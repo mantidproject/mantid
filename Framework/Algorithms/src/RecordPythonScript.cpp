@@ -25,11 +25,9 @@ RecordPythonScript::RecordPythonScript()
 /** Initialize the algorithm's properties.
 */
 void RecordPythonScript::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".py");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, exts),
+      new API::FileProperty("Filename", "", API::FileProperty::Save, {".py"}),
       "The file into which the Python script will be generated.");
 }
 

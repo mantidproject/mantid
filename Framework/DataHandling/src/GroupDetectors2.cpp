@@ -106,7 +106,7 @@ void GroupDetectors2::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL && preserveEvents) {
+  if (eventW != nullptr && preserveEvents) {
     this->execEvent();
     return;
   }
@@ -510,22 +510,16 @@ void GroupDetectors2::processXMLFile(std::string fname,
       loader.getGroupSpectraMap();
 
   // 3. Build m_GroupSpecInds
-  std::map<int, std::vector<detid_t>>::iterator dit;
-  for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
-       ++dit) {
-    int groupid = dit->first;
-    std::vector<size_t> tempv;
-    m_GroupSpecInds.insert(std::make_pair(groupid, tempv));
+  for (const auto &det : mGroupDetectorsMap) {
+    m_GroupSpecInds.emplace(det.first, std::vector<size_t>());
   }
 
   // 4. Detector IDs
-  for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end();
-       ++dit) {
-    int groupid = dit->first;
-    std::vector<detid_t> detids = dit->second;
+  for (const auto &det : mGroupDetectorsMap) {
+    int groupid = det.first;
+    const std::vector<detid_t> &detids = det.second;
 
-    storage_map::iterator sit;
-    sit = m_GroupSpecInds.find(groupid);
+    auto sit = m_GroupSpecInds.find(groupid);
     if (sit == m_GroupSpecInds.end())
       continue;
 
@@ -601,7 +595,7 @@ void GroupDetectors2::processGroupingWorkspace(
     if (groupid > 0) {
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
         // not found - create an empty set
-        group2WSIndexSetmap.insert(std::make_pair(groupid, std::set<size_t>()));
+        group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
       }
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
@@ -670,7 +664,7 @@ void GroupDetectors2::processMatrixWorkspace(
 
     if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
       // not found - create an empty set
-      group2WSIndexSetmap.insert(std::make_pair(groupid, std::set<size_t>()));
+      group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
     }
     // get a reference to the set
     std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];

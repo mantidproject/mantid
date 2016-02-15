@@ -50,7 +50,7 @@ public:
   PointGroup(const PointGroup &other);
   PointGroup &operator=(const PointGroup &other);
 
-  virtual ~PointGroup() {}
+  ~PointGroup() override {}
   /// Name of the point group
   std::string getName() const { return m_name; }
   /// Hermann-Mauguin symbol

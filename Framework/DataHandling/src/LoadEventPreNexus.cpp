@@ -77,10 +77,10 @@ static const double TOF_CONVERSION = .1;
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
 LoadEventPreNexus::LoadEventPreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(NULL),
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(nullptr),
       spectra_list(), pulsetimes(), event_indices(), proton_charge(),
       proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-      eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      eventfile(nullptr), num_events(0), num_pulses(0), numpixel(0),
       num_good_events(0), num_error_events(0), num_ignored_events(0),
       first_event(0), max_events(0), using_mapping_file(false),
       loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
@@ -157,10 +157,7 @@ void LoadEventPreNexus::init() {
   setPropertySettings("TotalChunks",
                       new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"

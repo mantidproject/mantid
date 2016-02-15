@@ -35,27 +35,27 @@ public:
   /// Default constructor
   CalMuonDetectorPhases() : API::Algorithm(){};
   /// Destructor
-  virtual ~CalMuonDetectorPhases(){};
+  ~CalMuonDetectorPhases() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CalMuonDetectorPhases"; }
+  const std::string name() const override { return "CalMuonDetectorPhases"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the asymmetry and phase for each detector in a "
            "workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 private:
   /// Initialise the algorithm
-  void init();
+  void init() override;
   /// Execute the algorithm
-  void exec();
+  void exec() override;
   /// Validate the inputs
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   /// Prepare workspace for fit by extracting data
   API::MatrixWorkspace_sptr extractDataFromWorkspace(double startTime,
                                                      double endTime);

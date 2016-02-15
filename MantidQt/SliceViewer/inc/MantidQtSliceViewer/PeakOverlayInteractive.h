@@ -53,16 +53,16 @@ public:
   PeakOverlayInteractive(PeaksPresenter *const peaksPresenter, QwtPlot *plot,
                         const int plotXIndex, const int plotYIndex, QWidget *parent);
   /// Destructor
-  virtual ~PeakOverlayInteractive();
+  ~PeakOverlayInteractive() override;
 
   /// Enter peak deletion mode.
-  void peakDeletionMode();
+  void peakDeletionMode() override;
   /// Enter peak addition mode
-  void peakAdditionMode();
+  void peakAdditionMode() override;
   /// Enter display mode
-  void peakDisplayMode();
+  void peakDisplayMode() override;
 
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
   QSize size() const;
   int height() const;
   int width() const;
@@ -81,15 +81,15 @@ private:
   /// Input controller.
   MantidQt::MantidWidgets::InputController *m_tool;
 
-  void mousePressEvent(QMouseEvent* e);
-  void mouseMoveEvent(QMouseEvent* e);
-  void mouseReleaseEvent(QMouseEvent* e);
-  void wheelEvent(QWheelEvent* e);
-  void keyPressEvent(QKeyEvent* e);
-  void enterEvent(QEvent *e);
-  void leaveEvent(QEvent *e);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseMoveEvent(QMouseEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
+  void wheelEvent(QWheelEvent *e) override;
+  void keyPressEvent(QKeyEvent *e) override;
+  void enterEvent(QEvent *e) override;
+  void leaveEvent(QEvent *e) override;
 
-  void paintEvent(QPaintEvent *event);
+  void paintEvent(QPaintEvent *event) override;
 
   // Call do paint on sub-classes
   virtual void doPaintPeaks(QPaintEvent *event) = 0;

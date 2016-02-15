@@ -50,9 +50,7 @@ void RemoveBins::init() {
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("None");
-  propOptions.push_back("Linear");
+  std::vector<std::string> propOptions{"None", "Linear"};
   declareProperty("Interpolation", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "
@@ -273,7 +271,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   // Check for valid instrument
-  if (sample == NULL) {
+  if (sample == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get sample");
   }

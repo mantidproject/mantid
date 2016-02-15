@@ -579,7 +579,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = NULL;
+  ::NeXus::File *f = nullptr;
   try {
     f = new ::NeXus::File(fname);
     if (f)

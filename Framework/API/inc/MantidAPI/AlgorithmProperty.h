@@ -67,24 +67,24 @@ public:
   /// Copy-Assignment operator
   AlgorithmProperty &operator=(const AlgorithmProperty &rhs);
   /// 'Virtual copy constructor'
-  inline AlgorithmProperty *clone() const {
+  inline AlgorithmProperty *clone() const override {
     return new AlgorithmProperty(*this);
   }
   /// Destructor
-  ~AlgorithmProperty();
+  ~AlgorithmProperty() override;
 
   /// Add the value of another property. Doesn't make sense here.
-  virtual AlgorithmProperty &operator+=(Kernel::Property const *) {
+  AlgorithmProperty &operator+=(Kernel::Property const *) override {
     throw Kernel::Exception::NotImplementedError(
         "+= operator is not implemented for AlgorithmProperty.");
     return *this;
   }
   /// Return the algorithm as string
-  virtual std::string value() const;
+  std::string value() const override;
   /// Get the default
-  virtual std::string getDefault() const;
+  std::string getDefault() const override;
   /// Sets the value of the algorithm
-  virtual std::string setValue(const std::string &value);
+  std::string setValue(const std::string &value) override;
 
 private:
   /// Default constructor

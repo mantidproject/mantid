@@ -240,7 +240,7 @@ AnalysisDataServiceImpl::topLevelItems() const {
     try {
       const std::string &name = topLevelName;
       auto ws = this->retrieve(topLevelName);
-      topLevel.insert(std::make_pair(name, ws));
+      topLevel.emplace(name, ws);
       if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);
       }

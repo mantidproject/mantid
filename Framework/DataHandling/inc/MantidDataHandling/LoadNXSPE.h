@@ -43,33 +43,33 @@ namespace DataHandling {
 class DLLExport LoadNXSPE : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadNXSPE();
-  ~LoadNXSPE();
+  ~LoadNXSPE() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadNXSPE"; };
+  const std::string name() const override { return "LoadNXSPE"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return " Algorithm to load an NXSPE file into a workspace2D.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /// Confidence in identifier.
   static int identiferConfidence(const std::string &value);
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Function to return a cuboid shape, with widths dx,dy,dz
   Geometry::Object_sptr createCuboid(double dx, double dy, double dz);
 };

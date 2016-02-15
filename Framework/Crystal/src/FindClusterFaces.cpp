@@ -53,7 +53,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
       const int labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
-        allowedLabels.insert(std::make_pair(labelIdAtPeakCenter, i));
+        allowedLabels.emplace(labelIdAtPeakCenter, i);
       }
     }
     optionalAllowedLabels = allowedLabels;

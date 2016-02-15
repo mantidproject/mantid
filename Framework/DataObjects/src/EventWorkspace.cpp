@@ -81,7 +81,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   }
   // Initialize the data
   m_noVectors = NVectors;
-  data.resize(m_noVectors, NULL);
+  data.resize(m_noVectors, nullptr);
   // Make sure SOMETHING exists for all initialized spots.
   for (size_t i = 0; i < m_noVectors; i++)
     data[i] = new EventList(mru, specid_t(i));
@@ -820,7 +820,7 @@ public:
   }
 
   // Execute the sort as specified.
-  void run() {
+  void run() override {
     if (!m_WS)
       return;
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
@@ -882,7 +882,7 @@ EventSortType EventWorkspace::getSortType() const {
 void EventWorkspace::sortAll(EventSortType sortType,
                              Mantid::API::Progress *prog) const {
   if (this->getSortType() == sortType) {
-    if (prog != NULL) {
+    if (prog != nullptr) {
       prog->reportIncrement(this->data.size());
     }
     return;

@@ -52,50 +52,52 @@ namespace SliceViewer
     PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
                            const QColor& peakColour, const QColor& backColour);
     /// Destructor
-    virtual ~PeakOverlayMultiSphere();
+    ~PeakOverlayMultiSphere() override;
     /// Set the slice point at position.
-    virtual void setSlicePoint(const double& point, const std::vector<bool>& viewablePeaks);
+    void setSlicePoint(const double &point,
+                       const std::vector<bool> &viewablePeaks) override;
     /// Hide the view.
-    virtual void hideView();
+    void hideView() override;
     /// Show the view.
-    virtual void showView();
+    void showView() override;
     /// Update the view.
-    virtual void updateView();
+    void updateView() override;
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
+    void
+    movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
     /// Change foreground colour
-    virtual void changeForegroundColour(const QColor);
+    void changeForegroundColour(const QColor) override;
     /// Change background colour
-    virtual void changeBackgroundColour(const QColor);
+    void changeBackgroundColour(const QColor) override;
     /// Show the background radius
-    virtual void showBackgroundRadius(const bool show);
+    void showBackgroundRadius(const bool show) override;
     /// Get a bounding box for this peak.
-    virtual PeakBoundingBox getBoundingBox(const int peakIndex) const;
+    PeakBoundingBox getBoundingBox(const int peakIndex) const override;
     /// Changes the size of the overlay to be the requested fraction of the current view width.
-    virtual void changeOccupancyInView(const double fraction);
+    void changeOccupancyInView(const double fraction) override;
     /// Changes the size of the overlay to be the requested fraction of the view depth.
-    virtual void changeOccupancyIntoView(const double fraction);
+    void changeOccupancyIntoView(const double fraction) override;
     /// Get the peak size (width/2 as a fraction of total width)  on projection
-    virtual double getOccupancyInView() const;
+    double getOccupancyInView() const override;
     /// Get the peaks size into the projection (effective radius as a fraction of z range)
-    virtual double getOccupancyIntoView() const;
+    double getOccupancyIntoView() const override;
     /// Getter indicating that the view is position only
-    virtual bool positionOnly() const;
+    bool positionOnly() const override;
     /// Get the radius of the peak objects.
-    virtual double getRadius() const;
+    double getRadius() const override;
     /// Determine if the background radius is shown.
-    virtual bool isBackgroundShown() const;
+    bool isBackgroundShown() const override;
     /// Get the current background colour
-    virtual QColor getBackgroundColour() const;
+    QColor getBackgroundColour() const override;
     /// Get the current foreground colour
-    virtual QColor getForegroundColour() const;
+    QColor getForegroundColour() const override;
     /// Take settings from another view
-    void takeSettingsFrom(const PeakOverlayView * const);
+    void takeSettingsFrom(const PeakOverlayView *const) override;
 
   private:
 
     /// Draw the peak representations. Pure virtual on base class.
-    virtual void doPaintPeaks(QPaintEvent *);
+    void doPaintPeaks(QPaintEvent *) override;
     /// Physical peak object
     VecPhysicalSphericalPeak m_physicalPeaks;
     /// Peak colour

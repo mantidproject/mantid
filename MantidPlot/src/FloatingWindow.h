@@ -16,13 +16,13 @@ class FloatingWindow: public QMainWindow
   Q_OBJECT
 public:
   FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
-  ~FloatingWindow();
+  ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
   MdiSubWindow* mdiSubWindow() const;
   void setMdiSubWindow(MdiSubWindow* sw);
   void removeMdiSubWindow();
-  virtual QSize minimumSizeHint () const;
+  QSize minimumSizeHint() const override;
 
 public slots:
   void dragMousePress(QPoint);
@@ -33,8 +33,8 @@ protected:
 
   void setWidget(QWidget* w);
   QWidget* widget() const;
-  bool event(QEvent *ev);
-  void moveEvent(QMoveEvent *ev);
+  bool event(QEvent *ev) override;
+  void moveEvent(QMoveEvent *ev) override;
 
 private:
 

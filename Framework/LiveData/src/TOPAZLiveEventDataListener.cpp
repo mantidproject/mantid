@@ -158,7 +158,7 @@ TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
     : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
-      m_udpBuf(NULL), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
+      m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
       m_thread(), m_stopThread(false), m_backgroundException() {
 
   m_udpBuf = new unsigned char[m_udpBufSize];
@@ -430,8 +430,7 @@ void TOPAZLiveEventDataListener::run() {
                   << "Thread will exit." << std::endl;
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can throw
@@ -444,8 +443,7 @@ void TOPAZLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
   } catch (Poco::Exception &e) { // Generic POCO exception handler
     g_log.fatal("Uncaught POCO exception in TOPAZLiveEventDataListener network "
                 "read thread.");

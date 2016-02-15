@@ -46,41 +46,41 @@ class MANTID_GEOMETRY_DLL Detector : public virtual IDetector,
                                      public ObjComponent {
 public:
   /// A string representation of the component type
-  virtual std::string type() const { return "DetectorComponent"; }
+  std::string type() const override { return "DetectorComponent"; }
 
   /// Constructor for parametrized version
   Detector(const Detector *base, const ParameterMap *map);
   Detector(const std::string &name, int id, IComponent *parent);
   Detector(const std::string &name, int it, boost::shared_ptr<Object> shape,
            IComponent *parent);
-  virtual ~Detector();
+  ~Detector() override;
   // functions inherited from IObjectComponent
-  virtual Component *clone() const { return new Detector(*this); }
+  Component *clone() const override { return new Detector(*this); }
 
   // IDetector methods
-  detid_t getID() const;
-  std::size_t nDets() const {
+  detid_t getID() const override;
+  std::size_t nDets() const override {
     return 1;
   } ///< A Detector object represents a single physical detector
-  double getDistance(const IComponent &comp) const;
+  double getDistance(const IComponent &comp) const override;
   double getTwoTheta(const Kernel::V3D &observer,
-                     const Kernel::V3D &axis) const;
+                     const Kernel::V3D &axis) const override;
   double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
-                           const Kernel::V3D &instrumentUp) const;
-  double getPhi() const;
-  double getPhiOffset(const double &offset) const;
-  bool isMasked() const;
-  bool isMonitor() const;
+                           const Kernel::V3D &instrumentUp) const override;
+  double getPhi() const override;
+  double getPhiOffset(const double &offset) const override;
+  bool isMasked() const override;
+  bool isMonitor() const override;
   // end IDetector methods
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's
      angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam)
      coordinate system */
-  det_topology getTopology(Kernel::V3D &center) const;
+  det_topology getTopology(Kernel::V3D &center) const override;
 
   /// Return the relative position to the parent
-  virtual const Kernel::V3D getRelativePos() const {
+  const Kernel::V3D getRelativePos() const override {
     return ObjComponent::getRelativePos();
   }
 

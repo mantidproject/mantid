@@ -44,19 +44,19 @@ public:
     Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
     Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
   }
-  ~OrEnabledWhenProperties() // responsible for deleting all supplied
-                             // EnabledWhenProperites
+  ~OrEnabledWhenProperties() override // responsible for deleting all supplied
+                                      // EnabledWhenProperites
   {
     delete Prop1;
     delete Prop2;
   }
 
-  IPropertySettings *clone() {
+  IPropertySettings *clone() override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
                                        Criteria2, value2);
   }
 
-  bool isEnabled(const IPropertyManager *algo) const {
+  bool isEnabled(const IPropertyManager *algo) const override {
     return Prop1->isEnabled(algo) && Prop2->isEnabled(algo);
   }
 
@@ -435,7 +435,7 @@ void OptimizeCrystalPlacement::exec() {
   boost::shared_ptr<const Instrument> OldInstrument = peak.getInstrument();
   boost::shared_ptr<const ParameterMap> pmap_old =
       OldInstrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap_new(new ParameterMap());
+  auto pmap_new = boost::make_shared<ParameterMap>();
 
   PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
 
@@ -449,8 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   if (OldInstrument->isParametrized())
     Inst = OldInstrument->baseInstrument();
 
-  boost::shared_ptr<const Instrument> NewInstrument(
-      new Geometry::Instrument(Inst, pmap_new));
+  auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
 
   SCDCalibratePanels::FixUpSourceParameterMap(NewInstrument, L0, newSampPos,
                                               pmap_old);

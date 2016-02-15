@@ -41,15 +41,15 @@ namespace LiveData {
 class DLLExport LiveDataAlgorithm : public API::Algorithm {
 public:
   LiveDataAlgorithm();
-  virtual ~LiveDataAlgorithm();
-  virtual const std::string category() const;
+  ~LiveDataAlgorithm() override;
+  const std::string category() const override;
 
   void copyPropertyValuesFrom(const LiveDataAlgorithm &other);
 
   Mantid::API::ILiveListener_sptr getLiveListener();
   void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 protected:
   void initProps();

@@ -30,7 +30,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 #include <QWidget>
 #include <QList>
-#include <DoubleSpinBox.h>
+#include <MantidQtMantidWidgets/DoubleSpinBox.h>
 class ApplicationWindow;
 class Graph;
 class QCheckBox;
@@ -44,7 +44,7 @@ class GridDetails: public QWidget
   Q_OBJECT
 public:
   GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QWidget *parent = 0); // populate and fill in with existing data
-  virtual ~GridDetails();
+  ~GridDetails() override;
   void initWidgets();
   bool modified(){return m_modified;}
   void apply(Grid *grid, bool antialias, bool multirun = false);

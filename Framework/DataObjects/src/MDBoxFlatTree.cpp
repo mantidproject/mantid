@@ -498,7 +498,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
                                        bool BoxStructureOnly) {
 
   size_t numBoxes = this->getNBoxes();
-  Boxes.assign(numBoxes, NULL);
+  Boxes.assign(numBoxes, nullptr);
 
   uint64_t totalNumEvents(0);
   m_nDim = static_cast<int>(bc->getNDims());
@@ -522,7 +522,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     if (box_type == 0)
       continue;
 
-    API::IMDNode *ibox = NULL;
+    API::IMDNode *ibox = nullptr;
 
     // Extents of the box, as a vector
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(

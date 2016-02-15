@@ -311,9 +311,7 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
  * @return A list of attribute names
  */
 std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("BinWidth");
-  return res;
+  return {"BinWidth"};
 }
 
 //----------------------------------------------------------------------------------------------

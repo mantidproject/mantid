@@ -363,9 +363,9 @@ tableToGrouping(ITableWorkspace_sptr table) {
   // If we have 2 groups only - create a longitudinal pair
   if ( grouping->groups.size() == 2 )
   {
-    grouping->pairNames.push_back("long");
+    grouping->pairNames.emplace_back("long");
     grouping->pairAlphas.push_back(1.0);
-    grouping->pairs.push_back(std::make_pair(0,1));
+    grouping->pairs.emplace_back(0, 1);
   }
 
   return grouping;
@@ -406,7 +406,7 @@ getDummyGrouping(Instrument_const_sptr instrument) {
 
   auto dummyGrouping = boost::make_shared<Mantid::API::Grouping>();
   dummyGrouping->description = "Dummy grouping";
-  dummyGrouping->groupNames.push_back("all");
+  dummyGrouping->groupNames.emplace_back("all");
   dummyGrouping->groups.push_back(all.str());
   return dummyGrouping;
 }

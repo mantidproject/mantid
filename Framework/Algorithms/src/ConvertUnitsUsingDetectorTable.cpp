@@ -204,7 +204,7 @@ void ConvertUnitsUsingDetectorTable::setupMemberVariables(
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
-      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != NULL);
+      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
 
   m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
@@ -560,12 +560,7 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
 
-  std::vector<double> retval;
-  retval.push_back(XMin);
-  retval.push_back(step);
-  retval.push_back(XMax);
-
-  return retval;
+  return {XMin, step, XMax};
 }
 
 /** Reverses the workspace if X values are in descending order

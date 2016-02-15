@@ -42,26 +42,26 @@ namespace Algorithms {
 class DLLExport GeneratePeaks : public API::Algorithm {
 public:
   GeneratePeaks();
-  virtual ~GeneratePeaks();
+  ~GeneratePeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GeneratePeaks"; }
+  const std::string name() const override { return "GeneratePeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Generate peaks in an output workspace according to a "
            "TableWorkspace containing a list of peak's parameters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
-  void init();
+  void init() override;
 
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process algorithm properties
   void processAlgProperties(std::string &peakfunctype,

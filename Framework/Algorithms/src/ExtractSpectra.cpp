@@ -109,7 +109,7 @@ void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
   } else {
@@ -134,9 +134,9 @@ void ExtractSpectra::execHistogram() {
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
   // later
-  Axis *inAxis1(NULL);
-  TextAxis *outTxtAxis(NULL);
-  NumericAxis *outNumAxis(NULL);
+  Axis *inAxis1(nullptr);
+  TextAxis *outTxtAxis(nullptr);
+  NumericAxis *outNumAxis(nullptr);
   if (m_inputWorkspace->axes() > 1) {
     inAxis1 = m_inputWorkspace->getAxis(1);
     auto outAxis1 = outputWorkspace->getAxis(1);
@@ -289,8 +289,8 @@ void ExtractSpectra::execEvent() {
           API::WorkspaceFactory::Instance().create(
               "EventWorkspace", m_workspaceIndexList.size(), ntcnew,
               ntcnew - m_histogram));
-  eventW->sortAll(TOF_SORT, NULL);
-  outputWorkspace->sortAll(TOF_SORT, NULL);
+  eventW->sortAll(TOF_SORT, nullptr);
+  outputWorkspace->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace,
                                                          outputWorkspace, true);
@@ -402,7 +402,7 @@ void ExtractSpectra::checkProperties() {
       g_log.error("XMin must be less than XMax");
       throw std::out_of_range("XMin must be less than XMax");
     }
-    if (m_minX == m_maxX && m_commonBoundaries && eventW == NULL) {
+    if (m_minX == m_maxX && m_commonBoundaries && eventW == nullptr) {
       g_log.error("The X range given lies entirely within a single bin");
       throw std::out_of_range(
           "The X range given lies entirely within a single bin");

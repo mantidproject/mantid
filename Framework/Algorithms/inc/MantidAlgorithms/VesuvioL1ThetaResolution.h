@@ -37,16 +37,16 @@ namespace Algorithms {
 class DLLExport VesuvioL1ThetaResolution : public API::Algorithm {
 public:
   VesuvioL1ThetaResolution();
-  virtual ~VesuvioL1ThetaResolution();
+  ~VesuvioL1ThetaResolution() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void loadInstrument();
 
   void calculateDetector(Mantid::Geometry::IDetector_const_sptr detector,

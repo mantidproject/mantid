@@ -49,15 +49,15 @@ public:
   /// Constructor
   ConvertToYSpace();
 
-  const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts workspace in units of TOF to Y-space as defined in "
            "Compton scattering field";
   }
 
-  int version() const;
-  const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Creates a POD struct containing the required detector parameters for this
   /// spectrum
@@ -76,8 +76,8 @@ public:
                          const DetectorParams &detpar);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Perform the conversion to Y-space
   bool convert(const size_t i);

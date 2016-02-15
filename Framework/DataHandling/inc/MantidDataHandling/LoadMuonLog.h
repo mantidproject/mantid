@@ -59,27 +59,27 @@ public:
   LoadMuonLog();
 
   /// Destructor
-  virtual ~LoadMuonLog() {}
+  ~LoadMuonLog() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadMuonLog"; };
+  const std::string name() const override { return "LoadMuonLog"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load log data from within Muon Nexus files into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Logs;Muon\\DataHandling";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of an input file. This may be the filename of a raw
   /// datafile or the name of a specific log file.

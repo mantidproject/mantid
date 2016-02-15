@@ -199,14 +199,9 @@ void PawleyFit::init() {
   declareProperty("StartX", 0.0, "Lower border of fitted data range.");
   declareProperty("EndX", 0.0, "Upper border of fitted data range.");
 
-  std::vector<std::string> latticeSystems;
-  latticeSystems.push_back("Cubic");
-  latticeSystems.push_back("Tetragonal");
-  latticeSystems.push_back("Hexagonal");
-  latticeSystems.push_back("Rhombohedral");
-  latticeSystems.push_back("Orthorhombic");
-  latticeSystems.push_back("Monoclinic");
-  latticeSystems.push_back("Triclinic");
+  std::vector<std::string> latticeSystems{
+      "Cubic",        "Tetragonal", "Hexagonal", "Rhombohedral",
+      "Orthorhombic", "Monoclinic", "Triclinic"};
 
   auto latticeSystemValidator =
       boost::make_shared<StringListValidator>(latticeSystems);

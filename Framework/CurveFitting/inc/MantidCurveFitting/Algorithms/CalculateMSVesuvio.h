@@ -67,25 +67,25 @@ private:
 
 public:
   CalculateMSVesuvio();
-  ~CalculateMSVesuvio();
+  ~CalculateMSVesuvio() override;
 
   /// @copydoc Algorithm::name
-  virtual const std::string name() const { return "CalculateMSVesuvio"; }
+  const std::string name() const override { return "CalculateMSVesuvio"; }
   /// @copydoc Algorithm::version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// @copydoc Algorithm::category
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\SpecialCorrections";
   }
   /// @copydoc Algorithm::summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the contributions of multiple scattering "
            "on a flat plate sample for VESUVIO";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void cacheInputs();
   void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,

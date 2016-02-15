@@ -61,15 +61,15 @@ private:
 public:
   LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
   /// Destructor
-  virtual ~LineIntersectVisit() {}
+  ~LineIntersectVisit() override {}
 
-  void Accept(const Surface &);
+  void Accept(const Surface &) override;
   void Accept(const Quadratic &);
-  void Accept(const Plane &);
-  void Accept(const Sphere &);
-  void Accept(const Cone &);
-  void Accept(const Cylinder &);
-  void Accept(const General &);
+  void Accept(const Plane &) override;
+  void Accept(const Sphere &) override;
+  void Accept(const Cone &) override;
+  void Accept(const Cylinder &) override;
+  void Accept(const General &) override;
 
   // Accessor
   /// Get the distance

@@ -60,9 +60,9 @@ void LoadRawHelper::init() {
                   "periods will be stored in separate workspaces called "
                   "OutputWorkspace_PeriodNo.");
 
-  m_cache_options.push_back("If Slow");
-  m_cache_options.push_back("Always");
-  m_cache_options.push_back("Never");
+  m_cache_options.emplace_back("If Slow");
+  m_cache_options.emplace_back("Always");
+  m_cache_options.emplace_back("Never");
   declareProperty("Cache", "If Slow",
                   boost::make_shared<StringListValidator>(m_cache_options),
                   "An option allowing the algorithm to cache a remote file on "
@@ -87,7 +87,7 @@ void LoadRawHelper::init() {
  */
 FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
   FILE *file = fopen(fileName.c_str(), "rb");
-  if (file == NULL) {
+  if (file == nullptr) {
     g_log.error("Unable to open file " + fileName);
     throw Exception::FileError("Unable to open File:", fileName);
   }
@@ -762,7 +762,7 @@ void LoadRawHelper::createPeriodLogs(
  */
 void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
                                       ISISRAW *const rawFile) const {
-  ISISRAW *localISISRaw(NULL);
+  ISISRAW *localISISRaw(nullptr);
   if (!rawFile) {
     localISISRaw = isisRaw.get();
   } else {

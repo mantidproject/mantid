@@ -1222,7 +1222,7 @@ void ConvFit::singleFitComplete(bool error) {
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
-
+  params.reserve(static_cast<int>(parNames.size()));
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 

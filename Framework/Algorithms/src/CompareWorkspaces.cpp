@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(NULL),
+    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
       m_ParallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
@@ -670,8 +670,8 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     Unit_const_sptr ax1_unit = ax1->unit();
     Unit_const_sptr ax2_unit = ax2->unit();
 
-    if ((ax1_unit == NULL && ax2_unit != NULL) ||
-        (ax1_unit != NULL && ax2_unit == NULL) ||
+    if ((ax1_unit == nullptr && ax2_unit != nullptr) ||
+        (ax1_unit != nullptr && ax2_unit == nullptr) ||
         (ax1_unit && ax1_unit->unitID() != ax2_unit->unitID())) {
       recordMismatch(axis_name + " unit mismatch");
       return false;

@@ -43,7 +43,7 @@ MatrixWorkspace::MatrixWorkspace(
       m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
       m_indexCalculator(),
       m_nearestNeighboursFactory(
-          (nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
+          (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
@@ -796,7 +796,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(
 
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -826,7 +826,7 @@ double
 MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
   Geometry::IComponent_const_sptr source = getInstrument()->getSource();
   Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
@@ -1083,7 +1083,7 @@ void MatrixWorkspace::flagMasked(const size_t &spectrumIndex,
     if (it != binList.end()) {
       binList.erase(it);
     }
-    binList.insert(std::make_pair(binIndex, weight));
+    binList.emplace(binIndex, weight);
   }
 }
 
@@ -1276,12 +1276,12 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
                                            m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
-  virtual std::string getName() const {
+  std::string getName() const override {
     const auto &unit = m_axis.unit();
     if (unit && unit->unitID() != "Empty")
       return unit->caption();
@@ -1290,27 +1290,27 @@ public:
   }
 
   /// @return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const {
+  const Kernel::UnitLabel getUnits() const override {
     return m_axis.unit()->label();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
-  virtual std::string getDimensionId() const { return m_dimensionId; }
+  std::string getDimensionId() const override { return m_dimensionId; }
 
   /// if the dimension is integrated (e.g. have single bin)
-  virtual bool getIsIntegrated() const { return m_axis.length() == 1; }
+  bool getIsIntegrated() const override { return m_axis.length() == 1; }
 
   /// @return the minimum extent of this dimension
-  virtual coord_t getMinimum() const { return coord_t(m_axis.getMin()); }
+  coord_t getMinimum() const override { return coord_t(m_axis.getMin()); }
 
   /// @return the maximum extent of this dimension
-  virtual coord_t getMaximum() const { return coord_t(m_axis.getMax()); }
+  coord_t getMaximum() const override { return coord_t(m_axis.getMax()); }
 
   /// number of bins dimension have (an integrated has one). A axis directed
   /// along dimension would have getNBins+1 axis points.
-  virtual size_t getNBins() const {
+  size_t getNBins() const override {
     if (m_haveEdges)
       return m_axis.length() - 1;
     else
@@ -1318,32 +1318,34 @@ public:
   }
 
   /// Change the extents and number of bins
-  virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) {
+  void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
   }
 
   ///  Get coordinate for index;
-  virtual coord_t getX(size_t ind) const { return coord_t(m_axis(ind)); }
+  coord_t getX(size_t ind) const override { return coord_t(m_axis(ind)); }
 
   /**
   * Return the bin width taking into account if the stored values are actually
   * bin centres or not
   * @return A single value for the uniform bin width
   */
-  virtual coord_t getBinWidth() const {
+  coord_t getBinWidth() const override {
     size_t nsteps = (m_haveEdges) ? this->getNBins() : this->getNBins() - 1;
     return (getMaximum() - getMinimum()) / static_cast<coord_t>(nsteps);
   }
 
   // Dimensions must be xml serializable.
-  virtual std::string toXMLString() const {
+  std::string toXMLString() const override {
     throw std::runtime_error("Not implemented");
   }
 
-  const Kernel::MDUnit &getMDUnits() const { return m_frame->getMDUnit(); }
-  const Geometry::MDFrame &getMDFrame() const { return *m_frame; }
+  const Kernel::MDUnit &getMDUnits() const override {
+    return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame &getMDFrame() const override { return *m_frame; }
 
-  virtual ~MWDimension() {}
+  ~MWDimension() override {}
 
 private:
   const Axis &m_axis;
@@ -1365,10 +1367,10 @@ public:
     m_X = ws->readX(0);
   }
 
-  virtual ~MWXDimension() {}
+  ~MWXDimension() override {}
 
   /// the name of the dimennlsion as can be displayed along the axis
-  virtual std::string getName() const {
+  std::string getName() const override {
     const auto *axis = m_ws->getAxis(0);
     const auto &unit = axis->unit();
     if (unit && unit->unitID() != "Empty")
@@ -1378,44 +1380,46 @@ public:
   }
 
   /// @return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const {
+  const Kernel::UnitLabel getUnits() const override {
     return m_ws->getAxis(0)->unit()->label();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
-  virtual std::string getDimensionId() const { return m_dimensionId; }
+  std::string getDimensionId() const override { return m_dimensionId; }
 
   /// if the dimension is integrated (e.g. have single bin)
-  virtual bool getIsIntegrated() const { return m_X.size() == 1; }
+  bool getIsIntegrated() const override { return m_X.size() == 1; }
 
   /// coord_t the minimum extent of this dimension
-  virtual coord_t getMinimum() const { return coord_t(m_X.front()); }
+  coord_t getMinimum() const override { return coord_t(m_X.front()); }
 
   /// @return the maximum extent of this dimension
-  virtual coord_t getMaximum() const { return coord_t(m_X.back()); }
+  coord_t getMaximum() const override { return coord_t(m_X.back()); }
 
   /// number of bins dimension have (an integrated has one). A axis directed
   /// along dimension would have getNBins+1 axis points.
-  virtual size_t getNBins() const {
+  size_t getNBins() const override {
     return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
   }
 
   /// Change the extents and number of bins
-  virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) {
+  void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
   }
 
   ///  Get coordinate for index;
-  virtual coord_t getX(size_t ind) const { return coord_t(m_X[ind]); }
+  coord_t getX(size_t ind) const override { return coord_t(m_X[ind]); }
 
   // Dimensions must be xml serializable.
-  virtual std::string toXMLString() const {
+  std::string toXMLString() const override {
     throw std::runtime_error("Not implemented");
   }
-  const Kernel::MDUnit &getMDUnits() const { return m_frame->getMDUnit(); }
-  const Geometry::MDFrame &getMDFrame() const { return *m_frame; }
+  const Kernel::MDUnit &getMDUnits() const override {
+    return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame &getMDFrame() const override { return *m_frame; }
 
 private:
   /// Workspace we refer to
@@ -1444,7 +1448,7 @@ MatrixWorkspace::getDimension(size_t index) const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  IMDDimension *dim = NULL;
+  IMDDimension *dim = nullptr;
   for (int i = 0; i < nAxes; i++) {
     Axis *xAxis = this->getAxis(i);
     const std::string &knownId = getDimensionIdFromAxis(i);
@@ -1453,7 +1457,7 @@ MatrixWorkspace::getDimensionWithId(std::string id) const {
       break;
     }
   }
-  if (NULL == dim) {
+  if (nullptr == dim) {
     std::string message = "Cannot find id : " + id;
     throw std::overflow_error(message);
   }

@@ -1,8 +1,5 @@
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
@@ -217,7 +214,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
-    Progress *prog2 = NULL;
+    Progress *prog2 = nullptr;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0, prog2);
     ws1->splitAllIfNeeded(ts);

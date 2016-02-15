@@ -266,7 +266,8 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", h);
     res->setParameter("s", a);
@@ -315,7 +316,8 @@ public:
     double c1 = 0.;
     double h1 = 3;
     double s1 = pi / 2;
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
@@ -332,7 +334,8 @@ public:
     double c2 = x0 + Dx / 2;
     double h2 = 10.;
     double s2 = pi / 3;
-    boost::shared_ptr<ConvolutionTest_Gauss> fun(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> fun =
+        boost::make_shared<ConvolutionTest_Gauss>();
     fun->setParameter("c", c2);
     fun->setParameter("h", h2);
     fun->setParameter("s", s2);
@@ -370,22 +373,25 @@ public:
 
   void testConvolution_fit_resolution() {
 
-    boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
     for (size_t i = 0; i < data->blocksize(); i++) {
       data->dataX(0)[i] = -10.0 + 0.2 * double(i);
     }
 
-    boost::shared_ptr<Convolution> conv(new Convolution);
+    boost::shared_ptr<Convolution> conv = boost::make_shared<Convolution>();
 
-    boost::shared_ptr<ConvolutionTest_Gauss> res(new ConvolutionTest_Gauss);
+    boost::shared_ptr<ConvolutionTest_Gauss> res =
+        boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", 1);
     res->setParameter("s", 2);
 
     conv->addFunction(res);
 
-    boost::shared_ptr<ConvolutionTest_Lorentz> fun(new ConvolutionTest_Lorentz);
+    boost::shared_ptr<ConvolutionTest_Lorentz> fun =
+        boost::make_shared<ConvolutionTest_Lorentz>();
     fun->setParameter("c", 0);
     fun->setParameter("h", 2);
     fun->setParameter("w", 0.5);

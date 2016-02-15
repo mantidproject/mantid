@@ -19,7 +19,7 @@ using namespace DataObjects;
 
 /// Default constructor
 MergeRuns::MergeRuns()
-    : MultiPeriodGroupAlgorithm(), m_progress(NULL), m_inEventWS(),
+    : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
       m_inMatrixWS(), m_tables() {}
 
 /// Destructor
@@ -179,7 +179,7 @@ void MergeRuns::buildAdditionTables() {
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
                           inDets.end())) {
           // We found the workspace index right away. No need to keep looking
-          table->push_back(std::make_pair(inWI, outWI));
+          table->emplace_back(inWI, outWI);
           done = true;
         }
       }
@@ -203,7 +203,7 @@ void MergeRuns::buildAdditionTables() {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
         }
-        table->push_back(std::make_pair(inWI, outWI));
+        table->emplace_back(inWI, outWI);
         done = true; // Great, we did it.
       }
 
@@ -219,7 +219,7 @@ void MergeRuns::buildAdditionTables() {
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {
             // This one is right. Now we can stop looking.
-            table->push_back(std::make_pair(inWI, outWI));
+            table->emplace_back(inWI, outWI);
             done = true;
             continue;
           }
@@ -234,7 +234,7 @@ void MergeRuns::buildAdditionTables() {
         // this one?
 
         // So we need to add it as a new workspace index
-        table->push_back(std::make_pair(inWI, -1));
+        table->emplace_back(inWI, -1);
       }
     }
 

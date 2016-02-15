@@ -22,13 +22,13 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(NULL) {}
+      m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
 UnwrapMonitor::~UnwrapMonitor() {
   if (m_progress)
     delete m_progress;
-  m_progress = NULL;
+  m_progress = nullptr;
 }
 
 /// Initialisation method

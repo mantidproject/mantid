@@ -367,7 +367,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max],
-                          PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
+                          PreserveEvents=True, OutputWorkspace="%s_histo" % str(workspace))
 
         # Crop TOF range
         workspace = CropWorkspace(InputWorkspace=workspace,

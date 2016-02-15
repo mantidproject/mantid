@@ -5,6 +5,7 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -23,12 +24,12 @@ public:
     instrument->markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument->markAsSamplePos(sample);
-    det = boost::shared_ptr<Detector>(new Detector("det1", 1, 0));
+    det = boost::make_shared<Detector>("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
     instrument->markAsDetector(det.get());
-    det2 = boost::shared_ptr<Detector>(new Detector("det2", 10, 0));
+    det2 = boost::make_shared<Detector>("det2", 10, nullptr);
     instrument->markAsDetector(det2.get());
-    det3 = boost::shared_ptr<Detector>(new Detector("det3", 11, 0));
+    det3 = boost::make_shared<Detector>("det3", 11, nullptr);
     instrument->markAsDetector(det3.get());
     instrument->markAsMonitor(det3.get());
 
@@ -41,9 +42,10 @@ public:
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),
                                 boost::shared_ptr<ParameterMap>()),
                      std::invalid_argument);
-    // boost::shared_ptr<Instrument> instr(new Instrument);
+    // boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     // TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),std::invalid_argument);
-    boost::shared_ptr<ParameterMap> paramMap(new ParameterMap);
+    boost::shared_ptr<ParameterMap> paramMap =
+        boost::make_shared<ParameterMap>();
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(), paramMap),
                      std::invalid_argument);
   }

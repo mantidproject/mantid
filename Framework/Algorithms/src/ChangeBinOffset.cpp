@@ -19,7 +19,7 @@ DECLARE_ALGORITHM(ChangeBinOffset)
  * Default constructor
  */
 ChangeBinOffset::ChangeBinOffset()
-    : API::Algorithm(), m_progress(NULL), offset(0.), wi_min(0), wi_max(0) {}
+    : API::Algorithm(), m_progress(nullptr), offset(0.), wi_min(0), wi_max(0) {}
 
 /**
  * Destructor
@@ -92,7 +92,7 @@ void ChangeBinOffset::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     this->execEvent();
     return;
   }

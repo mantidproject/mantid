@@ -47,26 +47,26 @@ public:
   /// Default constructor
   DetectorDiagnostic();
   /// Virtual destructor
-  virtual ~DetectorDiagnostic(){};
+  ~DetectorDiagnostic() override{};
 
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Identifies histograms and their detectors that have total numbers "
            "of counts over a user defined maximum or less than the user define "
            "minimum.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
 private:
   // Overridden Algorithm methods
-  virtual void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
   /// Apply a given mask
   void applyMask(API::MatrixWorkspace_sptr inputWS,
                  API::MatrixWorkspace_sptr maskWS);

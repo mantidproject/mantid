@@ -175,7 +175,7 @@ void FrameworkManagerImpl::setGlobalLocaleToAscii() {
 
 /// Silence NeXus output
 void FrameworkManagerImpl::disableNexusOutput() {
-  NXMSetError(NULL, NexusErrorFunction);
+  NXMSetError(nullptr, NexusErrorFunction);
 }
 
 /**

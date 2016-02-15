@@ -36,8 +36,8 @@ Logger g_log("NexusFileIO");
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(0),
-      m_filename() {}
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW),
+      m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)
@@ -175,18 +175,18 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
       return (3);
   }
 
-  attributes.push_back("URL");
+  attributes.emplace_back("URL");
   avalues.push_back(
       "http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
-  attributes.push_back("Version");
-  avalues.push_back("1.0");
+  attributes.emplace_back("Version");
+  avalues.emplace_back("1.0");
   // this may not be the "correct" long term path, but it is valid at present
   if (!writeNxValue<std::string>("definition", className, NX_CHAR, attributes,
                                  avalues))
     return (3);
   avalues.clear();
-  avalues.push_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
-  avalues.push_back("1.0");
+  avalues.emplace_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
+  avalues.emplace_back("1.0");
   if (!writeNxValue<std::string>("definition_local", className, NX_CHAR,
                                  attributes, avalues))
     return (3);
@@ -255,7 +255,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
 
   std::vector<std::string> attributes, avalues;
   if (date != "") {
-    attributes.push_back("date");
+    attributes.emplace_back("date");
     avalues.push_back(date);
   }
   if (!writeNxValue<std::string>("author", author, NX_CHAR, attributes,
@@ -343,7 +343,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                 start, asize);
       start[0]++;
     }
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     int signal = 1;
     NXputattr(fileID, "signal", &signal, 1, NX_INT32);
@@ -376,7 +376,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       start[0]++;
     }
 
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
     // Fractional area for RebinnedOutput
@@ -395,7 +395,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                   start, asize);
         start[0]++;
       }
-      if (m_progress != 0)
+      if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }
 

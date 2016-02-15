@@ -18,7 +18,7 @@ const char *JITTER = "JitterSigma";
 
 /// Default constructor required by the factory
 ChopperModel::ChopperModel()
-    : m_exptRun(NULL), m_angularSpeed(0.0), m_angularSpeedLog(),
+    : m_exptRun(nullptr), m_angularSpeed(0.0), m_angularSpeedLog(),
       m_jitterSigma(0.0), m_pulseVariance(0.0) {}
 
 /**

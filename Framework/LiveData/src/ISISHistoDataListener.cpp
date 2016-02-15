@@ -44,7 +44,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
+    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
@@ -94,7 +94,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
   if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, address.port()) != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -121,7 +121,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 bool ISISHistoDataListener::isConnected() {
-  if (m_daeHandle == NULL)
+  if (m_daeHandle == nullptr)
     return false;
   // try to read a parameter, success means connected
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;

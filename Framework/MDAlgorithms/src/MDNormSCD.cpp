@@ -156,7 +156,7 @@ void MDNormSCD::cacheInputs() {
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Instrument not sufficiently defined: failed to get source and/or "
         "sample");

@@ -415,7 +415,7 @@ void RunRangeList::addRun(unsigned int run) {
     return;
 
   // Else create a new range, containing a single run, and add it to the list.
-  m_rangeList.insert(std::make_pair(run, run));
+  m_rangeList.emplace(run, run);
 
   // Now merge any ranges that are adjacent.
   m_rangeList = std::accumulate(

@@ -28,7 +28,7 @@ using namespace API;
 LoadAscii2::LoadAscii2()
     : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
       m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(),
-      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(NULL) {}
+      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
 
 /**
 * Return the confidence with with this algorithm can load the file

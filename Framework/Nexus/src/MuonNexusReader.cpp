@@ -27,7 +27,7 @@ using namespace Mantid;
 MuonNexusReader::MuonNexusReader()
     : nexus_instrument_name(), nexus_samplename(), nexusLogCount(0),
       startTime_time_t(), t_nsp1(0), t_ntc1(0), t_nper(0),
-      corrected_times(NULL), counts(NULL), detectorGroupings(NULL),
+      corrected_times(nullptr), counts(nullptr), detectorGroupings(nullptr),
       numDetectors(0) {}
 
 /// Destructor deletes temp storage

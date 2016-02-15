@@ -44,7 +44,7 @@ DiskBuffer::~DiskBuffer() {}
  * @param item :: item that can be written to disk.
  */
 void DiskBuffer::toWrite(ISaveable *item) {
-  if (item == NULL)
+  if (item == nullptr)
     return;
   //    if (!m_useWriteBuffer) return;
 
@@ -81,7 +81,7 @@ void DiskBuffer::toWrite(ISaveable *item) {
  * @param item :: ISaveable object that is getting deleted.
  */
 void DiskBuffer::objectDeleted(ISaveable *item) {
-  if (item == NULL)
+  if (item == nullptr)
     return;
   // have it ever been in the buffer?
   m_mutex.lock();
@@ -119,7 +119,7 @@ void DiskBuffer::writeOldObjects() {
   auto it = m_toWriteBuffer.begin();
   auto it_end = m_toWriteBuffer.end();
 
-  ISaveable *obj = NULL;
+  ISaveable *obj = nullptr;
 
   for (; it != it_end; ++it) {
     obj = *it;

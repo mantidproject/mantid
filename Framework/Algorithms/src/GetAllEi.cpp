@@ -26,7 +26,7 @@ GetAllEi::GetAllEi()
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper(), m_pFilterLog(NULL) {}
+      m_chopper(), m_pFilterLog(nullptr) {}
 
 /// Initialization method.
 void GetAllEi::init() {
@@ -982,7 +982,7 @@ GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
   if (boost::iequals(LogName, "Defined in IDF")) {
     auto AllNames = m_chopper->getStringParameter(propertyName);
     if (AllNames.size() != 1)
-      return NULL;
+      return nullptr;
     LogName = AllNames[0];
   }
   auto pIProperty = (inputWS->run().getProperty(LogName));

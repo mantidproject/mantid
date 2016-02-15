@@ -155,7 +155,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +245,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------

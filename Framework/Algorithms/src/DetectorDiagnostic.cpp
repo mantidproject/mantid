@@ -8,6 +8,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include <boost/iterator/counting_iterator.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
@@ -529,14 +530,9 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 
 std::vector<std::vector<size_t>>
 DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
-  std::vector<std::vector<size_t>> mymap;
-  std::vector<size_t> single;
-
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
-  }
-  mymap.push_back(single);
-  return mymap;
+  return {
+      {boost::counting_iterator<std::size_t>(0),
+       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *
@@ -572,8 +568,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
       m_parents = 0;
       return makeInstrumentMap(countsWS);
     }
-    mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-        anc[m_parents - 1]->getComponentID(), i));
+    mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;
@@ -627,9 +622,9 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
 
     bool checkForMask = false;
     Geometry::Instrument_const_sptr instrument = input->getInstrument();
-    if (instrument != NULL) {
-      checkForMask = ((instrument->getSource() != NULL) &&
-                      (instrument->getSample() != NULL));
+    if (instrument != nullptr) {
+      checkForMask = ((instrument->getSource() != nullptr) &&
+                      (instrument->getSample() != nullptr));
     }
 
     PARALLEL_FOR1(input)

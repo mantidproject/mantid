@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(ScaleX)
  * Default constructor
  */
 ScaleX::ScaleX()
-    : API::Algorithm(), m_progress(NULL), m_algFactor(1.0), m_parname(),
+    : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(),
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
 
 /**
@@ -114,7 +114,7 @@ void ScaleX::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     this->execEvent();
     return;
   }

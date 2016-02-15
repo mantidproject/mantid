@@ -45,7 +45,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
  */
 LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
   // Add here supported instruments by this loader
-  m_supportedInstruments.push_back("D2B");
+  m_supportedInstruments.emplace_back("D2B");
 }
 
 //----------------------------------------------------------------------------------------------

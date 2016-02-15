@@ -111,7 +111,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 *  Handles a zero-sized vector */
 BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
   numPulses = times.size();
-  pulseTimes = NULL;
+  pulseTimes = nullptr;
   if (numPulses == 0)
     return;
   pulseTimes = new DateAndTime[numPulses];
@@ -186,7 +186,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
   */
-  void run() {
+  void run() override {
     // Local tof limits
     double my_shortest_tof =
         static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -485,8 +485,9 @@ public:
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-        m_event_id(NULL), m_event_time_of_flight(NULL), m_have_weight(false),
-        m_event_weight(NULL), m_framePeriodNumbers(framePeriodNumbers) {
+        m_event_id(nullptr), m_event_time_of_flight(nullptr),
+        m_have_weight(false), m_event_weight(nullptr),
+        m_framePeriodNumbers(framePeriodNumbers) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -791,7 +792,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
-  void run() {
+  void run() override {
     // The vectors we will be filling
     auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;
@@ -802,9 +803,9 @@ public:
     m_loadSize.resize(1, 0);
 
     // Data arrays
-    m_event_id = NULL;
-    m_event_time_of_flight = NULL;
-    m_event_weight = NULL;
+    m_event_id = nullptr;
+    m_event_time_of_flight = nullptr;
+    m_event_weight = nullptr;
 
     m_loadError = false;
     m_have_weight = alg->m_haveWeights;
@@ -1020,7 +1021,7 @@ LoadEventNexus::LoadEventNexus()
       compressTolerance(0), eventVectors(), m_eventVectorMutex(),
       eventid_max(0), pixelID_to_wi_vector(), pixelID_to_wi_offset(),
       m_bankPulseTimes(), m_allBanksPulseTimes(), m_top_entry_name(),
-      m_file(NULL), splitProcessing(false), m_haveWeights(false),
+      m_file(nullptr), splitProcessing(false), m_haveWeights(false),
       weightedEventVectors(), m_instrument_loaded_correctly(false),
       loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
 }
@@ -1394,7 +1395,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // possible spectrum number
     eventid_max = maxSpecNo;
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, NULL);
+      vectors[i].resize(maxSpecNo + 1, nullptr);
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
@@ -1414,7 +1415,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // Make an array where index = pixel ID
     // Set the value to NULL by default
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, NULL);
+      vectors[i].resize(eventid_max + 1, nullptr);
     }
 
     for (size_t j = size_t(pixelID_to_wi_offset);
@@ -1660,7 +1661,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       nPeriods, periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
-  if (m_allBanksPulseTimes == NULL) {
+  if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
     // m_allBanksPulseTimes = new BankPulseTimes(temp);
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);

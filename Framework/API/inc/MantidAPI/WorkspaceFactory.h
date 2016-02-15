@@ -94,7 +94,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
   /// Private Destructor
-  virtual ~WorkspaceFactoryImpl();
+  ~WorkspaceFactoryImpl() override;
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;

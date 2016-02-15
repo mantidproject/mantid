@@ -385,7 +385,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
           } // test on nxdata type
 
           NXfree(&dataBuffer);
-          dataBuffer = NULL;
+          dataBuffer = nullptr;
 
         } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 

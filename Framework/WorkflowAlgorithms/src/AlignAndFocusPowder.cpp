@@ -39,7 +39,7 @@ AlignAndFocusPowder::AlignAndFocusPowder()
     : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
       xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
       tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
-      m_lowResSpecOffset(0), m_progress(NULL) {}
+      m_lowResSpecOffset(0), m_progress(nullptr) {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)

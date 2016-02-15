@@ -244,6 +244,7 @@ namespace MantidQt
 
       // This will contain the list of column names.
       QStringList columnHeaders;
+      columnHeaders.reserve(static_cast<int>(workspace->columnCount()));
 
       // Add the data from the workspace to the search results table.
       for(size_t col = 0 ; col < workspace->columnCount(); col++)
@@ -441,32 +442,49 @@ namespace MantidQt
       std::map<std::string, std::string> searchFieldInput;
 
       // Left side of form.
-      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationName", m_icatUiForm.InvestigationName->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("Instrument", m_icatUiForm.Instrument->currentText().toStdString()));
+      searchFieldInput.emplace(
+          "InvestigationName",
+          m_icatUiForm.InvestigationName->text().toStdString());
+      searchFieldInput.emplace(
+          "Instrument", m_icatUiForm.Instrument->currentText().toStdString());
       if (m_icatUiForm.RunRange->text().size() > 2)
       {
-        searchFieldInput.insert(std::pair<std::string, std::string>("RunRange", m_icatUiForm.RunRange->text().toStdString()));
+        searchFieldInput.emplace("RunRange",
+                                 m_icatUiForm.RunRange->text().toStdString());
       }
-      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("DataFileName", m_icatUiForm.DataFileName->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationId", m_icatUiForm.InvestigationId->text().toStdString()));
+      searchFieldInput.emplace(
+          "InvestigatorSurname",
+          m_icatUiForm.InvestigatorSurname->text().toStdString());
+      searchFieldInput.emplace("DataFileName",
+                               m_icatUiForm.DataFileName->text().toStdString());
+      searchFieldInput.emplace(
+          "InvestigationId",
+          m_icatUiForm.InvestigationId->text().toStdString());
 
       // Right side of form.
       if (m_icatUiForm.StartDate->text().size() > 2)
       {
-        searchFieldInput.insert(std::pair<std::string, std::string>("StartDate", m_icatUiForm.StartDate->text().toStdString()));
+        searchFieldInput.emplace("StartDate",
+                                 m_icatUiForm.StartDate->text().toStdString());
       }
       if (m_icatUiForm.EndDate->text().size() > 2)
       {
-        searchFieldInput.insert(std::pair<std::string, std::string>("EndDate", m_icatUiForm.EndDate->text().toStdString()));
+        searchFieldInput.emplace("EndDate",
+                                 m_icatUiForm.EndDate->text().toStdString());
       }
-      searchFieldInput.insert(std::pair<std::string, std::string>("Keywords", m_icatUiForm.Keywords->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("SampleName", m_icatUiForm.SampleName->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationType", m_icatUiForm.InvestigationType->currentText().toStdString()));
+      searchFieldInput.emplace("Keywords",
+                               m_icatUiForm.Keywords->text().toStdString());
+      searchFieldInput.emplace("SampleName",
+                               m_icatUiForm.SampleName->text().toStdString());
+      searchFieldInput.emplace(
+          "InvestigationType",
+          m_icatUiForm.InvestigationType->currentText().toStdString());
 
       // Since we check if the field is empty in the algorithm, there's no need to check if advanced was clicked.
       // If the "My data only" field is checked. We return the state of the checkbox (1 is true, 0 is false).
-      searchFieldInput.insert(std::pair<std::string, std::string>("MyData", boost::lexical_cast<std::string>(m_icatUiForm.myDataCbox->isChecked())));
+      searchFieldInput.emplace("MyData",
+                               boost::lexical_cast<std::string>(
+                                   m_icatUiForm.myDataCbox->isChecked()));
 
       return (searchFieldInput);
     }
@@ -1001,10 +1019,13 @@ namespace MantidQt
       {
         if (table->item(row, 0)->checkState())
         {
-          fileInfo.push_back(std::make_pair(
-              table->item(row, headerIndexByName(table, "Id"))->text().toLongLong(),
-              table->item(row, headerIndexByName(table, "Name"))->text().toStdString())
-          );
+          fileInfo.emplace_back(
+              table->item(row, headerIndexByName(table, "Id"))
+                  ->text()
+                  .toLongLong(),
+              table->item(row, headerIndexByName(table, "Name"))
+                  ->text()
+                  .toStdString());
         }
       }
       return (fileInfo);

@@ -24,21 +24,21 @@ public:
   @param xPlotLabel : X-axis plot label
   @param yPlotLabel : Y-axis plot label
   */
-  virtual PeakTransform_sptr
+  PeakTransform_sptr
   createTransform(const std::string &xPlotLabel,
-                  const std::string &yPlotLabel) const {
+                  const std::string &yPlotLabel) const override {
     return boost::make_shared<PeakTransformProduct>(xPlotLabel, yPlotLabel);
   }
 
   /**
   Overriden Factory Method.
   */
-  virtual PeakTransform_sptr createDefaultTransform() const {
+  PeakTransform_sptr createDefaultTransform() const override {
     return boost::make_shared<PeakTransformProduct>();
   }
 
   /// Destructor
-  virtual ~ConcretePeakTransformFactory() {}
+  ~ConcretePeakTransformFactory() override {}
 };
 }
 }

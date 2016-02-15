@@ -74,7 +74,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   try {
     ITimeSeriesProperty *log = dynamic_cast<ITimeSeriesProperty *>(
         m_inputWorkspace->run().getLogData(m_logName));
-    if (log == NULL) {
+    if (log == nullptr) {
       errors["LogName"] = "'" + m_logName + "' is not a time-series log.";
       return errors;
     }
@@ -105,7 +105,7 @@ void SumEventsByLogValue::exec() {
   m_binningParams = getProperty("OutputBinning");
   // Binning parameters must be provided for floating point logs
   if (m_binningParams.empty()) {
-    if (intLog != NULL) {
+    if (intLog != nullptr) {
       createTableOutput(intLog);
     } else {
       throw std::invalid_argument(
@@ -113,9 +113,9 @@ void SumEventsByLogValue::exec() {
     }
   } else // Binning parameters have been given
   {
-    if (intLog != NULL) {
+    if (intLog != nullptr) {
       createBinnedOutput(intLog);
-    } else if (dblLog != NULL) {
+    } else if (dblLog != nullptr) {
       createBinnedOutput(dblLog);
     }
     // else if ( dynamic_cast<const TimeSeriesProperty<std::string>*>(log) !=
@@ -189,13 +189,13 @@ void SumEventsByLogValue::createTableOutput(
   // value
   auto protonChgCol = outputWorkspace->addColumn("double", "proton_charge");
   // Get hold of the proton charge log for later
-  const TimeSeriesProperty<double> *protonChargeLog = NULL;
+  const TimeSeriesProperty<double> *protonChargeLog = nullptr;
   try {
     protonChargeLog =
         m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
     // Set back to NULL if the log is empty or bad things will happen later
     if (protonChargeLog->realSize() == 0)
-      protonChargeLog = NULL;
+      protonChargeLog = nullptr;
   } catch (std::exception &) {
     // Log and carry on if not found. Column will be left empty.
     g_log.warning("proton_charge log not found in workspace.");
@@ -356,7 +356,7 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     // Try to cast to an ITimeSeriesProperty
     auto tsp = dynamic_cast<const ITimeSeriesProperty *>(log);
     // Move on to the next one if this is not a TSP
-    if (tsp == NULL)
+    if (tsp == nullptr)
       continue;
     // Don't keep ones with only one entry
     // if ( tsp->realSize() < 2 ) continue;
@@ -364,7 +364,7 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     // list
     if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
         dynamic_cast<TimeSeriesProperty<int> *>(log)) {
-      numberSeriesProps.push_back(std::make_pair(logName, tsp));
+      numberSeriesProps.emplace_back(logName, tsp);
     }
   }
 

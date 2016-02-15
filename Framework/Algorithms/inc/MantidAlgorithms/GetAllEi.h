@@ -37,27 +37,27 @@ namespace Algorithms {
 class DLLExport GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
-  virtual ~GetAllEi(){};
+  ~GetAllEi() override{};
 
   /// Algorithms name for identification. @see Algorithm::name
-  virtual const std::string name() const { return "GetAllEi"; };
+  const std::string name() const override { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Analyze the chopper logs and the signal registered by the monitors "
            "to identify energies used as incident energies in an inelastic "
            "experiment.";
   }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Inelastic\\Ei"; };
+  const std::string category() const override { return "Inelastic\\Ei"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
                                        const std::string &name);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);

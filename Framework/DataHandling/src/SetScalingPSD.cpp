@@ -340,7 +340,7 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
   (void)rawfile; // Avoid compiler warning
 
   // open raw file
-  ISISRAW iraw(NULL);
+  ISISRAW iraw(nullptr);
   if (iraw.readFromFile(m_filename.c_str(), false) != 0) {
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:", m_filename);

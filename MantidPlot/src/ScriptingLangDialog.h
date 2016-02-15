@@ -48,8 +48,8 @@ class ScriptingLangDialog: public QDialog, public Scripted
 										      
 public slots:
   void updateLangList();
-  void accept();
-  
+  void accept() override;
+
 private:
   QListWidget *langList;
   QPushButton *btnOK, *btnCancel;

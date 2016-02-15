@@ -9,7 +9,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 /// Default constructor required by the factory
 MDResolutionConvolution::MDResolutionConvolution()
-    : ParamFunction(), m_fittingFunction(NULL), m_foreground(NULL) {}
+    : ParamFunction(), m_fittingFunction(nullptr), m_foreground(nullptr) {}
 
 /**
  * Construct the object with a ForegroundModel & resolution the function being
@@ -21,7 +21,7 @@ MDResolutionConvolution::MDResolutionConvolution()
  */
 MDResolutionConvolution::MDResolutionConvolution(
     const API::IFunctionMD &fittingFunction, const std::string &fgModelName)
-    : ParamFunction(), m_fittingFunction(NULL), m_foreground(NULL) {
+    : ParamFunction(), m_fittingFunction(nullptr), m_foreground(nullptr) {
   setFittingFunction(fittingFunction);
   setForegroundModel(fgModelName);
 }

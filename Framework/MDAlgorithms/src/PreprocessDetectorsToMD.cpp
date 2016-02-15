@@ -127,7 +127,7 @@ PreprocessDetectorsToMD::createTableWorkspace(
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));
@@ -223,13 +223,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
 
   // Efixed; do we need one and does one exist?
   double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
-  float *pEfixedArray(NULL);
+  float *pEfixedArray(nullptr);
   const Geometry::ParameterMap &pmap = inputWS->constInstrumentParameters();
   if (m_getEFixed)
     pEfixedArray = targWS->getColDataArray<float>("eFixed");
 
   // check if one needs to generate masked detectors column.
-  int *pMasksArray(NULL);
+  int *pMasksArray(nullptr);
   if (m_getIsMasked)
     pMasksArray = targWS->getColDataArray<int>("detMask");
 

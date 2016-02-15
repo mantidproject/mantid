@@ -123,8 +123,7 @@ public:
   {}
 
   // See QValidator
-  virtual QValidator::State validate(QString& input, int& pos) const
-  {
+  QValidator::State validate(QString &input, int &pos) const override {
     if (input.isEmpty())
       return QValidator::Acceptable;
     else

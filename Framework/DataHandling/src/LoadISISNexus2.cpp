@@ -52,7 +52,7 @@ LoadISISNexus2::LoadISISNexus2()
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
       m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
-      m_spec_end(NULL), m_monitors(), m_logCreator(), m_progress(),
+      m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
       m_cppFile() {}
 
 /**
@@ -90,10 +90,7 @@ void LoadISISNexus2::init() {
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
-  std::vector<std::string> monitorOptions;
-  monitorOptions.push_back("Include");
-  monitorOptions.push_back("Exclude");
-  monitorOptions.push_back("Separate");
+  std::vector<std::string> monitorOptions{"Include", "Exclude", "Separate"};
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
@@ -213,8 +210,8 @@ void LoadISISNexus2::exec() {
   size_t total_specs =
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
 
-  m_progress = boost::shared_ptr<API::Progress>(new Progress(
-      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
+  m_progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
 
   DataObjects::Workspace2D_sptr local_workspace =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(

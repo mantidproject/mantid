@@ -65,10 +65,8 @@ void MuonProcess::init() {
                                                    PropertyMode::Mandatory),
                   "Input workspace loaded from file (e.g. by LoadMuonNexus)");
 
-  std::vector<std::string> allowedModes;
-  allowedModes.push_back("CorrectAndGroup");
-  allowedModes.push_back("Analyse");
-  allowedModes.push_back("Combined");
+  std::vector<std::string> allowedModes{"CorrectAndGroup", "Analyse",
+                                        "Combined"};
   auto modeVal = boost::make_shared<CompositeValidator>();
   modeVal->add(boost::make_shared<StringListValidator>(allowedModes));
   modeVal->add(boost::make_shared<MandatoryValidator<std::string>>());
@@ -111,10 +109,8 @@ void MuonProcess::init() {
   declareProperty("Xmin", EMPTY_DBL(), "Minimal X value to include");
   declareProperty("Xmax", EMPTY_DBL(), "Maximal X value to include");
 
-  std::vector<std::string> allowedTypes;
-  allowedTypes.push_back("PairAsymmetry");
-  allowedTypes.push_back("GroupAsymmetry");
-  allowedTypes.push_back("GroupCounts");
+  std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry",
+                                        "GroupCounts"};
   declareProperty("OutputType", "PairAsymmetry",
                   boost::make_shared<StringListValidator>(allowedTypes),
                   "What kind of workspace required for analysis.");

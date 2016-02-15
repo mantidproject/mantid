@@ -54,7 +54,7 @@ CalculateGammaBackground::CalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
-      m_backgroundWS(), m_correctedWS(), m_progress(NULL) {}
+      m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
 
 /// Destructor
 CalculateGammaBackground::~CalculateGammaBackground() {
@@ -458,13 +458,13 @@ void CalculateGammaBackground::retrieveInputs() {
   std::vector<int> requestedIndices = getProperty("WorkspaceIndexList");
   if (requestedIndices.empty()) {
     for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i) {
-      m_indices.insert(std::make_pair(i, i)); // 1-to-1
+      m_indices.emplace(i, i); // 1-to-1
     }
   } else {
     for (size_t i = 0; i < requestedIndices.size(); ++i) {
-      m_indices.insert(std::make_pair(
+      m_indices.emplace(
           i, static_cast<size_t>(
-                 requestedIndices[i]))); // user-requested->increasing on output
+                 requestedIndices[i])); // user-requested->increasing on output
     }
   }
 

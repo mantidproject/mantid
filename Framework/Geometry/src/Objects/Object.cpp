@@ -17,6 +17,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
+#include <boost/make_shared.hpp>
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -38,7 +39,7 @@ Object::Object()
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_material() // empty by default
 {
-  handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+  handle = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
@@ -53,7 +54,7 @@ Object::Object(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_material() // empty by default
 {
-  handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+  handle = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
@@ -61,7 +62,7 @@ Object::Object(const std::string &shapeXML)
 * @param A :: The object to initialise this copy from
 */
 Object::Object(const Object &A)
-    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL),
+    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : nullptr),
       m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
@@ -80,7 +81,7 @@ Object::Object(const Object &A)
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
     ObjName = A.ObjName;
-    TopRule = (A.TopRule) ? A.TopRule->clone() : 0;
+    TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -126,7 +127,7 @@ const Kernel::Material &Object::material() const { return m_material; }
 */
 bool Object::hasValidShape() const {
   // Assume invalid shape if object has no 'TopRule' or surfaces
-  return (TopRule != NULL && !SurList.empty());
+  return (TopRule != nullptr && !SurList.empty());
 }
 
 /**
@@ -668,7 +669,7 @@ void Object::write(std::ostream &OX) const {
 * @returns 1 on success
 */
 int Object::procString(const std::string &Line) {
-  TopRule = 0;
+  TopRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
@@ -1835,7 +1836,7 @@ int Object::searchForObject(Kernel::V3D &point) const {
 * the calling function.
 */
 void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
-  if (h == NULL)
+  if (h == nullptr)
     return;
   handle = h;
 }
@@ -1845,7 +1846,7 @@ void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
 * function does nothing.
 */
 void Object::draw() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   // Render the Object
   handle->Render();
@@ -1857,7 +1858,7 @@ void Object::draw() const {
 * If the handler is not set then this function does nothing.
 */
 void Object::initDraw() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   // Render the Object
   handle->Initialize();
@@ -1897,16 +1898,16 @@ void Object::updateGeometryHandler() {
     return;
   bGeometryCaching = true;
   // Check if the Geometry handler can be handled for cache
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   if (!handle->canTriangulate())
     return;
   // Check if the reader exist then read the cache
-  if (vtkCacheReader.get() != NULL) {
+  if (vtkCacheReader.get() != nullptr) {
     vtkCacheReader->readCacheForObject(this);
   }
   // Check if the writer exist then write the cache
-  if (vtkCacheWriter.get() != NULL) {
+  if (vtkCacheWriter.get() != nullptr) {
     vtkCacheWriter->addObject(this);
   }
 }
@@ -1918,7 +1919,7 @@ void Object::updateGeometryHandler() {
 * @return the number of triangles
 */
 int Object::NumberOfTriangles() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return 0;
   return handle->NumberOfTriangles();
 }
@@ -1927,7 +1928,7 @@ int Object::NumberOfTriangles() const {
 * get number of points
 */
 int Object::NumberOfPoints() const {
-  if (handle == NULL)
+  if (handle == nullptr)
     return 0;
   return handle->NumberOfPoints();
 }
@@ -1936,8 +1937,8 @@ int Object::NumberOfPoints() const {
 * get vertices
 */
 double *Object::getTriangleVertices() const {
-  if (handle == NULL)
-    return NULL;
+  if (handle == nullptr)
+    return nullptr;
   return handle->getTriangleVertices();
 }
 
@@ -1945,8 +1946,8 @@ double *Object::getTriangleVertices() const {
 * get faces
 */
 int *Object::getTriangleFaces() const {
-  if (handle == NULL)
-    return NULL;
+  if (handle == nullptr)
+    return nullptr;
   return handle->getTriangleFaces();
 }
 
@@ -1956,7 +1957,7 @@ int *Object::getTriangleFaces() const {
 void Object::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                            double &myradius, double &myheight) const {
   type = 0;
-  if (handle == NULL)
+  if (handle == nullptr)
     return;
   handle->GetObjectGeom(type, vectors, myradius, myheight);
 }
