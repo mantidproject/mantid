@@ -44,13 +44,12 @@ namespace Kernel {
 class DLLExport StringTokenizer {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
-  enum Options {
+  enum class Options {
     TOK_IGNORE_EMPTY = 1, ///< ignore empty tokens
     TOK_TRIM = 2, ///< remove leading and trailing whitespace from tokens
     TOK_IGNORE_FINAL_EMPTY_TOKEN =
         4 ///< ignore an empty token at the end of the string.
   };
-
   typedef std::vector<std::string> TokenVec;
   typedef std::vector<std::string>::iterator Iterator;
   typedef std::vector<std::string>::const_iterator ConstIterator;
