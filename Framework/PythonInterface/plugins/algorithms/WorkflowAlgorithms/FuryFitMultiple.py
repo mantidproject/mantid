@@ -56,6 +56,8 @@ class FuryFitMultiple(PythonAlgorithm):
                              doc='The outputworkspace containing the results of the fit data')
         self.declareProperty(ITableWorkspaceProperty('OutputParameterWorkspace', '', direction=Direction.Output),
                              doc='The outputworkspace containing the parameters for each fit')
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '', direction=Direction.Output),
+                             doc='The OutputWorkspace group Data, Calc and Diff, values for the fit of each spectra')
 
 
     def validateInputs(self):
@@ -181,6 +183,7 @@ class FuryFitMultiple(PythonAlgorithm):
 
         self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', params_table)
+        self.setProperty('OutputWorkspaceGroup', fit_group)
 
 
 AlgorithmFactory.subscribe(FuryFitMultiple)

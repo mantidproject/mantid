@@ -135,7 +135,7 @@ class FuryFitMultipleTest(unittest.TestCase):
         """
         Tests a basic run of FuryfitMultiple.
         """
-        result, params = FuryFitMultiple(InputWorkspace=self._iqt_ws,
+        result, params, fit_group = FuryFitMultiple(InputWorkspace=self._iqt_ws,
                                                     Function=self._function,
                                                     FitType='1S_s',
                                                     StartX=0,
@@ -146,7 +146,7 @@ class FuryFitMultipleTest(unittest.TestCase):
                                                     Save=False,
                                                     Plot='None')
         #params = mtd['irs26176_graphite002_fury_1Smult_s0_to_16_Parameters']
-        fit_group  = mtd['irs26176_graphite002_fury_1Smult_s0_to_16_Workspaces']
+        #fit_group  = mtd['irs26176_graphite002_fury_1Smult_s0_to_16_Workspaces']
         self._validate_output(params, result, fit_group)
 
 #----------------------------------------Failure cases-------------------------------------
@@ -160,7 +160,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=-1,
                           SpecMax=16,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
     def test_maximum_spectra_more_than_workspace_spectra(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
@@ -170,7 +171,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=0,
                           SpecMax=20,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
@@ -180,7 +182,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=10,
                           SpecMax=5,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
     def test_minimum_x_less_than_0(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
@@ -191,7 +194,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=0,
                           SpecMax=16,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
     def test_maximum_x_more_than_workspace_max_x(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
@@ -202,7 +206,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=0,
                           SpecMax=16,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
         self.assertRaises(RuntimeError, FuryFitMultiple, InputWorkspace=self._iqt_ws,
@@ -213,7 +218,8 @@ class FuryFitMultipleTest(unittest.TestCase):
                           SpecMin=0,
                           SpecMax=16,
                           OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table')
+                          OutputParameterWorkspace='table',
+                          OutputWorkspaceGroup='fit_group')
 
 
 if __name__=="__main__":
