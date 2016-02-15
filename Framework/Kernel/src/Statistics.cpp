@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <iostream>
 #include <numeric>
 #include <sstream>
