@@ -600,13 +600,13 @@ public:
       ANNdistArray dd,            // dist to near neighbors (modified)
       double eps = 0.0) override; // error bound
 
-  int annkFRSearch(               // approx fixed-radius kNN search
-      ANNpoint q,                 // query point
-      ANNdist sqRad,              // squared radius
-      int k = 0,                  // number of near neighbors to return
-      ANNidxArray nn_idx = nullptr,  // nearest neighbor array (modified)
-      ANNdistArray dd = nullptr,     // dist to near neighbors (modified)
-      double eps = 0.0) override; // error bound
+  int annkFRSearch(                 // approx fixed-radius kNN search
+      ANNpoint q,                   // query point
+      ANNdist sqRad,                // squared radius
+      int k = 0,                    // number of near neighbors to return
+      ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
+      ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
+      double eps = 0.0) override;   // error bound
 
   int theDim() override // return dimension of space
   {

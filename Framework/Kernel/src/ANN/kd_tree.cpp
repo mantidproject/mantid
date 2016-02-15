@@ -46,7 +46,7 @@
 //	must *never* deallocated (since it may be shared by more than
 //	one tree).
 //----------------------------------------------------------------------
-static int IDX_TRIVIAL[] = {0}; // trivial point index
+static int IDX_TRIVIAL[] = {0};   // trivial point index
 ANNkd_leaf *KD_TRIVIAL = nullptr; // trivial leaf node
 
 //----------------------------------------------------------------------

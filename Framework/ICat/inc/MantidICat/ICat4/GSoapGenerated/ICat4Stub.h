@@ -320,7 +320,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__parameterValueType_() { ns1__parameterValueType_::soap_default(nullptr); }
+  ns1__parameterValueType_() {
+    ns1__parameterValueType_::soap_default(nullptr);
+  }
   ~ns1__parameterValueType_() override {}
 };
 #endif
@@ -1020,7 +1022,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getUserNameResponse() { ns1__getUserNameResponse::soap_default(nullptr); }
+  ns1__getUserNameResponse() {
+    ns1__getUserNameResponse::soap_default(nullptr);
+  }
   ~ns1__getUserNameResponse() override {}
 };
 #endif
@@ -1405,7 +1409,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__luceneCommitResponse() { ns1__luceneCommitResponse::soap_default(nullptr); }
+  ns1__luceneCommitResponse() {
+    ns1__luceneCommitResponse::soap_default(nullptr);
+  }
   ~ns1__luceneCommitResponse() override {}
 };
 #endif
@@ -1657,7 +1663,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__getRemainingMinutes() { ns1__getRemainingMinutes::soap_default(nullptr); }
+  ns1__getRemainingMinutes() {
+    ns1__getRemainingMinutes::soap_default(nullptr);
+  }
   ~ns1__getRemainingMinutes() override {}
 };
 #endif
@@ -2115,7 +2123,9 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__instrumentScientist() { ns1__instrumentScientist::soap_default(nullptr); }
+  ns1__instrumentScientist() {
+    ns1__instrumentScientist::soap_default(nullptr);
+  }
   ~ns1__instrumentScientist() override {}
 };
 #endif

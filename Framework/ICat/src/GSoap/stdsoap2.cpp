@@ -9182,9 +9182,9 @@ void SOAP_FMAC2 soap_versioning(soap_init)(struct soap *soap, soap_mode imode,
   soap->fconnect = nullptr;
   soap->fdisconnect = nullptr;
 #ifndef WITH_NOIO
-  soap->ipv6_multicast_if = 0;    /* in_addr_t value */
+  soap->ipv6_multicast_if = 0;       /* in_addr_t value */
   soap->ipv4_multicast_if = nullptr; /* points to struct in_addr or in_addr_t */
-  soap->ipv4_multicast_ttl = 0;   /* 0: use default */
+  soap->ipv4_multicast_ttl = 0;      /* 0: use default */
 #ifndef WITH_IPV6
   soap->fresolve = tcp_gethost;
 #else
