@@ -2,6 +2,7 @@
 #define MANTID_API_GROUPINGLOADER_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace API {
