@@ -50,7 +50,7 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
-        
+
         self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
                              "Run sequence information (run number, sequence ID, sequence number).")
 
