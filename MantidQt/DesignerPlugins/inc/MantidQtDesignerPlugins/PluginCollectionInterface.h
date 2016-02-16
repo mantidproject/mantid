@@ -12,7 +12,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
-#include "MantidQtSliceViewer/ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
