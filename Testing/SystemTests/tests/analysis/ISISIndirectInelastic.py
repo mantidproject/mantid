@@ -973,10 +973,12 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                                           self.func,
                                                           self.ftype,
                                                           self.startx,
-                                                          self.endx)
+                                                          self.endx,
+                                                          self.spec_min,
+                                                          self.spec_max)
 
         self.result_names = [fury_ws.getName(),
-                             furyfitSeq_ws]
+                             furyfitSeq_ws.getName()]
 
         #remove workspaces from mantid
         for sample in self.samples:
@@ -1028,6 +1030,8 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.ftype = '1E_s'
         self.startx = 0.0
         self.endx = 0.119681
+        self.spec_min = 0
+        self.spec_max = 41
 
     def get_reference_files(self):
         ref_files = ['II.OSIRISFury.nxs']
@@ -1050,6 +1054,8 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.e_min = -0.4
         self.e_max = 0.4
         self.num_bins = 4
+        self.spec_min = 0
+        self.spec_max = 50
 
         # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
