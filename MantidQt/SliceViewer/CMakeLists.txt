@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	src/ColorBarWidget.cpp
 	src/CompositePeaksPresenter.cpp
 	src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
@@ -33,7 +32,6 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
@@ -86,7 +84,6 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
-	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
@@ -100,7 +97,6 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
 	inc/MantidQtSliceViewer/LinePlotOptions.ui
-	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui

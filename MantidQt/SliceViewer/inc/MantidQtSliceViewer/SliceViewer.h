@@ -1,7 +1,7 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
@@ -264,7 +264,7 @@ private:
   QHBoxLayout * m_spectLayout;
 
   /// Color bar indicating the color scale
-  ColorBarWidget * m_colorBar;
+  MantidQt::MantidWidgets::ColorBarWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
   std::vector<DimensionSliceWidget *> m_dimWidgets;
