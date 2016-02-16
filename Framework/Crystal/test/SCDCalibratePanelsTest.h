@@ -48,7 +48,6 @@ public:
     alg->setProperty("useL0", true);
     alg->setProperty("useTimeOffset", true);
     alg->setPropertyValue("ResultWorkspace", "Result");
-    alg->setPropertyValue("QErrorWorkspace", "QErrorResult");
     alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
     TS_ASSERT(alg->execute());
 

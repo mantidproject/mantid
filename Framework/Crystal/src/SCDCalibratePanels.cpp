@@ -501,7 +501,6 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
           std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
           lat[0], lat[1], lat[2], lat[3], lat[4], lat[5], lat[6]);
   std::string result(buffer);
-  std::cout << "Lattice before optimization: " << result << "\n";
 
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat[0] - a) / a > .25)
@@ -637,7 +636,7 @@ void SCDCalibratePanels::exec() {
 
   //----------------- Calculate & Create Calculated vs Theoretical
   //workspaces------------------,);
-  int nGroups = static_cast<int>(Groups.size());
+  int nGroups = static_cast<int>(AllBankNames.size());
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
                                                        nPeaks, nPeaks);
@@ -647,6 +646,7 @@ void SCDCalibratePanels::exec() {
   MatrixWorkspace_sptr TofWksp =
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
                                                        nPeaks, nPeaks);
+  nGroups = static_cast<int>(Groups.size());
 
   double chisqSum = 0;
   int NDofSum = 0;
