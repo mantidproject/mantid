@@ -120,17 +120,18 @@ specid_t SpectraAxis::spectraNo(const std::size_t &index) const {
 
 /** Returns a map where spectra is the key and index is the value
  *  This is used for efficient search of spectra number within a workspace
- *  @param  map Reference to the map
+ *  @returns :: map of spectra to index
  */
-void SpectraAxis::getSpectraIndexMap(spec2index_map &map) const {
+spec2index_map SpectraAxis::getSpectraIndexMap() const {
   size_t nel = length();
 
   if (nel == 0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
-  map.clear();
+  spec2index_map map;
   for (size_t i = 0; i < nel; ++i) {
     map.emplace(m_parentWS->getSpectrum(i)->getSpectrumNo(), i);
   }
+  return map;
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent

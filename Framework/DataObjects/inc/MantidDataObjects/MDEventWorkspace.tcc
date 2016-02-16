@@ -740,22 +740,17 @@ TMDE(void MDEventWorkspace)::refreshCache() {
  *- 1
  * @param e :: vector of errors for each bin.
  */
-TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
-                                         const Mantid::Kernel::VMD &end,
-                                         Mantid::API::MDNormalization normalize,
-                                         std::vector<coord_t> &x,
-                                         std::vector<signal_t> &y,
-                                         std::vector<signal_t> &e) const {
+TMDE(IMDWorkspace::LinePlot MDEventWorkspace)
+::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+              Mantid::API::MDNormalization normalize) const {
   // TODO: Don't use a fixed number of points later
   size_t numPoints = 500;
 
   VMD step = (end - start) / double(numPoints - 1);
   double stepLength = step.norm();
 
-  // These will be the curve as plotted
-  x.clear();
-  y.clear();
-  e.clear();
+  // This will be the curve as plotted
+  LinePlot line;
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
@@ -782,25 +777,26 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
             break;
           }
           // Record the position along the line
-          x.push_back(static_cast<coord_t>(stepLength * double(i)));
+          line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
           // And add the normalized signal/error to the list
-          y.push_back(box->getSignal() * normalizer);
-          e.push_back(box->getError() * normalizer);
+          line.y.push_back(box->getSignal() * normalizer);
+          line.e.push_back(box->getError() * normalizer);
         }
       } else {
         // Record the position along the line
-        x.push_back(static_cast<coord_t>(stepLength * double(i)));
-        y.push_back(std::numeric_limits<double>::quiet_NaN());
-        e.push_back(std::numeric_limits<double>::quiet_NaN());
+        line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
+        line.y.push_back(std::numeric_limits<double>::quiet_NaN());
+        line.e.push_back(std::numeric_limits<double>::quiet_NaN());
       }
     } else {
       // Record the position along the line
-      x.push_back(static_cast<coord_t>(stepLength * double(i)));
+      line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
       // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      line.y.push_back(std::numeric_limits<double>::quiet_NaN());
+      line.e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
+  return line;
 }
 
 /**
