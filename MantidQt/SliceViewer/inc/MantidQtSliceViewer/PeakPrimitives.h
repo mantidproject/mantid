@@ -9,36 +9,40 @@ namespace SliceViewer
 {
 
 struct PeakPrimitives {
-    PeakPrimitives(Mantid::Kernel::V3D peakOrigin, double peakOpacityAtDistance)
-        : peakOrigin(peakOrigin), peakOpacityAtDistance(peakOpacityAtDistance)
+    PeakPrimitives(Mantid::Kernel::V3D peakOrigin, double peakOpacityAtDistance,
+                   int peakLineWidth)
+        : peakOrigin(peakOrigin),
+          peakOpacityAtDistance(peakOpacityAtDistance),
+          peakLineWidth(peakLineWidth)
     {
     }
     Mantid::Kernel::V3D peakOrigin;
     double peakOpacityAtDistance;
+    int peakLineWidth;
 };
 
 struct PeakPrimitivesCross : public PeakPrimitives {
     PeakPrimitivesCross(Mantid::Kernel::V3D peakOrigin,
-                        double peakOpacityAtDistance, int peakHalfCrossWidth,
-                        int peakHalfCrossHeight, int peakLineWidth)
-        : PeakPrimitives(peakOrigin, peakOpacityAtDistance),
+                        double peakOpacityAtDistance, int peakLineWidth,
+                        int peakHalfCrossWidth, int peakHalfCrossHeight)
+        : PeakPrimitives(peakOrigin, peakOpacityAtDistance, peakLineWidth),
           peakHalfCrossWidth(peakHalfCrossWidth),
-          peakHalfCrossHeight(peakHalfCrossHeight), peakLineWidth(peakLineWidth)
+          peakHalfCrossHeight(peakHalfCrossHeight)
     {
     }
     int peakHalfCrossWidth;
     int peakHalfCrossHeight;
-    int peakLineWidth;
 };
 
 struct PeakPrimitivesSphere : public PeakPrimitives {
     PeakPrimitivesSphere(Mantid::Kernel::V3D peakOrigin,
-                        double peakOpacityAtDistance, double peakInnerRadiusX,
-                        double peakInnerRadiusY, double backgroundOuterRadiusX,
-                        double backgroundOuterRadiusY,
-                        double backgroundInnerRadiusX,
-                        double backgroundInnerRadiusY)
-        : PeakPrimitives(peakOrigin, peakOpacityAtDistance),
+                         double peakOpacityAtDistance, double peakLineWidthd,
+                         double peakInnerRadiusX, double peakInnerRadiusY,
+                         double backgroundOuterRadiusX,
+                         double backgroundOuterRadiusY,
+                         double backgroundInnerRadiusX,
+                         double backgroundInnerRadiusY)
+        : PeakPrimitives(peakOrigin, peakOpacityAtDistance, peakLineWidth),
           peakInnerRadiusX(peakInnerRadiusX),
           peakInnerRadiusY(peakInnerRadiusY),
           backgroundOuterRadiusX(backgroundOuterRadiusX),

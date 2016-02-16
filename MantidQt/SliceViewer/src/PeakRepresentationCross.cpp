@@ -103,10 +103,10 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
         0 /*peakHalfCrossWidth*/, 0 /*peakHalfCrossHeight*/,
         0 /*peakLineWidth*/);
 
-    const int halfCrossHeight
-        = int(viewInformation.windowHeight * m_crossViewFraction);
-    const int halfCrossWidth
-        = int(viewInformation.windowWidth * m_crossViewFraction);
+    const auto halfCrossHeight
+        = static_cast<int>(viewInformation.windowHeight * m_crossViewFraction);
+    const auto halfCrossWidth
+        = static_cast<int>(viewInformation.windowWidth * m_crossViewFraction);
 
     drawingInformation->peakHalfCrossHeight = halfCrossHeight;
     drawingInformation->peakHalfCrossWidth = halfCrossWidth;

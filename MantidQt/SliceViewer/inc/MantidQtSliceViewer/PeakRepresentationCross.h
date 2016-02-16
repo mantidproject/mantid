@@ -22,7 +22,8 @@ namespace SliceViewer
 class PeakRepresentationCross : public PeakRepresentation
 {
 public:
-    PeakRepresentationCross(const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ);
+    PeakRepresentationCross(const Mantid::Kernel::V3D &origin,
+                            const double &maxZ, const double &minZ);
     /// Setter for the slice point
     void setSlicePoint(const double &) override;
     /// Transform the coordinates.
@@ -41,15 +42,17 @@ public:
     /// Get the depth occupancy (fractional into the projection plane)
     double getOccupancyIntoView() const override;
     /// Get the origin
-    const Mantid::Kernel::V3D& getOrigin() const override;
+    const Mantid::Kernel::V3D &getOrigin() const override;
     /// Show the background radius
     void showBackgroundRadius(const bool show) override;
 
 protected:
     std::shared_ptr<PeakPrimitives> getDrawingInformation(
         PeakRepresentationViewInformation viewInformation) override;
-    void doDraw(QPainter &painter, PeakViewColor& foregroundColor, PeakViewColor& backgroundColor,
-                std::shared_ptr<PeakPrimitives> drawingInformation, PeakRepresentationViewInformation viewInformation) override;
+    void doDraw(QPainter &painter, PeakViewColor &foregroundColor,
+                PeakViewColor &backgroundColor,
+                std::shared_ptr<PeakPrimitives> drawingInformation,
+                PeakRepresentationViewInformation viewInformation) override;
 
 private:
     /// Original origin x=h, y=k, z=l

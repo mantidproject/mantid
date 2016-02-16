@@ -19,7 +19,7 @@ set ( SRC_FILES
 	src/PeakRepresentation.cpp
 	src/PeakRepresentationCross.cpp
         #src/PeakRepresentationEllipsoid.cpp
-        #src/PeakRepresentationSphere.cpp
+        src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
 	src/PeakView.cpp
 	src/PeakViewFactory.cpp
@@ -66,7 +66,7 @@ set ( INC_FILES
         inc/MantidQtSliceViewer/PeakRepresentation.h
 	inc/MantidQtSliceViewer/PeakRepresentationCross.h
         #inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
-        #inc/MantidQtSliceViewer/PeakRepresentationSphere.h
+        inc/MantidQtSliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/PeakView.h
 	inc/MantidQtSliceViewer/PeakViewColor.h
@@ -129,6 +129,7 @@ set ( TEST_FILES
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
     test/PeakRepresentationCrossTest.h
+    test/PeakRepresentationSphereTest.h
     test/PhysicalCrossPeakTest.h
     test/PhysicalSphericalPeakTest.h
     test/NullPeaksPresenterTest.h

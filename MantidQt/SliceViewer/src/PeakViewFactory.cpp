@@ -1,6 +1,7 @@
 #include "MantidQtSliceViewer/PeakViewFactory.h"
 #include "MantidQtSliceViewer/PeakRepresentation.h"
 #include "MantidQtSliceViewer/PeakRepresentationCross.h"
+#include "MantidQtSliceViewer/PeakRepresentationSphere.h"
 #include "MantidQtSliceViewer/PeakView.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -110,10 +111,33 @@ PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationCross(
 }
 
 PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationSphere(
-    Mantid::Kernel::V3D position, const Mantid::Geometry::IPeak &) const
+    Mantid::Kernel::V3D position, const Mantid::Geometry::IPeak &peak) const
 {
-    // TODO Replace with correct implementation
-    return std::make_shared<PeakRepresentationCross>(position, -1.0, 1.0);
+    const auto &shape = peak.getPeakShape();
+    const auto &sphericalShape
+        = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical &>(shape);
+
+    // Get the radius
+    const auto peakRadius = sphericalShape.radius();
+
+    // Get the background inner radius. If it does not exist, default to radius.
+    const auto backgroundInnerRadiusOptional
+        = sphericalShape.backgroundInnerRadius();
+    const auto backgroundInnerRadius
+        = backgroundInnerRadiusOptional.is_initialized()
+              ? backgroundInnerRadiusOptional.get()
+              : peakRadius;
+
+    // Get the background outer radius. If it does not exist, default to radius.
+    const auto backgroundOuterRadiusOptional
+        = sphericalShape.backgroundOuterRadius();
+    const auto backgroundOuterRadius
+        = backgroundOuterRadiusOptional.is_initialized()
+              ? backgroundOuterRadiusOptional.get()
+              : peakRadius;
+
+    return std::make_shared<PeakRepresentationSphere>(
+        position, peakRadius, backgroundInnerRadius, backgroundOuterRadius);
 }
 
 PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationEllipsoid(
