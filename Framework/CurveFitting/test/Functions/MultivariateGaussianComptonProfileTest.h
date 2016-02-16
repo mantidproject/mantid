@@ -17,7 +17,9 @@ public:
   static MutivariateGaussianComptonProfile *createSuite() {
     return new MutivariateGaussianComptonProfile();
   }
-  static void destroySuite(MutivariateGaussianComptonProfile *suite) { delete suite; }
+  static void destroySuite(MutivariateGaussianComptonProfile *suite) {
+    delete suite;
+  }
 
   void test_Name_Is_As_Expected() {
     // These are used in scripts so should not change!

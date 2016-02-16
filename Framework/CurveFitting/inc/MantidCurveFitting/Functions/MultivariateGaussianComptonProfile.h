@@ -56,7 +56,8 @@ private:
   void massProfile(double *result, const size_t nData) const;
 
   double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
-  double calculateIntegrand(int idx, std::vector<double> &s2Cache, double y) const;
+  double calculateIntegrand(int idx, std::vector<double> &s2Cache,
+                            double y) const;
 
   void buildS2Cache(std::vector<double> &s2Cache) const;
 
