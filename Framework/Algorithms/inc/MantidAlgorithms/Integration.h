@@ -81,16 +81,16 @@ private:
   void init() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr rangeFilterEventWorkspace(
-      API::MatrixWorkspace_sptr eventWorkspace, double minRange,
-      double maxRange);
+  API::MatrixWorkspace_sptr
+  rangeFilterEventWorkspace(API::MatrixWorkspace_sptr eventWorkspace,
+                            double minRange, double maxRange);
 
   /// Get the input workspace
   API::MatrixWorkspace_sptr getInputWorkspace();
   /// Create the outputworkspace
-  API::MatrixWorkspace_sptr
-  getOutputWorkspace(API::MatrixWorkspace_sptr inWS, const int minSpec,
-                     const int maxSpec);
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS,
+                                               const int minSpec,
+                                               const int maxSpec);
 };
 
 } // namespace Algorithm
