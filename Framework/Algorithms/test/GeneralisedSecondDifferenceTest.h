@@ -7,8 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <boost/assign.hpp>
-
 using namespace Mantid::API;
 
 class GeneralisedSecondDifferenceTest : public CxxTest::TestSuite {

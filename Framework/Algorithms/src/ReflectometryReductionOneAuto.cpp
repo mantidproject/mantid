@@ -6,7 +6,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
-#include <boost/assign/list_of.hpp>
 
 namespace Mantid {
 namespace Algorithms {
