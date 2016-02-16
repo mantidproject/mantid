@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "qmainwindow.h"
 #include <QApplication>
 #include <QDir>
