@@ -790,18 +790,14 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
 
 //---------------------------------------------------------------------------------------
 /** A given instrument may have multiple IDFs associated with it. This method
-*return an
-*  identifier which identify a given IDF for a given instrument. An IDF filename
-*is
-*  required to be of the form IDFname + _Definition + Identifier + .xml, the
-*identifier
-*  then is the part of a filename that identifies the IDF valid at a given date.
+*return an identifier which identify a given IDF for a given instrument.
+* An IDF filename is required to be of the form IDFname + _Definition +
+*Identifier + .xml, the identifier then is the part of a filename that
+*identifies the IDF valid at a given date.
 *
 *  If several IDF files are valid at the given date the file with the most
-*recent from
-*  date is selected. If no such files are found the file with the latest from
-*date is
-*  selected.
+*recent from date is selected. If no such files are found the file with the
+*latest from date is selected.
 *
 *  If no file is found for the given instrument, an empty string is returned.
 *

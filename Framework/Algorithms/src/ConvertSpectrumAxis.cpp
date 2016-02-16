@@ -18,6 +18,7 @@
 #include <boost/function.hpp>
 
 #include <cfloat>
+#include <unordered_map>
 
 namespace Mantid {
 namespace Algorithms {
@@ -68,10 +69,9 @@ void ConvertSpectrumAxis::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   std::string unitTarget = getProperty("Target");
   // Loop over the original spectrum axis, finding the theta (n.b. not 2theta!)
-  // for each spectrum
-  // and storing it's corresponding workspace index
+  // for each spectrum and storing it's corresponding workspace index
   // Map will be sorted on theta, so resulting axis will be ordered as well
-  std::multimap<double, size_t> indexMap;
+  std::unordered_multimap<double, size_t> indexMap;
   const size_t nHist = inputWS->getNumberHistograms();
   const size_t nBins = inputWS->blocksize();
   const bool isHist = inputWS->isHistogramData();
@@ -159,7 +159,7 @@ void ConvertSpectrumAxis::exec() {
   } else {
     newAxis->unit() = UnitFactory::Instance().create(unitTarget);
   }
-  std::multimap<double, size_t>::const_iterator it;
+  std::unordered_multimap<double, size_t>::const_iterator it;
   size_t currentIndex = 0;
   for (it = indexMap.begin(); it != indexMap.end(); ++it) {
     // Set the axis value
