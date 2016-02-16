@@ -374,12 +374,12 @@ public:
     MantidVec x1 = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4};
     MantidVec x2 = {-0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
 
-	MantidVec y1 = { 1,1,1,3,3,3,3 };
-	MantidVec y2 = { 1,1,1,1,3,3,3 };
+    MantidVec y1 = {1, 1, 1, 3, 3, 3, 3};
+    MantidVec y2 = {1, 1, 1, 1, 3, 3, 3};
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
-	MantidVec params = { -1.0,0.2,1.0 };
+    MantidVec params = {-1.0, 0.2, 1.0};
     auto ret = do_stitch1D(ws1, ws2, 0.5, params, false);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
@@ -400,7 +400,7 @@ public:
   }
 
   void test_stitching_scale_right() {
-	  MantidVec params = { 0.2 };
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
     double scale = ret.get<1>();
@@ -432,7 +432,7 @@ public:
   }
 
   void test_stitching_scale_left() {
-	  MantidVec params = { 0.2 };
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params, false);
 
     double scale = ret.get<1>();
@@ -464,7 +464,7 @@ public:
   }
 
   void test_stitching_manual_scale_factor_scale_right() {
-	  MantidVec params = { 0.2 } ;
+    MantidVec params = {0.2};
     auto ret =
         do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
 
@@ -497,7 +497,7 @@ public:
   }
 
   void test_stitching_manual_scale_factor_scale_left() {
-	  MantidVec params = { 0.2 };
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params,
                            3.0 / 2.0);
 

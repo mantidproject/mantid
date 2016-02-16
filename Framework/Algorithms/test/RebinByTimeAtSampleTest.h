@@ -276,8 +276,8 @@ public:
 // clang-format off
 class RebinByTimeAtSampleTestPerformance: public CxxTest::TestSuite,
     public RebinByTimeBaseTestPerformance<RebinByTimeAtSample>
-// clang-format on
-{
+      // clang-format on
+      {
 
 public:
   static RebinByTimeAtSampleTestPerformance *createSuite() {
