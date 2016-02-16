@@ -19,10 +19,10 @@ namespace Mantid {
 namespace VATES {
 
 /// Round up to next multiple of factor
-coord_t roundUp(const coord_t num_to_round, const coord_t factor);
+coord_t DLLExport roundUp(const coord_t num_to_round, const coord_t factor);
 
 /// Round down to previous multiple of factor
-coord_t roundDown(const coord_t num_to_round, const coord_t factor);
+coord_t DLLExport roundDown(const coord_t num_to_round, const coord_t factor);
 
 /** Class is used to generate vtkUnstructuredGrids from IMDEventWorkspaces.
 Utilises the non-uniform nature of the underlying workspace grid/box structure
