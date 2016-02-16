@@ -5,8 +5,23 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+
+// forward declaration from other Mantid modules
+namespace API {
+class Sample;
+}
+
+namespace Kernel {
+class V3D;
+}
+
+namespace Geometry {
+class Object;
+}
+
 namespace Algorithms {
 /** A spherical absorption correction algorithm.
 
@@ -68,21 +83,21 @@ public:
   /// (Empty) Constructor
   SphericalAbsorption();
   /// Virtual destructor
-  virtual ~SphericalAbsorption() {}
+  ~SphericalAbsorption() override {}
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
   }
   /// Algorithm's name
-  virtual const std::string name() const { return "SphericalAbsorption"; }
+  const std::string name() const override { return "SphericalAbsorption"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates bin-by-bin or event correction factors for attenuation "
            "due to absorption and scattering in a 'spherical' sample.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 protected:
   API::MatrixWorkspace_sptr m_inputWS;    ///< A pointer to the input workspace
@@ -96,9 +111,9 @@ protected:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);

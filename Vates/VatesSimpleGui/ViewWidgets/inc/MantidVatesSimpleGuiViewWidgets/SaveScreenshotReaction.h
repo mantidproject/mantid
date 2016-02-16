@@ -58,12 +58,11 @@ public:
 
 public slots:
   /// Updates the enabled state. Applications need not explicitly call this.
-  void updateEnableState();
+  void updateEnableState() override;
 
 protected:
   /// Called when the action is triggered.
-  virtual void onTriggered()
-  { SaveScreenshotReaction::saveScreenshot(); }
+  void onTriggered() override { SaveScreenshotReaction::saveScreenshot(); }
 
 private:
   Q_DISABLE_COPY(SaveScreenshotReaction)

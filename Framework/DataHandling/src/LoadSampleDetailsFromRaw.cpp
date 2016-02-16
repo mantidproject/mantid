@@ -3,6 +3,7 @@
 //------------------------------------------------------
 #include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 
 // The isis RAW data structure

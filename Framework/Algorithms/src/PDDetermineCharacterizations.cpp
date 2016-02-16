@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"

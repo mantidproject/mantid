@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect;

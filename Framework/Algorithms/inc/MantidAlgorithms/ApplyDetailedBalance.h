@@ -37,27 +37,27 @@ namespace Algorithms {
 class DLLExport ApplyDetailedBalance : public API::Algorithm {
 public:
   ApplyDetailedBalance();
-  ~ApplyDetailedBalance();
+  ~ApplyDetailedBalance() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "ApplyDetailedBalance"; };
+  const std::string name() const override { return "ApplyDetailedBalance"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Transform scattering intensity to dynamic susceptibility.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Inelastic\\Corrections";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

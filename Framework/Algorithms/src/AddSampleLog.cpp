@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
+
 #include <string>
 
 namespace {

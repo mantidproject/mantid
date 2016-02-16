@@ -2,21 +2,25 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
-#include <sstream>
-#include <numeric>
-#include <cmath>
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/tokenizer.hpp>
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
-#include <boost/tokenizer.hpp>
-#include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -45,7 +49,7 @@ public:
   * of fixed parameters in a particular fit.
   *   @param value :: The derivative value.
   */
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);
@@ -55,7 +59,7 @@ public:
   *   @param iP :: The index of the parameter. It does not depend on the number
   * of fixed parameters in a particular fit.
   */
-  double get(size_t iY, size_t iP) {
+  double get(size_t iY, size_t iP) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
       return gsl_matrix_get(m_J, iY, j);

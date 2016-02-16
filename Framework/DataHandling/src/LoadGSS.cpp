@@ -2,17 +2,21 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadGSS.h"
-#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
+
 #include <fstream>
 #include <sstream>
 

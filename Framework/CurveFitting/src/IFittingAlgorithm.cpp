@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidKernel/ListValidator.h"

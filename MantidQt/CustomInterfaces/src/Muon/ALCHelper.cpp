@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "QMessageBox"
 

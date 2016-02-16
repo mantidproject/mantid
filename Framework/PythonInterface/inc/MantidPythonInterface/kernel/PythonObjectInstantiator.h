@@ -71,10 +71,10 @@ public:
       : m_classObject(classObject) {}
 
   /// Creates an instance of the object as shared_ptr to the Base type
-  boost::shared_ptr<Base> createInstance() const;
+  boost::shared_ptr<Base> createInstance() const override;
 
   /// Creates an instance of the object as raw pointer to the Base type
-  Base *createUnwrappedInstance() const;
+  Base *createUnwrappedInstance() const override;
 
 private:
   /// The class name

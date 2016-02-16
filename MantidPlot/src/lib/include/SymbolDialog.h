@@ -88,11 +88,11 @@ private:
 
 protected:
   //! Event handler: When the dialog gets the focus the first button is set to react on [return]
-  void focusInEvent( QFocusEvent * event );
+  void focusInEvent(QFocusEvent *event) override;
 
 public slots:
   //! Change language (reset title)
-  virtual void languageChange();
+  void languageChange() override;
   //! Find and emit char from pressed button
   void getChar(int btnIndex);
   //! Find and emit char from current button ([return] pressed)

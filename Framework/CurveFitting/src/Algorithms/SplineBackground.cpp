@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_statistics.h>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace CurveFitting {

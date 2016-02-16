@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadReflTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>

@@ -62,26 +62,26 @@ public:
   /// Default constructor
   DetectorEfficiencyVariation();
   /// Destructor
-  virtual ~DetectorEfficiencyVariation(){};
+  ~DetectorEfficiencyVariation() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "DetectorEfficiencyVariation";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Compares two white beam vanadium workspaces from the same "
            "instrument to find detectors whose efficiencies have changed "
            "beyond a threshold.";
   }
 
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 protected:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Loads and checks the values passed to the algorithm
   void retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1,

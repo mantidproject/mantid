@@ -40,16 +40,16 @@ class MANTID_CURVEFITTING_DLL ParDomain : public SeqDomain {
 public:
   ParDomain() : SeqDomain() {}
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
-                                  API::FunctionValues_sptr &values) const;
+  void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
+                          API::FunctionValues_sptr &values) const override;
   /// Calculate the value of a least squares cost function
-  virtual void
-  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
+  void leastSquaresVal(
+      const CostFunctions::CostFuncLeastSquares &leastSquares) override;
   /// Calculate the value, first and second derivatives of a least squares cost
   /// function
-  virtual void leastSquaresValDerivHessian(
+  void leastSquaresValDerivHessian(
       const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
-      bool evalHessian);
+      bool evalHessian) override;
 };
 
 } // namespace CurveFitting

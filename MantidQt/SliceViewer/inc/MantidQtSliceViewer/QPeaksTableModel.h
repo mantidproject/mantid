@@ -56,15 +56,16 @@ namespace MantidQt
     public:
       QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
       void update();
-      int rowCount(const QModelIndex &parent) const;
-      int columnCount(const QModelIndex &parent) const;
-      QVariant data(const QModelIndex &index, int role) const;
-      QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-      Qt::ItemFlags flags(const QModelIndex &index) const;
-      void sort (int column, Qt::SortOrder);
+      int rowCount(const QModelIndex &parent) const override;
+      int columnCount(const QModelIndex &parent) const override;
+      QVariant data(const QModelIndex &index, int role) const override;
+      QVariant headerData(int section, Qt::Orientation orientation,
+                          int role) const override;
+      Qt::ItemFlags flags(const QModelIndex &index) const override;
+      void sort(int column, Qt::SortOrder) override;
       int numCharacters(const int column) const;
       std::vector<int> defaultHideCols();
-      ~QPeaksTableModel();
+      ~QPeaksTableModel() override;
       void setPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
      signals:
       void peaksSorted(const std::string&, const bool);

@@ -40,19 +40,19 @@ public:
   HKL &operator=(const HKL &other);
   HKL(std::unique_ptr<Kernel::MDUnit> &unit);
   HKL(Kernel::MDUnit *unit);
-  virtual ~HKL();
+  ~HKL() override;
   static const std::string HKLName;
 
   // MDFrame interface
-  Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
-  bool isQ() const;
-  bool isSameType(const MDFrame &frame) const;
-  std::string name() const;
-  HKL *clone() const;
+  Kernel::UnitLabel getUnitLabel() const override;
+  const Kernel::MDUnit &getMDUnit() const override;
+  bool canConvertTo(const Kernel::MDUnit &otherUnit) const override;
+  bool isQ() const override;
+  bool isSameType(const MDFrame &frame) const override;
+  std::string name() const override;
+  HKL *clone() const override;
   Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
+  equivalientSpecialCoordinateSystem() const override;
 
 private:
   std::unique_ptr<Kernel::MDUnit> m_unit;

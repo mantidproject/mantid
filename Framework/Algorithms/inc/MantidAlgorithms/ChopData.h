@@ -38,19 +38,19 @@ namespace Algorithms {
 class DLLExport ChopData : public API::Algorithm {
 public:
   ChopData() : API::Algorithm() {} ///< Empty constructor
-  virtual ~ChopData() {}           ///< Empty destructor
+  ~ChopData() override {}          ///< Empty destructor
 
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "ChopData";
   } ///< @return the algorithms name
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Splitting";
   } ///< @return the algorithms category
-  virtual int version() const {
+  int version() const override {
     return (1);
   } ///< @return version number of algorithm
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Splits an input workspace into a grouped workspace, where each "
            "spectra "
            "if 'chopped' at a certain point (given in 'Step' input value) "
@@ -59,8 +59,8 @@ public:
   }
 
 private:
-  void init(); ///< Initialise the algorithm. Declare properties, etc.
-  void exec(); ///< Executes the algorithm.
+  void init() override; ///< Initialise the algorithm. Declare properties, etc.
+  void exec() override; ///< Executes the algorithm.
 };
 }
 }

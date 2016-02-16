@@ -1,6 +1,7 @@
 #include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace ICat {

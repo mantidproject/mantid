@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -9,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
+
 #include <cmath>
 #include <ctime>
 #include <numeric>

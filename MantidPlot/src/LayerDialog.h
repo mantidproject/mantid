@@ -47,8 +47,8 @@ public:
 	void setMultiLayer(MultiLayer *g);
 
 protected slots:
-	void accept();
-	void update();
+  void accept() override;
+        void update();
 	void enableLayoutOptions(bool ok);
 	void swapLayers();
 

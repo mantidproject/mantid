@@ -48,18 +48,18 @@ class DLLExport CompositeImplicitFunction
     : public Mantid::Geometry::MDImplicitFunction {
 public:
   //---------------------------------- Override base-class methods---
-  virtual bool isPointContained(const coord_t *coords);
-  virtual bool isPointContained(const std::vector<coord_t> &coords);
+  bool isPointContained(const coord_t *coords) override;
+  bool isPointContained(const std::vector<coord_t> &coords) override;
   // Unhide base class methods (avoids Intel compiler warning)
   using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
   CompositeImplicitFunction();
-  virtual ~CompositeImplicitFunction();
+  ~CompositeImplicitFunction() override;
   bool
   addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
-  std::string getName() const;
-  std::string toXMLString() const;
+  std::string getName() const override;
+  std::string toXMLString() const override;
   int getNFunctions() const;
   static std::string functionName() { return "CompositeImplicitFunction"; }
 

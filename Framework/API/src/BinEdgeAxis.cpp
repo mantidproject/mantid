@@ -1,4 +1,5 @@
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace API {

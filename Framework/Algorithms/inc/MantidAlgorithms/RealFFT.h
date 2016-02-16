@@ -41,23 +41,23 @@ public:
   /// Default constructor
   RealFFT() : API::Algorithm(){};
   /// Destructor
-  virtual ~RealFFT(){};
+  ~RealFFT() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RealFFT"; }
+  const std::string name() const override { return "RealFFT"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs real Fast Fourier Transform";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\FFT"; }
+  const std::string category() const override { return "Arithmetic\\FFT"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

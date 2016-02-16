@@ -4,6 +4,7 @@
 #include "MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
@@ -12,7 +13,6 @@ namespace WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
-using namespace Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)

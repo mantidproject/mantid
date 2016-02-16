@@ -43,14 +43,14 @@ public:
 
 private:
   /// String identifier
-  std::string name() const { return "ComptonScatteringCountRate"; }
+  std::string name() const override { return "ComptonScatteringCountRate"; }
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
   /// Takes the string & constructs the constraint matrix
   void parseIntensityConstraintMatrix(const std::string &value);
 
   /// Called by the framework just before an iteration is starting
-  void iterationStarting();
+  void iterationStarting() override;
   /// Set the fixed parameters to the given values
   void setFixedParameterValues(const std::vector<double> &values);
   /// Refresh the values of the C matrix for this evaluation
@@ -59,7 +59,7 @@ private:
   /// Cache reference to workspace for use in setupForFit
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters

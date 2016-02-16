@@ -34,16 +34,16 @@ namespace MantidQt
     class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
     {
     public:
-      virtual TransferResults
+      TransferResults
       transferRuns(SearchResultMap &searchResults,
-                   Mantid::Kernel::ProgressBase &progress);
+                   Mantid::Kernel::ProgressBase &progress) override;
 
       std::unique_ptr<ReflLegacyTransferStrategy> clone() const;
 
-      virtual bool knownFileType(const std::string &filename) const;
+      bool knownFileType(const std::string &filename) const override;
 
     private:
-      virtual ReflLegacyTransferStrategy *doClone() const;
+      ReflLegacyTransferStrategy *doClone() const override;
     };
   }
 }

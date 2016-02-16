@@ -65,13 +65,13 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &);
   /// Private destructor
-  virtual ~LiveListenerFactoryImpl();
+  ~LiveListenerFactoryImpl() override;
 
   // Unhide the base class method to avoid a warning, but make private.
   using Kernel::DynamicFactory<ILiveListener>::create;
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.
-  ILiveListener *createUnwrapped(const std::string &className) const;
+  ILiveListener *createUnwrapped(const std::string &className) const override;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder (needed for

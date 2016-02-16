@@ -35,7 +35,7 @@ public:
                       const std::vector<int> summedPeriods,
                       const std::vector<int> subtractedPeriods,
                       const int groupIndex);
-  virtual ~MuonGroupCalculator();
+  ~MuonGroupCalculator() override;
 
 protected:
   /// Workspace index of the group to analyse

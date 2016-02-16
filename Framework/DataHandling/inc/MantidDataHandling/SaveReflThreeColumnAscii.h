@@ -45,26 +45,26 @@ public:
   /// Default constructor
   SaveReflThreeColumnAscii() {}
   /// Destructor
-  ~SaveReflThreeColumnAscii() {}
+  ~SaveReflThreeColumnAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveReflThreeColumnAscii"; }
+  const std::string name() const override { return "SaveReflThreeColumnAscii"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's version for data output overriding a virtual method
   void data(std::ofstream &file, const std::vector<double> &XData,
-            bool exportDeltaQ = false);
+            bool exportDeltaQ = false) override;
 
 private:
   /// Return the file extension this algorthm should output.
-  virtual std::string ext() { return ".dat"; }
+  std::string ext() override { return ".dat"; }
   /// extra properties specifically for this
-  virtual void extraProps();
+  void extraProps() override;
   /// write any extra information required
-  virtual void extraHeaders(std::ofstream &file);
+  void extraHeaders(std::ofstream &file) override;
 };
 } // namespace DataHandling
 } // namespace Mantid

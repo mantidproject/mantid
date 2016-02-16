@@ -38,12 +38,12 @@ public:
   Bar();
   explicit Bar(double rad);
 
-  Qwt3D::Enrichment* clone() const {return new Bar(*this);}
-  
+  Qwt3D::Enrichment *clone() const override { return new Bar(*this); }
+
   void configure(double rad);
-  void drawBegin();
-  void drawEnd();
-  void draw(Qwt3D::Triple const&);
+  void drawBegin() override;
+  void drawEnd() override;
+  void draw(Qwt3D::Triple const &) override;
 
 private:
   double radius_;

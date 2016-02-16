@@ -41,7 +41,7 @@ class MANTID_API_DLL IPawleyFunction : public FunctionParameterDecorator {
 public:
   IPawleyFunction();
   /// Virtual destructor.
-  virtual ~IPawleyFunction() {}
+  ~IPawleyFunction() override {}
 
   /// A string that names the crystal system.
   virtual void setLatticeSystem(const std::string &crystalSystem) = 0;

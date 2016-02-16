@@ -72,9 +72,9 @@ class MultiLayer: public MdiSubWindow, public Mantid::IProjectSerialisable
 
 public:
   MultiLayer (ApplicationWindow* parent = 0, int layers = 1, int rows = 1, int cols = 1, const QString& label = "", const char* name=0, Qt::WFlags f=0);
-	~MultiLayer();
+  ~MultiLayer() override;
 
-  QSize minimumSizeHint() const;
+  QSize minimumSizeHint() const override;
 
   QList<Graph *> layersList(){return graphsList;};
 	Graph *layer(int num);
@@ -98,8 +98,9 @@ public:
 
   void setWaterfallLayout(bool on = true);
 
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:
 	Graph* addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
@@ -153,13 +154,13 @@ public slots:
 	void exportToFile(const QString& fileName);
 	void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
 	void exportSVG(const QString& fname);
-    void exportPDF(const QString& fname);
-	void exportVector(const QString& fileName, int res = 0, bool color = true,
+        void exportPDF(const QString &fname) override;
+        void exportVector(const QString& fileName, int res = 0, bool color = true,
                     bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
 
 	void copyAllLayers();
-	void print();
-	void printAllLayers(QPainter *painter);
+        void print() override;
+        void printAllLayers(QPainter *painter);
 	void printActiveLayer();
 	//@}
 
@@ -216,16 +217,16 @@ private:
 
 	//! \name Event Handlers
 	//@{
-	void closeEvent(QCloseEvent*);
-	void wheelEvent(QWheelEvent *);
-	void keyPressEvent(QKeyEvent *);
-	bool eventFilter(QObject *object, QEvent *);
-	void releaseLayer();
+  void closeEvent(QCloseEvent *) override;
+  void wheelEvent(QWheelEvent *) override;
+  void keyPressEvent(QKeyEvent *) override;
+  bool eventFilter(QObject *object, QEvent *) override;
+        void releaseLayer();
 	void resizeLayers(QResizeEvent *re);
-	bool focusNextPrevChild ( bool next );
-  void dragEnterEvent( QDragEnterEvent * event );
-  void dropEvent( QDropEvent * event );
-	//@}
+        bool focusNextPrevChild(bool next) override;
+        void dragEnterEvent(QDragEnterEvent *event) override;
+        void dropEvent(QDropEvent *event) override;
+        //@}
 
   void removeLayerSelectionFrame();
 
@@ -262,8 +263,8 @@ public:
 	static int btnSize(){return 20;};
 
 protected:
-	void mousePressEvent( QMouseEvent * );
-	void mouseDoubleClickEvent ( QMouseEvent * );
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseDoubleClickEvent(QMouseEvent *) override;
 
 signals:
 	void showCurvesDialog();

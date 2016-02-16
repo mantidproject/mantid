@@ -9,6 +9,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"

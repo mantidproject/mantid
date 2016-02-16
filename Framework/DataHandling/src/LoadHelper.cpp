@@ -4,9 +4,12 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
-#include <nexus/napi.h>
-#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+
+#include <nexus/napi.h>
+
+#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
 namespace DataHandling {
