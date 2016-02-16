@@ -344,10 +344,10 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
 
         # Generate the URL for SPICE data file
-        # TODO/NOW - refactor to method
-        file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
-                                                                    exp_number, scan_number)
-        file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
+        file_url = get_spice_file_url(self._myServerURL, self._instrumentName, exp_number, scan_number)
+
+        file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
+        # file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
         file_name = os.path.join(self._dataDir, file_name)
         if os.path.exists(file_name) is True and over_write is False:
             return True, file_name
@@ -474,30 +474,36 @@ class CWSCDReductionControl(object):
 
         return bkgd_ws.name()
 
-    def does_file_exist(self, scanno, ptno):
+    def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
-        Check whether data file for a scan or pt number exists
-        :param scanno:
-        :param ptno:
+        Check whether data file for a scan or pt number exists on the
+        :param exp_number: experiment number or None (default to current experiment number)
+        :param scan_number:
+        :param pt_number: if None, check SPICE file; otherwise, detector xml file
         :return:
         """
-        # TODO/NOW - clean this method
-        # FIXME/NOW - add this one to download file
-        # Check spice file
-        spice_file_name = '%s_exp%04d_scan%04d.dat'%(self._instrumentName,
-                                                   self._expNumber, scanno)
-        spice_file_name = os.path.join(self._dataDir, spice_file_name)
-        if os.path.exists(spice_file_name) is False:
-            return False, 'Spice data file %s cannot be found.'% spice_file_name
+        # check inputs
+        assert isinstance(exp_number, int) or pt_number is None
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int) or pt_number is None
 
-        # Check xml file
-        xmlfilename = '%s_exp%d_scan%04d_%04d.xml'%(self._instrumentName, self._expNumber,
-                scanno, ptno)
-        xmlfilename = os.path.join(self._dataDir, xmlfilename)
-        if os.path.exists(xmlfilename) is False:
-            return (False, "Pt. XML file %s cannot be found."%(xmlfilename))
+        # deal with default experiment number
+        if exp_number is None:
+            exp_number = self._expNumber
 
-        return True, ""
+        # 2 cases
+        if pt_number is None:
+            # no pt number, then check SPICE file
+            spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
+            file_name = os.path.join(self._dataDir, spice_file_name)
+        else:
+            # pt number given, then check
+            xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
+                                                  pt_number)
+            file_name = os.path.join(self._dataDir, xml_file_name)
+        # END-IF
+
+        return os.path.exists(file_name)
 
     def find_peak(self, exp_number, scan_number, pt_number=None):
         """ Find 1 peak in sample Q space for UB matrix
@@ -525,27 +531,6 @@ class CWSCDReductionControl(object):
         else:
             self.merge_pts_in_scan(exp_number, scan_number, [pt_number])
 
-        """ Disabled...
-        # Collect reduction information: example
-        exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
-        virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
-        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_number,
-                                      GenerateVirtualInstrument=False,
-                                      ScanList=[scan_number],
-                                      PtLists=[-1, pt_number],
-                                      DataDirectory=self._dataDir,
-                                      GetFileFromServer=False,
-                                      Detector2ThetaTolerance=0.01,
-                                      OutputWorkspace=exp_info_ws_name,
-                                      DetectorTableWorkspace=virtual_instrument_info_table_name)
-
-        # Load XML file to MD
-        pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
-        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name,
-                                     CreateVirtualInstrument=False,
-                                     OutputWorkspace=pt_md_ws_name,
-                                     Directory=self._dataDir)
-        """
         # TODO/NOW/FIXME/1st - MODIFY the following codes for new workflow! Remember to update documentation!
         # Find peak in Q-space
         pt_peak_ws_name = get_single_pt_peak_ws_name(exp_number, scan_number, pt_number)
@@ -974,7 +959,7 @@ class CWSCDReductionControl(object):
 
         # Form standard name for a SPICE file if name is not given
         if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir, get_spice_file_name(exp_no, scan_no))
+            spice_file_name = os.path.join(self._dataDir, get_spice_file_name(self._instrumentName, exp_no, scan_no))
 
         # Download SPICE file if necessary
         if os.path.exists(spice_file_name) is False:
@@ -995,38 +980,47 @@ class CWSCDReductionControl(object):
 
     def load_spice_xml_file(self, exp_no, scan_no, pt_no, xml_file_name=None):
         """
-        Load SPICE's XML file to
+        Load SPICE's detector counts XML file from local data directory
+        Requirements: the SPICE detector counts file does exist. The XML file's name is given either
+                    explicitly by user or formed according to a convention with given experiment number,
+                    scan number and Pt number
+        :param exp_no:
         :param scan_no:
         :param pt_no:
+        :param xml_file_name:
         :return:
         """
-        # Form XMIL file as ~/../HB3A_exp355_scan%04d_%04d.xml'%(scan_no, pt)
+        # Get XML file name with full path
         if xml_file_name is None:
-            # TODO/NOW - refactor to method
-            xml_file_name = os.path.join(self._dataDir,
-                                         'HB3A_exp%d_scan%04d_%04d.xml' % (exp_no, scan_no, pt_no))
+            # use default
+            assert isinstance(exp_no, int) and isinstance(scan_no, int) and isinstance(pt_no, int)
+            xml_file_name = os.path.join(self._dataDir, get_det_xml_file_name(self._instrumentName,
+                                                                              exp_no, scan_no, pt_no))
+        # END-IF
 
-        # Get spice table
+        # check whether file exists
+        assert os.path.exists(xml_file_name)
+
+        # retrieve and check SPICE table workspace
         spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
         assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
         spice_table_name = spice_table_ws.name()
 
-        # Load SPICE Pt. file
-        # spice_table_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+        # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
         try:
-            ret_obj = api.LoadSpiceXML2DDet(Filename=xml_file_name,
-                                            OutputWorkspace=pt_ws_name,
-                                            DetectorGeometry='256,256',
-                                            SpiceTableWorkspace=spice_table_name,
-                                            PtNumber=pt_no)
+            api.LoadSpiceXML2DDet(Filename=xml_file_name,
+                                  OutputWorkspace=pt_ws_name,
+                                  DetectorGeometry='256,256',
+                                  SpiceTableWorkspace=spice_table_name,
+                                  PtNumber=pt_no)
         except RuntimeError as run_err:
             return False, str(run_err)
 
-        pt_ws = ret_obj
-
         # Add data storage
-        self._add_raw_workspace(exp_no, scan_no, pt_no, pt_ws)
+        assert AnalysisDataService.doesExist(pt_ws_name)
+        raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
+        self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
         return True, pt_ws_name
 
@@ -1127,11 +1121,17 @@ class CWSCDReductionControl(object):
 
         # Collect HB3A Exp/Scan information
         try:
-            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no, ScanList='%d' % scan_no, PtLists=pt_list_str,
+            # construct a configuration with 1 scan and multiple Pts.
+            scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
+            # 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
+            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                          ScanList='%d' % scan_no,
+                                          PtLists=pt_list_str,
                                           DataDirectory=self._dataDir,
                                           GenerateVirtualInstrument=False,
-                                          OutputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                          OutputWorkspace=scan_info_ws_name,
                                           DetectorTableWorkspace='MockDetTable')
+            assert AnalysisDataService.doesExist(scan_info_ws_name)
         except RuntimeError as e:
             err_msg += 'Unable to reduce scan %d due to %s' % (scan_no, str(e))
             return False, err_msg
@@ -1139,6 +1139,7 @@ class CWSCDReductionControl(object):
 
         # Convert to Q-sample
         # TODO/NOW - refactor to method
+        out_q_name = get_merged_md_name(exp_no, scan_no, ... )
         out_q_name = 'HB3A_Exp%d_Scan%d_MD' % (exp_no, scan_no)
         try:
             api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
@@ -1586,18 +1587,27 @@ class CWSCDReductionControl(object):
 
         # Download and
         for scan_number in xrange(start_scan, end_scan):
-            # form file URL
-            file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
-                                                                        exp_number, scan_number)
-            # TODO/NOW - refactor to algorithm
-            file_name = '%s_exp%04d_scan%04d.dat' % ('HB3A', exp_number, scan_number)
-            file_name = os.path.join(self._dataDir, file_name)
+            # check whether file exists
+            if self.does_file_exist(exp_number, scan_number) is False:
+                # SPICE file does not exist in data directory. Download!
+                # set up URL and target file name
+                spice_file_url = get_spice_file_url(self._myServerURL, self._instrumentName, exp_number, scan_number)
+                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
+                spice_file_name = os.path.join(self._dataDir, spice_file_name)
 
-            # download file and load
+                # download file and load
+                try:
+                    api.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
+                except RuntimeError as download_error:
+                    print 'Unable to download scan %d' % scan_number
+                    break
+            else:
+                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
+                spice_file_name = os.path.join(self._dataDir, spice_file_name)
+
+            # Load SPICE file and retrieve information
             try:
-                api.DownloadFile(Address=file_url, Filename=file_name)
-
-                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=file_name,
+                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
                                                                     OutputWorkspace='TempTable',
                                                                     RunInfoWorkspace='TempInfo')
                 num_rows = spice_table_ws.rowCount()
@@ -1635,19 +1645,67 @@ class CWSCDReductionControl(object):
 
         self._scanSummaryList = scan_sum_list
 
-        return scan_sum_list
+        return True, scan_sum_list
 
 
-def get_spice_file_name(exp_number, scan_number):
+def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
     """
-    Get standard HB3A SPICE file name from experiment number and scan number
+    Get detector XML file name (from SPICE)
+    :param instrument_name:
     :param exp_number:
-    :param scan_num:
+    :param scan_number:
+    :param pt_number:
     :return:
     """
-    file_name = 'HB3A_exp%04d_scan%04d.dat' % (exp_number, scan_number)
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
+    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
+                                                    scan_number, pt_number)
+
+    return xml_file_name
+
+
+def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, pt_number):
+    """ Get the URL to download the detector counts file in XML format
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+
+
+def get_spice_file_name(instrument_name, exp_number, scan_number):
+    """
+    Get standard HB3A SPICE file name from experiment number and scan number
+    :param instrument_name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    file_name = '%s_exp%04d_scan%04d.dat' % (instrument_name, exp_number, scan_number)
 
     return file_name
+
+
+def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
+    """ Get the SPICE file's URL from server
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+
+    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number,
+                                                              instrument_name, exp_number, scan_number)
+
+    return file_url
 
 
 def get_spice_table_name(exp_number, scan_number):
@@ -1669,6 +1727,17 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     :return:
     """
     ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_merge_pt_info_ws_name(exp_no, scan_no):
+    """ Create the standard table workspace's name to contain the information to merge Pts. in a scan
+    :param exp_no:
+    :param scan_no:
+    :return:
+    """
+    ws_name =  'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
 
     return ws_name
 

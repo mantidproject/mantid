@@ -1245,7 +1245,11 @@ class MainWindow(QtGui.QMainWindow):
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
 
         # Get value
-        scan_sum_list = self._myControl.survey(exp_number, start_scan, end_scan)
+        status, ret_obj = self._myControl.survey(exp_number, start_scan, end_scan)
+        if status is False:
+            self.pop_one_button_dialog(ret_obj)
+            return
+        scan_sum_list = ret_obj
         self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
         self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
