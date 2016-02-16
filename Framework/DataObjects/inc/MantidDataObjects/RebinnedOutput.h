@@ -68,9 +68,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  RebinnedOutput(const RebinnedOutput &other) = default;
+  RebinnedOutput(const RebinnedOutput &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  RebinnedOutput &operator=(const RebinnedOutput &other) = delete;
+  RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Called by initialize() in MatrixWorkspace
   void init(const std::size_t &NVectors, const std::size_t &XLength,

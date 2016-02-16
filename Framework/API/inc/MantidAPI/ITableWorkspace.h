@@ -305,9 +305,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ITableWorkspace(const ITableWorkspace &other) = default;
+  ITableWorkspace(const ITableWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  ITableWorkspace &operator=(const ITableWorkspace &other) = delete;
+  ITableWorkspace &operator=(const ITableWorkspace &) = delete;
 
   /**  Resize a column.
          @param c :: Pointer to the column

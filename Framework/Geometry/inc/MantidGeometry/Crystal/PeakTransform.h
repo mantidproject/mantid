@@ -39,7 +39,7 @@ public:
   getCoordinateSystem() const = 0;
 
 protected:
-  PeakTransform(const PeakTransform &other) = default;
+  PeakTransform(const PeakTransform &) = default;
   std::string m_xPlotLabel;
   std::string m_yPlotLabel;
   // For mapping/orientation from peak coordinates to plot coordinate

@@ -40,9 +40,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  GroupingWorkspace(const GroupingWorkspace &other) = default;
+  GroupingWorkspace(const GroupingWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  GroupingWorkspace &operator=(const GroupingWorkspace &other);
+  GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
 private:
   GroupingWorkspace *doClone() const override {

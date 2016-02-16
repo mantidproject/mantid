@@ -105,7 +105,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  Workspace(const Workspace &other) = default;
+  Workspace(const Workspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
   Workspace &operator=(const Workspace &other) = delete;
 

@@ -42,7 +42,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  MaskWorkspace(const MaskWorkspace &other) = default;
+  MaskWorkspace(const MaskWorkspace &) = default;
 
   /// Protected copy assignment operator. Assignment not implemented.
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;

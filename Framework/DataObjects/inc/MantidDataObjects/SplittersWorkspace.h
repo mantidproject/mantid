@@ -64,9 +64,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SplittersWorkspace(const SplittersWorkspace &other) = default;
+  SplittersWorkspace(const SplittersWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  SplittersWorkspace &operator=(const SplittersWorkspace &other);
+  SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
 
 private:
   SplittersWorkspace *doClone() const override {

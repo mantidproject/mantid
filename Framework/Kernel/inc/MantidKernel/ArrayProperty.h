@@ -101,7 +101,7 @@ public:
                                           validator, direction) {}
 
   /// Copy constructor
-  ArrayProperty(const ArrayProperty &right) = default;
+  ArrayProperty(const ArrayProperty &) = default;
 
   /// 'Virtual copy constructor'
   ArrayProperty<T> *clone() const override {

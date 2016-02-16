@@ -83,9 +83,9 @@ class MANTID_CURVEFITTING_DLL ChebfunBase {
 public:
   ChebfunBase(size_t n, double start, double end, double tolerance = 0.0);
   /// Copy constructor
-  ChebfunBase(const ChebfunBase &other) = default;
+  ChebfunBase(const ChebfunBase &) = default;
   /// Move constructor
-  ChebfunBase(ChebfunBase &&other) = default;
+  ChebfunBase(ChebfunBase &&) = default;
   /// Get the polynomial order of this base.
   size_t order() const { return m_n; }
   /// Get the size of the base which is the number of x-points.

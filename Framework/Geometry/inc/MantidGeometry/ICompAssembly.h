@@ -45,6 +45,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL ICompAssembly : public virtual IComponent {
 public:
+  // Default constructor;
+  ICompAssembly(){};
   /// String description of the type of component
   std::string type() const override { return "ICompAssembly"; }
   /// Make a clone of the present component
@@ -85,7 +87,7 @@ public:
 
 private:
   /// Private copy assignment operator
-  ICompAssembly &operator=(const ICompAssembly &);
+  ICompAssembly &operator=(const ICompAssembly &) = delete;
 };
 
 /// Shared pointer to a ICompAssembly

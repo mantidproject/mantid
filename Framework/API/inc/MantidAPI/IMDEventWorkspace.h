@@ -97,9 +97,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDEventWorkspace(const IMDEventWorkspace &other) = default;
+  IMDEventWorkspace(const IMDEventWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  IMDEventWorkspace &operator=(const IMDEventWorkspace &other) = delete;
+  IMDEventWorkspace &operator=(const IMDEventWorkspace &) = delete;
 
   const std::string toString() const override;
   /// Marker set to true when a file-backed workspace needs its back-end file

@@ -101,7 +101,7 @@ public:
   virtual std::string label(const std::size_t &index) const = 0;
 
 protected:
-  Axis(const Axis &right) = default;
+  Axis(const Axis &) = default;
 
 private:
   /// Private, undefined copy assignment operator

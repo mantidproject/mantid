@@ -63,9 +63,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IEventWorkspace(const IEventWorkspace &other) = default;
+  IEventWorkspace(const IEventWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  IEventWorkspace &operator=(const IEventWorkspace &other);
+  IEventWorkspace &operator=(const IEventWorkspace &) = delete;
 
   const std::string toString() const override;
 

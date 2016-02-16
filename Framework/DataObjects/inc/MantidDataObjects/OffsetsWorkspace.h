@@ -32,9 +32,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  OffsetsWorkspace(const OffsetsWorkspace &other) = default;
+  OffsetsWorkspace(const OffsetsWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &other) = delete;
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
 
 private:
   OffsetsWorkspace *doClone() const override {
