@@ -166,12 +166,12 @@ void IqtFit::run() {
   const auto minimizer = minimizerString("$outputname_$wsindex");
   const auto save = m_uiForm.ckSave->isChecked();
   m_plotOption = m_uiForm.cbPlotType->currentText().toStdString();
-  const auto startX =
-      boost::lexical_cast<double>(m_properties["StartX"]->valueText().toStdString());
-  const auto endX =
-      boost::lexical_cast<double>(m_properties["EndX"]->valueText().toStdString());
-  const auto maxIt =
-      boost::lexical_cast<long>(m_properties["MaxIterations"]->valueText().toStdString());
+  const auto startX = boost::lexical_cast<double>(
+      m_properties["StartX"]->valueText().toStdString());
+  const auto endX = boost::lexical_cast<double>(
+      m_properties["EndX"]->valueText().toStdString());
+  const auto maxIt = boost::lexical_cast<long>(
+      m_properties["MaxIterations"]->valueText().toStdString());
 
   QString pyInput =
       "from IndirectDataAnalysis import furyfitSeq\n"
@@ -187,7 +187,7 @@ void IqtFit::run() {
       m_properties["EndX"]->valueText() + "\n"
                                           "plot = '" +
       QString::fromStdString(m_plotOption) + "'\n"
-                                     "spec_min = " +
+                                             "spec_min = " +
       QString::number(specMin) + "\n"
                                  "spec_max = " +
       QString::number(specMax) + "\n"
@@ -223,7 +223,7 @@ void IqtFit::run() {
                            "_fury_" + fitType + QString::number(specMin) +
                            "_to_" + QString::number(specMax) + "_Workspaces";
     m_pythonExportWsName = resultWsName.toStdString();
-	updatePlot();
+    updatePlot();
 
   } else {
     m_baseName =
@@ -249,11 +249,10 @@ void IqtFit::run() {
                                 m_baseName + "_Workspaces");
     m_pythonExportWsName = (m_baseName + "_Workspaces");
     m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
-	connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-		SLOT(algorithmComplete(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(algorithmComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   }
-
 }
 
 /**
@@ -499,28 +498,28 @@ void IqtFit::typeSelection(int index) {
     m_ffTree->addProperty(m_properties["Exponential1"]);
 
     // remove option to plot beta and add all
-	m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(4);
     m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->addItem("All");
     break;
   case 1:
     m_ffTree->addProperty(m_properties["Exponential1"]);
     m_ffTree->addProperty(m_properties["Exponential2"]);
 
     // remove option to plot beta and add all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
 
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->addItem("All");
     break;
   case 2:
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
-	// add option to plot beta and all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("Beta");
-	m_uiForm.cbPlotType->addItem("All");
+    // add option to plot beta and all
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->addItem("Beta");
+    m_uiForm.cbPlotType->addItem("All");
 
     break;
   case 3:
@@ -528,10 +527,10 @@ void IqtFit::typeSelection(int index) {
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
     // add option to plot beta and all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("Beta");
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->addItem("Beta");
+    m_uiForm.cbPlotType->addItem("All");
 
     break;
   }
