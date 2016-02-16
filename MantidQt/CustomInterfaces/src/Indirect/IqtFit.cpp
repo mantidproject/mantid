@@ -174,7 +174,7 @@ void IqtFit::run() {
       boost::lexical_cast<long>(m_properties["MaxIterations"]->valueText().toStdString());
 
   QString pyInput =
-      "from IndirectDataAnalysis import furyfitSeq,\n"
+      "from IndirectDataAnalysis import furyfitSeq\n"
       "input = '" +
       m_ffInputWSName + "'\n"
                         "func = r'" +
@@ -214,8 +214,10 @@ void IqtFit::run() {
                "intensities_constrained=constrain_intens, Save=save, "
                "Plot=plot, minimizer=minimizer, "
                "max_iterations=max_iterations)\n";
+	QString pyOutput = runPythonCode(pyInput);
   } else {
-
+    const auto baseName =
+        constructBaseName(m_ffInputWSName.toStdString(), specMin, specMax);
     auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
     iqtFitMultiple->initialize();
     iqtFitMultiple->setProperty("InputWorkspace",
@@ -231,15 +233,15 @@ void IqtFit::run() {
     iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
     iqtFitMultiple->setProperty("Save", save);
     iqtFitMultiple->setProperty("Plot", plot);
-    iqtFitMultiple->setProperty("OutputResultWorkspace", "Result");
-    iqtFitMultiple->setProperty("OutputParameterWorkspace", "Params");
-    iqtFitMultiple->setProperty("OutputWorkspaceGroup", "FitGroup");
+    iqtFitMultiple->setProperty("OutputResultWorkspace", baseName + "_Result");
+    iqtFitMultiple->setProperty("OutputParameterWorkspace",
+                                baseName + "_Parameters");
+    iqtFitMultiple->setProperty("OutputWorkspaceGroup",
+                                baseName + "_Workspaces");
 
     m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
     m_batchAlgoRunner->executeBatch();
   }
-
-  QString pyOutput = runPythonCode(pyInput);
 
   // Set the result workspace for Python script export
   QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
@@ -249,6 +251,26 @@ void IqtFit::run() {
   m_pythonExportWsName = resultWsName.toStdString();
 
   updatePlot();
+}
+
+/**
+ * Constructs the desired output base name for the  IqtFitMultiple
+ * @param inputName		:: Name of the inputworkspace
+ * @param specMin		:: Minimum number of spectra being fitted
+ * @param specMax		:: Maximum number of spectra being fitted
+ * @return the base name
+ */
+std::string IqtFit::constructBaseName(const std::string &inputName,
+                                      const long &specMin,
+                                      const long &specMax) {
+  QString baseName = QString::fromStdString(inputName);
+  baseName = baseName.left(baseName.lastIndexOf("_"));
+  baseName += "_Iqt_1Smult_s";
+  baseName += QString::number(specMin);
+  baseName += "_to_";
+  baseName += QString::number(specMax);
+  const auto baseName_str = baseName.toStdString();
+  return baseName_str;
 }
 
 bool IqtFit::validate() {

@@ -61,6 +61,8 @@ namespace IDA
     QString fitTypeString() const;
     void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
     QString minimizerString(QString outputName) const;
+    std::string constructBaseName(const std::string &inputName,
+                                  const long &specMin, const long &specMax);
 
     Ui::IqtFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
