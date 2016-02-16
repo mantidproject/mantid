@@ -2,10 +2,10 @@
 #define WORKSPACE_OBSERVER_H
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <Poco/NObserver.h>
 #include <QObject>
 #include "DllOption.h"
-#include <MantidAPI\Workspace_fwd.h>
 #include <QMetaType>
 
 
