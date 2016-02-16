@@ -54,14 +54,14 @@ class MANTID_KERNEL_DLL Quat {
 public:
   Quat();
   // direct quat definition
-  Quat(const double, const double, const double, const double);
+  Quat(const double _w, const double _a, const double _b, const double _c);
   // * Construct a Quat between two vectors;
   // * The angle between them is defined differently from usual if vectors are
   // not unit or the same length vectors, so quat would be not consistent
-  Quat(const V3D &vec1, const V3D &vec2);
+  Quat(const V3D &src, const V3D &des);
   Quat(const V3D &rX, const V3D &rY, const V3D &rZ);
-  Quat(const Quat &);
-  Quat &operator=(const Quat &);
+  Quat(const Quat &_q);
+  Quat &operator=(const Quat &q);
   //! Set quaternion form an angle in degrees and an axis
   Quat(const double _deg, const V3D &_axis);
   // set a quaternion from a rotational matrix;
@@ -75,8 +75,8 @@ public:
 
   void set(const double ww, const double aa, const double bb, const double cc);
   void setAngleAxis(const double _deg, const V3D &_axis);
-  void getAngleAxis(double &_deg, double &_axis1, double &_axis2,
-                    double &axis3) const;
+  void getAngleAxis(double &_deg, double &_ax0, double &_ax1,
+                    double &ax2) const;
   std::vector<double> getEulerAngles(const std::string &convention) const;
   /// Set the rotation (both don't change rotation axis)
   void setRotation(const double deg);
@@ -97,7 +97,7 @@ public:
   //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
   //! stored as an linear array of 16 double
   //! The function glRotated must be called
-  void GLMatrix(double *glmat) const;
+  void GLMatrix(double *mat) const;
   //! returns the rotation matrix defined by this quaternion as an 9-point
   // vector representing M33 matrix
   //! (m33 is not used at the moment), if check_normalisation selected, verify
@@ -105,10 +105,10 @@ public:
   std::vector<double> getRotation(bool check_normalisation = false,
                                   bool throw_on_errors = false) const;
   //! Convert GL Matrix into Quat
-  void setQuat(double[16]);
+  void setQuat(double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
-  void setQuat(const DblMatrix &RotMat);
+  void setQuat(const DblMatrix &rMat);
   //! Rotate a vector
   void rotate(V3D &) const;
 

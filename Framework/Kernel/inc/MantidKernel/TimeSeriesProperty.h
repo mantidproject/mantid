@@ -325,7 +325,7 @@ private:
 /// statistics.
 double DLLExport
 filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                  Kernel::Math::StatisticType statistic_type);
+                  Kernel::Math::StatisticType statisticType);
 
 } // namespace Kernel
 } // namespace Mantid

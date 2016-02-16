@@ -33,7 +33,7 @@ public:
 
   ~BinFinder();
 
-  int bin(double value);
+  int bin(double x);
 
   int lastBinIndex();
 
