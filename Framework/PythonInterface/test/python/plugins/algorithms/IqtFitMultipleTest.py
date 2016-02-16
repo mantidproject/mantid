@@ -148,7 +148,7 @@ class IqtFitMultipleTest(unittest.TestCase):
 #----------------------------------------Failure cases-------------------------------------
 
     def test_minimum_spectra_number_less_than_0(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple,
+        self.assertRaises(ValueError, IqtFitMultiple,
                           InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
@@ -182,7 +182,7 @@ class IqtFitMultipleTest(unittest.TestCase):
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_x_less_than_0(self):
-        self.assertRaises(RuntimeError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
+        self.assertRaises(ValueError, IqtFitMultiple, InputWorkspace=self._iqt_ws,
                           Function=self._function,
                           FitType='1S_s',
                           StartX=-0.2,
