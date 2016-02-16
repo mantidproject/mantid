@@ -2,8 +2,19 @@
 #define MANTID_CURVEFITTING_CONVERTTOYSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class V3D;
+}
+
+namespace Geometry {
+class ParameterMap;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 

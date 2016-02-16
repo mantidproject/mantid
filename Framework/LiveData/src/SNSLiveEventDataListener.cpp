@@ -4,9 +4,11 @@
 #include <exception>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"

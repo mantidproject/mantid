@@ -5,6 +5,8 @@
 
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

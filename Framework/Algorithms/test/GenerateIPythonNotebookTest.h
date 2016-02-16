@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 

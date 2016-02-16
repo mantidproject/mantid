@@ -1,11 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTCWPDMDTOSPECTRA_H_
 #define MANTID_MDALGORITHMS_CONVERTCWPDMDTOSPECTRA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
+
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------

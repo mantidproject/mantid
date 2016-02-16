@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

@@ -5,6 +5,12 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,10 +20,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
-
-#include "MantidGeometry/Instrument/Detector.h"
+#include <boost/lexical_cast.hpp>
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -27,14 +30,13 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
 
-#include <boost/lexical_cast.hpp>
-#include <cmath>
-#include <climits>
-#include <vector>
-#include <sstream>
-#include <cctype>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <functional>
+#include <sstream>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

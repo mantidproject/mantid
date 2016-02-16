@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
-#include <math.h>
-
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {

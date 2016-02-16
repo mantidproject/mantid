@@ -1,11 +1,12 @@
 #include "MantidLiveData/LiveDataAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
+
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 

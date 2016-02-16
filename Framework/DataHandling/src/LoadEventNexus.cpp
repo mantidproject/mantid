@@ -4,26 +4,29 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/function.hpp>
-#include <functional>
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidKernel/Timer.h"
+#include <functional>
 
 using std::endl;
 using std::map;

@@ -23,7 +23,6 @@ set ( SRC_FILES
 	src/PhysicalSphericalPeak.cpp
 	src/ProxyCompositePeaksPresenter.cpp
 	src/QPeaksTableModel.cpp
-	src/QScienceSpinBox.cpp
 	src/SliceViewer.cpp
 	src/SliceViewerFunctions.cpp
 	src/SliceViewerWindow.cpp
@@ -65,7 +64,6 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PhysicalSphericalPeak.h
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
-	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerFunctions.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
@@ -89,7 +87,6 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
-	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h

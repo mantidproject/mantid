@@ -1,11 +1,15 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+
 #include <fstream>
 
 using namespace Mantid::Geometry;

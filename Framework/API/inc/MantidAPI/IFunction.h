@@ -10,7 +10,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"

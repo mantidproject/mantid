@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidSINQ/PoldiAutoCorrelation5.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"

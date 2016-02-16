@@ -3,12 +3,13 @@
 
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/iter_find.hpp>

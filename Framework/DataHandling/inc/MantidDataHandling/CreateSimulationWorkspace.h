@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
