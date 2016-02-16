@@ -115,9 +115,8 @@ class IqtFitMultiple(PythonAlgorithm):
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
-        # Run IqtFitMultiple algorithm from indirectDataAnalysis
-        nHist = self._input_ws.getNumberHistograms()
         output_workspace = self._fit_group_name
+        # check if the naming convention used is alreay correct
         chopped_name = self._fit_group_name.split('_')
         if 'WORKSPACE' in (chopped_name[-1].upper()):
             output_workspace = ('_').join(chopped_name[:-1])
@@ -159,6 +158,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         conclusion_prog.report('Renaming workspaces')
+        # rename workspaces to match user input
         if output_workspace + "_Workspaces" != self._fit_group_name:
             RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
         if output_workspace + "_Parameters" != self._parameter_name:
@@ -178,7 +178,7 @@ class IqtFitMultiple(PythonAlgorithm):
         conclusion_prog.report('Processing indirect fit parameters')
         self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name, ColumnX="axis-1", XAxisUnit="MomentumTransfer", ParameterNames=parameter_names)
 
-
+        # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
