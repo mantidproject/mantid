@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
-#define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
+#ifndef MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
+#define MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h"
@@ -10,14 +10,14 @@
 using Mantid::CurveFitting::Functions::MultivariateGaussianComptonProfile;
 using Mantid::CurveFitting::Functions::ComptonProfile;
 
-class GaussianComptonProfileTest : public CxxTest::TestSuite {
+class MutivariateGaussianComptonProfile : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GaussianComptonProfileTest *createSuite() {
-    return new GaussianComptonProfileTest();
+  static MutivariateGaussianComptonProfile *createSuite() {
+    return new MutivariateGaussianComptonProfile();
   }
-  static void destroySuite(GaussianComptonProfileTest *suite) { delete suite; }
+  static void destroySuite(MutivariateGaussianComptonProfile *suite) { delete suite; }
 
   void test_Name_Is_As_Expected() {
     // These are used in scripts so should not change!
