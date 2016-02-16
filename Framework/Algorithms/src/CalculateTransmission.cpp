@@ -46,7 +46,7 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  * @returns workspace index corresponding to the given detector ID
  */
 size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
-  const std::vector<detid_t> input = boost::assign::list_of(detid);
+  const std::vector<detid_t> input = {detid};
   std::vector<size_t> result;
 
   ws->getIndicesFromDetectorIDs(input, result);
