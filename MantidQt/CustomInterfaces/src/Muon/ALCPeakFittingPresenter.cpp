@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 

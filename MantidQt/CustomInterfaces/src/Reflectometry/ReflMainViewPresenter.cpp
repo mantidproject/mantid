@@ -5,7 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -25,10 +28,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
-
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>

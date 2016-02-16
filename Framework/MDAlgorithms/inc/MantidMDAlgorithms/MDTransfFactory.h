@@ -93,8 +93,8 @@ namespace MDAlgorithms {
 class MANTID_MDALGORITHMS_DLL MDTransfFactoryImpl
     : public Kernel::DynamicFactory<MDTransfInterface> {
 public:
-  virtual boost::shared_ptr<MDTransfInterface>
-  create(const std::string &className) const;
+  boost::shared_ptr<MDTransfInterface>
+  create(const std::string &className) const override;
 
 private:
   friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
@@ -106,7 +106,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &);
   /// Private Destructor
-  virtual ~MDTransfFactoryImpl();
+  ~MDTransfFactoryImpl() override;
 
   /// Stores pointers to already created unit instances, with their name as the
   /// key

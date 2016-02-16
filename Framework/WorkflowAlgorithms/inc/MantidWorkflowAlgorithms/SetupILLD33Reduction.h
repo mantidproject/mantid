@@ -41,24 +41,24 @@ public:
   /// Constructor
   SetupILLD33Reduction() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SetupILLD33Reduction() {}
+  ~SetupILLD33Reduction() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SetupILLD33Reduction"; }
+  const std::string name() const override { return "SetupILLD33Reduction"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Set up ILL D33 SANS reduction options.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   std::string _findFile(std::string dataRun);
   void
   setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);

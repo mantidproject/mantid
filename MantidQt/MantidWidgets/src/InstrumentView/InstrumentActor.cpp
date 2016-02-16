@@ -8,6 +8,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -17,7 +18,7 @@
 
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IObjComponent.h"
 
 #include "MantidKernel/ConfigService.h"

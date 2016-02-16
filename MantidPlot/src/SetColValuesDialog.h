@@ -71,8 +71,8 @@ private:
 	Table* table;
 	
 	void setTable(Table* w);
-	QSize sizeHint() const ;
-	void customEvent( QEvent *e );
+        QSize sizeHint() const override;
+        void customEvent(QEvent *e) override;
 
     QComboBox* functions;
     QComboBox* boxColumn;

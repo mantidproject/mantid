@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 #define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -37,23 +37,23 @@ namespace MDAlgorithms {
 class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
   ConvertSpiceDataToRealSpace();
-  virtual ~ConvertSpiceDataToRealSpace();
+  ~ConvertSpiceDataToRealSpace() override;
 
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "ConvertSpiceDataToRealSpace";
   }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a HFIR powder diffractometer SPICE file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength;DataHandling\\Text";
   }
 
@@ -65,10 +65,10 @@ private:
   typedef std::deque<std::string> DataCollectionType;
 
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Load data by call
   DataObjects::TableWorkspace_sptr

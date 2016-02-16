@@ -32,8 +32,7 @@ public:
     int start);
 
   /// Implementation of QAbstractTableModel::rowCount() -- number of rows (spectra) that can be shown
-  int rowCount(const QModelIndex &parent = QModelIndex()) const
-  {
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override {
     (void)parent; //To avoid compiler warning
     return m_rows;
   }
@@ -41,8 +40,7 @@ public:
   /// Implementation of QAbstractTableModel::columnCount() -- number of columns. If type is X it is
   /// the number of bin boundaries. If the type is DX it is the number of bin boundaries as well.
   ///If type is Y or E it is the number of data values.
-  int columnCount(const QModelIndex &parent = QModelIndex()) const
-  {
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override {
     (void)parent; //To avoid compiler warning
     int columnCount = 0;
     if (m_type == X || m_type == DX) {
@@ -57,10 +55,11 @@ public:
 
   /// Implementation of QAbstractTableModel::data(...). QTableView uses this function
   /// to retrieve data for displaying.
-  QVariant data(const QModelIndex &index, int role) const;
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+  QVariant data(const QModelIndex &index, int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
 
-  Qt::ItemFlags flags(const QModelIndex & index ) const;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   // Set format and precision of displayed numbers.
   void setFormat(const QChar& f,int prec);

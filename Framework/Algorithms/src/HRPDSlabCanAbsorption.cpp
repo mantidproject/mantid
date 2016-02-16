@@ -2,6 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 

@@ -33,19 +33,19 @@ namespace Algorithms {
 class DLLExport ClearMaskFlag : public API::Algorithm {
 public:
   ClearMaskFlag();
-  virtual ~ClearMaskFlag();
+  ~ClearMaskFlag() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Delete the mask flag/bit on all spectra in a workspace.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

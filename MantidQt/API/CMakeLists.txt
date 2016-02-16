@@ -28,8 +28,9 @@
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/PythonThreading.cpp
+        src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-	src/QwtRasterDataMD.cpp
+        src/QwtRasterDataMD.cpp
 	src/QwtWorkspaceBinData.cpp
 	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
@@ -61,6 +62,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/QScienceSpinBox.h
   inc/MantidQtAPI/QtSignalChannel.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/RepoTreeView.h
@@ -82,7 +84,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
-    inc/MantidQtAPI/DistributionOptions.h
+        inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
@@ -98,8 +100,9 @@ set ( INC_FILES
 	inc/MantidQtAPI/PropertyWidgetFactory.h
 	inc/MantidQtAPI/PythonSystemHeader.h
 	inc/MantidQtAPI/PythonThreading.h
-	inc/MantidQtAPI/QwtRasterDataMD.h
-	inc/MantidQtAPI/QwtWorkspaceBinData.h
+        inc/MantidQtAPI/QScienceSpinBox.h
+        inc/MantidQtAPI/QwtRasterDataMD.h
+        inc/MantidQtAPI/QwtWorkspaceBinData.h
 	inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
 	inc/MantidQtAPI/ScaleEngine.h
 	inc/MantidQtAPI/ScriptRepositoryView.h

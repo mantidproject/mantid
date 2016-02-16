@@ -44,28 +44,28 @@ public:
   /// (Empty) Constructor
   ConvertToDistribution() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ConvertToDistribution() {}
+  ~ConvertToDistribution() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertToDistribution"; }
+  const std::string name() const override { return "ConvertToDistribution"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Makes a histogram workspace a distribution i.e. divides by the bin "
            "width.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Distribution";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Validate inputs
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

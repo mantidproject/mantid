@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include "MantidAPI/Axis.h"
+
 using namespace Mantid::API;
 
 namespace {

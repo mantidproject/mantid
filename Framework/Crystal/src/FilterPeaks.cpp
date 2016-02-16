@@ -1,4 +1,5 @@
 #include "MantidCrystal/FilterPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

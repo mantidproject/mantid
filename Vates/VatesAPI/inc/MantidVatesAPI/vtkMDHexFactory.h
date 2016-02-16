@@ -63,19 +63,19 @@ public:
                   const size_t maxDepth = 1000);
 
   /// Destructor
-  virtual ~vtkMDHexFactory();
+  ~vtkMDHexFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdate) const;
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdate) const override;
 
   /// Initalize with a target workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr);
+  void initialize(Mantid::API::Workspace_sptr) override;
 
   /// Get the name of the type.
-  virtual std::string getFactoryTypeName() const { return "vtkMDHexFactory"; }
+  std::string getFactoryTypeName() const override { return "vtkMDHexFactory"; }
 
-  virtual void setRecursionDepth(size_t depth);
+  void setRecursionDepth(size_t depth) override;
 
   /// Set the time value.
   void setTime(double timeStep);
@@ -90,7 +90,7 @@ private:
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
-  virtual void validate() const;
+  void validate() const override;
 
   /// Threshold range strategy.
   ThresholdRange_scptr m_thresholdRange;

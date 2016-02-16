@@ -27,7 +27,7 @@ namespace MantidQt
     private:
       void updateRow(int row, QString text);
       int addRow(QString firstColumn, QString secondColumn);
-      void closeEvent(QCloseEvent *event);
+      void closeEvent(QCloseEvent *event) override;
 
     private:
       /// the layout that widgets are added to

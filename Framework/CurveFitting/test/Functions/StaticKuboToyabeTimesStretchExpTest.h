@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/Functions/StaticKuboToyabeTimesStretchExp.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 

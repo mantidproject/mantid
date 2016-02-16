@@ -4,10 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 

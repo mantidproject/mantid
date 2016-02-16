@@ -38,16 +38,16 @@ class MANTID_GEOMETRY_DLL QSample : public MDFrame {
 public:
   static const std::string QSampleName;
   QSample();
-  virtual ~QSample();
-  Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
-  bool isQ() const;
-  bool isSameType(const MDFrame &frame) const;
-  std::string name() const;
-  QSample *clone() const;
+  ~QSample() override;
+  Kernel::UnitLabel getUnitLabel() const override;
+  const Kernel::MDUnit &getMDUnit() const override;
+  bool canConvertTo(const Kernel::MDUnit &otherUnit) const override;
+  bool isQ() const override;
+  bool isSameType(const MDFrame &frame) const override;
+  std::string name() const override;
+  QSample *clone() const override;
   Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
+  equivalientSpecialCoordinateSystem() const override;
 
 private:
   /// immutable unit for qlab.

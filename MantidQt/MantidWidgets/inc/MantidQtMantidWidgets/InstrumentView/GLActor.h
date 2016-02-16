@@ -75,8 +75,8 @@ namespace MantidQt
 			enum VisitorAcceptRule { VisitAll, Finish };
 			GLActor() :m_visible(true) {}
 			///< Virtual destructor
-			virtual ~GLActor();
-			/// Toggle the visibility of the actor.
+                        ~GLActor() override;
+                        /// Toggle the visibility of the actor.
 			virtual void setVisibility(bool on) { m_visible = on; }
 			/// Toggle the visibility of the child actors (if exist).
 			virtual void setChildVisibility(bool on) { setVisibility(on); }

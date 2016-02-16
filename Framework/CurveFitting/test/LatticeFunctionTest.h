@@ -9,6 +9,7 @@
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 using Mantid::CurveFitting::LatticeFunction;

@@ -42,16 +42,16 @@ public:
   GeneralFrame(const std::string &frameName, const Kernel::UnitLabel &unit);
   GeneralFrame(const std::string &frameName,
                std::unique_ptr<Mantid::Kernel::MDUnit> unit);
-  virtual ~GeneralFrame();
-  Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
-  bool isQ() const;
-  bool isSameType(const MDFrame &frame) const;
-  std::string name() const;
-  virtual GeneralFrame *clone() const;
+  ~GeneralFrame() override;
+  Kernel::UnitLabel getUnitLabel() const override;
+  const Kernel::MDUnit &getMDUnit() const override;
+  bool canConvertTo(const Kernel::MDUnit &otherUnit) const override;
+  bool isQ() const override;
+  bool isSameType(const MDFrame &frame) const override;
+  std::string name() const override;
+  GeneralFrame *clone() const override;
   Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
+  equivalientSpecialCoordinateSystem() const override;
 
 private:
   /// Label unit

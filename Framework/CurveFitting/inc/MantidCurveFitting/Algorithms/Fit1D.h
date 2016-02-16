@@ -63,13 +63,13 @@ public:
   /// Default constructor
   Fit1D() : API::Algorithm(){};
   /// Destructor
-  virtual ~Fit1D(){};
+  ~Fit1D() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Fit1D"; }
+  const std::string name() const override { return "Fit1D"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Optimization"; }
+  const std::string category() const override { return "Optimization"; }
 
   /// Function you want to fit to.
   virtual void function(const double *in, double *out, const double *xValues,
@@ -80,8 +80,8 @@ public:
 
 protected:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Option for providing intelligent range starting value based e.g. on the
   /// user input parameter values

@@ -58,15 +58,15 @@ public:
   VectorValueParameterType *parseVectorParameter(std::string value);
 
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  createParameter(Poco::XML::Element *parameterElement) override;
 
   VectorValueParameterType *
   createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 
-  ~VectorParameterParser();
+  ~VectorParameterParser() override;
 };
 
 ////////////////////////////////////////////////////////////////////

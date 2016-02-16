@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;

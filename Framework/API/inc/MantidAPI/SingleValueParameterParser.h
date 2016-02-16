@@ -60,15 +60,15 @@ public:
   SingleValueParameterParser();
 
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  createParameter(Poco::XML::Element *parameterElement) override;
 
   SingleValueParameterType *
   createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 
-  ~SingleValueParameterParser();
+  ~SingleValueParameterParser() override;
 };
 
 //////////////////////////////////////////////////////////////////////////////////

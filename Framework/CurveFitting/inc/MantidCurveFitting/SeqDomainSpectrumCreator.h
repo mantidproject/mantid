@@ -47,18 +47,20 @@ public:
   SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
                            const std::string &workspacePropertyName);
 
-  virtual ~SeqDomainSpectrumCreator() {}
+  ~SeqDomainSpectrumCreator() override {}
 
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
-                            size_t i0 = 0);
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                    boost::shared_ptr<API::FunctionValues> &values,
+                    size_t i0 = 0) override;
 
-  virtual API::Workspace_sptr createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName = "OutputWorkspace");
-  virtual size_t getDomainSize() const;
+  API::Workspace_sptr
+  createOutputWorkspace(const std::string &baseName,
+                        API::IFunction_sptr function,
+                        boost::shared_ptr<API::FunctionDomain> domain,
+                        boost::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName =
+                            "OutputWorkspace") override;
+  size_t getDomainSize() const override;
 
 protected:
   void setParametersFromPropertyManager();

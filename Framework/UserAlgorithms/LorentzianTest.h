@@ -91,16 +91,16 @@ public:
   //       virtual void setWidth(const double w) {}
   //
   // I.e. replace the below 6 lines of code with the above 6 lines
-  virtual double centre() const { return getParameter("PeakCentre"); }
-  virtual double height() const { return getParameter("Height"); }
-  virtual double fwhm() const { return 2 * getParameter("HWHM"); }
-  virtual void setCentre(const double c) { setParameter("PeakCentre", c); }
-  virtual void setHeight(const double h) { setParameter("Height", h); }
-  virtual void setFwhm(const double w) { setParameter("HWHM", w / 2.0); }
+  double centre() const override { return getParameter("PeakCentre"); }
+  double height() const override { return getParameter("Height"); }
+  double fwhm() const override { return 2 * getParameter("HWHM"); }
+  void setCentre(const double c) override { setParameter("PeakCentre", c); }
+  void setHeight(const double h) override { setParameter("Height", h); }
+  void setFwhm(const double w) override { setParameter("HWHM", w / 2.0); }
 
   // ** MODIFY THIS **
   /// The name of the fitting function
-  std::string name() const { return "LorentzianTest"; }
+  std::string name() const override { return "LorentzianTest"; }
 
   // ** OPTIONALLY MODIFY THIS **
   /// The categories the Fit function belong to.
@@ -108,18 +108,18 @@ public:
   /// For example: "General, Muon\\Custom" which adds
   /// this function to the category "General" and the sub-category
   /// "Muon\\Custom"
-  virtual const std::string category() const { return "C++ User Defined"; }
+  const std::string category() const override { return "C++ User Defined"; }
 
   virtual const std::string summary() const {
     return "C++ User defined algorithm.";
   }
 
 protected:
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const;
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData);
-  virtual void init();
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+                          const size_t nData) override;
+  void init() override;
 };
 
 } // namespace CurveFitting

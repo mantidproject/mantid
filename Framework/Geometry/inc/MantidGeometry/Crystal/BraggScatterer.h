@@ -68,7 +68,7 @@ typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
 class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager {
 public:
   BraggScatterer();
-  virtual ~BraggScatterer() {}
+  ~BraggScatterer() override {}
 
   void initialize();
   bool isInitialized();
@@ -85,7 +85,7 @@ public:
 
 protected:
   /// Base implementation does nothing, can be re-implemented by subclasses.
-  void afterPropertySet(const std::string &) {}
+  void afterPropertySet(const std::string &) override {}
 
   /// Base implementation does nothing - for implementing classes only.
   virtual void declareProperties() {}

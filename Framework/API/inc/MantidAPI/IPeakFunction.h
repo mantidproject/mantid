@@ -42,7 +42,7 @@ public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
   /// classes)
-  virtual ~IPeakFunction() {}
+  ~IPeakFunction() override {}
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
@@ -56,10 +56,11 @@ public:
   virtual void setIntensity(const double newIntensity);
 
   /// General implementation of the method for all peaks.
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// General implementation of the method for all peaks.
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
   /// Set new peak radius
   static void setPeakRadius(const int &r = 5);
 

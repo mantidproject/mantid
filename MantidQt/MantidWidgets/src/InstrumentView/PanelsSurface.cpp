@@ -177,21 +177,28 @@ namespace MantidQt
 		public:
 			explicit FlatBankFinder(PanelsSurface &surface) : m_surface(surface) {}
 
-			bool visit(const GLActor*) { return false; }
-			bool visit(const GLActorCollection*) { return false; }
-			bool visit(const ComponentActor*) { return false; }
-			bool visit(const InstrumentActor*) { return false; }
-			bool visit(const ObjCompAssemblyActor*) { return false; }
+                        bool visit(const GLActor *) override { return false; }
+                        bool visit(const GLActorCollection *) override {
+                          return false;
+                        }
+                        bool visit(const ComponentActor *) override {
+                          return false;
+                        }
+                        bool visit(const InstrumentActor *) override {
+                          return false;
+                        }
+                        bool visit(const ObjCompAssemblyActor *) override {
+                          return false;
+                        }
 
-			bool visit(const CompAssemblyActor* actor)
-			{
-				m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
+                        bool visit(const CompAssemblyActor *actor) override {
+                                m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
 				return false;
 			}
 
-			bool visit(const RectangularDetectorActor* actor)
-			{
-				m_surface.addRectangularDetector(actor->getComponent()->getComponentID());
+                        bool
+                        visit(const RectangularDetectorActor *actor) override {
+                                m_surface.addRectangularDetector(actor->getComponent()->getComponentID());
 				return false;
 			}
 		};

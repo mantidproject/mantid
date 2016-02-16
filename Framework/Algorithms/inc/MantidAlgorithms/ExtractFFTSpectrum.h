@@ -46,11 +46,11 @@ public:
   /// (Empty) Constructor
   ExtractFFTSpectrum() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ExtractFFTSpectrum() {}
+  ~ExtractFFTSpectrum() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ExtractFFTSpectrum"; }
+  const std::string name() const override { return "ExtractFFTSpectrum"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm performs a Fast Fourier Transform on each spectrum "
            "in a workspace, and from the result takes the indicated spectrum "
            "and places it into the OutputWorkspace, so that you end up with "
@@ -58,15 +58,15 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic\\FFT"; }
+  const std::string category() const override { return "Arithmetic\\FFT"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

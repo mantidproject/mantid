@@ -40,46 +40,46 @@ public:
   Histogram1D();
   Histogram1D(const Histogram1D &);
   Histogram1D &operator=(const Histogram1D &);
-  virtual ~Histogram1D();
+  ~Histogram1D() override;
 
   /// Sets the data.
-  void setData(const MantidVec &Y) { refY.access() = Y; };
+  void setData(const MantidVec &Y) override { refY.access() = Y; };
   /// Sets the data and errors
-  void setData(const MantidVec &Y, const MantidVec &E) {
+  void setData(const MantidVec &Y, const MantidVec &E) override {
     refY.access() = Y;
     refE.access() = E;
   }
 
   /// Sets the data.
-  void setData(const MantidVecPtr &Y) { refY = Y; }
+  void setData(const MantidVecPtr &Y) override { refY = Y; }
   /// Sets the data and errors
-  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) {
+  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) override {
     refY = Y;
     refE = E;
   }
 
   /// Sets the data.
-  void setData(const MantidVecPtr::ptr_type &Y) { refY = Y; }
+  void setData(const MantidVecPtr::ptr_type &Y) override { refY = Y; }
   /// Sets the data and errors
   void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) {
+               const MantidVecPtr::ptr_type &E) override {
     refY = Y;
     refE = E;
   }
 
   /// Zero the data (Y&E) in this spectrum
-  void clearData();
+  void clearData() override;
 
   // Get the array data
   /// Returns the y data const
-  virtual const MantidVec &dataY() const { return *refY; }
+  const MantidVec &dataY() const override { return *refY; }
   /// Returns the error data const
-  virtual const MantidVec &dataE() const { return *refE; }
+  const MantidVec &dataE() const override { return *refE; }
 
   /// Returns the y data
-  virtual MantidVec &dataY() { return refY.access(); }
+  MantidVec &dataY() override { return refY.access(); }
   /// Returns the error data
-  virtual MantidVec &dataE() { return refE.access(); }
+  MantidVec &dataE() override { return refE.access(); }
 
   virtual std::size_t size() const { return refY->size(); } ///< get pseudo size
 
@@ -87,7 +87,7 @@ public:
   bool isError() const { return refE->empty(); }
 
   /// Gets the memory size of the histogram
-  size_t getMemorySize() const {
+  size_t getMemorySize() const override {
     return ((refX->size() + refY->size() + refE->size()) * sizeof(double));
   }
 };

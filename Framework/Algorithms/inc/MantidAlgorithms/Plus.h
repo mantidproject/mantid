@@ -51,44 +51,46 @@ public:
   /// Default constructor
   Plus() : CommutativeBinaryOperation(){};
   /// Destructor
-  virtual ~Plus(){};
+  ~Plus() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Plus"; }
+  const std::string name() const override { return "Plus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The Plus algorithm will add the data values and calculate the "
            "corresponding error values in two compatible workspaces. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                   const DataObjects::EventList &rhs);
+                                   const DataObjects::EventList &rhs) override;
   void performEventBinaryOperation(DataObjects::EventList &lhs,
                                    const MantidVec &rhsX, const MantidVec &rhsY,
-                                   const MantidVec &rhsE);
+                                   const MantidVec &rhsE) override;
   void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                   const double &rhsY, const double &rhsE);
+                                   const double &rhsY,
+                                   const double &rhsE) override;
 
-  void checkRequirements();
-  std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
-  bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                          const API::MatrixWorkspace_const_sptr rhs) const;
+  void checkRequirements() override;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
+  bool
+  checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                     const API::MatrixWorkspace_const_sptr rhs) const override;
   void operateOnRun(const API::Run &lhs, const API::Run &rhs,
-                    API::Run &ans) const;
+                    API::Run &ans) const override;
 
   // Overridden event-specific operation
   bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,

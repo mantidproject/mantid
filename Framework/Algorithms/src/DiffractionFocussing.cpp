@@ -2,11 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 
+#include <fstream>
 #include <limits>
 #include <map>
-#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {

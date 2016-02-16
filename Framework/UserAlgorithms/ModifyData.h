@@ -36,20 +36,20 @@ public:
   /// no arg constructor
   ModifyData() : API::Algorithm() {}
   /// virtual destructor
-  virtual ~ModifyData() {}
+  ~ModifyData() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ModifyData"; }
+  const std::string name() const override { return "ModifyData"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples"; }
-  virtual const std::string summary() const { return "An example summary"; }
+  const std::string category() const override { return "Examples"; }
+  const std::string summary() const override { return "An example summary"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

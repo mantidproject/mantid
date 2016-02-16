@@ -38,18 +38,18 @@ public:
   /// (Empty) Constructor
   EQSANSResolution() : Algorithms::TOFSANSResolution() {}
   /// Virtual destructor
-  virtual ~EQSANSResolution() {}
+  ~EQSANSResolution() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "EQSANSResolution"; }
+  const std::string name() const override { return "EQSANSResolution"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the Q resolution for EQSANS data.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
@@ -57,7 +57,7 @@ private:
   /// Execution code
   // void exec();
   /// Return the TOF resolution for a particular wavelength
-  virtual double getTOFResolution(double wl);
+  double getTOFResolution(double wl) override;
 };
 
 } // namespace Algorithms

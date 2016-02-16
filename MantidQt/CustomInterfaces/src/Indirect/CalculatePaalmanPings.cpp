@@ -1,6 +1,11 @@
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/Material.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
 
 #include <QLineEdit>

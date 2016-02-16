@@ -75,7 +75,7 @@ protected slots:
   void setScaledColors(bool scale = true);
   void spinBoxActivated(DoubleSpinBox *);
 
-  bool eventFilter(QObject *object, QEvent *e);
+  bool eventFilter(QObject *object, QEvent *e) override;
 
 private:
   //! Table displaying the values ranges in the first column and their corresponding colors in the second column

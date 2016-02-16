@@ -69,23 +69,23 @@ public:
   /// Default constructor
   FindDeadDetectors() : API::Algorithm(){};
   /// Destructor
-  virtual ~FindDeadDetectors(){};
+  ~FindDeadDetectors() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindDeadDetectors"; }
+  const std::string name() const override { return "FindDeadDetectors"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Identifies and flags empty spectra caused by 'dead' detectors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diagnostics"; }
+  const std::string category() const override { return "Diagnostics"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   API::MatrixWorkspace_sptr integrateWorkspace();
 };
