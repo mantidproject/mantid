@@ -50,8 +50,10 @@ class TableStatistics : public Table
 		//! return the base table of which statistics are displayed
 		Table *base() const { return d_base; }
 
-    void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-    std::string saveToProject(ApplicationWindow* app);
+                void loadFromProject(const std::string &lines,
+                                     ApplicationWindow *app,
+                                     const int fileVersion) override;
+                std::string saveToProject(ApplicationWindow *app) override;
 
     public slots:
         //! update statistics after a column has changed (to be connected with Table::modifiedData)

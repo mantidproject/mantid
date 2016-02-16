@@ -43,7 +43,7 @@ public:
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
 
   /// Return the workspace typeID
-  virtual const std::string id() const { return "IEventWorkspace"; }
+  const std::string id() const override { return "IEventWorkspace"; }
   virtual std::size_t getNumberEvents() const = 0;
   virtual double getTofMin() const = 0;
   virtual double getTofMax() const = 0;
@@ -55,9 +55,9 @@ public:
   getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
   virtual IEventList *getEventListPtr(const std::size_t workspace_index) = 0;
-  virtual void generateHistogram(const std::size_t index, const MantidVec &X,
-                                 MantidVec &Y, MantidVec &E,
-                                 bool skipError = false) const = 0;
+  void generateHistogram(const std::size_t index, const MantidVec &X,
+                         MantidVec &Y, MantidVec &E,
+                         bool skipError = false) const override = 0;
 
   virtual void clearMRU() const = 0;
 
@@ -67,10 +67,10 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IEventWorkspace &operator=(const IEventWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
-  virtual IEventWorkspace *doClone() const = 0;
+  IEventWorkspace *doClone() const override = 0;
 };
 }
 }

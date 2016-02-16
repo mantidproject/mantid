@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QFileInfo>

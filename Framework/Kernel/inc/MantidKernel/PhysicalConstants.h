@@ -94,6 +94,11 @@ static const double StandardAtmosphere = 101.325;
  */
 static const double BoltzmannConstant = 8.6173324e-02;
 
+/** Muon gyromagnetic ratio in MHz/G
+ * Taken from CalMuonDetectorPhases and DynamicKuboToyabe on 02/02/2016
+ */
+static const double MuonGyromagneticRatio = 0.01355342;
+
 } // namespace PhysicalConstants
 } // namespace Mantid
 

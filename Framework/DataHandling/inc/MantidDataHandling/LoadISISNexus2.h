@@ -76,20 +76,20 @@ public:
   /// Default constructor
   LoadISISNexus2();
   /// Destructor
-  virtual ~LoadISISNexus2() {}
+  ~LoadISISNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadISISNexus"; }
+  const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a file in ISIS NeXus format.";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /// Spectra block descriptor
   struct SpectraBlock {
@@ -131,9 +131,9 @@ public:
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   // Validate the optional input properties
   void checkOptionalProperties(
       const std::map<int64_t, std::string> &ExcludedMonitors);

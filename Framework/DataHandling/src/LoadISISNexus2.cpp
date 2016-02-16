@@ -5,6 +5,12 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,10 +20,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
-
-#include "MantidGeometry/Instrument/Detector.h"
+#include <boost/lexical_cast.hpp>
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -27,14 +30,13 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
 
-#include <boost/lexical_cast.hpp>
-#include <cmath>
-#include <climits>
-#include <vector>
-#include <sstream>
-#include <cctype>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <functional>
+#include <sstream>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -90,10 +92,7 @@ void LoadISISNexus2::init() {
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
-  std::vector<std::string> monitorOptions;
-  monitorOptions.push_back("Include");
-  monitorOptions.push_back("Exclude");
-  monitorOptions.push_back("Separate");
+  std::vector<std::string> monitorOptions{"Include", "Exclude", "Separate"};
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
@@ -213,8 +212,8 @@ void LoadISISNexus2::exec() {
   size_t total_specs =
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
 
-  m_progress = boost::shared_ptr<API::Progress>(new Progress(
-      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
+  m_progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
 
   DataObjects::Workspace2D_sptr local_workspace =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(

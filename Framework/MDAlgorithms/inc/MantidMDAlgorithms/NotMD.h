@@ -36,25 +36,25 @@ namespace MDAlgorithms {
 class DLLExport NotMD : public UnaryOperationMD {
 public:
   NotMD();
-  virtual ~NotMD();
+  ~NotMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs a boolean negation on a MDHistoWorkspace.";
   }
 
-  virtual int version() const;
+  int version() const override;
 
 private:
   /// Check the inputs and throw if the algorithm cannot be run
-  void checkInputs();
+  void checkInputs() override;
 
   /// Run the algorithm on a MDEventWorkspace
-  void execEvent(Mantid::API::IMDEventWorkspace_sptr out);
+  void execEvent(Mantid::API::IMDEventWorkspace_sptr out) override;
 
   /// Run the algorithm with a MDHistoWorkspace
-  void execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out);
+  void execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) override;
 };
 
 } // namespace MDAlgorithms

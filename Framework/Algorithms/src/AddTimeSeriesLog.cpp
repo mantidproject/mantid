@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"

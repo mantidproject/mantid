@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {

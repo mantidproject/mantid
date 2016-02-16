@@ -13,6 +13,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -97,9 +98,7 @@ void RefinePowderInstrumentParameters::init() {
       "Minimum number of fitted peaks for refining instrument parameters.");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.push_back("DirectFit");
-  algoptions.push_back("MonteCarlo");
+  vector<string> algoptions{"DirectFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -117,9 +116,7 @@ void RefinePowderInstrumentParameters::init() {
                   "Minimum allowed value for Sigma of a peak.");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.push_back("ConstantValue");
-  stdoptions.push_back("InvertedPeakHeight");
+  vector<string> stdoptions{"ConstantValue", "InvertedPeakHeight"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
@@ -694,12 +691,13 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 
         // iv.  Archive
         vector<double> newparvalues;
+        newparvalues.reserve(numparameters);
         for (size_t i = 0; i < numparameters; ++i) {
           double parvalue = func4fit->getParameter(i);
           newparvalues.push_back(parvalue);
         }
-        m_BestFitParameters.push_back(make_pair(homchi2, newparvalues));
-        m_BestFitChi2s.push_back(make_pair(homchi2, gslchi2));
+        m_BestFitParameters.emplace_back(homchi2, newparvalues);
+        m_BestFitChi2s.emplace_back(homchi2, gslchi2);
 
         // v.  Sort and keep in size
         sort(m_BestFitParameters.begin(), m_BestFitParameters.end());
@@ -748,8 +746,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
       paramvalues[paramindex] = newvalue;
 
       // ii.  Add the new values to vector
-      vector<double> parametervalues = paramvalues;
-      m_BestMCParameters.push_back(make_pair(newchi2, parametervalues));
+      m_BestMCParameters.emplace_back(newchi2, paramvalues);
 
       // iii. Sort and delete the last if necessary
       sort(m_BestMCParameters.begin(), m_BestMCParameters.end());
@@ -937,9 +934,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     hkl.push_back(k);
     hkl.push_back(l);
 
-    m_Peaks.insert(std::make_pair(hkl, newpeakptr));
+    m_Peaks.emplace(hkl, newpeakptr);
 
-    m_PeakErrors.insert(make_pair(hkl, chi2));
+    m_PeakErrors.emplace(hkl, chi2);
 
     g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
                         << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
@@ -984,7 +981,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     try {
       API::TableRow trow = parameterWS->getRow(ir);
       trow >> parname >> value;
-      parameters.insert(std::make_pair(parname, value));
+      parameters.emplace(parname, value);
     } catch (runtime_error &) {
       g_log.error() << "Import table workspace " << parameterWS->name()
                     << " error in line " << ir << ".  "
@@ -1067,7 +1064,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     tmpvec.push_back(tmin);
     tmpvec.push_back(tmax);
     tmpvec.push_back(tstepsize);
-    mcparameters.insert(make_pair(parname, tmpvec));
+    mcparameters.emplace(parname, tmpvec);
   }
 
   // 3. Retrieve the information for geometry parameters
@@ -1200,7 +1197,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
       throw runtime_error("Standard error option is not supported. ");
     }
 
-    peakcenters.push_back(make_pair(dh, make_pair(center, chi2)));
+    peakcenters.emplace_back(dh, make_pair(center, chi2));
   }
 
   // 2. Sort by d-spacing value
@@ -1241,7 +1238,7 @@ DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genMCResultTable() {
   // 1. Create table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<TableWorkspace>(new TableWorkspace());
+      boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("double", "Chi2");
   tablews->addColumn("double", "GSLChi2");

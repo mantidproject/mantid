@@ -43,22 +43,22 @@ public:
   /// Default constructor
   DiffractionEventCalibrateDetectors();
   /// Destructor
-  virtual ~DiffractionEventCalibrateDetectors();
+  ~DiffractionEventCalibrateDetectors() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "DiffractionEventCalibrateDetectors";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm optimizes the position and angles of all of the "
            "detector panels. The target instruments for this feature are SNAP "
            "and TOPAZ.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\Calibration;"
            "CorrectionFunctions\\InstrumentCorrections";
   }
@@ -73,8 +73,8 @@ public:
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   // Event workspace pointer
   // API::EventWorkspace_sptr inputW;
 };

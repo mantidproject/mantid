@@ -104,10 +104,10 @@ public:
                       const std::string &file = std::string(), int line = -1);
 
   /// Destructor
-  ~ScriptRepoException() throw() {}
+  ~ScriptRepoException() throw() override {}
 
   /// Returns the message string.
-  const char *what() const throw();
+  const char *what() const throw() override;
 
   /// Returns the error description with technical details on the origin and
   /// cause.

@@ -39,8 +39,8 @@ class MatrixEditCellCommand: public QUndoCommand
 public:
     MatrixEditCellCommand(MatrixModel *model, const QModelIndex & index, double valBefore,
                             double valAfter, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -53,8 +53,8 @@ class MatrixSetFormulaCommand: public QUndoCommand
 {
 public:
     MatrixSetFormulaCommand(Matrix *m, const QString& oldFormula, const QString& newFormula, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -66,8 +66,8 @@ class MatrixSetViewCommand: public QUndoCommand
 {
 public:
     MatrixSetViewCommand(Matrix *m, Matrix::ViewType oldView, Matrix::ViewType newView, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -80,8 +80,8 @@ class MatrixSetHeaderViewCommand: public QUndoCommand
 public:
     MatrixSetHeaderViewCommand(Matrix *m, Matrix::HeaderViewType oldView,
                             Matrix::HeaderViewType newView, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -93,8 +93,8 @@ class MatrixSetColWidthCommand: public QUndoCommand
 {
 public:
     MatrixSetColWidthCommand(Matrix *m, int oldWidth, int newWidth, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -107,8 +107,8 @@ class MatrixSetPrecisionCommand: public QUndoCommand
 public:
     MatrixSetPrecisionCommand(Matrix *m, const QChar& oldFormat, const QChar& newFormat,
                     int oldPrec, int newPrec, const QString & text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -123,8 +123,8 @@ class MatrixSetCoordinatesCommand: public QUndoCommand
 public:
     MatrixSetCoordinatesCommand(Matrix *, double, double, double, double,
                     double, double, double, double, const QString &);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -138,8 +138,8 @@ public:
     MatrixSetColorMapCommand(Matrix *m, Matrix::ColorMapType d_map_type_before,
 					const QwtLinearColorMap& d_map_before, Matrix::ColorMapType d_map_type_after,
 					const QwtLinearColorMap& d_map_after, const QString& text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Matrix *d_matrix;
@@ -151,9 +151,9 @@ class MatrixDeleteRowsCommand: public QUndoCommand
 {
 public:
     MatrixDeleteRowsCommand(MatrixModel *model, int startRow, int count, double* data, const QString& text);
-    ~MatrixDeleteRowsCommand(){free(d_data);};
-    virtual void redo();
-    virtual void undo();
+    ~MatrixDeleteRowsCommand() override { free(d_data); };
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -165,8 +165,8 @@ class MatrixInsertRowCommand: public QUndoCommand
 {
 public:
     MatrixInsertRowCommand(MatrixModel *model, int startRow, const QString& text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -177,9 +177,9 @@ class MatrixDeleteColsCommand: public QUndoCommand
 {
 public:
     MatrixDeleteColsCommand(MatrixModel *model, int startCol, int count, double* data, const QString& text);
-    ~MatrixDeleteColsCommand(){free(d_data);};
-    virtual void redo();
-    virtual void undo();
+    ~MatrixDeleteColsCommand() override { free(d_data); };
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -191,8 +191,8 @@ class MatrixInsertColCommand: public QUndoCommand
 {
 public:
     MatrixInsertColCommand(MatrixModel *model, int startCol, const QString& text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -203,9 +203,9 @@ class MatrixSetSizeCommand: public QUndoCommand
 {
 public:
     MatrixSetSizeCommand(MatrixModel *model, const QSize& oldSize, const QSize& newSize, double *data, const QString& text);
-	~MatrixSetSizeCommand(){free(d_backup);};    
-	virtual void redo();
-    virtual void undo();
+    ~MatrixSetSizeCommand() override { free(d_backup); };
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -218,9 +218,9 @@ class MatrixUndoCommand: public QUndoCommand
 public:
     MatrixUndoCommand(MatrixModel *model, Matrix::Operation op, int startRow, int endRow, int startCol, int endCol,
 						double *data, const QString& text);
-	~MatrixUndoCommand(){free(d_data);};
-    virtual void redo();
-    virtual void undo();
+    ~MatrixUndoCommand() override { free(d_data); };
+    void redo() override;
+    void undo() override;
 
 protected:
 	MatrixModel *d_model;
@@ -234,7 +234,7 @@ class MatrixFftCommand: public MatrixUndoCommand
 public:
     MatrixFftCommand(bool inverse, MatrixModel *model, int startRow, int endRow,
 					int startCol, int endCol, double *data, const QString& text);
-    virtual void redo();
+    void redo() override;
 
 private:
     bool d_inverse;
@@ -245,8 +245,8 @@ class MatrixSetImageCommand: public MatrixUndoCommand
 public:
     MatrixSetImageCommand(MatrixModel *model, const QImage& image, Matrix::ViewType oldView,
 						int startRow, int endRow, int startCol, int endCol, double *data, const QString& text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     QImage d_image;
@@ -261,7 +261,7 @@ public:
 						const QString& commentString, Matrix::ImportMode importAs, const QLocale& locale,
 						int endLineChar, int maxRows, MatrixModel *model, int startRow, int endRow,
 						int startCol, int endCol, double *data, const QString& text);
-    virtual void redo();
+    void redo() override;
 
 private:
 	QString d_path, d_sep, d_comment;
@@ -275,8 +275,8 @@ class MatrixSymmetryOperation: public QUndoCommand
 {
 public:
     MatrixSymmetryOperation(MatrixModel *model, Matrix::Operation op, const QString& text);
-    virtual void redo();
-    virtual void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     MatrixModel *d_model;
@@ -289,9 +289,12 @@ public:
     MatrixPasteCommand(MatrixModel *model, int startRow, int endRow, int startCol, int endCol,
 					double *clipboardData, int rows, int cols, double *backupData,
 					int oldRows, int oldCols, const QString& text);
-	~MatrixPasteCommand(){free(d_clipboard_data); free(d_backup_data);};
-    virtual void redo();
-    virtual void undo();
+    ~MatrixPasteCommand() override {
+      free(d_clipboard_data);
+      free(d_backup_data);
+    };
+    void redo() override;
+    void undo() override;
 
 private:
 	MatrixModel *d_model;

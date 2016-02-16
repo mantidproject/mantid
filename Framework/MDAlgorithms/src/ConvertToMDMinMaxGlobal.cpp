@@ -9,6 +9,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -98,10 +99,7 @@ void ConvertToMDMinMaxGlobal::init() {
       "dEAnalysisMode",
       new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
-  std::vector<std::string> TargFrames;
-  TargFrames.push_back("AutoSelect");
-  TargFrames.push_back("Q");
-  TargFrames.push_back("HKL");
+  std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
       "Q3DFrames", "AutoSelect",
       boost::make_shared<StringListValidator>(TargFrames),

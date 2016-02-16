@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MuonGroupDetectors.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 

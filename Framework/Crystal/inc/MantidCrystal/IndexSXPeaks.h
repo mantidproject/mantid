@@ -157,20 +157,20 @@ public:
   /// Default constructor
   IndexSXPeaks() : API::Algorithm(){};
   /// Destructor
-  virtual ~IndexSXPeaks(){};
+  ~IndexSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "IndexSXPeaks"; }
+  const std::string name() const override { return "IndexSXPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a PeaksWorkspace and a B-Matrix and determines the HKL "
            "values corresponding to each Single Crystal peak. Sets indexes on "
            "the input/output workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
   // Helper method to cull potential hkls off each peak.
@@ -179,9 +179,9 @@ private:
   // Helper method used to check that not all peaks are colinear.
   void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;
   // Overridden Algorithm methods
-  void init();
+  void init() override;
   //
-  void exec();
+  void exec() override;
   //
 };
 

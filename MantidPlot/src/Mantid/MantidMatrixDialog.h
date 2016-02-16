@@ -26,7 +26,7 @@ public:
 
   private slots:
     //! Accept changes and quit
-    void accept();
+    void accept() override;
     //! Apply changes
     void apply();
 

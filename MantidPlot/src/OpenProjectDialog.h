@@ -45,7 +45,7 @@ class OpenProjectDialog : public ExtensibleFileDialog
 		QComboBox *d_open_mode;
 
     protected slots:
-		void closeEvent(QCloseEvent* );
+      void closeEvent(QCloseEvent *) override;
         //! Update which options are visible and enabled based on the output format.
         void updateAdvancedOptions (const QString &filter);
 };

@@ -39,16 +39,14 @@ public:
     ExtractMaskToTable alg;
 
     vector<int> vecA;
-    vector<int> vecB;
 
     // Case: A constains B
+    vecA.reserve(20);
     for (size_t i = 0; i < 20; ++i) {
       vecA.push_back(static_cast<int>(i) + 5);
     }
 
-    for (size_t i = 0; i < 4; ++i) {
-      vecB.push_back(static_cast<int>(i) * 4 + 1 + 5);
-    }
+    vector<int> vecB{6, 10, 14, 18};
 
     vector<int> vecC = alg.subtractVector(vecA, vecB);
 

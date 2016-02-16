@@ -7,9 +7,13 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Material.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class Material;
+}
+
 namespace Geometry {
 //----------------------------------------------------------------------
 // Forward Declaration
@@ -54,7 +58,7 @@ class GeometryHandler;
 class MANTID_GEOMETRY_DLL IObjComponent : public virtual IComponent {
 public:
   /// type string
-  virtual std::string type() const { return "IObjComponent"; }
+  std::string type() const override { return "IObjComponent"; }
 
   IObjComponent();
 
@@ -62,12 +66,12 @@ public:
 
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
-  virtual ~IObjComponent();
+  ~IObjComponent() override;
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
    */
-  virtual IComponent *clone() const = 0;
+  IComponent *clone() const override = 0;
 
   /// Does the point given lie within this object component?
   virtual bool isValid(const Kernel::V3D &point) const = 0;

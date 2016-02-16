@@ -1,5 +1,6 @@
 #include "MantidQtAPI/QwtWorkspaceBinData.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/PlotAxis.h"
 

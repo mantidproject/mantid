@@ -61,26 +61,26 @@ namespace Algorithms {
 class DLLExport FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
-  virtual ~FitPowderDiffPeaks();
+  ~FitPowderDiffPeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FitPowderDiffPeaks"; }
+  const std::string name() const override { return "FitPowderDiffPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit peaks in powder diffraction pattern. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process input properties
   void processInputProperties();

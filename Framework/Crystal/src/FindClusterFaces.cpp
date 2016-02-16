@@ -1,15 +1,15 @@
 #include "MantidCrystal/FindClusterFaces.h"
 
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Utils.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Utils.h"
 
 #include "MantidCrystal/PeakClusterProjection.h"
 
@@ -53,7 +53,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
       const int labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
-        allowedLabels.insert(std::make_pair(labelIdAtPeakCenter, i));
+        allowedLabels.emplace(labelIdAtPeakCenter, i);
       }
     }
     optionalAllowedLabels = allowedLabels;

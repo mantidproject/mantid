@@ -42,19 +42,19 @@ public:
   /// Constructor
   ExpDecay();
   /// Destructor
-  virtual ~ExpDecay() {}
+  ~ExpDecay() override {}
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "ExpDecay"; }
+  std::string name() const override { return "ExpDecay"; }
 
   /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
 };
 
 } // namespace Functions

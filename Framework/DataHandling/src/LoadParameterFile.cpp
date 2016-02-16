@@ -2,10 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -15,7 +17,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

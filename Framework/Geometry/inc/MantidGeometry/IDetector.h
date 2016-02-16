@@ -5,12 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
-#include <stdexcept>
-#include <map>
 
 namespace Mantid {
 namespace Kernel {
@@ -71,7 +68,7 @@ public:
    *  @param comp :: The component to give the distance to
    *  @return The distance
    */
-  virtual double getDistance(const IComponent &comp) const = 0;
+  double getDistance(const IComponent &comp) const override = 0;
 
   /** Gives the angle of this detector object with respect to an axis
    *  @param observer :: The point to calculate the angle relative to (typically
@@ -112,7 +109,7 @@ public:
   /// (Empty) Constructor
   IDetector() {}
   /// Virtual destructor
-  virtual ~IDetector() {}
+  ~IDetector() override {}
 };
 
 /// Shared pointer to IDetector

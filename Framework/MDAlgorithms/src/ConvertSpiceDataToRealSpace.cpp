@@ -3,18 +3,20 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -61,8 +63,7 @@ void ConvertSpiceDataToRealSpace::init() {
                   "input RunInfoWorkspace.");
 
   /// TODO - Add HB2B as it is implemented in future
-  std::vector<std::string> allowedinstruments;
-  allowedinstruments.push_back("HB2A");
+  std::vector<std::string> allowedinstruments{"HB2A"};
   auto instrumentvalidator =
       boost::make_shared<ListValidator<std::string>>(allowedinstruments);
   declareProperty("Instrument", "HB2A", instrumentvalidator,
@@ -279,7 +280,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
       logvec[ir] = dbltemp;
     }
 
-    logvecmap.insert(std::make_pair(logname, logvec));
+    logvecmap.emplace(logname, logvec);
   }
 
   return;
@@ -403,9 +404,9 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
       size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
-      anodelist.push_back(std::make_pair(anodeid, icol));
+      anodelist.emplace_back(anodeid, icol);
     } else {
-      samplenameindexmap.insert(std::make_pair(colname, icol));
+      samplenameindexmap.emplace(colname, icol);
     }
   } // ENDFOR (icol)
 
@@ -425,11 +426,8 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   std::string durationlogname = getProperty("DurationLogName");      //"time"
   std::string rotanglelogname = getProperty("RotationAngleLogName"); // "2theta"
 
-  std::vector<std::string> lognames;
-  lognames.push_back(ptname);
-  lognames.push_back(monitorlogname);
-  lognames.push_back(durationlogname);
-  lognames.push_back(rotanglelogname);
+  std::vector<std::string> lognames{ptname, monitorlogname, durationlogname,
+                                    rotanglelogname};
 
   std::vector<size_t> ilognames(lognames.size());
 
@@ -766,7 +764,7 @@ void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
   for (size_t i = 0; i < numrows; ++i) {
     detid_t detid = detefftablews->cell<detid_t>(i, 0);
     double deteff = detefftablews->cell<double>(i, 1);
-    deteffmap.insert(std::make_pair(detid, deteff));
+    deteffmap.emplace(detid, deteff);
   }
 
   return;

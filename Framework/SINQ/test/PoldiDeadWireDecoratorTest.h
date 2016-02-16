@@ -26,7 +26,7 @@ public:
   static void destroySuite(PoldiDeadWireDecoratorTest *suite) { delete suite; }
 
   PoldiDeadWireDecoratorTest() {
-    m_detector = boost::shared_ptr<MockDetector>(new MockDetector);
+    m_detector = boost::make_shared<MockDetector>();
 
     int valid[] = {0, 1, 2, 5, 99, 299, 399};
     int invalid[] = {0, 1, 400};

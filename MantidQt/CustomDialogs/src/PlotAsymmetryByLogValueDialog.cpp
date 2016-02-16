@@ -4,6 +4,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QLabel>
 #include <QLineEdit>

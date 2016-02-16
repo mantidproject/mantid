@@ -3,7 +3,9 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Exception.h"
 
+#include <boost/make_shared.hpp>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -183,9 +185,8 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.insert(std::pair<detid_t, IDetector_sptr>(
-          in_det.first,
-          ParComponentFactory::createDetector(in_det.second.get(), m_map)));
+      out_map.emplace(in_det.first, ParComponentFactory::createDetector(
+                                        in_det.second.get(), m_map));
     }
   } else {
     // You can just return the detector cache directly.
@@ -570,7 +571,8 @@ Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const {
   if (ndets == 1) {
     return this->getDetector(det_ids[0]);
   } else {
-    boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
+    boost::shared_ptr<DetectorGroup> det_group =
+        boost::make_shared<DetectorGroup>();
     bool warn(false);
     for (size_t i = 0; i < ndets; ++i) {
       det_group->addDetector(this->getDetector(det_ids[i]), warn);

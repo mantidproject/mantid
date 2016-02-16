@@ -8,6 +8,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -29,9 +30,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
-#include <Poco/StringTokenizer.h>
-
 #include <nexus/NeXusException.hpp>
+
+#include <Poco/StringTokenizer.h>
 
 namespace Mantid {
 namespace DataHandling {

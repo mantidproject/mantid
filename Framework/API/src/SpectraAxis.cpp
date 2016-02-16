@@ -129,7 +129,7 @@ void SpectraAxis::getSpectraIndexMap(spec2index_map &map) const {
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
   for (size_t i = 0; i < nel; ++i) {
-    map.insert(std::make_pair(m_parentWS->getSpectrum(i)->getSpectrumNo(), i));
+    map.emplace(m_parentWS->getSpectrum(i)->getSpectrumNo(), i);
   }
 }
 

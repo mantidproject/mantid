@@ -1,7 +1,11 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -317,8 +321,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -330,8 +334,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -340,8 +344,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }

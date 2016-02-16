@@ -1,10 +1,15 @@
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/Column.h"
+
 #include <numeric>
 
 namespace Mantid {
@@ -364,7 +369,7 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     // list
     if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
         dynamic_cast<TimeSeriesProperty<int> *>(log)) {
-      numberSeriesProps.push_back(std::make_pair(logName, tsp));
+      numberSeriesProps.emplace_back(logName, tsp);
     }
   }
 

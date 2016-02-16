@@ -38,29 +38,29 @@ public:
   /// (Empty) Constructor
   LoadPreNexusMonitors();
   /// Virtual destructor
-  virtual ~LoadPreNexusMonitors() {}
+  ~LoadPreNexusMonitors() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadPreNexusMonitors"; }
+  const std::string name() const override { return "LoadPreNexusMonitors"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This is a routine to load in the beam monitors from SNS preNeXus "
            "files into a workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\PreNexus";
   }
   /// Algorithm's aliases
-  virtual const std::string alias() const { return "LoadPreNeXusMonitors"; }
+  const std::string alias() const override { return "LoadPreNeXusMonitors"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Number of monitors
   int nMonitors;

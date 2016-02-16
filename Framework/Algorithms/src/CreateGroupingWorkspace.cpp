@@ -80,12 +80,7 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -268,7 +263,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
 
     if (current.get()) {
       top_group = group_map[current->getName()]; // Return 0 if not in map
-      assemblies.push(std::make_pair(current, top_group));
+      assemblies.emplace(current, top_group);
     }
 
     prog.setNumSteps(int(assemblies.size()));
@@ -298,7 +293,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
               child_group = group_map[currentchild->getName()];
               if (child_group == 0)
                 child_group = top_group;
-              assemblies.push(std::make_pair(currentchild, child_group));
+              assemblies.emplace(currentchild, child_group);
             }
           }
         }

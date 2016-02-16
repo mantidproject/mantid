@@ -1,18 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <string>
-
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
+
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {

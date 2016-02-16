@@ -1,4 +1,5 @@
 #include "MantidCrystal/ClearUB.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 
 using namespace Mantid::Kernel;

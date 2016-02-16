@@ -66,8 +66,7 @@ void FindUBUsingIndexedPeaks::exec() {
                                              // just check for (0,0,0)
     {
       q_vectors.push_back(peaks[i].getQSampleFrame());
-      V3D miller_ind(round(hkl[0]), round(hkl[1]), round(hkl[2]));
-      hkl_vectors.push_back(V3D(miller_ind));
+      hkl_vectors.emplace_back(round(hkl[0]), round(hkl[1]), round(hkl[2]));
       indexed_count++;
     }
   }

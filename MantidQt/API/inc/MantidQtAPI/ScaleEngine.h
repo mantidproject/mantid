@@ -42,10 +42,12 @@ public:
 	enum Type{Linear, Log10, Power};
 
 	ScaleTransformation(const ScaleEngine *engine):QwtScaleTransformation(Other), d_engine(engine){};
-	virtual double xForm(double x, double, double, double p1, double p2) const;
-	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
-	QwtScaleTransformation* copy() const;
-  virtual ~ScaleTransformation();
+        double xForm(double x, double, double, double p1,
+                     double p2) const override;
+        double invXForm(double x, double s1, double s2, double p1,
+                        double p2) const override;
+        QwtScaleTransformation *copy() const override;
+        ~ScaleTransformation() override;
 
 protected:
 	QwtScaleTransformation* newScaleTransformation() const;
@@ -59,12 +61,14 @@ public:
 	ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear,
 				double left_break = -DBL_MAX, double right_break = DBL_MAX);
 
-  virtual ~ScaleEngine();
+        ~ScaleEngine() override;
 
-	QwtScaleTransformation* transformation() const;
-	virtual QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps,
-		int maxMinSteps, double stepSize = 0.0) const;
-	virtual void autoScale (int maxNumSteps, double &x1, double &x2, double &stepSize) const;
+        QwtScaleTransformation *transformation() const override;
+        QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps,
+                                int maxMinSteps,
+                                double stepSize = 0.0) const override;
+        void autoScale(int maxNumSteps, double &x1, double &x2,
+                       double &stepSize) const override;
 
     double axisBreakLeft() const;
     double axisBreakRight() const;

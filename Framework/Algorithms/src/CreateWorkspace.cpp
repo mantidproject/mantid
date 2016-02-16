@@ -4,9 +4,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -28,8 +30,8 @@ CreateWorkspace::~CreateWorkspace() {}
 void CreateWorkspace::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("SpectraNumber");
-  unitOptions.push_back("Text");
+  unitOptions.emplace_back("SpectraNumber");
+  unitOptions.emplace_back("Text");
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),

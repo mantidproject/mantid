@@ -36,18 +36,18 @@ namespace Algorithms {
 class DLLExport FilterByTime2 : public API::Algorithm {
 public:
   FilterByTime2();
-  virtual ~FilterByTime2();
+  ~FilterByTime2() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FilterByTime"; };
+  const std::string name() const override { return "FilterByTime"; };
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; };
+  int version() const override { return 2; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Events\\EventFiltering";
   }
   /// Algorithm's summary for identification overriding a virtual method
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Filter event data by time.";
   }
 
@@ -55,8 +55,8 @@ private:
   /// Sets documentation strings for this algorithm
 
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms
