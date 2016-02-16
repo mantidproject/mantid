@@ -55,10 +55,10 @@ stresstesting.MantidStressTest
      |   +--IRISFuryAndFuryFit
      |   +--OSIRISFuryAndFuryFit
      |
-     +--ISISIndirectInelasticFuryAndFuryFitMulti
+     +--ISISIndirectInelasticIqtAndIqtFitMulti
      |   |
-     |   +--IRISFuryAndFuryFitMulti
-     |   +--OSIRISFuryAndFuryFitMulti
+     |   +--IRISIqtAndIqtFitMulti
+     |   +--OSIRISIqtAndIqtFitMulti
      |
      +--ISISIndirectInelasticConvFit
      |   |
@@ -78,7 +78,7 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult
+from IndirectDataAnalysis import furyfitSeq
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
@@ -942,8 +942,8 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
 #==============================================================================
 
-class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
-    '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
+class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
+    '''A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
@@ -968,14 +968,12 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
                                     BinReductionFactor=self.num_bins,
                                     DryRun=False)
 
-        # Test FuryFit Sequential
-        furyfitSeq_ws = furyfitMult(fury_ws.getName(),
-                                    self.func,
-                                    self.ftype,
-                                    self.startx,
-                                    self.endx,
-                                    Save=False,
-                                    Plot='None')
+        # Test IqtFitMultiple
+        furyfitSeq_ws, params, fit_group = IqtFitMultiple(fury_ws.getName(),
+                                                          self.func,
+                                                          self.ftype,
+                                                          self.startx,
+                                                          self.endx)
 
         self.result_names = [fury_ws.getName(),
                              furyfitSeq_ws]
@@ -1009,13 +1007,13 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
+class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
     def skipTests(self):
         return platform.system() == "Darwin"
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
         # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
@@ -1024,7 +1022,7 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.510595,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
                      'Intensity=0.489405,Tau=0.105559,Beta=1.61112e-14;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
@@ -1041,10 +1039,10 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
 #------------------------- IRIS tests -----------------------------------------
 
-class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
+class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
         # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
@@ -1053,7 +1051,7 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
                      'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1S_s'
