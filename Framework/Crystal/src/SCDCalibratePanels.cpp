@@ -495,14 +495,7 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   IndexingUtils::Optimize_UB(UB, hkl, qVecs);
   std::vector<double> lat(7);
   IndexingUtils::GetLatticeParameters(UB, lat);
-  char buffer[100];
 
-  sprintf(buffer,
-          std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
-          lat[0], lat[1], lat[2], lat[3], lat[4], lat[5], lat[6]);
-  std::string result(buffer);
-  g_log.notice() << "Lattice before optimization: "
-                 << result << "\n";
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat[0] - a) / a > .25)
     return false;
