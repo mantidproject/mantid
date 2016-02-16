@@ -107,10 +107,9 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
-        from IndirectDataAnalysis import (getWSprefix, convertToElasticQ,
+        from IndirectDataAnalysis import (convertToElasticQ,
                                           createFuryMultiDomainFunction,
                                           transposeFitParametersTable,
-                                          convertParametersToWorkspace,
                                           furyFitSaveWorkspaces,
                                           furyfitPlotSeq)
 
