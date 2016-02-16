@@ -17,8 +17,6 @@ class IqtFitMultiple(PythonAlgorithm):
     _intensities_constrained = None
     _minimizer = None
     _max_iterations = None
-    _save = None
-    _plot = None
     _result_name = None
     _parameter_name = None
     _fit_group_name = None
@@ -52,8 +50,6 @@ class IqtFitMultiple(PythonAlgorithm):
                              doc="The Maximum number of iterations for the fit")
         self.declareProperty(name='ConstrainIntensities', defaultValue=False,
                              doc="If the Intensities should be constrained during the fit")
-        self.declareProperty(name='Plot', defaultValue='None', validator=StringListValidator(['None', 'Intensity', 'Tau', 'Beta', 'All']),
-                             doc='Switch Plot Off/On')
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The outputworkspace containing the results of the fit data')
         self.declareProperty(ITableWorkspaceProperty('OutputParameterWorkspace', '', direction=Direction.Output),
@@ -98,7 +94,6 @@ class IqtFitMultiple(PythonAlgorithm):
         self._intensities_constrained = self.getProperty('ConstrainIntensities').value
         self._minimizer = self.getProperty('Minimizer').value
         self._max_iterations = self.getProperty('MaxIterations').value
-        self._plot = self.getProperty('Plot').value
         self._result_name = self.getPropertyValue('OutputResultWorkspace')
         self._parameter_name = self.getPropertyValue('OutputParameterWorkspace')
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
@@ -190,10 +185,6 @@ class IqtFitMultiple(PythonAlgorithm):
         AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
         DeleteWorkspace(tmp_fit_workspace)
-
-        if self._plot != 'None':
-            conclusion_prog.report('Plotting')
-            furyfitPlotSeq(self._result_name, Plot)
 
         self.setProperty('OutputResultWorkspace', self._result_name)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)

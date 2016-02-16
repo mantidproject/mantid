@@ -165,7 +165,7 @@ void IqtFit::run() {
   const long specMax = m_uiForm.spSpectraMax->value();
   const auto minimizer = minimizerString("$outputname_$wsindex");
   const auto save = m_uiForm.ckSave->isChecked();
-  const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
+  m_plotOption = m_uiForm.cbPlotType->currentText().toStdString();
   const auto startX =
       boost::lexical_cast<double>(m_properties["StartX"]->valueText().toStdString());
   const auto endX =
@@ -186,7 +186,7 @@ void IqtFit::run() {
                                             "endx = " +
       m_properties["EndX"]->valueText() + "\n"
                                           "plot = '" +
-      QString::fromStdString(plot) + "'\n"
+      QString::fromStdString(m_plotOption) + "'\n"
                                      "spec_min = " +
       QString::number(specMin) + "\n"
                                  "spec_max = " +
@@ -226,7 +226,7 @@ void IqtFit::run() {
 	updatePlot();
 
   } else {
-    const auto baseName =
+    m_baseName =
         constructBaseName(m_ffInputWSName.toStdString(), specMin, specMax);
     auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
     iqtFitMultiple->initialize();
@@ -241,13 +241,13 @@ void IqtFit::run() {
     iqtFitMultiple->setProperty("Minimizer", minimizer.toStdString());
     iqtFitMultiple->setProperty("MaxIterations", maxIt);
     iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
-    iqtFitMultiple->setProperty("Plot", plot);
-    iqtFitMultiple->setProperty("OutputResultWorkspace", baseName + "_Result");
+    iqtFitMultiple->setProperty("OutputResultWorkspace",
+                                m_baseName + "_Result");
     iqtFitMultiple->setProperty("OutputParameterWorkspace",
-                                baseName + "_Parameters");
+                                m_baseName + "_Parameters");
     iqtFitMultiple->setProperty("OutputWorkspaceGroup",
-                                baseName + "_Workspaces");
-	m_pythonExportWsName = (baseName + "_Workspaces");
+                                m_baseName + "_Workspaces");
+    m_pythonExportWsName = (m_baseName + "_Workspaces");
     m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
 	connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
 		SLOT(algorithmComplete(bool)));
@@ -257,9 +257,25 @@ void IqtFit::run() {
 }
 
 /**
- * Plot workspace base don user input
+ * Plot workspace based on user input
  */
-void IqtFit::plotWorkspace() {}
+void IqtFit::plotWorkspace() {
+  auto resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_baseName + "_Result");
+  if (!(m_plotOption.compare("None") == 0)) {
+    if (m_plotOption.compare("All") == 0) {
+      int specEnd = (int)resultWs->getNumberHistograms();
+      for (int i = 0; i < specEnd; i++) {
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  i, i);
+      }
+    } else {
+      int specNumber = m_uiForm.cbPlotType->currentIndex();
+      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                specNumber, specNumber);
+    }
+  }
+}
 
 /**
  * Save the result of the algorithm
@@ -269,7 +285,7 @@ void IqtFit::saveResult() {
       Mantid::Kernel::ConfigService::Instance().getString(
           "defaultsave.directory");
   const auto filepath = workingdirectory + m_pythonExportWsName + ".nxs";
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName),
+  addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
                           QString::fromStdString(filepath));
 }
 
