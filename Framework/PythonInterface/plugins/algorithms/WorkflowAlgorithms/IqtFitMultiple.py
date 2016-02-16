@@ -1,5 +1,5 @@
-#pylint: disable=no-init
-from mantid import config, logger, AlgorithmFactory
+#pylint: disable=no-init, too-many-instance-attributes
+from mantid import logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -84,7 +84,8 @@ class IqtFitMultiple(PythonAlgorithm):
         # Validate SpecMin/Max
 
         if self._spec_max > maximum_possible_spectra:
-            issues['SpecMax'] = ('SpecMax must be smaller or equal to the number of spectra in the input workspace, %d' % maximum_possible_spectra)
+            issues['SpecMax'] = ('SpecMax must be smaller or equal to the '\
+             'number of spectra in the input workspace, %d' % maximum_possible_spectra)
         if self._spec_min < 0:
             issues['SpecMin'] = 'SpecMin can not be less than 0'
         if self._spec_max < self._spec_min:
@@ -118,16 +119,14 @@ class IqtFitMultiple(PythonAlgorithm):
     def PyExec(self):
         from IndirectDataAnalysis import (convertToElasticQ,
                                           createFuryMultiDomainFunction,
-                                          transposeFitParametersTable,
-                                          furyFitSaveWorkspaces,
-                                          furyfitPlotSeq)
+                                          transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
         output_workspace = self._fit_group_name
         # check if the naming convention used is alreay correct
         chopped_name = self._fit_group_name.split('_')
-        if 'WORKSPACE' in (chopped_name[-1].upper()):
+        if 'WORKSPACE' in chopped_name[-1].upper():
             output_workspace = ('_').join(chopped_name[:-1])
 
         option = self._fit_type[:-2]
@@ -185,7 +184,9 @@ class IqtFitMultiple(PythonAlgorithm):
         #convert parameters to matrix workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name, ColumnX="axis-1", XAxisUnit="MomentumTransfer", ParameterNames=parameter_names)
+        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
+                                                         ColumnX="axis-1", XAxisUnit="MomentumTransfer",
+                                                         ParameterNames=parameter_names)
 
         # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
