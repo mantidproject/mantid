@@ -118,7 +118,10 @@ class IqtFitMultiple(PythonAlgorithm):
         setup_prog.report('generating output name')
         # Run IqtFitMultiple algorithm from indirectDataAnalysis
         nHist = self._input_ws.getNumberHistograms()
-        output_workspace = self._input_ws.getName()
+        output_workspace = self._fit_group_name
+        chopped_name = self._fit_group_name.split('_')
+        if 'WORKSPACE' in (chopped_name[-1].upper()):
+            output_workspace = ('_').join(chopped_name[:-1])
 
         option = self._fit_type[:-2]
         logger.information('Option: '+ option)
@@ -157,9 +160,10 @@ class IqtFitMultiple(PythonAlgorithm):
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         conclusion_prog.report('Renaming workspaces')
-        RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=self._result_name)
-        RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
-        RenameWorkspace(InputWorkspace=output_workspace + "_Parameters", OutputWorkspace=self._parameter_name)
+        if output_workspace + "_Workspaces" != self._fit_group_name:
+            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
+        if output_workspace + "_Parameters" != self._parameter_name:
+            RenameWorkspace(InputWorkspace=output_workspace + "_Parameters", OutputWorkspace=self._parameter_name)
 
         conclusion_prog.report('Tansposing parameter table')
         transposeFitParametersTable(self._parameter_name)
