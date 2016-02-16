@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"

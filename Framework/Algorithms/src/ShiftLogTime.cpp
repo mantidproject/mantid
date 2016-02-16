@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ShiftLogTime.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 #include <sstream>
 
 using namespace Mantid::Kernel;

@@ -304,8 +304,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "cropped";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -342,8 +341,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "texture";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -1131,9 +1129,10 @@ EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
   std::vector<std::string> res;
+  res.reserve(banks.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_bank_";
   for (size_t b = 1; b <= banks.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_bank_" +
-                  boost::lexical_cast<std::string>(b) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(b) + ".nxs");
   }
   return res;
 }
@@ -1163,9 +1162,11 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   const std::string instStr = m_view->currentInstrument();
 
   std::vector<std::string> res;
+  res.reserve(bankIDs.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
   for (size_t b = 0; b < bankIDs.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_texture_bank_" +
-                  boost::lexical_cast<std::string>(bankIDs[b]) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankIDs[b]) +
+                     ".nxs");
   }
 
   return res;

@@ -66,28 +66,28 @@ public:
   /// (Empty) Constructor
   SumRowColumn() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SumRowColumn() {}
+  ~SumRowColumn() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SumRowColumn"; }
+  const std::string name() const override { return "SumRowColumn"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "SANS-specific algorithm which gives a single spectrum containing "
            "the total counts in either each row or each column of pixels in a "
            "square LOQ or SANS2D detector bank.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;Transforms\\Grouping";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   API::MatrixWorkspace_sptr integrateWorkspace();
 };

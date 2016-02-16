@@ -1,16 +1,17 @@
 #include "MantidLiveData/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
@@ -288,8 +289,7 @@ void ISISLiveEventDataListener::run() {
                   << "Exception message: " << e.what() << std::endl;
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &
                e) { // TimeSeriesProperty (and possibly some other things) can
@@ -300,8 +300,7 @@ void ISISLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
   } catch (...) { // Default exception handler
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "

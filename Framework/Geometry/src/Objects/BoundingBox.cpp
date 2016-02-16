@@ -3,6 +3,8 @@
 //---------------------------------------------------------
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Exception.h"
+
 #include <cfloat>
 
 namespace Mantid {

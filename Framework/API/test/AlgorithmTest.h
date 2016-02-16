@@ -43,9 +43,11 @@ public:
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
   void exec() {
-    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out1 =
+        boost::make_shared<WorkspaceTester>();
     out1->init(10, 10, 10);
-    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out2 =
+        boost::make_shared<WorkspaceTester>();
     out2->init(10, 10, 10);
     std::string outName = getPropertyValue("InputWorkspace1") + "+" +
                           getPropertyValue("InputWorkspace2") + "+" +
@@ -438,7 +440,8 @@ public:
   void do_test_locking(std::string in1, std::string in2, std::string inout,
                        std::string out1, std::string out2) {
     for (size_t i = 0; i < 6; i++) {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
     }
@@ -474,7 +477,8 @@ public:
   /** Have a workspace property that does NOT lock the workspace.
    * The failure mode of this test is HANGING. */
   void test_workspace_notLocking() {
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
@@ -511,7 +515,8 @@ public:
     if (contents1.empty()) {
       if (group1.empty())
         return;
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace(group1, ws);
       return;
     }
@@ -524,7 +529,8 @@ public:
       AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
       std::vector<std::string>::iterator it = names.begin();
       for (; it != names.end(); it++) {
-        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        boost::shared_ptr<WorkspaceTester> ws =
+            boost::make_shared<WorkspaceTester>();
         ws->init(10, 10, 10);
         AnalysisDataService::Instance().addOrReplace(*it, ws);
         wsGroup->add(*it);

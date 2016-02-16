@@ -45,7 +45,7 @@ public:
   /// Default constructor required by the factory
   IkedaCarpenterModerator();
   /// Returns a clone of the current object
-  boost::shared_ptr<ModeratorModel> clone() const;
+  boost::shared_ptr<ModeratorModel> clone() const override;
 
   /// Sets the value of the \f$\alpha\f$ parameter
   void setFastDecayCoefficent(const double value);
@@ -61,18 +61,19 @@ public:
   double getMixingCoefficient() const;
 
   /// Returns the mean time for emission in microseconds
-  double emissionTimeMean() const;
+  double emissionTimeMean() const override;
   /// Returns the variance of emission time in microseconds
-  double emissionTimeVariance() const;
+  double emissionTimeVariance() const override;
   /// Returns a time, in seconds, sampled from the distibution given a flat
   /// random number
-  double sampleTimeDistribution(const double flatRandomNo) const;
+  double sampleTimeDistribution(const double flatRandomNo) const override;
 
 private:
   /// Custom initialize function, called after parameters have been set
-  void init();
+  void init() override;
   /// Set a parameter value from a string
-  void setParameterValue(const std::string &name, const std::string &value);
+  void setParameterValue(const std::string &name,
+                         const std::string &value) override;
   /// Initialize the area-to-time lookup table
   void initLookupTable();
   /// For area between [0,1] returns the interpolated value of x

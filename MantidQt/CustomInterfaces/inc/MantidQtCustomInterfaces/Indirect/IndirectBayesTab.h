@@ -78,7 +78,7 @@ class DLLExport IndirectBayesTab : public IndirectTab {
 
 public:
   IndirectBayesTab(QWidget *parent = 0);
-  ~IndirectBayesTab();
+  ~IndirectBayesTab() override;
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;

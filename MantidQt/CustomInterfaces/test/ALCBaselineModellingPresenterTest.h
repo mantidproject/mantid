@@ -7,8 +7,9 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/assign/list_of.hpp>
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"

@@ -50,29 +50,29 @@ public:
   Quadrilateral &operator=(const Quadrilateral &rhs);
 
   /// Index access.
-  virtual const Kernel::V2D &operator[](const size_t index) const;
+  const Kernel::V2D &operator[](const size_t index) const override;
   /// Bounds-checked index access
-  virtual const Kernel::V2D &at(const size_t index) const;
+  const Kernel::V2D &at(const size_t index) const override;
   /// Return the number of vertices
-  virtual size_t npoints() const { return 4; }
+  size_t npoints() const override { return 4; }
   /// Is a point inside this polygon
-  virtual bool contains(const Kernel::V2D &point) const;
+  bool contains(const Kernel::V2D &point) const override;
   /// Is a the given polygon completely encosed by this one
-  virtual bool contains(const ConvexPolygon &poly) const;
+  bool contains(const ConvexPolygon &poly) const override;
   /// Compute the area of the polygon using triangulation
-  virtual double area() const;
+  double area() const override;
   /// Compute the 'determinant' of the points
-  virtual double determinant() const;
+  double determinant() const override;
   /// Return the lowest X value in the polygon
-  virtual double minX() const;
+  double minX() const override;
   /// Return the max X value in the polygon
-  virtual double maxX() const;
+  double maxX() const override;
   /// Return the lowest Y value in the polygon
-  virtual double minY() const;
+  double minY() const override;
   /// Return the max Y value in the polygon
-  virtual double maxY() const;
+  double maxY() const override;
   /// Return a new Polygon based on the current Quadrilateral
-  virtual ConvexPolygon toPoly() const;
+  ConvexPolygon toPoly() const override;
   /// Shifts the vertexes in a clockwise manner
   virtual void shiftVertexesClockwise();
 

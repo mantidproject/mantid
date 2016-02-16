@@ -55,7 +55,7 @@ class ScriptingEnv : public QObject
   ///Constructor
   ScriptingEnv(ApplicationWindow *parent, const QString & langName);
   /// Destructor
-  ~ScriptingEnv();
+  ~ScriptingEnv() override;
   /// Start the environment
   bool initialize();
   /// Shutdown the environment in a more controlled manner than the destructor allows

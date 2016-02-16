@@ -110,7 +110,7 @@ protected:
   std::vector<EventVector_pt> &m_eventVectors;
 
   // methods
-  virtual void addEventImpl(size_t id, double tof); // override
+  virtual void addEventImpl(size_t id, double tof) override;
 
 public:
   // construction

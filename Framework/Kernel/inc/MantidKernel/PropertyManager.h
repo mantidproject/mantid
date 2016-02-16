@@ -63,60 +63,63 @@ public:
   PropertyManager &operator+=(const PropertyManager &rhs);
 
   void filterByTime(const Kernel::DateAndTime &start,
-                    const Kernel::DateAndTime &stop);
+                    const Kernel::DateAndTime &stop) override;
   void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<PropertyManager *> outputs) const;
-  void filterByProperty(const TimeSeriesProperty<bool> &filter);
+                   std::vector<PropertyManager *> outputs) const override;
+  void filterByProperty(const TimeSeriesProperty<bool> &filter) override;
 
-  virtual ~PropertyManager();
+  ~PropertyManager() override;
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(Property *p, const std::string &doc = "");
+  void declareProperty(Property *p, const std::string &doc = "") override;
 
   // Sets all the declared properties from
-  void setProperties(
-      const std::string &propertiesJson,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setProperties(const std::string &propertiesJson,
+                     const std::set<std::string> &ignoreProperties =
+                         std::set<std::string>()) override;
   void setProperties(const std::string &propertiesJson,
                      IPropertyManager *targetPropertyManager,
                      const std::set<std::string> &ignoreProperties);
-  void setProperties(
-      const ::Json::Value &jsonValue,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setProperties(const ::Json::Value &jsonValue,
+                     const std::set<std::string> &ignoreProperties =
+                         std::set<std::string>()) override;
   void setProperties(
       const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
-  void setPropertiesWithSimpleString(
-      const std::string &propertiesString,
-      const std::set<std::string> &ignoreProperties = std::set<std::string>());
-  void setPropertyValue(const std::string &name, const std::string &value);
-  void setPropertyOrdinal(const int &index, const std::string &value);
+  void
+  setPropertiesWithSimpleString(const std::string &propertiesString,
+                                const std::set<std::string> &ignoreProperties =
+                                    std::set<std::string>()) override;
+  void setPropertyValue(const std::string &name,
+                        const std::string &value) override;
+  void setPropertyOrdinal(const int &index, const std::string &value) override;
 
-  bool existsProperty(const std::string &name) const;
-  bool validateProperties() const;
-  size_t propertyCount() const;
-  std::string getPropertyValue(const std::string &name) const;
-  const std::vector<Property *> &getProperties() const;
+  bool existsProperty(const std::string &name) const override;
+  bool validateProperties() const override;
+  size_t propertyCount() const override;
+  std::string getPropertyValue(const std::string &name) const override;
+  const std::vector<Property *> &getProperties() const override;
 
   /// removes the property from properties map
-  void removeProperty(const std::string &name, const bool delproperty = true);
+  void removeProperty(const std::string &name,
+                      const bool delproperty = true) override;
   /// Clears the whole property map
-  void clear();
+  void clear() override;
 
   /// Get the value of a property
-  TypedValue getProperty(const std::string &name) const;
+  TypedValue getProperty(const std::string &name) const override;
   /// Return the property manager serialized as a string.
-  virtual std::string asString(bool withDefaultValues = false) const;
+  std::string asString(bool withDefaultValues = false) const override;
   /// Return the property manager serialized as a json object.
-  virtual ::Json::Value asJson(bool withDefaultValues = false) const;
+  ::Json::Value asJson(bool withDefaultValues = false) const override;
 
 protected:
   using IPropertyManager::declareProperty;
 
   friend class PropertyManagerOwner;
 
-  Property *getPointerToProperty(const std::string &name) const;
-  Property *getPointerToPropertyOrdinal(const int &index) const;
+  Property *getPointerToProperty(const std::string &name) const override;
+  Property *getPointerToPropertyOrdinal(const int &index) const override;
   Property *getPointerToPropertyOrNull(const std::string &name) const;
 
 private:

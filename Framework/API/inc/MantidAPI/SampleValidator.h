@@ -37,8 +37,8 @@ public:
 
   SampleValidator(const unsigned int flags = (Shape | Material));
   std::string getType() const;
-  Kernel::IValidator_sptr clone() const;
-  std::string checkValidity(const MatrixWorkspace_sptr &value) const;
+  Kernel::IValidator_sptr clone() const override;
+  std::string checkValidity(const MatrixWorkspace_sptr &value) const override;
 
 private:
   unsigned int m_requires;

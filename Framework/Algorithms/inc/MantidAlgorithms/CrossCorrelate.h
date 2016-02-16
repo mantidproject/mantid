@@ -61,29 +61,29 @@ public:
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm(), m_progress(NULL) {}
   /// Virtual destructor
-  virtual ~CrossCorrelate() {
+  ~CrossCorrelate() override {
     if (m_progress)
       delete m_progress;
     m_progress = NULL;
   }
   /// Algorithm's name
-  virtual const std::string name() const { return "CrossCorrelate"; }
+  const std::string name() const override { return "CrossCorrelate"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Cross-correlates a range of spectra against one reference spectra "
            "in the same workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Spectra to index map
   spec2index_map index_map;
   /// Iterator for the spectra to index map

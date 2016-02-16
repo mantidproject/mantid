@@ -46,13 +46,13 @@ class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure
     : public BraggScatterer {
 public:
   BraggScattererInCrystalStructure();
-  virtual ~BraggScattererInCrystalStructure() {}
+  ~BraggScattererInCrystalStructure() override {}
 
   Kernel::V3D getPosition() const;
   UnitCell getCell() const;
 
 protected:
-  virtual void afterPropertySet(const std::string &propertyName);
+  void afterPropertySet(const std::string &propertyName) override;
 
   /// This method should be re-implemented by subclasses for additional
   /// parameter processing.
@@ -65,7 +65,7 @@ protected:
   virtual void setPosition(const Kernel::V3D &position);
   virtual void setCell(const UnitCell &cell);
 
-  virtual void declareProperties();
+  void declareProperties() override;
 
   Kernel::V3D getPositionFromString(const std::string &positionString) const;
 
@@ -86,8 +86,8 @@ typedef boost::shared_ptr<BraggScattererInCrystalStructure>
 class MANTID_GEOMETRY_DLL UnitCellStringValidator
     : public Kernel::TypedValidator<std::string> {
 protected:
-  Kernel::IValidator_sptr clone() const;
-  virtual std::string checkValidity(const std::string &unitCellString) const;
+  Kernel::IValidator_sptr clone() const override;
+  std::string checkValidity(const std::string &unitCellString) const override;
 };
 
 MANTID_GEOMETRY_DLL std::vector<std::string>

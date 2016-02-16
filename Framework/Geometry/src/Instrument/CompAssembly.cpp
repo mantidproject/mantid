@@ -287,9 +287,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   // are higher-level components
   // I found some useful info here
   // http://www.cs.bu.edu/teaching/c/tree/breadth-first/
-  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue;
-  // Need to be able to enter the while loop
-  nodeQueue.push_back(thisNode);
+  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
   const bool limitSearch(nlevels > 0);
   while (!nodeQueue.empty()) {
     // get the next node in the queue

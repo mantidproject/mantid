@@ -47,26 +47,25 @@ public:
         m_creators(workspacePropertyNames.size()) {}
 
   /// Create a domain from the input workspace
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
-                            size_t i0 = 0);
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                    boost::shared_ptr<API::FunctionValues> &values,
+                    size_t i0 = 0) override;
   /// Create the output workspace
-  boost::shared_ptr<API::Workspace>
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName);
+  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+      const std::string &baseName, API::IFunction_sptr function,
+      boost::shared_ptr<API::FunctionDomain> domain,
+      boost::shared_ptr<API::FunctionValues> values,
+      const std::string &outputWorkspacePropertyName) override;
 
   /// Return the size of the domain to be created.
-  virtual size_t getDomainSize() const { return 0; }
+  size_t getDomainSize() const override { return 0; }
   /// Set ith creator
   void setCreator(size_t i, API::IDomainCreator *creator);
   bool hasCreator(size_t i) const;
   /// Get number of creators
   size_t getNCreators() const { return m_creators.size(); }
   /// Initialize the function
-  void initFunction(API::IFunction_sptr function);
+  void initFunction(API::IFunction_sptr function) override;
 
 protected:
   /// Vector of creators.

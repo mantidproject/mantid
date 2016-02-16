@@ -31,15 +31,15 @@ namespace API
     /// Constructor
     ClickableLabel(QWidget * parent);
     /// Destructor
-    ~ClickableLabel();
- 
+    ~ClickableLabel() override;
+
 signals:
     /// Signal emitted when a user clicks the label.
     void clicked();
  
   protected:
     /// Catches the mouse press event and emits the signal.
-    void mousePressEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent *event) override;
   };
 
   /** Base class for widgets that will set
@@ -75,8 +75,8 @@ signals:
     enum Info { INVALID, REPLACE, RESTORE };
 
     PropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
-    virtual ~PropertyWidget();
-    
+    ~PropertyWidget() override;
+
     bool inGrid() const;
 
     /// Return the value of the property given the GUI state.
@@ -90,7 +90,7 @@ signals:
     virtual QWidget * getMainWidget() = 0;
 
     void setEnabled(bool val);
-    void setVisible(bool val);
+    void setVisible(bool val) override;
 
     /// @return the Layout object that these widget(s) are in.
     QGridLayout * getGridLayout()

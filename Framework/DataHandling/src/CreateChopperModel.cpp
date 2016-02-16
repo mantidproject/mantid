@@ -1,5 +1,6 @@
 #include "MantidDataHandling/CreateChopperModel.h"
 #include "MantidAPI/FermiChopperModel.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"

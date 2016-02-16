@@ -38,14 +38,15 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
     fun->setParameter("h", 3.);
     fun->setParameter("s", 0.1);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     DampingMinimizer s;
@@ -79,14 +80,15 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
     fun->setParameter("h", 3.);
     fun->setParameter("s", 0.1);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     DampingMinimizer s;
@@ -120,7 +122,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
@@ -128,7 +130,8 @@ public:
     fun->setParameter("s", 0.1);
     fun->fix(0);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -159,7 +162,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
@@ -167,7 +170,8 @@ public:
     fun->setParameter("s", 0.1);
     fun->tie("a", "1");
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -198,7 +202,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
@@ -206,7 +210,8 @@ public:
     fun->setParameter("s", 0.1);
     fun->tie("b", "2*a+0.1");
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -236,7 +241,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
@@ -246,7 +251,8 @@ public:
 
     fun->addConstraint(constraint);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 

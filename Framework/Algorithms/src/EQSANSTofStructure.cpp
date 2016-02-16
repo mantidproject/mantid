@@ -187,6 +187,7 @@ void EQSANSTofStructure::execEvent(
       clean_events.push_back(TofEvent(newtof, it->pulseTime()));
     }
     events.clear();
+    events.reserve(clean_events.size());
     for (it = clean_events.begin(); it < clean_events.end(); ++it) {
       events.push_back(*it);
     }

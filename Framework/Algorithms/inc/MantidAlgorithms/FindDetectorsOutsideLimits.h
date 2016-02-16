@@ -69,27 +69,27 @@ public:
   FindDetectorsOutsideLimits() : DetectorDiagnostic() {}
 
   /// Destructor
-  virtual ~FindDetectorsOutsideLimits() {}
+  ~FindDetectorsOutsideLimits() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "FindDetectorsOutsideLimits";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Identifies histograms and their detectors that have total numbers "
            "of counts over a user defined maximum or less than the user define "
            "minimum.";
   }
 
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
   /// Overridden init
-  void init();
+  void init() override;
   /// Overridden exec
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

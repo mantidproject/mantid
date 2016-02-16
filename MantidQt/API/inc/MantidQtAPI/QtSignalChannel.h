@@ -47,7 +47,7 @@ namespace MantidQt
       /// Default constructor
       QtSignalChannel(const QString & source = "");
       /// Destructor
-      ~QtSignalChannel();
+      ~QtSignalChannel() override;
 
       /// If set, only Mantid log messages from this source are emitted
       void setSource(const QString & source);
@@ -55,7 +55,7 @@ namespace MantidQt
       inline const QString & source() const { return m_source; }
 
       /// Converts the Poco::Message to a Qt signal
-      void log(const Poco::Message& msg);
+      void log(const Poco::Message &msg) override;
 
     public slots:
       /// Set the log level for all loggers

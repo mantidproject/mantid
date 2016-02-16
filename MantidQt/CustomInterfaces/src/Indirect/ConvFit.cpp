@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -1222,7 +1223,7 @@ void ConvFit::singleFitComplete(bool error) {
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
-
+  params.reserve(static_cast<int>(parNames.size()));
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 

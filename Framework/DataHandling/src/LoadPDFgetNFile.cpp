@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadPDFgetNFile.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceProperty.h"

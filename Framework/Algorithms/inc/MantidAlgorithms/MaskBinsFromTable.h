@@ -36,25 +36,25 @@ namespace Algorithms {
 class DLLExport MaskBinsFromTable : public API::Algorithm {
 public:
   MaskBinsFromTable();
-  virtual ~MaskBinsFromTable();
+  ~MaskBinsFromTable() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MaskBinsFromTable"; };
+  const std::string name() const override { return "MaskBinsFromTable"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Mask bins from a table workspace. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Masking"; }
+  const std::string category() const override { return "Transforms\\Masking"; }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
+  void init() override;
   // Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process input Mask bin TableWorkspace.
   void processMaskBinWorkspace(DataObjects::TableWorkspace_sptr masktblws,

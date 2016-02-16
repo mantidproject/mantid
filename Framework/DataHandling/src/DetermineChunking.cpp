@@ -1,5 +1,22 @@
-#include <exception>
-#include <fstream>
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/DetermineChunking.h"
+#include "MantidDataHandling/LoadPreNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "LoadRaw/isisraw.h"
+#include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/DOM/DOMParser.h>
@@ -10,24 +27,10 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/SAX/InputSource.h>
+
+#include <exception>
+#include <fstream>
 #include <set>
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/DetermineChunking.h"
-#include "MantidDataHandling/LoadPreNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "LoadRaw/isisraw.h"
-#include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/BoundedValidator.h"
-#ifdef MPI_BUILD
-#include <boost/mpi.hpp>
-namespace mpi = boost::mpi;
-#endif
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;

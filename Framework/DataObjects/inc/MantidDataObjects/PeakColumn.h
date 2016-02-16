@@ -23,50 +23,50 @@ class DLLExport PeakColumn : public Mantid::API::Column {
 public:
   /// Construct a column with a reference to the peaks list, a name & type
   PeakColumn(std::vector<Peak> &peaks, const std::string &name);
-  virtual ~PeakColumn();
+  ~PeakColumn() override;
 
   /// Number of individual elements in the column.
-  virtual size_t size() const { return m_peaks.size(); }
+  size_t size() const override { return m_peaks.size(); }
 
   /// Returns typeid for the data in the column
-  virtual const std::type_info &get_type_info() const;
+  const std::type_info &get_type_info() const override;
 
   /// Returns typeid for the pointer type to the data element in the column
-  virtual const std::type_info &get_pointer_type_info() const;
+  const std::type_info &get_pointer_type_info() const override;
 
-  virtual bool getReadOnly() const;
+  bool getReadOnly() const override;
 
   /// Prints
-  virtual void print(size_t index, std::ostream &s) const;
+  void print(size_t index, std::ostream &s) const override;
 
-  virtual void read(size_t index, const std::string &text);
+  void read(size_t index, const std::string &text) override;
 
   /// Specialized type check
-  virtual bool isBool() const;
+  bool isBool() const override;
 
   /// Must return overall memory size taken by the column.
-  virtual long int sizeOfData() const;
+  long int sizeOfData() const override;
 
   /// Clone.
-  virtual PeakColumn *clone() const;
+  PeakColumn *clone() const override;
 
   /// Cast to double
-  virtual double toDouble(size_t i) const;
+  double toDouble(size_t i) const override;
 
   /// Assign from double
-  virtual void fromDouble(size_t i, double value);
+  void fromDouble(size_t i, double value) override;
 
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t count);
+  void resize(size_t count) override;
   /// Inserts an item.
-  virtual void insert(size_t index);
+  void insert(size_t index) override;
   /// Removes an item.
-  virtual void remove(size_t index);
+  void remove(size_t index) override;
   /// Pointer to a data element
-  virtual void *void_pointer(size_t index);
+  void *void_pointer(size_t index) override;
   /// Pointer to a data element
-  virtual const void *void_pointer(size_t index) const;
+  const void *void_pointer(size_t index) const override;
 
 private:
   /// Reference to the peaks object saved in the PeaksWorkspace.

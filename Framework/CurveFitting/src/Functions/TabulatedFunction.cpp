@@ -4,13 +4,14 @@
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace CurveFitting {

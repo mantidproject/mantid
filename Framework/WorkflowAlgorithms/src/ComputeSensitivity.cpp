@@ -2,12 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/ComputeSensitivity.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -17,7 +18,6 @@ DECLARE_ALGORITHM(ComputeSensitivity)
 
 using namespace Kernel;
 using namespace API;
-using namespace Geometry;
 using namespace DataObjects;
 
 void ComputeSensitivity::init() {

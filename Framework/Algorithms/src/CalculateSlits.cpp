@@ -7,7 +7,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory

@@ -38,8 +38,10 @@ SpectrumView::SpectrumView(QWidget *parent) :
   //m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs,SIGNAL(currentChanged(int)),this,SLOT(changeSpectrumDisplay(int)));
   connect(m_ui->imageTabs,SIGNAL(tabCloseRequested(int)),this,SLOT(respondToTabCloseReqest(int)));
+  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this, SLOT(changeTracking(bool)));
   updateHandlers();
   setAcceptDrops(true);
+  loadSettings();
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
@@ -50,6 +52,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
 
 SpectrumView::~SpectrumView()
 {
+  saveSettings();
   if(m_emodeHandler)
     delete m_emodeHandler;
 }
@@ -125,7 +128,8 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
                                            m_sliderHandler,
                                            m_rangeHandler,
                                            m_hGraph.get(), m_vGraph.get(),
-                                           m_ui->image_table);
+                                           m_ui->image_table,
+                                           isTrackingOn());
   spectrumDisplay->setDataSource( dataSource );
 
   if (isFirstPlot)
@@ -251,6 +255,35 @@ void SpectrumView::respondToTabCloseReqest(int tab)
   if (m_spectrumDisplay.size() == 1) {
     m_ui->imageTabs->setTabsClosable(false);
   }
+}
+
+/**
+ * Check if mouse tracking should be "always on".
+ */
+bool SpectrumView::isTrackingOn() const {
+  return m_ui->tracking_always_on->isChecked();
+}
+
+void SpectrumView::changeTracking(bool on) {
+  if (m_spectrumDisplay.isEmpty()) {
+    return;
+  }
+  auto tab = m_ui->imageTabs->currentIndex();
+  m_spectrumDisplay[tab]->setTrackingOn(on);
+}
+
+/// Load settings
+void SpectrumView::loadSettings() {
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_ui->tracking_always_on->setChecked(settings.value("CursorTracking", true).toBool());
+}
+
+/// Save settings
+void SpectrumView::saveSettings() const {
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  settings.setValue("CursorTracking",m_ui->tracking_always_on->isChecked());
 }
 
 } // namespace SpectrumView

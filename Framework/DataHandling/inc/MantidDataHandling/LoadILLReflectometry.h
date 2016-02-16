@@ -38,21 +38,21 @@ class DLLExport LoadILLReflectometry
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLReflectometry();
-  virtual ~LoadILLReflectometry();
+  ~LoadILLReflectometry() override;
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
 
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a ILL/D17 nexus file.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void initWorkSpace(NeXus::NXEntry &entry,
                      std::vector<std::vector<int>> monitorsData);

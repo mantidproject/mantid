@@ -84,7 +84,8 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
+    boost::shared_ptr<Mantid::MantidVec> x1 =
+        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(

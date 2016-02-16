@@ -10,6 +10,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 
+#include "MantidGeometry/IComponent.h"
+
 #include <QRegExp>
 #include <QScrollArea>
 

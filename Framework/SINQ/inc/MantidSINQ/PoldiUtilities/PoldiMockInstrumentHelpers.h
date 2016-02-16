@@ -139,7 +139,7 @@ public:
   PoldiValidSourceFakeInstrument() : PoldiAbstractFakeInstrument() {}
 
   boost::shared_ptr<const IComponent> getComponentByNameFake() const {
-    return boost::shared_ptr<const IComponent>(new PoldiFakeSourceComponent);
+    return boost::make_shared<PoldiFakeSourceComponent>();
   }
 };
 

@@ -78,19 +78,19 @@ public:
   /// (Empty) Constructor
   AnvredCorrection();
   /// Virtual destructor
-  virtual ~AnvredCorrection() {}
+  ~AnvredCorrection() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "AnvredCorrection"; }
+  const std::string name() const override { return "AnvredCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates anvred correction factors for attenuation due to "
            "absorption and scattering in a spherical sample";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\Corrections;CorrectionFunctions\\AbsorptionCorrections";
   }
 
@@ -112,9 +112,9 @@ protected:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Event execution code
   void execEvent();
   /// Algorithm cleanup

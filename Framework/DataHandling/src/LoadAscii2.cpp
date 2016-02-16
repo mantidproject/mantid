@@ -3,19 +3,23 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include <fstream>
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+
+#include <Poco/StringTokenizer.h>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {

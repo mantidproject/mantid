@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -82,15 +83,15 @@ public:
   /// Default constructor
   ModeratorTzeroLinear();
   /// Virtual destructor
-  virtual ~ModeratorTzeroLinear() {}
+  ~ModeratorTzeroLinear() override {}
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 private:
   // conversion constants applicable to histogram and event workspaces
@@ -99,9 +100,9 @@ private:
   Geometry::Instrument_const_sptr m_instrument;
 
   // Initialisation code
-  void init();
+  void init() override;
   // Execution code for histogram workspace
-  void exec();
+  void exec() override;
   // Execution code for event workspace
   void execEvent();
   // Calculate time from sample to detector and initial flight path

@@ -38,17 +38,17 @@ namespace MDAlgorithms {
 class DLLExport ImportMDEventWorkspace : public API::Algorithm {
 public:
   ImportMDEventWorkspace();
-  virtual ~ImportMDEventWorkspace();
+  ~ImportMDEventWorkspace() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Reads an ASCII file containing MDEvent data and constructs an "
            "MDEventWorkspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Flag used to indicate the dimension block in the file
   static const std::string DimensionBlockFlag();
@@ -82,8 +82,8 @@ private:
   ///  Check that the a flag exists in the file.
   bool fileDoesContain(const std::string &flag);
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace MDAlgorithms

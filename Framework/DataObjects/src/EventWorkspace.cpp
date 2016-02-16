@@ -5,6 +5,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -820,7 +822,7 @@ public:
   }
 
   // Execute the sort as specified.
-  void run() {
+  void run() override {
     if (!m_WS)
       return;
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {

@@ -49,17 +49,17 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiPeakSearch : public API::Algorithm {
 public:
   PoldiPeakSearch();
-  virtual ~PoldiPeakSearch() {}
+  ~PoldiPeakSearch() override {}
 
-  virtual int version() const { return 1; }
-  virtual const std::string name() const { return "PoldiPeakSearch"; }
+  int version() const override { return 1; }
+  const std::string name() const override { return "PoldiPeakSearch"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm finds the peaks in a POLDI auto-correlation "
            "spectrum.";
   }
 
-  virtual const std::string category() const { return "SINQ\\Poldi"; }
+  const std::string category() const override { return "SINQ\\Poldi"; }
 
 protected:
   MantidVec getNeighborSums(MantidVec correlationCounts) const;
@@ -127,8 +127,8 @@ protected:
   PoldiPeakCollection_sptr m_peaks;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Poldi
