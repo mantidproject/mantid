@@ -2,6 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -50,9 +54,7 @@ void HRPDSlabCanAbsorption::init() {
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
-  std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),

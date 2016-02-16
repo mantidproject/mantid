@@ -44,10 +44,6 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
-  exts.push_back(".integrate");
-
   declareProperty(new FileProperty("Filename", "", FileProperty::Save,
                                    {".peaks", ".integrate"}),
                   "Path to an ISAW-style peaks or integrate file to save.");
@@ -297,13 +293,12 @@ void SaveIsawPeaks::exec() {
         size_t first_peak_index = ids[0];
         Peak &first_peak = peaks[first_peak_index];
         double monct = first_peak.getMonitorCount();
-        out << std::setw(12) << (int)(monct) << std::endl;
+        out << std::setw(12) << static_cast<int>(monct) << std::endl;
 
         out << header << std::endl;
 
         // Go through each peak at this run / bank
-        for (size_t i = 0; i < ids.size(); i++) {
-          size_t wi = ids[i];
+        for (auto wi : ids) {
           Peak &p = peaks[wi];
 
           // Sequence (run) number

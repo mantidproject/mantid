@@ -98,7 +98,7 @@ void SaveVTK::exec() {
         std::vector<double> xValue, yValue, errors;
         std::vector<double>::size_type nVals(
             localWorkspace->dataY(hNum).size());
-        for (int i = 0; i < (int)nVals; ++i) {
+        for (int i = 0; i < static_cast<int>(nVals); ++i) {
           if (xMin && localWorkspace->dataX(hNum)[i] < m_Xmin)
             continue;
           if (xMax && localWorkspace->dataX(hNum)[i + 1] > m_Xmax) {
@@ -106,7 +106,7 @@ void SaveVTK::exec() {
             break;
           }
           xValue.push_back(localWorkspace->dataX(hNum)[i]);
-          if (i == (int)nVals - 1) {
+          if (i == static_cast<int>(nVals) - 1) {
             xValue.push_back(localWorkspace->dataX(hNum)[i + 1]);
           }
           yValue.push_back(localWorkspace->dataY(hNum)[i]);

@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Interpolation.h"

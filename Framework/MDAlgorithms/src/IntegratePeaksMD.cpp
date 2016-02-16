@@ -55,10 +55,8 @@ void IntegratePeaksMD::init() {
                                                            Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
+                                       "HKL"};
   declareProperty("CoordinatesToUse", "Q (lab frame)",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
@@ -123,7 +121,7 @@ void IntegratePeaksMD::init() {
 
   std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  peakNames.push_back("NoFit");
+  peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
@@ -686,7 +684,8 @@ void IntegratePeaksMD::exec() {
 
 double f_eval(double x, void *params) {
   boost::shared_ptr<const API::CompositeFunction> fun =
-      *(boost::shared_ptr<const API::CompositeFunction> *)params;
+      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+          params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);

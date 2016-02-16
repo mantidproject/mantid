@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Utils.h"
@@ -92,7 +93,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   boost::uniform_real<coord_t> u2(0, 1.0); // Random from 0 to 1.0
   boost::variate_generator<boost::mt19937 &, boost::uniform_real<coord_t>>
       genUnit(rng, u2);
-  rng.seed((unsigned int)(m_randomSeed));
+  rng.seed(static_cast<unsigned int>(m_randomSeed));
 
   // Inserter to help choose the correct event type
   auto eventHelper =
@@ -227,7 +228,7 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
         " number of distributed events can not be equal to 0");
 
   boost::mt19937 rng;
-  rng.seed((unsigned int)(m_randomSeed));
+  rng.seed(static_cast<unsigned int>(m_randomSeed));
 
   // Unit-size randomizer
   boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0

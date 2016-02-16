@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/assign/list_of.hpp>

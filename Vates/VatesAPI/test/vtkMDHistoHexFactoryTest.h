@@ -141,9 +141,11 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    auto pMockFactorySuccessor =
-        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    auto pMockFactorySuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
+        .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -152,12 +154,14 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
         Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
     
     factory.initialize(ws_sptr);
 
+    // Need the raw pointer to test assertions here. Object is not yet deleted
+    // as the factory is still in scope.
     TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testInitializationDelegatesThrows()
@@ -180,9 +184,11 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     //2 dimensions on the workspace.
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
-    auto pMockFactorySuccessor =
-        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    auto pMockFactorySuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
+        .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate)))
         .Times(1)
         .WillOnce(
@@ -199,13 +205,15 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
         Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
     
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
+    // Need the raw pointer to test assertions here. Object is not yet deleted
+    // as the factory is still in scope.
     TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testTypeName()

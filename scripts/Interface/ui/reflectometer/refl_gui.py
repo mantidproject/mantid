@@ -77,8 +77,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
         self.__group_tof_workspaces_key = "group_tof_workspaces"
+        self.__stitch_right_key = "stitch_right"
 
-        #Setup instrument options with defaults assigned.
+        #Setup instrument with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF', 'OFFSPEC']
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None': PolarisationCorrection.NONE, '1-PNR': PolarisationCorrection.PNR, '2-PA': PolarisationCorrection.PA}
@@ -110,11 +111,13 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
+        self.__scale_right = settings.value(self.__stitch_right_key, True, type=bool)
 
         settings.setValue(self.__ads_use_key, self.__alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
         settings.setValue(self.__alg_migration_key, self.__alg_migrate)
+        settings.setValue(self.__stitch_right_key, self.__scale_right)
 
 
         settings.endGroup()
@@ -135,7 +138,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
 
-        accept_btn = QtGui.QPushButton('Accept')
+        accept_btn = QtGui.QPushButton('Save')
         cancel_btn = QtGui.QPushButton('Cancel')
         discard_btn = QtGui.QPushButton('Discard')
 
@@ -169,7 +172,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.AcceptRole:
                 if saved:
-                    event.accept()
+                    self.mod_flag = False
+                event.accept()
+            elif ret == QtGui.QMessageBox.RejectRole:
+                event.ignore()
             elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
@@ -279,7 +285,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #first check if the table has been changed before clearing it
         if self.mod_flag:
             ret, _saved = self._save_check()
-            if ret == QtGui.QMessageBox.Cancel:
+            if ret == QtGui.QMessageBox.RejectRole:
                 return
         self.current_table = None
 
@@ -820,7 +826,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                     if Qmin < _overallQMin:
                                         _overallQMin = Qmin
 
-                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
+                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
+                                                              _overallQMin, _overallQMax, -dqq, 1, keep=True,
+                                                              scale_right=self.__scale_right)
 
 
                         # Enable the plot button
@@ -913,7 +921,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 outputwksp = runno[0] + '_' + runno[2][3:]
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
-                _wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
+                                         keep=True, scale_right=self.__scale_right)
 
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
@@ -1140,7 +1149,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 #before loading make sure you give them a chance to save
                 if self.mod_flag:
                     ret, _saved = self._save_check()
-                    if ret == QtGui.QMessageBox.Cancel:
+                    if ret == QtGui.QMessageBox.RejectRole:
                         #if they hit cancel abort the load
                         self.loading = False
                         return
@@ -1217,9 +1226,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
 
-            dialog_controller = refl_options.ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
-                                                         def_alg_use=self.__alg_use, def_icat_download=self.__icat_download,
-                                                         def_group_tof_workspaces=self.__group_tof_workspaces)
+            dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq,
+                                                         def_alg_use = self.__alg_use, def_icat_download=self.__icat_download,
+                                                         def_group_tof_workspaces = self.__group_tof_workspaces,
+                                                         def_stitch_right=self.__scale_right)
             if dialog_controller.exec_():
 
                 # Fetch the settings back off the controller
@@ -1228,6 +1238,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 self.__alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
                 self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
+                self.__scale_right = dialog_controller.stitchRight()
 
                 # Persist the settings
                 settings = QtCore.QSettings()
@@ -1239,6 +1250,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 settings.setValue(self.__ads_use_key, self.__alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
+                settings.setValue(self.__stitch_right_key, self.__scale_right)
                 settings.endGroup()
                 del settings
         except Exception as ex:

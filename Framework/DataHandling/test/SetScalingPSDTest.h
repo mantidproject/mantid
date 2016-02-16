@@ -44,7 +44,7 @@ public:
     std::map<int, V3D> originalPositions;
     for (int i = 0; i < ndets; ++i) {
       IDetector_const_sptr det = testWS->getDetector(i);
-      originalPositions.insert(std::pair<int, V3D>(i, det->getPos()));
+      originalPositions.emplace(i, det->getPos());
     }
 
     IAlgorithm_sptr scaler = createAlgorithm();

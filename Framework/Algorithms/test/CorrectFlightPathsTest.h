@@ -5,12 +5,13 @@
 
 #include "MantidAlgorithms/CorrectFlightPaths.h"
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
 #include <cmath>
 
 using namespace Mantid::API;

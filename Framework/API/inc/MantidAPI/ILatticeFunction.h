@@ -41,10 +41,11 @@ namespace API {
 class MANTID_API_DLL ILatticeFunction : public FunctionParameterDecorator {
 public:
   ILatticeFunction();
-  virtual ~ILatticeFunction() {}
+  ~ILatticeFunction() override {}
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const;
-  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Function that should calculate d-values for the HKLs provided in the
   /// domain.

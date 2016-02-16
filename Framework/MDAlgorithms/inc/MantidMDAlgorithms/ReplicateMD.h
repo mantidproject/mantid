@@ -44,14 +44,14 @@ namespace MDAlgorithms {
 class MANTID_MDALGORITHMS_DLL ReplicateMD : public API::Algorithm {
 public:
   ReplicateMD();
-  virtual ~ReplicateMD();
+  ~ReplicateMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
   /// Valdiate the algorithm inputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   boost::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace> transposeMD(
@@ -61,8 +61,8 @@ private:
   getDataWorkspace() const;
   boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
   getShapeWorkspace() const;
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace MDAlgorithms

@@ -77,9 +77,9 @@ public:
 
   /** Compare two peaks using the stored criteria */
   inline bool operator()(const Peak &a, const Peak &b) {
-    for (size_t i = 0; i < criteria.size(); i++) {
-      std::string &col = criteria[i].first;
-      bool ascending = criteria[i].second;
+    for (auto &name : criteria) {
+      std::string &col = name.first;
+      bool ascending = name.second;
       bool lessThan = false;
       if (col == "BankName") {
         // If this criterion is equal, move on to the next one

@@ -126,13 +126,12 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
       boost::make_shared<IgnoreZerosThresholdRange>();
   auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
       thresholdRange, m_normalization);
-  auto quadFactory = Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-      thresholdRange, m_normalization);
-  auto lineFactory = Mantid::Kernel::make_unique<vtkMDLineFactory>(
-      thresholdRange, m_normalization);
 
-  hexahedronFactory->SetSuccessor(std::move(quadFactory));
-  quadFactory->SetSuccessor(std::move(lineFactory));
+  hexahedronFactory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+                                      thresholdRange, m_normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+          thresholdRange, m_normalization));
+
   hexahedronFactory->setTime(m_time);
   vtkDataSet *product = m_presenter->execute(
       hexahedronFactory.get(), loadingProgressAction, drawingProgressAction);

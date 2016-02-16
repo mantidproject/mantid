@@ -61,27 +61,27 @@ public:
   /// Default constructor
   LoadRawSpectrum0();
   /// Destructor
-  ~LoadRawSpectrum0();
+  ~LoadRawSpectrum0() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadRawSpectrum0"; }
+  const std::string name() const override { return "LoadRawSpectrum0"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads spectrum zero  from  ISIS  raw file and stores it in a 2D "
            "workspace (Workspace2D class).";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diagnostics\\Raw;DataHandling\\Raw";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// ISISRAW class instance which does raw file reading. Shared pointer to
   /// prevent memory leak when an exception is thrown.

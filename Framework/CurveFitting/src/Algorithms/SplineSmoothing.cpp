@@ -1,10 +1,11 @@
+#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 
 #include <algorithm>
 
@@ -344,7 +345,7 @@ void SplineSmoothing::selectSmoothingPoints(
   while (resmooth) {
 
     if (incBreaks) {
-      if (smoothPts.size() > (unsigned)(maxBreaks + 2)) {
+      if (smoothPts.size() > static_cast<unsigned>(maxBreaks + 2)) {
         break;
       }
 

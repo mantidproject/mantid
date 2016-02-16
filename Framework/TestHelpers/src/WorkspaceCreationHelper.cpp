@@ -45,8 +45,7 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress =
-      std::auto_ptr<API::Progress>(new API::Progress(this, 0, 1, nSteps));
+  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
 
 /**
@@ -205,7 +204,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
   const int nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
-    boost::shared_ptr<Instrument> instrument(new Instrument);
+    auto instrument = boost::make_shared<Instrument>();
     workspace->setInstrument(instrument);
 
     std::string xmlShape = "<sphere id=\"shape\"> ";
@@ -217,7 +216,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i), shape, NULL);
+      Detector *det = new Detector("det", detid_t(i), shape, nullptr);
       det->setPos(i, i + 1, 1);
       instrument->add(det);
       instrument->markAsDetector(det);
@@ -345,9 +344,9 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
-  boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
+  auto testInst = boost::make_shared<Instrument>(instrumentName);
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
   space->setInstrument(testInst);
 
   const double pixelRadius(0.05);
@@ -533,7 +532,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->add(source);
   instrument->markAsSource(source);
 
-  Detector *monitor = new Detector("Monitor", 1, NULL);
+  Detector *monitor = new Detector("Monitor", 1, nullptr);
   monitor->setPos(14, 0, 0);
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
@@ -546,7 +545,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   // Where 0.01 is half detector width etc.
   Detector *det = new Detector(
       "point-detector", 2,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), NULL);
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   det->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det);
   instrument->markAsDetector(det);
@@ -589,7 +588,7 @@ void createInstrumentForWorkspaceWithDistances(
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    Detector *det = new Detector(buffer.str(), i, NULL);
+    Detector *det = new Detector(buffer.str(), i, nullptr);
     det->setPos(detectorPositions[i]);
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -719,10 +718,10 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   for (size_t g = 0; g < groups.size(); g++) {
     retVal->getOrAddEventList(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
+    for (auto det : dets) {
       for (int i = 0; i < numBins; i++)
         retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(*it);
+      retVal->getOrAddEventList(g).addDetectorID(det);
     }
   }
   // Create the x-axis for histogramming.
@@ -919,7 +918,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = (size_t)sqrt(double(numPixels));
+  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
@@ -1259,7 +1258,7 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));

@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
@@ -22,9 +23,96 @@ public:
     TS_ASSERT(alg->isInitialized())
   }
 
+  void test_real_data() {
+    // Run one iteration, we just want to test the output workspaces' dimensions
+    int nHist = 5;
+    int nBins = 10;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist * 2);
+    TS_ASSERT_EQUALS(chi->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(angle->getNumberHistograms(), nHist);
+
+    TS_ASSERT_EQUALS(data->blocksize(), nBins);
+    TS_ASSERT_EQUALS(image->blocksize(), nBins);
+    TS_ASSERT_EQUALS(chi->blocksize(), 1);
+    TS_ASSERT_EQUALS(angle->blocksize(), 1);
+  }
+
+  void test_complex_data() {
+    // Run one iteration, we just want to test the output workspaces' dimensions
+    int nHist = 6;
+    int nBins = 10;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(chi->getNumberHistograms(), nHist / 2);
+    TS_ASSERT_EQUALS(angle->getNumberHistograms(), nHist / 2);
+
+    TS_ASSERT_EQUALS(data->blocksize(), nBins);
+    TS_ASSERT_EQUALS(image->blocksize(), nBins);
+    TS_ASSERT_EQUALS(chi->blocksize(), 1);
+    TS_ASSERT_EQUALS(angle->blocksize(), 1);
+  }
+
+  void test_bad_complex_data() {
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
   void test_cosine() {
 
-    auto ws = createWorkspace(0.0);
+    auto ws = createWorkspace(50, 0.0);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -57,7 +145,7 @@ public:
 
   void test_sine() {
 
-    auto ws = createWorkspace(M_PI / 2.);
+    auto ws = createWorkspace(50, M_PI / 2.);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -88,14 +176,12 @@ public:
     TS_ASSERT_DELTA(data->readY(0)[27], 0.7218, 0.0001);
   }
 
-  MatrixWorkspace_sptr createWorkspace(double phase) {
+  MatrixWorkspace_sptr createWorkspace(size_t maxt, double phase) {
 
     // Create cosine with phase 'phase'
 
     // Frequency of the oscillations
     double w = 1.6;
-    // Maximum time
-    size_t maxt = 50;
 
     MantidVec X;
     MantidVec Y;
@@ -106,7 +192,6 @@ public:
       Y.push_back(cos(w * x + phase));
       E.push_back(0.1);
     }
-
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
     createWS->initialize();
     createWS->setChild(true);

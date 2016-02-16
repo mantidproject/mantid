@@ -303,7 +303,7 @@ const V3D ObjComponent::takeOutRotation(V3D point) const {
 * nothing.
 */
 void ObjComponent::draw() const {
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   Handle()->Render();
@@ -313,7 +313,7 @@ void ObjComponent::draw() const {
 * Draws the Object
 */
 void ObjComponent::drawObject() const {
-  if (shape() != NULL)
+  if (shape() != nullptr)
     shape()->draw();
 }
 
@@ -322,10 +322,10 @@ void ObjComponent::drawObject() const {
 * before rendering.
 */
 void ObjComponent::initDraw() const {
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  if (shape() != NULL)
+  if (shape() != nullptr)
     shape()->initDraw();
   Handle()->Initialize();
 }

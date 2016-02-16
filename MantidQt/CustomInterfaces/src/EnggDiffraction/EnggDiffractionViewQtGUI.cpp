@@ -335,7 +335,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toString()
           .toStdString();
   m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
+      qs.value("rebin-calib", g_defaultRebinWidth).toBool();
 
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();
@@ -534,14 +534,16 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
 
   // focus
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
+
+  m_uiTabFocus.groupBox_cropped->setEnabled(enable);
+  m_uiTabFocus.groupBox_texture->setEnabled(enable);
+
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
   m_uiTabFocus.checkBox_SaveOutputFiles->setEnabled(enable);
   m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
-  m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
-  m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
   m_uiTabFocus.pushButton_stopFocus->setDisabled(enable);
 
   // pre-processing
@@ -556,8 +558,10 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   }
 }
 
-std::string EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
-  return m_uiTabPreproc.MWRunFiles_preproc_run_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
+  return qListToVector(
+      m_uiTabPreproc.MWRunFiles_preproc_run_num->getFilenames(),
+      m_uiTabPreproc.MWRunFiles_preproc_run_num->isValid());
 }
 
 double EnggDiffractionViewQtGUI::rebinningTimeBin() const {
@@ -578,8 +582,8 @@ void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -591,8 +595,8 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
       "', 0, error_bars=False, type=0, waterfall=True, window=win)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -603,8 +607,8 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -965,6 +969,9 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   // calibration tab
   m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
   m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefixInput);
+
+  // rebin tab
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
   m_uiTabCalib.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
 }
 

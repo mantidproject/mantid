@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -140,7 +142,7 @@ void Rebin::exec() {
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if (eventInputWS != NULL) {
+  if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
     EventWorkspace_sptr eventOutputWS =
         boost::dynamic_pointer_cast<EventWorkspace>(outputWS);

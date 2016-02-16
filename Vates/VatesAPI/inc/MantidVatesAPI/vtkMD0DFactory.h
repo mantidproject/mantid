@@ -42,22 +42,20 @@ namespace Mantid
       vtkMD0DFactory();
 
       /// Destructor
-      virtual ~vtkMD0DFactory();
+      ~vtkMD0DFactory() override;
 
       /// Factory Method.
-      virtual vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const;
+      vtkSmartPointer<vtkDataSet>
+      create(ProgressAction &progressUpdating) const override;
 
-      virtual void initialize(Mantid::API::Workspace_sptr);
+      void initialize(Mantid::API::Workspace_sptr) override;
 
-      virtual std::string getFactoryTypeName() const
-      {
+      std::string getFactoryTypeName() const override {
         return "vtkMD0DFactory";
       }
 
     protected:
-        virtual void validate() const;
-
+      void validate() const override;
     };
     
   }

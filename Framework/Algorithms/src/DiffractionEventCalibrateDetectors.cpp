@@ -53,7 +53,7 @@ DiffractionEventCalibrateDetectors::~DiffractionEventCalibrateDetectors() {}
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   double x, y, z, rotx, roty, rotz;
   std::string detname, inname, outname, peakOpt, rb_param, groupWSName;
-  std::string *p = (std::string *)params;
+  std::string *p = reinterpret_cast<std::string *>(params);
   detname = p[0];
   inname = p[1];
   outname = p[2];
@@ -418,7 +418,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     std::cout << tim << " to CreateGroupingWorkspace" << std::endl;
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = NULL;
+    gsl_multimin_fminimizer *s = nullptr;
     gsl_vector *ss, *x;
     gsl_multimin_function minex_func;
 

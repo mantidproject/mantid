@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,10 +34,7 @@ void RRFMuon::init() {
       new PropertyWithValue<double>("Frequency", 0, Direction::Input),
       "Frequency of the oscillations");
 
-  std::vector<std::string> unitOptions;
-  unitOptions.push_back("MHz");
-  unitOptions.push_back("Gauss");
-  unitOptions.push_back("Mrad/s");
+  std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
   declareProperty("FrequencyUnits", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");

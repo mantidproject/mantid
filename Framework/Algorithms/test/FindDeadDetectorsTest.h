@@ -7,9 +7,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
+
 #include <Poco/File.h>
+
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

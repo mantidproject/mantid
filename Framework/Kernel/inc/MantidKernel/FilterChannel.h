@@ -52,7 +52,7 @@ public:
   FilterChannel();
 
   /// destructor
-  ~FilterChannel();
+  ~FilterChannel() override;
 
   /// Attaches a channel, which may not be null.
   void addChannel(Channel *pChannel);
@@ -69,13 +69,13 @@ public:
   unsigned int getPriority() const { return _priority; }
 
   /// Sends the given Message to the attached channel.
-  void log(const Message &msg);
+  void log(const Message &msg) override;
 
   /// Sets or changes a configuration property.
-  void setProperty(const std::string &name, const std::string &value);
+  void setProperty(const std::string &name, const std::string &value) override;
 
   /// Removes all channels.
-  void close();
+  void close() override;
 
 protected:
 private:

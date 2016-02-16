@@ -3,11 +3,15 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <cstdio>
 #include <limits>
 #include <fstream>
@@ -108,7 +112,7 @@ void LoadSPE::exec() {
   if (comment[4] == 'Q' || comment[4] == 'q') {
     phiAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    phiAxis->unit() = boost::shared_ptr<Unit>(new Units::Phi);
+    phiAxis->unit() = boost::make_shared<Units::Phi>();
   }
 
   // Read in phi grid

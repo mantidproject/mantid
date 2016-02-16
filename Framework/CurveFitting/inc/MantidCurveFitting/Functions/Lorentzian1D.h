@@ -54,11 +54,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Lorentzian1D : public Algorithms::Fit1D {
 public:
   /// Destructor
-  virtual ~Lorentzian1D(){};
+  ~Lorentzian1D() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Lorentzian1D"; }
+  const std::string name() const override { return "Lorentzian1D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "== Deprecation notice == Instead of using this algorithm to fit a "
            "Lorentzian please use the Fit algorithm where the Function "
            "parameter of this algorithm is used to specified the fitting "
@@ -66,19 +66,19 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Optimization\\FitAlgorithms";
   }
 
 private:
   // Overridden Fit1D methods
-  void declareParameters();
+  void declareParameters() override;
   void function(const double *in, double *out, const double *xValues,
-                const size_t nData);
+                const size_t nData) override;
   void functionDeriv(const double *in, API::Jacobian *out,
-                     const double *xValues, const size_t nData);
+                     const double *xValues, const size_t nData) override;
 };
 
 } // namespace Functions

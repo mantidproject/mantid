@@ -15,13 +15,7 @@
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -161,12 +155,12 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // saveable and that the boxes were not saved.
       BoxFlatStruct.setBoxesFilePositions(true);
       prog->resetNumSteps(boxes.size(), 0.06, 0.90);
-      for (size_t i = 0; i < boxes.size(); i++) {
-        auto saveableTag = boxes[i]->getISaveable();
+      for (auto &boxe : boxes) {
+        auto saveableTag = boxe->getISaveable();
         if (saveableTag) // only boxes can be saveable
         {
           // do not spend time on empty boxes
-          if (boxes[i]->getDataInMemorySize() == 0)
+          if (boxe->getDataInMemorySize() == 0)
             continue;
           // save boxes directly using the boxes file postion, precalculated in
           // boxFlatStructure.

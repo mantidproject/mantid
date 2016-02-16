@@ -24,10 +24,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.078968412230231877, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.12162310222873171, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.018091076761311387, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.063175962622448692, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13015715643321046, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.12122048601642356, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.017172642169849039, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.063124106780391834, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
                                                diff_mode=diff_mode)
@@ -38,10 +38,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.10197619851290973, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.13636377723938517, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.053028031396861852, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.070808659911133845, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.16805529043135614, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13602628474190004, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.056426592449087654, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.070774572171486652, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
                                                diff_mode=diff_mode)
@@ -65,20 +65,20 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.12812011879757312, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.07005709042418834, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.038491709460370394, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.036783617369284975, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.14595792251532602, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.069974931114835631, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.034269132557441905, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.036773635912201605, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
     def test_non_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188,14190", "3-134", "DoubleDifference")
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.17509520926405386, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.085651536076367191, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.027855932189430499, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.044991428219920804, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.17587447223331631, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.085647015119071523, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.031951030862195084, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.044999174645580703, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
     def test_consecutive_runs_with_forward_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188-14190", "135-198", "SingleDifference")

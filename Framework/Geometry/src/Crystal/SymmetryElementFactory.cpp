@@ -378,10 +378,9 @@ SymmetryElement_sptr SymmetryElementFactoryImpl::createFromPrototype(
 /// invalid pointer if no appropriate generator is found.
 AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
     const SymmetryOperation &operation) const {
-  for (auto generator = m_generators.begin(); generator != m_generators.end();
-       ++generator) {
-    if ((*generator)->canProcess(operation)) {
-      return *generator;
+  for (const auto &generator : m_generators) {
+    if (generator->canProcess(operation)) {
+      return generator;
     }
   }
 
@@ -391,7 +390,7 @@ AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
 /// Inserts the provided prototype into the factory.
 void SymmetryElementFactoryImpl::insertPrototype(
     const std::string &identifier, const SymmetryElement_sptr &prototype) {
-  m_prototypes.insert(std::make_pair(identifier, prototype));
+  m_prototypes.emplace(identifier, prototype);
 }
 
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator)

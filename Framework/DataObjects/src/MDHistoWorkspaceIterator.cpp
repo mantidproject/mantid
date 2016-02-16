@@ -155,7 +155,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +245,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -526,12 +526,12 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
   std::vector<int> widths(
       m_nd, 3); // Face touching width is always 3 in each dimension
-  for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
-    if (m_permutationsFaceTouching[i] == 0) {
+  for (auto permutation : m_permutationsFaceTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -655,12 +655,12 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   // Accumulate neighbour indexes.
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
-  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
+  for (auto permutation : permutationsVertexTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {

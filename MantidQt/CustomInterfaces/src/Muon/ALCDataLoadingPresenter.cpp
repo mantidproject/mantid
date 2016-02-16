@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"

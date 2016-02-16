@@ -59,9 +59,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
 /** Test and check if units conversion really occurs. Return true if unit
  * conversion happens or false if noConversion mode is selected*/
 bool UnitsConversionHelper::isUnitConverted() const {
-  if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)
-    return false;
-  return true;
+  return m_UnitCnvrsn != CnvrtToMD::ConvertNo;
 }
 /** Initialize unit conversion helper
  * This method is interface to internal initialize method, which actually takes
@@ -101,7 +99,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
   if (!(targetWSDescr.m_PreprDetTable))
     throw std::runtime_error("MDWSDescription does not have a detector table");
 
-  int Emode = (int)targetWSDescr.getEMode();
+  int Emode = static_cast<int>(targetWSDescr.getEMode());
 
   this->initialize(unitsFrom, unitsTo, targetWSDescr.m_PreprDetTable, Emode,
                    forceViaTOF);
@@ -109,18 +107,12 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const std::pair<double, double> &range, const double &val) {
-  if (val >= range.first && val <= range.second)
-    return true;
-  else
-    return false;
+  return val >= range.first && val <= range.second;
 }
 // the helper function which used in the code below to simplify check if the
 // variable is in range
 inline bool inRange(const double &xMin, const double &xMax, const double &val) {
-  if (val >= xMin && val <= xMax)
-    return true;
-  else
-    return false;
+  return val >= xMin && val <= xMax;
 }
 
 /** Method verify if the Units transformation is well defined in the range
@@ -263,8 +255,8 @@ void UnitsConversionHelper::initialize(
 
   // get efix
   m_Efix = DetWS->getLogs()->getPropertyValueAsType<double>("Ei");
-  m_pEfixedArray = NULL;
-  if (m_Emode == (int)Kernel::DeltaEMode::Indirect)
+  m_pEfixedArray = nullptr;
+  if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
     m_pEfixedArray = DetWS->getColDataArray<float>("eFixed");
 
   // set up conversion to working state -- in some tests it can be used straight
@@ -273,7 +265,7 @@ void UnitsConversionHelper::initialize(
   m_L2 = (*m_pL2s)[0];
   double Efix = m_Efix;
   if (m_pEfixedArray)
-    Efix = (double)(*(m_pEfixedArray + 0));
+    Efix = static_cast<double>(*(m_pEfixedArray + 0));
 
   m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, 0.);
   if (m_SourceWSUnit) {
@@ -294,7 +286,7 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
-      Efix = (double)(*(m_pEfixedArray + i));
+      Efix = static_cast<double>(*(m_pEfixedArray + i));
 
     m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
     return;
@@ -305,7 +297,7 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
-      Efix = (double)(*(m_pEfixedArray + i));
+      Efix = static_cast<double>(*(m_pEfixedArray + i));
 
     m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
     m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
@@ -365,8 +357,8 @@ UnitsConversionHelper::UnitsConversionHelper(
 UnitsConversionHelper::UnitsConversionHelper()
     : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
       m_Emode(-1), // undefined
-      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(NULL),
-      m_pL2s(NULL), m_pEfixedArray(NULL) {}
+      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr),
+      m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
 
 } // endNamespace DataObjects
 } // endNamespace Mantid

@@ -73,7 +73,8 @@ public:
   //      double type
 
   void test_Extracting_From_PropertyManager_Succeeds() {
-    boost::shared_ptr<PropertyManager> manager(new PropertyManager);
+    boost::shared_ptr<PropertyManager> manager =
+        boost::make_shared<PropertyManager>();
     manager->declareProperty(new MatrixProperty<>("Rotation"),
                              "Rotation matrix"); // Default is null
     DblMatrix null = manager->getProperty("Rotation");

@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
-#include "MantidKernel/System.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -49,9 +51,7 @@ void StripVanadiumPeaks2::init() {
                                        "candidates. Passed through to "
                                        "FindPeaks. Default 4.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "The type of background of the histogram. Present choices "

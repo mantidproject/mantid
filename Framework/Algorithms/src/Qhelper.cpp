@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -116,7 +117,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     size_t num_histograms = dataWS->getNumberHistograms();
     for (size_t i = 0; i < num_histograms; i++) {
-      double adj = (double)detectAdj->readY(i)[0];
+      double adj = static_cast<double>(detectAdj->readY(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
 

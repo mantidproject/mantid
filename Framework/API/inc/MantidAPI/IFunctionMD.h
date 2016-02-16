@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -70,14 +69,15 @@ public:
   /* Overidden methods */
 
   /// Virtual copy constructor
-  virtual boost::shared_ptr<IFunction> clone() const;
+  boost::shared_ptr<IFunction> clone() const override;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
 
-  virtual void function(const FunctionDomain &domain,
-                        FunctionValues &values) const;
-  virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
+  void functionDeriv(const FunctionDomain &domain,
+                     Jacobian &jacobian) override {
     calNumericalDeriv(domain, jacobian);
   }
 

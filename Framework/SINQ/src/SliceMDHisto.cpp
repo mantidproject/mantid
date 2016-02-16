@@ -80,8 +80,10 @@ void SliceMDHisto::exec() {
   }
   MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
 
-  coord_t *sourceDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
-  coord_t *targetDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  coord_t *sourceDim =
+      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
+  coord_t *targetDim =
+      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   cutData(inWS, outWS, sourceDim, targetDim, start, end, 0);
   free(sourceDim);
   free(targetDim);

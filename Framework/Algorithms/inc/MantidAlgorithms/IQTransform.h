@@ -5,8 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace Kernel {
+namespace Units {
+class Label;
+}
+}
+
 namespace Algorithms {
 /** This algorithm permits the linearisation of reduced SANS data by applying a
    chosen transformation
@@ -59,21 +67,21 @@ namespace Algorithms {
 class DLLExport IQTransform : public API::Algorithm {
 public:
   IQTransform();
-  virtual ~IQTransform();
-  virtual const std::string name() const { return "IQTransform"; }
+  ~IQTransform() override;
+  const std::string name() const override { return "IQTransform"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm provides various functions that are sometimes used "
            "to linearise the output of a 'SANS' data reduction prior to "
            "fitting it.";
   }
 
-  virtual int version() const { return (1); }
-  virtual const std::string category() const { return "SANS"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return "SANS"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   inline void subtractBackgroundValue(MantidVec &Y, const double value);
   inline API::MatrixWorkspace_sptr

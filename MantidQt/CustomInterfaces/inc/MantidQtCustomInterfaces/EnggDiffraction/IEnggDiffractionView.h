@@ -304,7 +304,7 @@ public:
    *
    * @return run number(s), as a string
    */
-  virtual std::string currentPreprocRunNo() const = 0;
+  virtual std::vector<std::string> currentPreprocRunNo() const = 0;
 
   /**
    * For when pre-processing from event to histo data using a regular

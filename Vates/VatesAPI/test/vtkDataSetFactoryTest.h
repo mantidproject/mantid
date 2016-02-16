@@ -36,8 +36,8 @@ private:
     MOCK_CONST_METHOD0(validate,
       void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
-    void SetSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
-      vtkDataSetFactory::SetSuccessor(std::move(pSuccessor));
+    void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
+      vtkDataSetFactory::setSuccessor(pSuccessor);
     }
     bool hasSuccessorConcrete() const {
       return vtkDataSetFactory::hasSuccessor();
@@ -55,33 +55,35 @@ private:
 public:
   void testSetSuccessor() {
     MockvtkDataSetFactory factory;
-    auto successor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto successor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(successor);
 
     EXPECT_CALL(factory, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA"));
     EXPECT_CALL(*successor, getFactoryTypeName())
         .WillOnce(testing::Return("TypeB")); // Different type name, so setting
                                              // the successor should work.
-    factory.SetSuccessor(std::move(successor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     TSM_ASSERT("Successor should have been set", factory.hasSuccessor());
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
-    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor.get()));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor));
   }
 
   void testSetSuccessorThrows() {
     MockvtkDataSetFactory factory;
-    auto successor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto successor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(successor);
     EXPECT_CALL(factory, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA"));
     EXPECT_CALL(*successor, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA")); // Same type name. should NOT work.
     TSM_ASSERT_THROWS("By default, should throw when successor type is the "
                       "same as the container.",
-                      factory.SetSuccessor(std::move(successor)),
+                      factory.setSuccessor(std::move(uniqueSuccessor)),
                       std::runtime_error);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
-    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor.get()));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor));
   }
 
   void testEnumValues()

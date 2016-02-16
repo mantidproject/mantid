@@ -42,27 +42,27 @@ public:
   /// (Empty) Constructor
   LoadQKK() {}
   /// Virtual destructor
-  virtual ~LoadQKK() {}
+  ~LoadQKK() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadQKK"; }
+  const std::string name() const override { return "LoadQKK"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a ANSTO QKK file. ";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 }
 }

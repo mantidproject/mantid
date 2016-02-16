@@ -24,14 +24,14 @@ std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
  @param bc shared pointer to the box controller which uses this IO operations
 */
 BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
-    : m_File(NULL), m_ReadOnly(true), m_dataChunk(DATA_CHUNK), m_bc(bc),
+    : m_File(nullptr), m_ReadOnly(true), m_dataChunk(DATA_CHUNK), m_bc(bc),
       m_BlockStart(2, 0), m_BlockSize(2, 0), m_CoordSize(sizeof(coord_t)),
       m_EventType(FatEvent), m_EventsVersion("1.0"),
       m_ReadConversion(noConversion) {
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
-  for (size_t i = 0; i < 2; i++) {
-    m_EventsTypeHeaders.push_back(EventHeaders[i]);
+  for (auto &EventHeader : EventHeaders) {
+    m_EventsTypeHeaders.push_back(EventHeader);
   }
 
   m_EventsTypesSupported.resize(2);
@@ -487,7 +487,7 @@ void BoxControllerNeXusIO::closeFile() {
       m_File->close();      // close NeXus file
 
       delete m_File;
-      m_File = NULL;
+      m_File = nullptr;
     }
   }
 }

@@ -460,8 +460,8 @@ void LSFJobManager::stopRemoteTransaction(const std::string &transactionID) {
   it->second.stopped = true;
 
   std::vector<std::string> jobs = it->second.jobIDs;
-  for (size_t i = 0; i < jobs.size(); i++) {
-    abortRemoteJob(jobs[i]);
+  for (auto &job : jobs) {
+    abortRemoteJob(job);
   }
   g_transactions.erase(it);
 }
@@ -573,10 +573,12 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     addJobInTransaction(jobID);
     g_log.debug() << "Submitted job, got ID: " << iid << std::endl;
   } catch (std::exception &e) {
-    g_log.warning() << "The job has been submitted but the code returned does "
-                       "not seem well formed: '" +
-                           jobID + "'. Detailed error: " +
-                           e.what() << std::endl;
+    g_log.warning()
+        << "The job has been submitted but the job ID  returned does "
+           "not seem well formed. Job ID string from server: '" +
+               jobID + "'. Detailed error when tryint to interpret the code "
+                       "returned as an integer: " +
+               e.what() << std::endl;
   }
 
   return jobID;
@@ -1223,8 +1225,8 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
       while (std::getline(ss, PACname, ';')) {
         filePACNames.push_back(PACname);
       }
-      for (size_t i = 0; i < filePACNames.size(); i++) {
-        getOneJobFile(jobId, filePACNames[i], localDir, t);
+      for (auto &filePACName : filePACNames) {
+        getOneJobFile(jobId, filePACName, localDir, t);
       }
     }
   } else {
@@ -1322,10 +1324,10 @@ LSFJobManager::makeHeaders(const std::string &contentType,
         std::pair<std::string, std::string>("Content-Type", contentType));
   }
   if (!token.empty()) {
-    headers.insert(std::make_pair("Cookie", token));
+    headers.emplace("Cookie", token);
   }
   if (!acceptType.empty()) {
-    headers.insert(std::make_pair("Accept", acceptType));
+    headers.emplace("Accept", acceptType);
   }
 
   return headers;

@@ -5,8 +5,10 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -39,7 +41,7 @@ public:
     input->getSpectrum(0)->setSpectrumNo(0);
     input->getSpectrum(1)->setSpectrumNo(1);
     input->getSpectrum(2)->setSpectrumNo(2);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon =
         new Mantid::Geometry::Detector("monitor", 0, NULL);
@@ -281,9 +283,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         norm5.setPropertyValue("OutputWorkspace", "normMon5"));
 
-    std::auto_ptr<MonIDPropChanger> pID =
-        std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(
-            "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace"));
+    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+        "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
 
     // property is enabled but the conditions have not changed;
     TS_ASSERT(pID->isEnabled(&norm5));
@@ -322,9 +323,8 @@ public:
         norm6.setPropertyValue("InputWorkspace", "normMon"));
     TS_ASSERT_THROWS_NOTHING(
         norm6.setPropertyValue("OutputWorkspace", "normMon6"));
-    std::auto_ptr<MonIDPropChanger> pID =
-        std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(
-            "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace"));
+    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+        "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
     // first time in a row the condition has changed as it shluld read the
     // monitors from the workspace
     TS_ASSERT(pID->isConditionChanged(&norm6));
@@ -357,7 +357,7 @@ public:
     // create ws without monitors.
     MatrixWorkspace_sptr input =
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     AnalysisDataService::Instance().add("someWS", input);
 

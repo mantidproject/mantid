@@ -120,12 +120,11 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  auto successor = Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-      thresholdRange, m_normalizationOption);
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           thresholdRange, m_normalizationOption, m_time);
-  factory->SetSuccessor(std::move(successor));
+  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+      thresholdRange, m_normalizationOption));
 
   auto product = m_presenter->execute(factory.get(), loadingProgressAction,
                                       drawingProgressAction);

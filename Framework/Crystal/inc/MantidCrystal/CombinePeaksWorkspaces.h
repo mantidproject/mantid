@@ -36,21 +36,21 @@ namespace Crystal {
 class DLLExport CombinePeaksWorkspaces : public API::Algorithm {
 public:
   CombinePeaksWorkspaces();
-  virtual ~CombinePeaksWorkspaces();
+  ~CombinePeaksWorkspaces() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Combines the sets of peaks in two peaks workspaces, optionally "
            "omitting duplicates.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

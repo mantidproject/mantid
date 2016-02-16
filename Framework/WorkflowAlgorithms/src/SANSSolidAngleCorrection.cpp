@@ -2,14 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -32,7 +34,7 @@ static double getYTubeAngle(IDetector_const_sptr det,
       workspace->getInstrument()->getSource();
   Geometry::IComponent_const_sptr sample =
       workspace->getInstrument()->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     throw std::invalid_argument("Instrument not sufficiently defined: failed "
                                 "to get source and/or sample");
   }

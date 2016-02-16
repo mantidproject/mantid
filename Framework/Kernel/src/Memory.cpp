@@ -92,7 +92,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 
   if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO,
-                                (task_info_t)&t_info, &t_info_count)) {
+                                reinterpret_cast<task_info_t>(&t_info),
+                                &t_info_count)) {
     return;
   }
   // Need to find out the system page size for next part
@@ -229,7 +230,7 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   uint64_t totalmem;
   size_t len = sizeof(totalmem);
   // Gives system memory in bytes
-  int err = sysctlbyname("hw.memsize", &totalmem, &len, NULL, 0);
+  int err = sysctlbyname("hw.memsize", &totalmem, &len, nullptr, 0);
   if (err)
     g_log.warning("Unable to obtain memory of system");
   sys_total = totalmem / 1024;
@@ -243,7 +244,8 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   vm_statistics vmStats;
   mach_msg_type_number_t count;
   count = sizeof(vm_statistics) / sizeof(natural_t);
-  err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
+  err = host_statistics(port, HOST_VM_INFO,
+                        reinterpret_cast<host_info_t>(&vmStats), &count);
   if (err)
     g_log.warning("Unable to obtain memory statistics for this Mac.");
   sys_avail = pageSize * (vmStats.free_count + vmStats.inactive_count) / 1024;
@@ -523,7 +525,7 @@ size_t MemoryStats::getPeakRSS() const {
   struct rusage rusage;
   getrusage(RUSAGE_SELF, &rusage);
 #if defined(__APPLE__) && defined(__MACH__)
-  return (size_t)rusage.ru_maxrss;
+  return static_cast<size_t>(rusage.ru_maxrss);
 #else
   return (size_t)(rusage.ru_maxrss * 1024L);
 #endif
@@ -552,10 +554,11 @@ size_t MemoryStats::getCurrentRSS() const {
   /* OSX ------------------------------------------------------ */
   struct mach_task_basic_info info;
   mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                reinterpret_cast<task_info_t>(&info),
                 &infoCount) != KERN_SUCCESS)
-    return (size_t)0L; /* Can't access? */
-  return (size_t)info.resident_size;
+    return static_cast<size_t>(0L); /* Can't access? */
+  return static_cast<size_t>(info.resident_size);
 
 #elif defined(__linux__) || defined(__linux) || defined(linux) ||              \
     defined(__gnu_linux__)

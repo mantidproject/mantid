@@ -3,6 +3,7 @@
 //------------------------------------------------------
 #include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 
 // The isis RAW data structure
@@ -40,7 +41,7 @@ void LoadSampleDetailsFromRaw::exec() {
 
   std::string filename = getPropertyValue("Filename");
   FILE *file = fopen(filename.c_str(), "rb");
-  if (file == NULL) {
+  if (file == nullptr) {
     g_log.error("Unable to open file " + filename);
     throw Exception::FileError("Unable to open File:", filename);
   }

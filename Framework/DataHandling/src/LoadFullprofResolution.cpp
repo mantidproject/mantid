@@ -1,21 +1,22 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
+#include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <fstream>
 
@@ -125,8 +126,8 @@ void LoadFullprofResolution::exec() {
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-  for (size_t i = 0; i < vec_bankinirf.size(); ++i)
-    g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
+  for (auto bank : vec_bankinirf)
+    g_log.debug() << "Irf containing bank " << bank << ".\n";
 
   // Bank-workspace correspondence
   map<int, size_t> workspaceOfBank;
@@ -148,8 +149,7 @@ void LoadFullprofResolution::exec() {
 
     // Deal with banks
     sort(outputbankids.begin(), outputbankids.end());
-    for (size_t i = 0; i < outputbankids.size(); ++i) {
-      int outputbankid = outputbankids[i];
+    for (auto outputbankid : outputbankids) {
       if (outputbankid < 0) {
         g_log.warning() << "Input bank ID (" << outputbankid
                         << ") is negative.  It is not allowed and is  ignored. "
@@ -191,7 +191,7 @@ void LoadFullprofResolution::exec() {
     parseResolutionStrings(parammap, lines, useBankIDsInFile, bankid,
                            bankstartindexmap[bankid], bankendindexmap[bankid],
                            nProf);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
   }
 
   // Generate output table workspace
@@ -328,8 +328,8 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
         // Previous line is in a bank range.  Then finish the previous bank
         // range
         endindex = static_cast<int>(i) - 1;
-        bankstartindexmap.insert(make_pair(banks.back(), startindex));
-        bankendindexmap.insert(make_pair(banks.back(), endindex));
+        bankstartindexmap.emplace(banks.back(), startindex);
+        bankendindexmap.emplace(banks.back(), endindex);
       }
 
       // Start the new pair
@@ -353,16 +353,15 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
   if (startindex >= 0) {
     endindex = static_cast<int>(lines.size()) - 1;
-    bankstartindexmap.insert(make_pair(banks.back(), startindex));
-    bankendindexmap.insert(make_pair(banks.back(), endindex));
+    bankstartindexmap.emplace(banks.back(), startindex);
+    bankendindexmap.emplace(banks.back(), endindex);
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << endl;
-  for (size_t i = 0; i < banks.size(); ++i) {
-    g_log.debug() << "Bank " << banks[i] << " From line "
-                  << bankstartindexmap[banks[i]] << " to "
-                  << bankendindexmap[banks[i]] << endl;
+  for (auto &bank : banks) {
+    g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
+                  << " to " << bankendindexmap[bank] << endl;
   }
 
   return;
@@ -787,11 +786,11 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
     std::map<int, size_t> &workspaceOfBank) {
   if (workspaces.size() == 0) {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], i + 1));
+      workspaceOfBank.emplace(banks[i], i + 1);
     }
   } else {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], workspaces[i]));
+      workspaceOfBank.emplace(banks[i], workspaces[i]);
     }
   }
 }
@@ -1060,7 +1059,7 @@ void LoadFullprofResolution::getTableRowNumbers(
     TableRow row = tablews->getRow(i);
     std::string name;
     row >> name;
-    parammap.insert(std::make_pair(name, i));
+    parammap.emplace(name, i);
   }
 
   return;

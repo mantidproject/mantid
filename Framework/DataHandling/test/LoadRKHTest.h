@@ -5,6 +5,7 @@
 // Includes
 //-----------------
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>

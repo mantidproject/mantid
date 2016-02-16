@@ -49,8 +49,6 @@ public:
   }
 
   void test_filter_to_existing_sources_file_nonexist() {
-    // Create vector of data_sources to filter
-    std::vector<std::string> data_sources;
 
     // Create vector for other parameters
     std::vector<double> psi(1, 0.0);
@@ -62,7 +60,9 @@ public:
     Poco::Path filepath =
         Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(),
                    "ACCUMULATEMDTEST_NONEXISTENTFILE");
-    data_sources.push_back(filepath.toString());
+
+    // Create vector of data_sources to filter
+    std::vector<std::string> data_sources{filepath.toString()};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
                                                   efix);
@@ -71,8 +71,6 @@ public:
   }
 
   void test_filter_to_existing_sources_workspace_nonexist() {
-    // Create vector of data_sources to filter
-    std::vector<std::string> data_sources;
 
     // Create vector for other parameters
     std::vector<double> psi(1, 0.0);
@@ -80,7 +78,9 @@ public:
     std::vector<double> gs(1, 0.0);
     std::vector<double> efix(1, 0.0);
 
-    data_sources.push_back("ACCUMULATEMDTEST_NONEXISTENTWORKSPACE");
+    // Create vector of data_sources to filter
+    std::vector<std::string> data_sources{
+        "ACCUMULATEMDTEST_NONEXISTENTWORKSPACE"};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
                                                   efix);
@@ -89,8 +89,6 @@ public:
   }
 
   void test_filter_to_existing_sources_workspace_exist() {
-    // Create vector of data_sources to filter
-    std::vector<std::string> data_sources;
 
     // Create vector for other parameters
     std::vector<double> psi(1, 0.0);
@@ -104,7 +102,8 @@ public:
     // add to ADS (no choice but to use ADS here)
     AnalysisDataService::Instance().add(ws_name, bkg_ws);
 
-    data_sources.push_back(ws_name);
+    // Create vector of data_sources to filter
+    std::vector<std::string> data_sources{ws_name};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
                                                   efix);
@@ -116,8 +115,6 @@ public:
   }
 
   void test_filter_to_existing_sources_file_exist() {
-    // Create vector of data_sources to filter
-    std::vector<std::string> data_sources;
 
     // Create vector for other parameters
     std::vector<double> psi(1, 0.0);
@@ -131,7 +128,8 @@ public:
                    "ACCUMULATEMDTEST_EXISTENTFILE");
     Poco::File existent_file(filepath);
     existent_file.createFile();
-    data_sources.push_back(filepath.toString());
+    // Create vector of data_sources to filter
+    std::vector<std::string> data_sources{filepath.toString()};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
                                                   efix);
@@ -143,10 +141,7 @@ public:
   }
 
   void test_filter_to_new_none_new() {
-    std::vector<std::string> input_data;
-    input_data.push_back("test1");
-    input_data.push_back("test2");
-    input_data.push_back("test3");
+    std::vector<std::string> input_data{"test1", "test2", "test3"};
     std::vector<std::string> current_data = input_data;
 
     // Create vector for other parameters
@@ -169,17 +164,9 @@ public:
   }
 
   void test_filter_to_new() {
-    std::vector<std::string> input_data;
-    input_data.push_back("test1");
-    input_data.push_back("test2");
-    input_data.push_back("test3");
-    input_data.push_back("test4");
-    input_data.push_back("test5");
-
-    std::vector<std::string> current_data;
-    current_data.push_back("test1");
-    current_data.push_back("test3");
-    current_data.push_back("test4");
+    std::vector<std::string> input_data{"test1", "test2", "test3", "test4",
+                                        "test5"};
+    std::vector<std::string> current_data{"test1", "test3", "test4"};
 
     // Create vector for other parameters
     std::vector<double> psi(5, 0.0);

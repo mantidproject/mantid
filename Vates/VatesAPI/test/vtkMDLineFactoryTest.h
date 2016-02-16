@@ -34,27 +34,31 @@ public:
 
   void testInitializeDelegatesToSuccessor()
   {
-    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(std::move(mockSuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testCreateDelegatesToSuccessor()
   {
     FakeProgressAction progressUpdate;
 
-    auto mockSuccessor = Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate)))
         .Times(1)
@@ -63,14 +67,14 @@ public:
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(std::move(mockSuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
     TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor.get()));
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor()

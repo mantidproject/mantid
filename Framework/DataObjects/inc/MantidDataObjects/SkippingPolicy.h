@@ -53,8 +53,8 @@ public:
   Keep going as long as the current iterator bin is masked.
   @return True to keep going.
   */
-  bool keepGoing() const { return m_iterator->getIsMasked(); };
-  virtual ~SkipMaskedBins() {}
+  bool keepGoing() const override { return m_iterator->getIsMasked(); };
+  ~SkipMaskedBins() override {}
 };
 
 /// Policy that indicates no skipping should be applied.
@@ -64,8 +64,8 @@ public:
   Always returns false to cancel skipping.
   @return false to cancel continuation
   */
-  bool keepGoing() const { return false; }
-  virtual ~SkipNothing() {}
+  bool keepGoing() const override { return false; }
+  ~SkipNothing() override {}
 };
 
 typedef boost::scoped_ptr<SkippingPolicy> SkippingPolicy_scptr;

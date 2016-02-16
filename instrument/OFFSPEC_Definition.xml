@@ -109,7 +109,7 @@
      <location  z=" 3.52 " />
    </component>
    <component type="WLSFDetector">
-     <location  z=" 3.63 " />
+     <location  z=" 3.46 " />
    </component>
   </type>
 
@@ -690,7 +690,7 @@
 -->
   <type name="WLSFDetector">
  <component type="wlsfpixel">
-   <locations y="-0.19775" y-end="0.18225" n-elements="768" />
+   <locations y="-0.1975" y-end="0.1865" n-elements="768" />
  </component>
  </type>
  

@@ -1,6 +1,7 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 
@@ -253,7 +254,8 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
     throw std::invalid_argument("Not enough peaks to fit ");
   }
 
-  if ((m_startX > (int)nData - 1) || (m_endX > (int)nData - 1)) {
+  if ((m_startX > static_cast<int>(nData) - 1) ||
+      (m_endX > static_cast<int>(nData) - 1)) {
     throw std::invalid_argument(X_START + " and " + X_END +
                                 " attributes are out of range");
   }
@@ -285,7 +287,7 @@ Instrument_sptr
 SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
 
   Geometry::Instrument_const_sptr instSave = peak.getInstrument();
-  boost::shared_ptr<Geometry::ParameterMap> pmap(new ParameterMap());
+  auto pmap = boost::make_shared<ParameterMap>();
   boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
       instSave->getParameterMap();
 
@@ -293,13 +295,11 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
     g_log.error(" Not all peaks have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  boost::shared_ptr<Geometry::Instrument> instChange(
-      new Geometry::Instrument());
+  auto instChange = boost::make_shared<Geometry::Instrument>();
 
   if (!instSave->isParametrized()) {
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    boost::shared_ptr<Geometry::Instrument> Pinsta(
-        new Geometry::Instrument(instSave, pmap));
+    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
     instChange = Pinsta;
   } else // catch(...)
@@ -309,8 +309,8 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
         boost::dynamic_pointer_cast<const IComponent>(instSave);
     // updateParams(pmapSv, pmap, inst3);
 
-    boost::shared_ptr<Geometry::Instrument> P1(
-        new Geometry::Instrument(instSave->baseInstrument(), pmap));
+    auto P1 = boost::make_shared<Geometry::Instrument>(
+        instSave->baseInstrument(), pmap);
     instChange = P1;
   }
 
@@ -445,7 +445,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
                              "in the PeaksWorkspace");
     }
 
-    IPeak &peak_old = m_peaks->getPeak((int)pkIndex);
+    IPeak &peak_old = m_peaks->getPeak(static_cast<int>(pkIndex));
     Kernel::V3D hkl = peak_old.getHKL();
 
     // eliminate tolerance cause only those peaks that are OK should be here
@@ -664,8 +664,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     AllBankNames.insert(m_peaks->getPeak(i).getBankName());
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
-  for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-    std::string bankName = (*it);
+  for (auto bankName : AllBankNames) {
     boost::shared_ptr<const IComponent> panel =
         instrNew->getComponentByName(bankName);
     bankDetMap[bankName] = panel;
@@ -687,12 +686,12 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     V3D HKL;
     string thisBankName;
     Quat Rot;
-    IPeak &peak_old = m_peaks->getPeak((int)x);
+    IPeak &peak_old = m_peaks->getPeak(static_cast<int>(x));
 
     peak = createNewPeak(peak_old, instrNew, getParameter("t0"),
                          getParameter("l0"));
 
-    peakIndx.push_back((int)x);
+    peakIndx.push_back(static_cast<int>(x));
     qlab.push_back(peak.getQLabFrame());
     qXtal.push_back(peak.getQSampleFrame());
     row.push_back(peak.getRow());
@@ -778,8 +777,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   for (size_t gr = 0; gr < Groups.size(); ++gr) {
     vector<string> banknames;
     boost::split(banknames, Groups[gr], boost::is_any_of("/"));
-    for (auto it = banknames.begin(); it != banknames.end(); ++it)
-      bankName2Group[(*it)] = gr;
+    for (auto &bankname : banknames)
+      bankName2Group[bankname] = gr;
   }
   // derivative formulas documentation
   // Qvec=-K*Vvec +K*v_mag*beamDir
@@ -815,7 +814,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   vector<V3D> Unrot_dQ[3];
   Matrix<double> Result(3, qlab.size());
 
-  for (size_t gr = 0; gr < (size_t)NGroups; ++gr) {
+  for (size_t gr = 0; gr < static_cast<size_t>(NGroups); ++gr) {
     Unrot_dQ[0].clear();
     Unrot_dQ[1].clear();
     Unrot_dQ[2].clear();
@@ -824,7 +823,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     size_t StartPos =
         parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
-    for (size_t param = StartPos; param <= StartPos + (size_t)2; ++param) {
+    for (size_t param = StartPos; param <= StartPos + static_cast<size_t>(2);
+         ++param) {
 
       V3D parxyz(0, 0, 0);
       parxyz[param - StartPos] = 1.;
@@ -903,7 +903,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       Matrix<double> Result(3, qlab.size());
       Matrix<double> Rot2dRot(3, 3); // deriv of rot matrix at angle=0
       Rot2dRot.zeroMatrix();
-      int r1 = (int)param - (int)StartRot;
+      int r1 = static_cast<int>(param) - static_cast<int>(StartRot);
       int r = (r1 + 1) % 3;
 
       Rot2dRot[r][(r + 1) % 3] = -1;
@@ -1223,10 +1223,10 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   Mantid::MantidVecPtr yvals;
   Mantid::MantidVec &yvalB = yvals.access();
 
-  for (size_t k = 0; k < bankNames.size(); ++k)
+  for (auto &bankName : bankNames)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
-      Geometry::IPeak &peak = pwks->getPeak((int)j);
-      if (peak.getBankName().compare(bankNames[k]) == 0)
+      Geometry::IPeak &peak = pwks->getPeak(static_cast<int>(j));
+      if (peak.getBankName().compare(bankName) == 0)
         if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance ||
               floor(peak.getH() + 1) - peak.getH() < tolerance)
@@ -1235,9 +1235,9 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
               if (peak.getL() - floor(peak.getL()) < tolerance ||
                   floor(peak.getL() + 1) - peak.getL() < tolerance) {
                 N++;
-                xRef.push_back((double)j);
-                xRef.push_back((double)j);
-                xRef.push_back((double)j);
+                xRef.push_back(static_cast<double>(j));
+                xRef.push_back(static_cast<double>(j));
+                xRef.push_back(static_cast<double>(j));
                 yvalB.push_back(0.0);
                 yvalB.push_back(0.0);
                 yvalB.push_back(0.0);
@@ -1245,7 +1245,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     }
 
   MatrixWorkspace_sptr mwkspc = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", (size_t)3, 3 * N, 3 * N);
+      "Workspace2D", static_cast<size_t>(3), 3 * N, 3 * N);
 
   mwkspc->setX(0, pX);
   mwkspc->setX(1, pX);
@@ -1352,8 +1352,8 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
 
   if (recalcB) {
     if (a_set && b_set && c_set && alpha_set && beta_set && gamma_set) {
-      m_unitCell = boost::shared_ptr<Geometry::UnitCell>(
-          new Geometry::UnitCell(a, b, c, alpha, beta, gamma));
+      m_unitCell =
+          boost::make_shared<Geometry::UnitCell>(a, b, c, alpha, beta, gamma);
     }
   }
 }

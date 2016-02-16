@@ -57,9 +57,8 @@ void ReflectometryReductionOneAuto::init() {
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or Lambda");
 
-  std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  std::vector<std::string> analysis_modes{"PointDetectorAnalysis",
+                                          "MultiDetectorAnalysis"};
   auto analysis_mode_validator =
       boost::make_shared<StringListValidator>(analysis_modes);
 
@@ -583,11 +582,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   // Copy all the non-workspace properties over
   std::vector<Property *> props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if (*prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
+  for (auto &prop : props) {
+    if (prop) {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
-        alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        alg->setPropertyValue(prop->name(), prop->value());
     }
   }
 

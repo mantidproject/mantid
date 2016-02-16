@@ -119,8 +119,9 @@ public:
     // 3 dimensions on the workspace
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
-    auto pMockFactorySuccessor =
-        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto pMockFactorySuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
         .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
@@ -129,11 +130,13 @@ public:
     vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
     factory.initialize(ws_sptr);
 
+    // Need the raw pointer to test assertions here. Object is not yet deleted
+    // as the factory is still in scope.
     TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testInitializationDelegatesThrows()
@@ -155,8 +158,9 @@ public:
     // 3 dimensions on the workspace
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
-    auto pMockFactorySuccessor =
-        Mantid::Kernel::make_unique<MockvtkDataSetFactory>();
+    auto pMockFactorySuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
         .Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate)))
@@ -174,13 +178,15 @@ public:
         Mantid::VATES::VolumeNormalization);
 
     //Successor is provided.
-    factory.SetSuccessor(std::move(pMockFactorySuccessor));
+    factory.setSuccessor(std::move(uniqueSuccessor));
     
     factory.initialize(ws_sptr);
     factory.create(progressUpdate); // should be called on successor.
 
+    // Need the raw pointer to test assertions here. Object is not yet deleted
+    // as the factory is still in scope.
     TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor.get()));
+               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testTypeName()

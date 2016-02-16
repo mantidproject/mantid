@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyDetectorMapping.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 namespace Mantid {
@@ -48,12 +49,12 @@ std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   // Check that the workspaces actually are MatrixWorkspaces
   bool validWorkspaces = true;
 
-  if (wsToMatch == NULL) {
+  if (wsToMatch == nullptr) {
     issues["WorkspaceToMatch"] = "Must be a MatrixWorkspace";
     validWorkspaces = false;
   }
 
-  if (wsToRemap == NULL) {
+  if (wsToRemap == nullptr) {
     issues["WorkspaceToRemap"] = "Must be a MatrixWorkspace";
     validWorkspaces = false;
   }

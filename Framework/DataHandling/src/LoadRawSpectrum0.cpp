@@ -7,6 +7,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"

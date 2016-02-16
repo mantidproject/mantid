@@ -69,7 +69,8 @@ private:
   /// Make a simple group
   WorkspaceGroup_sptr makeGroup() {
     for (size_t i = 0; i < 3; i++) {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       ws->initialize(2, 3, 4);
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
@@ -238,7 +239,8 @@ public:
     AnalysisDataService::Instance().add("name", group);
     TSM_ASSERT("Empty group is not similar", !group->areNamesSimilar());
 
-    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws =
+        boost::make_shared<WorkspaceTester>();
     ws->initialize(2, 3, 4);
     AnalysisDataService::Instance().addOrReplace("name_0", ws);
 

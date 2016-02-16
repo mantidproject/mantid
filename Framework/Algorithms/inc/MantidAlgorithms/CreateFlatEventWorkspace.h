@@ -34,21 +34,21 @@ namespace Algorithms {
 class DLLExport CreateFlatEventWorkspace : public API::Algorithm {
 public:
   CreateFlatEventWorkspace();
-  virtual ~CreateFlatEventWorkspace();
+  ~CreateFlatEventWorkspace() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates a flat event workspace that can be used for background "
            "removal.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

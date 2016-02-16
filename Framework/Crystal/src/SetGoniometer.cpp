@@ -1,4 +1,5 @@
 #include "MantidCrystal/SetGoniometer.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -37,9 +38,8 @@ void SetGoniometer::init() {
       new WorkspaceProperty<>("Workspace", "", Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
-  std::vector<std::string> gonOptions;
-  gonOptions.push_back("None, Specify Individually");
-  gonOptions.push_back("Universal");
+  std::vector<std::string> gonOptions{"None, Specify Individually",
+                                      "Universal"};
   declareProperty("Goniometers", gonOptions[0],
                   boost::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "

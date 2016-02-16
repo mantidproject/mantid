@@ -54,7 +54,7 @@ public:
    */
   VsgMainWindow(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~VsgMainWindow();
+  ~VsgMainWindow() override;
 
 private:
   /// Create the actions for the main program.

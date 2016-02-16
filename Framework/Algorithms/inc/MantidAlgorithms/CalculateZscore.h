@@ -33,26 +33,26 @@ namespace Algorithms {
 class DLLExport CalculateZscore : public API::Algorithm {
 public:
   CalculateZscore();
-  virtual ~CalculateZscore();
+  ~CalculateZscore() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CalculateZscore"; }
+  const std::string name() const override { return "CalculateZscore"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate Z-score for Y and E of MatrixWorkspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Utility\\Calculation"; }
+  const std::string category() const override { return "Utility\\Calculation"; }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

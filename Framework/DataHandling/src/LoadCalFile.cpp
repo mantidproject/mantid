@@ -69,10 +69,7 @@ bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
     return true;
 
   std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
-  if (!InstrumentFilename.empty())
-    return true;
-
-  return false;
+  return !InstrumentFilename.empty();
 }
 
 //----------------------------------------------------------------------------------------------

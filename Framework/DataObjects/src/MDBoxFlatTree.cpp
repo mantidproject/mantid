@@ -1,17 +1,12 @@
-#include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
-// clang-format off
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
-// clang-format on
+typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
 namespace Mantid {
 namespace DataObjects {
@@ -144,8 +139,7 @@ void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked) {
   // Kernel::ISaveable::sortObjByFilePos(m_Boxes);
   // calculate the box positions in the resulting file and save it on place
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < m_Boxes.size(); i++) {
-    API::IMDNode *mdBox = m_Boxes[i];
+  for (auto mdBox : m_Boxes) {
     size_t ID = mdBox->getID();
 
     // avoid grid boxes;
@@ -409,8 +403,8 @@ void MDBoxFlatTree::loadExperimentInfos(
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
   std::list<uint16_t> ExperimentBlockNum;
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string name = it->first;
+  for (auto &entry : entries) {
+    const std::string &name = entry.first;
     if (boost::starts_with(name, "experiment")) {
       try {
         uint16_t num =
@@ -505,7 +499,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
                                        bool BoxStructureOnly) {
 
   size_t numBoxes = this->getNBoxes();
-  Boxes.assign(numBoxes, NULL);
+  Boxes.assign(numBoxes, nullptr);
 
   uint64_t totalNumEvents(0);
   m_nDim = static_cast<int>(bc->getNDims());
@@ -529,7 +523,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     if (box_type == 0)
       continue;
 
-    API::IMDNode *ibox = NULL;
+    API::IMDNode *ibox = nullptr;
 
     // Extents of the box, as a vector
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(

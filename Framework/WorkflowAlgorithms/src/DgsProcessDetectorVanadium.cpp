@@ -1,8 +1,10 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -117,10 +119,9 @@ void DgsProcessDetectorVanadium::exec() {
   }
 
   // Rebin the data (not Integration !?!?!?)
-  std::vector<double> binning;
-  binning.push_back(detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh - detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh);
+  std::vector<double> binning{detVanIntRangeLow,
+                              detVanIntRangeHigh - detVanIntRangeLow,
+                              detVanIntRangeHigh};
 
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);

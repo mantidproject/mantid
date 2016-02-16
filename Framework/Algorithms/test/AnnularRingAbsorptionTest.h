@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/AnnularRingAbsorption.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/UnitFactory.h"
@@ -121,8 +122,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    auto alg =
-        boost::shared_ptr<Mantid::API::IAlgorithm>(new AnnularRingAbsorption());
+    auto alg = boost::make_shared<AnnularRingAbsorption>();
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);

@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -196,9 +198,9 @@ SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
   specid_t temp;
-  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
-    if (*(it) < totalSpec) {
-      temp = localworkspace->getSpectrum(*(it))->getSpectrumNo();
+  for (auto index : this->m_indices) {
+    if (index < totalSpec) {
+      temp = localworkspace->getSpectrum(index)->getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }

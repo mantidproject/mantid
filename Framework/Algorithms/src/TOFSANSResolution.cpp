@@ -3,9 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -171,9 +174,10 @@ void TOFSANSResolution::exec() {
       // TODO: change this so that we don't have to pass in the binning
       // parameters
       if (binParams[1] > 0.0) {
-        iq = (int)floor((q - binParams[0]) / binParams[1]);
+        iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
       } else {
-        iq = (int)floor(log(q / binParams[0]) / log(1.0 - binParams[1]));
+        iq = static_cast<int>(
+            floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
       }
 
       const double L2 = scattered_flight_path.norm();

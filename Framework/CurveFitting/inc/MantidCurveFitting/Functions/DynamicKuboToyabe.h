@@ -48,36 +48,36 @@ public:
   DynamicKuboToyabe();
 
   /// Destructor
-  virtual ~DynamicKuboToyabe() {}
+  ~DynamicKuboToyabe() override {}
 
   /// overwrite base class methods
-  std::string name() const { return "DynamicKuboToyabe"; }
-  virtual const std::string category() const { return "Muon"; }
+  std::string name() const override { return "DynamicKuboToyabe"; }
+  const std::string category() const override { return "Muon"; }
 
   /// Returns the number of attributes associated with the function
-  size_t nAttributes() const { return 1; }
+  size_t nAttributes() const override { return 1; }
 
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
 
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const;
+  Attribute getAttribute(const std::string &attName) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
-  virtual void functionDeriv(const API::FunctionDomain &domain,
-                             API::Jacobian &jacobian);
-  virtual void init();
-  virtual void setActiveParameter(size_t i, double value);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &jacobian) override;
+  void init() override;
+  void setActiveParameter(size_t i, double value) override;
 
 private:
   // Evaluate DKT function for a given t, G, F, v and eps
