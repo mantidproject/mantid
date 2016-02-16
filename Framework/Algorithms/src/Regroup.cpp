@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Regroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-#include <numeric>
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {

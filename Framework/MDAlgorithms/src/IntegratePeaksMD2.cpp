@@ -57,11 +57,6 @@ void IntegratePeaksMD2::init() {
                                                            Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
-
   declareProperty(
       new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "
@@ -124,7 +119,7 @@ void IntegratePeaksMD2::init() {
 
   std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  peakNames.push_back("NoFit");
+  peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
@@ -714,8 +709,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+  for (auto &detectorID : detectorIDs) {
+    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
     if (det->isMonitor())
       continue; // skip monitor
     if (!det->isMasked())
@@ -741,16 +736,17 @@ void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
  */
 double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
   double edge = r;
-  for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
+  for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame -
-                *E1 * (QLabFrame.scalar_prod(
-                          *E1)); // distance to the trajectory as a vector
-    if (distv.norm() < std::min(r, edge)) {
+                E1 * (QLabFrame.scalar_prod(
+                         E1)); // distance to the trajectory as a vector
+    if (distv.norm() < r) {
       edge = distv.norm();
     }
   }
   return edge;
 }
+
 void IntegratePeaksMD2::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
     std::string values) {

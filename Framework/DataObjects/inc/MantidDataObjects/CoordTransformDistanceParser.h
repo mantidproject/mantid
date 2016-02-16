@@ -19,9 +19,9 @@ class DLLExport CoordTransformDistanceParser
     : public CoordTransformAffineParser {
 public:
   CoordTransformDistanceParser();
-  virtual Mantid::API::CoordTransform *
-  createTransform(Poco::XML::Element *coordTransElement) const;
-  virtual ~CoordTransformDistanceParser();
+  Mantid::API::CoordTransform *
+  createTransform(Poco::XML::Element *coordTransElement) const override;
+  ~CoordTransformDistanceParser() override;
 
 private:
   CoordTransformDistanceParser(const CoordTransformDistanceParser &);

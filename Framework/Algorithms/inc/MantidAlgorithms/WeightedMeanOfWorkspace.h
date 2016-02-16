@@ -35,21 +35,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport WeightedMeanOfWorkspace : public API::Algorithm {
 public:
   WeightedMeanOfWorkspace();
-  virtual ~WeightedMeanOfWorkspace();
+  ~WeightedMeanOfWorkspace() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm calculates the weighted mean for an entire "
            "workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

@@ -53,10 +53,10 @@ class MantidDockWidget: public QDockWidget
   Q_OBJECT
 public:
   MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
-  ~MantidDockWidget();
+  ~MantidDockWidget() override;
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
-  void dropEvent(QDropEvent *de);
+  void dropEvent(QDropEvent *de) override;
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
@@ -163,9 +163,9 @@ class MantidTreeWidget:public QTreeWidget
 
 public:
   MantidTreeWidget(MantidDockWidget *w, MantidUI *mui);
-  void mousePressEvent (QMouseEvent *e);
-  void mouseMoveEvent(QMouseEvent *e);
-  void mouseDoubleClickEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseMoveEvent(QMouseEvent *e) override;
+  void mouseDoubleClickEvent(QMouseEvent *e) override;
 
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
@@ -178,7 +178,7 @@ public:
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
   void sort();
-  void dropEvent(QDropEvent *de);
+  void dropEvent(QDropEvent *de) override;
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
   MantidSurfacePlotDialog::UserInputSurface
@@ -187,8 +187,8 @@ public:
   chooseContourPlotOptions(int nWorkspaces) const;
 
 protected:
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
   MantidSurfacePlotDialog::UserInputSurface
   choosePlotOptions(const QString &type, int nWorkspaces) const;
 
@@ -215,7 +215,7 @@ public:
 
 
 private:
-  bool operator<(const QTreeWidgetItem &other) const;
+  bool operator<(const QTreeWidgetItem &other) const override;
   MantidTreeWidget* m_parent;
   static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
   int m_sortPos;

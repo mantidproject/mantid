@@ -91,8 +91,8 @@ void SaveIsawDetCal::exec() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
-      std::string bankName = comps[i]->getName();
+    for (auto &comp : comps) {
+      std::string bankName = comp->getName();
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
@@ -103,8 +103,7 @@ void SaveIsawDetCal::exec() {
       uniqueBanks.insert(bank);
     }
   } else {
-    for (size_t i = 0; i < bankNames.size(); i++) {
-      std::string bankName = bankNames[i];
+    for (auto bankName : bankNames) {
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;

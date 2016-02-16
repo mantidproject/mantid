@@ -3,12 +3,14 @@
 //----------------------
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
 #include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

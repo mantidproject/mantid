@@ -68,8 +68,8 @@ Usage
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
    # difc, zero = EnggXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
 
-   out_tbl_name = 'out_params'
-   difc, zero = EnggFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
+   out_tbl_name = 'peaks'
+   difc, zero, peaks_tbl = EnggFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
 
 
    # Print the results
@@ -78,6 +78,9 @@ Usage
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
    print "Parameters from the table, Difc: %.1f, Zero: %.1f" % (tbl.cell(0,0), tbl.cell(0,1))
+   print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
+   print "First peak expected: {0}".format(peaks_tbl.column('dSpacing')[0])
+   print "First fitted peak center: {0:.1f}".format(peaks_tbl.column('X0')[0])
 
 Output:
 
@@ -91,6 +94,9 @@ Output:
    Zero: 46.0
    The output table has 1 row(s)
    Parameters from the table, Difc: 18400.0, Zero: 46.0
+   Number of peaks fitted: 2
+   First peak expected: 0.65
+   First fitted peak center: 12006.0
 
 .. categories::
 

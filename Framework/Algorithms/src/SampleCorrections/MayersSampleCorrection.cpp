@@ -6,6 +6,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/CompositeValidator.h"
 

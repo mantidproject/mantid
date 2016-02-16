@@ -79,11 +79,11 @@ public:
   /// Constructor
   PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser=true);
   /// Destructor
-  ~PeakPickerTool();
+  ~PeakPickerTool() override;
   /// Runtime type identifier
-  int rtti() const { return Rtti_SelectPeakTool;};
+  int rtti() const override { return Rtti_SelectPeakTool; };
   /// Receives and processes mouse and keyboard events
-  bool eventFilter(QObject *obj, QEvent *event);
+  bool eventFilter(QObject *obj, QEvent *event) override;
   /// Workspace name
   const QString& workspaceName()const{return m_wsName;}
   /// Spectrum index
@@ -139,7 +139,8 @@ private:
   void plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h);
   void replot(MantidQt::MantidWidgets::PropertyHandler* h) const;
 
-  virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &) const override;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);
   void addPeakAt(int x,int y);

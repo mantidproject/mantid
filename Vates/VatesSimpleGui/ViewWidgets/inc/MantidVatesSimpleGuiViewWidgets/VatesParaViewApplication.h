@@ -51,7 +51,8 @@ namespace Mantid
         void setupParaViewBehaviors();
       protected:
         VatesParaViewApplication();
-        ~VatesParaViewApplication();
+        ~VatesParaViewApplication() override;
+
       private:
         Q_DISABLE_COPY(VatesParaViewApplication)
         Mantid::Kernel::Logger m_logger;

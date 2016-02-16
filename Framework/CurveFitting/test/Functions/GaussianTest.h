@@ -180,7 +180,8 @@ public:
 
     CompositeFunction_sptr fnWithBk(new CompositeFunction());
 
-    boost::shared_ptr<LinearBackground> bk(new LinearBackground());
+    boost::shared_ptr<LinearBackground> bk =
+        boost::make_shared<LinearBackground>();
     bk->initialize();
 
     bk->setParameter("A0", 0.0);
@@ -188,7 +189,7 @@ public:
     bk->tie("A1", "0");
 
     // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
     fn->setParameter("PeakCentre", 79450.0);
     fn->setParameter("Height", 200.0);
@@ -201,7 +202,8 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fnWithBk, domain, values);
     // TS_ASSERT_EQUALS(costFun->nParams(),3);
 
@@ -247,7 +249,8 @@ public:
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk(new CompositeFunction());
 
-    boost::shared_ptr<LinearBackground> bk(new LinearBackground());
+    boost::shared_ptr<LinearBackground> bk =
+        boost::make_shared<LinearBackground>();
     bk->initialize();
 
     bk->setParameter("A0", 0.0);
@@ -255,7 +258,7 @@ public:
     bk->tie("A1", "0");
 
     // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
     fn->setParameter("PeakCentre", 79450.0);
     fn->setParameter("Height", 200.0);
@@ -435,7 +438,8 @@ public:
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk(new CompositeFunction());
 
-    boost::shared_ptr<LinearBackground> bk(new LinearBackground());
+    boost::shared_ptr<LinearBackground> bk =
+        boost::make_shared<LinearBackground>();
     bk->initialize();
 
     bk->setParameter("A0", 0.0);
@@ -447,7 +451,7 @@ public:
 
     // set up Gaussian fitting function
     // SimplexGaussian* fn = new SimplexGaussian();
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
 
     fn->setParameter("Height", 200.0);
@@ -498,7 +502,7 @@ public:
   }
 
   void testIntensity() {
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
     fn->setHeight(2.0);
     fn->setFwhm(0.125);
@@ -509,7 +513,7 @@ public:
   }
 
   void testSetIntensity() {
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
     fn->setHeight(2.0);
     fn->setFwhm(0.125);
@@ -527,7 +531,7 @@ public:
   }
 
   void testSetIntensityDefault() {
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
 
     TS_ASSERT_EQUALS(fn->intensity(), 0.0);
@@ -544,7 +548,7 @@ public:
   }
 
   void testGetCentreParameterName() {
-    boost::shared_ptr<Gaussian> fn(new Gaussian());
+    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
 
     TS_ASSERT_THROWS_NOTHING(fn->getCentreParameterName());

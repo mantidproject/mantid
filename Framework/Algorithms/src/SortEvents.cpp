@@ -27,10 +27,8 @@ void SortEvents::init() {
                                                         Direction::InOut),
                   "EventWorkspace to be sorted.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("X Value");
-  propOptions.push_back("Pulse Time");
-  propOptions.push_back("Pulse Time + TOF");
+  std::vector<std::string> propOptions{"X Value", "Pulse Time",
+                                       "Pulse Time + TOF"};
   declareProperty("SortBy", "X Value",
                   boost::make_shared<StringListValidator>(propOptions),
                   "How to sort the events:\n"

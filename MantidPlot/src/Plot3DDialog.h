@@ -64,8 +64,8 @@ public:
 	void showGeneralTab();
 
 private slots:
-	void accept();
-	bool updatePlot();
+  void accept() override;
+        bool updatePlot();
 
 	void pickTitleFont();
 	void viewAxisOptions(int axis);

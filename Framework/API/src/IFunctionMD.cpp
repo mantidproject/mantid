@@ -90,7 +90,7 @@ void IFunctionMD::evaluateFunction(const FunctionDomainMD &domain,
                                    FunctionValues &values) const {
   domain.reset();
   size_t i = 0;
-  for (const IMDIterator *r = domain.getNextIterator(); r != NULL;
+  for (const IMDIterator *r = domain.getNextIterator(); r != nullptr;
        r = domain.getNextIterator()) {
     this->reportProgress("Evaluating function for box " +
                          boost::lexical_cast<std::string>(i + 1));

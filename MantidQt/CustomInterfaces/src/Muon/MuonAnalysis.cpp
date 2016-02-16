@@ -2,9 +2,10 @@
 // Includes
 //----------------------
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -18,7 +19,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
@@ -73,6 +73,7 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
 using Mantid::API::Workspace_sptr;
+using Mantid::API::Grouping;
 
 namespace
 {
@@ -662,7 +663,7 @@ void MuonAnalysis::runSaveGroupButton()
 
   if( ! groupingFile.isEmpty() )
   {
-    Grouping groupingToSave;
+    Mantid::API::Grouping groupingToSave;
     parseGroupingTable(m_uiForm, groupingToSave);
     saveGroupingToXML(groupingToSave, groupingFile.toStdString());
     
@@ -698,11 +699,12 @@ void MuonAnalysis::runLoadGroupButton()
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
-  Grouping loadedGrouping;
+  Mantid::API::Grouping loadedGrouping;
 
   try
   {
-    loadGroupingFromXML(groupingFile.toStdString(), loadedGrouping);
+    Mantid::API::GroupingLoader::loadGroupingFromXML(groupingFile.toStdString(),
+                                                     loadedGrouping);
   }
   catch (Exception::FileError& e)
   {
@@ -1353,7 +1355,7 @@ boost::shared_ptr<GroupResult>
 MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
-  boost::shared_ptr<Grouping> groupingToUse;
+  boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
 
   Instrument_const_sptr instr = firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
@@ -1378,7 +1380,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   {
     // Use grouping currently set
     result->usedExistGrouping = true;
-    groupingToUse = boost::make_shared<Grouping>();
+    groupingToUse = boost::make_shared<Mantid::API::Grouping>();
     parseGroupingTable(m_uiForm, *groupingToUse);
   }
   else
@@ -1388,7 +1390,8 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
 
     try // to get grouping from IDF
     {
-      groupingToUse = getGroupingFromIDF(instr, loadResult->mainFieldDirection);
+      Mantid::API::GroupingLoader loader(instr, loadResult->mainFieldDirection);
+      groupingToUse = loader.getGroupingFromIDF();
     }
     catch(std::runtime_error& e)
     {
@@ -3019,7 +3022,7 @@ void MuonAnalysis::groupLoadedWorkspace()
  */
 ITableWorkspace_sptr MuonAnalysis::parseGrouping()
 {
-  auto grouping = boost::make_shared<Grouping>();
+  auto grouping = boost::make_shared<Mantid::API::Grouping>();
   parseGroupingTable(m_uiForm, *grouping);
   return groupingToTable(grouping);
 }

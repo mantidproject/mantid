@@ -39,13 +39,13 @@ National Laboratory & European Spallation Source
 class DLLExport MultiPeriodGroupAlgorithm : public Algorithm {
 public:
   MultiPeriodGroupAlgorithm();
-  virtual ~MultiPeriodGroupAlgorithm();
+  ~MultiPeriodGroupAlgorithm() override;
 
 private:
   /// Overriden from Algorithm base
-  virtual bool checkGroups();
+  bool checkGroups() override;
   /// Overriden from Algorithm base.
-  virtual bool processGroups();
+  bool processGroups() override;
   /// Method to provide the name for the input workspace property.
   virtual std::string fetchInputPropertyName() const = 0;
   /// Method to indicate that a non-standard property is taken as the input, so

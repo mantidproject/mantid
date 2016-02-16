@@ -59,27 +59,27 @@ public:
   /// Default constructor
   LoadNexusLogs();
   /// Destructor
-  virtual ~LoadNexusLogs() {}
+  ~LoadNexusLogs() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadNexusLogs"; }
+  const std::string name() const override { return "LoadNexusLogs"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads run logs (temperature, pulse charges, etc.) from a NeXus "
            "file and adds it to the run information in a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Logs;DataHandling\\Nexus";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// Load log data from a group
   void loadLogs(::NeXus::File &file, const std::string &entry_name,
                 const std::string &entry_class,

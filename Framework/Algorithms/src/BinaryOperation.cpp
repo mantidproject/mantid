@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/make_shared.hpp>
 
@@ -28,7 +31,7 @@ BinaryOperation::BinaryOperation()
       m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false), m_indicesToMask(),
-      m_progress(NULL) {}
+      m_progress(nullptr) {}
 
 BinaryOperation::~BinaryOperation() {
   if (m_progress)

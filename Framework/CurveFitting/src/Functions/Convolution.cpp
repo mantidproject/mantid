@@ -178,6 +178,7 @@ void Convolution::function(const FunctionDomain &domain,
   CompositeFunction_sptr cf =
       boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
+    dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
@@ -260,8 +261,7 @@ void Convolution::function(const FunctionDomain &domain,
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
-    for (auto it = dltFuns.begin(); it != dltFuns.end(); ++it) {
-      auto df = *it;
+    for (auto df : dltFuns) {
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
       std::transform(xValues, xValues + nData, x.data(),
@@ -301,7 +301,7 @@ size_t Convolution::addFunction(IFunction_sptr f) {
     }
     CompositeFunction_sptr cf =
         boost::dynamic_pointer_cast<CompositeFunction>(f1);
-    if (cf == 0) {
+    if (cf == nullptr) {
       cf = boost::dynamic_pointer_cast<CompositeFunction>(
           API::FunctionFactory::Instance().createFunction("CompositeFunction"));
       removeFunction(1);

@@ -58,23 +58,23 @@ namespace DataHandling {
 class DLLExport MaskDetectorsInShape : public API::Algorithm {
 public:
   MaskDetectorsInShape();
-  virtual ~MaskDetectorsInShape();
+  ~MaskDetectorsInShape() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MaskDetectorsInShape"; };
+  const std::string name() const override { return "MaskDetectorsInShape"; };
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Masking"; }
+  const std::string category() const override { return "Transforms\\Masking"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Masks detectors whose centres fall within the given 3D shape.";
   }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // internal functions
   std::vector<int> runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,

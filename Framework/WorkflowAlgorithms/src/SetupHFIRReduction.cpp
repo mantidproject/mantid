@@ -61,11 +61,8 @@ void SetupHFIRReduction::init() {
 
   // Beam center
   std::string center_grp = "Beam Center";
-  std::vector<std::string> centerOptions;
-  centerOptions.push_back("None");
-  centerOptions.push_back("Value");
-  centerOptions.push_back("DirectBeam");
-  centerOptions.push_back("Scattering");
+  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
+                                         "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
@@ -113,9 +110,9 @@ void SetupHFIRReduction::init() {
 
   // Normalisation
   std::vector<std::string> incidentBeamNormOptions;
-  incidentBeamNormOptions.push_back("None");
-  incidentBeamNormOptions.push_back("Monitor");
-  incidentBeamNormOptions.push_back("Timer");
+  incidentBeamNormOptions.emplace_back("None");
+  incidentBeamNormOptions.emplace_back("Monitor");
+  incidentBeamNormOptions.emplace_back("Timer");
   this->declareProperty(
       "Normalisation", "Monitor",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
@@ -204,9 +201,9 @@ void SetupHFIRReduction::init() {
   // Transmission
   std::string trans_grp = "Transmission";
   std::vector<std::string> transOptions;
-  transOptions.push_back("Value");
-  transOptions.push_back("DirectBeam");
-  transOptions.push_back("BeamSpreader");
+  transOptions.emplace_back("Value");
+  transOptions.emplace_back("DirectBeam");
+  transOptions.emplace_back("BeamSpreader");
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
@@ -500,9 +497,9 @@ void SetupHFIRReduction::init() {
       new ArrayProperty<int>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   std::vector<std::string> maskOptions;
-  maskOptions.push_back("None");
-  maskOptions.push_back("Front");
-  maskOptions.push_back("Back");
+  maskOptions.emplace_back("None");
+  maskOptions.emplace_back("Front");
+  maskOptions.emplace_back("Back");
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
@@ -514,9 +511,9 @@ void SetupHFIRReduction::init() {
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
   std::vector<std::string> scaleOptions;
-  scaleOptions.push_back("None");
-  scaleOptions.push_back("Value");
-  scaleOptions.push_back("ReferenceData");
+  scaleOptions.emplace_back("None");
+  scaleOptions.emplace_back("Value");
+  scaleOptions.emplace_back("ReferenceData");
   declareProperty("AbsoluteScaleMethod", "None",
                   boost::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");

@@ -47,9 +47,9 @@ public:
   typedef std::list<Poco::Message> MsgList;
 
   TestChannel();
-  ~TestChannel();
+  ~TestChannel() override;
 
-  void log(const Poco::Message &msg);
+  void log(const Poco::Message &msg) override;
   MsgList &list();
   void clear();
 

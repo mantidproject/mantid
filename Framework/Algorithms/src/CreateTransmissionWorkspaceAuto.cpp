@@ -46,9 +46,8 @@ const std::string CreateTransmissionWorkspaceAuto::summary() const {
  */
 void CreateTransmissionWorkspaceAuto::init() {
 
-  std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  std::vector<std::string> analysis_modes{"PointDetectorAnalysis",
+                                          "MultiDetectorAnalysis"};
   declareProperty("AnalysisMode", analysis_modes.at(0),
                   boost::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);

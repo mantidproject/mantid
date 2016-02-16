@@ -92,13 +92,18 @@ def setup_cmd_options():
                            help="Number of iterations (only valid for iterative methods "
                            "(example: SIRT, ART, etc.).")
 
-
-    grp_recon.add_argument("--max-angle", required=False, type=int,
+    grp_recon.add_argument("--max-angle", required=False, type=float,
                            help="Maximum angle (of the last projection), assuming first angle=0, and "
                            "uniform angle increment for every projection (note: this "
                            "is overriden by the angles found in the input FITS headers)")
 
     grp_pre = parser.add_argument_group('Pre-processing of input raw images/projections')
+
+    grp_pre.add_argument("--input-path-flat", required=False, default=None,
+                         type=str, help="Input directory for flat images")
+
+    grp_pre.add_argument("--input-path-dark", required=False, default=None,
+                         type=str, help="Input directory for flat images")
 
     img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
     grp_pre.add_argument("--in-img-format", required=False, default='fits', type=str,
@@ -171,6 +176,8 @@ def grab_preproc_options(args):
 
     pre_config = tomocfg.PreProcConfig()
     pre_config.input_dir = args.input_path
+    pre_config.input_dir_flat = args.input_path_flat
+    pre_config.input_dir_dark = args.input_path_dark
 
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
@@ -196,7 +203,7 @@ def grab_preproc_options(args):
         pre_config.crop_coords = ast.literal_eval(args.air_region)
 
     if args.median_filter_size:
-        if not args.median_filter.isdigit():
+        if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
@@ -218,7 +225,7 @@ def grab_tool_alg_options(args):
     config.algorithm = args.algorithm
 
     if args.num_iter:
-        if not args.num_iter.isdigit():
+        if isinstance(args.num_iter, str) and not args.num_iter.isdigit():
             raise RuntimeError("The number of iterations must be an integer")
         config.num_iter = int(args.num_iter)
 

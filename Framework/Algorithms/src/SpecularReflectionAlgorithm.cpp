@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -8,7 +9,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
-#include <vector>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -135,7 +135,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -165,9 +165,9 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
     bool warnIfMasked = true;
-    for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
-      const size_t &spectrumNumber = spectrumNumbers[i];
-      auto it = specToWorkspaceIndex.find(spectrumNumbers[i]);
+    for (auto index : spectrumNumbers) {
+      const size_t spectrumNumber{static_cast<size_t>(index)};
+      auto it = specToWorkspaceIndex.find(index);
       if (it == specToWorkspaceIndex.end()) {
         std::stringstream message;
         message << "Spectrum number " << spectrumNumber
@@ -188,7 +188,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       componentToCorrect = this->getPropertyValue("DetectorComponentName");
     }
     searchResult = inst->getComponentByName(componentToCorrect);
-    if (searchResult == NULL) {
+    if (searchResult == nullptr) {
       throw std::invalid_argument(componentToCorrect +
                                   " does not exist. Check input properties.");
     }

@@ -48,20 +48,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadSpec : public API::Algorithm {
 public:
   LoadSpec();
-  ~LoadSpec() {}
-  virtual const std::string name() const { return "LoadSpec"; }
+  ~LoadSpec() override {}
+  const std::string name() const override { return "LoadSpec"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads data from a text file and stores it in a 2D workspace "
            "(Workspace2D class).";
   }
 
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;

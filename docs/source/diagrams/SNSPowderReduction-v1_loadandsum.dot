@@ -1,0 +1,41 @@
+digraph LoadAndSum {
+  label="SNSPowderReduction Load And Sum Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    RunNumberList
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    getRunNumber [label="Get a run number"]
+    loadAndCompress [label="LoadEventAndCompress v1"]
+    plus [label="Plus v1\nsummed workspace"]
+    normaliseByCurrent [label="NormaliseByCurrent v1"]
+  }
+
+  subgraph decisions{
+    $decision_style
+    isLastRunNumber [label="Is Last Run Number?"]
+  }
+  
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+  }
+
+
+  RunNumberList	      -> getRunNumber
+  getRunNumber	      -> RunNumber
+  RunNumber	      -> loadAndCompress
+  loadAndCompress     -> plus
+  plus		      -> isLastRunNumber
+
+  isLastRunNumber     -> getRunNumber [label="No"]
+
+  isLastRunNumber     -> normaliseByCurrent [label="Yes"]
+  normaliseByCurrent  -> OutputWorkspace  
+  
+}

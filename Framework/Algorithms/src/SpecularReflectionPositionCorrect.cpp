@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -163,8 +165,8 @@ void SpecularReflectionPositionCorrect::moveDetectors(
       /*
        * We have to move individual components.
        */
-      for (size_t i = 0; i < detectors.size(); ++i) {
-        moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset,
+      for (const auto &detector : detectors) {
+        moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
                       detectorPosition); // Recursive call
       }
     }

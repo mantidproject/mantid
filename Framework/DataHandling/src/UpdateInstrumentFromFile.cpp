@@ -340,7 +340,7 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
       continue;
     } else {
       headerInfo.detParCols.insert(counter);
-      headerInfo.colToName.insert(std::make_pair(counter, colName));
+      headerInfo.colToName.emplace(counter, colName);
     }
     ++counter;
   }

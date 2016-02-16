@@ -36,21 +36,21 @@ public:
   /// no arg constructor
   WorkspaceAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  virtual ~WorkspaceAlgorithm() {}
+  ~WorkspaceAlgorithm() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "WorkspaceAlgorithm"; }
+  const std::string name() const override { return "WorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples"; }
+  const std::string category() const override { return "Examples"; }
   // Algorithm's summary. Overriding a virtual method.
-  virtual const std::string summary() const { return "Example summary text."; }
+  const std::string summary() const override { return "Example summary text."; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

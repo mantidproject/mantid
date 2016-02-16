@@ -5,7 +5,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -46,9 +48,7 @@ void CalculateFlatBackground::init() {
       new ArrayProperty<int>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
-  std::vector<std::string> modeOptions;
-  modeOptions.push_back("Linear Fit");
-  modeOptions.push_back("Mean");
+  std::vector<std::string> modeOptions{"Linear Fit", "Mean"};
   declareProperty("Mode", "Linear Fit",
                   boost::make_shared<StringListValidator>(modeOptions),
                   "The background count rate is estimated either by taking a "
@@ -56,9 +56,8 @@ void CalculateFlatBackground::init() {
                   "linear fit (default: Linear Fit)");
   // Property to determine whether we subtract the background or just return the
   // background.
-  std::vector<std::string> outputOptions;
-  outputOptions.push_back("Subtract Background");
-  outputOptions.push_back("Return Background");
+  std::vector<std::string> outputOptions{"Subtract Background",
+                                         "Return Background"};
   declareProperty("OutputMode", "Subtract Background",
                   boost::make_shared<StringListValidator>(outputOptions),
                   "Once the background has been determined it can either be "

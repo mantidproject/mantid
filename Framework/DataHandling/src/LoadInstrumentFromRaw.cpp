@@ -2,14 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
-#include "MantidKernel/ConfigService.h"
+#include "LoadRaw/isisraw.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "LoadRaw/isisraw.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <fstream>
 
@@ -55,7 +56,7 @@ void LoadInstrumentFromRaw::exec() {
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // open raw file
-  ISISRAW iraw(NULL);
+  ISISRAW iraw(nullptr);
   if (iraw.readFromFile(m_filename.c_str(), false) != 0) {
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:", m_filename);

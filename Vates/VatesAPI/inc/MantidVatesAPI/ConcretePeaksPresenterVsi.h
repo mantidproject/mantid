@@ -16,18 +16,18 @@ class DLLExport ConcretePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             ViewFrustum_const_sptr frustum, std::string wsFrame);
-  ~ConcretePeaksPresenterVsi();
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const;
-  virtual std::vector<bool> getViewablePeaks() const;
-  virtual void updateViewFrustum(ViewFrustum_const_sptr frustum);
-  virtual std::string getFrame() const;
-  virtual std::string getPeaksWorkspaceName() const;
-  virtual void
-  getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-               Mantid::Kernel::V3D &position, double &radius,
-               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const;
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending);
+  ~ConcretePeaksPresenterVsi() override;
+  Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const override;
+  std::vector<bool> getViewablePeaks() const override;
+  void updateViewFrustum(ViewFrustum_const_sptr frustum) override;
+  std::string getFrame() const override;
+  std::string getPeaksWorkspaceName() const override;
+  void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+                    Mantid::Kernel::V3D &position, double &radius,
+                    Mantid::Kernel::SpecialCoordinateSystem
+                        specialCoordinateSystem) const override;
+  void sortPeaksWorkspace(const std::string &byColumnName,
+                          const bool ascending) override;
 
 private:
   /// Get the max radius.

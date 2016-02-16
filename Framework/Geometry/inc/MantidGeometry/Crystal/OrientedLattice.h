@@ -59,7 +59,7 @@ public:
                   const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
                                                                        true));
   // Destructor
-  virtual ~OrientedLattice();
+  ~OrientedLattice() override;
 
   // Access private variables
   const Kernel::DblMatrix &getU() const;
@@ -93,7 +93,7 @@ private:
   Kernel::DblMatrix UB;
 
   /** Make recalculateFromGstar private. */
-  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) {
+  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }
 };

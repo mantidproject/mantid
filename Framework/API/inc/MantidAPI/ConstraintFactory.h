@@ -71,7 +71,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &);
   /// Private Destructor
-  virtual ~ConstraintFactoryImpl();
+  ~ConstraintFactoryImpl() override;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

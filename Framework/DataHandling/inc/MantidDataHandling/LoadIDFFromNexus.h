@@ -55,12 +55,12 @@ public:
   LoadIDFFromNexus();
 
   /// Destructor
-  virtual ~LoadIDFFromNexus() {}
+  ~LoadIDFFromNexus() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadIDFFromNexus"; }
+  const std::string name() const override { return "LoadIDFFromNexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load an IDF from a Nexus file, if found there. You may need to "
            "tell this algorithm where to find the Instrument folder in the "
            "Nexus file";
@@ -81,18 +81,18 @@ public:
                       const API::MatrixWorkspace_sptr localWorkspace);
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
   bool loadParameterFile(const std::string &fullPathName,

@@ -15,7 +15,7 @@ Timer::Timer() {
 #ifdef _WIN32
   m_start = clock();
 #else /* linux & mac */
-  gettimeofday(&m_start, 0);
+  gettimeofday(&m_start, nullptr);
 #endif
 }
 
@@ -46,7 +46,7 @@ float Timer::elapsed_no_reset() const {
   const float retval = float(now - m_start) / CLOCKS_PER_SEC;
 #else /* linux & mac */
   timeval now;
-  gettimeofday(&now, 0);
+  gettimeofday(&now, nullptr);
   const float retval =
       float(now.tv_sec - m_start.tv_sec) +
       float(static_cast<float>(now.tv_usec - m_start.tv_usec) / 1e6);
@@ -60,7 +60,7 @@ void Timer::reset() {
   m_start = clock();
 #else /* linux & mac */
   timeval now;
-  gettimeofday(&now, 0);
+  gettimeofday(&now, nullptr);
   m_start = now;
 #endif
 }

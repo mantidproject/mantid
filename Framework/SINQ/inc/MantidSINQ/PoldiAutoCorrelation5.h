@@ -61,22 +61,22 @@ public:
   /// Default constructor
   PoldiAutoCorrelation5() {}
   /// Destructor
-  virtual ~PoldiAutoCorrelation5() {}
+  ~PoldiAutoCorrelation5() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PoldiAutoCorrelation"; }
+  const std::string name() const override { return "PoldiAutoCorrelation"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs correlation analysis of POLDI 2D-data.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 5; }
+  int version() const override { return 5; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "SINQ\\Poldi"; }
+  const std::string category() const override { return "SINQ\\Poldi"; }
 
 protected:
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   void logConfigurationInformation(
       boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
@@ -84,7 +84,7 @@ protected:
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   boost::shared_ptr<PoldiAutoCorrelationCore> m_core;
 };

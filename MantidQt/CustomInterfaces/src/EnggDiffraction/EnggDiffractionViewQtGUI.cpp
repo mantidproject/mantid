@@ -582,8 +582,8 @@ void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -595,8 +595,8 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
       "', 0, error_bars=False, type=0, waterfall=True, window=win)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -607,8 +607,8 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
-  m_logMsgs.push_back("Plotted output focused data, with status string " +
-                      status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 

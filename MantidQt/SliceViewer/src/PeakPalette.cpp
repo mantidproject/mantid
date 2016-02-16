@@ -9,29 +9,14 @@ namespace MantidQt
   {
     PeakPalette::PeakPalette()
     {
-      int index = 0;
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#bf7651")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#bd97cb")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#ceeeea")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#da4a52")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#9bc888")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#ffe181")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#e8b7c1")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#f38235")));
-      m_foregroundMap.insert(std::make_pair(index++, QColor("#8390c6")));
-      m_foregroundMap.insert(std::make_pair(index, QColor("#4ca0ac")));
-
-      index = 0;
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#bf7651")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#bd97cb")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#ceeeea")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#da4a52")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#9bc888")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#ffe181")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#e8b7c1")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#f38235")));
-      m_backgroundMap.insert(std::make_pair(index++, QColor("#8390c6")));
-      m_backgroundMap.insert(std::make_pair(index, QColor("#4ca0ac")));
+      m_foregroundMap = {{0, {"#bf7651"}}, {1, {"#bd97cb"}}, {2, {"#ceeeea"}},
+                         {3, {"#da4a52"}}, {4, {"#9bc888"}}, {5, {"#ffe181"}},
+                         {6, {"#e8b7c1"}}, {7, {"#f38235"}}, {8, {"#8390c6"}},
+                         {9, {"#4ca0ac"}}};
+      m_backgroundMap = {{0, {"#bf7651"}}, {1, {"#bd97cb"}}, {2, {"#ceeeea"}},
+                         {3, {"#da4a52"}}, {4, {"#9bc888"}}, {5, {"#ffe181"}},
+                         {6, {"#e8b7c1"}}, {7, {"#f38235"}}, {8, {"#8390c6"}},
+                         {9, {"#4ca0ac"}}};
     }
 
     PeakPalette::PeakPalette(const PeakPalette& other) : m_backgroundMap(other.m_backgroundMap), m_foregroundMap(other.m_foregroundMap)

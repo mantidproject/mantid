@@ -33,7 +33,7 @@ public:
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     m_J->set(m_iY0 + iY, iP, value);
   }
   /**
@@ -41,14 +41,16 @@ public:
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    */
-  double get(size_t iY, size_t iP) { return m_J->get(m_iY0 + iY, iP); }
+  double get(size_t iY, size_t iP) override { return m_J->get(m_iY0 + iY, iP); }
 };
 
 class TempJacobian : public Jacobian {
 public:
   TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
-  void set(size_t iY, size_t iP, double value) { m_J[iY * m_p + iP] = value; }
-  double get(size_t iY, size_t iP) { return m_J[iY * m_p + iP]; }
+  void set(size_t iY, size_t iP, double value) override {
+    m_J[iY * m_p + iP] = value;
+  }
+  double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
   size_t maxParam(size_t iY) {
     double max = -DBL_MAX;
     size_t maxIndex = 0;

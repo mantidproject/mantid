@@ -10,6 +10,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -315,7 +316,7 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
                                   centers));
     }
   }
-  ws->splitAllIfNeeded(NULL);
+  ws->splitAllIfNeeded(nullptr);
   ws->refreshCache();
   return ws;
 }

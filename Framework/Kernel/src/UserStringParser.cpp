@@ -78,7 +78,7 @@ void UserStringParser::parse(const std::string &userString,
   */
 bool UserStringParser::Contains(const std::string &input, char ch) {
   std::string::size_type pos = input.find(ch);
-  return (pos == std::string::npos ? false : true);
+  return (pos != std::string::npos);
 }
 
 /**This method parses a given string of numbers into comma separated tokens.
@@ -191,7 +191,7 @@ bool UserStringParser::isValidStepSeparator(const std::string &input,
       step_separator = input.substr(index - 1, 1);
     }
     // step values must be preceded by colon ':'
-    return (!step_separator.compare(":") ? true : false);
+    return (!step_separator.compare(":"));
   }
   return true;
 }

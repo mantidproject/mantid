@@ -1,7 +1,9 @@
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -55,9 +57,7 @@ const std::string AppendGeometryToSNSNexus::category() const {
  */
 void AppendGeometryToSNSNexus::init() {
   // Declare potential extensions for input NeXus file
-  std::vector<std::string> extensions;
-  extensions.push_back(".nxs");
-  extensions.push_back(".h5");
+  std::vector<std::string> extensions{".nxs", ".h5"};
 
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
                                         extensions),
@@ -222,11 +222,11 @@ void AppendGeometryToSNSNexus::exec() {
                 polar_angle.reserve(dets.size());
                 azimuthal_angle.reserve(dets.size());
 
-                for (std::size_t i = 0; i < dets.size(); i++) {
-                  pixel_id.push_back(dets[i]->getID());
-                  distance.push_back(dets[i]->getDistance(*sample));
-                  azimuthal_angle.push_back(dets[i]->getPhi());
-                  polar_angle.push_back(ws->detectorTwoTheta(dets[i]));
+                for (auto &det : dets) {
+                  pixel_id.push_back(det->getID());
+                  distance.push_back(det->getDistance(*sample));
+                  azimuthal_angle.push_back(det->getPhi());
+                  polar_angle.push_back(ws->detectorTwoTheta(det));
                 }
 
                 // Write Pixel ID to file

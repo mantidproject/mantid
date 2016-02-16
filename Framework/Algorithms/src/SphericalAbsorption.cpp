@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -27,7 +29,7 @@ using namespace API;
 using namespace DataObjects;
 
 SphericalAbsorption::SphericalAbsorption()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_beamDirection(),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_beamDirection(),
       m_L1s(), m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.), m_refAtten(0.0), m_scattering(0.), n_lambda(0),
       x_step(0), m_emode(0), m_lambdaFixed(0.) {}

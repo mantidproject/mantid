@@ -1,7 +1,9 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -319,10 +321,7 @@ void DgsConvertToEnergyTransfer::exec() {
                                          "bkgd-range-max", inputWS);
     tibTofEnd += binOffset;
     const double tibTofWidth = tibTofEnd - tibTofStart;
-    std::vector<double> params;
-    params.push_back(tibTofStart);
-    params.push_back(tibTofWidth);
-    params.push_back(tibTofEnd);
+    std::vector<double> params{tibTofStart, tibTofWidth, tibTofEnd};
 
     bool treatTibAsEvents = false;
 

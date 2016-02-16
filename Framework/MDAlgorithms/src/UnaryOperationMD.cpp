@@ -69,8 +69,7 @@ void UnaryOperationMD::exec() {
     IAlgorithm_sptr alg = this->createChildAlgorithm(matrixAlg);
     // Copy all properties from THIS to the non-MD version
     std::vector<Property *> props = this->getProperties();
-    for (size_t i = 0; i < props.size(); i++) {
-      Property *prop = props[i];
+    for (auto prop : props) {
       alg->setPropertyValue(prop->name(), prop->value());
     }
     alg->execute();

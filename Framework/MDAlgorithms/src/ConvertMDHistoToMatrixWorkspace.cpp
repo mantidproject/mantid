@@ -2,16 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
+
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -187,7 +191,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   std::vector<Mantid::signal_t> Y;
   std::vector<Mantid::signal_t> E;
 
-  inputWorkspace->getLinePlot(start, end, normalization, X, Y, E);
+  inputWorkspace->getLineData(start, end, normalization, X, Y, E);
 
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", 1, X.size(), Y.size());

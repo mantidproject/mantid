@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidKernel/System.h"
-#include <fstream>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {

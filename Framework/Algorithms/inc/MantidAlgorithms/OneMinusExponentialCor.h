@@ -56,26 +56,27 @@ public:
   /// Default constructor
   OneMinusExponentialCor();
   /// Destructor
-  virtual ~OneMinusExponentialCor(){};
+  ~OneMinusExponentialCor() override{};
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "OneMinusExponentialCor"; }
+  const std::string name() const override { return "OneMinusExponentialCor"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Corrects the data in a workspace by one minus the value of an "
            "exponential function.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "CorrectionFunctions"; }
+  const std::string category() const override { return "CorrectionFunctions"; }
 
 private:
   // Overridden UnaryOperation methods
-  void defineProperties();
-  void retrieveProperties();
+  void defineProperties() override;
+  void retrieveProperties() override;
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 
   double m_c;    ///< The constant term in the exponent
   double m_c1;   ///< The multiplier
