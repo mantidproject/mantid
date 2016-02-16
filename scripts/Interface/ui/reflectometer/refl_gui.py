@@ -788,9 +788,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 overlapLow.append(qmin)
                             if self.tableMain.item(row, i * 5 + 4).text() == '':
                                 item = QtGui.QTableWidgetItem()
-                                if i == len(runno) - 1:
-                                # allow full high q-range for last angle
-                                    qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
                                 item.setText(str(qmax))
                                 self.tableMain.setItem(row, i * 5 + 4, item)
                                 overlapHigh.append(qmax)
@@ -1057,6 +1054,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         lmax = inst.getNumberParameter('LambdaMax')[0]
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
+        
         return th, qmin, qmax, wlam, wq
 
     def _save_table_contents(self, filename):
