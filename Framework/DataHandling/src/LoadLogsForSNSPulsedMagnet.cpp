@@ -197,9 +197,6 @@ struct Pulse {
   /// The number of seconds since January 1, 1990.
   uint32_t seconds;
 
-  /// The index of the first event for this pulse.
-  uint64_t event_index;
-
   /// The proton charge for the pulse.
   // cppcheck-suppress unusedStructMember
   double pCurrent;
