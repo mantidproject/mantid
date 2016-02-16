@@ -16,11 +16,14 @@ DECLARE_FUNCTION(MultivariateGaussianComptonProfile)
 const char *SIGMA_X_PARAM = "SigmaX";
 const char *SIGMA_Y_PARAM = "SigmaY";
 const char *SIGMA_Z_PARAM = "SigmaZ";
+const char *STEPS_NAME = "IntegrationSteps";
 
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
-    : ComptonProfile() {}
+    : ComptonProfile() {
+  /* setAttributeValue(STEPS_NAME, 100); */
+}
 
 /**
  * @returns A string containing the name of the function
@@ -37,11 +40,32 @@ void MultivariateGaussianComptonProfile::declareParameters() {
   declareParameter(SIGMA_Z_PARAM, 1.0, "Sigma Z parameter");
 }
 
+/**
+ */
+void MultivariateGaussianComptonProfile::declareAttributes() {
+  ComptonProfile::declareAttributes();
+  declareAttribute(STEPS_NAME, IFunction::Attribute(m_integrationSteps));
+}
+
+/**
+ * @param name The name of the attribute
+ * @param value The attribute's value
+ */
+void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
+                                  const Attribute &value) {
+  ComptonProfile::setAttribute(name, value);
+  if (name == STEPS_NAME) {
+    m_integrationSteps = value.asInt();
+    m_thetaStep = 1.0 / m_integrationSteps;
+    m_phiStep = (M_PI / 2.0) / m_integrationSteps;
+  }
+}
+
 /*
  */
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {
-  // TODO
+  return std::vector<size_t>();
 }
 
 /**
@@ -56,8 +80,12 @@ MultivariateGaussianComptonProfile::intensityParameterIndices() const {
 size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
     Kernel::DblMatrix &cmatrix, const size_t start,
     const std::vector<double> &errors) const {
-  // TODO
-  return 0;
+  std::vector<double> result(ySpace().size());
+  this->massProfile(result.data(), ySpace().size());
+  std::transform(result.begin(), result.end(), errors.begin(), result.begin(),
+                 std::divides<double>());
+  cmatrix.setColumn(start, result);
+  return 1;
 }
 
 /**
@@ -67,7 +95,81 @@ size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
  */
 void MultivariateGaussianComptonProfile::massProfile(double *result,
                                                      const size_t nData) const {
-  // TODO
+  std::vector<double> s2Cache;
+  buildS2Cache(s2Cache);
+
+  const double sigmaX(getParameter(0));
+  const double sigmaY(getParameter(1));
+  const double sigmaZ(getParameter(2));
+
+  const double prefactor = (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
+  const auto &yspace = ySpace();
+
+  for (size_t i = 0; i < nData; i++) {
+    double y = yspace[i];
+
+    double sum = 0.0;
+
+    for (int j = 0; j < m_integrationSteps; j++) {
+      int thetaIdx = (m_integrationSteps + 1) * j;
+      sum += (integratePhi(thetaIdx, s2Cache, y) + integratePhi(thetaIdx + (m_integrationSteps + 1), s2Cache, y)) * 0.5;
+    }
+
+    sum *= m_thetaStep;
+
+    result[i] = prefactor * sum;
+  }
+}
+
+double MultivariateGaussianComptonProfile::integratePhi(int idx, std::vector<double> &s2Cache, double y) const {
+  double sum = 0.0;
+
+  for (int i = 0; i < m_integrationSteps; i++) {
+    sum += (calculateIntegrand(idx + i, s2Cache, y) + calculateIntegrand(idx + i + 1, s2Cache, y)) * 0.5;
+  }
+
+  sum *= m_phiStep;
+
+  return sum;
+}
+
+double MultivariateGaussianComptonProfile::calculateIntegrand(int idx, std::vector<double> &s2Cache, double y) const {
+  double s2 = s2Cache[idx];
+  double i = s2 * exp(-(y * y)/(2 * s2));
+  return i;
+}
+
+void MultivariateGaussianComptonProfile::buildS2Cache(std::vector<double> &s2Cache) const {
+  s2Cache.clear();
+
+  double sigmaX2(getParameter(0));
+  double sigmaY2(getParameter(1));
+  double sigmaZ2(getParameter(2));
+
+  sigmaX2 *= sigmaX2;
+  sigmaY2 *= sigmaY2;
+  sigmaZ2 *= sigmaZ2;
+
+  const double num = sigmaX2 * sigmaY2 * sigmaZ2;
+
+  for (int i = 0; i <= m_integrationSteps; i++) {
+    const double theta = m_thetaStep * i;
+    for (int j = 0; j <= m_integrationSteps; j++) {
+      const double phi = m_phiStep * j;
+
+      double x = sin(theta) * cos(phi);
+      double y = sin(theta) * sin(phi);
+      double z = cos(theta);
+
+      double denom = (x * sigmaY2 * sigmaZ2) + (sigmaX2 * y * sigmaZ2) + (sigmaX2 * sigmaY2 * z);
+
+      double s2 = 0.0;
+      if (denom != 0.0)
+        s2 = num / denom;
+
+      s2Cache.push_back(s2);
+    }
+  }
 }
 
 } // namespace Functions

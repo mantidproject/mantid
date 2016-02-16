@@ -41,6 +41,10 @@ private:
   std::string name() const;
   /// Declare the function parameters
   void declareParameters();
+  /// Declare parameters that will never participate in the fit
+  void declareAttributes();
+  /// Set an attribute value (and possibly cache its value)
+  void setAttribute(const std::string &name, const Attribute &value);
 
   /// Returns the indices of the intensity parameters
   std::vector<size_t> intensityParameterIndices() const;
@@ -50,6 +54,15 @@ private:
 
   /// Compute the function
   void massProfile(double *result, const size_t nData) const;
+
+  double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
+  double calculateIntegrand(int idx, std::vector<double> &s2Cache, double y) const;
+
+  void buildS2Cache(std::vector<double> &s2Cache) const;
+
+  int m_integrationSteps;
+  double m_thetaStep;
+  double m_phiStep;
 };
 
 } // namespace Functions
