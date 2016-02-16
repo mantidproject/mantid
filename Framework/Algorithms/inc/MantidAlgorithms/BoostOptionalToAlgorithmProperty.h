@@ -39,7 +39,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /**
- * Checks for the default values of a mandatory algorithm property
+ * Checks for the default values of a mandatory algorithm property associated
+ * with
+ * an instrument component. i.e MonitorIndex
  *
  * @param alg : A pointer to the algorithm to which the property belongs
  * @param propName : The name of the property in the algorithm
@@ -69,7 +71,9 @@ T checkForMandatoryInstrumentDefault(
 }
 
 /**
-* Checks for the default values of an optional algorithm property
+* Checks for the default values of an optional algorithm property associated
+* with
+* an instrument component. i.e MonitorIndex
 *
 * @param alg : A pointer to the algorithm to which the property belongs
 * @param propName : The name of the property in the algorithm
