@@ -501,7 +501,8 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
           std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
           lat[0], lat[1], lat[2], lat[3], lat[4], lat[5], lat[6]);
   std::string result(buffer);
-
+  g_log.notice() << "Lattice before optimization: "
+                 << result << "\n";
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat[0] - a) / a > .25)
     return false;
@@ -635,7 +636,7 @@ void SCDCalibratePanels::exec() {
   CalculateGroups(AllBankNames, Grouping, bankPrefix, bankingCode, Groups);
 
   //----------------- Calculate & Create Calculated vs Theoretical
-  //workspaces------------------,);
+  // workspaces------------------,);
   int nGroups = static_cast<int>(AllBankNames.size());
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
@@ -851,7 +852,7 @@ void SCDCalibratePanels::exec() {
       tie(iFunc, !useTimeOffset, "t0", T0_bank);
 
       //--------------------- Set up Fit Algorithm and
-      //Execute-------------------
+      // Execute-------------------
       boost::shared_ptr<Algorithm> fit_alg =
           createChildAlgorithm("Fit", .2, .9, true);
 
