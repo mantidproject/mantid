@@ -254,7 +254,7 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = checkForOptionalDefault<int>(
+  auto i0_monitor_index = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
@@ -305,23 +305,25 @@ void ReflectometryReductionOneAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min = checkForMandatoryDefault<double>(
+  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max = checkForMandatoryDefault<double>(
+  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min =
-      checkForMandatoryDefault<double>(this, "MonitorBackgroundWavelengthMin",
-                                       instrument, "MonitorBackgroundMin");
-  double wavelength_back_max =
-      checkForMandatoryDefault<double>(this, "MonitorBackgroundWavelengthMax",
-                                       instrument, "MonitorBackgroundMax");
+  double wavelength_back_min = checkForMandatoryInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMin", instrument,
+      "MonitorBackgroundMin");
+  double wavelength_back_max = checkForMandatoryInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMax", instrument,
+      "MonitorBackgroundMax");
   double wavelength_integration_min =
-      checkForMandatoryDefault<double>(this, "MonitorIntegrationWavelengthMin",
-                                       instrument, "MonitorIntegralMin");
+      checkForMandatoryInstrumentDefault<double>(
+          this, "MonitorIntegrationWavelengthMin", instrument,
+          "MonitorIntegralMin");
   double wavelength_integration_max =
-      checkForMandatoryDefault<double>(this, "MonitorIntegrationWavelengthMax",
-                                       instrument, "MonitorIntegralMax");
+      checkForMandatoryInstrumentDefault<double>(
+          this, "MonitorIntegrationWavelengthMax", instrument,
+          "MonitorIntegralMax");
 
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");

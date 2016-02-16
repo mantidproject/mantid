@@ -112,7 +112,7 @@ void CreateTransmissionWorkspace::exec() {
   // Get the monitor i0 index
   auto transWS = firstTransmissionRun.get();
   auto instrument = transWS->getInstrument();
-  const OptionalInteger i0MonitorIndex = checkForOptionalDefault<int>(
+  const OptionalInteger i0MonitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   // Create the transmission workspace.

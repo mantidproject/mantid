@@ -9,11 +9,50 @@
 
 namespace Mantid {
 namespace Algorithms {
+/** BoostOptionalToAlgorithmProperty : Checks for default values of an algorithm
+property
+if the user has not supplied the value. If it is a mandatory property then the
+value will be
+returned, if the property is optional then a value of type boost::optional<T>
+will be returned.
+
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+
+/**
+ * Checks for the default values of a mandatory algorithm property
+ *
+ * @param alg : A pointer to the algorithm to which the property belongs
+ * @param propName : The name of the property in the algorithm
+ * @param instrument : A pointer to the instrument
+ * @param idf_name : The name of the property in the Instrument Defintion
+ * @return A value of type T that is either the default value or the user
+ * supplied value.
+ *
+ */
 template <typename T>
-T checkForMandatoryDefault(Mantid::API::Algorithm *const alg,
-                           std::string propName,
-                           Mantid::Geometry::Instrument_const_sptr instrument,
-                           std::string idf_name) {
+T checkForMandatoryInstrumentDefault(
+    Mantid::API::Algorithm *const alg, std::string propName,
+    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
@@ -29,11 +68,21 @@ T checkForMandatoryDefault(Mantid::API::Algorithm *const alg,
   }
 }
 
+/**
+* Checks for the default values of an optional algorithm property
+*
+* @param alg : A pointer to the algorithm to which the property belongs
+* @param propName : The name of the property in the algorithm
+* @param instrument : A pointer to the instrument
+* @param idf_name : The name of the property in the Instrument Defintion
+* @return A boost optional value of type T that is either the default value, the
+* user supplied value or an uninitialized boost::optional.
+*
+*/
 template <typename T>
-boost::optional<T>
-checkForOptionalDefault(Mantid::API::Algorithm *const alg, std::string propName,
-                        Mantid::Geometry::Instrument_const_sptr instrument,
-                        std::string idf_name) {
+boost::optional<T> checkForOptionalInstrumentDefault(
+    Mantid::API::Algorithm *const alg, std::string propName,
+    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
