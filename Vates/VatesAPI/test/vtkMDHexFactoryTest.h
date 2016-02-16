@@ -151,29 +151,29 @@ public:
   }
 
   void test_roundUp_positive_numbers() {
-    TS_ASSERT_DELTA(roundUp(3.7, 1.0), 4.0, 1e-5);
-    TS_ASSERT_DELTA(roundUp(3.7, 7.1), 7.1, 1e-5);
-    TS_ASSERT_DELTA(roundUp(7.1, 7.1), 14.2, 1e-5);
-    TS_ASSERT_DELTA(roundUp(0.0, 3.1), 3.1, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(3.7), coord_t(1.0)), 4.0, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(3.7), coord_t(7.1)), 7.1, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(7.1), coord_t(7.1)), 14.2, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(0.0), coord_t(3.1)), 3.1, 1e-5);
   }
 
   void test_roundUp_negative_numbers() {
-    TS_ASSERT_DELTA(roundUp(-0.5, 3.1), 0.0, 1e-5);
-    TS_ASSERT_DELTA(roundUp(-4.1, 3.1), -3.1, 1e-5);
-    TS_ASSERT_DELTA(roundUp(-4.1, 1.0), -4.0, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(-0.5), coord_t(3.1)), 0.0, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(-4.1), coord_t(3.1)), -3.1, 1e-5);
+    TS_ASSERT_DELTA(roundUp(coord_t(-4.1), coord_t(1.0)), -4.0, 1e-5);
   }
 
   void test_roundDown_positive_numbers() {
-    TS_ASSERT_DELTA(roundDown(3.7, 1.0), 3.0, 1e-5);
-    TS_ASSERT_DELTA(roundDown(3.7, 7.1), 0.0, 1e-5);
-    TS_ASSERT_DELTA(roundDown(7.1, 7.1), 7.1, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(3.7), coord_t(1.0)), 3.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(3.7), coord_t(7.1)), 0.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(7.1), coord_t(7.1)), 7.1, 1e-5);
   }
 
   void test_roundDown_negative_numbers() {
-    TS_ASSERT_DELTA(roundDown(-0.5, 3.1), -3.1, 1e-5);
-    TS_ASSERT_DELTA(roundDown(-4.1, 3.1), -6.2, 1e-5);
-    TS_ASSERT_DELTA(roundDown(-4.1, 1.0), -5.0, 1e-5);
-    TS_ASSERT_DELTA(roundDown(-4.0, 1.0), -4.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(-0.5), coord_t(3.1)), -3.1, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(-4.1), coord_t(3.1)), -6.2, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(-4.1), coord_t(1.0)), -5.0, 1e-5);
+    TS_ASSERT_DELTA(roundDown(coord_t(-4.0), coord_t(1.0)), -4.0, 1e-5);
   }
 
   /*Demonstrative tests*/
