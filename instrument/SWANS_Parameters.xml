@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "SWANS" valid-from = "16th February 2016">
+    
+    <component-link name="SWANS">
+		
+		<parameter name="number-of-x-pixels">
+		  <value val="128"/>
+		</parameter>
+
+		<parameter name="number-of-y-pixels">
+		  <value val="128"/>
+		</parameter>
+
+		<parameter name="x-pixel-size">
+		  <value val="3.25"/>
+		</parameter>
+		
+		<parameter name="y-pixel-size">
+		  <value val="3.25"/>
+		</parameter>
+
+    </component-link>
+</parameter-file>    
