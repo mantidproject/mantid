@@ -1,5 +1,6 @@
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {

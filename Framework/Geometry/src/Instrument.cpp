@@ -3,7 +3,9 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Exception.h"
 
+#include <boost/make_shared.hpp>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -569,7 +571,8 @@ Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const {
   if (ndets == 1) {
     return this->getDetector(det_ids[0]);
   } else {
-    boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
+    boost::shared_ptr<DetectorGroup> det_group =
+        boost::make_shared<DetectorGroup>();
     bool warn(false);
     for (size_t i = 0; i < ndets; ++i) {
       det_group->addDetector(this->getDetector(det_ids[i]), warn);

@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/RenameLog.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"

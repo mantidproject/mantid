@@ -23,28 +23,28 @@ namespace MDAlgorithms {
 class DLLExport FindPeaksMD : public API::Algorithm {
 public:
   FindPeaksMD();
-  ~FindPeaksMD();
+  ~FindPeaksMD() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "FindPeaksMD"; };
+  const std::string name() const override { return "FindPeaksMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Find peaks in reciprocal space in a MDEventWorkspace or a "
            "MDHistoWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Read member variables from experiment info
   void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei,

@@ -50,32 +50,32 @@ class DLLExport SaveNXTomo : public API::Algorithm {
 public:
   SaveNXTomo();
   /// Virtual dtor
-  virtual ~SaveNXTomo() {}
+  ~SaveNXTomo() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveNXTomo"; }
+  const std::string name() const override { return "SaveNXTomo"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Writes a MatrixWorkspace to a file in the NXTomo format.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Nexus;DataHandling\\Tomography;"
            "Diffraction\\DataHandling";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code : Single workspace
-  void exec();
+  void exec() override;
   /// Alternative execution code when operating on a WorkspaceGroup
-  bool processGroups();
+  bool processGroups() override;
 
   /// Creates the format for the output file if it doesn't exist
   ::NeXus::File setupFile();

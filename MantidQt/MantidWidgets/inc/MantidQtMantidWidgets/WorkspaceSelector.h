@@ -72,7 +72,7 @@ namespace MantidWidgets
     /// Default Constructor
     WorkspaceSelector(QWidget *parent = NULL, bool init = true);
     /// Destructor
-    virtual ~WorkspaceSelector();
+    ~WorkspaceSelector() override;
 
     QStringList getWorkspaceTypes() const;
     void setWorkspaceTypes(const QStringList & types);
@@ -102,9 +102,9 @@ signals:
       
   protected:
       //Method for handling drop events
-      void dropEvent(QDropEvent *);
+    void dropEvent(QDropEvent *) override;
       //called when a drag event enters the class
-      void dragEnterEvent(QDragEnterEvent *);
+    void dragEnterEvent(QDragEnterEvent *) override;
 
   private:
     /// Poco Observers for ADS Notifications

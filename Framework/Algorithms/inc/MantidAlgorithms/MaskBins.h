@@ -56,24 +56,24 @@ public:
   /// Constructor
   MaskBins();
   /// Virtual destructor
-  virtual ~MaskBins() {}
+  ~MaskBins() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "MaskBins"; }
+  const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Marks bins in a workspace as being masked.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Masking"; }
+  const std::string category() const override { return "Transforms\\Masking"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void execEvent();
 
   void findIndices(const MantidVec &X, MantidVec::difference_type &startBin,

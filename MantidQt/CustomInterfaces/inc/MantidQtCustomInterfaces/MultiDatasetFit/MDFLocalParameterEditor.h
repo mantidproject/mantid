@@ -41,7 +41,7 @@ private slots:
   void setTieAll();
   void removeAllTies();
 private:
-  bool eventFilter(QObject *widget, QEvent *evn);
+  bool eventFilter(QObject *widget, QEvent *evn) override;
   void setEditorState();
   static QString setTieDialog(QString tie);
   QLineEdit* m_editor;

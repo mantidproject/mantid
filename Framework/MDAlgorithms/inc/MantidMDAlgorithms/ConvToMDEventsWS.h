@@ -57,12 +57,12 @@ class ConvToMDEventsWS : public ConvToMDBase {
 public:
   size_t initialize(const MDWSDescription &WSD,
                     boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros);
-  void runConversion(API::Progress *pProgress);
+                    bool ignoreZeros) override;
+  void runConversion(API::Progress *pProgress) override;
 
 private:
   // function runs the conversion on
-  virtual size_t conversionChunk(size_t workspaceIndex);
+  size_t conversionChunk(size_t workspaceIndex) override;
   // the pointer to the source event workspace as event ws does not work through
   // the public Matrix WS interface
   DataObjects::EventWorkspace_const_sptr m_EventWS;

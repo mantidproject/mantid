@@ -44,7 +44,7 @@ public:
                    const std::string &pathDark, const std::string &pathOpen,
                    const std::string &pathSample);
 
-  ~ToolConfigTomoPy() {}
+  ~ToolConfigTomoPy() override {}
 
   // gives the list of methods (reconstruction algorithms) available
   static const std::vector<std::pair<std::string, std::string>> methods() {
@@ -52,9 +52,9 @@ public:
   }
 
 protected:
-  virtual std::string makeCmdLineOptions() const;
+  std::string makeCmdLineOptions() const override;
 
-  virtual std::string makeExecutable() const { return m_runnable; };
+  std::string makeExecutable() const override { return m_runnable; };
 
 private:
   static const std::vector<std::pair<std::string, std::string>> g_tomopyMethods;

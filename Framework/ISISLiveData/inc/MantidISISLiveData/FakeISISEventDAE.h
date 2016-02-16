@@ -43,25 +43,25 @@ namespace ISISLiveData {
 class FakeISISEventDAE : public API::Algorithm {
 public:
   FakeISISEventDAE();
-  virtual ~FakeISISEventDAE();
+  ~FakeISISEventDAE() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FakeISISEventDAE"; }
+  const std::string name() const override { return "FakeISISEventDAE"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\DataAcquisition";
   }
 
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Simulates ISIS event DAE.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Poco TCP server
   Poco::Net::TCPServer *m_server;
   /// Mutex

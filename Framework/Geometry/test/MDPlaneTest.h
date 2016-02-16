@@ -210,9 +210,53 @@ public:
     TS_ASSERT(p1.isPointBounded(point));
 
     point.clear();
+    point.push_back(5.0);
+    point.push_back(-5.0);
+    TSM_ASSERT("Point should be found to be bounded by "
+               "plane, it lies exactly on the plane",
+               p1.isPointBounded(point));
+
+    point.clear();
     point.push_back(6.0);
     point.push_back(-5.0);
     TS_ASSERT(!p1.isPointBounded(point));
+  }
+
+  void test_isPointInside_vectorversion() {
+    // Plane where x < 5
+    coord_t normal1[2] = {-1., 0};
+    coord_t point1[2] = {5., 0};
+    MDPlane p1(2, normal1, point1);
+    std::vector<coord_t> point;
+    point.clear();
+    point.push_back(4.0);
+    point.push_back(12.0);
+    TSM_ASSERT("Point should be found to be inside region bounded by plane",
+               p1.isPointInside(point));
+
+    // Point lies on the plane, not inside it
+    point.clear();
+    point.push_back(5.0);
+    point.push_back(-5.0);
+    TSM_ASSERT("Point should not be found to be inside region bounded by "
+               "plane, it lies exactly on the plane",
+               !p1.isPointInside(point));
+  }
+
+  void test_isPointInside_arrayversion() {
+    // Plane where x < 5
+    coord_t normal1[2] = {-1.0, 0.0};
+    coord_t point1[2] = {5.0, 0.0};
+    MDPlane plane1(2, normal1, point1);
+    coord_t test_point1[2] = {4.5, 0.0};
+    TSM_ASSERT("Point should be found to be inside region bounded by plane",
+               plane1.isPointInside(test_point1));
+
+    // Point lies on the plane, not inside it
+    coord_t test_point2[2] = {5.0, 0.0};
+    TSM_ASSERT("Point should not be found to be inside region bounded by "
+               "plane, it lies exactly on the plane",
+               !plane1.isPointInside(test_point2));
   }
 };
 

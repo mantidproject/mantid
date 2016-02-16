@@ -145,8 +145,9 @@ public:
   int precision();
 
   // Loading and saving projects
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  std::string saveToProject(ApplicationWindow *app) override;
 
   /// returns the workspace name
   const std::string & getWorkspaceName();
@@ -156,9 +157,13 @@ public:
   /// A better solution is needed
   void attachMultilayer(MultiLayer*);
 
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void clearADSHandle();
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void clearADSHandle() override;
 
 signals:
   void needWorkspaceChange(Mantid::API::MatrixWorkspace_sptr ws);
@@ -229,7 +234,7 @@ signals:
     void repaintAll();
     void closeDependants();
     // for context menu filtering
-    bool eventFilter(QObject *object, QEvent *e);
+    bool eventFilter(QObject *object, QEvent *e) override;
     //to synchronize the views
     void viewChanged(int);
 

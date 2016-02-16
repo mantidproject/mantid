@@ -54,7 +54,7 @@ public:
 private slots:
     void updateTable(int index);
     void updateCurves();
-    void accept();
+    void accept() override;
     void processStateChange(QTableWidgetItem* item);
 
 private:

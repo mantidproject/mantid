@@ -7,8 +7,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Memory.h"

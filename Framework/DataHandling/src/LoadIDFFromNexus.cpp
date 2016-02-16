@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
-#include <Poco/Path.h>
-#include <Poco/File.h>
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

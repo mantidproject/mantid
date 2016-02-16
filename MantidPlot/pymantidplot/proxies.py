@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module containing classes that act as proxies to the various MantidPlot gui objects that are
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
@@ -563,7 +563,7 @@ class MantidMatrix(MDIWindow):
         return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
-class InstrumentWindow(MDIWindow):
+class InstrumentView(MDIWindow):
     """Proxy for the instrument window
     """
 
@@ -592,7 +592,7 @@ class InstrumentWindow(MDIWindow):
     # ----- Deprecated functions -----
     def changeColormap(self, filename=None):
         import warnings
-        warnings.warn("InstrumentWindow.changeColormap has been deprecated. Use the render tab method instead.")
+        warnings.warn("InstrumentWidget.changeColormap has been deprecated. Use the render tab method instead.")
         callable = QtProxyObject.__getattr__(self, "changeColormap")
         if filename is None:
             callable()
@@ -601,32 +601,32 @@ class InstrumentWindow(MDIWindow):
 
     def setColorMapMinValue(self, value):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapMinValue has been deprecated. Use the render tab setMinValue method instead.")
+        warnings.warn("InstrumentWidget.setColorMapMinValue has been deprecated. Use the render tab setMinValue method instead.")
         QtProxyObject.__getattr__(self, "setColorMapMinValue")(value)
 
     def setColorMapMaxValue(self, value):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapMaxValue has been deprecated. Use the render tab setMaxValue method instead.")
+        warnings.warn("InstrumentWidget.setColorMapMaxValue has been deprecated. Use the render tab setMaxValue method instead.")
         QtProxyObject.__getattr__(self, "setColorMapMaxValue")(value)
 
     def setColorMapRange(self, minvalue, maxvalue):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapRange has been deprecated. Use the render tab setRange method instead.")
+        warnings.warn("InstrumentWidget.setColorMapRange has been deprecated. Use the render tab setRange method instead.")
         QtProxyObject.__getattr__(self, "setColorMapRange")(minvalue,maxvalue)
 
     def setScaleType(self, scale_type):
         import warnings
-        warnings.warn("InstrumentWindow.setScaleType has been deprecated. Use the render tab setScaleType method instead.")
+        warnings.warn("InstrumentWidget.setScaleType has been deprecated. Use the render tab setScaleType method instead.")
         QtProxyObject.__getattr__(self, "setScaleType")(scale_type)
 
     def setViewType(self, view_type):
         import warnings
-        warnings.warn("InstrumentWindow.setViewType has been deprecated. Use the render tab setSurfaceType method instead.")
+        warnings.warn("InstrumentWidget.setViewType has been deprecated. Use the render tab setSurfaceType method instead.")
         QtProxyObject.__getattr__(self, "setViewType")(view_type)
 
     def selectComponent(self, name):
         import warnings
-        warnings.warn("InstrumentWindow.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
+        warnings.warn("InstrumentWidget.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
         QtProxyObject.__getattr__(self, "selectComponent")(name)
 
 

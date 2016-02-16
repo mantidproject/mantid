@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "Poco/NumberFormatter.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "Poco/NumberFormatter.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

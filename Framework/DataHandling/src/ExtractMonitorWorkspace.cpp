@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
 
 namespace Mantid {

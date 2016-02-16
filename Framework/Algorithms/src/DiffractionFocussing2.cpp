@@ -5,9 +5,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
@@ -651,7 +653,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Build up the X vector.
     boost::shared_ptr<MantidVec> xnew =
-        boost::shared_ptr<MantidVec>(new MantidVec(xPoints)); // New X vector
+        boost::make_shared<MantidVec>(xPoints); // New X vector
     (*xnew)[0] = Xmin;
     for (int64_t j = 1; j < xPoints; j++) {
       (*xnew)[j] = Xmin * (1.0 + step);

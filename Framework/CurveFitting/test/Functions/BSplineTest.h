@@ -140,7 +140,7 @@ public:
     double startx = -3.14;
     double endx = 3.14;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 10);
     bsp->setAttributeValue("StartX", startx);
@@ -163,7 +163,7 @@ public:
     double startx = -3.14;
     double endx = 3.14;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 20);
     bsp->setAttributeValue("StartX", startx);
@@ -186,7 +186,7 @@ public:
     double startx = 0.0;
     double endx = 6.28;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 10);
     bsp->setAttributeValue("StartX", startx);
@@ -246,7 +246,7 @@ public:
     double startx = -3.14;
     double endx = 3.14;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 30);
     bsp->setAttributeValue("StartX", startx);
@@ -270,7 +270,7 @@ public:
     double startx = -3.14;
     double endx = 3.14;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 4);
     bsp->setAttributeValue("NBreak", 30);
     bsp->setAttributeValue("StartX", startx);
@@ -294,7 +294,7 @@ public:
     double startx = -3.14;
     double endx = 3.14;
 
-    boost::shared_ptr<BSpline> bsp(new BSpline);
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 5);
     bsp->setAttributeValue("NBreak", 20);
     bsp->setAttributeValue("StartX", startx);
@@ -343,7 +343,8 @@ private:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(bsp, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;

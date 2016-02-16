@@ -8,17 +8,19 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
-#include "MantidAPI/ScopedWorkspace.h"
-
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 #include <Poco/Path.h>
 
 using namespace Mantid::API;

@@ -159,7 +159,8 @@ public:
     ii[1] = 2;
     multi->setDomainIndices(2, ii);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(multi, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 6);
 
@@ -232,8 +233,7 @@ public:
     // middle part has
     // constant value A1
 
-    MatrixWorkspace_sptr ws =
-        boost::shared_ptr<MatrixWorkspace>(new WorkspaceTester);
+    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
     ws->initialize(1, 30, 30);
     {
       const double dx = 1.0;

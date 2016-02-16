@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
 namespace Mantid {

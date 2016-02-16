@@ -40,28 +40,28 @@ namespace Crystal {
 class DLLExport SaveIsawUB : public API::Algorithm {
 public:
   SaveIsawUB();
-  ~SaveIsawUB();
+  ~SaveIsawUB() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveIsawUB"; };
+  const std::string name() const override { return "SaveIsawUB"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a UB matrix and lattice parameters from a workspace to an "
            "ISAW-style ASCII file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Isaw";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   // Calculates the error in the volume
   double getErrorVolume(const Geometry::OrientedLattice &lattice);

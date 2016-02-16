@@ -53,10 +53,10 @@ private:
   std::size_t Nvec;   ///< Normal vector is x,y or z :: (1-3) (0 if general)
   double Radius;      ///< Radius of cylinder
 
-  void rotate(const Kernel::Matrix<double> &);
-  void displace(const Kernel::V3D &);
+  void rotate(const Kernel::Matrix<double> &) override;
+  void displace(const Kernel::V3D &) override;
   void setNvec(); ///< check to obtain orientation
-  Cylinder *doClone() const;
+  Cylinder *doClone() const override;
 
 protected:
   Cylinder(const Cylinder &);
@@ -64,21 +64,21 @@ protected:
 
 public:
   /// Public identifer
-  virtual std::string className() const { return "Cylinder"; }
+  std::string className() const override { return "Cylinder"; }
 
   Cylinder();
   std::unique_ptr<Cylinder> clone() const;
 
   // Visit acceptor
-  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
+  void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
   virtual double lineIntersect(const Kernel::V3D &, const Kernel::V3D &) const;
 
-  int side(const Kernel::V3D &) const;
-  int onSurface(const Kernel::V3D &) const;
-  double distance(const Kernel::V3D &) const;
+  int side(const Kernel::V3D &) const override;
+  int onSurface(const Kernel::V3D &) const override;
+  double distance(const Kernel::V3D &) const override;
 
-  int setSurface(const std::string &);
+  int setSurface(const std::string &) override;
   void setCentre(const Kernel::V3D &);
   void setNorm(const Kernel::V3D &);
   Kernel::V3D getCentre() const { return Centre; } ///< Return centre point
@@ -89,19 +89,19 @@ public:
     Radius = r;
     setBaseEqn();
   }
-  void setBaseEqn();
+  void setBaseEqn() override;
 
-  void write(std::ostream &) const;
-  void print() const;
+  void write(std::ostream &) const override;
+  void print() const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin);
+                      double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cylinder
   static int g_nslices;
   /// The number of stacks to approximate a cylinder
   static int g_nstacks;
 #ifdef ENABLE_OPENCASCADE
-  virtual TopoDS_Shape createShape();
+  TopoDS_Shape createShape() override;
 #endif
 };
 

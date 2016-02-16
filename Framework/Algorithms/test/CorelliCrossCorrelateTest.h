@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"

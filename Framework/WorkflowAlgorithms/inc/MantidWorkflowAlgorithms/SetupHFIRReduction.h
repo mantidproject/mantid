@@ -42,23 +42,23 @@ public:
   /// Constructor
   SetupHFIRReduction() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SetupHFIRReduction() {}
+  ~SetupHFIRReduction() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SetupHFIRReduction"; }
+  const std::string name() const override { return "SetupHFIRReduction"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Set up HFIR SANS reduction options.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void setupTransmission(
       boost::shared_ptr<Kernel::PropertyManager> reductionManager);
   void

@@ -38,7 +38,7 @@ public:
   /// Constructor for StdChannel
   StdoutChannel();
   /// destructor
-  ~StdoutChannel();
+  ~StdoutChannel() override;
 };
 }
 #endif // STDOUTCHANNEL_H

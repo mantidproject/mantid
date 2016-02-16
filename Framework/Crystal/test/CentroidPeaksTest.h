@@ -1,8 +1,10 @@
 #ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
 #define MANTID_CRYSTAL_CentroidPeaksTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/CentroidPeaks.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
@@ -10,7 +12,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>

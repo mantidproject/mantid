@@ -49,14 +49,14 @@ public:
   /// Constructor
   AlgorithmHasProperty(const std::string &propName);
   /// Destructor
-  ~AlgorithmHasProperty();
+  ~AlgorithmHasProperty() override;
   /**
    * Get a string representation of the type
    * @returns A string containing the validator type
    */
   inline std::string getType() const { return "AlgorithmHasProperty"; }
   /// Make a copy of the present type of validator
-  inline Kernel::IValidator_sptr clone() const {
+  inline Kernel::IValidator_sptr clone() const override {
     return boost::make_shared<AlgorithmHasProperty>(*this);
   }
 
@@ -67,8 +67,8 @@ protected:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  virtual std::string
-  checkValidity(const boost::shared_ptr<IAlgorithm> &value) const;
+  std::string
+  checkValidity(const boost::shared_ptr<IAlgorithm> &value) const override;
 
 private:
   /// Default constructor

@@ -2,10 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"

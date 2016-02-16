@@ -2,17 +2,18 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin2D.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidGeometry/Math/ConvexPolygon.h"
+#include "MantidGeometry/Math/PolygonIntersection.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/PolygonIntersection.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 

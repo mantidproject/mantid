@@ -2,13 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidGeometry/Instrument.h"
+
 #include "boost/assign.hpp"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
