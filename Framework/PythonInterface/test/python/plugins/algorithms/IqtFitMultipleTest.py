@@ -143,7 +143,6 @@ class IqtFitMultipleTest(unittest.TestCase):
                                                     SpecMin=0,
                                                     SpecMax=16,
                                                     ConstrainIntensities=True,
-                                                    Save=False,
                                                     Plot='None')
         self._validate_output(params, result, fit_group)
 

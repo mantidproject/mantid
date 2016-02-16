@@ -64,6 +64,8 @@ namespace IDA
     QString minimizerString(QString outputName) const;
     std::string constructBaseName(const std::string &inputName,
                                   const long &specMin, const long &specMax);
+	void plotWorkspace();
+	void saveResult();
 
     Ui::IqtFit m_uiForm;
     QtStringPropertyManager* m_stringManager;

@@ -241,7 +241,6 @@ void IqtFit::run() {
     iqtFitMultiple->setProperty("Minimizer", minimizer.toStdString());
     iqtFitMultiple->setProperty("MaxIterations", maxIt);
     iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
-    iqtFitMultiple->setProperty("Save", save);
     iqtFitMultiple->setProperty("Plot", plot);
     iqtFitMultiple->setProperty("OutputResultWorkspace", baseName + "_Result");
     iqtFitMultiple->setProperty("OutputParameterWorkspace",
@@ -258,6 +257,23 @@ void IqtFit::run() {
 }
 
 /**
+ * Plot workspace base don user input
+ */
+void IqtFit::plotWorkspace() {}
+
+/**
+ * Save the result of the algorithm
+ */
+void IqtFit::saveResult() {
+  const auto workingdirectory =
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory");
+  const auto filepath = workingdirectory + m_pythonExportWsName + ".nxs";
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName),
+                          QString::fromStdString(filepath));
+}
+
+/**
 * Handles completion of the IqtFitMultiple algorithm.
 * @param error True if the algorithm was stopped due to error, false otherwise
 */
@@ -267,6 +283,8 @@ void IqtFit::algorithmComplete(bool error) {
   if (error)
     return;
   updatePlot();
+  plotWorkspace();
+  saveResult();
 }
 
 /**
