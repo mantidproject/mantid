@@ -36,7 +36,7 @@ int main( int argc, char ** argv )
   QLayout * layout = new QVBoxLayout(frame);
   frame->setLayout(layout);
 
-  ColorBarWidget * widget = new ColorBarWidget(frame);
+  MantidQt::MantidWidgets::ColorBarWidget * widget = new ColorBarWidget(frame);
 
   widget->setViewRange(min, max);
   widget->setLog(false);
