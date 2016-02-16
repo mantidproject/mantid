@@ -1073,18 +1073,6 @@ class CWSCDReductionControl(object):
         assert isinstance(target_frame, str)
         assert isinstance(target_ws_name, str)
 
-        ub_matrix_1d = None
-
-        # Target frame
-        if target_frame.lower().startswith('hkl'):
-            target_frame = 'hkl'
-            ub_matrix_1d = self._myUBMatrixDict[self._expNumber].reshape(9,)
-        elif target_frame.lower().startswith('q-sample'):
-            target_frame = 'qsample'
-
-        else:
-            raise RuntimeError('Target frame %s is not supported.' % target_frame)
-
         # Get list of Pt.
         if len(pt_list) > 0:
             # user specified
@@ -1099,9 +1087,6 @@ class CWSCDReductionControl(object):
                 print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
                 print '[DB] Data directory: %s' % self._dataDir
         # END-IF
-        max_pts = 0
-        ws_names_str = ''
-        ws_names_to_group = ''
 
         # construct a list of Pt as the input of CollectHB3AExperimentInfo
         pt_list_str = '-1'  # header
@@ -1138,11 +1123,9 @@ class CWSCDReductionControl(object):
         # END-FOR(pt)
 
         # Convert to Q-sample
-        # TODO/NOW - refactor to method
-        out_q_name = get_merged_md_name(exp_no, scan_no, ... )
-        out_q_name = 'HB3A_Exp%d_Scan%d_MD' % (exp_no, scan_no)
+        out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_list)
         try:
-            api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+            api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
                                          CreateVirtualInstrument=False,
                                          OutputWorkspace=out_q_name,
                                          Directory=self._dataDir)
@@ -1150,31 +1133,13 @@ class CWSCDReductionControl(object):
             err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
             return False, err_msg
 
-
-        """ Compare with ...!!!!
-        # Collect reduction information: example
-        exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
-        virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
-        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_number,
-                                      GenerateVirtualInstrument=False,
-                                      ScanList=[scan_number],
-                                      PtLists=[-1, pt_number],
-                                      DataDirectory=self._dataDir,
-                                      GetFileFromServer=False,
-                                      Detector2ThetaTolerance=0.01,
-                                      OutputWorkspace=exp_info_ws_name,
-                                      DetectorTableWorkspace=virtual_instrument_info_table_name)
-
-        # Load XML file to MD
-        pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
-        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name,
-                                     CreateVirtualInstrument=False,
-                                     OutputWorkspace=pt_md_ws_name,
-                                     Directory=self._dataDir)
-        """
-
-        if target_frame == 'hkl':
-            out_hkl_name = 'HKL_Scan%d' % (scan_no)
+        # Optionally converted to HKL space # Target frame
+        if target_frame.lower().startswith('hkl'):
+            # retrieve UB matrix stored and convert to a 1-D array
+            assert exp_no in self._myUBMatrixDict
+            ub_matrix_1d = self._myUBMatrixDict[exp_no].reshape(9,)
+            # convert to HKL
+            out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_list)
             try:
                 api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
                                        UBMatrix=ub_matrix_1d,
@@ -1183,10 +1148,10 @@ class CWSCDReductionControl(object):
             except RuntimeError as e:
                 err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
                 return False, err_msg
+        elif target_frame.lower().startswith('q-sample') is False:
+            raise RuntimeError('Target frame %s is not supported.' % target_frame)
 
-        ret_tup = out_ws_name, group_name
-
-        return ret_tup
+        return True, ''
 
     def set_server_url(self, server_url):
         """
@@ -1674,7 +1639,10 @@ def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, p
     :param pt_number:
     :return:
     """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
 
+    base_file_name = get_det_xml_file_name(instrument_name, )
 
 def get_spice_file_name(instrument_name, exp_number, scan_number):
     """
@@ -1729,6 +1697,50 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
 
     return ws_name
+
+
+def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
+                                                     pt_list[0], pt_list[-1])
+
+    return merged_ws_name
+
+
+def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
+                                                         pt_list[0], pt_list[-1])
+
+    return merged_ws_name
 
 
 def get_merge_pt_info_ws_name(exp_no, scan_no):
