@@ -1,13 +1,15 @@
 #include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtMantidWidgets/InputController.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
 #include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 
-
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidQtMantidWidgets/InputController.h"
+#include "MantidKernel/Unit.h"
 
 #include <QRgb>
 #include <QSet>

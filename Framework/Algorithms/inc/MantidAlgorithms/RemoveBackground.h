@@ -5,7 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/IComponent.h"
+
 namespace Mantid {
+
+// forward declarations from other Mantid modules
+namespace Kernel {
+class Unit;
+}
+
 namespace Algorithms {
 /** Performs removal of constant (and possibly non-constant after simple
 modification) background calculated in TOF units

@@ -9,6 +9,14 @@
 
 namespace Mantid {
 
+namespace Geometry {
+class IComponent;
+}
+
+namespace Kernel {
+class Unit;
+}
+
 namespace Algorithms {
 
 /** Estimate all incident energies, used by chopper instrument.

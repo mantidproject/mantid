@@ -2,11 +2,6 @@
 #define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <fstream>
-#include <boost/regex.hpp>
 
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
@@ -14,7 +9,15 @@
 #include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
+
+#include <boost/regex.hpp>
 #include <Poco/File.h>
+
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

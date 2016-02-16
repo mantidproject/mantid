@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/AverageLogData.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
 namespace Mantid {
 namespace Algorithms {
 

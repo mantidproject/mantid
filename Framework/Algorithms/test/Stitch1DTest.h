@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include <algorithm>
 #include <math.h>
 #include <boost/tuple/tuple.hpp>

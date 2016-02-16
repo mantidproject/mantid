@@ -7,9 +7,13 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Material.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class Material;
+}
+
 namespace Geometry {
 //----------------------------------------------------------------------
 // Forward Declaration

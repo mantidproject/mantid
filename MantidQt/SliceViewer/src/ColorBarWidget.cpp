@@ -1,6 +1,6 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtSliceViewer/ColorBarWidget.h"
-#include "MantidQtSliceViewer/QScienceSpinBox.h"
+#include "MantidQtAPI/QScienceSpinBox.h"
 #include "qwt_scale_div.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
 #include <iosfwd>

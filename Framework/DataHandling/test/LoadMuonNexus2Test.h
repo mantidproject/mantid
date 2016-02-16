@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"

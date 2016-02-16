@@ -2,7 +2,6 @@
 #define MANTIDGEOMETRY_BOUNDINGBOX_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN

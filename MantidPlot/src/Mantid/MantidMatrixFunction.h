@@ -5,6 +5,7 @@
 #include "MantidMatrix.h"
 
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <QPointer>
 #include <vector>

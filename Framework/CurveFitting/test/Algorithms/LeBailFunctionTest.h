@@ -2,12 +2,15 @@
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <fstream>
 
-#include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
