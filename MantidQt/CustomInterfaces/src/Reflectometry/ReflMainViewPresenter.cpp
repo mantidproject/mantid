@@ -5,7 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -25,10 +28,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
-
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -147,9 +146,9 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // TODO. Select strategy.
   /*
   std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
   UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
 
   // Initialise options
@@ -157,11 +156,11 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 
   // Set up the instrument selectors
   std::vector<std::string> instruments;
-  instruments.push_back("INTER");
-  instruments.push_back("SURF");
-  instruments.push_back("CRISP");
-  instruments.push_back("POLREF");
-  instruments.push_back("OFFSPEC");
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
@@ -201,14 +200,13 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // should'nt touch.
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  std::set<std::string> blacklist;
-  blacklist.insert("ThetaIn");
-  blacklist.insert("ThetaOut");
-  blacklist.insert("InputWorkspace");
-  blacklist.insert("OutputWorkspace");
-  blacklist.insert("OutputWorkspaceWavelength");
-  blacklist.insert("FirstTransmissionRun");
-  blacklist.insert("SecondTransmissionRun");
+  std::set<std::string> blacklist{"ThetaIn",
+                                  "ThetaOut",
+                                  "InputWorkspace",
+                                  "OutputWorkspace",
+                                  "OutputWorkspaceWavelength",
+                                  "FirstTransmissionRun",
+                                  "SecondTransmissionRun"};
   m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -228,8 +226,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
 
 /**
- * Finds the first unused group id
- */
+* Finds the first unused group id
+*/
 int ReflMainViewPresenter::getUnusedGroup(std::set<int> ignoredRows) const {
   std::set<int> usedGroups;
 
@@ -597,11 +595,11 @@ ReflMainViewPresenter::prepareRunWorkspace(const std::string &runStr) {
     return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-   * but
-   * that doesn't preserve history nicely, so we'll just take care of tidying up
-   * in
-   * the event of failure.
-   */
+  * but
+  * that doesn't preserve history nicely, so we'll just take care of tidying up
+  * in
+  * the event of failure.
+  */
   IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
   algPlus->initialize();
   algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
@@ -890,7 +888,7 @@ void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
       const std::string runNo = getRunNumber(runWS);
       if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
         runs.push_back(runNo);
-        workspaceNames.push_back("IvsQ_" + runNo);
+        workspaceNames.emplace_back("IvsQ_" + runNo);
       }
     }
 
@@ -1113,9 +1111,6 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::GroupRowsFlag:
     groupRows();
     break;
-  case IReflPresenter::OpenTableFlag:
-    openTable();
-    break;
   case IReflPresenter::NewTableFlag:
     newTable();
     break;
@@ -1143,11 +1138,19 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::SearchFlag:
     search();
     break;
+  case IReflPresenter::ICATSearchCompleteFlag: {
+    auto algRunner = m_view->getAlgorithmRunner();
+    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+    populateSearch(searchAlg);
+  } break;
   case IReflPresenter::TransferFlag:
     transfer();
     break;
   case IReflPresenter::ImportTableFlag:
     importTable();
+    break;
+  case IReflPresenter::OpenTableFlag:
+    openTable();
     break;
   case IReflPresenter::ExportTableFlag:
     exportTable();
@@ -1323,9 +1326,9 @@ void ReflMainViewPresenter::afterReplaceHandle(
 }
 
 /** Returns how many rows there are in a given group
-    @param groupId : The id of the group to count the rows of
-    @returns The number of rows in the group
- */
+@param groupId : The id of the group to count the rows of
+@returns The number of rows in the group
+*/
 size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const {
   size_t count = 0;
   for (int i = 0; i < m_model->rowCount(); ++i)
@@ -1403,7 +1406,7 @@ void ReflMainViewPresenter::cutSelected() {
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
- * append new rows */
+* append new rows */
 void ReflMainViewPresenter::pasteSelected() {
   const std::string text = m_view->getClipboard();
   std::vector<std::string> lines;
@@ -1442,8 +1445,6 @@ void ReflMainViewPresenter::pasteSelected() {
 /** Searches for runs that can be used */
 void ReflMainViewPresenter::search() {
   const std::string searchString = m_view->getSearchString();
-  const std::string searchInstr = m_view->getSearchInstrument();
-
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -1454,14 +1455,55 @@ void ReflMainViewPresenter::search() {
   if (CatalogManager::Instance().getActiveSessions().empty())
     m_view->showAlgorithmDialog("CatalogLogin");
 
-  try {
-    auto results = m_searcher->search(searchString);
-    m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-    m_view->showSearch(m_searchModel);
+  auto sessionId =
+      CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+
+  // try {
+  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  algSearch->initialize();
+  algSearch->setChild(true);
+  algSearch->setLogging(false);
+  algSearch->setProperty("Session", sessionId);
+  algSearch->setProperty("InvestigationId", searchString);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  auto algRunner = m_view->getAlgorithmRunner();
+  algRunner->startAlgorithm(algSearch);
+  /*
+  while (!currentAlg->isExecuted())
+  {
+
+  THIS WORKS FUNCTIONALLY BUT YOU NEED TO
+  FIND A BETTER WAY TO SEE IF ALGORITHM
+  HAS BEEN EXECUTED AS THIS STILL INTRODUCES
+  A SERIAL-TYPE LAG
+
+
+
+  }
+  if (currentAlg->isExecuted())
+  {
+  ITableWorkspace_sptr results = currentAlg->getProperty("OutputWorkspace");
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
+  }
+  //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
+  //auto results = m_searcher->search(searchString);
+  m_searchModel = ReflSearchModel_sptr(
+  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+  m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-                             "Search Failed");
+  m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
+  "Search Failed");
+  }*/
+}
+
+void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+  if (searchAlg->isExecuted()) {
+    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_view->showSearch(m_searchModel);
   }
 }
 
@@ -1548,8 +1590,8 @@ void ReflMainViewPresenter::transfer() {
     }
 
     /* Set the scale to 1.0 for new rows. If there's a columnHeading specified
-       otherwise,
-       it will be overwritten below.
+    otherwise,
+    it will be overwritten below.
     */
     m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), 1.0);
     auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
@@ -1664,15 +1706,15 @@ void ReflMainViewPresenter::showOptionsDialog() {
 }
 
 /** Gets the options used by the presenter
-    @returns The options used by the presenter
- */
+@returns The options used by the presenter
+*/
 const std::map<std::string, QVariant> &ReflMainViewPresenter::options() const {
   return m_options;
 }
 
 /** Sets the options used by the presenter
-    @param options : The new options for the presenter to use
- */
+@param options : The new options for the presenter to use
+*/
 void ReflMainViewPresenter::setOptions(
     const std::map<std::string, QVariant> &options) {
   // Overwrite the given options
@@ -1705,12 +1747,12 @@ void ReflMainViewPresenter::initOptions() {
 }
 
 /**
- * Select and make a transfer strategy on demand based. Pick up the
- *user-provided
- * transfer strategy to do this.
- *
- * @return new TransferStrategy
- */
+* Select and make a transfer strategy on demand based. Pick up the
+*user-provided
+* transfer strategy to do this.
+*
+* @return new TransferStrategy
+*/
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();

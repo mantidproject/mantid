@@ -331,8 +331,8 @@ bool FitOneSinglePeak::simpleFit() {
     m_peakFunc->setFwhm(m_vecFWHM[i]);
 
     // fit and process result
-    double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX,
-                                     m_maxFitX, false);
+    double goodndess =
+        fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
     processNStoreFitResult(goodndess, true);
 
     // restore the function parameters
@@ -468,8 +468,7 @@ double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
   m_sstream << "Function (to fit): " << peakfunc->asString() << "  From "
             << startx << "  to " << endx << ".\n";
 
-  double goodness =
-      fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
+  double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
 
   return goodness;
 }
@@ -593,7 +592,7 @@ void FitOneSinglePeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
   }
 
   return;
@@ -616,7 +615,7 @@ void FitOneSinglePeak::storeFunctionError(
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;
@@ -638,6 +637,62 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Calcualte chi-square for single domain data
+ * @brief FitOneSinglePeak::calChiSquareSD
+ * @param fitfunc
+ * @param dataws
+ * @param wsindex
+ * @param xmin
+ * @param xmax
+ * @return
+ */
+double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
+                                        MatrixWorkspace_sptr dataws,
+                                        size_t wsindex, double xmin,
+                                        double xmax) {
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // Set the properties
+  fit->setProperty("Function", fitfunc);
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", xmin);
+  fit->setProperty("EndX", xmax);
+
+  fit->executeAsChildAlg();
+  if (!fit->isExecuted()) {
+    g_log.error("Fit for background is not executed. ");
+    throw std::runtime_error("Fit for background is not executed. ");
+  }
+
+  // Retrieve result
+  const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
+  // g_log.notice() << "[DELETE DB]"
+  //               << " Chi2/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByNData")
+  //               << " Chi2/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredDividedByDOF")
+  //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
+  //               << " Chi2W/NParam = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
+  //               << " Chi2W/DOF = " <<
+  //               fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
+  //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted")
+  //               << "\n";
+
+  return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Fit function in single domain
   * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
  * be executed)
@@ -646,24 +701,8 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
   */
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
                                        MatrixWorkspace_sptr dataws,
-                                       size_t wsindex, double xmin, double xmax,
-                                       bool calmode) {
-  // Set up calculation mode: for pure chi-square/Rwp
-  int maxiteration = 50;
-  vector<string> parnames;
-  if (calmode) {
-    // Fix all parameters
-    parnames = fitfunc->getParameterNames();
-    for (size_t i = 0; i < parnames.size(); ++i)
-      fitfunc->fix(i);
-
-    maxiteration = 1;
-  } else {
-    // Unfix all parameters
-    for (size_t i = 0; i < fitfunc->nParams(); ++i)
-      fitfunc->unfix(i);
-  }
-
+                                       size_t wsindex, double xmin,
+                                       double xmax) {
   // Set up sub algorithm fit
   IAlgorithm_sptr fit;
   try {
@@ -679,7 +718,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit->setProperty("MaxIterations", maxiteration);
+  fit->setProperty("MaxIterations", 50); // magic number
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
   fit->setProperty("Minimizer", m_minimizer);
@@ -699,15 +738,9 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
   double chi2 = EMPTY_DBL();
-  if (fitStatus == "success" || calmode) {
+  if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     fitfunc = fit->getProperty("Function");
-  }
-
-  // Release the ties
-  if (calmode) {
-    for (size_t i = 0; i < parnames.size(); ++i)
-      fitfunc->unfix(i);
   }
 
   // Debug information
@@ -820,12 +853,10 @@ double FitOneSinglePeak::fitCompositeFunction(
 
   // Do calculation for starting chi^2/Rwp: as the assumption that the input the
   // so far the best Rwp
-  bool modecal = true;
   // FIXME - This is not a good practise...
-  double backRwp =
-      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  double backRwp = calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
-  m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+  m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
@@ -835,9 +866,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
 
   // Fit
-  modecal = false;
-  double goodness =
-      fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+  double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
   string errorreason;
 
   // Check fit result
@@ -1101,13 +1130,8 @@ void FitPeak::init() {
       new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
       "Fitted peak parameter values. ");
 
-  vector<string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
+  vector<string> bkgdtypes{"Flat", "Flat (A0)", "Linear", "Linear (A0, A1)",
+                           "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -1164,9 +1188,7 @@ void FitPeak::init() {
                   "from proposed value more than "
                   "the given value, fit is treated as failure. ");
 
-  vector<string> costFuncOptions;
-  costFuncOptions.push_back("Chi-Square");
-  costFuncOptions.push_back("Rwp");
+  vector<string> costFuncOptions{"Chi-Square", "Rwp"};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
@@ -1246,16 +1268,16 @@ std::vector<std::string>
 FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
   vector<string> vec_funcparnames;
 
-  for (size_t i = 0; i < funcnames.size(); ++i) {
+  for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcnames[i]);
+    vec_funcparnames.push_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
-        FunctionFactory::Instance().createFunction(funcnames[i]);
+        FunctionFactory::Instance().createFunction(funcname);
 
     stringstream parnamess;
-    parnamess << funcnames[i] << " (";
+    parnamess << funcname << " (";
     vector<string> funcpars = tempfunc->getParameterNames();
     for (size_t j = 0; j < funcpars.size(); ++j) {
       parnamess << funcpars[j];
@@ -1564,18 +1586,18 @@ void FitPeak::setupOutput(
 
   // Parameter vector
   vector<double> vec_fitpeak;
-  for (size_t i = 0; i < m_peakParameterNames.size(); ++i) {
-    double value = m_peakFunc->getParameter(m_peakParameterNames[i]);
-    vec_fitpeak.push_back(value);
+  vec_fitpeak.reserve(m_peakParameterNames.size());
+  for (auto &peakParameterName : m_peakParameterNames) {
+    vec_fitpeak.push_back(m_peakFunc->getParameter(peakParameterName));
   }
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
 
   // Background
   vector<double> vec_fitbkgd;
-  for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i) {
-    double value = m_bkgdFunc->getParameter(m_bkgdParameterNames[i]);
-    vec_fitbkgd.push_back(value);
+  vec_fitpeak.reserve(m_bkgdParameterNames.size());
+  for (auto &bkgdParameterName : m_bkgdParameterNames) {
+    vec_fitbkgd.push_back(m_bkgdFunc->getParameter(bkgdParameterName));
   }
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);
@@ -1601,10 +1623,10 @@ void FitPeak::push(IFunction_const_sptr func,
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
 
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
   return;
@@ -1655,8 +1677,7 @@ TableWorkspace_sptr FitPeak::genOutputTableWS(
 
   if (m_outputRawParams) {
     vector<string> peakparnames = peakfunc->getParameterNames();
-    for (size_t i = 0; i < peakparnames.size(); ++i) {
-      string &parname = peakparnames[i];
+    for (auto &parname : peakparnames) {
       double parvalue = peakfunc->getParameter(parname);
       double error = peakerrormap[parname];
       newrow = outtablews->appendRow();
@@ -1679,8 +1700,7 @@ TableWorkspace_sptr FitPeak::genOutputTableWS(
 
   if (m_outputRawParams) {
     vector<string> bkgdparnames = bkgdfunc->getParameterNames();
-    for (size_t i = 0; i < bkgdparnames.size(); ++i) {
-      string &parname = bkgdparnames[i];
+    for (auto &parname : bkgdparnames) {
       double parvalue = bkgdfunc->getParameter(parname);
       double error = bkgderrormap[parname];
       newrow = outtablews->appendRow();

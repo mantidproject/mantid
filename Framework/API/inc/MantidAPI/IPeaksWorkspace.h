@@ -8,6 +8,7 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -48,10 +49,12 @@ class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
                                        public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
-  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {}
+  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
+    convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  }
 
   /// Destructor
-  virtual ~IPeaksWorkspace();
+  ~IPeaksWorkspace() override;
 
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
@@ -60,6 +63,11 @@ public:
   /** @return the number of peaks
    */
   virtual int getNumberPeaks() const = 0;
+
+  //---------------------------------------------------------------------------------------------
+  /** @return the number of peaks
+   */
+  virtual std::string getConvention() const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Removes the indicated peak
@@ -152,6 +160,8 @@ public:
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
 
+  std::string convention;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IPeaksWorkspace(const IPeaksWorkspace &other)
@@ -159,10 +169,10 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
-  virtual IPeaksWorkspace *doClone() const = 0;
+  IPeaksWorkspace *doClone() const override = 0;
 };
 }
 }

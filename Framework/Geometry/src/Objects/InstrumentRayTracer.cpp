@@ -77,7 +77,7 @@ void InstrumentRayTracer::traceFromSample(const V3D &dir) const {
  * @returns A collection of links defining intersection information
  */
 Links InstrumentRayTracer::getResults() const {
-  Links results(m_resultsTrack.begin(), m_resultsTrack.end());
+  Links results(m_resultsTrack.cbegin(), m_resultsTrack.cend());
   m_resultsTrack.clearIntersectionResults();
   return results;
 }

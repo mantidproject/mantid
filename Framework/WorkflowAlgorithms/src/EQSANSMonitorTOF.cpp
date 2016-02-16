@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "Poco/NumberFormatter.h"
@@ -96,7 +97,8 @@ void EQSANSMonitorTOF::exec() {
       frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
   double frame_offset = 0.0;
   if (frame_tof0 >= tmp_frame_width)
-    frame_offset = tmp_frame_width * ((int)(frame_tof0 / tmp_frame_width));
+    frame_offset =
+        tmp_frame_width * (static_cast<int>(frame_tof0 / tmp_frame_width));
 
   // Find the new binning first
   const MantidVec XIn = inputWS->readX(0); // Copy here to avoid holding on to

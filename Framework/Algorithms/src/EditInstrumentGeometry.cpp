@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -249,7 +251,7 @@ void EditInstrumentGeometry::exec() {
   // Map the properties from spectrum ID to workspace index
   for (size_t i = 0; i < specids.size(); i++) {
     // Find spectrum's workspace index
-    spec2index_map::const_iterator it = spec2indexmap.find(specids[i]);
+    auto it = spec2indexmap.find(specids[i]);
     if (it == spec2indexmap.end()) {
       stringstream errss;
       errss << "Spectrum ID " << specids[i] << " is not found. "

@@ -36,12 +36,12 @@ class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform {
 public:
   CoordTransformDistance(const size_t inD, const coord_t *center,
                          const bool *dimensionsUsed, const size_t outD = 1);
-  virtual CoordTransform *clone() const;
-  virtual ~CoordTransformDistance();
-  virtual std::string toXMLString() const;
-  virtual std::string id() const;
+  CoordTransform *clone() const override;
+  ~CoordTransformDistance() override;
+  std::string toXMLString() const override;
+  std::string id() const override;
 
-  void apply(const coord_t *inputVector, coord_t *outVector) const;
+  void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
   /// Return the center coordinate array
   const coord_t *getCenter() { return m_center; }

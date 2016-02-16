@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "Poco/Path.h"
-#include "Poco/String.h"
-#include "Poco/NumberFormatter.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+
+#include "Poco/NumberFormatter.h"
+#include "Poco/Path.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -234,10 +236,12 @@ void SANSBeamFinder::exec() {
  */
 void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
                                int low, int left, int right) {
-  const int nx_pixels = (int)(HFIRInstrument::readInstrumentParameter(
-      "number-of-x-pixels", beamCenterWS));
-  const int ny_pixels = (int)(HFIRInstrument::readInstrumentParameter(
-      "number-of-y-pixels", beamCenterWS));
+  const int nx_pixels =
+      static_cast<int>(HFIRInstrument::readInstrumentParameter(
+          "number-of-x-pixels", beamCenterWS));
+  const int ny_pixels =
+      static_cast<int>(HFIRInstrument::readInstrumentParameter(
+          "number-of-y-pixels", beamCenterWS));
   std::vector<int> IDs;
 
   // Lower edge

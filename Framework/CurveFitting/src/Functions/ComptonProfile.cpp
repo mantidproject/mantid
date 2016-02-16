@@ -4,6 +4,10 @@
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
+
 #include <gsl/gsl_poly.h>
 
 namespace Mantid {
@@ -17,8 +21,6 @@ namespace {
 ///@cond
 // const char * WSINDEX_NAME = "WorkspaceIndex";
 const char *MASS_NAME = "Mass";
-
-const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 ///@endcond
 }
 

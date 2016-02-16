@@ -26,6 +26,13 @@ Restrictions on the input workspace
 The input workspace must have a fully defined instrument that has X axis units
 of wavelength.
 
+
+Workflow
+--------
+
+.. diagram:: FlatPlatePaalmanPingsCorrection-v1_wkflw.dot
+
+
 Usage
 -----
 

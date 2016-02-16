@@ -34,21 +34,21 @@ namespace Crystal {
 class DLLExport FilterPeaks : public API::Algorithm {
 public:
   FilterPeaks();
-  virtual ~FilterPeaks();
+  ~FilterPeaks() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Filters the peaks in a peaks workspace based upon the valur of a "
            "chosen variable.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

@@ -98,25 +98,26 @@ class DLLExport SaveCanSAS1D : public API::Algorithm {
 public:
   /// default constructor
   SaveCanSAS1D();
-  virtual ~SaveCanSAS1D();
+  ~SaveCanSAS1D() override;
 
-  virtual const std::string name() const { return "SaveCanSAS1D"; }
-  virtual const std::string summary() const {
+  const std::string name() const override { return "SaveCanSAS1D"; }
+  const std::string summary() const override {
     return "Save a MatrixWorkspace to a file in the canSAS 1-D format";
   }
-  virtual int version() const { return 1; }
-  virtual const std::string category() const {
+  int version() const override { return 1; }
+  const std::string category() const override {
     return "DataHandling\\XML;SANS\\DataHandling";
   }
 
 protected:
   /// Overwrites Algorithm method.
-  virtual void init();
+  void init() override;
   /// overriden method sets appending for workspace groups
   void setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int perioidNum);
+                          const std::string &propertyValue,
+                          int perioidNum) override;
   /// Overwrites Algorithm method
-  virtual void exec();
+  void exec() override;
 
   /// Opens the output file and, as necessary blanks it, writes the file header
   /// and moves the file pointer

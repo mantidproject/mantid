@@ -9,6 +9,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -98,10 +99,7 @@ void ConvertToMDMinMaxGlobal::init() {
       "dEAnalysisMode",
       new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
-  std::vector<std::string> TargFrames;
-  TargFrames.push_back("AutoSelect");
-  TargFrames.push_back("Q");
-  TargFrames.push_back("HKL");
+  std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
       "Q3DFrames", "AutoSelect",
       boost::make_shared<StringListValidator>(TargFrames),
@@ -266,13 +264,13 @@ void ConvertToMDMinMaxGlobal::exec() {
     }
   }
 
-  for (size_t i = 0; i < OtherDimensions.size(); ++i) {
-    if (!ws->run().hasProperty(OtherDimensions[i])) {
+  for (auto &OtherDimension : OtherDimensions) {
+    if (!ws->run().hasProperty(OtherDimension)) {
       g_log.error() << "The workspace does not have a property "
-                    << OtherDimensions[i] << std::endl;
+                    << OtherDimension << std::endl;
       throw std::invalid_argument("Property not found. Please see error log.");
     }
-    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimensions[i]));
+    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
     TimeSeriesProperty<double> *p =
         dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
@@ -285,8 +283,8 @@ void ConvertToMDMinMaxGlobal::exec() {
       if (!p) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimensions[i] + " is neither a time series (run) property nor "
-                                 "a property with value<double>";
+            OtherDimension + " is neither a time series (run) property nor "
+                             "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *p;

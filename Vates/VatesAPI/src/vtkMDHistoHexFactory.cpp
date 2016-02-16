@@ -13,7 +13,6 @@
 #include "MantidKernel/ReadLock.h"
 
 #include "vtkNew.h"
-#include "vtkSmartPointer.h"
 #include "vtkStructuredGrid.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
@@ -84,8 +83,8 @@ void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
  *stack.
  * @return the vtkDataSet created
  */
-vtkDataSet *
-vtkMDHistoHexFactory::create3Dor4D(size_t timestep, 
+vtkSmartPointer<vtkDataSet>
+vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
                                    ProgressAction &progressUpdate) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault from
   // algos modifying ws)
@@ -109,8 +108,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-  //vtkSmartPointer<vtkStructuredGrid> visualDataSet = vtkSmartPointer<vtkStructuredGrid>::New();
-  vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
+  vtkSmartPointer<vtkStructuredGrid> visualDataSet =
+      vtkSmartPointer<vtkStructuredGrid>::New();
   visualDataSet->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
 
   // Array with true where the voxel should be shown
@@ -195,12 +194,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   // Hedge against empty data sets
   if (visualDataSet->GetNumberOfPoints() <= 0) {
-    visualDataSet->Delete();
     vtkNullStructuredGrid nullGrid;
     visualDataSet = nullGrid.createNullData();
   }
 
-  return visualDataSet;
+  vtkSmartPointer<vtkDataSet> dataset = visualDataSet;
+  return dataset;
 
 }
 
@@ -210,9 +209,9 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkDataSet *
+vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
-  vtkDataSet *product =
+  auto product =
       tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
   if (product != NULL) {
     return product;

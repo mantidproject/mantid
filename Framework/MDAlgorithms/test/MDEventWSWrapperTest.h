@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -12,7 +13,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
 
 class MDEventWSWrapperTest : public CxxTest::TestSuite {
-  std::auto_ptr<MDEventWSWrapper> pWSWrap;
+  std::unique_ptr<MDEventWSWrapper> pWSWrap;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -24,7 +25,7 @@ public:
 
   void test_construct() {
     TS_ASSERT_THROWS_NOTHING(
-        pWSWrap = std::auto_ptr<MDEventWSWrapper>(new MDEventWSWrapper()));
+        pWSWrap = Mantid::Kernel::make_unique<MDEventWSWrapper>());
   }
   void test_buildNewWS() {
     IMDEventWorkspace_sptr pws;

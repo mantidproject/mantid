@@ -17,11 +17,7 @@ using namespace Mantid::DataObjects;
 void SINQTranspose3D::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
-  std::vector<std::string> transposeOptions;
-  transposeOptions.push_back("Y,X,Z");
-  transposeOptions.push_back("X,Z,Y");
-  transposeOptions.push_back("TRICS");
-  transposeOptions.push_back("AMOR");
+  std::vector<std::string> transposeOptions{"Y,X,Z", "X,Z,Y", "TRICS", "AMOR"};
   this->declareProperty(
       "TransposeOption", "Y,X,Z",
       boost::make_shared<StringListValidator>(transposeOptions),

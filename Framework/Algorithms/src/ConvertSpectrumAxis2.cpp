@@ -7,6 +7,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -56,8 +58,8 @@ void ConvertSpectrumAxis2::init() {
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
   std::vector<std::string> eModeOptions;
-  eModeOptions.push_back("Direct");
-  eModeOptions.push_back("Indirect");
+  eModeOptions.emplace_back("Direct");
+  eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
                   boost::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
@@ -129,7 +131,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
-      m_indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
+      m_indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
     } catch (Exception::NotFoundError &) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -176,13 +178,13 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
 
     if (targetUnit == "ElasticQ") {
-      m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
+      m_indexMap.emplace(elasticQInAngstroms, i);
     } else if (targetUnit == "ElasticQSquared") {
       // The QSquared value.
       double elasticQSquaredInAngstroms =
           elasticQInAngstroms * elasticQInAngstroms;
 
-      m_indexMap.insert(std::make_pair(elasticQSquaredInAngstroms, i));
+      m_indexMap.emplace(elasticQSquaredInAngstroms, i);
     }
 
     progress.report("Converting to Elastic Q...");
@@ -210,7 +212,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
-  NumericAxis *const newAxis = new NumericAxis(m_indexMap.size());
+  auto const newAxis = new NumericAxis(m_indexMap.size());
   outputWorkspace->replaceAxis(1, newAxis);
 
   progress.setNumSteps(nHist + m_indexMap.size());
@@ -218,7 +220,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {

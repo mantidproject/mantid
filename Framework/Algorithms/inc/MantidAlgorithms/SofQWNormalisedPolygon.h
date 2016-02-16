@@ -61,24 +61,24 @@ public:
   /// Default constructor
   SofQWNormalisedPolygon();
   /// Algorithm's name for identification
-  virtual const std::string name() const;
-  virtual const std::string alias() const { return "SofQW3"; }
+  const std::string name() const override;
+  const std::string alias() const override { return "SofQW3"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the intensity as a function of momentum transfer and "
            "energy.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 private:
   /// Initialize the algorithm
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Calculate the Q value for given conditions.
   double calculateQ(const double efixed, const int emode, const double deltaE,

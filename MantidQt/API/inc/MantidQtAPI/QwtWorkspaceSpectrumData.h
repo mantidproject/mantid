@@ -23,54 +23,54 @@ public:
                            const bool plotAsDistribution);
 
   //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtWorkspaceSpectrumData *copy() const;
+  QwtWorkspaceSpectrumData *copy() const override;
   /// Return a new data object of the same type but with a new workspace
-  virtual QwtWorkspaceSpectrumData *
-  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const;
+  QwtWorkspaceSpectrumData *copyWithNewSource(
+      const Mantid::API::MatrixWorkspace &workspace) const override;
 
   //! @return Size of the data set
-  virtual size_t size() const;
+  size_t size() const override;
 
   /**
   Return the x value of data point i
   @param i :: Index
   @return x X value of data point i
   */
-  virtual double x(size_t i) const;
+  double x(size_t i) const override;
   /**
   Return the y value of data point i
   @param i :: Index
   @return y Y value of data point i
   */
-  virtual double y(size_t i) const;
+  double y(size_t i) const override;
 
   /// Returns the error of the i-th data point
-  double e(size_t i) const;
+  double e(size_t i) const override;
   /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i) const;
+  double ex(size_t i) const override;
   /// Number of error bars to plot
-  size_t esize() const;
+  size_t esize() const override;
 
-  double getYMin() const;
-  double getYMax() const;
+  double getYMin() const override;
+  double getYMax() const override;
   /// Return the label to use for the X axis
-  QString getXAxisLabel() const;
+  QString getXAxisLabel() const override;
   /// Return the label to use for the Y axis
-  QString getYAxisLabel() const;
+  QString getYAxisLabel() const override;
 
   bool isHistogram() const { return m_isHistogram; }
   bool dataIsNormalized() const { return m_dataIsNormalized; }
 
   /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on);
-  bool logScale() const { return m_logScale; }
-  void saveLowestPositiveValue(const double v);
+  void setLogScale(bool on) override;
+  bool logScale() const override { return m_logScale; }
+  void saveLowestPositiveValue(const double v) override;
   bool setAsDistribution(bool on = true);
 
   // Sets offsets for and enables waterfall plots
-  void setXOffset(const double x);
-  void setYOffset(const double y);
-  void setWaterfallPlot(bool on);
+  void setXOffset(const double x) override;
+  void setYOffset(const double y) override;
+  void setWaterfallPlot(bool on) override;
 
 protected:
   // Assignment operator (virtualized). MSVC not happy with compiler generated

@@ -38,7 +38,7 @@ namespace Kernel {
 */
 class DLLExport NullValidator : public IValidator {
 public:
-  IValidator_sptr clone() const {
+  IValidator_sptr clone() const override {
     return boost::make_shared<NullValidator>(*this);
   }
 
@@ -46,7 +46,7 @@ private:
   /** Always returns valid, that is ""
    *  @returns an empty string
    */
-  std::string check(const boost::any &) const { return ""; }
+  std::string check(const boost::any &) const override { return ""; }
 };
 
 } // namespace Kernel

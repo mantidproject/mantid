@@ -41,14 +41,12 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
       # for python to find it.
 
       # Lets get the location of the output for the given target
-      get_target_property(SOURCE_LOCATION ${TARGET} LOCATION)
-
-      # And copy it to where we want it to go
+      # and copy it to where we want it to go
       add_custom_command (TARGET ${TARGET} POST_BUILD 
                           COMMAND ${CMAKE_COMMAND} ARGS -E echo 
-                          "Copying \"${SOURCE_LOCATION}\" to \"${OUTPUT_DIR}/\" "
+                          "Copying \"$<TARGET_FILE:${TARGET}>\" to \"${OUTPUT_DIR}/\" "
                           COMMAND ${CMAKE_COMMAND} ARGS -E copy
-                          ${SOURCE_LOCATION}
+                          $<TARGET_FILE:${TARGET}>
                           ${OUTPUT_DIR}/
                           )
   else ()

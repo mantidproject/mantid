@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -49,28 +50,28 @@ public:
   ApplyCalibration();
 
   /// Destructor
-  ~ApplyCalibration() {}
+  ~ApplyCalibration() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ApplyCalibration"; }
+  const std::string name() const override { return "ApplyCalibration"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Update detector positions from input table workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   } // Needs to change
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// Set the detector position from the calibration table
   void setDetectorPosition(const Geometry::Instrument_const_sptr &instrument,
                            const int detID, Mantid::Kernel::V3D pos,

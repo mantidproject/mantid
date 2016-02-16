@@ -45,27 +45,27 @@ public:
   MultipleScatteringCylinderAbsorption();
 
   /// Destructor
-  virtual ~MultipleScatteringCylinderAbsorption();
+  ~MultipleScatteringCylinderAbsorption() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Multiple scattering absorption correction, originally used to "
            "correct vanadium spectrum at IPNS.";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// MultipleScatteringCylinderAbsorption correction calculation.
   void apply_msa_correction(const double angle_deg, const double radius,

@@ -26,12 +26,11 @@ void CatalogLogout::exec() {
   auto keepAliveInstances =
       API::AlgorithmManager::Instance().runningInstancesOf("CatalogKeepAlive");
 
-  for (unsigned i = 0; i < keepAliveInstances.size(); ++i) {
+  for (auto &instance : keepAliveInstances) {
     auto keepAliveInstance = API::AlgorithmManager::Instance().getAlgorithm(
-        keepAliveInstances.at(i)->getAlgorithmID());
+        instance->getAlgorithmID());
 
-    if (logoutSession ==
-        keepAliveInstances.at(i)->getPropertyValue("Session")) {
+    if (logoutSession == instance->getPropertyValue("Session")) {
       keepAliveInstance->cancel();
       API::CatalogManager::Instance().destroyCatalog(logoutSession);
       break;

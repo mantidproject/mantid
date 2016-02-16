@@ -41,56 +41,53 @@ public:
   MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
                             Mantid::Geometry::MDImplicitFunction *function,
                             size_t beginWI = 0, size_t endWI = size_t(-1));
-  virtual ~MatrixWorkspaceMDIterator();
-  virtual size_t getDataSize() const;
+  ~MatrixWorkspaceMDIterator() override;
+  size_t getDataSize() const override;
 
-  virtual bool valid() const;
+  bool valid() const override;
 
-  virtual bool next();
+  bool next() override;
 
-  virtual bool next(size_t skip);
+  bool next(size_t skip) override;
 
-  virtual void jumpTo(size_t index);
+  void jumpTo(size_t index) override;
 
-  virtual signal_t getNormalizedSignal() const;
+  signal_t getNormalizedSignal() const override;
 
-  virtual signal_t getNormalizedError() const;
+  signal_t getNormalizedError() const override;
 
-  virtual signal_t getNormalizedSignalWithMask() const;
+  signal_t getSignal() const override;
 
-  virtual signal_t getSignal() const;
+  signal_t getError() const override;
 
-  virtual signal_t getError() const;
+  coord_t *getVertexesArray(size_t &numVertices) const override;
 
-  virtual coord_t *getVertexesArray(size_t &numVertices) const;
+  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                            const bool *maskDim) const override;
 
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const;
+  Mantid::Kernel::VMD getCenter() const override;
 
-  virtual Mantid::Kernel::VMD getCenter() const;
+  size_t getNumEvents() const override;
 
-  virtual size_t getNumEvents() const;
+  uint16_t getInnerRunIndex(size_t index) const override;
 
-  virtual uint16_t getInnerRunIndex(size_t index) const;
+  int32_t getInnerDetectorID(size_t index) const override;
 
-  virtual int32_t getInnerDetectorID(size_t index) const;
+  coord_t getInnerPosition(size_t index, size_t dimension) const override;
 
-  virtual coord_t getInnerPosition(size_t index, size_t dimension) const;
+  signal_t getInnerSignal(size_t index) const override;
 
-  virtual signal_t getInnerSignal(size_t index) const;
+  signal_t getInnerError(size_t index) const override;
 
-  virtual signal_t getInnerError(size_t index) const;
+  bool getIsMasked() const override;
 
-  virtual bool getIsMasked() const;
+  std::vector<size_t> findNeighbourIndexes() const override;
 
-  virtual std::vector<size_t> findNeighbourIndexes() const;
+  std::vector<size_t> findNeighbourIndexesFaceTouching() const override;
 
-  virtual std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+  size_t getLinearIndex() const override;
 
-  virtual size_t getLinearIndex() const;
-
-  virtual bool isWithinBounds(size_t index) const;
+  bool isWithinBounds(size_t index) const override;
 
 private:
   void calcWorkspacePos(size_t newWI);

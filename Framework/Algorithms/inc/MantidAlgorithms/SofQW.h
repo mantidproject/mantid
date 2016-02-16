@@ -51,14 +51,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SofQW : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
-  virtual const std::string name() const { return "SofQW"; }
+  const std::string name() const override { return "SofQW"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic\\SofQW"; }
+  const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
   static API::MatrixWorkspace_sptr
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
@@ -71,9 +71,9 @@ public:
 
 private:
   /// Initialization code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   SofQCommon m_EmodeProperties;
 };

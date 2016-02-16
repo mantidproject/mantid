@@ -46,21 +46,21 @@ namespace Algorithms {
 class DLLExport SplineInterpolation : public API::Algorithm {
 public:
   SplineInterpolation();
-  virtual ~SplineInterpolation();
+  ~SplineInterpolation() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Interpolates a set of spectra onto a spline defined by a second "
            "input workspace. Optionally, this algorithm can also calculate "
            "derivatives up to order 2 as a side product";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// CubicSpline member used to perform interpolation
   boost::shared_ptr<Functions::CubicSpline> m_cspline;

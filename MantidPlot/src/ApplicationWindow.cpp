@@ -4824,10 +4824,11 @@ void ApplicationWindow::openProjectFolder(std::string lines,
       TSVSerialiser iws(*it);
       if (iws.selectLine("WorkspaceName")) {
         std::string wsName = iws.asString(1);
-        InstrumentWindow *iw =
-            mantidUI->getInstrumentView(QString::fromStdString(wsName));
-        if (iw)
+        InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(
+            mantidUI->getInstrumentView(QString::fromStdString(wsName)));
+        if (iw) {
           iw->loadFromProject(*it, this, fileVersion);
+		}
       }
     }
   }
@@ -11560,7 +11561,7 @@ void ApplicationWindow::populateMantidTreeWidget(const QString &s) {
           // execute the algorithm
           alg->execute();
           // name picked because random and won't ever be used.
-          inputWsVec.push_back("boevsMoreBoevs");
+          inputWsVec.emplace_back("boevsMoreBoevs");
         }
 
         // Group the workspaces as they were when the project was saved

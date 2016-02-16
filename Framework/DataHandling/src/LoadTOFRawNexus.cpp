@@ -1,12 +1,15 @@
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -96,7 +99,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
   bankNames.clear();
 
   // Create the root Nexus class
-  ::NeXus::File *file = new ::NeXus::File(nexusfilename);
+  auto file = new ::NeXus::File(nexusfilename);
 
   // Open the default data group 'entry'
   file->openGroup(entry_name, "NXentry");
@@ -199,8 +202,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
           if (!dims.empty()) {
             size_t newPixels = 1;
-            for (size_t i = 0; i < dims.size(); i++)
-              newPixels *= dims[i];
+            for (auto dim : dims)
+              newPixels *= dim;
             m_numPixels += newPixels;
           }
         } else {
@@ -289,7 +292,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   m_fileMutex.lock();
 
   // Navigate to the point in the file
-  ::NeXus::File *file = new ::NeXus::File(nexusfilename);
+  auto file = new ::NeXus::File(nexusfilename);
   file->openGroup(entry_name, "NXentry");
   file->openGroup("instrument", "NXinstrument");
   file->openGroup(bankName, "NXdetector");
@@ -351,8 +354,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   if (m_spec_max != Mantid::EMPTY_INT()) {
     uint32_t ifirst = pixel_id[0];
     range_check out_range(m_spec_min, m_spec_max, id_to_wi);
-    std::vector<uint32_t>::iterator newEnd =
-        std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
+    auto newEnd = std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
     pixel_id.erase(newEnd, pixel_id.end());
     // check if beginning or end of array was erased
     if (ifirst != pixel_id[0])
@@ -455,7 +457,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 /** @return the name of the entry that we will load */
 std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   std::string entry_name = "entry";
-  ::NeXus::File *file = new ::NeXus::File(filename);
+  auto file = new ::NeXus::File(filename);
   std::map<std::string, std::string> entries = file->getEntries();
   file->close();
   delete file;
@@ -497,7 +499,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  Progress *prog = new Progress(this, 0.0, 1.0, 10);
+  auto prog = new Progress(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -548,9 +550,8 @@ void LoadTOFRawNexus::exec() {
 
   // Load each bank sequentially
   // PARALLEL_FOR1(WS)
-  for (int i = 0; i < int(bankNames.size()); i++) {
+  for (auto bankName : bankNames) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << std::endl;
     loadBank(filename, entry_name, bankName, WS, id_to_wi);

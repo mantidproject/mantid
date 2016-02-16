@@ -40,13 +40,16 @@ namespace CustomInterfaces
   public:
     // -- IALCBaselineModellingModel interface -----------------------------------------------------
 
-    MatrixWorkspace_const_sptr data() const;
+    MatrixWorkspace_const_sptr data() const override;
 
-    void fit(IFunction_const_sptr function, const std::vector<Section> &sections);
+    void fit(IFunction_const_sptr function,
+             const std::vector<Section> &sections) override;
 
-    IFunction_const_sptr fittedFunction() const { return m_fittedFunction; }
+    IFunction_const_sptr fittedFunction() const override {
+      return m_fittedFunction;
+    }
 
-    MatrixWorkspace_const_sptr correctedData() const;
+    MatrixWorkspace_const_sptr correctedData() const override;
 
     ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 

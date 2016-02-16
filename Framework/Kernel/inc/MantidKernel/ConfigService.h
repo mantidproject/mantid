@@ -339,7 +339,7 @@ private:
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;
-  /// wether the proxy has been populated yet
+  /// whether the proxy has been populated yet
   bool m_isProxySet;
 };
 

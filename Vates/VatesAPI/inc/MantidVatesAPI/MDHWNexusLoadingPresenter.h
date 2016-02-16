@@ -39,15 +39,15 @@ class MDLoadingView;
 class DLLExport MDHWNexusLoadingPresenter : public MDHWLoadingPresenter
 {
 public:
-  MDHWNexusLoadingPresenter(MDLoadingView* view,
+  MDHWNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                             const std::string fileName);
-  virtual vtkDataSet* execute(vtkDataSetFactory* factory,
-                              ProgressAction& rebinningProgressUpdate,
-                              ProgressAction& drawingProgressUpdate);
-  virtual void executeLoadMetadata();
-  virtual ~MDHWNexusLoadingPresenter();
-  virtual bool canReadFile() const;
-  virtual std::string getWorkspaceTypeName();
+  vtkSmartPointer<vtkDataSet>
+  execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
+          ProgressAction &drawingProgressUpdate) override;
+  void executeLoadMetadata() override;
+  ~MDHWNexusLoadingPresenter() override;
+  bool canReadFile() const override;
+  std::string getWorkspaceTypeName() override;
   std::vector<int> getExtents();
 private:
   void loadWorkspace();

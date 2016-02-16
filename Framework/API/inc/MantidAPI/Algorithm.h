@@ -1,9 +1,8 @@
 #ifndef MANTID_API_ALGORITHM_H_
 #define MANTID_API_ALGORITHM_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include <atomic>
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
@@ -12,7 +11,6 @@
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
@@ -30,6 +28,10 @@ template <class O> class ActiveStarter;
 class NotificationCenter;
 template <class C, class N> class NObserver;
 class Void;
+}
+
+namespace Json {
+class Value;
 }
 
 namespace Mantid {
@@ -103,7 +105,7 @@ public:
   public:
     StartedNotification(const Algorithm *const alg)
         : AlgorithmNotification(alg) {} ///< Constructor
-    virtual std::string name() const {
+    std::string name() const override {
       return "StartedNotification";
     } ///< class name
   };
@@ -113,7 +115,7 @@ public:
   public:
     FinishedNotification(const Algorithm *const alg, bool res)
         : AlgorithmNotification(alg), success(res) {} ///< Constructor
-    virtual std::string name() const {
+    std::string name() const override {
       return "FinishedNotification";
     }             ///< class name
     bool success; ///< true if the finished algorithm was successful or false if
@@ -130,7 +132,7 @@ public:
                          int progressPrecision)
         : AlgorithmNotification(alg), progress(p), message(msg),
           estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
-    virtual std::string name() const {
+    std::string name() const override {
       return "ProgressNotification";
     }                      ///< class name
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -147,7 +149,7 @@ public:
     /// Constructor
     ErrorNotification(const Algorithm *const alg, const std::string &str)
         : AlgorithmNotification(alg), what(str) {}
-    virtual std::string name() const {
+    std::string name() const override {
       return "ErrorNotification";
     }                 ///< class name
     std::string what; ///< message string
@@ -168,10 +170,10 @@ public:
     /// Assignment operator
     CancelException &operator=(const CancelException &A);
     /// Destructor
-    ~CancelException() throw() {}
+    ~CancelException() throw() override {}
 
     /// Returns the message string.
-    const char *what() const throw() { return outMessage.c_str(); }
+    const char *what() const throw() override { return outMessage.c_str(); }
 
   private:
     /// The message returned by what()
@@ -180,99 +182,103 @@ public:
 
   //============================================================================
   Algorithm();
-  virtual ~Algorithm();
+  ~Algorithm() override;
 
   /** @name Algorithm Information */
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
-  virtual const std::string name() const = 0;
+  const std::string name() const override = 0;
   /// function to return a version of the algorithm, must be overridden in all
   /// algorithms
-  virtual int version() const = 0;
+  int version() const override = 0;
   /// function returns a summary message that will be displayed in the default
   /// GUI, and in the help.
-  virtual const std::string summary() const = 0;
+  const std::string summary() const override = 0;
   /// function to return a category of the algorithm. A default implementation
   /// is provided
-  virtual const std::string category() const { return "Misc"; }
+  const std::string category() const override { return "Misc"; }
   /// Function to return all of the categories that contain this algorithm
-  virtual const std::vector<std::string> categories() const;
+  const std::vector<std::string> categories() const override;
   /// Function to return the separator token for the category string. A default
   /// implementation ';' is provided
-  virtual const std::string categorySeparator() const { return ";"; }
+  const std::string categorySeparator() const override { return ";"; }
   /// function to return any aliases to the algorithm;  A default implementation
   /// is provided
-  virtual const std::string alias() const { return ""; }
+  const std::string alias() const override { return ""; }
 
-  const std::string workspaceMethodName() const;
-  const std::vector<std::string> workspaceMethodOn() const;
-  const std::string workspaceMethodInputProperty() const;
+  const std::string workspaceMethodName() const override;
+  const std::vector<std::string> workspaceMethodOn() const override;
+  const std::string workspaceMethodInputProperty() const override;
 
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed
   /// ones have non-zero.
-  AlgorithmID getAlgorithmID() const { return m_algorithmID; }
+  AlgorithmID getAlgorithmID() const override { return m_algorithmID; }
 
   /** @name IAlgorithm methods */
-  void initialize();
-  bool execute();
-  void executeAsChildAlg();
-  virtual std::map<std::string, std::string> validateInputs();
-  virtual bool isInitialized() const;
-  virtual bool isExecuted() const;
-  bool isRunning() const;
+  void initialize() override;
+  bool execute() override;
+  void executeAsChildAlg() override;
+  std::map<std::string, std::string> validateInputs() override;
+  bool isInitialized() const override;
+  bool isExecuted() const override;
+  bool isRunning() const override;
 
   using Kernel::PropertyManagerOwner::getProperty;
 
-  bool isChild() const;
-  void setChild(const bool isChild);
-  void enableHistoryRecordingForChild(const bool on);
+  bool isChild() const override;
+  void setChild(const bool isChild) override;
+  void enableHistoryRecordingForChild(const bool on) override;
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
-  void setAlwaysStoreInADS(const bool doStore);
-  void setRethrows(const bool rethrow);
+  void setAlwaysStoreInADS(const bool doStore) override;
+  void setRethrows(const bool rethrow) override;
 
   /** @name Asynchronous Execution */
-  Poco::ActiveResult<bool> executeAsync();
+  Poco::ActiveResult<bool> executeAsync() override;
 
   /// Add an observer for a notification
-  void addObserver(const Poco::AbstractObserver &observer) const;
+  void addObserver(const Poco::AbstractObserver &observer) const override;
 
   /// Remove an observer
-  void removeObserver(const Poco::AbstractObserver &observer) const;
+  void removeObserver(const Poco::AbstractObserver &observer) const override;
 
   /// Raises the cancel flag.
-  virtual void cancel();
+  void cancel() override;
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
   /// Returns a reference to the logger.
   Kernel::Logger &getLogger() const { return g_log; }
   /// Logging can be disabled by passing a value of false
-  void setLogging(const bool value) { g_log.setEnabled(value); }
+  void setLogging(const bool value) override { g_log.setEnabled(value); }
   /// returns the status of logging, True = enabled
-  bool isLogging() const { return g_log.getEnabled(); }
+  bool isLogging() const override { return g_log.getEnabled(); }
 
   /// sets the logging priority offset
-  void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
+  void setLoggingOffset(const int value) override {
+    g_log.setLevelOffset(value);
+  }
   /// returns the logging priority offset
-  int getLoggingOffset() const { return g_log.getLevelOffset(); }
+  int getLoggingOffset() const override { return g_log.getLevelOffset(); }
   /// disable Logging of start and end messages
-  void setAlgStartupLogging(const bool enabled);
+  void setAlgStartupLogging(const bool enabled) override;
   /// get the state of Logging of start and end messages
-  bool getAlgStartupLogging() const;
+  bool getAlgStartupLogging() const override;
 
   /// setting the child start progress
-  void setChildStartProgress(const double startProgress) const {
+  void setChildStartProgress(const double startProgress) const override {
     m_startChildProgress = startProgress;
   }
   /// setting the child end progress
-  void setChildEndProgress(const double endProgress) const {
+  void setChildEndProgress(const double endProgress) const override {
     m_endChildProgress = endProgress;
   }
 
   /** @name Serialization functions */
   //@{
   /// Serialize an object to a string
-  virtual std::string toString() const;
+  std::string toString() const override;
+  /// Serialize an object to a json object
+  ::Json::Value toJson() const;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
   /// Construct an object from a history entry
@@ -350,9 +356,9 @@ protected:
   virtual void fillHistory();
 
   /// Set to true to stop execution
-  bool m_cancel;
+  std::atomic<bool> m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
-  bool m_parallelException;
+  std::atomic<bool> m_parallelException;
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust
                                  // g_execCount
@@ -400,6 +406,8 @@ private:
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
 
+  void registerFeatureUsage() const;
+
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm,
@@ -419,7 +427,7 @@ private:
   /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync;     ///< Algorithm is running asynchronously
-  bool m_running;          ///< Algorithm is running
+  std::atomic<bool> m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class
@@ -451,8 +459,6 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-  /// A non-recursive mutex for thread-safety
-  mutable Kernel::Mutex m_mutex;
 };
 
 /// Typedef for a shared pointer to an Algorithm

@@ -5,6 +5,12 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,10 +20,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
-
-#include "MantidGeometry/Instrument/Detector.h"
+#include <boost/lexical_cast.hpp>
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -27,14 +30,13 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
 
-#include <boost/lexical_cast.hpp>
-#include <cmath>
-#include <climits>
-#include <vector>
-#include <sstream>
-#include <cctype>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <functional>
+#include <sstream>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -52,7 +54,7 @@ LoadISISNexus2::LoadISISNexus2()
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
       m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
-      m_spec_end(NULL), m_monitors(), m_logCreator(), m_progress(),
+      m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
       m_cppFile() {}
 
 /**
@@ -80,19 +82,17 @@ void LoadISISNexus2::init() {
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", (int64_t)0, mustBePositive);
-  declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
+  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
+  declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
-  std::vector<std::string> monitorOptions;
-  monitorOptions.push_back("Include");
-  monitorOptions.push_back("Exclude");
-  monitorOptions.push_back("Separate");
+  std::vector<std::string> monitorOptions{"Include", "Exclude", "Separate"};
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
@@ -212,8 +212,8 @@ void LoadISISNexus2::exec() {
   size_t total_specs =
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
 
-  m_progress = boost::shared_ptr<API::Progress>(new Progress(
-      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
+  m_progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
 
   DataObjects::Workspace2D_sptr local_workspace =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -722,8 +722,8 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
   }
   // count the number of spectra
   size_t nSpec = 0;
-  for (auto it = m_spectraBlocks.begin(); it != m_spectraBlocks.end(); ++it) {
-    nSpec += it->last - it->first + 1;
+  for (auto &spectraBlock : m_spectraBlocks) {
+    nSpec += spectraBlock.last - spectraBlock.first + 1;
   }
   return nSpec;
 }
@@ -745,10 +745,9 @@ void LoadISISNexus2::loadPeriodData(
   int64_t period_index(period - 1);
   // int64_t first_monitor_spectrum = 0;
 
-  for (auto block = m_spectraBlocks.begin(); block != m_spectraBlocks.end();
-       ++block) {
-    if (block->isMonitor) {
-      NXData monitor = entry.openNXData(block->monName);
+  for (auto &spectraBlock : m_spectraBlocks) {
+    if (spectraBlock.isMonitor) {
+      NXData monitor = entry.openNXData(spectraBlock.monName);
       NXInt mondata = monitor.openIntData();
       m_progress->report("Loading monitor");
       mondata.load(1, static_cast<int>(period - 1)); // TODO this is just wrong
@@ -782,9 +781,9 @@ void LoadISISNexus2::loadPeriodData(
       // divisible by the block-size
       // and if not have an extra read of the left overs
       const int64_t blocksize = 8;
-      const int64_t rangesize = block->last - block->first + 1;
+      const int64_t rangesize = spectraBlock.last - spectraBlock.first + 1;
       const int64_t fullblocks = rangesize / blocksize;
-      int64_t spectra_no = block->first;
+      int64_t spectra_no = spectraBlock.first;
 
       // For this to work correctly, we assume that the spectrum list increases
       // monotonically
@@ -1176,8 +1175,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
                                             // number of groups.
 
     // identify monitor ID range.
-    for (auto it = monitors.begin(); it != monitors.end(); it++) {
-      int64_t mon_id = static_cast<int64_t>(it->first);
+    for (auto &monitor : monitors) {
+      int64_t mon_id = static_cast<int64_t>(monitor.first);
       if (m_monBlockInfo.spectraID_min > mon_id)
         m_monBlockInfo.spectraID_min = mon_id;
       if (m_monBlockInfo.spectraID_max < mon_id)
@@ -1274,15 +1273,15 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
   std::map<int64_t, std::string> remaining_monitors;
   if (removeMonitors) {
-    for (auto it = monitors.begin(); it != monitors.end(); it++) {
-      if (it->first >= m_detBlockInfo.spectraID_min &&
-          it->first <= m_detBlockInfo.spectraID_max) { // monitors ID-s are
-                                                       // included with spectra
-                                                       // ID-s -- let's try not
-                                                       // to load it twice.
-        OvelapMonitors.insert(*it);
+    for (auto &monitor : monitors) {
+      if (monitor.first >= m_detBlockInfo.spectraID_min &&
+          monitor.first <= m_detBlockInfo.spectraID_max) { // monitors ID-s are
+        // included with spectra
+        // ID-s -- let's try not
+        // to load it twice.
+        OvelapMonitors.insert(monitor);
       } else {
-        remaining_monitors.insert(*it);
+        remaining_monitors.insert(monitor);
       }
     }
   }

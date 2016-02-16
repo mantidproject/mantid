@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
 
@@ -48,7 +48,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageROIViewQtWidget : public QWidget, public IImageROIView {
+class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
+    : public QWidget,
+      public IImageROIView {
   Q_OBJECT
 
 public:
@@ -61,7 +63,7 @@ public:
 
   SelectionState selectionState() const { return m_selectionState; }
 
-  void changeSelectionState(const SelectionState& state);
+  void changeSelectionState(const SelectionState &state);
 
   /// show a stack of images given the path to the files
   void showStack(const std::string &path);

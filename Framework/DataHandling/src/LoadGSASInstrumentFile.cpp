@@ -1,23 +1,24 @@
 #include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadFullprofResolution.h"
-
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
+#include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <fstream>
 
@@ -151,7 +152,7 @@ void LoadGSASInstrumentFile::exec() {
                   << ".\n";
     map<string, double> parammap;
     parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1]);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
     g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
   }
 
@@ -172,18 +173,17 @@ void LoadGSASInstrumentFile::exec() {
     if (bankIds.size()) {
       // If user provided a list of banks, check that they exist in the .prm
       // file
-      for (size_t i = 0; i < bankIds.size(); i++) {
-        if (!bankparammap.count(bankIds[i])) {
+      for (auto bankId : bankIds) {
+        if (!bankparammap.count(bankId)) {
           std::stringstream errorString;
-          errorString << "Bank " << bankIds[i] << " not found in .prm file";
+          errorString << "Bank " << bankId << " not found in .prm file";
           throw runtime_error(errorString.str());
         }
       }
     } else {
       // Else, use all available banks
-      for (map<size_t, map<string, double>>::iterator it = bankparammap.begin();
-           it != bankparammap.end(); ++it) {
-        bankIds.push_back(static_cast<int>(it->first));
+      for (auto &bank : bankparammap) {
+        bankIds.push_back(static_cast<int>(bank.first));
       }
     }
 
@@ -410,7 +410,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<size_t, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name

@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
@@ -68,9 +69,7 @@ void RefinePowderInstrumentParameters3::init() {
       "Output tableworkspace containing instrument's fitted parameters. ");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.push_back("OneStepFit");
-  algoptions.push_back("MonteCarlo");
+  vector<string> algoptions{"OneStepFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -84,9 +83,7 @@ void RefinePowderInstrumentParameters3::init() {
                   "Random seed for Monte Carlo simulation. ");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.push_back("ConstantValue");
-  stdoptions.push_back("UseInputValue");
+  vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
@@ -295,7 +292,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
     }
     newpar.fit = fit;
 
-    parammap.insert(make_pair(parname, newpar));
+    parammap.emplace(parname, newpar);
   }
 
   return;
@@ -520,13 +517,12 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
-  for (size_t i = 0; i < mcgroup.size(); ++i) {
+  for (auto paramname : mcgroup) {
     // random number between -1 and 1
     double randomnumber =
         2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
 
     // parameter information
-    string paramname = mcgroup[i];
     Parameter param = curparammap[paramname];
     double stepsize = m_dampingFactor * currchisq *
                       (param.curvalue * param.mcA1 + param.mcA0) *
@@ -694,7 +690,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   {
     map<string, Parameter> storemap;
     duplicateParameters(parammap, storemap);
-    bestresults.push_back(make_pair(chisq, storemap));
+    bestresults.emplace_back(chisq, storemap);
     sort(bestresults.begin(), bestresults.end());
   }
   */
@@ -723,8 +719,8 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
   mcgroups.push_back(geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (size_t i = 0; i < geomparams.size(); ++i)
-    dboutss << geomparams[i] << "\t\t";
+  for (auto &geomparam : geomparams)
+    dboutss << geomparam << "\t\t";
   dboutss << endl;
 
   g_log.notice(dboutss.str());
@@ -1107,14 +1103,14 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
   */
 void RefinePowderInstrumentParameters3::addOrReplace(
     map<string, Parameter> &parameters, string parname, double parvalue) {
-  map<string, Parameter>::iterator pariter = parameters.find(parname);
+  auto pariter = parameters.find(parname);
   if (pariter != parameters.end()) {
     parameters[parname].curvalue = parvalue;
   } else {
     Parameter newparameter;
     newparameter.name = parname;
     newparameter.curvalue = parvalue;
-    parameters.insert(make_pair(parname, newparameter));
+    parameters.emplace(parname, newparameter);
   }
 
   return;
@@ -1134,7 +1130,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 
   outws->getAxis(0)->setUnit("dSpacing");
 
-  TextAxis *taxis = new TextAxis(outws->getNumberHistograms());
+  auto taxis = new TextAxis(outws->getNumberHistograms());
   taxis->setLabel(0, "Data");
   taxis->setLabel(1, "Model");
   taxis->setLabel(2, "DiffDM");
@@ -1187,8 +1183,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   msgss << "Set Instrument Function Parameter : " << endl;
 
   std::map<std::string, Parameter>::iterator paramiter;
-  for (size_t i = 0; i < funparamnames.size(); ++i) {
-    string parname = funparamnames[i];
+  for (auto parname : funparamnames) {
     paramiter = params.find(parname);
 
     if (paramiter != params.end()) {
@@ -1317,7 +1312,7 @@ void duplicateParameters(map<string, Parameter> source,
     Parameter param = miter->second;
     Parameter newparam;
     newparam = param;
-    target.insert(make_pair(parname, newparam));
+    target.emplace(parname, newparam);
   }
 
   return;
@@ -1360,7 +1355,7 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
   lookupdict.clear();
 
   for (size_t i = 0; i < strvec.size(); ++i)
-    lookupdict.insert(make_pair(strvec[i], i));
+    lookupdict.emplace(strvec[i], i);
 
   return;
 }
@@ -1397,7 +1392,7 @@ void storeFunctionParameterValue(
     string &parname = parnames[i];
     double parvalue = function->getParameter(i);
     double parerror = function->getError(i);
-    parvaluemap.insert(make_pair(parname, make_pair(parvalue, parerror)));
+    parvaluemap.emplace(parname, make_pair(parvalue, parerror));
   }
 
   return;
@@ -1413,8 +1408,7 @@ void restoreFunctionParameterValue(
     map<string, Parameter> &parammap) {
   vector<string> parnames = function->getParameterNames();
 
-  for (size_t i = 0; i < parnames.size(); ++i) {
-    string &parname = parnames[i];
+  for (auto &parname : parnames) {
     map<string, pair<double, double>>::iterator miter;
     miter = parvaluemap.find(parname);
 
@@ -1426,7 +1420,7 @@ void restoreFunctionParameterValue(
       function->setParameter(parname, parvalue);
 
       // 2. Parameter map
-      map<string, Parameter>::iterator pariter = parammap.find(parname);
+      auto pariter = parammap.find(parname);
       if (pariter != parammap.end()) {
         // Find the entry
         pariter->second.curvalue = parvalue;

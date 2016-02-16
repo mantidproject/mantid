@@ -178,7 +178,7 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   Poco::StringTokenizer tokenizer(versionString, ".",
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
+  auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
     try {
@@ -240,11 +240,11 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().insert(std::make_pair(
+  inetHelper.headers().emplace(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
-          Poco::DateTimeFormat::HTTP_FORMAT)));
+          Poco::DateTimeFormat::HTTP_FORMAT));
   inetHelper.sendRequest(url, os);
   std::string retVal = os.str();
 

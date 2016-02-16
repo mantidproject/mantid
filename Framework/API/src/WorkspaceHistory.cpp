@@ -6,7 +6,10 @@
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string/split.hpp>
+
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
@@ -95,7 +98,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  AlgorithmHistories::const_iterator start = m_algorithms.begin();
+  auto start = m_algorithms.cbegin();
   std::advance(start, index);
   return *start;
 }
@@ -180,9 +183,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  AlgorithmHistories::const_iterator histIter = m_algorithms.begin();
-  for (; histIter != m_algorithms.end(); ++histIter) {
-    (*histIter)->saveNexus(file, algCount);
+  for (const auto &algorithm : m_algorithms) {
+    algorithm->saveNexus(file, algCount);
   }
 
   // close process group
@@ -269,8 +271,9 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
                                          AlgorithmHistory_sptr parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
-  for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it) {
-    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(*it);
+  for (auto historyNumber : historyNumbers) {
+    std::string entryName =
+        "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
@@ -305,8 +308,8 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string entryName = it->first;
+  for (auto &entry : entries) {
+    std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
       entryName = entryName.substr(16, entryName.size() - 16);

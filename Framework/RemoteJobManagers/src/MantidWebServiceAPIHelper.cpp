@@ -21,7 +21,7 @@ std::vector<Poco::Net::HTTPCookie> MantidWebServiceAPIHelper::g_cookies;
 
 MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
     : m_session(
-          NULL) // Make sure this is always either NULL or a valid pointer.
+          nullptr) // Make sure this is always either NULL or a valid pointer.
 {
   // TODO: the job manager factory or someone else should set this, and then
   // this class would be usable with any other compute resource that implements
@@ -105,8 +105,8 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   // Need to be able to specify the content length, so build up the post body
   // here.
   std::ostringstream postBody;
-  PostDataMap::const_iterator it = postData.begin();
-  while (it != postData.end()) {
+  auto it = postData.cbegin();
+  while (it != postData.cend()) {
     postBody << boundaryLine;
     postBody << "Content-Disposition: form-data; name=\"" << (*it).first
              << "\"";
@@ -182,7 +182,7 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
   // Set up the session object
   if (m_session) {
     delete m_session;
-    m_session = NULL;
+    m_session = nullptr;
   }
 
   if (Poco::URI(m_serviceBaseUrl).getScheme() == "https") {

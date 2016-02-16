@@ -137,9 +137,9 @@ std::string plotsString(const std::vector<std::string> &unstitched_ws,
   // Plot I vs Q and I vs Lambda graphs
   plot_string << "#Plot workspaces\n";
   std::vector<std::string> workspaceList;
-  workspaceList.push_back("unstitchedGroupWS");
+  workspaceList.emplace_back("unstitchedGroupWS");
   workspaceList.push_back(stitched_wsStr);
-  workspaceList.push_back("IvsLamGroupWS");
+  workspaceList.emplace_back("IvsLamGroupWS");
 
   plot_string << plot1DString(
       workspaceList,
@@ -238,7 +238,7 @@ stitchGroupString(const std::set<int> &rows, const std::string &instrument,
 
     const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
     runs.push_back(runNo);
-    workspaceNames.push_back("IvsQ_" + runNo);
+    workspaceNames.emplace_back("IvsQ_" + runNo);
 
     startOverlaps.push_back(qmin);
     endOverlaps.push_back(qmax);

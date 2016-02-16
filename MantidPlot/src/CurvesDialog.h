@@ -47,7 +47,7 @@ class CurvesDialog : public QDialog
 
 public:
   CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0 );
-  ~CurvesDialog();
+  ~CurvesDialog() override;
 
 private slots:
   void addCurves();
@@ -67,12 +67,12 @@ private slots:
 
 private:
   void setGraph(Graph *graph);
-  void closeEvent(QCloseEvent*);
+  void closeEvent(QCloseEvent *) override;
 
   void init();	
   bool addCurve(const QString& name);
-  QSize sizeHint() const;
-  void contextMenuEvent(QContextMenuEvent *);
+  QSize sizeHint() const override;
+  void contextMenuEvent(QContextMenuEvent *) override;
 
   ApplicationWindow* d_app;
   Graph *d_graph;

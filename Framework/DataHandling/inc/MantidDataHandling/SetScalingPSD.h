@@ -7,6 +7,15 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace Geometry {
+class IComponent;
+}
+
+namespace Kernel {
+class V3D;
+}
+
 namespace DataHandling {
 /** @class SetScalingPSD SetScalingPSD.h MantidAlgorithm/SetScalingPSD.h
 
@@ -56,11 +65,11 @@ public:
   SetScalingPSD();
 
   /// Destructor
-  ~SetScalingPSD() {}
+  ~SetScalingPSD() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SetScalingPSD"; };
+  const std::string name() const override { return "SetScalingPSD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "For an instrument with Position Sensitive Detectors (PSDs) the "
            "'engineering' positions of individual detectors may not match the "
            "true areas where neutrons are detected. This algorithm reads data "
@@ -69,18 +78,18 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of the input file
   std::string m_filename;

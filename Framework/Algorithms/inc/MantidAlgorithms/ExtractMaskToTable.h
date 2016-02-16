@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -36,20 +37,20 @@ namespace Algorithms {
 class DLLExport ExtractMaskToTable : public API::Algorithm {
 public:
   ExtractMaskToTable();
-  virtual ~ExtractMaskToTable();
+  ~ExtractMaskToTable() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ExtractMaskToTable"; }
+  const std::string name() const override { return "ExtractMaskToTable"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The output TableWorkspace should be compatible to "
            "MaskBinsFromTable.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Masking"; }
+  const std::string category() const override { return "Transforms\\Masking"; }
 
   /// Remove the items appeared in a vector from another
   std::vector<detid_t> subtractVector(std::vector<detid_t> minuend,
@@ -57,9 +58,9 @@ public:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Input matrix workspace
   API::MatrixWorkspace_const_sptr m_dataWS;
@@ -76,10 +77,10 @@ private:
   void parseStringToVector(std::string liststr, std::vector<detid_t> &detidvec);
 
   /// Extract mask from a workspace to a list of detectors
-  void extractMaskFromMatrixWorkspace(std::vector<detid_t> &maskeddetids);
+  std::vector<detid_t> extractMaskFromMatrixWorkspace();
 
   /// Extract masked detectors from a MaskWorkspace
-  void extractMaskFromMaskWorkspace(std::vector<detid_t> &maskeddetids);
+  std::vector<detid_t> extractMaskFromMaskWorkspace();
 
   /// Copy table workspace content from one workspace to another
   void copyTableWorkspaceContent(DataObjects::TableWorkspace_sptr sourceWS,

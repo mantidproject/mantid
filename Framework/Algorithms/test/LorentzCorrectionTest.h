@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"

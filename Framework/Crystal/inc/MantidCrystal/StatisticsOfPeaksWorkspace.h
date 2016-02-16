@@ -17,21 +17,21 @@ namespace Crystal {
 class DLLExport StatisticsOfPeaksWorkspace : public API::Algorithm {
 public:
   StatisticsOfPeaksWorkspace();
-  ~StatisticsOfPeaksWorkspace();
+  ~StatisticsOfPeaksWorkspace() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "StatisticsOfPeaksWorkspace";
   };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Statistics of a PeaksWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\Peaks;DataHandling\\Text";
   }
 
@@ -39,9 +39,9 @@ private:
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Runs SortHKL on workspace
   void doSortHKL(Mantid::API::Workspace_sptr ws, std::string runName);
 

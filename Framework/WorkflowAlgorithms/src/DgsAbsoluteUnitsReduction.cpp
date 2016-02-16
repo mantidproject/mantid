@@ -1,10 +1,11 @@
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -160,10 +161,8 @@ void DgsAbsoluteUnitsReduction::exec() {
                                   "monovan-integr-min", outputWS);
   double eMax = getDblPropOrParam("AbsUnitsMaximumEnergy", reductionManager,
                                   "monovan-integr-max", outputWS);
-  std::vector<double> params;
-  params.push_back(eMin);
-  params.push_back(eMax - eMin);
-  params.push_back(eMax);
+
+  std::vector<double> params{eMin, eMax - eMin, eMax};
 
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);

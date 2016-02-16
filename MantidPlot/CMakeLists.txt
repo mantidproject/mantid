@@ -139,7 +139,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/ColorBox.cpp
                    src/lib/src/ColorButton.cpp
                    src/lib/src/ColorMapEditor.cpp
-                   src/lib/src/DoubleSpinBox.cpp
                    src/lib/src/ExtensibleFileDialog.cpp
                    src/lib/src/LineNumberDisplay.cpp
                    src/lib/src/PatternBox.cpp
@@ -185,6 +184,8 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
+				   src/Mantid/MantidSurfacePlotDialog.cpp
+				   src/Mantid/MantidGroupPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
@@ -193,51 +194,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
-                   src/Mantid/InstrumentWidget/BinDialog.cpp
-                   src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/ComponentActor.cpp
-                   src/Mantid/InstrumentWidget/SampleActor.cpp
-                   src/Mantid/InstrumentWidget/GLActorCollection.cpp
-                   src/Mantid/InstrumentWidget/GLActor.cpp
-                   src/Mantid/InstrumentWidget/GLActorVisitor.cpp
-                   src/Mantid/InstrumentWidget/GLColor.cpp
-                   src/Mantid/InstrumentWidget/GLObject.cpp
-                   src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/InstrumentActor.cpp
-                   src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
-                   src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowTab.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.cpp
-                   src/Mantid/InstrumentWidget/MantidGLWidget.cpp
-                   src/Mantid/InstrumentWidget/MaskBinsData.cpp
-                   src/Mantid/InstrumentWidget/ColorMapWidget.cpp
-                   src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/ObjComponentActor.cpp
-                   src/Mantid/InstrumentWidget/OpenGLError.cpp
-                   src/Mantid/InstrumentWidget/RectangularDetectorActor.cpp
-                   src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
-                   src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
-                   src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
-                   src/Mantid/InstrumentWidget/RotationSurface.cpp
-                   src/Mantid/InstrumentWidget/PanelsSurface.cpp
-                   src/Mantid/InstrumentWidget/ProjectionSurface.cpp
-                   src/Mantid/InstrumentWidget/Projection3D.cpp
-                   src/Mantid/InstrumentWidget/PeakMarker2D.cpp
-                   src/Mantid/InstrumentWidget/PeakOverlay.cpp
-                   src/Mantid/InstrumentWidget/RectF.cpp
-                   src/Mantid/InstrumentWidget/OneCurvePlot.cpp
-                   src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
-                   src/Mantid/InstrumentWidget/XIntegrationControl.cpp
-                   src/Mantid/InstrumentWidget/Shape2D.cpp
-                   src/Mantid/InstrumentWidget/Shape2DCollection.cpp
-                   src/Mantid/InstrumentWidget/SimpleWidget.cpp
-                   src/Mantid/InstrumentWidget/Viewport.cpp
-                   src/Mantid/InstrumentWidget/DetXMLFile.cpp
-                   src/Mantid/InstrumentWidget/UCorrectionDialog.cpp
 )
 
 ###########################################################################
@@ -382,7 +339,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/include/ColorBox.h
                    src/lib/include/ColorButton.h
                    src/lib/include/ColorMapEditor.h
-                   src/lib/include/DoubleSpinBox.h
                    src/lib/include/ExtensibleFileDialog.h
                    src/lib/include/LineNumberDisplay.h
                    src/lib/include/PatternBox.h
@@ -421,9 +377,10 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidMatrixFunction.h
-                   src/Mantid/MantidAlgorithmMetatype.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
+				   src/Mantid/MantidSurfacePlotDialog.h
+				   src/Mantid/MantidGroupPlotGenerator.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
@@ -432,53 +389,8 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
-                   src/Mantid/InstrumentWidget/BinDialog.h
-                   src/Mantid/InstrumentWidget/CompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/ComponentActor.h
-                   src/Mantid/InstrumentWidget/SampleActor.h
-                   src/Mantid/InstrumentWidget/GLActorCollection.h
-                   src/Mantid/InstrumentWidget/GLActor.h
-                   src/Mantid/InstrumentWidget/GLActorVisitor.h
-                   src/Mantid/InstrumentWidget/GLColor.h
-                   src/Mantid/InstrumentWidget/GLObject.h
-                   src/Mantid/InstrumentWidget/ICompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/InstrumentActor.h
-                   src/Mantid/InstrumentWidget/InstrumentTreeModel.h
-                   src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
-				   src/Mantid/InstrumentWidget/InstrumentWindowTypes.h
-                   src/Mantid/InstrumentWidget/InstrumentWindow.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowTab.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h
-                   src/Mantid/InstrumentWidget/MantidGLWidget.h
-                   src/Mantid/InstrumentWidget/MaskBinsData.h
-                   src/Mantid/InstrumentWidget/ColorMapWidget.h
-                   src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/ObjComponentActor.h
-                   src/Mantid/InstrumentWidget/OpenGLError.h
-                   src/Mantid/InstrumentWidget/RectangularDetectorActor.h
-                   src/Mantid/InstrumentWidget/UnwrappedCylinder.h
-                   src/Mantid/InstrumentWidget/UnwrappedSphere.h
-                   src/Mantid/InstrumentWidget/UnwrappedSurface.h
-                   src/Mantid/InstrumentWidget/RotationSurface.h
-                   src/Mantid/InstrumentWidget/PeakMarker2D.h
-                   src/Mantid/InstrumentWidget/PeakOverlay.h
-                   src/Mantid/InstrumentWidget/PanelsSurface.h
-                   src/Mantid/InstrumentWidget/ProjectionSurface.h
-                   src/Mantid/InstrumentWidget/Projection3D.h
-                   src/Mantid/InstrumentWidget/RectF.h
-                   src/Mantid/InstrumentWidget/OneCurvePlot.h
-                   src/Mantid/InstrumentWidget/CollapsiblePanel.h
-                   src/Mantid/InstrumentWidget/XIntegrationControl.h
-                   src/Mantid/InstrumentWidget/Shape2D.h
-                   src/Mantid/InstrumentWidget/Shape2DCollection.h
-                   src/Mantid/InstrumentWidget/SimpleWidget.h
-                   src/Mantid/InstrumentWidget/Viewport.h
-                   src/Mantid/InstrumentWidget/DetXMLFile.h
-                   src/Mantid/InstrumentWidget/UCorrectionDialog.h
                    src/Mantid/IProjectSerialisable.h
+                   src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
 ###########################################################################
@@ -521,7 +433,6 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/Mantid/ErrorBarSettings.h
                src/Mantid/MantidUI.h
                src/Mantid/MantidMatrix.h
-               src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
 set( SRC_UNITY_IGNORE_FILES )
@@ -666,7 +577,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/lib/include/ColorBox.h
                         src/lib/include/ColorButton.h
                         src/lib/include/ColorMapEditor.h
-                        src/lib/include/DoubleSpinBox.h
                         src/lib/include/ExtensibleFileDialog.h
                         src/lib/include/LineNumberDisplay.h
                         src/lib/include/PatternBox.h
@@ -696,36 +606,17 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidMatrixFunction.h
-		       src/Mantid/MantidMatrixModel.h
+		               src/Mantid/MantidMatrixModel.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidSampleMaterialDialog.h
+					   src/Mantid/MantidSurfacePlotDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
-                       src/Mantid/InstrumentWidget/XIntegrationControl.h
-                       src/Mantid/InstrumentWidget/BinDialog.h
-                       src/Mantid/InstrumentWidget/InstrumentTreeModel.h
-                       src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowTab.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h
-                       src/Mantid/InstrumentWidget/ColorMapWidget.h
-                       src/Mantid/InstrumentWidget/MantidGLWidget.h
-                       src/Mantid/InstrumentWidget/OneCurvePlot.h
-                       src/Mantid/InstrumentWidget/CollapsiblePanel.h
-                       src/Mantid/InstrumentWidget/InstrumentActor.h
-                       src/Mantid/InstrumentWidget/PeakOverlay.h
-                       src/Mantid/InstrumentWidget/ProjectionSurface.h
-                       src/Mantid/InstrumentWidget/Projection3D.h
-                       src/Mantid/InstrumentWidget/Shape2DCollection.h
-                       src/Mantid/InstrumentWidget/UnwrappedSurface.h
-					   src/Mantid/InstrumentWidget/UCorrectionDialog.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -737,7 +628,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
                src/Mantid/MantidSampleMaterialDialog.ui
-      			   src/Mantid/InstrumentWidget/UCorrectionDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
@@ -887,6 +777,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             ${CORE_MANTIDLIBS}
+            API
             MantidQtAPI
             MantidWidgets
             MantidQtSliceViewer

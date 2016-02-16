@@ -79,25 +79,25 @@ public:
   /// (Empty) Constructor
   FlatPlateAbsorption();
   /// Virtual destructor
-  virtual ~FlatPlateAbsorption() {}
+  ~FlatPlateAbsorption() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "FlatPlateAbsorption"; }
+  const std::string name() const override { return "FlatPlateAbsorption"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates bin-by-bin correction factors for attenuation due to "
            "absorption and scattering in a sample of 'flat plate' geometry.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 protected:
-  void initialiseCachedDistances();
+  void initialiseCachedDistances() override;
 
 private:
-  void defineProperties();
-  void retrieveProperties();
-  std::string sampleXML();
+  void defineProperties() override;
+  void retrieveProperties() override;
+  std::string sampleXML() override;
 
   double m_slabHeight;      ///< The height of the sample in m
   double m_slabWidth;       ///< The width of the sample in m

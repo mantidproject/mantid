@@ -28,7 +28,7 @@ namespace MantidWidgets
 
     RangeSelector(QwtPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
     RangeSelector(PreviewPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
-    ~RangeSelector() {};
+    ~RangeSelector() override{};
 
     std::pair<double,double> getRange();
     void setRange(std::pair<double,double> range); /// Overloaded function provided for convenience
@@ -67,7 +67,7 @@ namespace MantidWidgets
     bool inRange(double);
     bool changingMin(double, double);
     bool changingMax(double, double);
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject *, QEvent *) override;
 
     // MEMBER ATTRIBUTES
     SelectType m_type; ///< type of selection widget is for

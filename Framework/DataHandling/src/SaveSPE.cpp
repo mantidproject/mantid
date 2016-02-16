@@ -2,10 +2,13 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 
 #include "Poco/File.h"
@@ -346,8 +349,7 @@ void SaveSPE::writeValue(const double value, FILE *const outFile) const {
 */
 void SaveSPE::logMissingMasked(const std::vector<int> &inds,
                                const size_t nonMasked, const int masked) const {
-  std::vector<int>::const_iterator index = inds.begin(), end = inds.end();
-  if (index != end) {
+  if (inds.cbegin() != inds.cend()) {
     g_log.information() << "Found " << inds.size()
                         << " spectra without associated detectors, probably "
                            "the detectors are not present in the instrument "

@@ -3,8 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -139,15 +142,15 @@ void MultipleScatteringCylinderAbsorption::exec() {
   // geometry stuff
   const int64_t NUM_HIST = static_cast<int64_t>(in_WS->getNumberHistograms());
   Instrument_const_sptr instrument = in_WS->getInstrument();
-  if (instrument == NULL)
+  if (instrument == nullptr)
     throw std::runtime_error(
         "Failed to find instrument attached to InputWorkspace");
   IComponent_const_sptr source = instrument->getSource();
   IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL)
+  if (source == nullptr)
     throw std::runtime_error(
         "Failed to find source in the instrument for InputWorkspace");
-  if (sample == NULL)
+  if (sample == nullptr)
     throw std::runtime_error(
         "Failed to find sample in the instrument for InputWorkspace");
 
@@ -181,7 +184,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       PARALLEL_START_INTERUPT_REGION
       IDetector_const_sptr det = out_WSevent->getDetector(index);
-      if (det == NULL)
+      if (det == nullptr)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
@@ -218,7 +221,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
 
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       IDetector_const_sptr det = in_WS->getDetector(index);
-      if (det == NULL)
+      if (det == nullptr)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;

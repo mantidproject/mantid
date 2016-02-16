@@ -67,9 +67,8 @@ LeBailFunction::LeBailFunction(std::string peaktype) {
        m_orderedProfileParameterNames.end());
 
   // Peak parameter values
-  for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i) {
-    string parname = m_peakParameterNameVec[i];
-    m_functionParameters.insert(make_pair(parname, 0.0));
+  for (auto parname : m_peakParameterNameVec) {
+    m_functionParameters.emplace(parname, 0.0);
   }
 
   // Importing peak position tolerance
@@ -166,9 +165,8 @@ void LeBailFunction::calPeak(size_t ipk, std::vector<double> &out,
  * @param paramname :: parameter name to check with
  */
 bool LeBailFunction::hasProfileParameter(std::string paramname) {
-  vector<string>::iterator fiter =
-      lower_bound(m_orderedProfileParameterNames.begin(),
-                  m_orderedProfileParameterNames.end(), paramname);
+  auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
+                           m_orderedProfileParameterNames.cend(), paramname);
 
   bool found = true;
   if (fiter == m_orderedProfileParameterNames.end()) {
@@ -296,8 +294,8 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
       // Add new peak to all related data storage
       m_vecPeaks.push_back(newpeak);
       // FIXME - Refining lattice size is not considered here!
-      m_dspPeakVec.push_back(make_pair(dsp, newpeak));
-      m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+      m_dspPeakVec.emplace_back(dsp, newpeak);
+      m_mapHKLPeak.emplace(hkl, newpeak);
     }
   }
 
@@ -321,8 +319,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
       boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
   peak->setMillerIndex(h, k, l);
-  for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i) {
-    string parname = m_peakParameterNameVec[i];
+  for (auto parname : m_peakParameterNameVec) {
     double parvalue = m_functionParameters[parname];
     peak->setParameter(parname, parvalue);
   }
@@ -372,8 +369,7 @@ bool LeBailFunction::calculatePeaksIntensities(
   }
 
   // Set zero to all peaks out of boundary
-  for (size_t i = 0; i < outboundpeakvec.size(); ++i) {
-    IPowderDiffPeakFunction_sptr peak = outboundpeakvec[i];
+  for (auto peak : outboundpeakvec) {
     peak->setHeight(0.);
   }
 
@@ -478,9 +474,9 @@ bool LeBailFunction::calculateGroupPeakIntensities(
             << ", TOF_h = " << thispeak->centre()
             << ", FWHM = " << thispeak->fwhm() << "\n";
       vector<string> peakparamnames = thispeak->getParameterNames();
-      for (size_t ipar = 0; ipar < peakparamnames.size(); ++ipar) {
-        errss << "\t" << peakparamnames[ipar] << " = "
-              << thispeak->getParameter(peakparamnames[ipar]) << "\n";
+      for (auto &peakparamname : peakparamnames) {
+        errss << "\t" << peakparamname << " = "
+              << thispeak->getParameter(peakparamname) << "\n";
       }
     }
 
@@ -1101,9 +1097,8 @@ double
 LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
                                       std::string parname) const {
   // Locate the category of the parameter name
-  vector<string>::const_iterator vsiter =
-      lower_bound(m_orderedProfileParameterNames.begin(),
-                  m_orderedProfileParameterNames.end(), parname);
+  auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
+                            m_orderedProfileParameterNames.cend(), parname);
 
   double parvalue = EMPTY_DBL();
 

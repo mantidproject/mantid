@@ -5,11 +5,11 @@
 
 #include <boost/assign.hpp>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 
@@ -81,8 +81,8 @@ public:
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
 
     std::vector<IALCBaselineModellingModel::Section> sections;
-    sections.push_back(std::make_pair(2,3));
-    sections.push_back(std::make_pair(6,8));
+    sections.emplace_back(2, 3);
+    sections.emplace_back(6, 8);
 
     // TODO: test that the appropriate signals are thrown
     TS_ASSERT_THROWS_NOTHING(m_model->fit(func, sections));

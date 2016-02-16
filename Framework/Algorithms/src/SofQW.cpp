@@ -10,6 +10,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -96,9 +97,7 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       "The bin parameters to use for the q axis (in the format used by the "
       ":ref:`algm-Rebin` algorithm).");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Direct", "Indirect"};
   alg.declareProperty("EMode", "",
                       boost::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");

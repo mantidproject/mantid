@@ -57,13 +57,13 @@ public:
   /// Default constructor
   LoadRawHelper();
   /// Destructor
-  ~LoadRawHelper();
+  ~LoadRawHelper() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadRawHelper"; }
+  const std::string name() const override { return "LoadRawHelper"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Helper class for LoadRaw algorithms.";
   }
   /// Opens Raw File
@@ -73,7 +73,7 @@ public:
                          ISISRAW *const = NULL) const;
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// returns true if the Exclude Monitor option(property) selected
   static bool isExcludeMonitors(const std::string &monitorOption);
@@ -124,7 +124,7 @@ public:
 
 protected:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// checks the file is an ascii file
   bool isAscii(FILE *file) const;
   /// Reads title from the isisraw class
@@ -222,7 +222,7 @@ protected:
 
 private:
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// convert month label to int string
   std::string convertMonthLabelToIntStr(std::string month) const;
 

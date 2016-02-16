@@ -171,7 +171,9 @@ namespace MantidQt
 
       // These two vectors are required by the "CatalogDownloadDataFiles" algorithm.
       std::vector<int64_t> fileIDs;
+      fileIDs.reserve(userSelectedFiles.size());
       std::vector<std::string> fileNames;
+      fileNames.reserve(userSelectedFiles.size());
 
       // For each pair in userSelectedFiles we want to add them to their related vector to pass to the algorithm.
       for (auto it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
@@ -220,7 +222,7 @@ namespace MantidQt
 
           // Add the input name + "_err" (to indicate the error marker in the GUI,
           // rather than the input field) as the key, and the related error as the value.
-          errors.insert(std::make_pair(iter->first + "_err", documentation));
+          errors.emplace(iter->first + "_err", documentation);
         }
       }
       return errors;

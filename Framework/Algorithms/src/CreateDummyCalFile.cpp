@@ -105,7 +105,7 @@ void CreateDummyCalFile::exec() {
 
   if (current.get()) {
     top_group = group_map[current->getName()]; // Return 0 if not in map
-    assemblies.push(std::make_pair(current, top_group));
+    assemblies.emplace(current, top_group);
   }
 
   std::string filename = getProperty("CalFilename");
@@ -143,7 +143,7 @@ void CreateDummyCalFile::exec() {
             child_group = group_map[currentchild->getName()];
             if (child_group == 0)
               child_group = top_group;
-            assemblies.push(std::make_pair(currentchild, child_group));
+            assemblies.emplace(currentchild, child_group);
           }
         }
       }
@@ -213,7 +213,7 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
         continue;
       std::istringstream istr(str);
       istr >> number >> udet >> offset >> select >> group;
-      instrcalmap::const_iterator it = instrcalib.find(udet);
+      auto it = instrcalib.find(udet);
       if (it == instrcalib.end()) // Not found, don't assign a group
         group = 0;
       else
@@ -223,10 +223,9 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
     }
   } else //
   {
-    instrcalmap::const_iterator it = instrcalib.begin();
-    for (; it != instrcalib.end(); ++it)
-      writeCalEntry(outfile, (*it).first, ((*it).second).first, 0.0, 1,
-                    ((*it).second).second);
+    for (const auto &value : instrcalib)
+      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1,
+                    (value.second).second);
   }
 
   // Closing

@@ -156,7 +156,7 @@ class Graph : public QWidget
 
 public:
   Graph (int x = 0, int y = 0, int width = 500, int height = 400, QWidget* parent=0, Qt::WFlags f=0);
-  ~Graph();
+  ~Graph() override;
 
   enum Ticks{NoTicks = 0, Out = 1, InOut = 2, In = 3};
   enum MarkerType{None = -1, Text = 0, Arrow = 1, Image = 2};
@@ -368,10 +368,10 @@ public slots:
 
   //! \name Event Handlers
   //@{
-  void contextMenuEvent(QContextMenuEvent *);
-  void closeEvent(QCloseEvent *e);
-  bool focusNextPrevChild ( bool next );
-  void hideEvent(QHideEvent* e);
+  void contextMenuEvent(QContextMenuEvent *) override;
+  void closeEvent(QCloseEvent *e) override;
+  bool focusNextPrevChild(bool next) override;
+  void hideEvent(QHideEvent *e) override;
   //@}
 
   //! Set axis scale
@@ -700,7 +700,7 @@ public slots:
   //@{
   bool ignoresResizeEvents(){return ignoreResize;};
   void setIgnoreResizeEvents(bool ok){ignoreResize=ok;};
-  void resizeEvent(QResizeEvent *e);
+  void resizeEvent(QResizeEvent *e) override;
   void scaleFonts(double factor);
   //@}
 

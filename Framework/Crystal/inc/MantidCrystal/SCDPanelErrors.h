@@ -68,16 +68,17 @@ public:
                  double a, double b, double c, double alpha, double beta,
                  double gamma, double tolerance);
 
-  virtual ~SCDPanelErrors();
+  ~SCDPanelErrors() override;
 
-  std::string name() const { return "SCDPanelErrors"; }
+  std::string name() const override { return "SCDPanelErrors"; }
 
-  virtual const std::string category() const { return "Calibrate"; }
+  const std::string category() const override { return "Calibrate"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
   Kernel::Matrix<double>
   CalcDiffDerivFromdQ(Kernel::Matrix<double> const &DerivQ,
@@ -86,15 +87,16 @@ public:
                       Kernel::Matrix<double> const &InvhklThkl,
                       Kernel::Matrix<double> const &UB) const;
 
-  size_t nAttributes() const;
+  size_t nAttributes() const override;
 
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
 
-  Attribute getAttribute(const std::string &attName) const;
+  Attribute getAttribute(const std::string &attName) const override;
 
-  void setAttribute(const std::string &attName, const Attribute &value);
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override;
 
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
   /**
  * A utility method that will set up the Workspace needed by this function.
@@ -139,7 +141,7 @@ public:
                                          double T0, double L0);
 
 protected:
-  void init();
+  void init() override;
 
   /**
      *  Checks for out of bounds values ,  peaksWorkspace status

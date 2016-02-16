@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ShiftLogTime.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -98,7 +100,7 @@ void ShiftLogTime::exec() {
   }
 
   // Create the new log
-  TimeSeriesProperty<double> *newlog = new TimeSeriesProperty<double>(logname);
+  auto newlog = new TimeSeriesProperty<double>(logname);
   newlog->setUnits(oldlog->units());
   newlog->create(times, values);
 

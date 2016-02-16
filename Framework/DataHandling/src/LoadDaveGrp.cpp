@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -70,11 +71,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 void LoadDaveGrp::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".grp");
-  exts.push_back(".sqe");
-  exts.push_back(".txt");
-  exts.push_back(".dat");
+  std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
   this->declareProperty(
       new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
@@ -111,8 +108,8 @@ void LoadDaveGrp::exec() {
 
   int yLength = 0;
 
-  MantidVec *xAxis = new MantidVec();
-  MantidVec *yAxis = new MantidVec();
+  auto xAxis = new MantidVec();
+  auto yAxis = new MantidVec();
 
   std::vector<MantidVec *> data;
   std::vector<MantidVec *> errors;
@@ -235,8 +232,8 @@ void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
     // Skip the group comment line
     this->readLine();
     // Read the data block
-    MantidVec *d = new MantidVec();
-    MantidVec *e = new MantidVec();
+    auto d = new MantidVec();
+    auto e = new MantidVec();
     for (std::size_t k = 0; k < static_cast<std::size_t>(this->xLength); k++) {
       this->readLine();
       std::istringstream is(this->line);

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -48,15 +49,14 @@ protected:
   /// Successor factory
   /// boost::optional<std::unique_ptr<ChainableType>> m_successor;
   std::unique_ptr<ChainableType> m_successor;
+  /// Provide option for derived classes to check successor and throw if bad
+  virtual void checkSuccessor() const {}
 
 public:
   /// Set the successor
-  Chainable &setSuccessor(std::unique_ptr<ChainableType> &successor) {
+  template <typename T> Chainable &setSuccessor(T &&successor) {
     m_successor = std::move(successor);
-    return *m_successor;
-  }
-  Chainable &setSuccessor(std::unique_ptr<ChainableType> &&successor) {
-    m_successor = std::move(successor);
+    checkSuccessor();
     return *m_successor;
   }
   bool hasSuccessor() const { return m_successor.get() != NULL; }

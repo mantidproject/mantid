@@ -36,18 +36,20 @@ namespace MDAlgorithms {
 class DLLExport CutMD : public API::DataProcessorAlgorithm {
 public:
   CutMD();
-  virtual ~CutMD();
+  ~CutMD() override;
 
-  virtual const std::string name() const { return "CutMD"; }
-  virtual int version() const { return 1; }
-  virtual const std::string summary() const {
+  const std::string name() const override { return "CutMD"; }
+  int version() const override { return 1; }
+  const std::string summary() const override {
     return "Slices multidimensional workspaces using input projection "
            "information and binning limits.";
   }
-  virtual const std::string category() const { return "MDAlgorithms\\Slicing"; }
+  const std::string category() const override {
+    return "MDAlgorithms\\Slicing";
+  }
 
-  virtual void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
 
   static const std::string InvAngstromSymbol;
   static const std::string RLUSymbol;

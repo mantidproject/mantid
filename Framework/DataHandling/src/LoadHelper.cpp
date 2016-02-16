@@ -4,9 +4,12 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
-#include <nexus/napi.h>
-#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+
+#include <nexus/napi.h>
+
+#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
 namespace DataHandling {
@@ -290,7 +293,8 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
           }
 
           if (type == NX_CHAR) {
-            std::string property_value((const char *)dataBuffer);
+            std::string property_value(
+                reinterpret_cast<const char *>(dataBuffer));
             if (boost::algorithm::ends_with(property_name, "_time")) {
               // That's a time value! Convert to Mantid standard
               property_value = dateTimeInIsoFormat(property_value);
@@ -322,9 +326,11 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               // Simple case, one value
               if (dims[0] == 1) {
                 if (type == NX_FLOAT32) {
-                  property_double_value = *((float *)dataBuffer);
+                  property_double_value =
+                      *(reinterpret_cast<float *>(dataBuffer));
                 } else if (type == NX_FLOAT64) {
-                  property_double_value = *((double *)dataBuffer);
+                  property_double_value =
+                      *(reinterpret_cast<double *>(dataBuffer));
                 }
                 if (units_status != NX_ERROR)
                   runDetails.addProperty(property_name, property_double_value,
@@ -336,9 +342,11 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                 // test above)
                 for (int dim_index = 0; dim_index < dims[0]; dim_index++) {
                   if (type == NX_FLOAT32) {
-                    property_double_value = ((float *)dataBuffer)[dim_index];
+                    property_double_value =
+                        (reinterpret_cast<float *>(dataBuffer))[dim_index];
                   } else if (type == NX_FLOAT64) {
-                    property_double_value = ((double *)dataBuffer)[dim_index];
+                    property_double_value =
+                        (reinterpret_cast<double *>(dataBuffer))[dim_index];
                   }
                   std::string indexed_property_name =
                       property_name + std::string("_") +
@@ -357,11 +365,13 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               // int case
               int property_int_value = 0;
               if (type == NX_INT16) {
-                property_int_value = *((short int *)dataBuffer);
+                property_int_value =
+                    *(reinterpret_cast<short int *>(dataBuffer));
               } else if (type == NX_INT32) {
-                property_int_value = *((int *)dataBuffer);
+                property_int_value = *(reinterpret_cast<int *>(dataBuffer));
               } else if (type == NX_UINT16) {
-                property_int_value = *((short unsigned int *)dataBuffer);
+                property_int_value =
+                    *(reinterpret_cast<short unsigned int *>(dataBuffer));
               }
 
               if (units_status != NX_ERROR)
@@ -378,7 +388,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
           } // test on nxdata type
 
           NXfree(&dataBuffer);
-          dataBuffer = NULL;
+          dataBuffer = nullptr;
 
         } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 

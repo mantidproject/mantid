@@ -59,7 +59,8 @@ public:
   void testGetSpectrumParameter() {
     TestablePoldiSourceSpectrum spectrum;
 
-    boost::shared_ptr<const IComponent> source(new PoldiFakeSourceComponent);
+    boost::shared_ptr<const IComponent> source =
+        boost::make_shared<PoldiFakeSourceComponent>();
     ParameterMap_sptr goodParameterMap(
         new PoldiValidFakeParameterMap(source.get()));
 
@@ -74,7 +75,8 @@ public:
   void testSetSpectrum() {
     TestablePoldiSourceSpectrum spectrum;
 
-    boost::shared_ptr<const IComponent> source(new PoldiFakeSourceComponent);
+    boost::shared_ptr<const IComponent> source =
+        boost::make_shared<PoldiFakeSourceComponent>();
     ParameterMap_sptr goodParameterMap(
         new PoldiValidFakeParameterMap(source.get()));
     Parameter_sptr goodParameter =

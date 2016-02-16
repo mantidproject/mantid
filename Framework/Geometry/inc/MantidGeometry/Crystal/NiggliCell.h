@@ -54,7 +54,7 @@ public:
   NiggliCell(const UnitCell *uc,
              const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
   // Destructor
-  virtual ~NiggliCell();
+  ~NiggliCell() override;
 
   // Access private variables
   /// Check if a,b,c cell has angles satifying Niggli condition within epsilon

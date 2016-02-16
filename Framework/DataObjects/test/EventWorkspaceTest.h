@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -621,11 +622,9 @@ public:
 
     V3D source(0, 0, 0);
     V3D sample(10, 0, 0);
-    std::vector<V3D> detectorPositions;
-
-    detectorPositions.push_back(V3D(11, 1, 0)); // First detector pos
-    detectorPositions.push_back(
-        V3D(11, 1, 0)); // Second detector sits on the first.
+    // First detector pos
+    // Second detector sits on the first.
+    std::vector<V3D> detectorPositions{{11, 1, 0}, {11, 1, 0}};
 
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         ws, source, sample, detectorPositions);
@@ -797,7 +796,7 @@ public:
       // Vector with 10 bins, 10 wide
       MantidVec X;
       for (size_t j = 0; j < 11; j++)
-        X.push_back(double(j) * 10.0);
+        X.push_back(static_cast<double>(j) * 10.0);
       ew1->setX(i, X);
 
       // Now it should be 20 in that spot

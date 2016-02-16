@@ -78,6 +78,11 @@ public:
   void setExponent(double);
   double getExponent();
 
+  void setAutoScale(bool autoscale);
+  bool getAutoScale() const;
+
+  bool getAutoColorScaleforCurrentSlice() const;
+
 
 public slots:
   void changedMinimum();

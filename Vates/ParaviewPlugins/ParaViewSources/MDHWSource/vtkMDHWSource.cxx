@@ -26,18 +26,15 @@ using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkMDHWSource)
 
-/// Constructor
-vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_time(0), m_presenter(NULL), m_normalizationOption(AutoSelect)
-{
+    /// Constructor
+    vtkMDHWSource::vtkMDHWSource()
+    : m_wsName(""), m_time(0), m_normalizationOption(AutoSelect) {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
 /// Destructor
-vtkMDHWSource::~vtkMDHWSource()
-{
-  delete m_presenter;
-}
+vtkMDHWSource::~vtkMDHWSource() {}
 
 /*
   Setter for the workspace name.
@@ -56,18 +53,13 @@ void vtkMDHWSource::SetWsName(std::string name)
   Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
   @return geometry xml const * char reference.
 */
-const char* vtkMDHWSource::GetInputGeometryXML()
-{
-  if(m_presenter == NULL)
-  {
+const char *vtkMDHWSource::GetInputGeometryXML() {
+  if (m_presenter == nullptr) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getGeometryXML().c_str();
-  }
-  catch(std::runtime_error&)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -77,18 +69,13 @@ const char* vtkMDHWSource::GetInputGeometryXML()
  * workspace.
  * @return the special coordinates value
  */
-int vtkMDHWSource::GetSpecialCoordinates()
-{
-  if (NULL == m_presenter)
-  {
+int vtkMDHWSource::GetSpecialCoordinates() {
+  if (nullptr == m_presenter) {
     return 0;
   }
-  try
-  {
+  try {
     return m_presenter->getSpecialCoordinates();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0;
   }
 }
@@ -98,18 +85,13 @@ int vtkMDHWSource::GetSpecialCoordinates()
  * workspace.
  * @return The minimum value of the workspace data.
  */
-double vtkMDHWSource::GetMinValue()
-{
-  if (NULL == m_presenter)
-  {
+double vtkMDHWSource::GetMinValue() {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMinValue();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0.0;
   }
 }
@@ -119,18 +101,13 @@ double vtkMDHWSource::GetMinValue()
  * workspace.
  * @return The maximum value of the workspace data.
  */
-double vtkMDHWSource::GetMaxValue()
-{
-  if (NULL == m_presenter)
-  {
+double vtkMDHWSource::GetMaxValue() {
+  if (nullptr == m_presenter) {
     return 0.0;
   }
-  try
-  {
+  try {
     return m_presenter->getMaxValue();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return 0.0;
   }
 }
@@ -139,18 +116,13 @@ double vtkMDHWSource::GetMaxValue()
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char* vtkMDHWSource::GetInstrument()
-{
-  if (NULL == m_presenter)
-  {
+const char *vtkMDHWSource::GetInstrument() {
+  if (nullptr == m_presenter) {
     return "";
   }
-  try
-  {
+  try {
     return m_presenter->getInstrument().c_str();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     return "";
   }
 }
@@ -183,27 +155,29 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDHWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDHWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+    ThresholdRange_scptr thresholdRange =
+        boost::make_shared<IgnoreZerosThresholdRange>();
 
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
-    vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
-    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
+    auto factory =
+        Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+            thresholdRange, m_normalizationOption, m_time);
 
-    factory->SetSuccessor(hexFactory);
-    hexFactory->SetSuccessor(quadFactory);
-    quadFactory->SetSuccessor(lineFactory);
-    lineFactory->SetSuccessor(zeroDFactory);
+    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+                              thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+            thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+            thresholdRange, m_normalizationOption))
+        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
-    vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
-      
+    auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
+                                        drawingProgressUpdate);
+
     vtkDataSet* output = vtkDataSet::GetData(outInfo);
     output->ShallowCopy(product);
-    product->Delete();
       
     try
     {
@@ -222,13 +196,16 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
   return 1;
 }
 
-int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
-{
-  if(m_presenter == NULL && !m_wsName.empty())
-  {
-    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this),
-                                                   new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>,
-                                                   m_wsName);
+int vtkMDHWSource::RequestInformation(
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
+  if (m_presenter == nullptr && !m_wsName.empty()) {
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWSource>>(this);
+    m_presenter = Mantid::Kernel::make_unique<MDHWInMemoryLoadingPresenter>(
+        std::move(view),
+        new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
   }
   if (m_presenter) {
     if (!m_presenter->canReadFile()) {
@@ -238,7 +215,7 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
       MDHWInMemoryLoadingPresenter *castPresenter =
-          dynamic_cast<MDHWInMemoryLoadingPresenter *>(m_presenter);
+          dynamic_cast<MDHWInMemoryLoadingPresenter *>(m_presenter.get());
       if (castPresenter) {
         std::vector<int> extents = castPresenter->getExtents();
         outputVector->GetInformationObject(0)
@@ -253,7 +230,6 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     // all attributes are setup.
     return 1;
   }
-
 }
 
 void vtkMDHWSource::PrintSelf(ostream& os, vtkIndent indent)
@@ -324,12 +300,10 @@ Getter for the workspace type name.
 */
 char* vtkMDHWSource::GetWorkspaceTypeName()
 {
-  if(m_presenter == NULL)
-  {
-    return const_cast<char*>("");
+  if (m_presenter == nullptr) {
+    return const_cast<char *>("");
   }
-  try
-  {
+  try {
     //Forward request on to MVP presenter
     typeName = m_presenter->getWorkspaceTypeName();
     return const_cast<char*>(typeName.c_str());

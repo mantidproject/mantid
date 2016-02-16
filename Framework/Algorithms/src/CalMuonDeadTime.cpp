@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,9 +54,10 @@ void CalMuonDeadTime::init() {
  *
  */
 void CalMuonDeadTime::exec() {
-  // Muon decay constant
+  // Muon lifetime
 
-  const double muonDecay = 2.2; // in units of micro-seconds
+  const double muonLifetime = Mantid::PhysicalConstants::MuonLifetime *
+                              1e6; // in units of micro-seconds
 
   // get input properties
 
@@ -131,7 +134,7 @@ void CalMuonDeadTime::exec() {
     for (size_t t = 0; t < timechannels; t++) {
       const double time =
           wsFitAgainst->dataX(i)[t]; // mid-point time value because point WS
-      const double decayFac = exp(time / muonDecay);
+      const double decayFac = exp(time / muonLifetime);
       if (wsCrop->dataY(i)[t] > 0) {
         wsFitAgainst->dataY(i)[t] = wsCrop->dataY(i)[t] * decayFac;
         wsFitAgainst->dataX(i)[t] = wsCrop->dataY(i)[t];

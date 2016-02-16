@@ -42,11 +42,13 @@ class DLLExport ThermalNeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 public:
   ThermalNeutronBk2BkExpConvPVoigt();
-  virtual ~ThermalNeutronBk2BkExpConvPVoigt();
+  ~ThermalNeutronBk2BkExpConvPVoigt() override;
 
   /// Overwrite IFunction base class methods
-  std::string name() const { return "ThermalNeutronBk2BkExpConvPVoigt"; }
-  virtual const std::string category() const { return "General"; }
+  std::string name() const override {
+    return "ThermalNeutronBk2BkExpConvPVoigt";
+  }
+  const std::string category() const override { return "General"; }
 
   /// Overwrite IPeakFunction base class methods
   /*
@@ -66,10 +68,10 @@ public:
   // virtual void getMillerIndex(int& h, int &k, int &l);
 
   /// Get peak parameters
-  virtual double getPeakParameter(std::string);
+  double getPeakParameter(std::string) override;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
-  virtual void calculateParameters(bool explicitoutput) const;
+  void calculateParameters(bool explicitoutput) const override;
 
   /// Core function to calcualte peak values for whole region
   // void functionLocal(vector<double>& out, const vector<double> &xValues)
@@ -84,12 +86,12 @@ public:
   */
 
   /// Override setting a new value to the i-th parameter
-  virtual void setParameter(size_t i, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySe = true);
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySe = true) override;
 
   /// Set peak's height
   // virtual void setHeight(const double h);
@@ -97,12 +99,12 @@ public:
   // virtual double height()const;
 
   using IFunction1D::function;
-  virtual void function(std::vector<double> &out,
-                        const std::vector<double> &xValues) const;
+  void function(std::vector<double> &out,
+                const std::vector<double> &xValues) const override;
 
   /// Function you want to fit to.
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
@@ -113,11 +115,11 @@ private:
   virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
                                   const size_t nData);
   /// Derivative
-  virtual void functionDeriv(const API::FunctionDomain &domain,
-                             API::Jacobian &jacobian);
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &jacobian) override;
 
   /// Overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
   static int s_peakRadius;
 

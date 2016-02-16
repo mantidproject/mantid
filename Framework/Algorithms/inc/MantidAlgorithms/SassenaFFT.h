@@ -43,29 +43,29 @@ public:
         m_T2ueV(1000.0 / Mantid::PhysicalConstants::meVtoKelvin),
         m_ps2meV(4.136) {}
   /// Destructor
-  virtual ~SassenaFFT() {}
+  ~SassenaFFT() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SassenaFFT"; }
+  const std::string name() const override { return "SassenaFFT"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs complex Fast Fourier Transform of intermediate scattering "
            "function";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\FFT"; }
+  const std::string category() const override { return "Arithmetic\\FFT"; }
 
 protected:
   // Overridden Algorithm methods
-  bool processGroups();
+  bool processGroups() override;
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
-  bool checkGroups();
+  void init() override;
+  void exec() override;
+  bool checkGroups() override;
   const double m_T2ueV;  // conversion factor from Kelvin to ueV
   const double m_ps2meV; // conversion factor from picosecond to mili-eV
 

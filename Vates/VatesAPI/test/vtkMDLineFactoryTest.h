@@ -2,6 +2,7 @@
 #define VTK_MD_LINE_FACTORY_TEST
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -10,6 +11,7 @@
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkSmartPointer.h"
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -25,50 +27,64 @@ public:
 
   void testGetFactoryTypeName()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
   void testInitializeDelegatesToSuccessor()
   {
-    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(mockSuccessor);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    ITableWorkspace_sptr ws =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
-    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.",
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testCreateDelegatesToSuccessor()
   {
     FakeProgressAction progressUpdate;
 
-    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    auto mockSuccessor = new MockvtkDataSetFactory();
+    auto uniqueSuccessor =
+        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate)))
+        .Times(1)
+        .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
-    factory.SetSuccessor(mockSuccessor);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
+    factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
-    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.",
+               Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    ITableWorkspace_sptr ws =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 
@@ -76,7 +92,8 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
@@ -101,17 +118,18 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create(mockProgressAction);
+    auto product = factory.create(mockProgressAction);
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
+              NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(200, product->GetNumberOfPoints());
     TS_ASSERT_EQUALS(VTK_LINE, product->GetCellType(0));
 
-    product->Delete();
     AnalysisDataService::Instance().remove("binned");
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
@@ -151,17 +169,16 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
+                             Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create(progressAction);
+    auto product = factory.create(progressAction);
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
+              NULL);
     TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
-    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
-
-    product->Delete();
-    
+    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());    
   }
 };
 

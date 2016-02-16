@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <gmock/gmock.h>
 #include <utility>
@@ -41,7 +42,9 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We expect that we are going to fetch the  measurement data for every
     // search result.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -49,7 +52,8 @@ public:
         .WillRepeatedly(
             Return(MeasurementItem("a", "s_a", "l", "t", 0, "111")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
@@ -61,15 +65,13 @@ public:
     EXPECT_CALL(progress, doReport(_))
         .Times(Exactly(static_cast<int>(data.size())));
 
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     strategy.transferRuns(data, progress);
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_when_two_measurement_ids_match_group_them_but_not_others() {
@@ -84,7 +86,9 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We are going to return three SearchResults two have the same measurement
     // id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -93,7 +97,8 @@ public:
         .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122")))
         .WillOnce(Return(MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
@@ -106,10 +111,8 @@ public:
         .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
@@ -132,8 +135,8 @@ public:
                        successfulRuns[0][ReflTableSchema::GROUP],
                        successfulRuns[2][ReflTableSchema::GROUP]);
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_when_there_is_no_valid_measurement_id() {
@@ -147,7 +150,9 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We have 2 with valid measurement ids and 1 with no measurement id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
@@ -155,7 +160,8 @@ public:
         .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
         .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
 
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -169,10 +175,8 @@ public:
         .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     // retreive transfer results
     auto transferResult = strategy.transferRuns(data, progress);
@@ -191,8 +195,8 @@ public:
     TSM_ASSERT_EQUALS("run should be singular.", "123",
                       successfulRuns[1][ReflTableSchema::RUNS]);
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_when_two_measurement_sub_ids_match_combine_rows() {
@@ -207,7 +211,9 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
@@ -215,7 +221,8 @@ public:
         .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
         .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
@@ -228,10 +235,8 @@ public:
         .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
@@ -252,8 +257,8 @@ public:
                         successfulRuns[i][ReflTableSchema::GROUP]);
     }
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_complex_example_two_groups_of_two() {
@@ -270,7 +275,9 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("14916", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
@@ -280,7 +287,8 @@ public:
         .WillOnce(
             Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
@@ -293,10 +301,8 @@ public:
         .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     // Do the transfer
     auto transferResult = strategy.transferRuns(data, progress);
@@ -312,8 +318,8 @@ public:
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
                       "14915+14916", successfulRuns[1][ReflTableSchema::RUNS]);
 
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_do_not_include_invalid_measurements() {
@@ -323,7 +329,10 @@ public:
     data.insert(
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
-    auto mockMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
+
     // We expect that we are going to fetch the  measurement data for every
     // search result.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -331,7 +340,8 @@ public:
         .WillRepeatedly(
             Return(MeasurementItem::InvalidMeasurementItem("Abort!")));
 
-    auto mockCatInfo = new MockICatalogInfo;
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
@@ -341,47 +351,42 @@ public:
     // Nothing obtained. No progress to report.
     EXPECT_CALL(progress, doReport(_)).Times(Exactly(1));
 
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            mockMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
 
     auto transferRuns = strategy.transferRuns(data, progress);
     auto result = transferRuns.getTransferRuns();
     TSM_ASSERT_EQUALS("Measurements where invalid. Results should be empty.", 0,
                       result.size());
-    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
   void test_clone() {
 
     // Sub component ICatalogInfo will be cloned
-    auto pCatInfo = new MockICatalogInfo;
+    auto pCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     EXPECT_CALL(*pCatInfo, clone()).WillOnce(Return(new MockICatalogInfo));
 
     // Sub component Measurment source will be cloned
-    auto pMeasurementItemSource = new MockReflMeasurementItemSource;
+    auto pMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
     EXPECT_CALL(*pMeasurementItemSource, clone())
         .WillOnce(Return(new MockReflMeasurementItemSource));
 
     // Create it
-    ReflMeasureTransferStrategy strategy(
-        std::move(std::unique_ptr<MockICatalogInfo>(pCatInfo)),
-        std::move(std::unique_ptr<MockReflMeasurementItemSource>(
-            pMeasurementItemSource)));
+    ReflMeasureTransferStrategy strategy(std::move(pCatInfo),
+                                         std::move(pMeasurementItemSource));
     // Clone it
-    auto *clone = strategy.clone();
-    TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone));
-    delete clone;
+    auto clone = strategy.clone();
+    TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone.get()));
   }
 
   void test_filtering() {
 
     ReflMeasureTransferStrategy strategy(
-        std::unique_ptr<MockICatalogInfo>(new MockICatalogInfo),
-        std::unique_ptr<MockReflMeasurementItemSource>(
-            new MockReflMeasurementItemSource));
+        Mantid::Kernel::make_unique<MockICatalogInfo>(),
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>());
 
     // ISIS nexus format files can have the right logs.
     TSM_ASSERT("Yes this transfer mechanism should know about nexus formats",

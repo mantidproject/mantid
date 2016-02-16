@@ -47,19 +47,15 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
   const typename std::vector<T> &events = *events_ptr;
 
   // Iterators to start/end
-  typename std::vector<T>::const_iterator it = events.begin();
-  typename std::vector<T>::const_iterator it_end = events.end();
-
-  it = events.begin();
-  for (; it != it_end; it++) {
+  for (auto it = events.cbegin(); it != events.cend(); it++) {
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_err.push_back(float(signal));
-    sig_err.push_back(float(errorSq));
+    sig_err.push_back(static_cast<float>(signal));
+    sig_err.push_back(static_cast<float>(errorSq));
     run_index.push_back(runIndexLoc);
     det_ids.push_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
@@ -129,7 +125,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   size_t nValidSpectra = m_NSpectra;
 
   //--->>> Thread control stuff
-  Kernel::ThreadSchedulerFIFO *ts(NULL);
+  Kernel::ThreadSchedulerFIFO *ts(nullptr);
 
   int nThreads(m_NumThreads);
   if (nThreads < 0)
@@ -174,8 +170,9 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
           tp.joinAll();
       } else {
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            NULL); // it is done this way as it is possible trying to do single
-                   // threaded split more efficiently
+            nullptr); // it is done this way as it is possible trying to do
+                      // single
+                      // threaded split more efficiently
       }
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()
@@ -191,7 +188,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
     tp.joinAll();
   } else {
-    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr);
   }
 
   // Recount totals at the end.

@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -202,7 +204,7 @@ void ConvertAxesToRealSpace::exec() {
   yRef.resize(axisVector[1].bins);
   fillAxisValues(yRef, axisVector[1], false);
 
-  NumericAxis *const yAxis = new NumericAxis(yRef);
+  auto const yAxis = new NumericAxis(yRef);
   boost::shared_ptr<Units::Label> ylabel =
       boost::dynamic_pointer_cast<Units::Label>(
           UnitFactory::Instance().create("Label"));
@@ -309,7 +311,7 @@ void ConvertAxesToRealSpace::fillUnitMap(
     std::vector<std::string> &orderedVector,
     std::map<std::string, std::string> &unitMap, const std::string &caption,
     const std::string &unit) {
-  unitMap.insert(std::make_pair(caption, unit));
+  unitMap.emplace(caption, unit);
   orderedVector.push_back(caption);
 }
 

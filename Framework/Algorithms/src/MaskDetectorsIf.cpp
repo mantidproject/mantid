@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -78,9 +79,9 @@ void MaskDetectorsIf::exec() {
     else {
       double val = inputW->readY(i)[0];
       if (compar_f(val, value)) {
-        std::set<detid_t>::const_iterator it = dets.begin();
-        for (; it != dets.end(); ++it)
-          umap.insert(std::make_pair(*it, select_on));
+        for (auto det : dets) {
+          umap.emplace(det, select_on);
+        }
       }
     }
     double p = static_cast<double>(i) / static_cast<double>(nspec);
@@ -164,11 +165,11 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     int n, udet, sel, group;
     double offset;
     istr >> n >> udet >> offset >> sel >> group;
-    udet2valuem::iterator it = umap.find(udet);
+    auto it = umap.find(udet);
     bool selection;
 
     if (it == umap.end())
-      selection = (sel == 0) ? false : true;
+      selection = sel != 0;
     else
       selection = (*it).second;
 

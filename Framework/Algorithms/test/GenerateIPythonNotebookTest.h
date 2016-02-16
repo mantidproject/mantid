@@ -13,6 +13,8 @@
 #include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 
 using namespace Mantid;
@@ -146,7 +148,7 @@ public:
     // set up history for the algorithn which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
-    auto pAlg = std::auto_ptr<API::Algorithm>(new NonExistingAlgorithm());
+    auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));

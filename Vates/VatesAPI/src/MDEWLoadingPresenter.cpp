@@ -21,74 +21,66 @@ namespace Mantid
 {
   namespace VATES
   {
-    /// Constructor
-    MDEWLoadingPresenter::MDEWLoadingPresenter(MDLoadingView* view) : 
-    m_view(view), 
-    m_isSetup(false), 
-    m_time(-1),
-    m_recursionDepth(0),
-    m_loadInMemory(false),
-    m_firstLoad(true),
-    m_metadataJsonManager(new MetadataJsonManager()),
-    m_metaDataExtractor(new MetaDataExtractorUtils()),
-    m_vatesConfigurations(new VatesConfigurations())
-    {
-      Mantid::API::FrameworkManager::Instance();
+  /// Constructor
+  MDEWLoadingPresenter::MDEWLoadingPresenter(
+      std::unique_ptr<MDLoadingView> view)
+      : m_view(std::move(view)), m_isSetup(false), m_time(-1),
+        m_recursionDepth(0), m_loadInMemory(false), m_firstLoad(true),
+        m_metadataJsonManager(new MetadataJsonManager()),
+        m_metaDataExtractor(new MetaDataExtractorUtils()),
+        m_vatesConfigurations(new VatesConfigurations()) {
+    Mantid::API::FrameworkManager::Instance();
+  }
+
+  /// Destructor
+  MDEWLoadingPresenter::~MDEWLoadingPresenter() {}
+
+  /*
+ Extract the geometry and function information
+ @param eventWs : event workspace to get the information from.
+ */
+  void MDEWLoadingPresenter::extractMetadata(
+      Mantid::API::IMDEventWorkspace_sptr eventWs) {
+    using namespace Mantid::Geometry;
+    MDGeometryBuilderXML<NoDimensionPolicy> refresh;
+    xmlBuilder = refresh; // Reassign.
+    std::vector<MDDimensionExtents<coord_t>> ext =
+        eventWs->getMinimumExtents(5);
+    std::vector<IMDDimension_sptr> dimensions;
+    size_t nDimensions = eventWs->getNumDims();
+    for (size_t d = 0; d < nDimensions; d++) {
+      IMDDimension_const_sptr inDim = eventWs->getDimension(d);
+      coord_t min = ext[d].getMin();
+      coord_t max = ext[d].getMax();
+      if (min > max) {
+        min = 0.0;
+        max = 1.0;
+      }
+      // std::cout << "dim " << d << min << " to " <<  max << std::endl;
+      axisLabels.push_back(makeAxisTitle(inDim));
+      MDHistoDimension_sptr dim(new MDHistoDimension(
+          inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
+          inDim->getNBins()));
+      dimensions.push_back(dim);
     }
 
-    /// Destructor
-    MDEWLoadingPresenter::~MDEWLoadingPresenter()
-    {
+    // Configuring the geometry xml builder allows the object panel associated
+    // with this reader to later
+    // determine how to display all geometry related properties.
+    if (nDimensions > 0) {
+      xmlBuilder.addXDimension(dimensions[0]);
     }
-
-     /*
-    Extract the geometry and function information 
-    @param eventWs : event workspace to get the information from.
-    */
-    void MDEWLoadingPresenter::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
-    {
-      using namespace Mantid::Geometry;
-      MDGeometryBuilderXML<NoDimensionPolicy> refresh;
-      xmlBuilder= refresh; //Reassign.
-      std::vector<MDDimensionExtents<coord_t> > ext = eventWs->getMinimumExtents(5);
-      std::vector<IMDDimension_sptr> dimensions;
-      size_t nDimensions = eventWs->getNumDims();
-      for (size_t d=0; d<nDimensions; d++)
-      {
-        IMDDimension_const_sptr inDim = eventWs->getDimension(d);
-        coord_t min = ext[d].getMin();
-        coord_t max = ext[d].getMax();
-        if (min > max)
-        {
-          min = 0.0;
-          max = 1.0;
-        }
-        //std::cout << "dim " << d << min << " to " <<  max << std::endl;
-        axisLabels.push_back(makeAxisTitle(inDim));
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max, inDim->getNBins()));
-        dimensions.push_back(dim);
-      }
-
-      //Configuring the geometry xml builder allows the object panel associated with this reader to later
-      //determine how to display all geometry related properties.
-      if(nDimensions > 0)
-      {
-        xmlBuilder.addXDimension( dimensions[0] );
-      }
-      if(nDimensions > 1)
-      {
-        xmlBuilder.addYDimension( dimensions[1] );
-      }
-      if(nDimensions > 2)
-      {
-        xmlBuilder.addZDimension( dimensions[2]  );
-      }
-      if(nDimensions > 3)
-      {
-        tDimension = dimensions[3];
-        xmlBuilder.addTDimension(tDimension);
-      }
-      m_isSetup = true;
+    if (nDimensions > 1) {
+      xmlBuilder.addYDimension(dimensions[1]);
+    }
+    if (nDimensions > 2) {
+      xmlBuilder.addZDimension(dimensions[2]);
+    }
+    if (nDimensions > 3) {
+      tDimension = dimensions[3];
+      xmlBuilder.addTDimension(tDimension);
+    }
+    m_isSetup = true;
     }
 
     /**
@@ -153,7 +145,7 @@ namespace Mantid
     {
       using namespace Mantid::API;
 
-      vtkFieldData* outputFD = vtkFieldData::New();
+      vtkNew<vtkFieldData> outputFD;
       
       //Serialize metadata
       VatesKnowledgeSerializer serializer;
@@ -167,10 +159,9 @@ namespace Mantid
 
       //Add metadata to dataset.
       MetadataToFieldData convert;
-      convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
-      visualDataSet->SetFieldData(outputFD);
-      outputFD->Delete();
+      convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+      convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
+      visualDataSet->SetFieldData(outputFD.GetPointer());
     }
 
     /**

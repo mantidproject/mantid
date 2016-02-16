@@ -197,9 +197,8 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
   }
 
   bool masked(true);
-  for (std::set<detid_t>::const_iterator it = detectorIDs.begin();
-       it != detectorIDs.end(); ++it) {
-    if (!this->isMasked(*it)) {
+  for (auto detectorID : detectorIDs) {
+    if (!this->isMasked(detectorID)) {
       masked = false;
       break; // allows space for a debug print statement
     }
@@ -235,8 +234,8 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
  */
 void MaskWorkspace::setMasked(const std::set<detid_t> &detectorIDs,
                               const bool mask) {
-  for (auto detId = detectorIDs.begin(); detId != detectorIDs.end(); ++detId) {
-    this->setMasked(*detId, mask);
+  for (auto detectorID : detectorIDs) {
+    this->setMasked(detectorID, mask);
   }
 }
 
@@ -282,10 +281,7 @@ bool MaskWorkspace::hasInstrument() const {
   bool hasinst;
   Geometry::Instrument_const_sptr inst = this->getInstrument();
   if (inst) {
-    if (inst->getNumberDetectors() > 0)
-      hasinst = true;
-    else
-      hasinst = false;
+    hasinst = inst->getNumberDetectors() > 0;
   } else
     hasinst = false;
 

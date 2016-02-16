@@ -47,18 +47,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Quadratic : public BackgroundFunction {
 public:
   /// Destructor
-  virtual ~Quadratic(){};
+  ~Quadratic() override{};
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "Quadratic"; }
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  std::string name() const override { return "Quadratic"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

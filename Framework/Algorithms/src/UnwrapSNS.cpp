@@ -5,8 +5,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -31,13 +33,13 @@ using std::size_t;
 UnwrapSNS::UnwrapSNS()
     : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
       m_L1(0.), m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
-      m_XSize(0), m_progress(NULL) {}
+      m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
 UnwrapSNS::~UnwrapSNS() {
   if (m_progress)
     delete m_progress;
-  m_progress = NULL;
+  m_progress = nullptr;
 }
 
 /// Algorithm's name for identification overriding a virtual method
@@ -123,8 +125,8 @@ void UnwrapSNS::exec() {
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  if ((m_inputEvWS != NULL)) // && ! this->getProperty("ForceHist")) // TODO
-                             // remove ForceHist option
+  if ((m_inputEvWS != nullptr)) // && ! this->getProperty("ForceHist")) // TODO
+                                // remove ForceHist option
   {
     this->execEvent();
     return;
@@ -333,7 +335,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent) {
     double dataTmin;
     double dataTmax;
     if (isEvent) {
-      m_inputEvWS->sortAll(DataObjects::TOF_SORT, NULL);
+      m_inputEvWS->sortAll(DataObjects::TOF_SORT, nullptr);
       m_inputEvWS->getEventXMinMax(dataTmin, dataTmax);
     } else {
       m_inputWS->getXMinMax(dataTmin, dataTmax);

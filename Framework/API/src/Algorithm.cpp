@@ -11,11 +11,13 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/UsageService.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -84,8 +86,8 @@ size_t Algorithm::g_execCount = 0;
 /// Constructor
 Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
-      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(NULL),
-      m_notificationCenter(NULL), m_progressObserver(NULL),
+      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
+      m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
       m_runningAsync(false), m_running(false), m_rethrow(false),
@@ -164,10 +166,7 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
-  return m_running;
-}
+bool Algorithm::isRunning() const { return m_running; }
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
@@ -202,20 +201,16 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  std::vector<std::string> res;
   Poco::StringTokenizer tokenizer(category(), categorySeparator(),
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
-  if (depo != NULL) {
-    res.push_back("Deprecated");
+  if (depo != nullptr) {
+    res.emplace_back("Deprecated");
   }
   return res;
 }
@@ -236,13 +231,8 @@ const std::vector<std::string> Algorithm::workspaceMethodOn() const {
                                   WORKSPACE_TYPES_SEPARATOR,
                                   Poco::StringTokenizer::TOK_TRIM |
                                       Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  std::vector<std::string> res;
-  res.reserve(tokenizer.count());
-  for (auto iter = tokenizer.begin(); iter != tokenizer.end(); ++iter) {
-    res.push_back(*iter);
-  }
 
-  return res;
+  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
 }
 
 /**
@@ -317,8 +307,7 @@ void Algorithm::cacheWorkspaceProperties() {
   m_outputWorkspaceProps.clear();
   m_pureOutputWorkspaceProps.clear();
   const std::vector<Property *> &props = this->getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
-    Property *prop = props[i];
+  for (auto prop : props) {
     IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (wsProp) {
       switch (prop->direction()) {
@@ -363,12 +352,12 @@ void Algorithm::lockWorkspaces() {
 
   // First, Write-lock the output workspaces
   auto &debugLog = g_log.debug();
-  for (size_t i = 0; i < m_outputWorkspaceProps.size(); i++) {
-    Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
+  for (auto &outputWorkspaceProp : m_outputWorkspaceProps) {
+    Workspace_sptr ws = outputWorkspaceProp->getWorkspace();
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (m_outputWorkspaceProps[i]->isLocking() &&
+      if (outputWorkspaceProp->isLocking() &&
           std::find(m_writeLockedWorkspaces.begin(),
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
@@ -381,12 +370,12 @@ void Algorithm::lockWorkspaces() {
   }
 
   // Next read-lock the input workspaces
-  for (size_t i = 0; i < m_inputWorkspaceProps.size(); i++) {
-    Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+  for (auto &inputWorkspaceProp : m_inputWorkspaceProps) {
+    Workspace_sptr ws = inputWorkspaceProp->getWorkspace();
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (m_inputWorkspaceProps[i]->isLocking() &&
+      if (inputWorkspaceProp->isLocking() &&
           std::find(m_writeLockedWorkspaces.begin(),
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
@@ -408,15 +397,13 @@ void Algorithm::unlockWorkspaces() {
   if (this->isChild())
     return;
   auto &debugLog = g_log.debug();
-  for (size_t i = 0; i < m_writeLockedWorkspaces.size(); i++) {
-    Workspace_sptr ws = m_writeLockedWorkspaces[i];
+  for (auto &ws : m_writeLockedWorkspaces) {
     if (ws) {
       debugLog << "Unlocking " << ws->getName() << std::endl;
       ws->getLock()->unlock();
     }
   }
-  for (size_t i = 0; i < m_readLockedWorkspaces.size(); i++) {
-    Workspace_sptr ws = m_readLockedWorkspaces[i];
+  for (auto &ws : m_readLockedWorkspaces) {
     if (ws) {
       debugLog << "Unlocking " << ws->getName() << std::endl;
       ws->getLock()->unlock();
@@ -443,7 +430,7 @@ bool Algorithm::execute() {
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
-    if (depo != NULL)
+    if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
   // Start by freeing up any memory available.
@@ -468,11 +455,11 @@ bool Algorithm::execute() {
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
-    for (unsigned int i = 0; i < props.size(); ++i) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(props[i]);
+    for (auto &prop : props) {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
-        props[i]->setValue(props[i]->value());
+        prop->setValue(prop->value());
       }
     }
     // Try the validation again
@@ -513,14 +500,14 @@ bool Algorithm::execute() {
       // Log each issue
       auto &errorLog = getLogger().error();
       auto &warnLog = getLogger().warning();
-      for (auto it = errors.begin(); it != errors.end(); it++) {
-        if (this->existsProperty(it->first))
-          errorLog << "Invalid value for " << it->first << ": " << it->second
-                   << "\n";
+      for (auto &error : errors) {
+        if (this->existsProperty(error.first))
+          errorLog << "Invalid value for " << error.first << ": "
+                   << error.second << "\n";
         else {
           numErrors -= 1; // don't count it as an error
           warnLog << "validateInputs() references non-existant property \""
-                  << it->first << "\"\n";
+                  << error.first << "\"\n";
         }
       }
       // Throw because something was invalid
@@ -575,7 +562,6 @@ bool Algorithm::execute() {
   try {
     try {
       if (!isChild()) {
-        Poco::FastMutex::ScopedLock _lock(m_mutex);
         m_running = true;
       }
 
@@ -584,11 +570,11 @@ bool Algorithm::execute() {
       Timer timer;
       // Call the concrete algorithm's exec method
       this->exec();
+      registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
       // Get how long this algorithm took to run
       const float duration = timer.elapsed();
-
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -784,11 +770,11 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   // If output workspaces are nameless, give them a temporary name to satisfy
   // validator
   const std::vector<Property *> &props = alg->getProperties();
-  for (unsigned int i = 0; i < props.size(); ++i) {
-    auto wsProp = dynamic_cast<IWorkspaceProperty *>(props[i]);
-    if (props[i]->direction() == Mantid::Kernel::Direction::Output && wsProp) {
-      if (props[i]->value().empty()) {
-        props[i]->createTemporaryValue();
+  for (auto prop : props) {
+    auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
+      if (prop->value().empty()) {
+        prop->createTemporaryValue();
       }
     }
   }
@@ -819,19 +805,27 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
 
 /**
  * Serialize this object to a string. The format is
- * AlgorithmName.version(prop1=value1,prop2=value2,...)
+ * a json formatted string.
  * @returns This object serialized as a string
  */
 std::string Algorithm::toString() const {
-  ::Json::Value root;
   ::Json::FastWriter writer;
-  ::Json::Reader reader;
+
+  return writer.write(toJson());
+}
+
+/**
+* Serialize this object to a json object)
+* @returns This object serialized as a json object
+*/
+::Json::Value Algorithm::toJson() const {
+  ::Json::Value root;
 
   root["name"] = name();
   root["version"] = this->version();
   root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
 
-  return writer.write(root);
+  return root;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1126,12 +1120,12 @@ bool Algorithm::checkGroups() {
   // Unroll the groups or single inputs into vectors of workspace
   m_groups.clear();
   m_groupWorkspaces.clear();
-  for (size_t i = 0; i < m_inputWorkspaceProps.size(); i++) {
-    auto *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
-    auto *wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
+  for (auto inputWorkspaceProp : m_inputWorkspaceProps) {
+    auto prop = dynamic_cast<Property *>(inputWorkspaceProp);
+    auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
     std::vector<Workspace_sptr> thisGroup;
 
-    Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+    Workspace_sptr ws = inputWorkspaceProp->getWorkspace();
     WorkspaceGroup_sptr wsGroup =
         boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
@@ -1153,12 +1147,12 @@ bool Algorithm::checkGroups() {
       numGroups++;
       processGroups = true;
       std::vector<std::string> names = wsGroup->getNames();
-      for (size_t j = 0; j < names.size(); j++) {
+      for (auto &name : names) {
         Workspace_sptr memberWS =
-            AnalysisDataService::Instance().retrieve(names[j]);
+            AnalysisDataService::Instance().retrieve(name);
         if (!memberWS)
           throw std::invalid_argument("One of the members of " +
-                                      wsGroup->name() + ", " + names[j] +
+                                      wsGroup->name() + ", " + name +
                                       " was not found!.");
         thisGroup.push_back(memberWS);
       }
@@ -1233,8 +1227,8 @@ bool Algorithm::processGroups() {
   std::vector<WorkspaceGroup_sptr> outGroups;
 
   // ---------- Create all the output workspaces ----------------------------
-  for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-    Property *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+  for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
+    Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop) {
       WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
       outGroups.push_back(outWSGrp);
@@ -1351,8 +1345,8 @@ bool Algorithm::processGroups() {
   } // for each entry in each group
 
   // restore group notifications
-  for (size_t i = 0; i < outGroups.size(); i++) {
-    outGroups[i]->observeADSNotifications(true);
+  for (auto &outGroup : outGroups) {
+    outGroup->observeADSNotifications(true);
   }
 
   // We finished successfully.
@@ -1373,8 +1367,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   if (!alg)
     throw std::runtime_error("Algorithm not created!");
   std::vector<Property *> props = this->getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
-    Property *prop = props[i];
+  for (auto prop : props) {
     if (prop) {
       IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
@@ -1413,7 +1406,7 @@ bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
   }
   const IWorkspaceProperty *const wsProp =
       dynamic_cast<const IWorkspaceProperty *>(prop);
-  return (wsProp ? true : false);
+  return (wsProp != nullptr);
 }
 
 //=============================================================================================
@@ -1499,14 +1492,11 @@ const Poco::AbstractObserver &Algorithm::progressObserver() const {
  * Cancel an algorithm
  */
 void Algorithm::cancel() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // set myself to be cancelled
   m_cancel = true;
 
   // Loop over the output workspaces and try to cancel them
-  for (auto it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end();
-       ++it) {
-    const auto &weakPtr = *it;
+  for (auto &weakPtr : m_ChildAlgorithms) {
     if (IAlgorithm_sptr sharedPtr = weakPtr.lock()) {
       sharedPtr->cancel();
     }
@@ -1518,7 +1508,6 @@ void Algorithm::cancel() {
  * and check if the algorithm has requested that it be cancelled.
  */
 void Algorithm::interruption_point() {
-  Poco::FastMutex::ScopedLock _lock(m_mutex);
   // only throw exceptions if the code is not multi threaded otherwise you
   // contravene the OpenMP standard
   // that defines that all loops must complete, and no exception can leave an
@@ -1564,6 +1553,17 @@ void Algorithm::reportCompleted(const double &duration,
                         << std::endl;
   }
   m_running = false;
+}
+
+/** Registers the usage of the algorithm with the UsageService
+*/
+void Algorithm::registerFeatureUsage() const {
+  if (UsageService::Instance().isEnabled()) {
+    std::ostringstream oss;
+    oss << this->name() << ".v" << this->version();
+    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
+                                                  isChild());
+  }
 }
 
 /** Enable or disable Logging of start and end messages

@@ -62,7 +62,7 @@ public:
   /// Constructor
   FitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL);
   /// Destructor
-  ~FitPropertyBrowser();
+  ~FitPropertyBrowser() override;
   /// Get handler to the root composite function
   PropertyHandler* getHandler()const;
   /// Initialise layout
@@ -145,6 +145,8 @@ public:
   bool convolveMembers()const;
   /// Set if the data must be normalised before fitting
   void normaliseData(bool on) {m_shouldBeNormalised = on;}
+  /// Get the max number of iterations
+  int maxIterations() const;
 
   /// Get the start X
   double startX()const;
@@ -213,11 +215,12 @@ public:
 
   void setADSObserveEnabled(bool enabled);
 
-  void postDeleteHandle(const std::string& wsName);
-  void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void postDeleteHandle(const std::string &wsName) override;
+  void addHandle(const std::string &wsName,
+                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
   /// Called when the Fit is finished
-  virtual void finishHandle(const Mantid::API::IAlgorithm* alg);
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
@@ -335,9 +338,9 @@ private slots:
 
 protected:
   /// actions to do before the browser made visible
-  virtual void showEvent(QShowEvent* e);
+  void showEvent(QShowEvent *e) override;
   /// actions to do before the browser is hidden
-  virtual void hideEvent(QHideEvent* e);  
+  void hideEvent(QHideEvent *e) override;
   /// Get and store available workspace names
   void populateWorkspaceNames();
   /// Create editors and assign them to the managers

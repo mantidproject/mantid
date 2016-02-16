@@ -9,8 +9,9 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-
+#include <vtkNew.h>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 using Mantid::DataObjects::MDEventWorkspace;
 
@@ -55,21 +56,19 @@ public:
   vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption, const size_t maxDepth = 1000);
 
   /// Destructor
-  virtual ~vtkMDHexFactory();
+  ~vtkMDHexFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create(ProgressAction& progressUpdate) const;
-  
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdate) const override;
+
   /// Initalize with a target workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr);
+  void initialize(Mantid::API::Workspace_sptr) override;
 
   /// Get the name of the type.
-  virtual std::string getFactoryTypeName() const
-  {
-    return "vtkMDHexFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkMDHexFactory"; }
 
-  virtual void setRecursionDepth(size_t depth);
+  void setRecursionDepth(size_t depth) override;
 
   /// Set the time value.
   void setTime(double timeStep);
@@ -80,7 +79,7 @@ private:
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
-  virtual void validate() const;
+  void validate() const override;
 
   /// Threshold range strategy.
   ThresholdRange_scptr m_thresholdRange;
@@ -95,16 +94,17 @@ private:
   size_t m_maxDepth;
 
   /// Data set that will be generated
-  mutable vtkDataSet * dataSet;
+  mutable vtkSmartPointer<vtkDataSet> dataSet;
 
   /// We are slicing down from > 3 dimensions
   mutable bool slice;
 
   /// Mask for choosing along which dimensions to slice
-  mutable bool * sliceMask;
+  mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
+  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+      sliceImplicitFunction;
 
   /// Time value.
   double m_time;

@@ -45,10 +45,8 @@ void LoadDspacemap::init() {
       new FileProperty("Filename", "", FileProperty::Load, {".dat", ".bin"}),
       "The DspacemapFile containing the d-space mapping.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("POWGEN");
-  propOptions.push_back("VULCAN-ASCII");
-  propOptions.push_back("VULCAN-Binary");
+  std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
+                                       "VULCAN-Binary"};
   declareProperty("FileType", "POWGEN",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
@@ -203,8 +201,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   Kernel::V3D referencePos;
   detid_t anydetinrefmodule = 21 * 1250 + 5;
 
-  std::map<detid_t, Geometry::IDetector_const_sptr>::iterator det_iter =
-      allDetectors.find(anydetinrefmodule);
+  auto det_iter = allDetectors.find(anydetinrefmodule);
 
   if (det_iter == allDetectors.end()) {
     throw std::invalid_argument("Any Detector ID is Instrument's detector");
@@ -344,7 +341,7 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
     int32_t udet;
     double correction;
     istr >> udet >> correction;
-    vulcan.insert(std::make_pair(udet, correction));
+    vulcan.emplace(udet, correction);
     numentries++;
   }
 
@@ -376,10 +373,9 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> *results = file.loadAll();
   if (results) {
-    for (std::vector<VulcanCorrectionFactor>::iterator it = results->begin();
-         it != results->end(); ++it) {
+    for (auto &result : *results) {
       // std::cout << it->pixelID << " :! " << it->factor << std::endl;
-      vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
+      vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
     }
   }
 

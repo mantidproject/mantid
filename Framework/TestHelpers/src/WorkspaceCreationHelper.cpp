@@ -30,6 +30,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -44,8 +45,7 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress =
-      std::auto_ptr<API::Progress>(new API::Progress(this, 0, 1, nSteps));
+  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
 
 /**
@@ -68,9 +68,14 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   MantidVecPtr x1, y1, e1;
   x1.access().resize(size, 1);
   y1.access().resize(size);
-  std::generate(y1.access().begin(), y1.access().end(), rand);
+
+  MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
+                            std::numeric_limits<int>::max());
+  auto randFunc = [&randomGen] { return randomGen.nextValue(); };
+
+  std::generate(y1.access().begin(), y1.access().end(), randFunc);
   e1.access().resize(size);
-  std::generate(e1.access().begin(), e1.access().end(), rand);
+  std::generate(e1.access().begin(), e1.access().end(), randFunc);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
@@ -136,9 +141,9 @@ Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = Create2DWorkspaceBinned(nHist, nBins);
-  NumericAxis *const newAxis = new NumericAxis(nHist);
+  auto const newAxis = new NumericAxis(nHist);
   outputWS->replaceAxis(1, newAxis);
-  newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+  newAxis->unit() = boost::make_shared<Units::Degrees>();
   for (int i = 0; i < nHist; ++i) {
     newAxis->setValue(i, i + 1);
   }
@@ -199,7 +204,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
   const int nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
-    boost::shared_ptr<Instrument> instrument(new Instrument);
+    auto instrument = boost::make_shared<Instrument>();
     workspace->setInstrument(instrument);
 
     std::string xmlShape = "<sphere id=\"shape\"> ";
@@ -211,7 +216,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i), shape, NULL);
+      Detector *det = new Detector("det", detid_t(i), shape, nullptr);
       det->setPos(i, i + 1, 1);
       instrument->add(det);
       instrument->markAsDetector(det);
@@ -339,9 +344,9 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
-  boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
+  auto testInst = boost::make_shared<Instrument>(instrumentName);
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
   space->setInstrument(testInst);
 
   const double pixelRadius(0.05);
@@ -463,10 +468,11 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
 
   // Set the X axes
   MantidVec x = ws->readX(0);
-  NumericAxis *ax0 = new NumericAxis(x.size());
+  auto ax0 = new NumericAxis(x.size());
   ax0->setUnit("dSpacing");
-  for (size_t i = 0; i < x.size(); i++)
+  for (size_t i = 0; i < x.size(); i++) {
     ax0->setValue(i, x[i]);
+  }
   ws->replaceAxis(0, ax0);
 
   // re-assign detector IDs to the rectangular detector
@@ -526,7 +532,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->add(source);
   instrument->markAsSource(source);
 
-  Detector *monitor = new Detector("Monitor", 1, NULL);
+  Detector *monitor = new Detector("Monitor", 1, nullptr);
   monitor->setPos(14, 0, 0);
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
@@ -539,7 +545,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   // Where 0.01 is half detector width etc.
   Detector *det = new Detector(
       "point-detector", 2,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), NULL);
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   det->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det);
   instrument->markAsDetector(det);
@@ -582,7 +588,7 @@ void createInstrumentForWorkspaceWithDistances(
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    Detector *det = new Detector(buffer.str(), i, NULL);
+    Detector *det = new Detector(buffer.str(), i, nullptr);
     det->setPos(detectorPositions[i]);
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -712,13 +718,12 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   for (size_t g = 0; g < groups.size(); g++) {
     retVal->getOrAddEventList(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
-    for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); ++it) {
+    for (auto det : dets) {
       for (int i = 0; i < numBins; i++)
         retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(*it);
+      retVal->getOrAddEventList(g).addDetectorID(det);
     }
   }
-
   // Create the x-axis for histogramming.
   MantidVecPtr x1;
   MantidVec &xRef = x1.access();
@@ -748,8 +753,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
-  NumericAxis *pAxis0 = new NumericAxis(numbins);
-
+  auto pAxis0 = new NumericAxis(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   Kernel::cow_ptr<MantidVec> axis;
@@ -761,13 +765,16 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   }
   pAxis0->setUnit("TOF");
 
+  MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
+                            std::numeric_limits<int>::max());
   // Make up some data for each pixels
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
     EventList &events = retVal->getEventList(static_cast<detid_t>(i));
     for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
-      events += TofEvent(std::rand(), std::rand());
+      events += TofEvent(static_cast<double>(randomGen.nextValue()),
+                         static_cast<int64_t>(randomGen.nextValue()));
     }
     events.addDetectorID(detid_t(i));
   }
@@ -883,9 +890,9 @@ void AddTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  OrientedLattice *latt = new OrientedLattice(a, b, c, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt);
-  delete latt;
+  auto latt =
+      Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
+  ws->mutableSample().setOrientedLattice(latt.release());
 }
 
 // =====================================================================================
@@ -911,14 +918,13 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = (size_t)sqrt(double(numPixels));
+  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
   Mantid::API::MatrixWorkspace_sptr ws =
       CreateGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
-  NumericAxis *pAxis0 = new NumericAxis(numBins);
-
+  auto pAxis0 = new NumericAxis(numBins);
   for (size_t i = 0; i < numBins; i++) {
     double dE = -1.0 + static_cast<double>(i) * 0.8;
     pAxis0->setValue(i, dE);
@@ -926,9 +932,9 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
   pAxis0->setUnit("DeltaE");
   ws->replaceAxis(0, pAxis0);
   if (has_oriented_lattice) {
-    OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-    ws->mutableSample().setOrientedLattice(latt);
-    delete latt;
+    auto latt =
+        Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+    ws->mutableSample().setOrientedLattice(latt.release());
 
     AddTSPEntry(ws->mutableRun(), "phi", 0);
     AddTSPEntry(ws->mutableRun(), "chi", 0);
@@ -991,7 +997,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     }
   }
   // set axis, correspondent to the X-values
-  NumericAxis *pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = new NumericAxis(numBins);
   MantidVec &E_transfer = ws->dataX(0);
   for (size_t i = 0; i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
@@ -1003,9 +1009,9 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->replaceAxis(0, pAxis0);
 
   // define oriented lattice which requested for processed ws
-  OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt);
-  delete latt;
+  auto latt =
+      Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+  ws->mutableSample().setOrientedLattice(latt.release());
 
   // TODO: clarify if this property indeed goes there;
   ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei), true);
@@ -1252,7 +1258,7 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
+  auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
   if (!targWS->addColumn("V3D", "DetDirections"))
     throw(std::runtime_error("Can not add column DetDirectrions"));

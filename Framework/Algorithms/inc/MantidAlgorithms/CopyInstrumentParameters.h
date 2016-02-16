@@ -58,19 +58,19 @@ namespace Algorithms {
 class DLLExport CopyInstrumentParameters : public API::Algorithm {
 public:
   CopyInstrumentParameters();
-  virtual ~CopyInstrumentParameters();
+  ~CopyInstrumentParameters() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "CopyInstrumentParameters"; }
+  const std::string name() const override { return "CopyInstrumentParameters"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Transfers an instrument from on workspace to another workspace "
            "with same base instrument.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   } // Needs to change
   /// method indicates that base source instrument is the same or different from
@@ -79,9 +79,9 @@ public:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void checkProperties();
 

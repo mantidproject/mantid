@@ -34,6 +34,7 @@ set ( TEST_PY_FILES
   UnitFactoryTest.py
   UnitLabelTest.py
   UnitsTest.py
+  UsageServiceTest.py
   V3DTest.py
   VisibleWhenPropertyTest.py
   VMDTest.py

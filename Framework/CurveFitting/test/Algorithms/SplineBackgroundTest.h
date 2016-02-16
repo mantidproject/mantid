@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"

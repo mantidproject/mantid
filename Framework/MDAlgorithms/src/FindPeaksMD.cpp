@@ -107,7 +107,7 @@ DECLARE_ALGORITHM(FindPeaksMD)
  */
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
-      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL), inst(),
+      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
       m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
@@ -328,8 +328,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
-    typename std::multimap<double, boxPtr>::reverse_iterator it2_end =
-        sortedBoxes.rend();
+    auto it2_end = sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
       signal_t density = it2->first;
       boxPtr box = it2->second;
@@ -342,14 +341,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
-           it3 != peakBoxes.end(); it3++) {
+      for (auto &peakBoxe : peakBoxes) {
 
 #ifndef MDBOX_TRACK_CENTROID
         coord_t otherCenter[nd];
         (*it3)->calculateCentroid(otherCenter);
 #else
-        const coord_t *otherCenter = (*it3)->getCentroid();
+        const coord_t *otherCenter = peakBoxe->getCentroid();
 #endif
 
         // Distance between this box and a box we already put in.
@@ -388,10 +386,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // --- Convert the "boxes" to peaks ----
-    for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
-         it3 != peakBoxes.end(); it3++) {
-      // The center of the box = Q in the lab frame
-      boxPtr box = *it3;
+    for (auto box : peakBoxes) {
+// The center of the box = Q in the lab frame
+
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
       box->calculateCentroid(boxCenter);
@@ -509,8 +506,7 @@ void FindPeaksMD::findPeaksHisto(
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
     std::multimap<double, size_t>::reverse_iterator it2;
-    std::multimap<double, size_t>::reverse_iterator it2_end =
-        sortedBoxes.rend();
+    auto it2_end = sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
       signal_t density = it2->first;
       size_t index = it2->second;
@@ -519,9 +515,8 @@ void FindPeaksMD::findPeaksHisto(
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
-           it3 != peakBoxes.end(); ++it3) {
-        VMD otherCenter = ws->getCenter(*it3);
+      for (auto &peakBoxe : peakBoxes) {
+        VMD otherCenter = ws->getCenter(peakBoxe);
 
         // Distance between this box and a box we already put in.
         coord_t distSquared = 0.0;
@@ -554,9 +549,7 @@ void FindPeaksMD::findPeaksHisto(
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
-         it3 != peakBoxes.end(); ++it3) {
-      size_t index = *it3;
+    for (auto index : peakBoxes) {
       // The center of the box = Q in the lab frame
       VMD boxCenter = ws->getCenter(index);
 

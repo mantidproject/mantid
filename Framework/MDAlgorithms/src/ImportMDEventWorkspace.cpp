@@ -122,7 +122,7 @@ void ImportMDEventWorkspace::addEventsData(
     typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Creates a new instance of the MDEventInserter.
   MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr> inserter(ws);
-  DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+  auto mdEventEntriesIterator = m_posMDEventStart;
   std::vector<Mantid::coord_t> centers(nd);
   for (size_t i = 0; i < m_nDataObjects; ++i) {
     float signal = convert<float>(*(++mdEventEntriesIterator));
@@ -165,9 +165,9 @@ void ImportMDEventWorkspace::quickFileCheck() {
     throw std::invalid_argument(message);
   }
   // Are the mandatory block in the correct order.
-  DataCollectionType::iterator posDimStart =
+  auto posDimStart =
       std::find(m_file_data.begin(), m_file_data.end(), DimensionBlockFlag());
-  DataCollectionType::iterator posMDEventStart =
+  auto posMDEventStart =
       std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
   int posDiffDims =
       static_cast<int>(std::distance(posDimStart, posMDEventStart));
@@ -184,7 +184,7 @@ void ImportMDEventWorkspace::quickFileCheck() {
   }
   const size_t nDimensions = (posDiffDims - 1) / 4;
   // Are the dimension entries all of the correct type.
-  DataCollectionType::iterator dimEntriesIterator = posDimStart;
+  auto dimEntriesIterator = posDimStart;
   for (size_t i = 0; i < nDimensions; ++i) {
     convert<std::string>(*(++dimEntriesIterator));
     convert<std::string>(*(++dimEntriesIterator));
@@ -278,7 +278,7 @@ void ImportMDEventWorkspace::exec() {
   // Get the min and max extents in each dimension.
   std::vector<double> extentMins(m_nDimensions);
   std::vector<double> extentMaxs(m_nDimensions);
-  DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+  auto mdEventEntriesIterator = m_posMDEventStart;
   for (size_t i = 0; i < m_nDataObjects; ++i) {
     mdEventEntriesIterator += 2;
     if (m_IsFullDataObjects) {
@@ -296,7 +296,7 @@ void ImportMDEventWorkspace::exec() {
       m_nDimensions, m_IsFullDataObjects ? "MDEvent" : "MDLeanEvent");
 
   // Extract Dimensions and add to the output workspace.
-  DataCollectionType::iterator dimEntriesIterator = m_posDimStart;
+  auto dimEntriesIterator = m_posDimStart;
   auto unitFactory = makeMDUnitFactoryChain();
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = convert<std::string>(*(++dimEntriesIterator));

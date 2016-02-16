@@ -38,11 +38,12 @@ public:
   // Constructor
   PeakNoShapeFactory();
   // Destructor
-  virtual ~PeakNoShapeFactory();
+  ~PeakNoShapeFactory() override;
   // Factory method
-  Mantid::Geometry::PeakShape *create(const std::string &source) const;
+  Mantid::Geometry::PeakShape *create(const std::string &source) const override;
   // Set successor. No shape will not delegate.
-  void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
+  void setSuccessor(
+      boost::shared_ptr<const PeakShapeFactory> successorFactory) override;
 
 private:
 };

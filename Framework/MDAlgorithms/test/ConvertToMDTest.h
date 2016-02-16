@@ -35,16 +35,11 @@ public:
 };
 // helper function to provide list of names to test:
 std::vector<std::string> dim_availible() {
-  std::string dns_ws[] = {"DeltaE", "T", "alpha", "beta", "gamma"};
-  std::vector<std::string> data_names_in_WS;
-  for (size_t i = 0; i < 5; i++) {
-    data_names_in_WS.push_back(dns_ws[i]);
-  }
-  return data_names_in_WS;
+  return {"DeltaE", "T", "alpha", "beta", "gamma"};
 }
 //
 class ConvertToMDTest : public CxxTest::TestSuite {
-  std::auto_ptr<Convert2AnyTestHelper> pAlg;
+  std::unique_ptr<Convert2AnyTestHelper> pAlg;
 
 public:
   static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
@@ -405,7 +400,7 @@ public:
   }
 
   ConvertToMDTest() {
-    pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());
+    pAlg = Mantid::Kernel::make_unique<Convert2AnyTestHelper>();
     Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
@@ -461,7 +456,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   DataObjects::TableWorkspace_sptr pDetLoc_events;
   DataObjects::TableWorkspace_sptr pDetLoc_histo;
   // pointer to mock algorithm to work with progress bar
-  std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
+  std::unique_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
   boost::shared_ptr<MDEventWSWrapper> pTargWS;
 
@@ -641,8 +636,7 @@ public:
     inWs2D->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS", inWs2D);
 
-    auto pAlg =
-        std::auto_ptr<PreprocessDetectorsToMD>(new PreprocessDetectorsToMD());
+    auto pAlg = Mantid::Kernel::make_unique<PreprocessDetectorsToMD>();
     pAlg->initialize();
 
     pAlg->setPropertyValue("InputWorkspace", "TestMatrixWS");
@@ -673,14 +667,14 @@ public:
       throw(
           std::runtime_error("Can not obtain preprocessed events detectors "));
 
-    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+    pTargWS = boost::make_shared<MDEventWSWrapper>();
 
     Rot.setRandom(100);
     Rot.toRotation();
 
     // this will be used to display progress
-    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(
-        new WorkspaceCreationHelper::MockAlgorithm());
+    pMockAlgorithm =
+        Mantid::Kernel::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
   }
 };
 

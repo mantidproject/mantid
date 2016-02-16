@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertToPointData.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {

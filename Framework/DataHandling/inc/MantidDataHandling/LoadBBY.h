@@ -73,24 +73,24 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   // construction
   LoadBBY() {}
-  virtual ~LoadBBY() {}
+  ~LoadBBY() override {}
 
   // description
-  virtual int version() const { return 1; }
-  virtual const std::string name() const { return "LoadBBY"; }
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
-  virtual const std::string summary() const {
+  int version() const override { return 1; }
+  const std::string name() const override { return "LoadBBY"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
+  const std::string summary() const override {
     return "Loads a BilBy data file into an workspace.";
   }
 
   // returns a confidence value that this algorithm can load a specified file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 protected:
   // initialisation
-  virtual void init();
+  void init() override;
   // execution
-  virtual void exec();
+  void exec() override;
 
 private:
   // region of intreset

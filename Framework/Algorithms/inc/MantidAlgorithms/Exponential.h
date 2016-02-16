@@ -49,22 +49,23 @@ public:
   /// Default constructor
   Exponential();
   /// Destructor
-  virtual ~Exponential(){};
+  ~Exponential() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Exponential"; }
+  const std::string name() const override { return "Exponential"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The Exponential algorithm will transform the signal values 'y' "
            "into e^y.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
   // Overridden UnaryOperation methods
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 
   /*
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY,
