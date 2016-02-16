@@ -115,9 +115,8 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
                       const int &emptyLabelId,
                       const std::vector<size_t> &imageShape,
                       ClusterFaces &localClusterFaces) {
-  std::vector<size_t> indexes;
-  Mantid::Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape,
-                                                   indexes);
+  auto indexes =
+      Mantid::Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape);
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
   for (auto neighbourLinearIndex : neighbours) {
@@ -128,9 +127,8 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
       // We have an edge!
 
       // In which dimension is the edge?
-      std::vector<size_t> neighbourIndexes;
-      Mantid::Kernel::Utils::getIndicesFromLinearIndex(
-          neighbourLinearIndex, imageShape, neighbourIndexes);
+      auto neighbourIndexes = Mantid::Kernel::Utils::getIndicesFromLinearIndex(
+          neighbourLinearIndex, imageShape);
       for (size_t j = 0; j < imageShape.size(); ++j) {
         if (indexes[j] != neighbourIndexes[j]) {
           const bool maxEdge = neighbourLinearIndex > linearIndex;
