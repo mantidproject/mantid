@@ -106,6 +106,7 @@ void Integration::exec() {
     maxRange = 0.0;
   }
 
+  double progressStart = 0.0;
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_sptr eventInputWS =
@@ -121,6 +122,7 @@ void Integration::exec() {
     localworkspace =
         rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
 
+    progressStart = 0.5;
     if ((isEmpty(maxSpec)) && (isEmpty(maxSpec))) {
       // Assign it to the output workspace property
       setProperty("OutputWorkspace", localworkspace);
@@ -133,7 +135,7 @@ void Integration::exec() {
       this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, 0, 1, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
@@ -282,7 +284,7 @@ API::MatrixWorkspace_sptr
 Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
                                        double minRange, double maxRange) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
-  auto childAlg = createChildAlgorithm("Rebin", 0, 0.1, childLog);
+  auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
   childAlg->setProperty("InputWorkspace", workspace);
   std::ostringstream binParams;
   binParams << minRange << "," << maxRange - minRange << "," << maxRange;
@@ -341,9 +343,9 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
  *
  * @return the output workspace
  */
-MatrixWorkspace_sptr
-Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
-                                const int minSpec, const int maxSpec) {
+MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
+                                                     const int minSpec,
+                                                     const int maxSpec) {
   if (inWS->id() == "RebinnedOutput") {
     MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
         "Workspace2D", maxSpec - minSpec + 1, 2, 1);
