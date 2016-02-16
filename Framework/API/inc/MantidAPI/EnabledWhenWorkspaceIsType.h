@@ -65,7 +65,7 @@ public:
    */
   virtual bool fulfillsCriterion(const Kernel::IPropertyManager *algo) const {
     // Find the property
-    if (algo == nullptr)
+    if (!algo)
       return true;
     Mantid::Kernel::Property *prop = nullptr;
     try {

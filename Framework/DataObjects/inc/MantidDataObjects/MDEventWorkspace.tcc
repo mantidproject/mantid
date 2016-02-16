@@ -767,7 +767,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
     if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
-      if (box != nullptr) {
+      if (box) {
         if (!box->getIsMasked()) {
           // What is our normalization factor?
           signal_t normalizer = 1.0;

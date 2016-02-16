@@ -152,9 +152,7 @@ public:
   getMinimumExtents(size_t depth = 2) override;
 
   /// Return true if the underlying box is a MDGridBox.
-  bool isGridBox() {
-    return (dynamic_cast<MDGridBox<MDE, nd> *>(data) != nullptr);
-  }
+  bool isGridBox() { return dynamic_cast<MDGridBox<MDE, nd> *>(data); }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
   MDBoxBase<MDE, nd> *getBox() { return data; }
