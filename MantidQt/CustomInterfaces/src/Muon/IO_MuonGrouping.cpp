@@ -49,8 +49,8 @@ using namespace MantidQt::API;
  * @param        g :: Struct with grouping information
  * @param filename :: XML filename where information will be saved
  */
-void saveGroupingToXML(const Grouping& g, const std::string& filename)
-{
+void saveGroupingToXML(const Mantid::API::Grouping &g,
+                       const std::string &filename) {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
     throw Mantid::Kernel::Exception::FileError("Unable to open output file", filename);
@@ -107,164 +107,13 @@ void saveGroupingToXML(const Grouping& g, const std::string& filename)
 }
 
 /**
- * Loads grouping from the XML file specified.
- *
- * @param filename :: XML filename to load grouping information from
- * @param        g :: Struct to store grouping information to
- */
-void loadGroupingFromXML(const std::string& filename, Grouping& g)
-{
-  // Set up the DOM parser and parse xml file
-  DOMParser pParser;
-  Poco::AutoPtr<Document> pDoc;
-  try
-  {
-    pDoc = pParser.parse(filename);
-  }
-  catch(...)
-  {
-    throw Mantid::Kernel::Exception::FileError("Unable to parse File" , filename);
-  }
-
-  // Get pointer to root element
-  Element* pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes())
-    throw Mantid::Kernel::Exception::FileError("No root element in XML grouping file" , filename);
-
-  // Parse information for groups
-  Poco::AutoPtr<NodeList> groups = pRootElem->getElementsByTagName("group");
-  if (groups->length() == 0)
-    throw Mantid::Kernel::Exception::FileError("No groups specified in XML grouping file" , filename);
-
-  // Resize vectors
-  g.groupNames.resize(groups->length());
-  g.groups.resize(groups->length());
-
-  for (size_t ig = 0; ig < groups->length(); ig++)
-  {
-    Element* pGroupElem = static_cast<Element*>(groups->item(static_cast<long>(ig)));
-
-    if (!pGroupElem->hasAttribute("name"))
-      throw Mantid::Kernel::Exception::FileError("Group element without name" , filename);
-
-    g.groupNames[ig] = pGroupElem->getAttribute("name");
-
-    Element* idlistElement = pGroupElem->getChildElement("ids");
-    if (!idlistElement)
-      throw Mantid::Kernel::Exception::FileError("Group element without <ids>" , filename);
-
-    g.groups[ig] = idlistElement->getAttribute("val");
-  }
-  
-
-  // Parse information for pairs
-  Poco::AutoPtr<NodeList> pairs = pRootElem->getElementsByTagName("pair");
-
-  // Resize vectors
-  g.pairNames.resize(pairs->length());
-  g.pairs.resize(pairs->length());
-  g.pairAlphas.resize(pairs->length());
-
-  for (size_t ip = 0; ip < pairs->length(); ip++)
-  {
-    Element* pPairElem = static_cast<Element*>(pairs->item(static_cast<long>(ip)));
-
-    if ( !pPairElem->hasAttribute("name") )
-      throw Mantid::Kernel::Exception::FileError("Pair element without name" , filename);
-
-    g.pairNames[ip] = pPairElem->getAttribute("name");
-
-    size_t fwdGroupId, bwdGroupId; // Ids of forward/backward groups
-
-    // Try to get id of the first group
-    if (Element* fwdElement = pPairElem->getChildElement("forward-group"))
-    {
-      if(!fwdElement->hasAttribute("val"))
-        throw Mantid::Kernel::Exception::FileError("Pair forward-group without <val>" , filename);
-      
-      // Find the group with the given name
-      auto it = std::find(g.groupNames.begin(), g.groupNames.end(), fwdElement->getAttribute("val"));
-
-      if(it == g.groupNames.end())
-        throw Mantid::Kernel::Exception::FileError("Pair forward-group name not recognized" , filename);
-
-      // Get index of the iterator
-      fwdGroupId = it - g.groupNames.begin();
-    }
-    else
-    {
-      throw Mantid::Kernel::Exception::FileError("Pair element without <forward-group>" , filename);
-    }
-
-    // Try to get id of the second group
-    if(Element* bwdElement = pPairElem->getChildElement("backward-group"))
-    {
-      if(!bwdElement->hasAttribute("val"))
-        throw Mantid::Kernel::Exception::FileError("Pair backward-group without <val>" , filename);
-
-      // Find the group with the given name
-      auto it = std::find(g.groupNames.begin(), g.groupNames.end(), bwdElement->getAttribute("val"));
-
-      if(it == g.groupNames.end())
-        throw Mantid::Kernel::Exception::FileError("Pair backward-group name not recognized" , filename);
-
-      // Get index of the iterator
-      bwdGroupId = it - g.groupNames.begin();
-    }
-    else
-    {
-      throw Mantid::Kernel::Exception::FileError("Pair element without <backward-group>" , filename);
-    }
-
-    g.pairs[ip] = std::make_pair(fwdGroupId, bwdGroupId);
-
-    // Try to get alpha element
-    if (Element* aElement = pPairElem->getChildElement("alpha"))
-    {
-      if (!aElement->hasAttribute("val") )
-        throw Mantid::Kernel::Exception::FileError("Pair alpha element with no <val>" , filename);
-     
-      try // ... to convert value to double
-      {
-        g.pairAlphas[ip] = boost::lexical_cast<double>(aElement->getAttribute("val"));
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw Mantid::Kernel::Exception::FileError("Pair alpha value is not a number" , filename);
-      }   
-    }
-    // If alpha element not there, default it to 1.0
-    else 
-    {
-      g.pairAlphas[ip] = 1.0;
-    }
-
-  }
-
-  // Try to get description
-  if (pRootElem->hasAttribute("description"))
-  {
-    g.description = pRootElem->getAttribute("description");
-  }
-
-  // Try to get default group/pair name
-  if(Element* defaultElement = pRootElem->getChildElement("default"))
-  {
-    if(!defaultElement->hasAttribute("name"))
-      throw Mantid::Kernel::Exception::FileError("Default element with no <name>" , filename);
-    
-    g.defaultName = defaultElement->getAttribute("name");
-  }
-}
-
-/**
  * Parses information from the grouping table and saves to Grouping struct.
  *
  * @param form :: Muon Analysis UI containing table widgets
  * @param    g :: Grouping struct to store parsed info to
  */
-void parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& g)
-{
+void parseGroupingTable(const Ui::MuonAnalysis &form,
+                        Mantid::API::Grouping &g) {
   // Parse description
   g.description = form.groupDescription->text().toStdString();
 
@@ -315,7 +164,7 @@ void parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& g)
  * @param    g :: Grouping struct to use for filling the table
  * @param form :: Muon Analysis UI containing table widgets
  */
-void fillGroupingTable(const Grouping& g, Ui::MuonAnalysis& form)
+void fillGroupingTable(const Mantid::API::Grouping& g, Ui::MuonAnalysis& form)
 {
   // Add groups to a table
   for(int gi = 0; gi < static_cast<int>(g.groups.size()); gi++)
@@ -374,8 +223,8 @@ void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
  * @param  g :: The grouping information
  * @return Sptr to created grouped workspace
  */
-MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws, const Grouping& g)
-{
+MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws,
+                                    const Mantid::API::Grouping &g) {
   // As I couldn't specify multiple groups for GroupDetectors, I am going down quite a complicated
   // route - for every group distinct grouped workspace is created using GroupDetectors. These
   // workspaces are then merged into the output workspace.
@@ -495,9 +344,9 @@ void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pai
  * @param table :: A table to convert
  * @return Grouping info
  */
-boost::shared_ptr<Grouping> tableToGrouping(ITableWorkspace_sptr table)
-{
-  auto grouping = boost::make_shared<Grouping>();
+boost::shared_ptr<Mantid::API::Grouping>
+tableToGrouping(ITableWorkspace_sptr table) {
+  auto grouping = boost::make_shared<Mantid::API::Grouping>();
 
   for ( size_t row = 0; row < table->rowCount(); ++row )
   {
@@ -530,8 +379,8 @@ boost::shared_ptr<Grouping> tableToGrouping(ITableWorkspace_sptr table)
  * @param grouping :: Grouping information to convert
  * @return A grouping table as accepted by MuonGroupDetectors
  */
-ITableWorkspace_sptr groupingToTable(boost::shared_ptr<Grouping> grouping)
-{
+ITableWorkspace_sptr
+groupingToTable(boost::shared_ptr<Mantid::API::Grouping> grouping) {
   auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace") );
 
@@ -551,54 +400,17 @@ ITableWorkspace_sptr groupingToTable(boost::shared_ptr<Grouping> grouping)
  * @param instrument :: Instrument we want a dummy grouping for
  * @return Grouping information
  */
-boost::shared_ptr<Grouping> getDummyGrouping(Instrument_const_sptr instrument)
-{
+boost::shared_ptr<Mantid::API::Grouping>
+getDummyGrouping(Instrument_const_sptr instrument) {
   // Group with all the detectors
   std::ostringstream all;
   all << "1-" << instrument->getNumberDetectors();
 
-  auto dummyGrouping = boost::make_shared<Grouping>();
+  auto dummyGrouping = boost::make_shared<Mantid::API::Grouping>();
   dummyGrouping->description = "Dummy grouping";
   dummyGrouping->groupNames.emplace_back("all");
   dummyGrouping->groups.push_back(all.str());
   return dummyGrouping;
-}
-
-/**
- * Attempts to load a grouping information referenced by IDF.
- * @param instrument :: Intrument which we went the grouping for
- * @param mainFieldDirection :: (MUSR) orientation of the instrument
- * @return Grouping information
- */
-boost::shared_ptr<Grouping> getGroupingFromIDF(Instrument_const_sptr instrument,
-                                               const std::string& mainFieldDirection)
-{
-  std::string parameterName = "Default grouping file";
-
-  // Special case for MUSR, because it has two possible groupings
-  if (instrument->getName() == "MUSR")
-  {
-    parameterName.append(" - " + mainFieldDirection);
-  }
-
-  std::vector<std::string> groupingFiles = instrument->getStringParameter(parameterName);
-
-  if ( groupingFiles.size() == 1 )
-  {
-    const std::string groupingFile = groupingFiles[0];
-
-    // Get search directory for XML instrument definition files (IDFs)
-    std::string directoryName = ConfigService::Instance().getInstrumentDirectory();
-
-    auto loadedGrouping = boost::make_shared<Grouping>();
-    loadGroupingFromXML(directoryName + groupingFile, *loadedGrouping);
-
-    return loadedGrouping;
-  }
-  else
-  {
-    throw std::runtime_error("Multiple groupings specified for the instrument");
-  }
 }
 
 }
