@@ -61,8 +61,8 @@ signals:
 protected:
 
   /// Override base class method, to emit a mousedMoved() signal for each move
-  QwtText trackerText( const QPoint & point ) const;
-  QwtText trackerText( const QwtDoublePoint & pos) const;
+  QwtText trackerText(const QPoint &point) const override;
+  QwtText trackerText(const QwtDoublePoint &pos) const override;
 
 private:
   bool m_hideReadout;

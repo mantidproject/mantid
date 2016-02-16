@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 

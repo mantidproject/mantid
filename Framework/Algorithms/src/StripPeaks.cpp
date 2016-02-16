@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/StripPeaks.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,9 +50,7 @@ void StripPeaks::init() {
                   "peak positions. Non-positive value indicates that this "
                   "option is turned off.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
       boost::make_shared<StringListValidator>(bkgdtypes),

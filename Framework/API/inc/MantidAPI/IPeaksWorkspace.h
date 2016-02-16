@@ -54,7 +54,7 @@ public:
   }
 
   /// Destructor
-  virtual ~IPeaksWorkspace();
+  ~IPeaksWorkspace() override;
 
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
@@ -169,10 +169,10 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
-  virtual IPeaksWorkspace *doClone() const = 0;
+  IPeaksWorkspace *doClone() const override = 0;
 };
 }
 }

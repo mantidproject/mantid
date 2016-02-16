@@ -211,7 +211,7 @@ protected:
   virtual void validate() const = 0;
 
   /// Checks successor when set and throws if bad
-  virtual void checkSuccessor() const override;
+  void checkSuccessor() const override;
 
   /// Flag indicating whether a transformation should be used.
   bool m_useTransform;

@@ -169,8 +169,7 @@ public:
   bool my_isnan(const double number) { return number != number; }
 
   void testString() {
-    vector<string> data;
-    data.push_back("hi there");
+    vector<string> data{"hi there"};
 
     Statistics stats = getStatistics(data);
 
@@ -212,24 +211,9 @@ public:
   /** Test throw exception
     */
   void testRwpException1() {
-    vector<double> obsY(4);
-    vector<double> calY(4);
-    vector<double> obsE(3);
-
-    obsY[0] = 1.0;
-    calY[0] = 1.1;
-    obsE[0] = 1.0;
-
-    obsY[1] = 2.0;
-    calY[1] = 2.1;
-    obsE[1] = 1.2;
-
-    obsY[2] = 3.0;
-    calY[2] = 3.5;
-    obsE[2] = 1.4;
-
-    obsY[3] = 1.0;
-    calY[3] = 1.3;
+    vector<double> obsY{1.0, 2.0, 3.0, 1.0};
+    vector<double> calY{1.1, 2.1, 3.5, 1.3};
+    vector<double> obsE{1.0, 1.2, 1.4};
 
     TS_ASSERT_THROWS_ANYTHING(getRFactor(obsY, calY, obsE));
   }

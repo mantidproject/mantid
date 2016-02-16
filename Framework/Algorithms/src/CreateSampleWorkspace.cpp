@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -9,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
+
 #include <cmath>
 #include <ctime>
 #include <numeric>
@@ -59,9 +61,7 @@ void CreateSampleWorkspace::init() {
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
-  std::vector<std::string> typeOptions;
-  typeOptions.push_back("Histogram");
-  typeOptions.push_back("Event");
+  std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",
                   boost::make_shared<StringListValidator>(typeOptions),
                   "The type of workspace to create (default: Histogram)");
@@ -71,18 +71,18 @@ void CreateSampleWorkspace::init() {
   //$PC0$ is the far left of the data, and $PC10$ is the far right, and
   // therefore will often not be used
   //$PC5$ is the centre of the data
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+  m_preDefinedFunctionmap.emplace(
       "One Peak", "name=LinearBackground, A0=0.3; name=Gaussian, "
-                  "PeakCentre=$PC5$, Height=10, Sigma=0.7;"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+                  "PeakCentre=$PC5$, Height=10, Sigma=0.7;");
+  m_preDefinedFunctionmap.emplace(
       "Multiple Peaks", "name=LinearBackground, A0=0.3;name=Gaussian, "
                         "PeakCentre=$PC3$, Height=10, Sigma=0.7;name=Gaussian, "
-                        "PeakCentre=$PC6$, Height=8, Sigma=0.5"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
-      "Flat background", "name=LinearBackground, A0=1;"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
-      "Exp Decay", "name=ExpDecay, Height=100, Lifetime=1000;"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+                        "PeakCentre=$PC6$, Height=8, Sigma=0.5");
+  m_preDefinedFunctionmap.emplace("Flat background",
+                                  "name=LinearBackground, A0=1;");
+  m_preDefinedFunctionmap.emplace("Exp Decay",
+                                  "name=ExpDecay, Height=100, Lifetime=1000;");
+  m_preDefinedFunctionmap.emplace(
       "Powder Diffraction",
       "name= LinearBackground,A0=0.0850208,A1=-4.89583e-06;"
       "name=Gaussian,Height=0.584528,PeakCentre=$PC1$,Sigma=14.3772;"
@@ -93,24 +93,24 @@ void CreateSampleWorkspace::init() {
       "name=Gaussian,Height=3.64069,PeakCentre=$PC6$,Sigma=19.2404;"
       "name=Gaussian,Height=2.8998,PeakCentre=$PC7$,Sigma=21.1127;"
       "name=Gaussian,Height=2.05237,PeakCentre=$PC8$,Sigma=21.9932;"
-      "name=Gaussian,Height=8.40976,PeakCentre=$PC9$,Sigma=25.2751;"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+      "name=Gaussian,Height=8.40976,PeakCentre=$PC9$,Sigma=25.2751;");
+  m_preDefinedFunctionmap.emplace(
       "Quasielastic", "name=Lorentzian,FWHM=0.3,PeakCentre=$PC5$,Amplitude=0.8;"
                       "name=Lorentzian,FWHM=0.1,PeakCentre=$PC5$,Amplitude=1;"
-                      "name=LinearBackground,A0=0.1"));
-  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+                      "name=LinearBackground,A0=0.1");
+  m_preDefinedFunctionmap.emplace(
       "Quasielastic Tunnelling",
       "name=LinearBackground,A0=0.1;"
       "name=Lorentzian,FWHM=0.1,PeakCentre=$PC5$,Amplitude=1;"
       "name=Lorentzian,FWHM=0.05,PeakCentre=$PC7$,Amplitude=0.04;"
       "name=Lorentzian,FWHM=0.05,PeakCentre=$PC3$,Amplitude=0.04;"
       "name=Lorentzian,FWHM=0.05,PeakCentre=$PC8$,Amplitude=0.02;"
-      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC2$,Amplitude=0.02"));
-  m_preDefinedFunctionmap.insert(
-      std::pair<std::string, std::string>("User Defined", ""));
+      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC2$,Amplitude=0.02");
+  m_preDefinedFunctionmap.emplace("User Defined", "");
   std::vector<std::string> functionOptions;
-  for (auto &iterator : m_preDefinedFunctionmap) {
-    functionOptions.push_back(iterator.first);
+  functionOptions.reserve(m_preDefinedFunctionmap.size());
+  for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
+    functionOptions.push_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
                   boost::make_shared<StringListValidator>(functionOptions),
@@ -470,11 +470,11 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
     const double bankDistanceFromSample, const double sourceSampleDistance) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  auto testInst = boost::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);

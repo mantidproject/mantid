@@ -64,7 +64,7 @@ namespace API
     typedef std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps> ConfiguredAlgorithm;
 
     explicit BatchAlgorithmRunner(QObject * parent = 0);
-    virtual ~BatchAlgorithmRunner();
+    ~BatchAlgorithmRunner() override;
 
     /// Adds an algorithm to the execution queue
     void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = AlgorithmRuntimeProps());

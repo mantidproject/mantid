@@ -360,7 +360,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_other_samples;
     file->readData("num_other_samples", num_other_samples);
     for (int i = 0; i < num_other_samples; i++) {
-      boost::shared_ptr<Sample> extra(new Sample);
+      auto extra = boost::make_shared<Sample>();
       extra->loadNexus(file, "sample" + Strings::toString(i + 1));
       this->addSample(extra);
     }

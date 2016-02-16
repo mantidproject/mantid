@@ -1,8 +1,11 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <gsl/gsl_statistics.h>
+
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <gsl/gsl_statistics.h>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -213,8 +216,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
         parents = 0;
         return makeInstrumentMap(countsWS);
       }
-      mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-          anc[parents - 1]->getComponentID(), i));
+      mymap.emplace(anc[parents - 1]->getComponentID(), i);
     } catch (Mantid::Kernel::Exception::NotFoundError &e) {
       // do nothing
       g_log.debug(e.what());

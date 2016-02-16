@@ -138,7 +138,7 @@ protected slots:
 private:
   void setMultiLayer(MultiLayer *ml);
   int labelsAlignment();
-  void closeEvent(QCloseEvent* e);
+  void closeEvent(QCloseEvent *e) override;
 
   void clearTabWidget();
   void initAxesPage();
@@ -160,7 +160,7 @@ private:
   void initPrintPage();
   void initLabelsPage();
   void initContourLinesPage();
-  void contextMenuEvent(QContextMenuEvent *e);
+  void contextMenuEvent(QContextMenuEvent *e) override;
   void updateContourLevelsDisplay(Spectrogram *sp);
 
   void showAllLabelControls(bool show = true);

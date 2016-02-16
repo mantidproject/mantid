@@ -3,6 +3,7 @@
 //----------------------------------
 #include "MantidWSIndexDialog.h"
 #include "MantidUI.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 

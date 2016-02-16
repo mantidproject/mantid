@@ -122,7 +122,9 @@ private:
   Geometry::Instrument_sptr createInstrument() {
     // Create a virtual instrument
     std::vector<Kernel::V3D> vec_detpos;
+    vec_detpos.reserve(256);
     std::vector<detid_t> vec_detid;
+    vec_detid.reserve(256);
     Kernel::V3D sourcePos(0., 0., -2.);
     Kernel::V3D samplePos(0., 0., 0.);
 
@@ -130,11 +132,8 @@ private:
       double x = 0.38 + static_cast<double>(i - 128) * 0.001;
       double y = 0;
       double z = 0.38 + static_cast<double>(i - 128) * 0.001;
-      Kernel::V3D pos(x, y, z);
-      detid_t detid = static_cast<detid_t>(i) + 1;
-
-      vec_detid.push_back(detid);
-      vec_detpos.push_back(pos);
+      vec_detid.emplace_back(static_cast<detid_t>(i) + 1);
+      vec_detpos.emplace_back(x, y, z);
     }
 
     Geometry::Instrument_sptr virtualInstrument =

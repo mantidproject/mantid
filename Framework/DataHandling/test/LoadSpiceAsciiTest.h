@@ -2,9 +2,10 @@
 #define MANTID_DATAHANDLING_LOADSPICEASCIITEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidDataHandling/LoadSpiceAscii.h"
 
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/LoadSpiceAscii.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::DataHandling::LoadSpiceAscii;
 using namespace Mantid::API;

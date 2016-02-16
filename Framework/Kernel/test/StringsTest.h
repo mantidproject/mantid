@@ -255,13 +255,13 @@ public:
     out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS(out, "");
 
-    v.push_back("Help");
-    v.push_back("Me");
-    v.push_back("I'm");
-    v.push_back("Stuck");
-    v.push_back("Inside");
-    v.push_back("A");
-    v.push_back("Test");
+    v.emplace_back("Help");
+    v.emplace_back("Me");
+    v.emplace_back("I'm");
+    v.emplace_back("Stuck");
+    v.emplace_back("Inside");
+    v.emplace_back("A");
+    v.emplace_back("Test");
 
     out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
@@ -279,11 +279,7 @@ public:
   }
 
   void test_isMember() {
-    std::vector<std::string> group(5, "");
-    group[0] = "A";
-    group[1] = "A1";
-    group[2] = "B0";
-    group[3] = "C";
+    std::vector<std::string> group{"A", "A1", "B0", "C"};
 
     TS_ASSERT_EQUALS(1, isMember(group, "A1"));
     TS_ASSERT_EQUALS(-1, isMember(group, " "));
@@ -295,13 +291,7 @@ public:
   void test_parseRange_defaultSimple() {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("3,1,4,0,2,5"));
-    std::vector<int> expected(6);
-    expected[0] = 3;
-    expected[1] = 1;
-    expected[2] = 4;
-    expected[3] = 0;
-    expected[4] = 2;
-    expected[5] = 5;
+    std::vector<int> expected{3, 1, 4, 0, 2, 5};
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -319,10 +309,7 @@ public:
   }
 
   void test_parseRange_emptyElements() {
-    std::vector<int> expected(3);
-    expected[0] = 1;
-    expected[1] = 2;
-    expected[2] = 3;
+    std::vector<int> expected{1, 2, 3};
 
     std::vector<int> result1;
     TS_ASSERT_THROWS_NOTHING(result1 = parseRange(",1,2,3"));

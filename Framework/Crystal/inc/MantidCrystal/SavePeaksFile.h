@@ -15,25 +15,25 @@ namespace Crystal {
 class DLLExport SavePeaksFile : public API::Algorithm {
 public:
   SavePeaksFile();
-  ~SavePeaksFile();
+  ~SavePeaksFile() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SavePeaksFile"; };
+  const std::string name() const override { return "SavePeaksFile"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a PeaksWorkspace to a .peaks text-format file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal"; }
+  const std::string category() const override { return "Crystal"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

@@ -45,16 +45,17 @@ public:
   HardThresholdBackground &operator=(const HardThresholdBackground &other);
 
   /// Overriden isBackground
-  virtual bool isBackground(Mantid::API::IMDIterator *iterator) const;
+  bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
   /// Overriden configureIterator.
-  void configureIterator(Mantid::API::IMDIterator *const iterator) const;
+  void
+  configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virtual constructor
-  virtual HardThresholdBackground *clone() const;
+  HardThresholdBackground *clone() const override;
 
   /// Destructor
-  virtual ~HardThresholdBackground();
+  ~HardThresholdBackground() override;
 
 private:
   /// Cutoff

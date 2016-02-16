@@ -228,8 +228,9 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   PointGroupCrystalSystemMap map;
 
   std::vector<PointGroup_sptr> pointGroups = getAllPointGroups();
+
   for (auto &pointGroup : pointGroups) {
-    map.insert(std::make_pair(pointGroup->crystalSystem(), pointGroup));
+    map.emplace(pointGroup->crystalSystem(), pointGroup);
   }
 
   return map;

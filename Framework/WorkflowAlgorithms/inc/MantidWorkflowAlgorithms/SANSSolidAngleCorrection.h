@@ -39,26 +39,26 @@ public:
   /// (Empty) Constructor
   SANSSolidAngleCorrection() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SANSSolidAngleCorrection() {}
+  ~SANSSolidAngleCorrection() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SANSSolidAngleCorrection"; }
+  const std::string name() const override { return "SANSSolidAngleCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs solid angle correction on SANS 2D data.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager;"
            "CorrectionFunctions\\InstrumentCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void execEvent();
 };
 

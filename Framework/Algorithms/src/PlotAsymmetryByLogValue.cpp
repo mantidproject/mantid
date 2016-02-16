@@ -4,13 +4,14 @@
 #include <cmath>
 #include <vector>
 
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <MantidAPI/FileFinder.h>
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -97,12 +98,7 @@ void PlotAsymmetryByLogValue::init() {
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
 
-  std::vector<std::string> optionsLog;
-  optionsLog.push_back("Mean");
-  optionsLog.push_back("Min");
-  optionsLog.push_back("Max");
-  optionsLog.push_back("First");
-  optionsLog.push_back("Last");
+  std::vector<std::string> optionsLog{"Mean", "Min", "Max", "First", "Last"};
   declareProperty(
       "Function", "Last", boost::make_shared<StringListValidator>(optionsLog),
       "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
@@ -111,9 +107,7 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("Green", EMPTY_INT(),
                   "The period number for the 'green' data.");
 
-  std::vector<std::string> options;
-  options.push_back("Integral");
-  options.push_back("Differential");
+  std::vector<std::string> options{"Integral", "Differential"};
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
@@ -135,10 +129,8 @@ void PlotAsymmetryByLogValue::init() {
                   "available. The backward will use the second of these "
                   "groups.");
 
-  std::vector<std::string> deadTimeCorrTypes;
-  deadTimeCorrTypes.push_back("None");
-  deadTimeCorrTypes.push_back("FromRunData");
-  deadTimeCorrTypes.push_back("FromSpecifiedFile");
+  std::vector<std::string> deadTimeCorrTypes{"None", "FromRunData",
+                                             "FromSpecifiedFile"};
 
   declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),

@@ -45,22 +45,24 @@ public:
   /// constructor
   CatalogKeepAlive() : API::Algorithm() {}
   /// Algorithm's name for identification.
-  virtual const std::string name() const { return "CatalogKeepAlive"; }
+  const std::string name() const override { return "CatalogKeepAlive"; }
   /// Summary of algorithms purpose.
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Refreshes the current session to the maximum amount provided by "
            "the catalog API.";
   }
   /// Algorithm's version for identification.
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification.
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
 private:
   /// Override algorithm initialisation method.
-  void init();
+  void init() override;
   /// Override algorithm execute method.
-  void exec();
+  void exec() override;
 };
 }
 }

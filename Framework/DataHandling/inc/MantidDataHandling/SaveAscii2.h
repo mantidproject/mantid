@@ -55,23 +55,23 @@ public:
   /// Default constructor
   SaveAscii2();
   /// Destructor
-  ~SaveAscii2() {}
+  ~SaveAscii2() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveAscii"; }
+  const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /**writes a spectra to the file using a workspace ID
   @param spectraIndex :: an integer relating to a workspace ID
   @param file :: the file writer object

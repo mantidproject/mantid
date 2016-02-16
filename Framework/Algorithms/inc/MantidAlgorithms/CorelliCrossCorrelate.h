@@ -34,21 +34,21 @@ namespace Algorithms {
 class DLLExport CorelliCrossCorrelate : public API::Algorithm {
 public:
   CorelliCrossCorrelate();
-  virtual ~CorelliCrossCorrelate();
+  ~CorelliCrossCorrelate() override;
 
-  virtual const std::string name() const { return "CorelliCrossCorrelate"; };
-  virtual int version() const { return 1; };
-  virtual const std::string category() const {
+  const std::string name() const override { return "CorelliCrossCorrelate"; };
+  int version() const override { return 1; };
+  const std::string category() const override {
     return "Diffraction\\Calibration;Events";
   };
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Cross-correlation calculation for the elastic signal from Corelli.";
   };
 
 private:
-  std::map<std::string, std::string> validateInputs();
-  void init();
-  void exec();
+  std::map<std::string, std::string> validateInputs() override;
+  void init() override;
+  void exec() override;
 
   /// Input workspace
   DataObjects::EventWorkspace_const_sptr inputWS;

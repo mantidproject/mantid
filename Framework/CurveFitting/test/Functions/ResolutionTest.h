@@ -8,6 +8,9 @@
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/cow_ptr.h"
 #include <Poco/File.h>
 
 #include <fstream>

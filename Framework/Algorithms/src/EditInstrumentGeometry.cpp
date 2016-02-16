@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 

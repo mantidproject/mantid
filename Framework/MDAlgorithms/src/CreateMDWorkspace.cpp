@@ -43,9 +43,7 @@ void CreateMDWorkspace::init() {
   declareProperty(new PropertyWithValue<int>("Dimensions", 1, Direction::Input),
                   "Number of dimensions that the workspace will have.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("MDEvent");
-  propOptions.push_back("MDLeanEvent");
+  std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
@@ -229,11 +227,10 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
   int ndims_prop = getProperty("Dimensions");
   auto ndims = static_cast<size_t>(ndims_prop);
 
-  std::vector<std::string> targetFrames;
-  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+  std::vector<std::string> targetFrames{
+      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+      Mantid::Geometry::HKL::HKLName, Mantid::Geometry::QLab::QLabName,
+      Mantid::Geometry::QSample::QSampleName};
 
   auto isValidFrame = true;
   for (auto &frame : frames) {
@@ -251,7 +248,7 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
     std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
                           "or 'General Frame'. You must specify as many frames "
                           "as there are dimensions.";
-    errors.insert(std::make_pair(framePropertyName, message));
+    errors.emplace(framePropertyName, message);
   }
   return errors;
 }

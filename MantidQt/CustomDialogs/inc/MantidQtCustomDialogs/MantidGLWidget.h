@@ -61,18 +61,18 @@ public:
   ///Default constructor
   MantidGLWidget(QWidget *parent = 0);
   ///Destructor
-  ~MantidGLWidget();
-  
+  ~MantidGLWidget() override;
+
   /// Set the Mantid geometry object
   void setDisplayObject(boost::shared_ptr<Mantid::Geometry::Object> object);
 
 protected:
   /// Initialize the renderer
-  void initializeGL();
+  void initializeGL() override;
   /// Set up the viewport
-  void resizeGL(int width, int height);
+  void resizeGL(int width, int height) override;
   /// Render the scene
-  void paintGL();
+  void paintGL() override;
 
 private:
   /// Set the rotation angle around the X-axis
@@ -88,9 +88,9 @@ private:
   /// Ensure the angle is in the range 0 < angle < 360
   void normalizeAngle(int *angle);
   /// Handle a MousePressEvent
-  void mousePressEvent(QMouseEvent *event);
+  void mousePressEvent(QMouseEvent *event) override;
   /// Handle a MouseMoveEvent
-  void mouseMoveEvent(QMouseEvent *event);
+  void mouseMoveEvent(QMouseEvent *event) override;
   /// A Mantid geometry object
   boost::shared_ptr<Mantid::Geometry::Object> m_display_object;
   /// The current X, Y and Z rotations 

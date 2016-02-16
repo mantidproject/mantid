@@ -37,14 +37,15 @@ namespace MDAlgorithms {
 class DLLExport AndMD : public BooleanBinaryOperationMD {
 public:
   AndMD();
-  virtual ~AndMD();
+  ~AndMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
+  const std::string name() const override;
+  int version() const override;
 
 private:
-  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
 };
 
 } // namespace MDAlgorithms

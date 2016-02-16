@@ -144,6 +144,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
 class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
 
+    #pylint: disable=too-many-instance-attributes
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         # difc and zero parameters for GSAS
@@ -153,6 +154,11 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.zero = -1
         # table workspace with detector positions
         self.posTable = None
+        # expected peaks in d-spacing and fitted peak centers
+        self.peaks = []
+        self.peaks_b2 = []
+        self.peaks_fitted = []
+        self.peaks_fitted_b2 = []
 
     def runTest(self):
         # These lines run a 'CalibrateFull' and then 'Clibrate' for the instrument EnginX
@@ -170,18 +176,24 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.posTable = positions
 
         # Bank 1
-        (self.difc, self.zero) = EnggCalibrate(InputWorkspace = long_calib_ws,
-                                               VanadiumWorkspace = van_ws,
-                                               Bank = '1',
-                                               ExpectedPeaks = '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
-                                               DetectorPositions = self.posTable)
+        self.difc, self.zero, tbl = EnggCalibrate(InputWorkspace = long_calib_ws,
+                                                  VanadiumWorkspace = van_ws,
+                                                  Bank = '1',
+                                                  ExpectedPeaks =
+                                                  '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
+                                                  DetectorPositions = self.posTable)
+        self.peaks = tbl.column('dSpacing')
+        self.peaks_fitted = tbl.column('X0')
 
         # Bank 2
-        (self.difc_b2, self.zero_b2) = EnggCalibrate(InputWorkspace = long_calib_ws,
-                                                     VanadiumWorkspace = van_ws,
-                                                     Bank = '2',
-                                                     ExpectedPeaks = '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
-                                                     DetectorPositions = self.posTable)
+        self.difc_b2, self.zero_b2, tbl_b2 = EnggCalibrate(InputWorkspace = long_calib_ws,
+                                                           VanadiumWorkspace = van_ws,
+                                                           Bank = '2',
+                                                           ExpectedPeaks =
+                                                           '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
+                                                           DetectorPositions = self.posTable)
+        self.peaks_b2 = tbl_b2.column('dSpacing')
+        self.peaks_fitted_b2 = tbl_b2.column('X0')
 
     def validate(self):
         # === check detector positions table produced by EnggCalibrateFull
@@ -227,6 +239,21 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         if "darwin" != sys.platform:
             self.assertTrue(rel_err_less_delta(self.zero_b2, -11.341251, exdelta_special),
                             "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+
+        # === peaks used to fit the difc and zero parameters ===
+        expected_peaks = [0.9566, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
+        self.assertEquals(len(self.peaks), len(expected_peaks))
+        self.assertEquals(len(self.peaks_b2), len(expected_peaks))
+        self.assertEquals(self.peaks, expected_peaks)
+        self.assertEquals(self.peaks_b2, expected_peaks)
+        self.assertEquals(len(self.peaks_fitted), 6)
+        self.assertEquals(len(self.peaks_fitted_b2), 6)
+        # Check that the individual peaks do not deviate too much from the fitted
+        # straight line
+        for fit1, fit2, expected in zip(self.peaks_fitted, self.peaks_fitted_b2, self.peaks):
+            REF_COEFF = 18400
+            self.assertTrue(rel_err_less_delta(fit1 / expected, REF_COEFF, 5e-2))
+            self.assertTrue(rel_err_less_delta(fit2 / expected, REF_COEFF, 5e-2))
 
     def cleanup(self):
         mtd.remove('long_calib_ws')

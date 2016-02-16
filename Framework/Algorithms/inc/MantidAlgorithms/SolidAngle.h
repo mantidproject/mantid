@@ -48,11 +48,11 @@ public:
   /// Default constructor
   SolidAngle();
   /// Virtual destructor
-  virtual ~SolidAngle();
+  ~SolidAngle() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SolidAngle"; }
+  const std::string name() const override { return "SolidAngle"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The SolidAngle algorithm calculates the solid angle in steradians "
            "for each of the detectors in an instrument and outputs the data in "
            "a workspace.  This can then be used to normalize a data workspace "
@@ -60,16 +60,16 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

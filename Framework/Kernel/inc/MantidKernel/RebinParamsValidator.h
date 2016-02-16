@@ -39,13 +39,13 @@ class MANTID_KERNEL_DLL RebinParamsValidator
     : public TypedValidator<std::vector<double>> {
 public:
   RebinParamsValidator(bool allowEmpty = false);
-  virtual ~RebinParamsValidator() {}
-  IValidator_sptr clone() const {
+  ~RebinParamsValidator() override {}
+  IValidator_sptr clone() const override {
     return boost::make_shared<RebinParamsValidator>(*this);
   }
 
 private:
-  std::string checkValidity(const std::vector<double> &value) const;
+  std::string checkValidity(const std::vector<double> &value) const override;
   bool m_allowEmpty;
 };
 

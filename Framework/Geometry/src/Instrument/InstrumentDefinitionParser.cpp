@@ -1989,7 +1989,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
 
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    boost::shared_ptr<Interpolation> interpolation =
+        boost::make_shared<Interpolation>();
 
     if (numberLookUp >= 1) {
       Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
@@ -2067,12 +2068,11 @@ void InstrumentDefinitionParser::setLogfile(
     }
 
     auto cacheKey = std::make_pair(paramName, comp);
-    auto cacheValue =
-        boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-            logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-            paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-            extractSingleValueAs, eq, comp, m_angleConvertConst, description));
-    auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
+    auto cacheValue = boost::make_shared<XMLInstrumentParameter>(
+        logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+        paramName, type, tie, constraint, penaltyFactor, fittingFunction,
+        extractSingleValueAs, eq, comp, m_angleConvertConst, description);
+    auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;
     }

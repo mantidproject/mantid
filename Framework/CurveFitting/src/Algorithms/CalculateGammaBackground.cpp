@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -14,6 +15,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 namespace Mantid {
@@ -458,13 +460,13 @@ void CalculateGammaBackground::retrieveInputs() {
   std::vector<int> requestedIndices = getProperty("WorkspaceIndexList");
   if (requestedIndices.empty()) {
     for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i) {
-      m_indices.insert(std::make_pair(i, i)); // 1-to-1
+      m_indices.emplace(i, i); // 1-to-1
     }
   } else {
     for (size_t i = 0; i < requestedIndices.size(); ++i) {
-      m_indices.insert(std::make_pair(
+      m_indices.emplace(
           i, static_cast<size_t>(
-                 requestedIndices[i]))); // user-requested->increasing on output
+                 requestedIndices[i])); // user-requested->increasing on output
     }
   }
 

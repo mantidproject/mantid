@@ -243,6 +243,9 @@ private:
   // Set aspect ratio type.
   void setAspectRatio(AspectRatioType type);
 
+  /// Extracts and applies the color scaling for the current slice
+  void applyColorScalingForCurrentSliceIfRequired();
+
 private:
   
 

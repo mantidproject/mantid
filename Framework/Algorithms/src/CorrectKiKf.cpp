@@ -3,8 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -40,9 +43,7 @@ void CorrectKiKf::init() {
                                                   Direction::Output),
       "Name of the output workspace, can be the same as the input");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Direct", "Indirect"};
   this->declareProperty("EMode", "Direct",
                         boost::make_shared<StringListValidator>(propOptions),
                         "The energy mode (default: Direct)");

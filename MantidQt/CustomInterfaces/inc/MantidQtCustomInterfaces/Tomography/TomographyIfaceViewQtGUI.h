@@ -118,8 +118,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus);
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus);
 
   std::vector<std::string> processingJobsIDs() const {
     return m_processingJobsIDs;
