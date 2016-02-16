@@ -51,6 +51,7 @@ namespace IDA
     void fixItem();
     void unFixItem();
     void singleFitComplete(bool error);
+    void algorithmComplete(bool error);
 
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);

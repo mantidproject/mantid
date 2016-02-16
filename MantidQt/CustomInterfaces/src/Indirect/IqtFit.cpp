@@ -214,7 +214,17 @@ void IqtFit::run() {
                "intensities_constrained=constrain_intens, Save=save, "
                "Plot=plot, minimizer=minimizer, "
                "max_iterations=max_iterations)\n";
-	QString pyOutput = runPythonCode(pyInput);
+
+    QString pyOutput = runPythonCode(pyInput);
+
+    // Set the result workspace for Python script export
+    QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
+    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
+                           "_fury_" + fitType + QString::number(specMin) +
+                           "_to_" + QString::number(specMax) + "_Workspaces";
+    m_pythonExportWsName = resultWsName.toStdString();
+	updatePlot();
+
   } else {
     const auto baseName =
         constructBaseName(m_ffInputWSName.toStdString(), specMin, specMax);
@@ -238,18 +248,24 @@ void IqtFit::run() {
                                 baseName + "_Parameters");
     iqtFitMultiple->setProperty("OutputWorkspaceGroup",
                                 baseName + "_Workspaces");
-
+	m_pythonExportWsName = (baseName + "_Workspaces");
     m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
-    m_batchAlgoRunner->executeBatch();
+	connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+		SLOT(algorithmComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
-  // Set the result workspace for Python script export
-  QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
-  QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
-                         "_fury_" + fitType + QString::number(specMin) + "_to_" + QString::number(specMax) +
-                         "_Workspaces";
-  m_pythonExportWsName = resultWsName.toStdString();
+}
 
+/**
+* Handles completion of the IqtFitMultiple algorithm.
+* @param error True if the algorithm was stopped due to error, false otherwise
+*/
+void IqtFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+  if (error)
+    return;
   updatePlot();
 }
 
