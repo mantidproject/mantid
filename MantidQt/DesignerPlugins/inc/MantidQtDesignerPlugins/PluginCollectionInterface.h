@@ -118,7 +118,7 @@ DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
     "Select a workspace for use in this operation");
 
 DECLARE_WIDGET_PLUGIN(ColorBarWidgetPlugin,
-    MantidQt::SliceViewer::ColorBarWidget,
+    MantidQt::MantidWidgets::ColorBarWidget,
     "Shows a color scale and allow user to change it");
 
 DECLARE_WIDGET_PLUGIN(SliceViewerPlugin,
