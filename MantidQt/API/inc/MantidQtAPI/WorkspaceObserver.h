@@ -5,6 +5,12 @@
 #include <Poco/NObserver.h>
 #include <QObject>
 #include "DllOption.h"
+#include <MantidAPI\Workspace_fwd.h>
+#include <QMetaType>
+
+
+Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
 
 //------------------------------------------------
 // Mantid Forward declaration
