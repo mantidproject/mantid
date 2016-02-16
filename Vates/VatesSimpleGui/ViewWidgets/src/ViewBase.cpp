@@ -954,6 +954,13 @@ void ViewBase::setAxesGrid(bool on) {
   }
 }
 
+/**
+ * Check if there is an active source available
+ * @returns true if there is an active source else false
+ */
+bool ViewBase::hasActiveSource() {
+  return this->getPvActiveSrc() != nullptr;
+}
 
 } // namespace SimpleGui
 } // namespace Vates
