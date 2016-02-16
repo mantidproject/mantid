@@ -1,6 +1,8 @@
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/PatchBBY.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/FileProperty.h"
+
+#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,27 +25,41 @@ struct PropertyInfo {
 static char const *const HistoryStr = "History.log";
 static char const *const FilenameStr = "Filename";
 static PropertyInfo PatchableProperties[] = {
-    {"Group1", "bm1_counts", TYPE_INT},
-    {"Group1", "att_pos", TYPE_DBL},
+    {"Group1", "Bm1Counts", TYPE_INT},
+    {"Group1", "AttPos", TYPE_DBL},
 
-    {"Group2", "master_chopper_freq", TYPE_DBL},
-    {"Group2", "t0_chopper_freq", TYPE_DBL},
-    {"Group2", "t0_chopper_phase", TYPE_DBL},
+    {"Group2", "MasterChopperFreq", TYPE_DBL},
+    {"Group2", "T0ChopperFreq", TYPE_DBL},
+    {"Group2", "T0ChopperPhase", TYPE_DBL},
 
-    //{ "Group3", "L1"                 , TYPE_DBL },
-    {"Group3", "L2_det", TYPE_DBL},
-    {"Group3", "Ltof_det", TYPE_DBL},
+    //{ "Group3", "L1", TYPE_DBL},
+    {"Group3", "L2Det", TYPE_DBL},
+    {"Group3", "LTofDet", TYPE_DBL},
 
-    {"Group4", "L2_curtainl", TYPE_DBL},
-    {"Group4", "L2_curtainr", TYPE_DBL},
-    {"Group4", "L2_curtainu", TYPE_DBL},
-    {"Group4", "L2_curtaind", TYPE_DBL},
+    {"Group4", "L2CurtainL", TYPE_DBL},
+    {"Group4", "L2CurtainR", TYPE_DBL},
+    {"Group4", "L2CurtainU", TYPE_DBL},
+    {"Group4", "L2CurtainD", TYPE_DBL},
 
-    {"Group5", "curtainl", TYPE_DBL},
-    {"Group5", "curtainr", TYPE_DBL},
-    {"Group5", "curtainu", TYPE_DBL},
-    {"Group5", "curtaind", TYPE_DBL},
+    {"Group5", "CurtainL", TYPE_DBL},
+    {"Group5", "CurtainR", TYPE_DBL},
+    {"Group5", "CurtainU", TYPE_DBL},
+    {"Group5", "CurtainD", TYPE_DBL},
 };
+
+// load nx dataset
+template <class T>
+bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
+  try {
+    NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    dataSet.load();
+
+    value = *dataSet();
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
 
 /**
  * Initialise the algorithm. Declare properties which can be set before
@@ -81,6 +97,10 @@ void PatchBBY::init() {
 
     setPropertyGroup(itr->Name, itr->Group);
   }
+
+  declareProperty(new Kernel::PropertyWithValue<bool>("Reset", false,
+                                                      Kernel::Direction::Input),
+                  "Optional");
 }
 /**
  * Execute the algorithm.
@@ -98,8 +118,8 @@ void PatchBBY::exec() {
   size_t logSize = 0;
 
   // open file (and select hisotry file if it exists)
-  const std::vector<std::string> &subFiles = tarFile.files();
-  for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr) {
+  const std::vector<std::string> &files = tarFile.files();
+  for (auto itr = files.begin(); itr != files.end(); ++itr) {
     auto len = itr->length();
 
     if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
@@ -108,7 +128,7 @@ void PatchBBY::exec() {
       else if (itr->rfind(".bin") == len - 4)
         binFiles++;
       else if (itr->compare(HistoryStr) == 0) {
-        if (std::distance(itr, subFiles.end()) != 1)
+        if (std::distance(itr, files.end()) != 1)
           throw std::invalid_argument(
               "invalid BBY file (history has to be at the end)");
 
@@ -122,6 +142,13 @@ void PatchBBY::exec() {
   // check if it's valid
   if ((hdfFiles != 1) || (binFiles != 1) || (logFiles > 1))
     throw std::invalid_argument("invalid BBY file");
+
+  // read existing history
+  std::string logContent;
+  if (logFiles != 0) {
+    logContent.resize(logSize);
+    tarFile.read(&logContent[0], logSize);
+  }
 
   // create new content
   std::ostringstream logContentNewBuffer;
@@ -146,19 +173,97 @@ void PatchBBY::exec() {
     }
   }
 
+  // load original values from hdf
+  bool reset = getProperty("Reset");
+  if (reset) {
+    int64_t fileSize = 0;
+    for (auto itr = files.begin(); itr != files.end(); ++itr)
+      if (itr->rfind(".hdf") == itr->length() - 4) {
+        tarFile.select(itr->c_str());
+        fileSize = tarFile.selected_size();
+        break;
+      }
+
+    if (fileSize != 0) {
+      // extract hdf file into tmp file
+      Poco::TemporaryFile hdfFile;
+      boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"),
+                                     fclose);
+      if (handle) {
+        // copy content
+        char buffer[4096];
+        size_t bytesRead;
+        while (0 != (bytesRead = tarFile.read(buffer, sizeof(buffer))))
+          fwrite(buffer, bytesRead, 1, handle.get());
+        handle.reset();
+
+        NeXus::NXRoot root(hdfFile.path());
+        NeXus::NXEntry entry = root.openFirstEntry();
+
+        float tmp_float;
+        int32_t tmp_int32 = 0;
+
+        if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
+          logContentNewBuffer << "bm1_counts"
+                              << " = " << tmp_int32 << std::endl;
+        if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
+          logContentNewBuffer << "att_pos"
+                              << " = " << tmp_float << std::endl;
+
+        if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
+          logContentNewBuffer << "master_chopper_freq"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
+          logContentNewBuffer << "t0_chopper_freq"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
+          logContentNewBuffer << "t0_chopper_phase"
+                              << " = " << (tmp_float < 999.0 ? tmp_float : 0.0)
+                              << std::endl;
+
+        if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
+          logContentNewBuffer << "L2_det"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
+          logContentNewBuffer << "Ltof_det"
+                              << " = " << tmp_float << std::endl;
+
+        if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
+          logContentNewBuffer << "L2_curtainl"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/L2_curtainr", tmp_float))
+          logContentNewBuffer << "L2_curtainr"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/L2_curtainu", tmp_float))
+          logContentNewBuffer << "L2_curtainu"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/L2_curtaind", tmp_float))
+          logContentNewBuffer << "L2_curtaind"
+                              << " = " << tmp_float << std::endl;
+
+        if (loadNXDataSet(entry, "instrument/detector/curtainl", tmp_float))
+          logContentNewBuffer << "curtainl"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/detector/curtainr", tmp_float))
+          logContentNewBuffer << "curtainr"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/detector/curtainu", tmp_float))
+          logContentNewBuffer << "curtainu"
+                              << " = " << tmp_float << std::endl;
+        if (loadNXDataSet(entry, "instrument/detector/curtaind", tmp_float))
+          logContentNewBuffer << "curtaind"
+                              << " = " << tmp_float << std::endl;
+      }
+    }
+  }
+
   std::string logContentNew = logContentNewBuffer.str();
   if (logContentNew.size() == 0)
     throw std::invalid_argument("nothing to patch");
 
-  // read existing history
-  std::string logContent;
-  if (logFiles == 0) {
-    logContent = std::move(logContentNew);
-  } else {
-    logContent.resize(logSize);
-    tarFile.read(&logContent[0], logSize);
-    logContent.append(logContentNew);
-  }
+  // merge log content
+  logContent.append(logContentNew);
+
   // append patches to file
   tarFile.close();
   if (!ANSTO::Tar::File::append(filename, HistoryStr, logContent.c_str(),
