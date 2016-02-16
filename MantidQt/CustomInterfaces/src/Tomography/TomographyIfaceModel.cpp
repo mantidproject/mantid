@@ -1,6 +1,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
 #include <Poco/Process.h>

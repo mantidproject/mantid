@@ -43,112 +43,111 @@ namespace API {
 class MANTID_API_DLL FunctionParameterDecorator : virtual public IFunction {
 public:
   FunctionParameterDecorator() : IFunction(), m_wrappedFunction() {}
-  virtual ~FunctionParameterDecorator() {}
+  ~FunctionParameterDecorator() override {}
 
   void setDecoratedFunction(const std::string &wrappedFunctionName);
   IFunction_sptr getDecoratedFunction() const;
 
-  IFunction_sptr clone() const;
+  IFunction_sptr clone() const override;
 
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
-  virtual void
-  setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
+  void setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   /// Set i-th parameter of decorated function.
-  virtual void setParameter(size_t i, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
   /// Set i-th parameter description of decorated function.
-  virtual void setParameterDescription(size_t i,
-                                       const std::string &description);
+  void setParameterDescription(size_t i,
+                               const std::string &description) override;
   /// Get i-th parameter of decorated function.
-  virtual double getParameter(size_t i) const;
+  double getParameter(size_t i) const override;
   /// Set parameter of decorated function by name.
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override;
   /// Set description of parameter of decorated function by name.
-  virtual void setParameterDescription(const std::string &name,
-                                       const std::string &description);
+  void setParameterDescription(const std::string &name,
+                               const std::string &description) override;
 
   /// Value of i-th active parameter of the decorated function.
-  virtual double activeParameter(size_t i) const;
+  double activeParameter(size_t i) const override;
   /// Set new value of i-th active parameter of the decorated function.
-  virtual void setActiveParameter(size_t i, double value);
+  void setActiveParameter(size_t i, double value) override;
 
   /// Get parameter of decorated function by name.
-  virtual double getParameter(const std::string &name) const;
+  double getParameter(const std::string &name) const override;
   /// Total number of parameters of decorated function.
-  virtual size_t nParams() const;
+  size_t nParams() const override;
   /// Returns the index of parameter of decorated function name.
-  virtual size_t parameterIndex(const std::string &name) const;
+  size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i of decorated function.
-  virtual std::string parameterName(size_t i) const;
+  std::string parameterName(size_t i) const override;
   /// Returns the description of parameter i of decorated function.
-  virtual std::string parameterDescription(size_t i) const;
+  std::string parameterDescription(size_t i) const override;
   /// Checks if a parameter of decorated function has been set explicitly
-  virtual bool isExplicitlySet(size_t i) const;
+  bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter of decorated function.
-  virtual double getError(size_t i) const;
+  double getError(size_t i) const override;
   /// Set the fitting error for a parameter of decorated function.
-  virtual void setError(size_t i, double err);
+  void setError(size_t i, double err) override;
 
   /// Check if a declared parameter i of decorated function is active.
-  virtual bool isFixed(size_t i) const;
+  bool isFixed(size_t i) const override;
   /// Removes a declared parameter i of decorated function from the list of
   /// active.
-  virtual void fix(size_t i);
+  void fix(size_t i) override;
   /// Restores a declared parameter i of decorated function to the active
   /// status.
-  virtual void unfix(size_t i);
+  void unfix(size_t i) override;
 
   /// Return parameter index of decorated function from a parameter reference.
   /// Usefull for constraints and ties in composite functions.
-  virtual size_t getParameterIndex(const ParameterReference &ref) const;
+  size_t getParameterIndex(const ParameterReference &ref) const override;
 
   /// Returns the number of attributes associated with the decorated function.
-  virtual size_t nAttributes() const;
+  size_t nAttributes() const override;
   /// Returns a list of attribute names of decorated function.
-  virtual std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
   /// Return a value of attribute attName of decorated function-
-  virtual IFunction::Attribute getAttribute(const std::string &attName) const;
+  IFunction::Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName of decorated function.
-  virtual void setAttribute(const std::string &attName,
-                            const IFunction::Attribute &attValue);
+  void setAttribute(const std::string &attName,
+                    const IFunction::Attribute &attValue) override;
   /// Check if attribute attName exists in decorated function
-  virtual bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
   /// Tie a parameter of decorated function to other parameters (or a constant).
-  virtual ParameterTie *tie(const std::string &parName, const std::string &expr,
-                            bool isDefault = false);
+  ParameterTie *tie(const std::string &parName, const std::string &expr,
+                    bool isDefault = false) override;
   /// Apply the ties in decorated function.
-  virtual void applyTies();
+  void applyTies() override;
   /// Remove all ties of decorated function.
-  virtual void clearTies();
-  virtual void removeTie(const std::string &parName);
+  void clearTies() override;
+  void removeTie(const std::string &parName) override;
   /// Removes i-th parameter's of decorated function tie.
-  virtual bool removeTie(size_t i);
+  bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter of decorated function.
-  virtual ParameterTie *getTie(size_t i) const;
+  ParameterTie *getTie(size_t i) const override;
 
   /// Add a constraint to decorated function.
-  virtual void addConstraint(IConstraint *ic);
+  void addConstraint(IConstraint *ic) override;
   /// Get constraint of i-th parameter of decorated function.
-  virtual IConstraint *getConstraint(size_t i) const;
+  IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint of decorated function.
-  virtual void removeConstraint(const std::string &parName);
+  void removeConstraint(const std::string &parName) override;
   /// Set parameters of decorated function to satisfy constraints.
-  void setUpForFit();
+  void setUpForFit() override;
 
 protected:
   /// Does nothing.
-  void init() {}
+  void init() override {}
 
   void throwIfNoFunctionSet() const;
 
   void declareParameter(const std::string &name, double initValue,
-                        const std::string &description);
+                        const std::string &description) override;
 
-  virtual void addTie(ParameterTie *tie);
+  void addTie(ParameterTie *tie) override;
 
   virtual void beforeDecoratedFunctionSet(const IFunction_sptr &fn);
   void setDecoratedFunctionPrivate(const IFunction_sptr &fn);

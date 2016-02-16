@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DataItem.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -54,7 +54,7 @@ class AnalysisDataServiceImpl;
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
   Workspace();
-  virtual ~Workspace();
+  ~Workspace() override;
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
    * derived classes.
@@ -79,14 +79,14 @@ public:
 
   // DataItem interface
   /// Name
-  virtual const std::string name() const { return this->getName(); }
+  const std::string name() const override { return this->getName(); }
   /** Marks the workspace as safe for multiple threads to edit data
    * simutaneously.
    * Workspace creation is always considered to be a single threaded operation.
    * @return true if the workspace is suitable for multithreaded operations,
    * otherwise false.
    */
-  virtual bool threadSafe() const { return true; }
+  bool threadSafe() const override { return true; }
 
   void virtual setTitle(const std::string &);
   void setComment(const std::string &);

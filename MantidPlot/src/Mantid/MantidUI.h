@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -115,7 +116,7 @@ public:
   explicit MantidUI(ApplicationWindow *aw);
 
   // Destructor
-  ~MantidUI();
+  ~MantidUI() override;
 
   //Clear the framework
   void shutdown();

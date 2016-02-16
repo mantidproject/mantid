@@ -1,5 +1,6 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"

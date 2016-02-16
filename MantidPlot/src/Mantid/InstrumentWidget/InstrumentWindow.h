@@ -28,11 +28,11 @@ public:
                             const QString &label = QString(),
                             ApplicationWindow *parent = nullptr,
                             const QString &name = QString());
-  ~InstrumentWindow();
+  ~InstrumentWindow() override;
 
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
-  std::string saveToProject(ApplicationWindow *app);
+                       const int fileVersion) override;
+  std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
   MantidQt::MantidWidgets::InstrumentWidgetTab *getTab(const QString & title) const;
   MantidQt::MantidWidgets::InstrumentWidgetTab *getTab(int tab) const;

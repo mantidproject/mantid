@@ -64,8 +64,8 @@ namespace MantidQt
 			enum Activity { Move, Select, DrawEllipse, DrawRectangle, DrawEllipticalRing, DrawRectangularRing, DrawFree };
 
 			explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
-			void initSurface();
-			void setMode(Mode mode);
+                        void initSurface() override;
+                        void setMode(Mode mode);
 			void selectTool(Activity tool);
 
 		signals:
@@ -104,9 +104,9 @@ namespace MantidQt
 
 			void doubleChanged(QtProperty*);
 		protected:
-			void showEvent(QShowEvent *);
+                  void showEvent(QShowEvent *) override;
 
-			void clearProperties();
+                        void clearProperties();
 			void setProperties();
 			boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false);
 			void saveMaskingToWorkspace(bool invertMask = false);

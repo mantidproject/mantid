@@ -39,19 +39,19 @@ namespace Crystal {
 class DLLExport SelectCellOfType : public API::Algorithm {
 public:
   SelectCellOfType();
-  ~SelectCellOfType();
+  ~SelectCellOfType() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SelectCellOfType"; };
+  const std::string name() const override { return "SelectCellOfType"; };
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Cell"; }
+  const std::string category() const override { return "Crystal\\Cell"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Select a conventional cell with a specific lattice type and "
            "centering, corresponding to the UB stored with the sample for this "
            "peaks works space.";
@@ -59,10 +59,10 @@ public:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

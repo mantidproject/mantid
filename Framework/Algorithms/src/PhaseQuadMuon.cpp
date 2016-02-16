@@ -2,10 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {

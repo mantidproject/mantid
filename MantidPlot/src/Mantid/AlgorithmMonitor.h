@@ -29,7 +29,7 @@ public:
   /// Constructor
   explicit AlgorithmMonitor(MantidUI *m);
   /// Destructor
-  ~AlgorithmMonitor();
+  ~AlgorithmMonitor() override;
   /// Add algorithm to monitor
   void add(Mantid::API::IAlgorithm_sptr alg);
   /// Removes stopped algorithm
@@ -88,7 +88,7 @@ class MonitorDlg: public QDialog
   Q_OBJECT
 public:
   MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor);
-  ~MonitorDlg();
+  ~MonitorDlg() override;
 public slots:
   void update();
   // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef

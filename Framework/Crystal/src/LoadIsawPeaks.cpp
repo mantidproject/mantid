@@ -1,10 +1,12 @@
-#include "MantidKernel/OptionalBool.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;

@@ -5,22 +5,25 @@
 
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidAPI/FileFinder.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;

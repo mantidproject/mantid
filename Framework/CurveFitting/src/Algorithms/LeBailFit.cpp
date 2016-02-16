@@ -9,6 +9,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"

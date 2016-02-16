@@ -7,6 +7,7 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -44,19 +45,19 @@ public:
     Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
     Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
   }
-  ~OrEnabledWhenProperties() // responsible for deleting all supplied
-                             // EnabledWhenProperites
+  ~OrEnabledWhenProperties() override // responsible for deleting all supplied
+                                      // EnabledWhenProperites
   {
     delete Prop1;
     delete Prop2;
   }
 
-  IPropertySettings *clone() {
+  IPropertySettings *clone() override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
                                        Criteria2, value2);
   }
 
-  bool isEnabled(const IPropertyManager *algo) const {
+  bool isEnabled(const IPropertyManager *algo) const override {
     return Prop1->isEnabled(algo) && Prop2->isEnabled(algo);
   }
 

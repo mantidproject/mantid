@@ -43,25 +43,25 @@ public:
   /// (Empty) Constructor
   DefineGaugeVolume() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~DefineGaugeVolume() {}
+  ~DefineGaugeVolume() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "DefineGaugeVolume"; }
+  const std::string name() const override { return "DefineGaugeVolume"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Defines a geometrical shape object to be used as the gauge volume "
            "in the AbsorptionCorrection algorithm.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Sample"; }
+  const std::string category() const override { return "Sample"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 }
 }

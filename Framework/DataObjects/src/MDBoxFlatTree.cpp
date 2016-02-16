@@ -1,8 +1,9 @@
-#include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
 typedef std::unique_ptr<::NeXus::File> file_holder_type;

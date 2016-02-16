@@ -69,25 +69,27 @@ namespace Algorithms {
 class DLLExport CropWorkspace : public API::Algorithm {
 public:
   CropWorkspace();
-  virtual ~CropWorkspace();
+  ~CropWorkspace() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "CropWorkspace"; }
+  const std::string name() const override { return "CropWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Extracts a 'block' from a workspace and places it in a new "
            "workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Splitting"; }
+  const std::string category() const override {
+    return "Transforms\\Splitting";
+  }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

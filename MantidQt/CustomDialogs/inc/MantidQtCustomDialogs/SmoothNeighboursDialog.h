@@ -16,7 +16,7 @@ public:
 
 protected:
   /// Overridden to enable validators
-  void accept();
+  void accept() override;
 
 private slots:
   /// Called when input workspace get changed
@@ -31,7 +31,7 @@ private:
   static const QString INPUT_WORKSPACE;
 
   /// Initialize the layout
-  void initLayout();
+  void initLayout() override;
 
   /// Widget for all the PropertyWidgets
   AlgorithmPropertiesWidget* m_propertiesWidget;

@@ -45,29 +45,29 @@ class DLLExport SaveSavuTomoConfig : public API::Algorithm {
 public:
   SaveSavuTomoConfig();
   /// Virtual dtor
-  virtual ~SaveSavuTomoConfig() {}
+  ~SaveSavuTomoConfig() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveSavuTomoConfig"; }
+  const std::string name() const override { return "SaveSavuTomoConfig"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Writes a configuration file for a tomographic reconstruction job.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Tomography;";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code : Single workspace
-  void exec();
+  void exec() override;
 
   /// basic check on a table workspace properties
   bool tableLooksGenuine(const API::ITableWorkspace_sptr &tws);

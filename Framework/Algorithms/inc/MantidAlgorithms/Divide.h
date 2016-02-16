@@ -49,51 +49,50 @@ public:
   /// Default constructor
   Divide() : BinaryOperation(), m_warnOnZeroDivide(true){};
   /// Destructor
-  virtual ~Divide(){};
+  ~Divide() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Divide"; }
+  const std::string name() const override { return "Divide"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The Divide algorithm will divide the data values and calculate the "
            "corresponding error values of two compatible workspaces.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
-  virtual void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                       const API::MatrixWorkspace_const_sptr rhs,
-                      API::MatrixWorkspace_sptr out);
+                      API::MatrixWorkspace_sptr out) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const DataObjects::EventList &rhs);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const DataObjects::EventList &rhs) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const MantidVec &rhsX,
-                                           const MantidVec &rhsY,
-                                           const MantidVec &rhsE);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const MantidVec &rhsX, const MantidVec &rhsY,
+                                   const MantidVec &rhsE) override;
 
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const double &rhsY,
-                                           const double &rhsE);
+  void performEventBinaryOperation(DataObjects::EventList &lhs,
+                                   const double &rhsY,
+                                   const double &rhsE) override;
 
-  void checkRequirements();
+  void checkRequirements() override;
 
-  std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
   // usually you want to warn user if division by 0 occurs. set it to false to
   // generate these warnings on debug level only
   bool m_warnOnZeroDivide;

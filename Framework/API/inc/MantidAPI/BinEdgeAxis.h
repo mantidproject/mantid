@@ -37,15 +37,15 @@ class MANTID_API_DLL BinEdgeAxis : public NumericAxis {
 public:
   BinEdgeAxis(const std::size_t &length);
   BinEdgeAxis(const std::vector<double> &edges);
-  virtual ~BinEdgeAxis() {}
+  ~BinEdgeAxis() override {}
 
-  virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
-  virtual Axis *clone(const std::size_t length,
-                      const MatrixWorkspace *const parentWorkspace);
+  Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length,
+              const MatrixWorkspace *const parentWorkspace) override;
 
-  virtual std::vector<double> createBinBoundaries() const;
-  void setValue(const std::size_t &index, const double &value);
-  size_t indexOfValue(const double value) const;
+  std::vector<double> createBinBoundaries() const override;
+  void setValue(const std::size_t &index, const double &value) override;
+  size_t indexOfValue(const double value) const override;
 
 private:
   /// Private, undefined copy assignment operator

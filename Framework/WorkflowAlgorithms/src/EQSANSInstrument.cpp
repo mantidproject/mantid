@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {

@@ -48,7 +48,8 @@ public:
    * @param event the event to pass to the receiver
    * @return value from the receiver's event handler
    */
-  virtual bool notify(QObject *receiver, QEvent *event);
+  bool notify(QObject *receiver, QEvent *event) override;
+
 private:
   pqPVApplicationCore *pvApp; ///< ParaView application engine
 

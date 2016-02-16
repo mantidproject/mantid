@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 

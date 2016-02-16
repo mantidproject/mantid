@@ -2,26 +2,31 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidAPI/FileFinder.h>
-#include <MantidAPI/FileProperty.h>
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
+
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+
 #include <iostream>
 #include <fstream>
 #include <istream>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

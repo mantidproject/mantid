@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ResetNegatives.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/System.h"

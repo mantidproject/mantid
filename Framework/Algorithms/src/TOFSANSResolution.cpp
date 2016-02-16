@@ -3,9 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"

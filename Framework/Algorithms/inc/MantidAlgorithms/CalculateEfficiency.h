@@ -47,25 +47,25 @@ public:
   /// Default constructor
   CalculateEfficiency() : API::Algorithm(){};
   /// Destructor
-  virtual ~CalculateEfficiency(){};
+  ~CalculateEfficiency() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CalculateEfficiency"; }
+  const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the detector efficiency for a SANS instrument.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;CorrectionFunctions\\EfficiencyCorrections";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
   void sumUnmaskedDetectors(API::MatrixWorkspace_sptr rebinnedWS, double &sum,

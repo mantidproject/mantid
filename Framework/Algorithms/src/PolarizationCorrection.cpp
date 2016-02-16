@@ -1,13 +1,16 @@
 #include "MantidAlgorithms/PolarizationCorrection.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include <algorithm>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <boost/shared_ptr.hpp>
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

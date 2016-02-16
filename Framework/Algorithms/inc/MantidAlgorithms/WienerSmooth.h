@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_WIENERSMOOTH_H_
 #define MANTID_ALGORITHMS_WIENERSMOOTH_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,16 +35,16 @@ namespace Algorithms {
 class DLLExport WienerSmooth : public API::Algorithm {
 public:
   WienerSmooth();
-  virtual ~WienerSmooth();
+  ~WienerSmooth() override;
 
-  virtual const std::string name() const { return "WienerSmooth"; }
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override { return "WienerSmooth"; }
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   std::pair<double, double> getStartEnd(const MantidVec &X,
                                         bool isHistogram) const;

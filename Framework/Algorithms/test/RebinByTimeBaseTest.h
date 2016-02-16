@@ -10,6 +10,7 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"

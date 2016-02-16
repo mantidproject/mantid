@@ -48,12 +48,12 @@ namespace Poldi {
 class DLLExport PoldiTruncateData : public API::Algorithm {
 public:
   PoldiTruncateData();
-  virtual ~PoldiTruncateData() {}
+  ~PoldiTruncateData() override {}
 
-  virtual const std::string name() const { return "PoldiTruncateData"; }
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override { return "PoldiTruncateData"; }
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
   size_t getCalculatedBinCount();
   size_t getActualBinCount();
@@ -91,8 +91,8 @@ protected:
   size_t m_actualBinCount;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace SINQ

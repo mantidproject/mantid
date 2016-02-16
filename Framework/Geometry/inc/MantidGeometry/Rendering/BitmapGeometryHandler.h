@@ -54,7 +54,7 @@ class MANTID_GEOMETRY_DLL BitmapGeometryHandler : public GeometryHandler {
 private:
   static Kernel::Logger &PLog; ///< The official logger
 
-  boost::shared_ptr<GeometryHandler> clone() const;
+  boost::shared_ptr<GeometryHandler> clone() const override;
 
   /// The RectangularDetector object being plotted.
   RectangularDetector *m_rectDet;
@@ -68,31 +68,31 @@ public:
   //                      BitmapGeometryHandler(boost::shared_ptr<Object> obj);
   //                      ///<Constructor
   //                      BitmapGeometryHandler(Object *obj); ///<Constructor
-  virtual ~BitmapGeometryHandler();
-  virtual BitmapGeometryHandler *
-  createInstance(IObjComponent *); ///< Create an instance of concrete geometry
+  ~BitmapGeometryHandler() override;
+  BitmapGeometryHandler *createInstance(
+      IObjComponent *) override; ///< Create an instance of concrete geometry
   /// handler for ObjComponent
-  virtual BitmapGeometryHandler *createInstance(boost::shared_ptr<
-      Object>); ///< Create an instance of concrete geometry handler for Object
-  virtual GeometryHandler *createInstance(
-      Object *); ///< Create an instance of concrete geometry handler for Object
-  virtual void Triangulate(); ///< Triangulate the Object
-  virtual void Render();      ///< Render Object or ObjComponent
-  virtual void
-  Initialize(); ///< Prepare/Initialize Object/ObjComponent to be rendered
+  BitmapGeometryHandler *createInstance(boost::shared_ptr<Object>)
+      override; ///< Create an instance of concrete geometry handler for Object
+  GeometryHandler *createInstance(Object *)
+      override; ///< Create an instance of concrete geometry handler for Object
+  void Triangulate() override; ///< Triangulate the Object
+  void Render() override;      ///< Render Object or ObjComponent
+  void Initialize()
+      override; ///< Prepare/Initialize Object/ObjComponent to be rendered
   /// Returns true if the shape can be triangulated
-  virtual bool canTriangulate() { return false; }
+  bool canTriangulate() override { return false; }
   /// get the number of triangles
-  virtual int NumberOfTriangles() { return 0; }
+  int NumberOfTriangles() override { return 0; }
   /// get the number of points or vertices
-  virtual int NumberOfPoints() { return 0; }
+  int NumberOfPoints() override { return 0; }
   /// Extract the vertices of the triangles
-  virtual double *getTriangleVertices() { return NULL; }
+  double *getTriangleVertices() override { return NULL; }
   /// Extract the Faces of the triangles
-  virtual int *getTriangleFaces() { return NULL; }
+  int *getTriangleFaces() override { return NULL; }
   /// Sets the geometry cache using the triangulation information provided
-  virtual void setGeometryCache(int noPts, int noFaces, double *pts,
-                                int *faces) {
+  void setGeometryCache(int noPts, int noFaces, double *pts,
+                        int *faces) override {
     (void)noPts;
     (void)noFaces;
     (void)pts;
@@ -100,8 +100,8 @@ public:
   };
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
-  virtual void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
-                             double &myradius, double &myheight) {
+  void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
+                     double &myradius, double &myheight) override {
     (void)mytype;
     (void)vectors;
     (void)myradius;

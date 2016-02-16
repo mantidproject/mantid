@@ -46,10 +46,11 @@ class Note: public MdiSubWindow, public Mantid::IProjectSerialisable
 
 public:
   Note(const QString& label, QWidget* parent, const QString& name = QString(), Qt::WFlags f=0);
-  ~Note(){};
+  ~Note() override{};
 
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  std::string saveToProject(ApplicationWindow *app) override;
 
   void setName(const QString& name);
 
@@ -61,8 +62,8 @@ public slots:
   QString text() { return te->text(); }
   void setText(const QString &s) { te->setText(s); }
 
-  void print();
-  void exportPDF(const QString& fileName);
+  void print() override;
+  void exportPDF(const QString &fileName) override;
   QString exportASCII(const QString &filename=QString::null);
 
 private:
