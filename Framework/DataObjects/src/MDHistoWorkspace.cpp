@@ -609,7 +609,7 @@ MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
     line.x.push_back(length);
     line.y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
     line.e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-    return;
+    return line;
   } else {
     // Get the first point
     std::set<coord_t>::iterator it;
