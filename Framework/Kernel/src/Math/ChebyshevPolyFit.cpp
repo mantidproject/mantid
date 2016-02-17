@@ -17,9 +17,9 @@ class ChebyshevPolyFitImpl {
 public:
   explicit ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
 
-  std::vector<double> fit(const std::vector<double> &xs,
-                          const std::vector<double> &ys,
-                          const std::vector<double> &wgts);
+  std::vector<double> fit(const std::vector<double> &x,
+                          const std::vector<double> &y,
+                          const std::vector<double> &w);
 
 private:
   const size_t m_order;
