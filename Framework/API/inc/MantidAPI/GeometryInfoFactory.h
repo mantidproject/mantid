@@ -15,6 +15,7 @@ class IComponent;
 
 namespace API {
 class MatrixWorkspace;
+class GeometryInfo;
 
 /** Factory for GeometryInfo, see there for detailed information.
 
@@ -45,6 +46,9 @@ class MANTID_API_DLL GeometryInfoFactory {
 public:
   GeometryInfoFactory(const MatrixWorkspace &workspace);
 
+  /// Returns a GeometryInfo instance for workspace index "index".
+  GeometryInfo create(const size_t index) const;
+
   /// Returns a reference to the instrument. The value is cached, so calling it
   /// repeatedly is cheap.
   const Geometry::Instrument &getInstrument() const;
@@ -63,6 +67,7 @@ public:
   double getL1() const;
 
 private:
+  const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   boost::shared_ptr<const Geometry::IComponent> m_source;
   boost::shared_ptr<const Geometry::IComponent> m_sample;

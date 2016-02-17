@@ -39,11 +39,11 @@ class ISpectrum;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class MANTID_API_DLL GeometryInfo {
 public:
-  GeometryInfo(const GeometryInfoFactory &instrument_info,
-               const ISpectrum &spectrum);
+  /// Constructor, usually not used directy. Creation of GeometryInfo is done
+  /// via GeometryInfoFactory.
+  GeometryInfo(const GeometryInfoFactory &factory, const ISpectrum &spectrum);
 
   /// Returns true is the spectrum is a monitor.
   bool isMonitor() const;
@@ -61,7 +61,7 @@ public:
   boost::shared_ptr<const Geometry::IDetector> getDetector() const;
 
 private:
-  const GeometryInfoFactory &m_instrument_info;
+  const GeometryInfoFactory &m_factory;
   boost::shared_ptr<const Geometry::IDetector> m_detector;
 };
 }
