@@ -1756,6 +1756,7 @@ void ReflMainViewPresenter::initOptions() {
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
+  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
@@ -1770,16 +1771,16 @@ ReflMainViewPresenter::getTransferStrategy() {
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source = std::unique_ptr<ReflMeasurementItemSource>(
-        new ReflNexusMeasurementItemSource);
+    std::unique_ptr<ReflMeasurementItemSource> source =
+        Mantid::Kernel::make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflMeasureTransferStrategy(std::move(catInfo), std::move(source)));
+    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+        std::move(catInfo), std::move(source));
+    return rtnStrategy;
   } else if (currentMethod == LegacyTransferMethod) {
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflLegacyTransferStrategy);
-
+    rtnStrategy = Mantid::Kernel::make_unique<ReflLegacyTransferStrategy>();
+    return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);

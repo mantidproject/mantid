@@ -1634,8 +1634,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log"));
+  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
