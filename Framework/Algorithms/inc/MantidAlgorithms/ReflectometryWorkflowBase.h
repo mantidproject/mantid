@@ -41,7 +41,7 @@ class DLLExport ReflectometryWorkflowBase : public API::DataProcessorAlgorithm {
 public:
   // Class typedefs
   using MinMax = boost::tuple<double, double>;
-  using OptionalMinMax = boost::optional<boost::tuple<double, double>>;
+  using OptionalMinMax = boost::optional<MinMax>;
   using OptionalDouble = boost::optional<double>;
   using OptionalMatrixWorkspace_sptr =
       boost::optional<Mantid::API::MatrixWorkspace_sptr>;
