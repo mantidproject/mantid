@@ -1,0 +1,87 @@
+digraph HB3AReduction {
+  label = "HB3A Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    ExperimentNumber
+    PtNumberList
+    OutputWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    isAbsUnits [label="Absolute\nUnits?"]
+    isOutputHKL [label="Output\nHKL?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    downloadData [label="DownloadFile v1\n Spice file, XML file"]
+    viewRawData [label="View data (GUI)"]
+    loadSpiceFile [label="LoadSpiceAscii v1"]
+    loadDetFile [label="LoadSpiceXML2DDet v1"]
+    collectExpInfo [label="CollectHB3AExperimentInfo v1\n(find peak)"]
+    collectExpInfo2 [label="CollectHB3AExperimentInfo v1\n(merge)"]
+    convertToQ [label="ConvertCWSDExpToMomentum v1\nExp. Info. WS\n(find peak)"]
+    convertToQ2 [label="ConvertCWSDExpToMomentum v1\nExp. Info. WS\n(merge)"]
+    findPeaks [label="FindPeaksMD v1\n(find peak)"]
+    combinePeaks [label="CombinePeaksWorkspace v1\n(cal ub)"]
+    calUB [label="CalculateUMatrix v1\n(cal ub)"]
+    getUB [label="PeakWorkspace.getUB()\n(cal ub)"]
+    setUB [label="SetUB v1\n(index peaks)"]
+    indexPeaks [label="IndexPeaks v1\n(index peaks)"]
+    convert2HKL [label="ConvertCWSDMDtoHKL v1\n(merge)"]
+    mergeMD [label="MergeMD v1\n(merge)"]
+  }
+
+  subgraph values {
+    $value_style
+    detMatrix [label="Measurement Workspace"]
+    spiceTable [label="Spice TableWorkspace"]
+    expScanMD [label="Exp-scan MDWorkspace"]
+    peakWS [label="Peaks PeakWorkspace"]
+    ubmatrix [label="UB matrix"]
+    background [label="Time-independent\nbackground"]
+    absUnits [label="Absolute\nUnits\nDiag Mask"]
+  }
+
+  ExperimentNumber	-> downloadData
+  PtNumberList		-> downloadData
+  downloadData		-> loadSpiceFile
+  loadSpiceFile		-> loadDetFile
+  loadSpiceFile		-> spiceTable
+  loadDetFile		-> viewRawData
+  loadDetFile		-> detMatrix
+
+  detMatrix		-> collectExpInfo
+  spiceTable		-> collectExpInfo
+  collectExpInfo	-> convertToQ
+  convertToQ		-> expScanMD
+  expScanMD		-> findPeaks
+  findPeaks		-> peakWS
+
+  peakWS		-> combinePeaks
+  combinePeaks		-> calUB
+  calUB			-> peakWS
+  peakWS		-> getUB
+  getUB			-> ubmatrix
+
+  ubmatrix		-> setUB
+  peakWS		-> setUB
+  setUB			-> peakWS
+  peakWS		-> indexPeaks
+
+  ExperimentNumber	-> collectExpInfo2
+  PtNumberList 		-> collectExpInfo2
+  collectExpInfo2	-> convertToQ2
+  convertToQ2		-> isOutputHKL
+  isOutputHKL		-> convert2HKL [label="Yes"]
+  convert2HKL		-> mergeMD
+  isOutputHKL		-> mergeMD [label="No"]
+
+
+  viewRawData		-> OutputWorkspace
+
+}
+

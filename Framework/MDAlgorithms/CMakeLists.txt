@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
+	src/IntegratePeaksCWSD.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
@@ -184,6 +185,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
+	inc/MantidMDAlgorithms/IntegratePeaksCWSD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
@@ -309,6 +311,7 @@ set ( TEST_FILES
 	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
+	IntegratePeaksCWSDTest.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h

@@ -91,7 +91,7 @@ void ConvertCWSDMDtoHKL::exec() {
   getUBMatrix();
 
   // Test indexing.  Will be delete soon
-  if (true) {
+  if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
     qsample.setX(1.36639);
     qsample.setY(-2.52888);
