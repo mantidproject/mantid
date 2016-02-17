@@ -1,10 +1,4 @@
-#pragma clang diagnostic ignored                                               \
-    "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
-#pragma clang diagnostic ignored "-Wreadability-named-parameter"
-#pragma clang diagnostic ignored                                               \
-    "-Wcppcoreguidelines-pro-bounds-array-to-pointer-decay"
-#pragma clang diagnostic ignored "-Wreadability-braces-around-statements"
-#pragma clang diagnostic ignored "-Wllvm-namespace-comment"
+#pragma clang diagnostic ignored "-Wall"
 
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 #include "MantidKernel/Exception.h"
