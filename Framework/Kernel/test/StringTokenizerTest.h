@@ -145,7 +145,7 @@ public:
   }
 
   void test_StringTokenizer_invalidOptionThrows() {
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Kernel::StringTokenizer("", "-:", 8));
+    TS_ASSERT_THROWS_ANYTHING(Mantid::Kernel::StringTokenizer(" ", "-:", 8));
   }
 };
 

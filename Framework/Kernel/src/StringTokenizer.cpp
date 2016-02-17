@@ -26,8 +26,8 @@ void trimToken(std::string &s) {
 
 // If the final character is a separator, we need to add an empty string to
 // tokens.
-void emptyFinalToken(const std::string &str, const std::string &delims,
-                     std::vector<std::string> &tokens) {
+void addEmptyFinalToken(const std::string &str, const std::string &delims,
+                        std::vector<std::string> &tokens) {
 
   const auto pos = std::find(delims.cbegin(), delims.cend(), str.back());
 
@@ -132,35 +132,34 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
   switch (options) {
   case 0:
     m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
-    emptyFinalToken(str, separators, m_tokens);
-    break;
-  case 1:
+    addEmptyFinalToken(str, separators, m_tokens);
+    return;
+  case TOK_IGNORE_EMPTY:
     m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
-    break;
-  case 2:
+    return;
+  case TOK_TRIM:
     m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
-    emptyFinalToken(str, separators, m_tokens);
-    break;
-  case 3:
+    addEmptyFinalToken(str, separators, m_tokens);
+    return;
+  case (TOK_IGNORE_EMPTY | TOK_TRIM):
     m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
-    break;
-  case 4:
+    return;
+  case (TOK_IGNORE_FINAL_EMPTY_TOKEN):
     m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
-    break;
-  case 5:
+    return;
+  case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_IGNORE_EMPTY):
     m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
-    break;
-  case 6:
+    return;
+  case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_TRIM):
     m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
-    break;
-  case 7:
+    return;
+  case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_TRIM | TOK_IGNORE_EMPTY):
     m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
-    break;
+    return;
   }
 
-  // check options variable is in the range 0-7.
-  if (options > 7)
-    throw std::runtime_error(
-        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
-        std::to_string(options));
+  // This point is reached only if options > 7.
+  throw std::runtime_error(
+      "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
+      std::to_string(options));
 }
