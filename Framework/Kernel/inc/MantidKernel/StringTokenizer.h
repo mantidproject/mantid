@@ -44,7 +44,7 @@ namespace Kernel {
 class DLLExport StringTokenizer {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
-  enum class Options {
+  enum Options {
     TOK_IGNORE_EMPTY = 1, ///< ignore empty tokens
     TOK_TRIM = 2, ///< remove leading and trailing whitespace from tokens
     TOK_IGNORE_FINAL_EMPTY_TOKEN =
