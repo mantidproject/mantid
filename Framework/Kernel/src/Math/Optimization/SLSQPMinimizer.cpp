@@ -1,5 +1,3 @@
-#pragma clang diagnostic ignored "-Wall"
-
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 #include "MantidKernel/Exception.h"
 
@@ -7,6 +5,11 @@
 #include <cmath>
 #include <cassert>
 #include <sstream>
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+#endif
 
 namespace Mantid {
 namespace Kernel {
@@ -3015,3 +3018,7 @@ L40:
 } // namespace Math
 } // namespace Kernel
 } // namespace Mantid
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
