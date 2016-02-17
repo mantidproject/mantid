@@ -76,20 +76,21 @@ public:
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesJson,
                      const std::unordered_set<std::string> &ignoreProperties =
-                     std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>()) override;
   void setProperties(const std::string &propertiesJson,
                      IPropertyManager *targetPropertyManager,
                      const std::unordered_set<std::string> &ignoreProperties);
   void setProperties(const ::Json::Value &jsonValue,
                      const std::unordered_set<std::string> &ignoreProperties =
-                     std::unordered_set<std::string>()) override;
-  void setProperties(
-      const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
-      const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>());
-  void
-  setPropertiesWithSimpleString(const std::string &propertiesString,
-                                const std::unordered_set<std::string> &ignoreProperties =
-                                std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>()) override;
+  void setProperties(const ::Json::Value &jsonValue,
+                     IPropertyManager *targetPropertyManager,
+                     const std::unordered_set<std::string> &ignoreProperties =
+                         std::unordered_set<std::string>());
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties =
+          std::unordered_set<std::string>()) override;
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
