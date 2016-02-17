@@ -191,7 +191,16 @@ ReflectometryWorkflowBase::getMinMax(const std::string &minProperty,
   }
   return MinMax(min, max);
 }
-
+/**
+ * Get min max pairs of Optional Properties
+ * @param alg : A Pointer to the algorithm to which the properties belong
+ * @param minProperty : Property name for the min property
+ * @param maxProperty : Property name for the max property
+ * @param inst : Pointer to the instrument associated with the workspace (for optional defaults)
+ * @param minIdfName : name of the min property component in the instrument defintion (for optional defaults)
+ * @param maxIdfName : name of the max property component in the instrument defintion (for optional defaults)
+ * @return An initliazed/uninitialized boost::optional of type MinMax.
+ */
 ReflectometryWorkflowBase::OptionalMinMax
 ReflectometryWorkflowBase::getOptionalMinMax(
     Mantid::API::Algorithm *const alg, const std::string &minProperty,
@@ -203,7 +212,8 @@ ReflectometryWorkflowBase::getOptionalMinMax(
   const auto max = checkForOptionalInstrumentDefault<double>(alg, maxProperty,
                                                              inst, maxIdfName);
   if (min.is_initialized() && max.is_initialized()) {
-    return OptionalMinMax(MinMax(min.get(), max.get()));
+    MinMax result = getMinMax(minProperty, maxProperty);
+    return OptionalMinMax(result);
   } else {
     return OptionalMinMax();
   }
