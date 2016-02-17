@@ -55,7 +55,8 @@ private:
 
   std::map<int, signal_t> getMonitorCounts();
 
-  std::vector<detid_t> processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+  std::vector<detid_t>
+  processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
 
   void getPeakInformation();
 

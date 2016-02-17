@@ -10,7 +10,6 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidDataObjects/MDEventInserter.h"
 
-
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
@@ -26,16 +25,11 @@ using Mantid::Kernel::V3D;
 
 class IntegratePeaksCWSDTest : public CxxTest::TestSuite {
 public:
-
-  static IntegratePeaksCWSDTest *createSuite()
-  {
+  static IntegratePeaksCWSDTest *createSuite() {
     return new IntegratePeaksCWSDTest();
   }
 
-  static void destroySuite(IntegratePeaksCWSDTest *suite)
-  {
-    delete suite;
-  }
+  static void destroySuite(IntegratePeaksCWSDTest *suite) { delete suite; }
 
   //-------------------------------------------------------------------------------
   /** Test initialize of the algorithm
@@ -49,8 +43,7 @@ public:
   //-------------------------------------------------------------------------------
   /** Test integrate MDEventWorkspace with 1 run
    */
-  void Ptest_singleRun()
-  {
+  void Ptest_singleRun() {
     // Initialize algorithm and set up
     IntegratePeaksCWSD alg;
     alg.initialize();
@@ -63,8 +56,8 @@ public:
     std::vector<int> vec_runnumbers;
     createMDEvents1Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal,
-                                                       vec_detid, vec_runnumbers);
+    IMDEventWorkspace_sptr inputws =
+        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS", inputws);
 
     std::vector<int> runnumberlist;
@@ -72,9 +65,9 @@ public:
     Mantid::Kernel::V3D peakcenter(3, 3, 3);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.push_back(peakcenter);
-    PeaksWorkspace_sptr peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
+    PeaksWorkspace_sptr peakws =
+        buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
-
 
     alg.setProperty("InputWorkspace", inputws);
     alg.setProperty("PeaksWorkspace", peakws);
@@ -83,14 +76,12 @@ public:
 
     alg.execute();
     TS_ASSERT(alg.isExecuted())
-
   }
 
   //-------------------------------------------------------------------------------
   /** Test integrate MDEventWorkspace with 1 run
    */
-  void test_multipleRun()
-  {
+  void test_multipleRun() {
     // Create workspaces to test
     std::vector<Mantid::Kernel::V3D> vec_qsample;
     std::vector<double> vec_signal;
@@ -98,8 +89,8 @@ public:
     std::vector<int> vec_runnumbers;
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal,
-                                                       vec_detid, vec_runnumbers);
+    IMDEventWorkspace_sptr inputws =
+        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
@@ -110,7 +101,8 @@ public:
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.push_back(peakcenter);
     peakcenterlist.push_back(peakcenter);
-    PeaksWorkspace_sptr peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
+    PeaksWorkspace_sptr peakws =
+        buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 
     // Initialize algorithm and set up
@@ -127,19 +119,17 @@ public:
 
     alg.execute();
     TS_ASSERT(alg.isExecuted())
-
   }
-
 
   //-------------------------------------------------------------------------------
   /** Add a list of MDEvents around Q = (1, 2, 3)
    * @brief createMDWorkspace
    */
-  IMDEventWorkspace_sptr createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
-                                           const std::vector<double> &vec_event_signal,
-                                           const std::vector<int> &vec_event_det,
-                                           const std::vector<int> &vec_event_run)
-  {
+  IMDEventWorkspace_sptr
+  createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
+                    const std::vector<double> &vec_event_signal,
+                    const std::vector<int> &vec_event_det,
+                    const std::vector<int> &vec_event_run) {
     // Check the inputs
     TS_ASSERT_EQUALS(vec_event_qsample.size(), vec_event_signal.size());
     TS_ASSERT_EQUALS(vec_event_qsample.size(), vec_event_det.size());
@@ -168,8 +158,7 @@ public:
     std::vector<double> m_extentMins(3);
     std::vector<double> m_extentMaxs(3);
     std::vector<size_t> m_numBins(3, 100);
-    for (size_t i = 0; i < 3; ++i)
-    {
+    for (size_t i = 0; i < 3; ++i) {
       m_extentMins[i] = 2;
       m_extentMaxs[i] = 4;
     }
@@ -180,8 +169,8 @@ public:
     for (size_t i = 0; i < nDimension; ++i) {
       std::string id = vec_ID[i];
       std::string name = dimensionNames[i];
-      mdws->addDimension(
-          Mantid::Geometry::MDHistoDimension_sptr(new Mantid::Geometry::MDHistoDimension(
+      mdws->addDimension(Mantid::Geometry::MDHistoDimension_sptr(
+          new Mantid::Geometry::MDHistoDimension(
               id, name, frame, static_cast<Mantid::coord_t>(m_extentMins[i]),
               static_cast<Mantid::coord_t>(m_extentMaxs[i]), m_numBins[i])));
     }
@@ -192,7 +181,8 @@ public:
     // Creates a new instance of the MDEventInserter to output workspace
     MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
         boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
-    MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
+    MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
+        mdws_mdevt_3);
 
     // Go though each spectrum to conver to MDEvent
     for (size_t iq = 0; iq < vec_event_qsample.size(); ++iq) {
@@ -224,7 +214,6 @@ public:
     exp_info2->mutableRun().addProperty("monitor", 1022);
     mdws->addExperimentInfo(exp_info2);
 
-
     return mdws;
   }
 
@@ -233,8 +222,9 @@ public:
    * @brief buildPW
    * @return
    */
-  PeaksWorkspace_sptr buildPeakWorkspace(std::vector<int> vec_run_number,
-                                         std::vector<Mantid::Kernel::V3D> vec_q_sample) {
+  PeaksWorkspace_sptr
+  buildPeakWorkspace(std::vector<int> vec_run_number,
+                     std::vector<Mantid::Kernel::V3D> vec_q_sample) {
     // create instrument
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
@@ -252,8 +242,7 @@ public:
     size_t num_peaks = vec_run_number.size();
     TS_ASSERT_EQUALS(num_peaks, vec_q_sample.size());
 
-    for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak)
-    {
+    for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak) {
       Peak p(inst, 1, 3.0);
       Mantid::Kernel::V3D qsample = vec_q_sample[i_peak];
       p.setQSampleFrame(qsample);
@@ -268,7 +257,7 @@ public:
   void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
                           std::vector<double> &vec_signal,
                           std::vector<Mantid::detid_t> &vec_detid,
-                          std::vector<int> &vec_runnumber){
+                          std::vector<int> &vec_runnumber) {
 
     double q_x0 = -0.4;
     double q_y0 = -0.4;
@@ -277,14 +266,11 @@ public:
     Mantid::Kernel::V3D origin(0, 0, 0);
 
     Mantid::detid_t detid = 1000;
-    for (size_t i = 0; i < 8; ++i)
-    {
+    for (size_t i = 0; i < 8; ++i) {
       double q_x = static_cast<double>(i) * d_q + q_x0;
-      for (size_t j = 0; j < 8; ++j)
-      {
+      for (size_t j = 0; j < 8; ++j) {
         double q_y = static_cast<double>(j) * d_q + q_y0;
-        for (size_t k = 0; k < 8; ++k)
-        {
+        for (size_t k = 0; k < 8; ++k) {
           double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
           double signal = qsample.distance(origin) * 1000;
@@ -294,7 +280,7 @@ public:
           vec_detid.push_back(detid);
           vec_runnumber.push_back(121);
 
-          ++ detid;
+          ++detid;
         }
       }
     }
@@ -306,7 +292,7 @@ public:
   void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
                           std::vector<double> &vec_signal,
                           std::vector<Mantid::detid_t> &vec_detid,
-                          std::vector<int> &vec_runnumber){
+                          std::vector<int> &vec_runnumber) {
 
     double q_x0 = -0.4;
     double q_y0 = -0.4;
@@ -315,14 +301,11 @@ public:
     Mantid::Kernel::V3D origin(0, 0, 0);
 
     Mantid::detid_t detid = 1000;
-    for (size_t i = 0; i < 8; ++i)
-    {
+    for (size_t i = 0; i < 8; ++i) {
       double q_x = static_cast<double>(i) * d_q + q_x0;
-      for (size_t j = 0; j < 8; ++j)
-      {
+      for (size_t j = 0; j < 8; ++j) {
         double q_y = static_cast<double>(j) * d_q + q_y0;
-        for (size_t k = 0; k < 8; ++k)
-        {
+        for (size_t k = 0; k < 8; ++k) {
           double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
           double signal = qsample.distance(origin) * 1000;
@@ -332,7 +315,7 @@ public:
           vec_detid.push_back(detid);
           vec_runnumber.push_back(121);
 
-          ++ detid;
+          ++detid;
         }
       }
     }
@@ -344,14 +327,11 @@ public:
     d_q = 0.1;
 
     detid = 1000;
-    for (size_t i = 0; i < 8; ++i)
-    {
+    for (size_t i = 0; i < 8; ++i) {
       double q_x = static_cast<double>(i) * d_q + q_x0;
-      for (size_t j = 0; j < 8; ++j)
-      {
+      for (size_t j = 0; j < 8; ++j) {
         double q_y = static_cast<double>(j) * d_q + q_y0;
-        for (size_t k = 0; k < 8; ++k)
-        {
+        for (size_t k = 0; k < 8; ++k) {
           double q_z = static_cast<double>(k) * d_q + q_z0;
           Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
           double signal = qsample.distance(origin) * 100;
@@ -361,16 +341,13 @@ public:
           vec_detid.push_back(detid);
           vec_runnumber.push_back(144);
 
-          ++ detid;
+          ++detid;
         }
       }
     }
 
     return;
   }
-
 };
-
-
 
 #endif /* MANTID_MDEVENTS_INTEGRATEPEAKSCWSDTEST_H_ */

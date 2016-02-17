@@ -25,9 +25,9 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColScan(0), m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_iMonitorCounts(4),
-      m_setQRange(true),
-      m_isBaseName(false), m_removeBackground(false) {}
+    : m_iColScan(0), m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3),
+      m_iMonitorCounts(4), m_setQRange(true), m_isBaseName(false),
+      m_removeBackground(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
