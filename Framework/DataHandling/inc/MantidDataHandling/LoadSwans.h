@@ -45,8 +45,6 @@ private:
 	void init();
 	void exec();
 
-	/// The name and path of the input file
-	std::string m_filename;
 	DataObjects::EventWorkspace_sptr m_ws;
 };
 
