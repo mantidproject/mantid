@@ -9,7 +9,8 @@ MultivariateGaussianComptonProfile
 Description
 -----------
 
-The fitted function for y-Space converted values is:
+The fitted function for y-Space converted values is as described by G.
+Romanelli. [1]_.
 
 .. math::
   J(y) = \frac{1}{\sqrt{2\pi} \sigma_{x} \sigma_{y} \sigma_{z}}
@@ -38,7 +39,7 @@ Where :math:`S^{2}(\theta, \phi)` is given by:
 References
 ----------
 
-TODO
+.. [1] G. Romanelli, `On the quantum contributions to phase transitions in Water probed by inelastic neutron scattering <https://epubs.stfc.ac.uk/work/12422430>`__
 
 .. categories::
 
