@@ -21,7 +21,7 @@ namespace {
 EventWorkspaceCollection_uptr
 makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
-  EventWorkspaceCollection_uptr decorator(new EventWorkspaceCollection);
+  auto decorator = make_unique<EventWorkspaceCollection>();
 
   auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
 
