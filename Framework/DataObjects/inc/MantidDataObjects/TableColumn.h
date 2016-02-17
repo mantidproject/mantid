@@ -330,7 +330,7 @@ inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value) {
   m_data[i] = value != 0.0;
 }
 
-/// Shared pointer to a column with aoutomatic type cast and data type check.
+/// Shared pointer to a column with automatic type cast and data type check.
 /// Can be created with TableWorkspace::getColumn(...)
 template <class T>
 class TableColumn_ptr : public boost::shared_ptr<TableColumn<T>> {
@@ -341,7 +341,7 @@ public:
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : boost::shared_ptr<TableColumn<T>>(
             boost::dynamic_pointer_cast<TableColumn<T>>(c)) {
-    if (this->get() == NULL) {
+    if (!this->get()) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(T).name();
       throw std::runtime_error(str);
@@ -357,7 +357,7 @@ public:
     */
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : TableColumn_ptr<API::Boolean>(c) {
-    if (this->get() == NULL) {
+    if (!this->get()) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(API::Boolean).name();
       throw std::runtime_error(str);

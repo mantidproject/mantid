@@ -1745,7 +1745,7 @@ public:
     content = soap_next_multipart(content);
     return *this;
   }
-  soap_multipart_iterator() : content(NULL) {}
+  soap_multipart_iterator() : content(nullptr) {}
   soap_multipart_iterator(struct soap_multipart *p) : content(p) {}
 };
 #endif
@@ -1769,7 +1769,7 @@ struct soap_dime {
     return iter;
   };
   soap_multipart_iterator end() {
-    soap_multipart_iterator iter(NULL);
+    soap_multipart_iterator iter(nullptr);
     return iter;
   };
 #endif
@@ -1788,7 +1788,7 @@ struct soap_mime {
     return iter;
   };
   soap_multipart_iterator end() {
-    soap_multipart_iterator iter(NULL);
+    soap_multipart_iterator iter(nullptr);
     return iter;
   };
 #endif
