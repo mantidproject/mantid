@@ -153,9 +153,6 @@ void PeakViewFactory::swapPeaksWorkspace(
     m_peaksWS = peaksWS;
 }
 
-// TODO REMOVE< wont be needed anymore
-int PeakViewFactory::FOM() const { return 100; }
-
 void PeakViewFactory::setForegroundAndBackgroundColors(
     const size_t colourNumber)
 {

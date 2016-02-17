@@ -13,11 +13,12 @@ namespace SliceViewer
 PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
                    QWidget *parent,
                    const VecPeakRepresentation &vecPeakRepresentation,
-                   const int plotXIndex, const int plotYIndex, PeakViewColor foregroundColor, PeakViewColor backgroundColor)
+                   const int plotXIndex, const int plotYIndex,
+                   PeakViewColor foregroundColor, PeakViewColor backgroundColor)
     : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent),
-      m_peaks(vecPeakRepresentation),
-      m_cachedOccupancyIntoView(0), m_cachedOccupancyInView(0),
-      m_showBackground(false), m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor)
+      m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0),
+      m_cachedOccupancyInView(0), m_showBackground(false),
+      m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor)
 {
 }
 
@@ -27,18 +28,22 @@ void PeakView::doPaintPeaks(QPaintEvent *)
 {
     const auto windowHeight = height();
     const auto windowWidth = width();
-    const auto viewHeight = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
-    const auto viewWidth = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
+    const auto viewHeight
+        = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
+    const auto viewWidth
+        = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
 
     for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
         if (m_viewablePeaks[i]) {
             // Get the peak
-            auto& peak = m_peaks[i];
-            const auto& origin = peak->getOrigin();
+            auto &peak = m_peaks[i];
+            const auto &origin = peak->getOrigin();
 
             // Set up the view information
-            const auto xOriginWindow = m_plot->transform(QwtPlot::xBottom, origin.X());
-            const auto yOriginWindow = m_plot->transform(QwtPlot::yLeft, origin.Y());
+            const auto xOriginWindow
+                = m_plot->transform(QwtPlot::xBottom, origin.X());
+            const auto yOriginWindow
+                = m_plot->transform(QwtPlot::yLeft, origin.Y());
 
             PeakRepresentationViewInformation peakRepresentationViewInformation;
             peakRepresentationViewInformation.windowHeight = windowHeight;
@@ -49,7 +54,8 @@ void PeakView::doPaintPeaks(QPaintEvent *)
             peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
 
             QPainter painter(this);
-            peak->draw(painter, m_foregroundColor, m_backgroundColor, peakRepresentationViewInformation);
+            peak->draw(painter, m_foregroundColor, m_backgroundColor,
+                       peakRepresentationViewInformation);
         }
     }
 }
@@ -88,10 +94,10 @@ void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform)
 
 void PeakView::showBackgroundRadius(const bool show)
 {
-  for(const auto& peak : m_peaks) {
-    peak->showBackgroundRadius(show);
-  }
-  m_showBackground = show;
+    for (const auto &peak : m_peaks) {
+        peak->showBackgroundRadius(show);
+    }
+    m_showBackground = show;
 }
 
 PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const
@@ -115,60 +121,57 @@ void PeakView::changeOccupancyIntoView(const double fraction)
     m_cachedOccupancyIntoView = fraction;
 }
 
-double PeakView::getOccupancyInView() const
-{
-    // TODO how to set this for differnt peak types
-  return 0.0;
-}
+double PeakView::getOccupancyInView() const { return m_cachedOccupancyInView; }
 
 double PeakView::getOccupancyIntoView() const
 {
-    // TODO how to set this for differnt peak types
-  return 0.0;
+    return m_cachedOccupancyIntoView;
 }
 
 bool PeakView::positionOnly() const
 {
     // TODO how to set this for differnt peak types, probably always false from
     // now on
-  return false;
+    return false;
 }
 
-double PeakView::getRadius() const
+double PeakView::getRadius() const { return m_peaks[0]->getEffectiveRadius(); }
+
+bool PeakView::isBackgroundShown() const { return m_showBackground; }
+
+void PeakView::takeSettingsFrom(const PeakOverlayView *const source)
 {
-  return m_peaks[0]->getEffectiveRadius();
+    // Pass on the color settings
+    this->changeForegroundColour(source->getForegroundPeakViewColor());
+    this->changeBackgroundColour(source->getBackgroundPeakViewColor());
+
+    // Pass on the information regarding the background color - not relvant for
+    // cross-type peak
+    this->showBackgroundRadius(source->isBackgroundShown());
+
+    // Pass on the information which only concerns the cross-type peak
+    this->changeOccupancyIntoView(source->getOccupancyIntoView());
+    this->changeOccupancyInView(source->getOccupancyInView());
 }
 
-bool PeakView::isBackgroundShown() const
+void PeakView::changeForegroundColour(const PeakViewColor peakViewColor)
 {
-    // This might be odd for cross-types
-    return m_showBackground;
+    m_foregroundColor = peakViewColor;
 }
 
-void PeakView::takeSettingsFrom(const PeakOverlayView *const)
+void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor)
 {
-    // TODO how to set this for differnt peak types, probably always false from
-    // now on
+    m_backgroundColor = peakViewColor;
 }
 
-void PeakView::changeForegroundColour(const PeakViewColor peakViewColor) {
-  m_foregroundColor = peakViewColor;
+PeakViewColor PeakView::getBackgroundPeakViewColor() const
+{
+    return m_backgroundColor;
 }
 
-
-void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor) {
-  m_backgroundColor = peakViewColor;
+PeakViewColor PeakView::getForegroundPeakViewColor() const
+{
+    return m_foregroundColor;
 }
-
-PeakViewColor PeakView::getBackgroundPeakViewColor() const {
-  return m_backgroundColor;
-}
-
-
-PeakViewColor PeakView::getForegroundPeakViewColor() const {
-  return m_foregroundColor;
-}
-
-
 }
 }

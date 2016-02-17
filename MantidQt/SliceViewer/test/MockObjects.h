@@ -153,7 +153,6 @@ public:
   MOCK_CONST_METHOD0(getPlotXLabel, std::string());
   MOCK_CONST_METHOD0(getPlotYLabel, std::string());
   MOCK_METHOD0(updateView, void());
-  MOCK_CONST_METHOD0(FOM, int());
   MOCK_METHOD1(swapPeaksWorkspace,
                void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> &));
 };

@@ -34,12 +34,9 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
-//#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
-//#include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakViewFactory.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
-//#include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
@@ -2345,22 +2342,6 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
         AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
             workspaceName);
     const size_t numberOfChildPresenters = m_peaksPresenter->size();
-
-#if 0
-    PeakOverlayViewFactorySelector_sptr viewFactorySelector =
-        boost::make_shared<PeakOverlayViewFactorySelector>();
-    // Candidate for overplotting as spherical peaks
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-            m_spect->yAxis(), numberOfChildPresenters));
-    // Candiate for plotting as a markers of peak positions
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiCrossFactory>(
-            m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), m_spect->xAxis(), m_spect->yAxis(),
-            numberOfChildPresenters));
-#endif
 
     // Peak View factory, displays peaks on a peak by peak basis
     auto peakViewFactory = boost::make_shared<PeakViewFactory>(
