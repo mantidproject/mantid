@@ -436,7 +436,7 @@ void LoadNexusProcessed::exec() {
     m_list = !specListProp->isDefault();
 
     // Load all first level entries
-    WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+    auto wksp_group = boost::make_shared<WorkspaceGroup>();
     // This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
