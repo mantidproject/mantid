@@ -21,9 +21,7 @@ const char *STEPS_NAME = "IntegrationSteps";
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
-    : ComptonProfile() {
-  /* setAttributeValue(STEPS_NAME, 100); */
-}
+    : ComptonProfile(), m_integrationSteps(35) {}
 
 /**
  * @returns A string containing the name of the function
@@ -55,9 +53,14 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
                                                       const Attribute &value) {
   ComptonProfile::setAttribute(name, value);
   if (name == STEPS_NAME) {
-    m_integrationSteps = value.asInt();
-    m_thetaStep = 1.0 / m_integrationSteps;
-    m_phiStep = (M_PI / 2.0) / m_integrationSteps;
+    int steps = value.asInt();
+    if (steps < 1)
+      throw std::runtime_error(std::string(STEPS_NAME) +
+                               " attribute must be positive and non-zero");
+
+    m_integrationSteps = steps;
+    m_thetaStep = 1.0 / steps;
+    m_phiStep = (M_PI / 2.0) / steps;
   }
 }
 
