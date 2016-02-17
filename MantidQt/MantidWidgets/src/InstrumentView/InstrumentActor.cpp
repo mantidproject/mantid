@@ -685,7 +685,7 @@ namespace MantidQt
 				try
 				{
 					// Find if the detector is masked
-					const std::set<detid_t>& dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
+					const auto &dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
 					bool masked = false;
 
 					if (mask)

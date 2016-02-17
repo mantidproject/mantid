@@ -288,7 +288,7 @@ void MatrixWSDataSource::getInfoList( double x,
     SVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
-  std::set<detid_t> ids = spec->getDetectorIDs();
+  auto ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
     list.emplace_back("Det ID");

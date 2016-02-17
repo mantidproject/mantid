@@ -776,8 +776,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
       const DataObjects::EventList events = m_eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
+      auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
         stringstream errss;
@@ -788,7 +787,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         throw runtime_error(errss.str());
       }
       detid_t detid = 0;
-      for (detit = detids.begin(); detit != detids.end(); ++detit)
+      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
         detid = *detit;
       vecDetIDs[i] = detid;
     }

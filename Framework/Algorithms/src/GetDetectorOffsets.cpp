@@ -131,16 +131,15 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const std::set<detid_t> &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi)->getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.
     PARALLEL_CRITICAL(GetDetectorOffsets_setValue) {
       // Use the same offset for all detectors from this pixel
-      std::set<detid_t>::iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it) {
-        outputW->setValue(*it, offset);
-        const auto mapEntry = pixel_to_wi.find(*it);
+      for (const auto &det : dets) {
+        outputW->setValue(det, offset);
+        const auto mapEntry = pixel_to_wi.find(det);
         if (mapEntry == pixel_to_wi.end())
           continue;
         const size_t workspaceIndex = mapEntry->second;

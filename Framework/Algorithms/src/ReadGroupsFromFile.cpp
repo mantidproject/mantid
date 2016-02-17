@@ -112,7 +112,7 @@ void ReadGroupsFromFile::exec() {
 
   for (int64_t i = 0; i < nHist; i++) {
     ISpectrum *spec = localWorkspace->getSpectrum(i);
-    const std::set<detid_t> &dets = spec->getDetectorIDs();
+    const auto &dets = spec->getDetectorIDs();
     if (dets.empty()) // Nothing
     {
       spec->dataY()[0] = 0.0;
