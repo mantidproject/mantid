@@ -326,13 +326,13 @@ void ReflMainViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
     return;
   }
 
-  std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+  auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(),
       ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
       ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
       ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
       ReflTableSchema::COL_DQQ, ReflTableSchema::COL_SCALE,
-      ReflTableSchema::COL_GROUP));
+      ReflTableSchema::COL_GROUP);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -1763,9 +1763,10 @@ ReflMainViewPresenter::getTransferStrategy() {
         makeCatalogConfigServiceAdapter(ConfigService::Instance()));
 
     // We make a user-based Catalog Info object for the transfer
-    auto catInfo = std::unique_ptr<ICatalogInfo>(new UserCatalogInfo(
-        ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService));
+    std::unique_ptr<ICatalogInfo> catInfo =
+        Mantid::Kernel::make_unique<UserCatalogInfo>(
+            ConfigService::Instance().getFacility().catalogInfo(),
+            *catConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
