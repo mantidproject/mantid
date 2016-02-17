@@ -357,9 +357,6 @@ void ColorBarWidget::setAutoScale(bool autoscale) {
  */
 bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
 
-<<<<<<< HEAD
-ColorBarWidget::~ColorBarWidget() {}
-=======
 /**
  * Gets the state of the "Autoscale for current slice" checkbox
  * @returns true if it is checked else false
@@ -372,7 +369,6 @@ bool ColorBarWidget::getAutoColorScaleforCurrentSlice() const {
 ColorBarWidget::~ColorBarWidget()
 {
 }
->>>>>>> origin/master
 
 } // namespace MantidQt
 } // namespace MantidWidgets
