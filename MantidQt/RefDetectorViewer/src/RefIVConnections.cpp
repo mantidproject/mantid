@@ -2,7 +2,6 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 namespace MantidQt
 {
