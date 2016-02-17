@@ -105,9 +105,9 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDHistoWorkspace(const IMDHistoWorkspace &other) = default;
+  IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
   /// Protected copy assignment operator. Assignment not implemented.
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other) = delete;
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
 
   const std::string toString() const override;
 
