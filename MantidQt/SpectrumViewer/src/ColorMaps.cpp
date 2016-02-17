@@ -22,7 +22,7 @@ namespace SpectrumView
  */
 std::vector<QRgb> ColorMaps::GetColorMap(ColorScale name, size_t n_colors) {
   std::vector<double> base_red, base_green, base_blue;
-  size_t n_base_colors;
+  size_t n_base_colors(0);
   switch (name) {
   case HEAT: {
     base_red = {40, 127, 230, 255, 255};

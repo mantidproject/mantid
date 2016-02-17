@@ -137,7 +137,7 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
   if (masktablews->columnCount() != 3) {
     g_log.error("Mask table workspace must have more than 3 columns.  First 3 "
                 "must be Xmin, Xmax and Spectrum List.");
-    return;
+    return maskeddetectorids;
   } else {
     vector<string> colnames = masktablews->getColumnNames();
     vector<string> chkcolumans(3);
@@ -151,7 +151,7 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
-        return;
+        return maskeddetectorids;
       }
     }
   }
