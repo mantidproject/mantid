@@ -157,7 +157,7 @@ TMDE(void MDBoxIterator)::jumpTo(size_t index) {
 
 //----------------------------------------------------------------------------------------------
 /// @return true if the iterator is currently valid
-TMDE(bool MDBoxIterator)::valid() const { return m_current; }
+TMDE(bool MDBoxIterator)::valid() const { return m_current != nullptr; }
 
 //----------------------------------------------------------------------------------------------
 /// Advance to the next cell. If the current cell is the last one in the
