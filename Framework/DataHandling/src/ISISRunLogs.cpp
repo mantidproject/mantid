@@ -25,9 +25,9 @@ ISISRunLogs::ISISRunLogs(const API::Run &icpRun, const int totalNumPeriods)
     : m_logParser(), m_numOfPeriods(totalNumPeriods) {
   // ICP event either in form icp_event or icpevent
   static const char *icpLogNames[2] = {"icp_event", "icpevent"};
-  for (int i = 0; i < 2; ++i) {
+  for (auto &icpLogName : icpLogNames) {
     try {
-      Kernel::Property *icpLog = icpRun.getLogData(icpLogNames[i]);
+      Kernel::Property *icpLog = icpRun.getLogData(icpLogName);
       m_logParser.reset(new LogParser(icpLog));
       return;
     } catch (std::runtime_error &) {
@@ -35,7 +35,7 @@ ISISRunLogs::ISISRunLogs(const API::Run &icpRun, const int totalNumPeriods)
   }
   // If it does not exist then pass in a NULL log to indicate that period 1
   // should be assumed
-  m_logParser.reset(new LogParser(NULL));
+  m_logParser.reset(new LogParser(nullptr));
 }
 
 /**
@@ -53,8 +53,8 @@ void ISISRunLogs::addStatusLog(API::Run &exptRun) {
  */
 void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   auto periodLog = m_logParser->createPeriodLog(period);
-  LogFilter *logFilter(NULL);
-  const TimeSeriesProperty<bool> *maskProp(NULL);
+  LogFilter *logFilter(nullptr);
+  const TimeSeriesProperty<bool> *maskProp(nullptr);
   try {
     auto runningLog =
         exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());

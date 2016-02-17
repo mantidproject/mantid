@@ -34,17 +34,17 @@ namespace DataHandling {
 class DLLExport CreateChunkingFromInstrument : public API::Algorithm {
 public:
   CreateChunkingFromInstrument();
-  virtual ~CreateChunkingFromInstrument();
+  ~CreateChunkingFromInstrument() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
-  virtual std::map<std::string, std::string> validateInputs();
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   Geometry::Instrument_const_sptr getInstrument();
 };
 

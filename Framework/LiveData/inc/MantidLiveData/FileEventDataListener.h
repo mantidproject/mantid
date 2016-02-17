@@ -43,19 +43,21 @@ namespace LiveData {
 class FileEventDataListener : public API::ILiveListener {
 public:
   FileEventDataListener();
-  ~FileEventDataListener();
+  ~FileEventDataListener() override;
 
-  std::string name() const { return "FileEventDataListener"; }
-  bool supportsHistory() const { return false; } // For the time being at least
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "FileEventDataListener"; }
+  bool supportsHistory() const override {
+    return false;
+  } // For the time being at least
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  bool isConnected();
-  ILiveListener::RunStatus runStatus();
-  int runNumber() const;
+  bool isConnected() override;
+  ILiveListener::RunStatus runStatus() override;
+  int runNumber() const override;
 
 private:
   std::string m_filename;   ///< The file to read

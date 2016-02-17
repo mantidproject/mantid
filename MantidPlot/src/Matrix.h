@@ -84,7 +84,7 @@ public:
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
   Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
-  ~Matrix();
+  ~Matrix() override;
 
   enum Operation{Transpose, Invert, FlipHorizontally, FlipVertically, RotateClockwise,
     RotateCounterClockwise, FFT, Clear, Calculate, MuParserCalculate, SetImage, ImportAscii};
@@ -129,7 +129,7 @@ public:
   /**
    * Currently handles SCRIPTING_CHANGE_EVENT only.
    */
-  void customEvent(QEvent *e);
+  void customEvent(QEvent *e) override;
 
   void resetView();
   void moveCell(const QModelIndex& index);
@@ -171,9 +171,9 @@ public:
   QPixmap matrixIcon(){return m_matrix_icon;}
 
 public slots:
-  void exportPDF(const QString& fileName);
+  void exportPDF(const QString &fileName) override;
   //! Print the Matrix
-  void print();
+  void print() override;
   //! Print the Matrix to fileName
   void print(const QString& fileName);
 
@@ -231,11 +231,12 @@ public slots:
   void setFormula(const QString &s){formula_str = s;};
 
   //! Load the matrix from a string list (i.e. lines from a project file)
-  void restore(const QStringList &l);
+  void restore(const QStringList &l) override;
 
   // loading and saving project files
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  std::string saveToProject(ApplicationWindow *app) override;
 
   // selection operations
   //! Standard cut operation

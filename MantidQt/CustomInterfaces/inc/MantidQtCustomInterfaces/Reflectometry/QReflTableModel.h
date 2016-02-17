@@ -43,24 +43,30 @@ namespace MantidQt
       Q_OBJECT
     public:
       QReflTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace);
-      virtual ~QReflTableModel();
+      ~QReflTableModel() override;
       //emit a signal saying things have changed
       void update();
       //row and column counts
-      int rowCount(const QModelIndex &parent = QModelIndex()) const;
-      int columnCount(const QModelIndex &parent = QModelIndex()) const;
+      int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+      int columnCount(const QModelIndex &parent = QModelIndex()) const override;
       //get data fro a cell
-      QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+      QVariant data(const QModelIndex &index,
+                    int role = Qt::DisplayRole) const override;
       //get header data for the table
-      QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+      QVariant headerData(int section, Qt::Orientation orientation,
+                          int role) const override;
       //get flags for a cell
-      Qt::ItemFlags flags(const QModelIndex &index) const;
+      Qt::ItemFlags flags(const QModelIndex &index) const override;
       //change or add data to the model
-      bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+      bool setData(const QModelIndex &index, const QVariant &value,
+                   int role = Qt::EditRole) override;
       //add new rows to the model
-      bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex());
+      bool insertRows(int row, int count,
+                      const QModelIndex &parent = QModelIndex()) override;
       //remove rows from the model
-      bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
+      bool removeRows(int row, int count,
+                      const QModelIndex &parent = QModelIndex()) override;
+
     private:
 
       //cache for a row's data

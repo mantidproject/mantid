@@ -1,7 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QFileInfo>

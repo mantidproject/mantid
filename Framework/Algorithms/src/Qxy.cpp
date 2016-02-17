@@ -6,7 +6,9 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -297,8 +299,8 @@ void Qxy::exec() {
   // left to be executed here for computational efficiency
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
-    for (size_t j = 0; j < weights->dataE(i).size(); j++) {
-      weights->dataE(i)[j] = sqrt(weights->dataE(i)[j]);
+    for (double &j : weights->dataE(i)) {
+      j = sqrt(j);
     }
   }
 

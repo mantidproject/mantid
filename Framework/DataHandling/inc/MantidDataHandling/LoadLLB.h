@@ -36,21 +36,21 @@ namespace DataHandling {
 class DLLExport LoadLLB : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadLLB();
-  virtual ~LoadLLB();
+  ~LoadLLB() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const { return "Loads LLB nexus file."; }
+  const std::string summary() const override { return "Loads LLB nexus file."; }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void setInstrumentName(NeXus::NXEntry &entry);
   void initWorkSpace(NeXus::NXEntry &);
   void loadTimeDetails(NeXus::NXEntry &entry);

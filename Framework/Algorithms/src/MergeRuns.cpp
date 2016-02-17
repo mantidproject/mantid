@@ -1,9 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MergeRuns.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -19,7 +23,7 @@ using namespace DataObjects;
 
 /// Default constructor
 MergeRuns::MergeRuns()
-    : MultiPeriodGroupAlgorithm(), m_progress(NULL), m_inEventWS(),
+    : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
       m_inMatrixWS(), m_tables() {}
 
 /// Destructor
@@ -64,16 +68,15 @@ void MergeRuns::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 
@@ -180,7 +183,7 @@ void MergeRuns::buildAdditionTables() {
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
                           inDets.end())) {
           // We found the workspace index right away. No need to keep looking
-          table->push_back(std::make_pair(inWI, outWI));
+          table->emplace_back(inWI, outWI);
           done = true;
         }
       }
@@ -204,7 +207,7 @@ void MergeRuns::buildAdditionTables() {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
         }
-        table->push_back(std::make_pair(inWI, outWI));
+        table->emplace_back(inWI, outWI);
         done = true; // Great, we did it.
       }
 
@@ -220,7 +223,7 @@ void MergeRuns::buildAdditionTables() {
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {
             // This one is right. Now we can stop looking.
-            table->push_back(std::make_pair(inWI, outWI));
+            table->emplace_back(inWI, outWI);
             done = true;
             continue;
           }
@@ -235,7 +238,7 @@ void MergeRuns::buildAdditionTables() {
         // this one?
 
         // So we need to add it as a new workspace index
-        table->push_back(std::make_pair(inWI, -1));
+        table->emplace_back(inWI, -1);
       }
     }
 
@@ -283,9 +286,9 @@ void MergeRuns::execEvent() {
     boost::shared_ptr<AdditionTable> table = m_tables[workspaceNum - 1];
 
     // Add all the event lists together as the table says to do
-    for (auto it = table->begin(); it != table->end(); ++it) {
-      int64_t inWI = it->first;
-      int64_t outWI = it->second;
+    for (auto &WI : *table) {
+      int64_t inWI = WI.first;
+      int64_t outWI = WI.second;
       if (outWI >= 0) {
         outWS->getEventList(outWI) += addee->getEventList(inWI);
       } else {

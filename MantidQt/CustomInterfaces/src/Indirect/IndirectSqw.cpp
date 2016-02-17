@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectSqw.h"
-
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QFileInfo>
 

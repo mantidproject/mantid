@@ -5,11 +5,12 @@
 *      Author: ruth
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 //#include "MantidKernel/Strings.h"
 namespace Mantid {
@@ -159,16 +160,16 @@ void PredictFractionalPeaks::exec() {
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   while (!done) {
-    for (size_t hoffset = 0; hoffset < hOffsets.size(); hoffset++)
-      for (size_t koffset = 0; koffset < kOffsets.size(); koffset++)
-        for (size_t loffset = 0; loffset < lOffsets.size(); loffset++)
+    for (double hOffset : hOffsets) {
+      for (double kOffset : kOffsets) {
+        for (double lOffset : lOffsets) {
           try {
             V3D hkl1(hkl);
             ErrPos = 0;
 
-            hkl1[0] += hOffsets[hoffset];
-            hkl1[1] += kOffsets[koffset];
-            hkl1[2] += lOffsets[loffset];
+            hkl1[0] += hOffset;
+            hkl1[1] += kOffset;
+            hkl1[2] += lOffset;
 
             Kernel::V3D Qs = UB * hkl1;
             Qs *= 2.0;
@@ -208,6 +209,9 @@ void PredictFractionalPeaks::exec() {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
               throw new std::invalid_argument("Invalid data at this point");
           }
+        }
+      }
+    }
     if (includePeaksInRange) {
       hkl[0]++;
       if (hkl[0] > Hmax) {

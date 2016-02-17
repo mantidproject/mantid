@@ -41,13 +41,13 @@ namespace Algorithms {
 class DLLExport SplineSmoothing : public API::Algorithm {
 public:
   SplineSmoothing();
-  virtual ~SplineSmoothing();
+  ~SplineSmoothing() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Smoothes a set of spectra using a cubic spline. Optionally, this "
            "algorithm can also calculate derivatives up to order 2 as a side "
            "product";
@@ -58,8 +58,8 @@ private:
   const int M_START_SMOOTH_POINTS;
 
   // Overriden methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// smooth a single spectrum of the workspace
   void smoothSpectrum(int index);

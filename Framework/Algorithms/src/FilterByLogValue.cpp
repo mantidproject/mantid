@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -93,7 +94,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   try {
     ITimeSeriesProperty *log =
         dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
-    if (log == NULL) {
+    if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
       return errors;
     }

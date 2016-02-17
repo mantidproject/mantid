@@ -63,7 +63,7 @@ int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh,
   (void)options; // Avoid compiler warning
 
   SOCKET s;
-  *pfh = NULL;
+  *pfh = nullptr;
   s = isisds_send_open(host, ISISDSDAEAccess, port);
   if (s == INVALID_SOCKET) {
     IDCreport(0, 0, "Error accessing DAE");
@@ -77,7 +77,7 @@ int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh,
 int IDCclose(idc_handle_t *pfh) {
   isisds_send_close((*pfh)->s);
   free((*pfh));
-  *pfh = NULL;
+  *pfh = nullptr;
   return 0;
 }
 
@@ -92,7 +92,7 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int **value,
   ISISDSDataType ret_type;
   int spec_nos[2] = {ifsn, nos};
   int spec_nos_dims[1] = {2};
-  char *command = NULL;
+  char *command = nullptr;
   if (isisds_send_command(fh->s, "GETDAT", spec_nos, ISISDSInt32, spec_nos_dims,
                           1) <= 0) {
     IDCreport(0, 0, "error sending command (getdat)");
@@ -138,7 +138,7 @@ static int IDCgetpar(idc_handle_t fh, const char *name, void **value,
                      int do_alloc) {
   int n, stat, comm_buff_size;
   ISISDSDataType ret_type;
-  char *command = NULL;
+  char *command = nullptr;
   char comm_buffer[256];
   sprintf(comm_buffer, "GETPAR%s", isisds_type_code[type]);
   n = static_cast<int>(strlen(name));

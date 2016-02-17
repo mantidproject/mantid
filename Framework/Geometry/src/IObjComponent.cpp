@@ -20,7 +20,7 @@ IObjComponent::IObjComponent(GeometryHandler *the_handler) {
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
 IObjComponent::~IObjComponent() {
-  if (handle != NULL)
+  if (handle != nullptr)
     delete handle;
 }
 
@@ -30,7 +30,7 @@ IObjComponent::~IObjComponent() {
  * the calling function.
  */
 void IObjComponent::setGeometryHandler(GeometryHandler *h) {
-  if (h == NULL)
+  if (h == nullptr)
     return;
   this->handle = h;
 }

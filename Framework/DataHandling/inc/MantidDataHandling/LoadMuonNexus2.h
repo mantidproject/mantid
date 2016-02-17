@@ -64,11 +64,11 @@ public:
   /// Default constructor
   LoadMuonNexus2();
   /// Destructor
-  ~LoadMuonNexus2() {}
+  ~LoadMuonNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadMuonNexus"; }
+  const std::string name() const override { return "LoadMuonNexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
            "file Version 2 and use the results to populate the named "
            "workspace. LoadMuonNexus may be invoked by LoadNexus if it is "
@@ -76,18 +76,18 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Nexus;Muon\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// Execute this version of the algorithm
   void doExec();
 

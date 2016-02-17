@@ -47,26 +47,26 @@ public:
   /// (Empty) Constructor
   ConvertToMatrixWorkspace() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ConvertToMatrixWorkspace() {}
+  ~ConvertToMatrixWorkspace() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertToMatrixWorkspace"; }
+  const std::string name() const override { return "ConvertToMatrixWorkspace"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts an EventWorkspace into a Workspace2D, using the input "
            "workspace's current X bin values.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Events"; }
+  const std::string category() const override { return "Events"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

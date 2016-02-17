@@ -41,15 +41,15 @@ namespace Functions {
 class DLLExport StaticKuboToyabeTimesExpDecay : public API::ParamFunction,
                                                 public API::IFunction1D {
 public:
-  std::string name() const { return "StaticKuboToyabeTimesExpDecay"; }
+  std::string name() const override { return "StaticKuboToyabeTimesExpDecay"; }
 
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

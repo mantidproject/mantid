@@ -366,9 +366,8 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 
       // Traverse each parent category, working our way from the top down.
       std::string currentLayer = "";
-      for (auto layerIt = categoryLayers.begin();
-           layerIt != categoryLayers.end(); ++layerIt) {
-        currentLayer.append(*layerIt);
+      for (auto &categoryLayer : categoryLayers) {
+        currentLayer.append(categoryLayer);
 
         if (hiddenCategories.find(currentLayer) != hiddenCategories.end()) {
           // Category is hidden, no need to check any others.

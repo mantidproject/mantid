@@ -12,7 +12,7 @@ class MantidApplication:public QApplication
 public:
   MantidApplication(int & argc, char ** argv );
   /// Reimplement notify to catch exceptions from event handlers
-  virtual bool notify(QObject * receiver, QEvent * event );
+  bool notify(QObject *receiver, QEvent *event) override;
 };
 
 #endif // MANTIDAPPLICATION_H_

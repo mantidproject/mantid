@@ -20,13 +20,13 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ThreadPoolRunnable : public Poco::Runnable {
 public:
   ThreadPoolRunnable(size_t threadnum, ThreadScheduler *scheduler,
-                     ProgressBase *prog = NULL, double waitSec = 0.0);
-  ~ThreadPoolRunnable();
+                     ProgressBase *prog = nullptr, double waitSec = 0.0);
+  ~ThreadPoolRunnable() override;
 
   /// Return the thread number of this thread.
   size_t threadnum() { return m_threadnum; }
 
-  virtual void run();
+  void run() override;
 
   void clearWait();
 

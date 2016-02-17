@@ -1,10 +1,12 @@
-#include "MantidKernel/OptionalBool.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -303,9 +305,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  boost::shared_ptr<ParameterMap> map(new ParameterMap());
-  Geometry::Instrument_const_sptr instr(
-      new Geometry::Instrument(instr_old->baseInstrument(), map));
+  auto map = boost::make_shared<ParameterMap>();
+  auto instr = boost::make_shared<const Geometry::Instrument>(
+      instr_old->baseInstrument(), map);
 
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);
@@ -374,23 +376,23 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   seqNum = atoi(getWord(in, false).c_str());
 
-  h = strtod(getWord(in, false).c_str(), 0);
-  k = strtod(getWord(in, false).c_str(), 0);
-  l = strtod(getWord(in, false).c_str(), 0);
+  h = strtod(getWord(in, false).c_str(), nullptr);
+  k = strtod(getWord(in, false).c_str(), nullptr);
+  l = strtod(getWord(in, false).c_str(), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), 0);
-  row = strtod(getWord(in, false).c_str(), 0);
-  strtod(getWord(in, false).c_str(), 0); // chan
-  strtod(getWord(in, false).c_str(), 0); // L2
-  strtod(getWord(in, false).c_str(), 0); // ScatAng
+  col = strtod(getWord(in, false).c_str(), nullptr);
+  row = strtod(getWord(in, false).c_str(), nullptr);
+  strtod(getWord(in, false).c_str(), nullptr); // chan
+  strtod(getWord(in, false).c_str(), nullptr); // L2
+  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
 
-  strtod(getWord(in, false).c_str(), 0); // Az
-  wl = strtod(getWord(in, false).c_str(), 0);
-  strtod(getWord(in, false).c_str(), 0); // D
-  IPK = strtod(getWord(in, false).c_str(), 0);
+  strtod(getWord(in, false).c_str(), nullptr); // Az
+  wl = strtod(getWord(in, false).c_str(), nullptr);
+  strtod(getWord(in, false).c_str(), nullptr); // D
+  IPK = strtod(getWord(in, false).c_str(), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), 0);
-  SigI = strtod(getWord(in, false).c_str(), 0);
+  Inti = strtod(getWord(in, false).c_str(), nullptr);
+  SigI = strtod(getWord(in, false).c_str(), nullptr);
   static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
 
   // Finish the line and get the first word of next line
@@ -486,11 +488,11 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
 
   run = atoi(getWord(in, false).c_str());
   detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), 0);
-  phi = strtod(getWord(in, false).c_str(), 0);
+  chi = strtod(getWord(in, false).c_str(), nullptr);
+  phi = strtod(getWord(in, false).c_str(), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), 0);
-  monCount = strtod(getWord(in, false).c_str(), 0);
+  omega = strtod(getWord(in, false).c_str(), nullptr);
+  monCount = strtod(getWord(in, false).c_str(), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);

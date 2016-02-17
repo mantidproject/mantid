@@ -42,8 +42,7 @@ public:
    */
   void Passed_test_FitZero() {
     // 1. Generate testing workspace
-    std::map<std::string, double> newparamvalues;
-    newparamvalues.insert(std::make_pair("Tcross", 0.5));
+    std::map<std::string, double> newparamvalues{{"Tcross", 0.5}};
 
     // This is the output from FitPowderDiffPeaks()
     std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/"
@@ -403,15 +402,9 @@ public:
     DataObjects::TableWorkspace_sptr geomws =
         DataObjects::TableWorkspace_sptr(tablews);
 
-    std::vector<std::string> paramnames;
-    paramnames.push_back("Zero");
-    paramnames.push_back("Zerot");
-    paramnames.push_back("Dtt1");
-    paramnames.push_back("Dtt1t");
-    paramnames.push_back("Dtt2t");
-    paramnames.push_back("Tcross");
-    paramnames.push_back("Width");
-    paramnames.push_back("LatticeConstant");
+    std::vector<std::string> paramnames{"Zero",  "Zerot",          "Dtt1",
+                                        "Dtt1t", "Dtt2t",          "Tcross",
+                                        "Width", "LatticeConstant"};
 
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value");
@@ -473,7 +466,7 @@ public:
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
-        parameters.insert(std::make_pair(parname, parvalue));
+        parameters.emplace(parname, parvalue);
 
         try {
           ss >> parmin >> parmax >> parstepsize;
@@ -481,7 +474,7 @@ public:
           mcpars.push_back(parmin);
           mcpars.push_back(parmax);
           mcpars.push_back(parstepsize);
-          parametermcs.insert(make_pair(parname, mcpars));
+          parametermcs.emplace(parname, mcpars);
         } catch (runtime_error err) {
           ;
         }
@@ -504,7 +497,7 @@ public:
       double parvalue;
       row >> parname >> parvalue;
 
-      paramvalues.insert(std::make_pair(parname, parvalue));
+      paramvalues.emplace(parname, parvalue);
     }
 
     return;

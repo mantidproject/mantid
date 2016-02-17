@@ -12,50 +12,50 @@ Mantid::Kernel::Logger g_log("MantidMatrixNullExtensionHandler");
 class MantidMatrixNullExtensionHandler : public IMantidMatrixExtensionHandler {
 public:
   MantidMatrixNullExtensionHandler() {}
-  virtual ~MantidMatrixNullExtensionHandler() {}
+  ~MantidMatrixNullExtensionHandler() override {}
 
-  virtual void setNumberFormat(MantidMatrixTabExtension& ,
-                               const QChar &, int ) {
+  void setNumberFormat(MantidMatrixTabExtension &, const QChar &,
+                       int) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual void recordFormat(MantidMatrixTabExtension& , const QChar&, int) {
+  void recordFormat(MantidMatrixTabExtension &, const QChar &, int) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual QChar getFormat(MantidMatrixTabExtension&) {
+  QChar getFormat(MantidMatrixTabExtension &) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual int getPrecision(MantidMatrixTabExtension&) {
+  int getPrecision(MantidMatrixTabExtension &) override {
     throw  std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual void setColumnWidth(MantidMatrixTabExtension&, int, int) {
+  void setColumnWidth(MantidMatrixTabExtension &, int, int) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual int getColumnWidth(MantidMatrixTabExtension&) {
+  int getColumnWidth(MantidMatrixTabExtension &) override {
     throw  std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual QTableView* getTableView(MantidMatrixTabExtension&) {
+  QTableView *getTableView(MantidMatrixTabExtension &) override {
     throw  std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual void setColumnWidthPreference(MantidMatrixTabExtension&, int) {
+  void setColumnWidthPreference(MantidMatrixTabExtension &, int) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }
 
-  virtual int getColumnWidthPreference(MantidMatrixTabExtension&) {
+  int getColumnWidthPreference(MantidMatrixTabExtension &) override {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "
                 "Mantid Matrix.");
   }

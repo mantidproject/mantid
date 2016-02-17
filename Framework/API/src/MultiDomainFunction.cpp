@@ -44,9 +44,9 @@ void MultiDomainFunction::setDomainIndices(
  */
 void MultiDomainFunction::countNumberOfDomains() {
   std::set<size_t> dSet;
-  for (auto it = m_domains.begin(); it != m_domains.end(); ++it) {
-    if (it->second.size()) {
-      dSet.insert(it->second.begin(), it->second.end());
+  for (auto &domain : m_domains) {
+    if (domain.second.size()) {
+      dSet.insert(domain.second.begin(), domain.second.end());
     }
   }
   m_nDomains = dSet.size();
@@ -124,11 +124,11 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
     std::vector<size_t> domains;
     getDomainIndices(iFun, cd.getNParts(), domains);
 
-    for (auto i = domains.begin(); i != domains.end(); ++i) {
-      const FunctionDomain &d = cd.getDomain(*i);
+    for (auto &domain : domains) {
+      const FunctionDomain &d = cd.getDomain(domain);
       FunctionValues tmp(d);
       getFunction(iFun)->function(d, tmp);
-      values.addToCalculated(m_valueOffsets[*i], tmp);
+      values.addToCalculated(m_valueOffsets[domain], tmp);
     }
   }
 }
@@ -162,9 +162,9 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
       std::vector<size_t> domains;
       getDomainIndices(iFun, cd.getNParts(), domains);
 
-      for (auto i = domains.begin(); i != domains.end(); ++i) {
-        const FunctionDomain &d = cd.getDomain(*i);
-        PartialJacobian J(&jacobian, m_valueOffsets[*i], paramOffset(iFun));
+      for (auto &domain : domains) {
+        const FunctionDomain &d = cd.getDomain(domain);
+        PartialJacobian J(&jacobian, m_valueOffsets[domain], paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d, J);
       }
     }
@@ -295,8 +295,8 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
   } else {
     // value must be either an int or a list of ints: "a,b,c,..."
     list.toList();
-    for (size_t k = 0; k < list.size(); ++k) {
-      indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+    for (const auto &k : list) {
+      indx.push_back(boost::lexical_cast<size_t>(k.name()));
     }
   }
   setDomainIndices(i, indx);
@@ -319,13 +319,12 @@ MultiDomainFunction::createEquivalentFunctions() const {
     std::vector<size_t> domains;
     getDomainIndices(iFun, nDomains, domains);
 
-    for (auto i = domains.begin(); i != domains.end(); ++i) {
-      size_t j = *i;
-      CompositeFunction_sptr cf = compositeFunctions[j];
+    for (auto domainIndex : domains) {
+      CompositeFunction_sptr cf = compositeFunctions[domainIndex];
       if (!cf) {
         // create a composite function for each domain
         cf = CompositeFunction_sptr(new CompositeFunction());
-        compositeFunctions[j] = cf;
+        compositeFunctions[domainIndex] = cf;
       }
       // add copies of all functions applied to j-th domain to a single
       // compositefunction

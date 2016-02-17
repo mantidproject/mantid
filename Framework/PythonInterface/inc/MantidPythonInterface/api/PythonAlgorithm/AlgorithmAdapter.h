@@ -52,29 +52,29 @@ public:
   /** @name Algorithm virtual methods */
   ///@{
   /// Returns the name of the algorithm
-  const std::string name() const;
+  const std::string name() const override;
   /// Returns a version of the algorithm
-  virtual int version() const;
+  int version() const override;
   /// A default version, chosen if there is no override
   int defaultVersion() const;
   /// Returns the summary for the algorithm
-  virtual const std::string summary() const;
+  const std::string summary() const override;
   /// Returns the summary for the algorithm
   std::string defaultSummary() const;
   /// Returns a category of the algorithm.
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// A default category, chosen if there is no override
   std::string defaultCategory() const;
   /// Allow the isRunning method to be overridden
-  virtual bool isRunning() const;
+  bool isRunning() const override;
   /// Allow the cancel method to be overridden
-  virtual void cancel();
+  void cancel() override;
   /// A return of false will allow processing workspace groups as a whole
-  virtual bool checkGroups();
+  bool checkGroups() override;
   /// A default value for checkGroups, chosen if there is no override
   bool checkGroupsDefault();
   /// Returns the validateInputs result of the algorithm.
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   ///@}
 
   // -- Deprecated methods --
@@ -127,9 +127,9 @@ private:
   DISABLE_COPY_AND_ASSIGN(AlgorithmAdapter)
 
   /// Private init for this algorithm
-  virtual void init();
+  void init() override;
   /// Private exec for this algorithm
-  virtual void exec();
+  void exec() override;
 
   /// We don't want the base class versions
   using SuperClass::declareProperty;

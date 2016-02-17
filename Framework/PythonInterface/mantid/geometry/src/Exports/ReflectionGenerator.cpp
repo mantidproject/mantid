@@ -12,8 +12,8 @@ using namespace boost::python;
 namespace {
 boost::python::list getListFromV3DVector(const std::vector<V3D> &hkls) {
   boost::python::list hklList;
-  for (auto it = hkls.begin(); it != hkls.end(); ++it) {
-    hklList.append(*it);
+  for (const auto &hkl : hkls) {
+    hklList.append(hkl);
   }
   return hklList;
 }

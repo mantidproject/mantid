@@ -11,7 +11,7 @@ using namespace API;
  * Default Constructor.
  */
 FunctionDomain1DSpectrumCreator::FunctionDomain1DSpectrumCreator()
-    : IDomainCreator(NULL, std::vector<std::string>(),
+    : IDomainCreator(nullptr, std::vector<std::string>(),
                      FunctionDomain1DSpectrumCreator::Simple),
       m_matrixWorkspace(), m_workspaceIndex(0), m_workspaceIndexIsSet(false) {}
 

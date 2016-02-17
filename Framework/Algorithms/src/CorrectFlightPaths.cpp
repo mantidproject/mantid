@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CorrectFlightPaths.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"

@@ -61,27 +61,27 @@ public:
   LoadNexus();
 
   /// Destructor
-  ~LoadNexus() {}
+  ~LoadNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadNexus"; };
+  const std::string name() const override { return "LoadNexus"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The LoadNexus algorithm will try to identify the type of Nexus "
            "file given to it and invoke the appropriate algorithm to read the "
            "data and populate the named workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of the input file
   std::string m_filename;

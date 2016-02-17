@@ -322,10 +322,8 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 //******************************************************************************************************************************************
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
-  if ((this->AlgID == "|Q|") ||
-      (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice()))
-    return true;
-  return false;
+  return (this->AlgID == "|Q|") ||
+         (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */

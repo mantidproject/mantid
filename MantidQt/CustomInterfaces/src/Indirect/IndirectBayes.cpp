@@ -26,12 +26,12 @@ IndirectBayes::IndirectBayes(QWidget *parent)
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // insert each tab into the interface on creation
-  m_bayesTabs.insert(std::make_pair(
-      RES_NORM, new ResNorm(m_uiForm.indirectBayesTabs->widget(RES_NORM))));
-  m_bayesTabs.insert(std::make_pair(
-      QUASI, new Quasi(m_uiForm.indirectBayesTabs->widget(QUASI))));
-  m_bayesTabs.insert(std::make_pair(
-      STRETCH, new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH))));
+  m_bayesTabs.emplace(
+      RES_NORM, new ResNorm(m_uiForm.indirectBayesTabs->widget(RES_NORM)));
+  m_bayesTabs.emplace(QUASI,
+                      new Quasi(m_uiForm.indirectBayesTabs->widget(QUASI)));
+  m_bayesTabs.emplace(STRETCH,
+                      new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH)));
 
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectBayesTab *>::iterator iter;

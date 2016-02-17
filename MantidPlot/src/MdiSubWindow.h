@@ -83,8 +83,7 @@ public:
     m_widget = w;
     m_widget->setParent(this); // I am not sure about this
   }
-  ~MdiSubWindowParent_t()
-  {
+  ~MdiSubWindowParent_t() override {
     //std::cerr << "MdiSubWindowParent_t deleted\n";
   }
   QWidget* widget() {return m_widget;}
@@ -187,14 +186,14 @@ public slots:
    * Ask the user "delete, hide, or cancel?" if the
    * "ask on close" flag is set.
    */
-  void closeEvent( QCloseEvent *);
-  void resizeEvent( QResizeEvent* );
+  void closeEvent(QCloseEvent *) override;
+  void resizeEvent(QResizeEvent *) override;
 
   //! Toggle the "ask on close" flag
   void confirmClose(bool ask);
 
   //! Filters other object's events (customizes title bar's context menu)
-  bool eventFilter(QObject *object, QEvent *e);
+  bool eventFilter(QObject *object, QEvent *e) override;
 
   FloatingWindow* getFloatingWindow() const;
   QMdiSubWindow* getDockedWindow() const;
@@ -227,7 +226,7 @@ public slots:
   void show();
   void resize(int w, int h);
   void resize(const QSize& size);
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
 
   /// Focus on the window
   void setFocus();
@@ -278,7 +277,7 @@ signals:
   
 protected:
   //! Catches status changes
-  virtual void changeEvent(QEvent *event);
+  void changeEvent(QEvent *event) override;
 
 private:
   //! Used to parse ASCII files with carriage return ('\r') endline.

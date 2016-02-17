@@ -29,7 +29,7 @@ CatalogConfigService *makeCatalogConfigServiceAdapter(
   public:
     Adapter(const T &adaptee, const std::string key)
         : m_adaptee(adaptee), m_key(key) {}
-    virtual OptionalPath preferredMountPoint() const {
+    OptionalPath preferredMountPoint() const override {
       return m_adaptee.getString(m_key);
     }
   };
@@ -68,17 +68,17 @@ public:
                   const CatalogConfigService &catalogConfigService);
 
   UserCatalogInfo(const UserCatalogInfo &other);
-  virtual ~UserCatalogInfo();
+  ~UserCatalogInfo() override;
 
   // ICatalogInfo interface
-  const std::string catalogName() const;
-  const std::string soapEndPoint() const;
-  const std::string externalDownloadURL() const;
-  const std::string catalogPrefix() const;
-  const std::string windowsPrefix() const;
-  const std::string macPrefix() const;
-  const std::string linuxPrefix() const;
-  UserCatalogInfo *clone() const;
+  const std::string catalogName() const override;
+  const std::string soapEndPoint() const override;
+  const std::string externalDownloadURL() const override;
+  const std::string catalogPrefix() const override;
+  const std::string windowsPrefix() const override;
+  const std::string macPrefix() const override;
+  const std::string linuxPrefix() const override;
+  UserCatalogInfo *clone() const override;
 
 private:
   /// Facility catalog info. Aggregation only solution here.

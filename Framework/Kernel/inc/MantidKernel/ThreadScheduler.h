@@ -145,17 +145,17 @@ public:
   ThreadSchedulerFIFO() : ThreadScheduler() {}
 
   /// Destructor
-  virtual ~ThreadSchedulerFIFO() { clear(); }
+  ~ThreadSchedulerFIFO() override { clear(); }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
-  bool empty() {
+  bool empty() override {
     Mutex::ScopedLock _lock(m_queueLock);
     return m_queue.empty();
   }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) {
+  void push(Task *newTask) override {
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
@@ -164,9 +164,9 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  virtual Task *pop(size_t threadnum) {
+  Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -180,7 +180,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  size_t size() {
+  size_t size() override {
     m_queueLock.lock();
     size_t temp = m_queue.size();
     m_queueLock.unlock();
@@ -188,7 +188,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() {
+  void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
     for (std::deque<Task *>::iterator it = m_queue.begin(); it != m_queue.end();
@@ -217,9 +217,9 @@ protected:
 class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
 
   //-------------------------------------------------------------------------------
-  Task *pop(size_t threadnum) {
+  Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -250,28 +250,28 @@ public:
   ThreadSchedulerLargestCost() : ThreadScheduler() {}
 
   /// Destructor
-  virtual ~ThreadSchedulerLargestCost() { clear(); }
+  ~ThreadSchedulerLargestCost() override { clear(); }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
-  bool empty() {
+  bool empty() override {
     Mutex::ScopedLock _lock(m_queueLock);
     return m_map.empty();
   }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) {
+  void push(Task *newTask) override {
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
-    m_map.insert(std::pair<double, Task *>(newTask->cost(), newTask));
+    m_map.emplace(newTask->cost(), newTask);
     m_queueLock.unlock();
   }
 
   //-------------------------------------------------------------------------------
-  virtual Task *pop(size_t threadnum) {
+  Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -287,7 +287,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  size_t size() {
+  size_t size() override {
     m_queueLock.lock();
     size_t temp = m_map.size();
     m_queueLock.unlock();
@@ -295,7 +295,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() {
+  void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
     for (std::multimap<double, Task *>::iterator it = m_map.begin();

@@ -35,14 +35,14 @@ namespace Algorithms {
 class DLLExport ShiftLogTime : public API::Algorithm {
 public:
   ShiftLogTime();
-  ~ShiftLogTime();
+  ~ShiftLogTime() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Shifts the indexes of the specified log. This will make the log "
            "shorter by the specified shift.";
   }
@@ -51,9 +51,9 @@ private:
   /// Sets documentation strings for this algorithm
 
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

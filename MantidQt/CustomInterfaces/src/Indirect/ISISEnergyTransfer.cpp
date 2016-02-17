@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -469,17 +470,17 @@ std::vector<std::string> ISISEnergyTransfer::getSaveFormats() {
   std::vector<std::string> fileFormats;
 
   if (m_uiForm.ckSaveNexus->isChecked())
-    fileFormats.push_back("nxs");
+    fileFormats.emplace_back("nxs");
   if (m_uiForm.ckSaveSPE->isChecked())
-    fileFormats.push_back("spe");
+    fileFormats.emplace_back("spe");
   if (m_uiForm.ckSaveNXSPE->isChecked())
-    fileFormats.push_back("nxspe");
+    fileFormats.emplace_back("nxspe");
   if (m_uiForm.ckSaveASCII->isChecked())
-    fileFormats.push_back("ascii");
+    fileFormats.emplace_back("ascii");
   if (m_uiForm.ckSaveAclimax->isChecked())
-    fileFormats.push_back("aclimax");
+    fileFormats.emplace_back("aclimax");
   if (m_uiForm.ckSaveDaveGrp->isChecked())
-    fileFormats.push_back("davegrp");
+    fileFormats.emplace_back("davegrp");
 
   return fileFormats;
 }

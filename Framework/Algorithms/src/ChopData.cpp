@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -163,8 +164,8 @@ void ChopData::exec() {
   // Create workspace group that holds output workspaces
   WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
 
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &workspace : workspaces) {
+    wsgroup->addWorkspace(workspace);
   }
   // set the output property
   setProperty("OutputWorkspace", wsgroup);

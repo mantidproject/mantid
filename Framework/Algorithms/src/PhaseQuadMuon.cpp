@@ -2,10 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -178,7 +179,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       maxAsym = phase->Double(h, 1);
     }
   }
-  if (!maxAsym) {
+  if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
 

@@ -5,19 +5,20 @@
 #include <fstream>
 
 #include "MantidDataHandling/SavePAR.h"
+
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-
-#include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

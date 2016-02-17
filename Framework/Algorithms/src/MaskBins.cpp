@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -78,8 +79,7 @@ void MaskBins::exec() {
   if (this->spectra_list.size() > 0) {
     const int numHist = static_cast<int>(inputWS->getNumberHistograms());
     //--- Validate spectra list ---
-    for (size_t i = 0; i < this->spectra_list.size(); ++i) {
-      int wi = this->spectra_list[i];
+    for (auto wi : this->spectra_list) {
       if ((wi < 0) || (wi >= numHist)) {
         std::ostringstream oss;
         oss << "One of the workspace indices specified, " << wi
@@ -95,7 +95,7 @@ void MaskBins::exec() {
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     //------- EventWorkspace ---------------------------
     this->execEvent();
   } else {

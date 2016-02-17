@@ -10,6 +10,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,30 +64,30 @@ public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  virtual ~FindPeaks() {
+  ~FindPeaks() override {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
-  virtual const std::string name() const { return "FindPeaks"; }
+  const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Searches for peaks in a dataset.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Optimization\\PeakFinding";
   }
   /// needed by FindPeaksBackground
   int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Process algorithm's properties
   void processAlgorithmProperties();

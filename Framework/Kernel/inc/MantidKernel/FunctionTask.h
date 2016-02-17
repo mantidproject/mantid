@@ -60,8 +60,8 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
-  virtual void run() {
-    if (m_voidFunc != NULL)
+  void run() override {
+    if (m_voidFunc)
       m_voidFunc();
     else
       throw std::runtime_error("FunctionTask: NULL method pointer provided.");

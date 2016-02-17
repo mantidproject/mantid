@@ -56,11 +56,11 @@ public:
   /// Constructor
   LoadDAEDialog(QWidget *parent = 0);
   /// Destruktor
-  ~LoadDAEDialog();
+  ~LoadDAEDialog() override;
 
 protected:
   /// This does the work and must be overridden in each deriving class
-  void initLayout();
+  void initLayout() override;
 
 private:
   /* GUI components */

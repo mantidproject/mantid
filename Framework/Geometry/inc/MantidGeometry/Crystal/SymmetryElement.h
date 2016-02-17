@@ -75,9 +75,9 @@ typedef boost::shared_ptr<SymmetryElement> SymmetryElement_sptr;
 class MANTID_GEOMETRY_DLL SymmetryElementIdentity : public SymmetryElement {
 public:
   SymmetryElementIdentity();
-  ~SymmetryElementIdentity() {}
+  ~SymmetryElementIdentity() override {}
 
-  SymmetryElement_sptr clone() const;
+  SymmetryElement_sptr clone() const override;
 };
 
 typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
@@ -91,9 +91,9 @@ typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
   SymmetryElementInversion(const V3R &inversionPoint = V3R(0, 0, 0));
-  ~SymmetryElementInversion() {}
+  ~SymmetryElementInversion() override {}
 
-  SymmetryElement_sptr clone() const;
+  SymmetryElement_sptr clone() const override;
 
   /// Returns the internally stored inversion point.
   V3R getInversionPoint() const { return m_inversionPoint; }
@@ -114,12 +114,12 @@ typedef boost::shared_ptr<SymmetryElementInversion>
 class MANTID_GEOMETRY_DLL SymmetryElementTranslation : public SymmetryElement {
 public:
   SymmetryElementTranslation(const V3R &translation);
-  ~SymmetryElementTranslation() {}
+  ~SymmetryElementTranslation() override {}
 
   /// Returns the internally stored translation vector.
   V3R getTranslation() const { return m_translation; }
 
-  SymmetryElement_sptr clone() const;
+  SymmetryElement_sptr clone() const override;
 
 protected:
   V3R m_translation;
@@ -137,7 +137,7 @@ typedef boost::shared_ptr<SymmetryElementTranslation>
  */
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxis : public SymmetryElement {
 public:
-  ~SymmetryElementWithAxis() {}
+  ~SymmetryElementWithAxis() override {}
 
   /// Returns the internally stored axis.
   V3R getAxis() const { return m_axis; }
@@ -178,9 +178,9 @@ public:
   SymmetryElementRotation(const std::string &symbol, const V3R &axis,
                           const V3R &translation = V3R(0, 0, 0),
                           const RotationSense &rotationSense = Positive);
-  ~SymmetryElementRotation() {}
+  ~SymmetryElementRotation() override {}
 
-  SymmetryElement_sptr clone() const;
+  SymmetryElement_sptr clone() const override;
 
   /// Returns the internally stored rotation sense.
   RotationSense getRotationSense() const { return m_rotationSense; }
@@ -205,9 +205,9 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirror
 public:
   SymmetryElementMirror(const std::string &symbol, const V3R &axis,
                         const V3R &translation = V3R(0, 0, 0));
-  ~SymmetryElementMirror() {}
+  ~SymmetryElementMirror() override {}
 
-  SymmetryElement_sptr clone() const;
+  SymmetryElement_sptr clone() const override;
 };
 
 typedef boost::shared_ptr<SymmetryElementMirror> SymmetryElementMirror_sptr;

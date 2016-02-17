@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -877,7 +878,7 @@ void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
     } else {
       std::string propName = props[i]->propertyName().toStdString();
       double propValue = props[i]->valueText().toDouble();
-      if (propValue) {
+      if (propValue != 0.0) {
         if (func->hasAttribute(propName))
           func->setAttributeValue(propName, propValue);
         else
@@ -1133,6 +1134,10 @@ void ConvFit::plotGuess() {
  * Runs the single fit algorithm
  */
 void ConvFit::singleFit() {
+  // Validate tab before running a single fit
+  if (!validate()) {
+	  return;
+  }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFit(bool)));
@@ -1218,7 +1223,7 @@ void ConvFit::singleFitComplete(bool error) {
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
-
+  params.reserve(static_cast<int>(parNames.size()));
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 

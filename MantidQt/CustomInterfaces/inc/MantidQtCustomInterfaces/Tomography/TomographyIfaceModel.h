@@ -5,7 +5,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 // Qt classes forward declarations
@@ -73,6 +75,11 @@ public:
     return m_jobsStatus;
   }
 
+  const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+  jobsStatusLocal() const {
+    return m_jobsStatusLocal;
+  }
+
   /// Username last logged in, if any.
   std::string loggedIn() const { return m_loggedInUser; }
   // TODO: add companion currentComputeResource where LoggedIn() is in
@@ -100,9 +107,33 @@ public:
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
+  void doRunReconstructionJobLocal();
+
   /// Update to the current setings given by the user
   void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
     m_toolsSettings = ts;
+  }
+
+  void updateTomopyMethod(const std::string &method) {
+    m_tomopyMethod = method;
+  }
+
+  void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
+
+  void updateExternalInterpreterPath(const std::string &interp) {
+    m_externalInterpreterPath = interp;
+  }
+
+  void updatePathLocalReconScripts(const std::string &path) {
+    m_pathLocalReconScripts = path;
+  }
+
+  void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
+    m_prePostProcSettings = filters;
+  }
+
+  void updateImageStackPreParams(const ImageStackPreParams &roiEtc) {
+    m_imageStackPreParams = roiEtc;
   }
 
   /// loads an image/picture in FITS format
@@ -129,20 +160,26 @@ private:
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
-  std::string validateCompResource(const std::string &res);
+  std::string validateCompResource(const std::string &res) const;
 
   /// makes the command line string to run on the remote/local
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::string &opt);
+                               std::string &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
                                 const std::string &settings,
-                                const std::string &cmd, const std::string &opt);
+                                const std::string &cmd,
+                                const std::string &opt) const;
+
+  std::string makeTomoRecScriptOptions() const;
+
+  std::string filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
+                                  const ImageStackPreParams &corRegions) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
-                    std::string &opts);
+                    std::string &opts) const;
 
-  void checkDataPathsSet();
+  void checkDataPathsSet() const;
 
   /// username last logged in (empty if not in login status), from local
   /// perspective
@@ -164,6 +201,8 @@ private:
 
   // status of remote jobs
   std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatus;
+  // status of local runs/jobs
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatusLocal;
 
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
@@ -177,6 +216,18 @@ private:
 
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
+
+  std::string m_tomopyMethod;
+  std::string m_astraMethod;
+
+  std::string m_externalInterpreterPath;
+  std::string m_pathLocalReconScripts;
+
+  // Settings for the pre-/post-processing filters
+  TomoReconFiltersSettings m_prePostProcSettings;
+
+  // Parameters set for the ROI, normalization region, etc.
+  ImageStackPreParams m_imageStackPreParams;
 
   // mutex for the job status info update operations
   QMutex *m_statusMutex;

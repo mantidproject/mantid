@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 
 #include "MantidAlgorithms/RemoveBackground.h"
 #include "MantidAlgorithms/Rebin.h"

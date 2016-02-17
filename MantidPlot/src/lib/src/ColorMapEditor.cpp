@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ColorMapEditor.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QPushButton>
 #include <QTableWidget>

@@ -15,7 +15,6 @@ All the script files used to process GEM, HRPD, INS and Polaris data have been
 integrated to Mantid which can be found inside the following directory on a Windows
 machine: `C:\MantidInstall\scripts\PowderISIS`.
 
-
 Run Requirement
 ---------------
 There are a preference file and a small script which is required to run inside
@@ -24,9 +23,11 @@ ScriptingWindow.html>`_ on mantid in order to carry out the data normalisation:
 
 The preference file, a file with an extension name of .pref (e.g: UserPrefFile.pref)
 will contain the following at least:
+
 - vanadium, background and empty sample container (if used) run numbers
 - parameters  for carrying out a sample absorption correction (if required)
 - directories which can be assigned to RAW files, Vanadium Directory
+
 *These directories have been left blank but can be changed and set by each user*
 *on their preference. The directories are also modifiable via small script which*
 *is ran inside* `Scripting Window <http://docs.mantidproject.org/nightly/interfaces
@@ -34,6 +35,7 @@ will contain the following at least:
 
 The script which is required to be written inside `Scripting Window <http://docs.
 mantidproject.org/nightly/interfaces/ScriptingWindow.html>`_ on Mantid contains:
+
 - details of the location for all the files which will be utilised
 - name of the pref file and folders
 - the run number(s) you wish to process
@@ -90,7 +92,6 @@ within the python script, the `GrpOff` and `Cycle_15_2` folder will be required 
 Similarly if the `Cycle_15_2` or `user` is passed as an empty string ("") or else is not passed
 as a parameter, then the script shall look for the files in previous folder.
 
-
 Data Layout
 -----------
 
@@ -111,11 +112,12 @@ as shown below, the script shall look for the raw files (with the format of
 .. code-block:: python
 
    #----------------------------------------------------
-   # Calibration Runs Numbers
+   # Runs Numbers
    #----------------------------------------------------
    #
    Vanadium     78338
    V-Empty      78339
+   S-Empty      0
    #
 
 Output
@@ -184,7 +186,17 @@ modifying the following line of the :ref:`usage-PowderISIS-ref` script to:
 Workflow
 --------
 
-.. diagram:: PowderDiffractionISIS-v1_wkflw.dot
+High-Level Workflow
+^^^^^^^^^^^^^^^^^^^
+.. diagram:: PowderDiffractionISIS_HighLvl-v1_wkflw.dot
+
+Mid-Level Workflow
+^^^^^^^^^^^^^^^^^^
+.. diagram:: PowderDiffractionISIS_MidLvl-v1_wkflw.dot
+
+Low-Level Workflow
+^^^^^^^^^^^^^^^^^^
+.. diagram:: PowderDiffractionISIS_LowLvl-v1_wkflw.dot
 
 Additional Information
 ----------------------
@@ -234,3 +246,7 @@ Usage
 
    cry_focus.focus_all(expt, "79514", Write_ExtV=False)
 
+.. toctree::
+   :maxdepth: 1
+
+   api/python/index

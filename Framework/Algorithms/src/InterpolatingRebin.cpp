@@ -2,9 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/InterpolatingRebin.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -135,7 +139,7 @@ void InterpolatingRebin::outputYandEValues(
       << "Preparing to calculate y-values using splines and estimate errors\n";
 
   // prepare to use GSL functions but don't let them terminate Mantid
-  gsl_error_handler_t *old_handler = gsl_set_error_handler(NULL);
+  gsl_error_handler_t *old_handler = gsl_set_error_handler(nullptr);
 
   const int histnumber = static_cast<int>(inputW->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, histnumber);
@@ -298,8 +302,8 @@ void InterpolatingRebin::cubicInterpolation(
   }
 
   // get the GSL to allocate the memory
-  gsl_interp_accel *acc = NULL;
-  gsl_spline *spline = NULL;
+  gsl_interp_accel *acc = nullptr;
+  gsl_spline *spline = nullptr;
   try {
     acc = gsl_interp_accel_alloc();
     const size_t nPoints = oldIn2 - oldIn1 + 1;

@@ -39,7 +39,7 @@ typedef std::vector<VecV3D> VecVecV3D;
 class DLLExport PeaksIntersection : public API::Algorithm {
 public:
   PeaksIntersection();
-  virtual ~PeaksIntersection();
+  ~PeaksIntersection() override;
 
   static std::string detectorSpaceFrame();
   static std::string qLabFrame();

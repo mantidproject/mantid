@@ -121,8 +121,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++) {
-    outWS->addDimension(m_binDimensions[od]);
+  for (auto &binDimension : m_binDimensions) {
+    outWS->addDimension(binDimension);
   }
   outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();
@@ -185,7 +185,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Function defining which events (in the input dimensions) to place in the
   // output
-  MDImplicitFunction *function = this->getImplicitFunctionForChunk(NULL, NULL);
+  MDImplicitFunction *function =
+      this->getImplicitFunctionForChunk(nullptr, nullptr);
 
   std::vector<API::IMDNode *> boxes;
   // Leaf-only; no depth limit; with the implicit function passed to it.
@@ -262,7 +263,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } // for each box in the vector
   prog->report();
 
-  outWS->splitAllIfNeeded(NULL);
+  outWS->splitAllIfNeeded(nullptr);
   // Refresh all cache.
   outWS->refreshCache();
 

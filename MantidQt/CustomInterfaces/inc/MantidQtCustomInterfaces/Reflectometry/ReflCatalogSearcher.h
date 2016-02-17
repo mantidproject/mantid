@@ -34,8 +34,9 @@ namespace MantidQt
     class ReflCatalogSearcher : public IReflSearcher
     {
     public:
-      virtual ~ReflCatalogSearcher() {};
-      Mantid::API::ITableWorkspace_sptr search(const std::string &text);
+      ~ReflCatalogSearcher() override{};
+      Mantid::API::ITableWorkspace_sptr
+      search(const std::string &text) override;
     };
   }
 }

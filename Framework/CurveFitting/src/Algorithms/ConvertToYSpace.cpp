@@ -1,11 +1,16 @@
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -101,8 +106,8 @@ double ConvertToYSpace::getComponentParameter(
           boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp)) {
     const auto dets = group->getDetectors();
     double avg(0.0);
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
-      auto param = pmap.getRecursive((*it)->getComponentID(), name);
+    for (const auto &det : dets) {
+      auto param = pmap.getRecursive(det->getComponentID(), name);
       if (param)
         avg += param->value<double>();
       else

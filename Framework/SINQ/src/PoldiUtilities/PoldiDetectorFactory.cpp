@@ -22,7 +22,7 @@ PoldiDetectorFactory::createDetector(date experimentDate) {
     return new PoldiHeliumDetector();
   }
 
-  return 0;
+  return nullptr;
 }
 
 } // namespace Poldi

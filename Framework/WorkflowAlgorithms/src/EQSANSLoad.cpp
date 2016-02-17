@@ -2,26 +2,31 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidAPI/FileFinder.h>
-#include <MantidAPI/FileProperty.h>
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
+
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+
 #include <iostream>
 #include <fstream>
 #include <istream>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -128,8 +133,8 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   std::string config_file = "";
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
-  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
-    Poco::DirectoryIterator file_it(*it);
+  for (const auto &searchPath : searchPaths) {
+    Poco::DirectoryIterator file_it(searchPath);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it) {
       if (boost::regex_search(file_it.name(), matches, re1)) {

@@ -3,12 +3,13 @@
 
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/iter_find.hpp>
@@ -34,10 +35,7 @@ static bool endswith(const std::string &s, const std::string &subs) {
   // get a substring
   std::string tail = s.substr(s.size() - subs.size());
 
-  if (tail.compare(subs) != 0)
-    return false;
-
-  return true;
+  return tail.compare(subs) == 0;
 }
 
 static bool checkIntersection(std::vector<std::string> v1,
@@ -50,10 +48,7 @@ static bool checkIntersection(std::vector<std::string> v1,
   std::vector<std::string> intersectvec(v1.size() + v2.size());
   auto outiter = std::set_intersection(v1.begin(), v1.end(), v2.begin(),
                                        v2.end(), intersectvec.begin());
-  if (static_cast<int>(outiter - intersectvec.begin()) == 0)
-    return false;
-
-  return true;
+  return static_cast<int>(outiter - intersectvec.begin()) != 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -286,7 +281,7 @@ void LoadSpiceAscii::parseSPICEAscii(
               << "' is hard to parse.  It has more than 1 '='.";
           g_log.warning(wss.str());
         }
-        runinfodict.insert(std::make_pair(terms[0], infovalue));
+        runinfodict.emplace(terms[0], infovalue);
       } else if (line.find("Pt.") != std::string::npos) {
         // Title line
         boost::split(titles, line, boost::is_any_of("\t\n "),
@@ -297,7 +292,7 @@ void LoadSpiceAscii::parseSPICEAscii(
                           boost::algorithm::first_finder("scan completed."));
         std::string time = terms.front();
         boost::trim(time);
-        runinfodict.insert(std::make_pair("runend", time));
+        runinfodict.emplace("runend", time);
       } else {
         // Not supported
         std::stringstream wss;

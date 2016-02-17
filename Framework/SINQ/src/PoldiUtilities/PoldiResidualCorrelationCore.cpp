@@ -85,9 +85,8 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
       double deltaForD =
           -dInt / m_weightsForD[i] / static_cast<double>(chopperSlits.size());
 
-      for (auto offset = chopperSlits.begin(); offset != chopperSlits.end();
-           ++offset) {
-        CountLocator locator = getCountLocator(d, *offset, m_indices[k]);
+      for (double chopperSlit : chopperSlits) {
+        CountLocator locator = getCountLocator(d, chopperSlit, m_indices[k]);
 
         int indexDifference = locator.icmax - locator.icmin;
 
