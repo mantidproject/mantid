@@ -11,6 +11,10 @@ namespace API {
 GeometryInfo::GeometryInfo(const GeometryInfoFactory &instrument_info,
                            const ISpectrum &spectrum)
     : m_instrument_info(instrument_info) {
+
+  // Note: This constructor body has big overlap with the method
+  // MatrixWorkspace::getDetector(). The plan is to eventually remove the
+  // latter, once GeometryInfo is in widespread use.
   const std::set<detid_t> &dets = spectrum.getDetectorIDs();
 
   const size_t ndets = dets.size();
