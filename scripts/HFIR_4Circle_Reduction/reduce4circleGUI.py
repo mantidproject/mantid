@@ -8,8 +8,8 @@ import os
 import math
 import csv
 import time
+import random
 
-import PyQt4
 from PyQt4 import QtCore, QtGui
 from mantidqtpython import MantidQt
 
@@ -532,7 +532,7 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = float_list
 
         try:
-            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
         except AssertionError as ass_err:
             self.pop_one_button_dialog(str(ass_err))
             return
@@ -780,7 +780,7 @@ class MainWindow(QtGui.QMainWindow):
             # This is the first time that in the workflow to get HKL from MD workspace
             peak_info = self._myControl.get_peak_info(exp_no, scan_no)
             try:
-                peak_info.retrieve_hkl_from_spice()
+                peak_info.retrieve_hkl_from_spice_table()
             except RuntimeError as run_err:
                 self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
         # END-IF
@@ -792,10 +792,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_K.setText('%.2f' % k)
         self.ui.lineEdit_L.setText('%.2f' % l)
 
-        q_sample = peak_info.get_peak_centre()
-        self.ui.lineEdit_sampleQx.setText('%.5E' % q_sample[0])
-        self.ui.lineEdit_sampleQy.setText('%.5E' % q_sample[1])
-        self.ui.lineEdit_sampleQz.setText('%.5E' % q_sample[2])
+        q_x, q_y, q_z = peak_info.get_peak_centre()
+        self.ui.lineEdit_sampleQx.setText('%.5E' % q_x)
+        self.ui.lineEdit_sampleQy.setText('%.5E' % q_y)
+        self.ui.lineEdit_sampleQz.setText('%.5E' % q_z)
 
         return
 
@@ -1262,19 +1262,33 @@ class MainWindow(QtGui.QMainWindow):
         View merged scan data in 3D after FindPeaks
         :return:
         """
-        # TODO/NOW/1st
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_scanNumber])
+        # get experiment and scan number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_scanNumber])
         if status:
-            scan_number = ret_obj[0]
+            exp_number = ret_obj[0]
+            scan_number = ret_obj[1]
         else:
-            blabla
+            self.pop_one_button_dialog(ret_obj)
+            return
 
         # Check
         if self._myControl.has_merged_data(exp_number, scan_number) is False:
-            balbla
+            self.pop_one_button_dialog('No merged MD workspace found for %d, %d' % (exp_number, scan_number))
+            return
 
-        # Get data
-        data_points = self._myControl.get_merged_data(scan_number)
+        # Generate data by writing out temp file
+        base_file_name = 'md_%d.dat' % random.randint(1, 1001)
+        md_file_name = self._myControl.export_md_data(exp_number, scan_number, base_file_name)
+        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+        weight_peak_centers = peak_info.get_weighted_peak_centres()
+        avg_peak_centre = peak_info.get_peak_centre()
+
+        print 'Write file to %s' % md_file_name
+        for i_peak in xrange(len(weight_peak_centers)):
+            peak_i = weight_peak_centers[i_peak]
+            print '%f, %f, %f, %f' % (peak_i[0], peak_i[1], peak_i[2], peak_i[3])
+        print
+        print avg_peak_centre
 
         # Plot
 
@@ -1429,21 +1443,21 @@ class MainWindow(QtGui.QMainWindow):
 
     def set_ub_peak_table(self, peakinfo):
         """
-        DOC
+        TODO/NOW/DOC
         :param peak_info:
         :return:
         """
         assert isinstance(peakinfo, r4c.PeakInfo)
 
         # Get data
-        exp_number, scan_number, pt_number = peakinfo.getExpInfo()
+        exp_number, scan_number = peakinfo.getExpInfo()
         h, k, l = peakinfo.get_user_hkl()
-        q_sample = peakinfo.getQSample()
-        m1 = self._myControl.get_sample_log_value(exp_number, scan_number, pt_number, '_m1')
+        q_sample = peakinfo.get_sample_frame_q()
+        m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1, ''])
+            [scan_number, -1, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1, ''])
         if status is False:
             self.pop_one_button_dialog(err_msg)
 

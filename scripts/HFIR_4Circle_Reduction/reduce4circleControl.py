@@ -37,7 +37,7 @@ class PeakInfo(object):
         """
         # check
         assert isinstance(exp_number, int) and isinstance(scan_number, int)
-        assert isinstance(peak_ws_name) and AnalysisDataService.doesExist(peak_ws_name)
+        assert isinstance(peak_ws_name, str) and AnalysisDataService.doesExist(peak_ws_name)
 
         # set
         self._myExpNumber = exp_number
@@ -66,7 +66,7 @@ class PeakInfo(object):
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 
         # spice table workspace
-        spice_table_name = get_spice_table_name(self._myExpNumber, self._myExpNumber)
+        spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
         spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
 
         pt_spice_row_dict = build_pt_spice_table_row_map(spice_table_ws)
@@ -96,11 +96,21 @@ class PeakInfo(object):
             # contribute to total
             weight_sum += weight_i
             q_sample_sum += q_array * weight_i
+            # set non-normalized peak intensity as detector counts (roughly)
+            peak_i.setIntensity(det_counts)
         # END-FOR (i_peak)
 
         self._avgPeakCenter = q_sample_sum/weight_sum
+        print '[DB] Weighted peak center = %s' % str(self._avgPeakCenter)
 
         return
+
+    def get_peak_centre(self):
+        """ get weighted peak centre
+        :return: Qx, Qy, Qz (3-double-tuple)
+        """
+        assert isinstance(self._avgPeakCenter, numpy.ndarray)
+        return self._avgPeakCenter[0], self._avgPeakCenter[1], self._avgPeakCenter[2]
 
     def get_peak_workspace(self):
         """
@@ -126,6 +136,24 @@ class PeakInfo(object):
         hkl = self._userHKL
 
         return hkl[0], hkl[1], hkl[2]
+
+    def get_weighted_peak_centres(self):
+        """ Get the peak centers found in peak workspace.
+        Guarantees: the peak centers and its weight (detector counts) are exported
+        :return: a list of 4-tuple (Qx, Qy, Qz, Det_Counts)
+        """
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+
+        peak_center_list = list()
+        num_peaks = peak_ws.getNumberPeaks()
+        for i_peak in xrange(num_peaks):
+            peak_i = peak_ws.getPeak(i_peak)
+            center_i = peak_i.getQSampleFrame()
+            intensity_i = peak_i.getIntensity()
+            peak_center_list.append((center_i.X(), center_i.Y(), center_i.Z(), intensity_i))
+        # END-FOR
+
+        return peak_center_list
 
     def retrieve_hkl_from_spice_table(self):
         """ Get averaged HKL from SPICE table
@@ -176,10 +204,8 @@ class PeakInfo(object):
 
         :return:
         """
-        # Check
-        if isinstance(self._myPeak, mantid.api.IPeak) is False:
-            raise RuntimeError('self._myPeakWS should be an instance of  mantid.api.IPeak. '
-                               'But it is of instance of %s now.' % str(type(self._myPeak)))
+        # Get peak workspace
+        I_dont_know()
 
         # Get hkl
         h = self._userHKL[0]
@@ -211,16 +237,18 @@ class PeakInfo(object):
     def getExpInfo(self):
         """
 
-        :return: 3-tuple of integer as experiment number, scan number and Pt number
+        :return: 2-tuple of integer as experiment number
         """
-        return self._myExpNumber, self._myScanNumber, self._myPtNumber
+        return self._myExpNumber, self._myScanNumber
 
-    def getQSample(self):
+    def get_sample_frame_q(self):
         """
-
+        Get Q in sample frame
         :return: 3-tuple of floats as Qx, Qy, Qz
         """
-        q_sample = self._myPeak.getQSampleFrame()
+        peak_ws = AnalysisDataService.retrieves(self._myPeakWorkspaceName)
+        q_sample = peak_ws.getQSampleFrame()
+
         return q_sample.getX(), q_sample.getY(), q_sample.getZ()
 
 
@@ -524,6 +552,30 @@ class CWSCDReductionControl(object):
         # END-IF
 
         return os.path.exists(file_name)
+
+    def export_md_data(self, exp_number, scan_number, base_file_name):
+        """
+        Export MD data to an external file
+        :param exp_number:
+        :param scan_number:
+        :param base_file_name:
+        :return:
+        """
+        # get output file name and source workspace name
+        out_file_name = os.path.join(self._workDir, base_file_name)
+
+        status, pt_list = self.get_pt_numbers(exp_number, scan_number)
+        assert status, pt_list
+        md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list)
+        temp_out_ws = base_file_name
+
+        api.ConvertCWSDMDtoHKL(InputWorkspace=md_ws_name,
+                               UBMatrix='1., 0., 0., 0., 1., 0., 0., 0., 1',
+                               OutputWorkspace=temp_out_ws,
+                               QSampleFileName=out_file_name)
+        api.DeleteWorkspace(Workspace=temp_out_ws)
+
+        return out_file_name
 
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
@@ -1701,7 +1753,7 @@ def get_spice_table_name(exp_number, scan_number):
     :param scan_number:
     :return:
     """
-    table_name = 'HB3A_%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
 
     return table_name
 
