@@ -76,9 +76,9 @@ private:
   /// Private Constructor for singleton class
   UnitFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  UnitFactoryImpl(const UnitFactoryImpl &);
+  UnitFactoryImpl(const UnitFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UnitFactoryImpl &operator=(const UnitFactoryImpl &);
+  UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
   /// Private Destructor
   ~UnitFactoryImpl() override = default;
 };

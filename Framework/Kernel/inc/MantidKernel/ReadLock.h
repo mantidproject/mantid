@@ -57,9 +57,9 @@ public:
 
 private:
   /// Private copy constructor - NO COPY ALLOWED
-  ReadLock(const ReadLock &);
+  ReadLock(const ReadLock &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ReadLock &operator=(const ReadLock &);
+  ReadLock &operator=(const ReadLock &) = delete;
   /// Disallow creating the object on the heap
   void *operator new(size_t);
   /// Disallow creating the object on the heap

@@ -478,7 +478,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
+  MDHistoWorkspace &operator=(const MDHistoWorkspace &other) = delete;
 
   /// Linear array of masks for each bin
   bool *m_masks;

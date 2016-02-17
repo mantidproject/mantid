@@ -76,10 +76,10 @@ private:
 	///Private Constructor
 	InputHistoryImpl();
 	/// Private copy constructor - NO COPY ALLOWED
-	InputHistoryImpl(const InputHistoryImpl&);
-	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	InputHistoryImpl& operator = (const InputHistoryImpl&);
-	///Private Destructor
+        InputHistoryImpl(const InputHistoryImpl &) = delete;
+        /// Private assignment operator - NO ASSIGNMENT ALLOWED
+        InputHistoryImpl &operator=(const InputHistoryImpl &) = delete;
+        ///Private Destructor
 	virtual ~InputHistoryImpl();
 
   /// For debugging

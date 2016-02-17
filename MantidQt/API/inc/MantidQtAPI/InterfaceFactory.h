@@ -65,9 +65,10 @@ private:
   {
   }
   /// Private copy constructor - NO COPY ALLOWED
-  AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl&);
+  AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AlgorithmDialogFactoryImpl& operator = (const AlgorithmDialogFactoryImpl&);
+  AlgorithmDialogFactoryImpl &
+  operator=(const AlgorithmDialogFactoryImpl &) = delete;
   ///Private Destructor
   ~AlgorithmDialogFactoryImpl() override {}
 };
@@ -143,9 +144,10 @@ private:
   /// Private Constructor for singleton class
   UserSubWindowFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl&);
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UserSubWindowFactoryImpl& operator = (const UserSubWindowFactoryImpl&);
+  UserSubWindowFactoryImpl &
+  operator=(const UserSubWindowFactoryImpl &) = delete;
   ///Private Destructor
   ~UserSubWindowFactoryImpl() override {}
   /// Try to create a sub window from the list of aliases for an interface

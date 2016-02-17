@@ -48,10 +48,12 @@ private:
   /// Private Constructor for singleton class
   ArchiveSearchFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &);
+  ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ArchiveSearchFactoryImpl &operator=(const ArchiveSearchFactoryImpl &);
-  ~ArchiveSearchFactoryImpl() override {}
+  ArchiveSearchFactoryImpl &
+  operator=(const ArchiveSearchFactoryImpl &) = delete;
+  /// Private Destructor
+  ~ArchiveSearchFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

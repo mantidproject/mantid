@@ -66,9 +66,9 @@ private:
   /// Destructor
   ~MemoryManagerImpl() = default;
   /// Copy constructor
-  MemoryManagerImpl(const MemoryManagerImpl &);
+  MemoryManagerImpl(const MemoryManagerImpl &) = delete;
   /// Standard Assignment operator
-  MemoryManagerImpl &operator=(const MemoryManagerImpl &);
+  MemoryManagerImpl &operator=(const MemoryManagerImpl &) = delete;
 
   /** Amount of memory (in bytes) that has been cleared but perhaps not
    * released.

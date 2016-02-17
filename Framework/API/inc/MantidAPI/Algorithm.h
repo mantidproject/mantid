@@ -387,9 +387,9 @@ protected:
 
 private:
   /// Private Copy constructor: NO COPY ALLOWED
-  Algorithm(const Algorithm &);
+  Algorithm(const Algorithm &) = delete;
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  Algorithm &operator=(const Algorithm &);
+  Algorithm &operator=(const Algorithm &) = delete;
 
   void lockWorkspaces();
   void unlockWorkspaces();

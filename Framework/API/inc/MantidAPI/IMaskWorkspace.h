@@ -59,7 +59,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
   /// Protected copy assignment operator. Assignment not implemented.
-  IMaskWorkspace &operator=(const IMaskWorkspace &other);
+  IMaskWorkspace &operator=(const IMaskWorkspace &) = delete;
   /// returns a clone of the workspace as the interface
   virtual IMaskWorkspace *doInterfaceClone() const = 0;
 };

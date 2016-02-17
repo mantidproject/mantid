@@ -42,9 +42,10 @@ private:
   /// Constructor
   InstrumentDataServiceImpl();
   /// Private, unimplemented copy constructor
-  InstrumentDataServiceImpl(const InstrumentDataServiceImpl &);
+  InstrumentDataServiceImpl(const InstrumentDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
-  InstrumentDataServiceImpl &operator=(const InstrumentDataServiceImpl &);
+  InstrumentDataServiceImpl &
+  operator=(const InstrumentDataServiceImpl &) = delete;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

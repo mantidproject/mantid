@@ -160,7 +160,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  IMDWorkspace &operator=(const IMDWorkspace &other);
+  IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   const std::string toString() const override;
 

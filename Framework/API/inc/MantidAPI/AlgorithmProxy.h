@@ -159,9 +159,9 @@ public:
 
 private:
   /// Private Copy constructor: NO COPY ALLOWED
-  AlgorithmProxy(const AlgorithmProxy &);
+  AlgorithmProxy(const AlgorithmProxy &) = delete;
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  AlgorithmProxy &operator=(const AlgorithmProxy &);
+  AlgorithmProxy &operator=(const AlgorithmProxy &) = delete;
 
   void createConcreteAlg(bool initOnly = false);
   void stopped();

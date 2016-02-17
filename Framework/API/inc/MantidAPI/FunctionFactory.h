@@ -83,9 +83,9 @@ private:
   /// Private Constructor for singleton class
   FunctionFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  FunctionFactoryImpl(const FunctionFactoryImpl &);
+  FunctionFactoryImpl(const FunctionFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  FunctionFactoryImpl &operator=(const FunctionFactoryImpl &);
+  FunctionFactoryImpl &operator=(const FunctionFactoryImpl &) = delete;
 
   /// These methods shouldn't be used to create functions
   using Kernel::DynamicFactory<IFunction>::create;

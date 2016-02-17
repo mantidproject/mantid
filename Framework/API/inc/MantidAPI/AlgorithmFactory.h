@@ -154,9 +154,9 @@ private:
   /// Private Constructor for singleton class
   AlgorithmFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  AlgorithmFactoryImpl(const AlgorithmFactoryImpl &);
+  AlgorithmFactoryImpl(const AlgorithmFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &);
+  AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &) = delete;
   /// Private Destructor
   ~AlgorithmFactoryImpl() override;
   /// creates an algorithm name convolved from an name and version

@@ -37,10 +37,11 @@ private:
   /// Constructor
   PropertyManagerDataServiceImpl();
   /// Private, unimplemented copy constructor
-  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &);
+  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
+      delete;
   /// Private, unimplemented copy assignment operator
   PropertyManagerDataServiceImpl &
-  operator=(const PropertyManagerDataServiceImpl &);
+  operator=(const PropertyManagerDataServiceImpl &) = delete;
   ~PropertyManagerDataServiceImpl() override = default;
 };
 

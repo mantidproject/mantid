@@ -41,7 +41,7 @@ namespace API {
 class MANTID_API_DLL FunctionValues {
 public:
   /// Default constructor.
-  FunctionValues() {}
+  FunctionValues() = default;
   /// Constructor.
   FunctionValues(const FunctionDomain &domain);
   /// Return the number of values

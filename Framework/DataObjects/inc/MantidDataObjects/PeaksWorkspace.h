@@ -183,7 +183,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   PeaksWorkspace(const PeaksWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  PeaksWorkspace &operator=(const PeaksWorkspace &other);
+  PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }

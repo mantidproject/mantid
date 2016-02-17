@@ -67,9 +67,9 @@ private:
   /// Private Constructor for singleton class
   ConstraintFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  ConstraintFactoryImpl(const ConstraintFactoryImpl &);
+  ConstraintFactoryImpl(const ConstraintFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &);
+  ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &) = delete;
   /// Private Destructor
   ~ConstraintFactoryImpl() override = default;
 };

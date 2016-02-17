@@ -60,10 +60,11 @@ private:
   /// Private Constructor for singleton class
   ImplicitFunctionParserFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &);
+  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &) =
+      delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ImplicitFunctionParserFactoryImpl &
-  operator=(const ImplicitFunctionParserFactoryImpl &);
+  operator=(const ImplicitFunctionParserFactoryImpl &) = delete;
   /// Private Destructor
   ~ImplicitFunctionParserFactoryImpl() override = default;
 };

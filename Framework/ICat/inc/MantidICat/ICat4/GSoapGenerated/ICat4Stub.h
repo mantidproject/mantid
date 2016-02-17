@@ -1107,7 +1107,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__loginResponse() { ns1__loginResponse::soap_default(nullptrptrptr); }
+  ns1__loginResponse() { ns1__loginResponse::soap_default(nullptr); }
 };
 #endif
 
@@ -1176,7 +1176,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__dummy() { ns1__dummy::soap_default(nullptrptr); }
+  ns1__dummy() { ns1__dummy::soap_default(nullptr); }
 };
 #endif
 
@@ -1194,7 +1194,7 @@ public:
   int soap_out(struct soap *, const char *, int, const char *) const override;
   void *soap_get(struct soap *, const char *, const char *) override;
   void *soap_in(struct soap *, const char *, const char *) override;
-  ns1__dummyResponse() { ns1__dummyResponse::soap_default(nullptrptr); }
+  ns1__dummyResponse() { ns1__dummyResponse::soap_default(nullptr); }
 };
 #endif
 
@@ -1296,7 +1296,7 @@ class SOAP_CMAC ns1__entityField : public xsd__anyType {
 public:
   std::string *comment;       /* optional element of type xsd:string */
   std::string *name;          /* optional element of type xsd:string */
-  bool notnullptrable;           /* required element of type xsd:boolean */
+  bool notNullable;           /* required element of type xsd:boolean */
   enum ns1__relType *relType; /* optional element of type ns1:relType */
   int *stringLength;          /* optional element of type xsd:int */
   std::string *type;          /* optional element of type xsd:string */

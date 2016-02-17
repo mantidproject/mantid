@@ -56,10 +56,6 @@ public:
   Projection(const V3D &u, const V3D &v, const V3D &w);
   /// Construct from an ITableWorkspace
   Projection(const ITableWorkspace &ws);
-  /// Copy constructor
-  Projection(const Projection &other);
-  /// Assignment operator
-  Projection &operator=(const Projection &other);
   /// Destructor
   virtual ~Projection() = default;
   /// Retrieves the offset for the given dimension

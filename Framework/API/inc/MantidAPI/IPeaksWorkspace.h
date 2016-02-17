@@ -164,7 +164,7 @@ protected:
   IPeaksWorkspace(const IPeaksWorkspace &other)
       : ITableWorkspace(other), ExperimentInfo(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
-  IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
+  IPeaksWorkspace &operator=(const IPeaksWorkspace &other) = delete;
 
   const std::string toString() const override;
 

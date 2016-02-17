@@ -61,9 +61,9 @@ public:
 
 private:
   /// Private copy constructor - NO COPY ALLOWED
-  WriteLock(const WriteLock &);
+  WriteLock(const WriteLock &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WriteLock &operator=(const WriteLock &);
+  WriteLock &operator=(const WriteLock &) = delete;
   /// Disallow creating the object on the heap
   void *operator new(size_t);
   /// Disallow creating the object on the heap

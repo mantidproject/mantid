@@ -102,9 +102,9 @@ private:
   /// Private Constructor for singleton class
   MDTransfFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  MDTransfFactoryImpl(const MDTransfFactoryImpl &);
+  MDTransfFactoryImpl(const MDTransfFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &);
+  MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &) = delete;
 
   /// Stores pointers to already created unit instances, with their name as the
   /// key

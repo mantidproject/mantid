@@ -167,9 +167,9 @@ protected:
 
 private:
   /// Private Copy constructor: NO COPY ALLOWED
-  DiskBuffer(const DiskBuffer &);
+  DiskBuffer(const DiskBuffer &) = delete;
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  DiskBuffer &operator=(const DiskBuffer &);
+  DiskBuffer &operator=(const DiskBuffer &) = delete;
 };
 
 } // namespace Kernel

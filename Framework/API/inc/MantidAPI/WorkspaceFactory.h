@@ -92,11 +92,11 @@ private:
   /// Private Constructor for singleton class
   WorkspaceFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &);
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
+  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
   /// Private Destructor
-  ~WorkspaceFactoryImpl() = default;
+  ~WorkspaceFactoryImpl() override = default;
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
 };

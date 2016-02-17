@@ -109,9 +109,9 @@ private:
   /// Private Destructor
   ~FrameworkManagerImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  FrameworkManagerImpl(const FrameworkManagerImpl &);
+  FrameworkManagerImpl(const FrameworkManagerImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &);
+  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &) = delete;
 
   /// Set up the global locale
   void setGlobalLocaleToAscii();

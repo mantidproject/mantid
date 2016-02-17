@@ -58,9 +58,9 @@ private:
   /// Private Constructor for singleton class
   ColumnFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  ColumnFactoryImpl(const ColumnFactoryImpl &);
+  ColumnFactoryImpl(const ColumnFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ColumnFactoryImpl &operator=(const ColumnFactoryImpl &);
+  ColumnFactoryImpl &operator=(const ColumnFactoryImpl &) = delete;
   /// Private Destructor
   ~ColumnFactoryImpl() override = default;
 };

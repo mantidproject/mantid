@@ -167,9 +167,9 @@ private:
   /// Constructor
   AnalysisDataServiceImpl();
   /// Private, unimplemented copy constructor
-  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
-  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
   /// Private destructor
   ~AnalysisDataServiceImpl() override = default;
 

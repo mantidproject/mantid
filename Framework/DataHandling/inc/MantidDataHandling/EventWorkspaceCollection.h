@@ -50,9 +50,10 @@ private:
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
   /// private copy constructor. Not implemented.
-  EventWorkspaceCollection(const EventWorkspaceCollection &other);
+  EventWorkspaceCollection(const EventWorkspaceCollection &other) = delete;
   /// Private copy assignment operator. Assignment not implemented.
-  EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other);
+  EventWorkspaceCollection &
+  operator=(const EventWorkspaceCollection &other) = delete;
 
 public:
   EventWorkspaceCollection();

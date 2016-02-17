@@ -202,7 +202,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   EventWorkspace(const EventWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  EventWorkspace &operator=(const EventWorkspace &other);
+  EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }

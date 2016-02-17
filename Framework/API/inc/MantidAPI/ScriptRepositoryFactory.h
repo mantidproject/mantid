@@ -60,9 +60,10 @@ private:
   /// Private Constructor for singleton class
   ScriptRepositoryFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  ScriptRepositoryFactoryImpl(const ScriptRepositoryFactoryImpl &);
+  ScriptRepositoryFactoryImpl(const ScriptRepositoryFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ScriptRepositoryFactoryImpl &operator=(const ScriptRepositoryFactoryImpl &);
+  ScriptRepositoryFactoryImpl &
+  operator=(const ScriptRepositoryFactoryImpl &) = delete;
   /// Private Destructor
   ~ScriptRepositoryFactoryImpl() override = default;
 };

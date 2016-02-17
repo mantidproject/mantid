@@ -61,9 +61,10 @@ private:
   /// used here.
   ITransformScale *createUnwrapped(const std::string &className) const override;
   /// Private copy constructor - NO COPY ALLOWED
-  TransformScaleFactoryImpl(const TransformScaleFactoryImpl &);
+  TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  TransformScaleFactoryImpl &operator=(const TransformScaleFactoryImpl &);
+  TransformScaleFactoryImpl &
+  operator=(const TransformScaleFactoryImpl &) = delete;
   // Do not use default methods
 };
 

@@ -97,7 +97,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  Workspace2D &operator=(const Workspace2D &other);
+  Workspace2D &operator=(const Workspace2D &other) = delete;
 
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,

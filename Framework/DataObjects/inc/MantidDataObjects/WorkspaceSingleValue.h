@@ -76,7 +76,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   WorkspaceSingleValue(const WorkspaceSingleValue &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
+  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
 
 private:
   WorkspaceSingleValue *doClone() const override {

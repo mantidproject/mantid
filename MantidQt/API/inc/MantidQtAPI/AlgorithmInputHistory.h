@@ -65,10 +65,11 @@ protected:
 
 private:
   /// Private copy constructor - NO COPY ALLOWED
-  AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory&);
+  AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AbstractAlgorithmInputHistory& operator = (const AbstractAlgorithmInputHistory&);
-  
+  AbstractAlgorithmInputHistory &
+  operator=(const AbstractAlgorithmInputHistory &) = delete;
+
   /// Load any values that are available from persistent storage
   void load();
   

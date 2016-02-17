@@ -56,10 +56,10 @@ private:
   ImplicitFunctionParameterParserFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
   ImplicitFunctionParameterParserFactoryImpl(
-      const ImplicitFunctionParameterParserFactoryImpl &);
+      const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   ImplicitFunctionParameterParserFactoryImpl &
-  operator=(const ImplicitFunctionParameterParserFactoryImpl &);
+  operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   /// Private Destructor
   ~ImplicitFunctionParameterParserFactoryImpl() override = default;
 };

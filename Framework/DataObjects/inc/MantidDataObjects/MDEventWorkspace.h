@@ -202,15 +202,8 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  /// Windows Visual Studio 2012 has trouble with declaration without definition
-  /// so we provide one that throws an error. This seems template related.
-  /// TODO: clean this up.
-  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
-    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
-    // this codepath should never be reached, prevent unused parameter warning:
-    setTitle(other.getTitle());
-    return *this;
-  }
+  MDEventWorkspace<MDE, nd> &
+  operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;

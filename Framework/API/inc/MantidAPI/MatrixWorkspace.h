@@ -468,7 +468,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  MatrixWorkspace &operator=(const MatrixWorkspace &other);
+  MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
 
   MatrixWorkspace(
       Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);

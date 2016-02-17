@@ -66,9 +66,9 @@ private:
   /// Private Constructor for singleton class
   CatalogFactoryImpl();
   /// Private copy constructor
-  CatalogFactoryImpl(const CatalogFactoryImpl &);
+  CatalogFactoryImpl(const CatalogFactoryImpl &) = delete;
   /// Private assignment operator
-  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &);
+  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &) = delete;
   /// Private Destructor
   ~CatalogFactoryImpl() override = default;
   /// Stores pointers to already created Catalog instances, with their name as

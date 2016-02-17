@@ -294,7 +294,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   TableWorkspace(const TableWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
-  TableWorkspace &operator=(const TableWorkspace &other);
+  TableWorkspace &operator=(const TableWorkspace &other) = delete;
 
 private:
   TableWorkspace *doClone() const override { return new TableWorkspace(*this); }
