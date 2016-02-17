@@ -2683,9 +2683,12 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
 
   // Create a map to convert the Bragg peak Table paramter name to Back to back
   // exponential+pseudo-voigt
-  map<string, string> bk2bk2braggmap{{"A", "Alpha"},  {"B", "Beta"},
-                                     {"X0", "TOF_h"}, {"I", "Height"},
-                                     {"S", "Sigma"},  {"S2", "Sigma2"}};
+  map<string, string> bk2bk2braggmap{{"A", "Alpha"},
+                                     {"B", "Beta"},
+                                     {"X0", "TOF_h"},
+                                     {"I", "Height"},
+                                     {"S", "Sigma"},
+                                     {"S2", "Sigma2"}};
 
   // Generate Peaks
   size_t numbadrows = 0;

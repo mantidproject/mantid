@@ -159,7 +159,7 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
   }
 
   // This point is reached only if options > 7.
-    throw std::runtime_error(
-        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
-        std::to_string(options));
+  throw std::runtime_error(
+      "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
+      std::to_string(options));
 }
