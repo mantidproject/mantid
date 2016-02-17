@@ -29,9 +29,9 @@ public:
 
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nparams(3);
-    const char *expectedParams[nparams] = {"SigmaX", "SigmaY", "SigmaZ"};
-
+    static const size_t nparams(4);
+    const char *expectedParams[nparams] = {"Intensity", "SigmaX", "SigmaY",
+                                           "SigmaZ"};
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
@@ -93,6 +93,7 @@ private:
     auto func = createFunction();
     func->setAttributeValue("Mass", 1.0);
     func->setAttributeValue("IntegrationSteps", 35);
+    func->setParameter("Intensity", 1.0);
     func->setParameter("SigmaX", 2.5);
     func->setParameter("SigmaY", 2.5);
     func->setParameter("SigmaZ", 6.0);

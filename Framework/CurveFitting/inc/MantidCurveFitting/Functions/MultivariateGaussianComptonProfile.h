@@ -33,6 +33,13 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile
     : public ComptonProfile {
 public:
+  static constexpr char *AMP_PARAM = "Intensity";
+  static constexpr char *SIGMA_X_PARAM = "SigmaX";
+  static constexpr char *SIGMA_Y_PARAM = "SigmaY";
+  static constexpr char *SIGMA_Z_PARAM = "SigmaZ";
+
+  static constexpr char *STEPS_ATTR = "IntegrationSteps";
+
   /// Default constructor required for factory
   MultivariateGaussianComptonProfile();
 
@@ -55,15 +62,19 @@ private:
   /// Compute the function
   void massProfile(double *result, const size_t nData) const;
 
+  /// Helper to allow the amplitude to be specified separately
+  void massProfile(double *result, const size_t nData,
+                   const double amplitude) const;
+
   double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
   double calculateIntegrand(int idx, std::vector<double> &s2Cache,
                             double y) const;
 
   void buildS2Cache(std::vector<double> &s2Cache) const;
 
-  int m_integrationSteps;
-  double m_thetaStep;
-  double m_phiStep;
+  int m_integrationSteps; //!< Number of steps to perform during integration
+  double m_thetaStep;     //!< Delta theta in integration
+  double m_phiStep;       //!< Delta phi in integration
 };
 
 } // namespace Functions

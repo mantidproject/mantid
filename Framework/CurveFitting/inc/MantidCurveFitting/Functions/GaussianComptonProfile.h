@@ -42,6 +42,10 @@ namespace Functions {
 */
 class MANTID_CURVEFITTING_DLL GaussianComptonProfile : public ComptonProfile {
 public:
+  static constexpr char *WIDTH_PARAM = "Width";
+  static constexpr char *AMP_PARAM = "Intensity";
+  static constexpr double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
+
   /// Default constructor required for factory
   GaussianComptonProfile();
 

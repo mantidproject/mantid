@@ -13,11 +13,6 @@ namespace Functions {
 using namespace CurveFitting;
 DECLARE_FUNCTION(MultivariateGaussianComptonProfile)
 
-const char *SIGMA_X_PARAM = "SigmaX";
-const char *SIGMA_Y_PARAM = "SigmaY";
-const char *SIGMA_Z_PARAM = "SigmaZ";
-const char *STEPS_NAME = "IntegrationSteps";
-
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
@@ -33,6 +28,7 @@ std::string MultivariateGaussianComptonProfile::name() const {
 /**
  */
 void MultivariateGaussianComptonProfile::declareParameters() {
+  declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
   declareParameter(SIGMA_X_PARAM, 1.0, "Sigma X parameter");
   declareParameter(SIGMA_Y_PARAM, 1.0, "Sigma Y parameter");
   declareParameter(SIGMA_Z_PARAM, 1.0, "Sigma Z parameter");
@@ -42,7 +38,7 @@ void MultivariateGaussianComptonProfile::declareParameters() {
  */
 void MultivariateGaussianComptonProfile::declareAttributes() {
   ComptonProfile::declareAttributes();
-  declareAttribute(STEPS_NAME, IFunction::Attribute(m_integrationSteps));
+  declareAttribute(STEPS_ATTR, IFunction::Attribute(m_integrationSteps));
 }
 
 /**
@@ -52,10 +48,10 @@ void MultivariateGaussianComptonProfile::declareAttributes() {
 void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
                                                       const Attribute &value) {
   ComptonProfile::setAttribute(name, value);
-  if (name == STEPS_NAME) {
+  if (name == STEPS_ATTR) {
     int steps = value.asInt();
     if (steps < 1)
-      throw std::runtime_error(std::string(STEPS_NAME) +
+      throw std::runtime_error(std::string(STEPS_ATTR) +
                                " attribute must be positive and non-zero");
 
     m_integrationSteps = steps;
@@ -68,7 +64,7 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
  */
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {
-  return std::vector<size_t>();
+  return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
 }
 
 /**
@@ -98,6 +94,12 @@ size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
  */
 void MultivariateGaussianComptonProfile::massProfile(double *result,
                                                      const size_t nData) const {
+  const double amplitude(getParameter(1));
+  this->massProfile(result, nData, amplitude);
+}
+
+void MultivariateGaussianComptonProfile::massProfile(
+    double *result, const size_t nData, const double amplitude) const {
   std::vector<double> s2Cache;
   buildS2Cache(s2Cache);
 
@@ -123,7 +125,7 @@ void MultivariateGaussianComptonProfile::massProfile(double *result,
 
     sum *= m_thetaStep;
 
-    result[i] = prefactor * sum;
+    result[i] = amplitude * prefactor * sum;
   }
 }
 
@@ -149,6 +151,10 @@ double MultivariateGaussianComptonProfile::calculateIntegrand(
   return i;
 }
 
+/**
+ * @brief Caches values of S2 for all theta and phi in integration range.
+ * @param s2Cache Reference to vector to cache S2 values in
+ */
 void MultivariateGaussianComptonProfile::buildS2Cache(
     std::vector<double> &s2Cache) const {
   s2Cache.clear();
