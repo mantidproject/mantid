@@ -1,4 +1,4 @@
-#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912
+#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914
 ################################################################################
 #
 # Controlling class
@@ -159,34 +159,6 @@ class PeakInfo(object):
 
         return self._userHKL
 
-
-    def set_from_run_info(self, exp_number, scan_number, pt_number):
-        """ Set from run information with parent
-        :param exp_number:
-        :param scan_number:
-        :param pt_number:
-        :return:
-        """
-        raise NotImplementedError('Not sure how to deal with this method!')
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
-
-        status, peak_ws = self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)
-        if status is True:
-            self._myPeakWSKey = (exp_number, scan_number, pt_number)
-            self._myPeakIndex = 0
-            self._myPeak = peak_ws.getPeak(0)
-        else:
-            error_message = peak_ws
-            return False, error_message
-
-        self._myExpNumber = exp_number
-        self._myScanNumber = scan_number
-        self._myPtNumber = pt_number
-
-        return True, ''
-
     def set_data_ws_name(self, md_ws_name):
         """ Set the name of MDEventWorkspace with merged Pts.
         :param md_ws_name:
@@ -196,23 +168,6 @@ class PeakInfo(object):
         assert AnalysisDataService.doesExist(md_ws_name)
 
         self._myDataMDWorkspaceName = md_ws_name
-
-        return
-
-    def set_from_peak_ws(self, peak_ws, peak_index):
-        """
-        Set from peak workspace
-        :param peak_ws:
-        :return:
-        """
-        # Check
-        assert isinstance(peak_ws, mantid.dataobjects.PeaksWorkspace)
-
-        # Get peak
-        try:
-            peak = peak_ws.getPeak(peak_index)
-        except RuntimeError as run_err:
-            raise RuntimeError(run_err)
 
         return
 
@@ -227,7 +182,9 @@ class PeakInfo(object):
                                'But it is of instance of %s now.' % str(type(self._myPeak)))
 
         # Get hkl
-        h, k, l = self._userHKL
+        h = self._userHKL[0]
+        k = self._userHKL[1]
+        l = self._userHKL[2]
         print '[DB] PeakInfo Get User HKL = (%f, %f, %f) to IPeak ' % (h, k, l)
 
         self._myPeak.setHKL(h, k, l)
@@ -581,6 +538,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
         if pt_number_list is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+            assert status
         assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
 
         # Check whether the MDEventWorkspace used to find peaks exists
@@ -707,12 +665,21 @@ class CWSCDReductionControl(object):
 
         return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
 
-    def get_merged_data(self, scan_number):
+    def get_merged_data(self, exp_number, scan_number, pt_number_list):
         """
         Get merged data in format of numpy.ndarray to plot
+        :param exp_number:
         :param scan_number:
         :return: numpy.ndarray. shape = (?, 3)
         """
+        # check
+        assert isinstance(exp_number, int) and isinstance(scan_number, int)
+        assert isinstance(pt_number_list, list)
+
+        # get MDEventWorkspace
+        md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
+        assert AnalysisDataService.doesExist(md_ws_name)
+
         # TODO/NOW/1st - everything
         return
 
@@ -1114,7 +1081,7 @@ class CWSCDReductionControl(object):
         Requirements:
           1. target_frame must be either 'q-sample' or 'hkl'
           2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
-        Guarantees: blablabla
+        Guarantees: An MDEventWorkspace is created containing merged Pts.
         :param exp_no:
         :param scan_no:
         :param pt_num_list:
@@ -1167,11 +1134,6 @@ class CWSCDReductionControl(object):
                                       OutputWorkspace=scan_info_ws_name,
                                       DetectorTableWorkspace='MockDetTable')
         assert AnalysisDataService.doesExist(scan_info_ws_name)
-        """
-        except RuntimeError as e:
-            err_msg += 'Unable to reduce scan %d due to %s' % (scan_no, str(e))
-            return False, err_msg
-        """
 
         # Convert to Q-sample
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
@@ -1572,6 +1534,8 @@ class CWSCDReductionControl(object):
         """ Load all the SPICE ascii file to get the big picture such that
         * the strongest peaks and their HKL in order to make data reduction and analysis more convenient
         :param exp_number: experiment number
+        :param start_scan:
+        :param end_scan:
         :return: a list. first item is max_count
         """
         # Check
@@ -1598,7 +1562,7 @@ class CWSCDReductionControl(object):
                 try:
                     api.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print 'Unable to download scan %d' % scan_number
+                    print 'Unable to download scan %d due to %s.' % (scan_number, str(download_error))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
@@ -1606,9 +1570,9 @@ class CWSCDReductionControl(object):
 
             # Load SPICE file and retrieve information
             try:
-                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
-                                                                    OutputWorkspace='TempTable',
-                                                                    RunInfoWorkspace='TempInfo')
+                spice_table_ws_name = 'TempTable'
+                api.LoadSpiceAscii(Filename=spice_file_name, OutputWorkspace=spice_table_ws_name, RunInfoWorkspace='TempInfo')
+                spice_table_ws = AnalysisDataService.retrieves(spice_table_ws_name)
                 num_rows = spice_table_ws.rowCount()
                 col_name_list = spice_table_ws.getColumnNames()
                 h_col_index = col_name_list.index('h')

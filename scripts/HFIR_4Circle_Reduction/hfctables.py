@@ -627,27 +627,6 @@ class ScanSurveyTable(tableBase.NTableWidget):
             row_items.append(False)
             # append
             self.append_row(row_items)
-
-            """
-            counts = self._myScanList[i_ref]
-            dict_value = self._myScanSummaryList[counts]
-            if isinstance(dict_value, tuple):
-                row_items = list(dict_value)
-                row_items.insert(2, counts)
-                row_items.append(False)
-                print 'Appending row:', row_items
-                self.append_row(row_items)
-            elif isinstance(dict_value, list):
-                for reflection in dict_value:
-                    row_items = list(reflection)
-                    row_items.insert(2, counts)
-                    row_items.append(False)
-                    print 'Appending row-2:', row_items
-                    self.append_row(row_items)
-            else:
-                err_msg = 'Type %s is not a supported value type of counts dictionary.' % str(type(dict_value))
-                raise RuntimeError(err_msg)
-            """
         # END-FOR
 
         return

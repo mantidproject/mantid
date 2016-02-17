@@ -9,6 +9,7 @@ import math
 import csv
 import time
 
+import PyQt4
 from PyQt4 import QtCore, QtGui
 from mantidqtpython import MantidQt
 
@@ -185,11 +186,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         """
-
+        Close event
         :param QCloseEvent:
         :return:
         """
-        print 'I am called!'
+        print '[QCloseEvent=]', str(QCloseEvent)
         self.menu_quit()
 
     def _init_table_widgets(self):
@@ -390,6 +391,7 @@ class MainWindow(QtGui.QMainWindow):
         # loop over all peaks for peak information
         peak_info_list = list()
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        assert status
         for i_row in row_index_list:
             scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
             try:
@@ -432,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
         self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
 
-        # TODO/NOW/1st
+        # TODO/NOW/1st: need to offer users with different types of UB matrix refinement tool!
         # call mantid.FindUBUsingIndexedPeaks()
         # refer to Calculate UB matrix to build PeakWorkspace
 
@@ -560,7 +562,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Accept the calculated UB matrix
         """
         raise RuntimeError('ASAP')
-        return
 
     def doAddScanPtToRefineUB(self):
         """ Add scan/pt numbers to the list of data points for refining ub matrix
@@ -877,7 +878,8 @@ class MainWindow(QtGui.QMainWindow):
                                                               file_filter))
 
         # call controller to load
-        header, scan_sum_list = self._myControl.load_scan_survey_file(csv_file_name)
+        survey_tuple = self._myControl.load_scan_survey_file(csv_file_name)
+        scan_sum_list = survey_tuple[1]
         assert isinstance(scan_sum_list, list), 'Returned value from load scan survey file must be a dictionary.'
 
         # set the table
@@ -1024,7 +1026,6 @@ class MainWindow(QtGui.QMainWindow):
                 if len(err_msg) > 0:
                     self.pop_one_button_dialog(err_msg)
 
-            out_ws_name = base_name + '%04d' % scan_no
             self.ui.tableWidget_mergeScans.set_status_by_row(i_row, 'In Processing')
             merge_status = 'UNKNOWN'
             merged_name = '???'
@@ -1280,12 +1281,12 @@ class MainWindow(QtGui.QMainWindow):
         raise
 
     def do_view_survey_peak(self):
-        """ View survey peak
-
+        """ View selected peaks from survey table
+        Requirements: one and only 1 run is selected
+        Guarantees: the scan number and pt number that are selected will be set to
+            tab 'View Raw' and the tab is switched.
         :return:
         """
-        # TODO/NOW/1st: documents + requirements check
-
         # get values
         try:
             scan_num, pt_num = self.ui.tableWidget_surveyTable.get_selected_run_surveyed()
@@ -1488,33 +1489,32 @@ class MainWindow(QtGui.QMainWindow):
         """
         settings = QtCore.QSettings()
 
-        # TODO/NOW/1st: if return is QPyNullVariant from settings.value, then skip!
-
         # directories
         try:
             spice_dir = settings.value('local_spice_dir', '')
-            self.ui.lineEdit_localSpiceDir.setText(spice_dir)
+            self.ui.lineEdit_localSpiceDir.setText(str(spice_dir))
             work_dir = settings.value('work_dir')
-            self.ui.lineEdit_workDir.setText(work_dir)
+            self.ui.lineEdit_workDir.setText(str(work_dir))
 
             # experiment number
             exp_num = settings.value('exp_number')
-            self.ui.lineEdit_exp.setText(exp_num)
+            self.ui.lineEdit_exp.setText(str(exp_num))
 
             # lattice parameters
             lattice_a = settings.value('a')
-            self.ui.lineEdit_a.setText(lattice_a)
+            self.ui.lineEdit_a.setText(str(lattice_a))
             lattice_b = settings.value('b')
-            self.ui.lineEdit_b.setText(lattice_b)
+            self.ui.lineEdit_b.setText(str(lattice_b))
             lattice_c = settings.value('c')
-            self.ui.lineEdit_c.setText(lattice_c)
+            self.ui.lineEdit_c.setText(str(lattice_c))
             lattice_alpha = settings.value('alpha')
-            self.ui.lineEdit_alpha.setText(lattice_alpha)
+            self.ui.lineEdit_alpha.setText(str(lattice_alpha))
             lattice_beta = settings.value('beta')
-            self.ui.lineEdit_beta.setText(lattice_beta)
+            self.ui.lineEdit_beta.setText(str(lattice_beta))
             lattice_gamma = settings.value('gamma')
-            self.ui.lineEdit_gamma.setText(lattice_gamma)
+            self.ui.lineEdit_gamma.setText(str(lattice_gamma))
         except TypeError as e:
+            self.pop_one_button_dialog(str(e))
             return
 
         return
