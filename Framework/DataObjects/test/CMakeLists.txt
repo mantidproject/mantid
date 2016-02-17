@@ -26,7 +26,6 @@ if ( CXXTEST_FOUND )
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES})
   # Specify implicit dependency, but don't link to it
-  add_dependencies ( DataObjectsTest UserAlgorithms )
   add_dependencies ( FrameworkTests DataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataObjectsTest PROPERTY FOLDER "UnitTests" )
