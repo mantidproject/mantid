@@ -24,12 +24,6 @@ WeightingStrategy::WeightingStrategy() : m_cutOff(0) {}
 // Flat Weighting Implementations
 //----------------------------------------------------------------------------
 
-/// Constructor
-FlatWeighting::FlatWeighting() {}
-
-/// Destructor
-FlatWeighting::~FlatWeighting() = default;
-
 /**
 Calculate the weight at distance from epicenter. Always returns 1 for this
 implementation
@@ -55,9 +49,6 @@ Constructor
 */
 LinearWeighting::LinearWeighting(const double cutOff)
     : WeightingStrategy(cutOff) {}
-
-/// Destructor
-LinearWeighting::~LinearWeighting() = default;
 
 /**
 Calculate the weight at distance from epicenter. Uses linear scaling based on
@@ -93,9 +84,6 @@ double LinearWeighting::weightAt(const double &adjX, const double &ix,
 ParabolicWeighting::ParabolicWeighting(const double cutOff)
     : WeightingStrategy(cutOff) {}
 
-/// Destructor
-ParabolicWeighting::~ParabolicWeighting() = default;
-
 /**
 Implementation doesn't make sense on this type.
 @param distance :
@@ -122,12 +110,6 @@ double ParabolicWeighting::weightAt(const double &adjX, const double &ix,
 //----------------------------------------------------------------------------
 // Null Weighting Implementations
 //----------------------------------------------------------------------------
-
-/// Constructor
-NullWeighting::NullWeighting() : WeightingStrategy() {}
-
-/// Destructor
-NullWeighting::~NullWeighting() = default;
 
 /**
 Calculate the weight at distance from epicenter. Always throws.
@@ -170,9 +152,6 @@ GaussianWeightingnD::GaussianWeightingnD(double cutOff, double sigma)
 
   m_twiceSigmaSquared = 2 * sigma * sigma;
 }
-
-/// Destructor
-GaussianWeightingnD::~GaussianWeightingnD() = default;
 
 /**
 Calculate the weight at distance from epicenter. Uses linear scaling based on

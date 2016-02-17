@@ -55,11 +55,11 @@ private:
   /// Private Constructor
   LibraryManagerImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  LibraryManagerImpl(const LibraryManagerImpl &);
+  LibraryManagerImpl(const LibraryManagerImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  LibraryManagerImpl &operator=(const LibraryManagerImpl &);
+  LibraryManagerImpl &operator=(const LibraryManagerImpl &) = delete;
   /// Private Destructor
-  virtual ~LibraryManagerImpl();
+  virtual ~LibraryManagerImpl() = default;
 
   /// Load a given library
   bool loadLibrary(const std::string &filepath);

@@ -10,11 +10,6 @@ namespace Geometry {
  */
 ComponentParser::ComponentParser() { m_current.clear(); }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ComponentParser::~ComponentParser() = default;
-
 /** @return the top-level component created */
 Component *ComponentParser::getComponent() {
   if (m_current.size() > 0)

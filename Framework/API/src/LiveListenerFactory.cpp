@@ -16,8 +16,6 @@ Kernel::Logger g_log("LiveListenerFactory");
 LiveListenerFactoryImpl::LiveListenerFactoryImpl()
     : Kernel::DynamicFactory<ILiveListener>() {}
 
-LiveListenerFactoryImpl::~LiveListenerFactoryImpl() = default;
-
 /** Creates an instance of the appropriate listener for the given instrument,
  * and establishes the
  *  connection to the data acquisition.

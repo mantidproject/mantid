@@ -61,11 +61,11 @@ private:
   /// Private constructor for singleton class
   LiveListenerFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &);
+  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &);
+  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
   /// Private destructor
-  ~LiveListenerFactoryImpl() override;
+  ~LiveListenerFactoryImpl() override = default;
 
   // Unhide the base class method to avoid a warning, but make private.
   using Kernel::DynamicFactory<ILiveListener>::create;
