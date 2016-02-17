@@ -64,7 +64,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 If no Pt. given, then all Pt. are all loaded."
         self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []), pd)
 
-        self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.OptionalDirectory))
+        self.declareProperty(FileProperty(name="DataDirectory",
+                                          defaultValue="",
+                                          action=FileAction.OptionalDirectory))
 
         self.declareProperty("GetFileFromServer", False, "Obtain data file directly from neutrons.ornl.gov.")
 
@@ -108,15 +110,28 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._collectPixelsPositions()
 
         # Set up ScanPtFileTable
-        for scannumber in sorted(self._scanPtDict.keys()):
-            for ptnumber in sorted(self._scanPtDict[scannumber]):
-                self.log().debug("Keys for scanPt2ThetaDict: %s." %(str(self._scanPt2ThetaDict.keys())))
-                twotheta = self._scanPt2ThetaDict[(scannumber, ptnumber)]
-                startdetid = self._detStartID[twotheta]
-                datafilename = 'HB3A_exp%d_scan%04d_%04d.xml'%(self._expNumber, scannumber, ptnumber)
-                monitor_counts = self._monitorCountsDict[(scannumber, ptnumber)]
-                self._myScanPtFileTableWS.addRow([int(scannumber), int(ptnumber), str(datafilename), int(startdetid), 
-                        int(monitor_counts)])
+        self.log().warning('Scan numbers are %s.' % str(self._scanPtDict.keys()))
+        self.log().warning("Keys for scanPt2ThetaDict: %s." % str(self._scanPt2ThetaDict.keys()))
+
+        for scan_number in sorted(self._scanPtDict.keys()):
+            self.log().warning('scan %d has Pt. as %s.' % (scan_number, str(self._scanPtDict[scan_number])))
+
+            start_det_id = None
+            for pt_number in sorted(self._scanPtDict[scan_number]):
+                # get start det id.  all Pt. belonged to same scan will use the same starting detector ID
+                if start_det_id is None:
+                    # get 2theta for starting det-ID
+                    assert (scan_number, pt_number) in self._scanPt2ThetaDict
+                    two_theta = self._scanPt2ThetaDict[(scan_number, pt_number)]
+
+                    assert two_theta in self._detStartID
+                    start_det_id = self._detStartID[two_theta]
+
+                # get detector counts file name and monitor counts
+                data_file_name = 'HB3A_exp%d_scan%04d_%04d.xml' % (self._expNumber, scan_number, pt_number)
+                monitor_counts = self._monitorCountsDict[(scan_number, pt_number)]
+                self._myScanPtFileTableWS.addRow([int(scan_number), int(pt_number), str(data_file_name),
+                                                  int(start_det_id), int(monitor_counts)])
 
         # Output
         self.setProperty("OutputWorkspace", self._myScanPtFileTableWS)
