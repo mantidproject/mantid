@@ -43,20 +43,15 @@ ColorBarWidget::ColorBarWidget(QWidget *parent) : QWidget(parent) {
   ui.verticalLayout->insertWidget(2, m_colorBar, 1, 0);
 
   // Hook up signals
-  QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this,
-                   SLOT(changedExponent(double)));
-  QObject::connect(ui.cmbScaleType, SIGNAL(currentIndexChanged(int)), this,
-                   SLOT(changedScaleType(int)));
-  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this,
-                   SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this,
-                   SLOT(changedMaximum()));
-  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this,
-                   SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this,
-                   SLOT(changedMaximum()));
-  QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this,
-                   SLOT(colorBarMouseMoved(QPoint, double)));
+  QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this, SLOT(changedExponent(double)));
+  QObject::connect(ui.cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(changedScaleType(int)));
+  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum()));
+  QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
   this->updateColorMap();
@@ -362,7 +357,18 @@ void ColorBarWidget::setAutoScale(bool autoscale) {
  */
 bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
 
-ColorBarWidget::~ColorBarWidget() {}
+/**
+ * Gets the state of the "Autoscale for current slice" checkbox
+ * @returns true if it is checked else false
+ */
+bool ColorBarWidget::getAutoColorScaleforCurrentSlice() const {
+  return ui.autoScaleForCurrentSlice->isChecked();
+}
+
+
+ColorBarWidget::~ColorBarWidget()
+{
+}
 
 } // namespace MantidQt
 } // namespace MantidWidgets

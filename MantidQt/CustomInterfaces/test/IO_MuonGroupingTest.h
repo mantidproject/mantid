@@ -50,34 +50,6 @@ public:
     FrameworkManager::Instance();
   }
 
-  void test_loadGroupingFromXML()
-  {
-    Grouping g;
-
-    TS_ASSERT_THROWS_NOTHING(loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
-
-    TS_ASSERT_EQUALS(g.groupNames.size(), 2);
-    TS_ASSERT_EQUALS(g.groupNames[0], "fwd");
-    TS_ASSERT_EQUALS(g.groupNames[1], "bwd");
-
-    TS_ASSERT_EQUALS(g.groups.size(), 2);
-    TS_ASSERT_EQUALS(g.groups[0], "33-64");
-    TS_ASSERT_EQUALS(g.groups[1], "1-32");
-
-    TS_ASSERT_EQUALS(g.pairNames.size(), 1);
-    TS_ASSERT_EQUALS(g.pairNames[0], "long");
-
-    TS_ASSERT_EQUALS(g.pairs.size(), 1);
-    TS_ASSERT_EQUALS(g.pairs[0].first, 0);
-    TS_ASSERT_EQUALS(g.pairs[0].second, 1);
-
-    TS_ASSERT_EQUALS(g.pairAlphas.size(), 1);
-    TS_ASSERT_EQUALS(g.pairAlphas[0], 1);
-
-    TS_ASSERT_EQUALS(g.description, "musr longitudinal (64 detectors)");
-    TS_ASSERT_EQUALS(g.defaultName, "long");
-  }
-
   void test_saveGroupingToXML()
   {
     Grouping g, lg;
@@ -85,13 +57,15 @@ public:
     std::string tmpFile = m_tmpDir + "tmp_MUSRGrouping.xml";
 
     // Load grouping first
-    TS_ASSERT_THROWS_NOTHING(loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
+    TS_ASSERT_THROWS_NOTHING(API::GroupingLoader::loadGroupingFromXML(
+        m_testDataDir + "MUSRGrouping.xml", g));
 
     // Then save it
     TS_ASSERT_THROWS_NOTHING(saveGroupingToXML(g, tmpFile));
 
     // And load it again
-    TS_ASSERT_THROWS_NOTHING(loadGroupingFromXML(tmpFile, lg));
+    TS_ASSERT_THROWS_NOTHING(
+        API::GroupingLoader::loadGroupingFromXML(tmpFile, lg));
 
     // Check that all the information was saved
     TS_ASSERT_EQUALS(lg.groupNames.size(), 2);
@@ -123,7 +97,8 @@ public:
   {
     // Load grouping for MUSR
     Grouping g;
-    TS_ASSERT_THROWS_NOTHING(loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
+    TS_ASSERT_THROWS_NOTHING(API::GroupingLoader::loadGroupingFromXML(
+        m_testDataDir + "MUSRGrouping.xml", g));
 
     // Load MUSR data file
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");

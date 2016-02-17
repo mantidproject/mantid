@@ -91,12 +91,12 @@ template <typename T> void SingletonHolder<T>::DestroySingleton() {
   // std::cerr << "destroying singleton " << typeid(T).name() << std::endl;
   assert(!destroyed);
   CreateUsingNew<T>::Destroy(pInstance);
-  pInstance = 0;
+  pInstance = nullptr;
   destroyed = true;
 }
 
 /// global variable holding pointer to singleton instance
-template <typename T> T *SingletonHolder<T>::pInstance = 0;
+template <typename T> T *SingletonHolder<T>::pInstance = nullptr;
 
 /// variable to allow trapping of attempts to destroy a singleton more than once
 template <typename T> bool SingletonHolder<T>::destroyed = false;

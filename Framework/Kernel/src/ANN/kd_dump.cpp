@@ -131,7 +131,7 @@ void ANNkd_tree::Dump( // dump entire tree
   annPrintPt(bnd_box_hi, dim, out); // print upper bound
   out << "\n";
 
-  if (root == NULL) // empty tree?
+  if (root == nullptr) // empty tree?
     out << "null\n";
   else {
     root->dump(out); // invoke printing at root
@@ -275,7 +275,7 @@ annReadDump(istream &in,              // input stream
   int j;
   char str[STRING_LEN];     // storage for string
   char version[STRING_LEN]; // ANN version number
-  ANNkd_ptr the_root = NULL;
+  ANNkd_ptr the_root = nullptr;
 
   //------------------------------------------------------------------
   //	Input file header
@@ -399,7 +399,7 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
   in >> tag; // input node tag
 
   if (strcmp(tag, "null") == 0) { // null tree
-    return NULL;
+    return nullptr;
   }
   //------------------------------------------------------------------
   //	Read a leaf
