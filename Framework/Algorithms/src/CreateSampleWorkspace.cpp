@@ -306,7 +306,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   std::transform(y.access().begin(), y.access().end(), e.access().begin(),
                  dblSqrt);
 
-  MatrixWorkspace_sptr retVal(new DataObjects::Workspace2D);
+  MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
   retVal->initialize(numPixels, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
@@ -331,7 +331,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   retVal->setInstrument(inst);

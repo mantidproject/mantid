@@ -861,8 +861,7 @@ Instrument::getPlottable() const {
 
   } else {
     // Base instrument
-    boost::shared_ptr<std::vector<IObjComponent_const_sptr>> res(
-        new std::vector<IObjComponent_const_sptr>);
+    auto res = boost::make_shared<std::vector<IObjComponent_const_sptr>>();
     res->reserve(m_detectorCache.size() + 10);
     appendPlottable(*this, *res);
     return res;
