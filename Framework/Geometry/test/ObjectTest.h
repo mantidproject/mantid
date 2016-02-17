@@ -586,8 +586,7 @@ public:
     // for defining non-AA objects. However, BoundingBox is poor for non-AA and
     // needs improvement if these are
     // common
-    planes = {"p 1 0 0 -0.5",
-              "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
               "p 0 .70710678118 .70710678118 -1.1",
               "p 0 .70710678118 .70710678118 -0.1",
               "p 0 -.70710678118 .70710678118 -0.5",
@@ -602,8 +601,7 @@ public:
     // case. Framework has now been updated to support this automatically.
     // Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and
     // rotated 45deg to these two axes
-    planes = {"p 1 0 0 -0.5",
-              "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
               "p 0  .70710678118 .70710678118 -2",
               "p 0  .70710678118 .70710678118 -1",
               "p 0 -.70710678118 .70710678118 -0.5",

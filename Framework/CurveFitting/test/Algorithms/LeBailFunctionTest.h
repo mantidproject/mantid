@@ -331,17 +331,23 @@ public:
     // Add peak parameters
     map<string, double> parammap
 
-        {{"Dtt1", 16370.650},    {"Dtt2", 0.10},
+        {{"Dtt1", 16370.650},
+         {"Dtt2", 0.10},
          {"Zero", 0.0},
 
-         {"Alph0", 1.0},         {"Alph1", 0.0},
-         {"Beta0", 0.109036},    {"Beta1", 0.009834},
+         {"Alph0", 1.0},
+         {"Alph1", 0.0},
+         {"Beta0", 0.109036},
+         {"Beta1", 0.009834},
 
-         {"Sig2", sqrt(91.127)}, {"Sig1", sqrt(1119.230)},
+         {"Sig2", sqrt(91.127)},
+         {"Sig1", sqrt(1119.230)},
          {"Sig0", sqrt(0.0)},
 
-         {"Gam0", 0.0},          {"Gam1", 7.688},
-         {"Gam2", 0.0},          {"LatticeConstant", 5.431363}};
+         {"Gam0", 0.0},
+         {"Gam1", 7.688},
+         {"Gam2", 0.0},
+         {"LatticeConstant", 5.431363}};
 
     lebailfunction.setProfileParameterValues(parammap);
 
