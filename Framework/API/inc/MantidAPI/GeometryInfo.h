@@ -1,7 +1,7 @@
-#ifndef MANTID_ALGORITHMS_GEOMETRYINFO_H_
-#define MANTID_ALGORITHMS_GEOMETRYINFO_H_
+#ifndef MANTID_API_GEOMETRYINFO_H_
+#define MANTID_API_GEOMETRYINFO_H_
 
-#include "MantidAlgorithms/BasicInstrumentInfo.h"
+#include "MantidAPI/GeometryInfoFactory.h"
 
 namespace Mantid {
 
@@ -12,14 +12,11 @@ class IDetector;
 
 namespace API {
 class ISpectrum;
-}
 
-namespace Algorithms {
-
-class MANTID_ALGORITHMS_DLL GeometryInfo {
+class MANTID_API_DLL GeometryInfo {
 public:
-  GeometryInfo(const BasicInstrumentInfo &instrument_info,
-               const API::ISpectrum &spectrum);
+  GeometryInfo(const GeometryInfoFactory &instrument_info,
+               const ISpectrum &spectrum);
 
   bool isMonitor() const;
   bool isMasked() const;
@@ -30,10 +27,10 @@ public:
   boost::shared_ptr<const Geometry::IDetector> getDetector() const;
 
 private:
-  const BasicInstrumentInfo &m_instrument_info;
+  const GeometryInfoFactory &m_instrument_info;
   boost::shared_ptr<const Geometry::IDetector> m_detector;
 };
 }
 }
 
-#endif /*MANTID_ALGORITHMS_GEOMETRYINFO_H_*/
+#endif /*MANTID_API_GEOMETRYINFO_H_*/

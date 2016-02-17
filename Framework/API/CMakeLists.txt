@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
+	src/GeometryInfoFactory.cpp
 	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
@@ -44,6 +45,7 @@ set ( SRC_FILES
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
+	src/GeometryInfo.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -159,6 +161,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
+	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/BinEdgeAxis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
@@ -197,6 +200,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
+	inc/MantidAPI/GeometryInfo.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -335,6 +339,7 @@ set ( TEST_FILES
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
+	GeometryInfoFactoryTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CommonBinsValidatorTest.h
@@ -358,6 +363,7 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	GeometryInfoTest.h
 	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h

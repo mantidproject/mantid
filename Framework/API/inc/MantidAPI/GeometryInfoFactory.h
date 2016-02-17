@@ -1,10 +1,10 @@
-#ifndef MANTID_ALGORITHMS_BASICINSTRUMENT_INFO_H_
-#define MANTID_ALGORITHMS_BASICINSTRUMENT_INFO_H_
+#ifndef MANTID_API_GEOMETRYINFOFACTORY_H_
+#define MANTID_API_GEOMETRYINFOFACTORY_H_
 
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/V3D.h"
-#include "MantidAlgorithms/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid {
 
@@ -15,13 +15,10 @@ class IComponent;
 
 namespace API {
 class MatrixWorkspace;
-}
 
-namespace Algorithms {
-
-class MANTID_ALGORITHMS_DLL BasicInstrumentInfo {
+class MANTID_API_DLL GeometryInfoFactory {
 public:
-  BasicInstrumentInfo(const API::MatrixWorkspace &workspace);
+  GeometryInfoFactory(const MatrixWorkspace &workspace);
 
   const Geometry::Instrument &getInstrument() const;
   const Geometry::IComponent &getSource() const;
@@ -41,4 +38,4 @@ private:
 }
 }
 
-#endif /* MANTID_ALGORITHMS_BASICINSTRUMENT_INFO_H_ */
+#endif /* MANTID_API_GEOMETRYINFOFACTORY_H_ */

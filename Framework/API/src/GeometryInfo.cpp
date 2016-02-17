@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/GeometryInfo.h"
+#include "MantidAPI/GeometryInfo.h"
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument.h"
@@ -6,10 +6,10 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace API {
 
-GeometryInfo::GeometryInfo(const BasicInstrumentInfo &instrument_info,
-                           const API::ISpectrum &spectrum)
+GeometryInfo::GeometryInfo(const GeometryInfoFactory &instrument_info,
+                           const ISpectrum &spectrum)
     : m_instrument_info(instrument_info) {
   const std::set<detid_t> &dets = spectrum.getDetectorIDs();
 

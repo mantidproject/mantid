@@ -1,14 +1,13 @@
-#ifndef MANTID_ALGORITHMS_GEOMETRYINFOTEST_H_
-#define MANTID_ALGORITHMS_GEOMETRYINFOTEST_H_
+#ifndef MANTID_API_GEOMETRYINFOTEST_H_
+#define MANTID_API_GEOMETRYINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/GeometryInfo.h"
+#include "MantidAPI/GeometryInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
 class GeometryInfoTest : public CxxTest::TestSuite {
@@ -46,7 +45,7 @@ public:
 
   void test_isMasked() {
     auto ws = WorkspaceCreationHelper::maskSpectra(workspace, {0, 3});
-    auto instrument_info = BasicInstrumentInfo(*ws);
+    auto instrument_info = GeometryInfoFactory(*ws);
     TS_ASSERT_EQUALS(
         GeometryInfo(instrument_info, *(ws->getSpectrum(0))).isMasked(), true);
     TS_ASSERT_EQUALS(
@@ -129,7 +128,7 @@ public:
 
 private:
   Workspace2D_sptr workspace;
-  BasicInstrumentInfo m_instrument_info;
+  GeometryInfoFactory m_instrument_info;
 };
 
-#endif /* MANTID_ALGORITHMS_GEOMETRYINFOTEST_H_ */
+#endif /* MANTID_API_GEOMETRYINFOTEST_H_ */
