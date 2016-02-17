@@ -100,6 +100,8 @@ signals:
 
 private:
   RefIVConnections() {}
+  void setColorScale(ColorMaps::ColorScale positive,
+                     ColorMaps::ColorScale negative);
 
 private:
 
