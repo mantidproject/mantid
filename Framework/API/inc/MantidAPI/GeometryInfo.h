@@ -16,6 +16,27 @@ class ISpectrum;
 /** GeometryInfo is a small wrapper around the Instrument/Geometry and provides
   easy access to commonly used parameters, such as L1, L2, and 2-theta.
 
+  Usage:
+  This is mainly intented for use in algorithms that need access to simple
+  instrument parameters and work with spectra. For example:
+
+  ~~~{.cpp}
+  void exec() {
+    // Some setup code
+    GeometryInfoFactory factory(*inputWorkspace);
+    // Loop over spectra
+    for(size_t i=0; i<inputWorkspace->getNumberHistograms(); ++i) {
+      auto geometry = factory.create(i);
+      if (!geometry.isMasked()) {
+        auto L1 = geometry.getL1();
+        auto L2 = geometry.getL2();
+        auto twoTheta = geometry.getTwoTheta();
+        // Your code
+      }
+    }
+  }
+  ~~~
+
   @author Simon Heybrock, ESS
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
