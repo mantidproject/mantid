@@ -5,6 +5,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+
 #include <vector>
 
 namespace NeXus {

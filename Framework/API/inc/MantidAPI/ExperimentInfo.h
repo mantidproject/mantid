@@ -5,7 +5,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include "MantidKernel/DeltaEMode.h"
@@ -18,6 +19,7 @@ namespace Mantid {
 //---------------------------------------------------------------------------
 namespace Geometry {
 class ParameterMap;
+class XMLInstrumentParameter;
 }
 
 namespace API {

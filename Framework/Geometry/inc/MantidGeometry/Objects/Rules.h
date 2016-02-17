@@ -76,7 +76,7 @@ public:
   } ///< Returns class name as string
 
   /// No leaf for a base rule
-  virtual Rule *leaf(const int = 0) const { return 0; }
+  virtual Rule *leaf(const int = 0) const { return nullptr; }
   void setParent(Rule *);
   Rule *getParent() const;
   void makeParents();
@@ -257,7 +257,7 @@ public:
   } ///< Returns class name as string
   std::unique_ptr<SurfPoint> clone() const;
 
-  Rule *leaf(const int = 0) const override { return 0; } ///< No Leaves
+  Rule *leaf(const int = 0) const override { return nullptr; } ///< No Leaves
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>) override;
   void setLeaf(std::unique_ptr<Rule>, const int = 0) override;
   int findLeaf(const Rule *) const override;
@@ -422,11 +422,11 @@ public:
     return "BoolValue";
   } ///< Returns class name as string
 
-  Rule *leaf(const int = 0) const override { return 0; } ///< No leaves
+  Rule *leaf(const int = 0) const override { return nullptr; } ///< No leaves
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>) override;
   void setLeaf(std::unique_ptr<Rule>, const int = 0) override;
   int findLeaf(const Rule *) const override;
-  Rule *findKey(const int) override { return 0; }
+  Rule *findKey(const int) override { return nullptr; }
 
   int type() const override { return 0; } // effective name
 

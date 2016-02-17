@@ -5,8 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+
+namespace API {
+class Sample;
+}
+namespace Geometry {
+class Object;
+}
+
 namespace Algorithms {
 /** A base class for absorption correction algorithms.
 

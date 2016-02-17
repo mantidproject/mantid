@@ -95,7 +95,7 @@ public:
   /// Creates a new iterator pointing to the first cell in the workspace
   virtual std::vector<IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const = 0;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates
   virtual signal_t
@@ -115,8 +115,8 @@ public:
                            std::vector<coord_t> &x, std::vector<signal_t> &y,
                            std::vector<signal_t> &e) const;
 
-  IMDIterator *
-  createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  IMDIterator *createIterator(
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
   void setConvention(std::string m_convention);

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
@@ -74,8 +75,9 @@ protected:
 
 private:
   /// Fix the detector numbers if the defaults are not correct
-  void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
-                const boost::scoped_array<specid_t> &spec_ids,
+  void fixUDets(boost::scoped_array<Mantid::detid_t> &det_ids,
+                ::NeXus::File &file,
+                const boost::scoped_array<Mantid::specid_t> &spec_ids,
                 const size_t nmonitors) const;
 
   /// Load the logs

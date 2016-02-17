@@ -4,8 +4,10 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+
 #include <algorithm>
 #include <cctype>
 #include <string>

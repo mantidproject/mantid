@@ -5,7 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/IComponent.h"
+
 namespace Mantid {
+
+// forward declarations from other Mantid modules
+namespace Kernel {
+class Unit;
+}
+
 namespace Algorithms {
 /** Performs removal of constant (and possibly non-constant after simple
 modification) background calculated in TOF units
@@ -44,7 +53,7 @@ public:
 
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
-                  Kernel::Logger *pLog = NULL, int nTreads = 1,
+                  Kernel::Logger *pLog = nullptr, int nTreads = 1,
                   bool inPlace = true, bool nullifyNegative = false);
   void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
                         MantidVec &e_data, int tread_num = 0) const;

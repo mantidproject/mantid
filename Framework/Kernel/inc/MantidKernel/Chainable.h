@@ -59,7 +59,7 @@ public:
     checkSuccessor();
     return *m_successor;
   }
-  bool hasSuccessor() const { return m_successor.get() != NULL; }
+  bool hasSuccessor() const { return bool(m_successor); }
   virtual ~Chainable() = 0;
 };
 

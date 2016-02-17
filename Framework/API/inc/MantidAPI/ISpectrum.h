@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
+
 #include <set>
 
 namespace Mantid {

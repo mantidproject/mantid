@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <cmath>
 #include <climits>
 #include <MantidAPI/IEventWorkspace.h>

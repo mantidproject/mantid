@@ -8,15 +8,27 @@
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
+
+namespace API {
+class ISpectrum;
+}
+
+namespace Geometry {
+class Object;
+}
+
 namespace CurveFitting {
+
 namespace MSVesuvioHelper {
 class RandomNumberGenerator;
 struct Simulation;
 struct SimulationWithErrors;
 }
+
 namespace Functions {
 struct ResolutionParams;
 }
+
 namespace Algorithms {
 struct DetectorParams;
 

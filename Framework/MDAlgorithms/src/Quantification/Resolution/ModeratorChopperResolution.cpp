@@ -5,6 +5,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

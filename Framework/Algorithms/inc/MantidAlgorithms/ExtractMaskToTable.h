@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {

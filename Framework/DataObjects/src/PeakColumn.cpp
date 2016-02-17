@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 
 #include <Poco/Mutex.h>
 

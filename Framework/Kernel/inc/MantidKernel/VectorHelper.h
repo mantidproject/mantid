@@ -87,9 +87,9 @@ MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
 MANTID_KERNEL_DLL void
 smoothInRange(const std::vector<double> &input, std::vector<double> &output,
               double avrgInterval,
-              std::vector<double> const *const binBoundaris = NULL,
+              std::vector<double> const *const binBoundaris = nullptr,
               size_t startIndex = 0, size_t endIndex = 0,
-              std::vector<double> *const outputBinBoundaries = NULL);
+              std::vector<double> *const outputBinBoundaries = nullptr);
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),

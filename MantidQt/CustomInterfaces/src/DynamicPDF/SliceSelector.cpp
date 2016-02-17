@@ -2,6 +2,7 @@
 #include <iomanip>
 // includes for workspace handling
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // includes for interface
 #include "MantidQtAPI/HelpWindow.h"

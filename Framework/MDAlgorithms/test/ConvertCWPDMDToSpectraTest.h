@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
-#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;

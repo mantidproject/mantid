@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/DataComparison.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 

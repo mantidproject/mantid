@@ -1,10 +1,11 @@
+#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 
 #include <algorithm>
 

@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"

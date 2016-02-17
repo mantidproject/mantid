@@ -54,7 +54,7 @@ public:
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string &, IComponent *reference = 0);
+  RectangularDetector(const std::string &, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);

@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/make_shared.hpp>
 

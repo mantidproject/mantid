@@ -185,12 +185,12 @@ public:
   template <class T> T *getColDataArray(const std::string &name) {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      return NULL;
+      return nullptr;
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->dataArray();
     else
-      return NULL;
+      return nullptr;
   }
   /**Non-throwing const access to the pointer to the column data array for the
    * column with given name. Returns null on error or if the coulmn has not been
@@ -202,12 +202,12 @@ public:
   template <class T> T *getColDataArray(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      return NULL;
+      return nullptr;
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->dataArray();
     else
-      return NULL;
+      return nullptr;
   }
 
   /// Resizes the workspace.

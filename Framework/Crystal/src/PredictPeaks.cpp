@@ -1,13 +1,13 @@
 #include "MantidCrystal/PredictPeaks.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-
-#include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
-#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 

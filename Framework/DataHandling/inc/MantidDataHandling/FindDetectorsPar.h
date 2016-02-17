@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include <fstream>
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace DataHandling {

@@ -51,7 +51,10 @@ class LRAutoReduction(PythonAlgorithm):
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
 
-    def _get_series_info(self, filename, run_number):
+        self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
+                             "Run sequence information (run number, sequence ID, sequence number).")
+
+    def _get_series_info(self, filename):
         """
             Retrieve the information about the scan series so
             that we know how to put all the pieces together.
@@ -62,6 +65,7 @@ class LRAutoReduction(PythonAlgorithm):
         # Load meta data to decide what to do
         self.event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
         meta_data_run = self.event_data.getRun()
+        run_number = self.event_data.getRunNumber()
 
         # Deal with a forced sequence number
         force_value = self.getProperty("ForceSequenceNumber").value
@@ -87,7 +91,8 @@ class LRAutoReduction(PythonAlgorithm):
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
             do_reduction = not is_direct_beam
 
-        return first_run_of_set, sequence_number, do_reduction, is_direct_beam
+        self.setProperty("SequenceInfo", [int(run_number), int(first_run_of_set), int(sequence_number)])
+        return run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
 
     def _parse_title(self, meta_data_run, run_number):
@@ -497,11 +502,9 @@ class LRAutoReduction(PythonAlgorithm):
 
     def PyExec(self):
         filename = self.getProperty("Filename").value
-        event_file = os.path.split(filename)[-1]
-        run_number = event_file.split('_')[2]
 
         # Determine where we are in the scan
-        first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename, run_number)
+        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
 
         # Get the reduction parameters for this run
         data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)

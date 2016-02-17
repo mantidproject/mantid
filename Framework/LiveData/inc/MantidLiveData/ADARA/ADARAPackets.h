@@ -565,7 +565,7 @@ public:
                                          m_name_offset + 2];
     } else {
       // Shouldn't be asking for this if bankCount() returned 0...!
-      return ((const uint32_t *)NULL);
+      return ((const uint32_t *)nullptr);
     }
   }
 

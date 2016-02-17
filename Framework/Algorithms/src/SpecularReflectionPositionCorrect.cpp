@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"

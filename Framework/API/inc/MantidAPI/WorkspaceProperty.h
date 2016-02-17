@@ -398,12 +398,10 @@ private:
     g_log.debug() << " Input WorkspaceGroup found " << std::endl;
 
     std::vector<std::string> wsGroupNames = wsGroup->getNames();
-    std::vector<std::string>::iterator it = wsGroupNames.begin();
-
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (; it != wsGroupNames.end(); ++it) {
+    for (auto it = wsGroupNames.begin(); it != wsGroupNames.end(); ++it) {
       std::string memberWsName = *it;
       boost::shared_ptr<Workspace> memberWs =
           AnalysisDataService::Instance().retrieve(memberWsName);
@@ -418,7 +416,7 @@ private:
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
-        if (NULL == boost::dynamic_pointer_cast<TYPE>(memberWs)) {
+        if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
           error = "Workspace " + memberWsName + " is not of type " +
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";

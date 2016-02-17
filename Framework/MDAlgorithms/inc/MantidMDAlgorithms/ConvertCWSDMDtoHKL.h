@@ -1,13 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_
 #define MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

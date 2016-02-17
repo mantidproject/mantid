@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {

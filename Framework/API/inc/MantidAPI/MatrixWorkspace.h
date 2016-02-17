@@ -7,17 +7,13 @@
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
+
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------------
@@ -28,7 +24,9 @@ class ParameterMap;
 class INearestNeighbours;
 class INearestNeighboursFactory;
 }
+
 namespace API {
+class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
@@ -424,7 +422,7 @@ public:
   /// cores.
   std::vector<IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Apply masking.
   void
@@ -472,7 +470,8 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   MatrixWorkspace &operator=(const MatrixWorkspace &other);
 
-  MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
+  MatrixWorkspace(
+      Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.

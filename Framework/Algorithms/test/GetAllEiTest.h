@@ -5,6 +5,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

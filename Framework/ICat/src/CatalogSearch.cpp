@@ -16,6 +16,7 @@ GCC_DIAG_ON(literal-suffix)
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>

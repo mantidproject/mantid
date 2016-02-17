@@ -4,10 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadSpiceXML2DDet.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

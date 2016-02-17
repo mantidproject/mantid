@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DataItem.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {

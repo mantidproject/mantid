@@ -143,7 +143,7 @@ VectorParameter<Derived, ElemType>::VectorParameter(
 /// Default constructor
 template <typename Derived, typename ElemType>
 VectorParameter<Derived, ElemType>::VectorParameter()
-    : m_arry(NULL), m_size(0) {
+    : m_arry(nullptr), m_size(0) {
   m_isValid = false;
 }
 

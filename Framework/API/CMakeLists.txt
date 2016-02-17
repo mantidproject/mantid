@@ -46,6 +46,7 @@ set ( SRC_FILES
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
+	src/GroupingLoader.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -197,6 +198,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
+	inc/MantidAPI/GroupingLoader.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -355,6 +357,7 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h
 	HistoryViewTest.h

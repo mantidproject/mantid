@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyDetectorMapping.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 namespace Mantid {

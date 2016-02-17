@@ -3,10 +3,15 @@
 
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadAscii2.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include <Poco/File.h>
+
 #include <fstream>
 
 using namespace Mantid::API;

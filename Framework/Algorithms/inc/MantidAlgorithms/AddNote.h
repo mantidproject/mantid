@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace Algorithms {

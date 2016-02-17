@@ -10,6 +10,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -66,7 +67,7 @@ public:
   ~FindPeaks() override {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
