@@ -612,7 +612,7 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    mask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+    mask_detid_single.insert(mask_detid_single.end(), singles.begin(),
                              singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_detid_pair_low.push_back(pairs[2 * i]);

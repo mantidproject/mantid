@@ -80,10 +80,6 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags 
 	}
 
 	QGridLayout *gl1 = new QGridLayout();
-	functions = new QComboBox();
-	gl1->addWidget(functions, 0, 0);
-	btnAddFunction = new QPushButton(tr( "Add function" ));
-	gl1->addWidget(btnAddFunction, 0, 1);
 	boxColumn = new QComboBox();
 	gl1->addWidget(boxColumn, 1, 0);
 	btnAddCol = new QPushButton(tr( "Add column" ));
@@ -141,16 +137,10 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags 
 	setFocusProxy (commands);
 	commands->setFocus();
 
-	functions->insertStringList(scriptingEnv()->mathFunctions(), -1);
-	if (functions->count() > 0)
-		insertExplain(0);
-
-	connect(btnAddFunction, SIGNAL(clicked()),this, SLOT(insertFunction()));
 	connect(btnAddCol, SIGNAL(clicked()),this, SLOT(insertCol()));
 	connect(addCellButton, SIGNAL(clicked()),this, SLOT(insertCell()));
 	connect(btnApply, SIGNAL(clicked()),this, SLOT(apply()));
 	connect(btnCancel, SIGNAL(clicked()),this, SLOT(close()));
-	connect(functions, SIGNAL(activated(int)),this, SLOT(insertExplain(int)));
 	connect(buttonPrev, SIGNAL(clicked()), this, SLOT(prevColumn()));
 	connect(buttonNext, SIGNAL(clicked()), this, SLOT(nextColumn()));
 
@@ -223,16 +213,6 @@ bool SetColValuesDialog::apply()
 	
 	table->setCommand(col, oldFormula);
 	return false;
-}
-
-void SetColValuesDialog::insertExplain(int index)
-{
-	explain->setText(scriptingEnv()->mathFunctionDoc(functions->text(index)));
-}
-
-void SetColValuesDialog::insertFunction()
-{
-  QMessageBox::warning(this, "", "Deprepcated functionality");
 }
 
 void SetColValuesDialog::insertCol()
