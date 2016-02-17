@@ -1,6 +1,7 @@
 #include "MantidAPI/GeometryInfoFactory.h"
-#include "MantidAPI/GeometryInfo.h"
 
+#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/GeometryInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
