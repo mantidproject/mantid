@@ -16,31 +16,45 @@ Description
    instrument scientists decide to do so.
 
 
-The pattern is specified by providing a list of dSpacing values where
-Bragg peaks are expected. The algorithm then fits peaks in those areas
-using a peak fitting function. The dSpacing values for ExpectedPeaks
-are then converted to time-of-flight (TOF) (as in the Mantid
-ConvertUnits algorithm).
+Fits a series of single peak to a spectrum with an expected
+diffraction pattern.  The pattern is specified by providing a list of
+dSpacing values where Bragg peaks are expected. The algorithm then
+fits peaks in those areas using a peak fitting function. The dSpacing
+values for ExpectedPeaks are then converted to time-of-flight (TOF)
+(as in the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`
+algorithm). Expected dSpacing values can be given as an input string
+or in a file with values separated by commas.
 
 These values are used as start peak position in fit. It is these
 adjusted peak TOF value positions that are fitted against
 ExpectedPeaks dSpacing values according to:
 
 
-.. math:: TOF = DifC*d + Zero
+.. math:: TOF = DIFC*d + TZERO
 
 
-ZERO and Difc can then be used within the GSAS program.  The
+TZERO and DIFC can then be used within the GSAS program.  The
 parameters DIFC and ZERO are returned and can be retrieved as output
-properties as well.
+properties as well. The DIFA coefficient (quadratic term on d) is not
+considered in this version of the algorithm.
 
-If a name is given in OutParametersTable this algorithm also
-produces a table workspace with that name, containing the two fitted
-(DIFC, ZERO) parameters. Also, if a name is given in
-OutFittedPeaksTable, the algorithm produces a table workspace with
-information about the peaks fitted. The table has one row per peak and
-several columns for the different fitted parameters (and the errors of
-these parameters).
+This algorithm currently fits (single) peaks of type
+:ref:`Back2BackExponential <func-Back2BackExponential>`. Other
+alternatives might be added as optional in the future (for example the
+simpler :ref:`Gaussian <func-Gaussian>` or the more complex
+:ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV` or :ref:`IkedaCarpenterPV
+<func-IkedaCarpenterPV>`). To produce an initial guess for the peak
+function parameters this algorithm uses the :ref:`FindPeaks
+<algm-FindPeaks>` algorithm.
+
+If a name is given in OutParametersTable this algorithm also produces
+a table workspace with that name, containing the two fitted (DIFC,
+ZERO) parameters. The algorithm produces an output table workspace
+with information about the peaks fitted. The table has one row per
+peak and several columns for the different fitted parameters (and the
+errors of these parameters). If a name is given in the input
+OutFittedPeaksTable, the table will be available in the "analysis data
+service" (workspaces window) with that name.
 
 Usage
 -----
@@ -49,7 +63,7 @@ Usage
 
 .. testcode:: ExTwoPeaks
 
-   # Two B2B peaks
+   # Two BackB2Back exponential peaks
    peak1 = "name=BackToBackExponential,I=4000,A=1,B=0.5,X0=12000,S=350"
    peak2 = "name=BackToBackExponential,I=5000,A=1,B=0.7,X0=35000,S=300"
 
