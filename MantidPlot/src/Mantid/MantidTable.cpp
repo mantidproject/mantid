@@ -153,16 +153,6 @@ void MantidTable::fillTable()
     setColumnWidth(i, maxWidth);
   }
 
-  // Set all the row labels
-  if (m_ws->rowCount() < 1000)
-  {
-    // Note: This is very slow for some reason so it is only done for smallish tables.
-    for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++) {
-      auto item = new QTableWidgetItem(QString::number(j));
-      d_table->setHorizontalHeaderItem(j, item);
-    }
-  }
-
   // block resizing
   d_table->blockResizing(true);
 

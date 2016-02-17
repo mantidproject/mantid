@@ -32,10 +32,6 @@
 #ifndef TABLE_H
 #define TABLE_H
 
-//#include <q3table.h>
-//#include <q3header.h>
-//#include <Q3ValueList>
-
 #include <QTableWidget>
 #include <QVarLengthArray>
 
@@ -47,6 +43,7 @@
 #include "Mantid/IProjectSerialisable.h"
 
 class Folder;
+class QTableWidgetItem;
 
 class MyTable : public QTableWidget
 {
@@ -78,7 +75,10 @@ signals:
     void unwantedResize();
 private:
     void resizeData(int n);
+    QTableWidgetItem* addNewItem(int row, int col);
+    void makeItemPrototype();
     bool m_blockResizing; // a workaround to prevent unwanted resizes
+    QTableWidgetItem* m_itemPrototype;
 };
 
 /**\brief MDI window providing a spreadsheet table with column logic.

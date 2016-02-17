@@ -130,7 +130,7 @@ void Table::init(int rows, int cols)
   QShortcut *accelAll = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_A), this);
   connect(accelAll, SIGNAL(activated()), this, SLOT(selectAllTable()));
 
-  connect(d_table, SIGNAL(valueChanged(int, int)), this, SLOT(cellEdited(int, int)));
+  connect(d_table, SIGNAL(cellChanged(int, int)), this, SLOT(cellEdited(int, int)));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
 }
@@ -1267,10 +1267,14 @@ void Table::copySelection()
       int bottom = d_table->bottomSelectedRow();
       int top = d_table->topSelectedRow();
       int left = d_table->leftSelectedColumn();
-      for (int i = top; i<=bottom; i++){
-        for (int j = left; j<right; j++)
-          text += d_table->text(i, j) + "\t";
-        text += d_table->text(i, right) + eol;
+      if (right == left && bottom == top) {
+        text = d_table->text(top, left);
+      } else {
+        for (int i = top; i<=bottom; i++){
+          for (int j = left; j<right; j++)
+            text += d_table->text(i, j) + "\t";
+          text += d_table->text(i, right) + eol;
+        }
       }
     }
   }
@@ -2563,49 +2567,8 @@ void Table::moveCurrentCell()
 bool Table::eventFilter(QObject *object, QEvent *e)
 {
   auto hheader = d_table->horizontalHeader();
-  auto vheader = d_table->verticalHeader();
 
-  if (e->type() == QEvent::MouseButtonDblClick && object == (QObject*)hheader) {
-    const QMouseEvent *me = (const QMouseEvent *)e;
-    selectedCol = d_table->horizontalHeader()->logicalIndexAt(me->pos());
-
-  //  QRect rect = hheader->sectionRect (selectedCol);
-  //  rect.setLeft(rect.right() - 2);
-  //  rect.setWidth(4);
-
-  //  if (rect.contains (me->pos())) {
-  //    d_table->adjustColumn(selectedCol);
-  //    emit modifiedWindow(this);
-  //  } else
-  //    emit optionsDialog();
-  //  setActiveWindow();
-  //  return true;
-  //} else if (e->type() == QEvent::MouseButtonPress && object == (QObject*)hheader) {
-  //  const QMouseEvent *me = (const QMouseEvent *)e;
-  //  if (me->button() == Qt::LeftButton && me->state() == Qt::ControlButton) {
-  //    selectedCol = hheader->sectionAt (me->pos().x() + hheader->offset());
-  //    d_table->selectColumn (selectedCol);
-  //    d_table->setCurrentCell (0, selectedCol);
-  //    setActiveWindow();
-  //    return true;
-  //  } else if (selectedColsNumber() <= 1) {
-  //    selectedCol = hheader->sectionAt (me->pos().x() + hheader->offset());
-  //    d_table->clearSelection();
-  //    d_table->selectColumn (selectedCol);
-  //    d_table->setCurrentCell (0, selectedCol);
-  //    setActiveWindow();
-  //    return false;
-  //  }
-  //} else if (e->type() == QEvent::MouseButtonPress && object == (QObject*)vheader) {
-  //  const QMouseEvent *me = (const QMouseEvent *)e;
-  //  if (me->button() == Qt::RightButton && numSelectedRows() <= 1) {
-  //    d_table->clearSelection();
-  //    int row = vheader->sectionAt(me->pos().y() + vheader->offset());
-  //    d_table->selectRow (row);
-  //    d_table->setCurrentCell (row, 0);
-  //    setActiveWindow();
-  //  }
-  } else if (e->type() == QEvent::ContextMenu && object == (QObject*)d_table){
+  if (e->type() == QEvent::ContextMenu && object == (QObject*)d_table){
     const QContextMenuEvent *ce = (const QContextMenuEvent *)e;
     auto indx = d_table->horizontalHeader()->logicalIndexAt(ce->pos());
     setFocus();
@@ -3398,12 +3361,26 @@ MyTable::MyTable(QWidget * parent, const char * name)
 :QTableWidget(parent),m_blockResizing(false)
 {
   setWindowTitle(QString::fromAscii(name));
+  makeItemPrototype();
 }
 
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
 :QTableWidget(numRows, numCols, parent),m_blockResizing(false)
 {
   setWindowTitle(QString::fromAscii(name));
+  makeItemPrototype();
+}
+
+void MyTable::makeItemPrototype() {
+  m_itemPrototype = new QTableWidgetItem();
+  m_itemPrototype->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  setItemPrototype(m_itemPrototype);
+}
+
+QTableWidgetItem* MyTable::addNewItem(int row, int col) {
+  auto item = m_itemPrototype->clone();
+  setItem(row, col, item);
+  return item;
 }
 
 QString MyTable::text(int row, int col) const {
@@ -3417,8 +3394,7 @@ QString MyTable::text(int row, int col) const {
 void MyTable::setText(int row, int col, const QString& txt) {
   auto it = item(row, col);
   if (it == nullptr) {
-    it = new QTableWidgetItem();
-    setItem(row, col, it);
+    it = addNewItem(row, col);
   }
   it->setText(txt);
 }
@@ -3447,12 +3423,16 @@ bool MyTable::isColumnReadOnly(int col) const {
 
 void MyTable::setColumnReadOnly(int col, bool on) {
   if (col >= columnCount()) return;
-  auto flags = model()->flags(model()->index(0, col)) ^ Qt::ItemIsEditable;
+  auto flags = model()->flags(model()->index(0, col));
+  if (on && (flags & Qt::ItemIsEditable)) {
+    flags ^= Qt::ItemIsEditable;
+  } else if (!on && !bool(flags & Qt::ItemIsEditable)) {
+    flags |= Qt::ItemIsEditable;
+  }
   for(int row = 0; row < rowCount(); ++row) {
     auto it = item(row, col);
     if (it == nullptr) {
-      it = new QTableWidgetItem();
-      setItem(row, col, it);
+      it = addNewItem(row, col);
     }
     it->setFlags(flags);
   }
@@ -3522,6 +3502,7 @@ int MyTable::topSelectedRow() const {
     while (top < rowCount() && !sel->rowIntersectsSelection(top, parentIndex)) {
       ++top;
     }
+    return top;
   }
   return -1;
 }
@@ -3534,6 +3515,7 @@ int MyTable::bottomSelectedRow() const {
     while (bottom >= 0 && !sel->rowIntersectsSelection(bottom, parentIndex)) {
       --bottom;
     }
+    return bottom;
   }
   return -1;
 }
@@ -3547,6 +3529,7 @@ int MyTable::leftSelectedColumn() const {
     while (left < columnCount() && !sel->columnIntersectsSelection(left, parentIndex)) {
       ++left;
     }
+    return left;
   }
   return -1;
 }
@@ -3559,6 +3542,7 @@ int MyTable::rightSelectedColumn() const {
     while (right >= 0 && !sel->columnIntersectsSelection(right, parentIndex)) {
       --right;
     }
+    return right;
   }
   return -1;
 }

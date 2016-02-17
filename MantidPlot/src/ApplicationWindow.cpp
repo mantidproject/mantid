@@ -12024,7 +12024,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
 }
 
 void ApplicationWindow::connectTable(Table *w) {
-  connect(w->table(), SIGNAL(selectionChanged()), this,
+  connect(w->table(), SIGNAL(itemSelectionChanged()), this,
           SLOT(customColumnActions()));
   connect(w, SIGNAL(removedCol(const QString &)), this,
           SLOT(removeCurves(const QString &)));
