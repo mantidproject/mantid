@@ -1,3 +1,9 @@
+#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+#pragma clang diagnostic ignored "-Wreadability-named-parameter"
+#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-array-to-pointer-decay"
+#pragma clang diagnostic ignored "-Wreadability-braces-around-statements"
+#pragma clang diagnostic ignored "-Wllvm-namespace-comment"
+
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 #include "MantidKernel/Exception.h"
 
@@ -17,7 +23,7 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
            double *f, double *c__, double *g, double *a, double *acc, int *iter,
            int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
 ///@endcond
-}
+}// namespace
 
 /**
  * Perform the minimization using the SLSQP routine
@@ -3008,8 +3014,8 @@ L40:
 
 ///@endcond
 
-} // <anonymous>
+} // namespace
 
 } // namespace Math
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid
