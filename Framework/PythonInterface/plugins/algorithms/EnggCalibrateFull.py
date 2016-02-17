@@ -158,7 +158,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         for i in indices:
 
             try:
-                zero, difc = self._fitPeaks(ws, i, expectedPeaksD)
+                zero, difc, fitted_peaks_table = self._fitPeaks(ws, i, expectedPeaksD)
             except RuntimeError as re:
                 raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
                                    "This calibration algorithm cannot continue. Please check the expected "
@@ -174,6 +174,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             detPhi = det.getPhi()
             oldPos = det.getPos()
 
+            # TODO: add information about peaks
             posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
                            difc, zero])
             prog.report()
@@ -193,12 +194,14 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
+        alg.setPropertyValue('OutFittedPeaksTable', 'table_fitted_peaks_internal')
         alg.execute()
 
         difc = alg.getProperty('Difc').value
         zero = alg.getProperty('Zero').value
+        fitted_peaks_table = alg.getProperty('FittedPeaks')
 
-        return (zero, difc)
+        return (zero, difc, fitted_peaks_table)
 
     def _createPositionsTable(self):
         """
