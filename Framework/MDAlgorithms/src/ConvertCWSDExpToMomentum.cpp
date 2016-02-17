@@ -359,6 +359,7 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  * @param usevirtual :: boolean flag to use virtual instrument
  * @param startdetid :: starting detid for detectors from this workspace mapping
  * to virtual instrument in MDEventWorkspace
+ * @param scannumber :: scan number
  * @param runnumber :: run number for all MDEvents created from this matrix
  * @param monitor_counts :: monitor counts; add to ExpInfo
  * workspace

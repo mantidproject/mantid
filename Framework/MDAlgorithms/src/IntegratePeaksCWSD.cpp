@@ -345,7 +345,8 @@ void IntegratePeaksCWSD::mergePeaks() {
  */
 DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
   // clone the original peaks workspace
-  DataObjects::PeaksWorkspace_sptr outws = m_peaksWS->clone();
+  DataObjects::PeaksWorkspace_sptr outws = boost::shared_ptr<DataObjects::PeaksWorkspace>(
+        m_peaksWS->clone().release());
 
   size_t num_peaks = outws->getNumberPeaks();
   for (size_t i_peak = 0; i_peak < num_peaks; ++i_peak) {
