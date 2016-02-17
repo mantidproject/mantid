@@ -46,7 +46,6 @@ double GeometryInfo::getL2() const {
     auto &sample = m_factory.getSample();
     return m_detector->getDistance(sample);
   } else {
-    // If this is a monitor then make l1+l2 = source-detector distance
     auto &source = m_factory.getSource();
     return m_detector->getDistance(source) - getL1();
   }

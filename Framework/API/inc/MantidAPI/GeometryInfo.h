@@ -72,7 +72,11 @@ public:
   bool isMasked() const;
   /// Returns L1 (distance from source to sample).
   double getL1() const;
-  /// Returns L2 (distance from sample to spectrum).
+  /** Returns L2 (distance from sample to spectrum).
+   *
+   * For monitors this is defined such that L1+L2 = source-detector distance,
+   * i.e., for a monitor in the beamline between source and sample L2 is
+   * negative. */
   double getL2() const;
   /// Returns 2 theta (angle w.r.t. to beam direction).
   double getTwoTheta() const;
