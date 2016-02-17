@@ -259,7 +259,8 @@ void RadiusSum::inputValidationSanityCheck() {
   g_log.information() << "Boundary limits are: " << s.str() << std::endl;
 
   g_log.debug() << "Check: centre is defined inside the region defined by the "
-                   "image or instrument" << std::endl;
+                   "image or instrument"
+                << std::endl;
   centerIsInsideLimits(getProperty("centre"), boundary_limits);
 
   g_log.debug() << "Recalculate MaxRadius if default value is given"
@@ -533,7 +534,8 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << std::endl;
+                                        min_bin_size)
+                    << std::endl;
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -610,14 +612,9 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
 double RadiusSum::getMaxDistance(const V3D &centre,
                                  const std::vector<double> &boundary_limits) {
 
-  std::vector<double> Xs;       //  = {boundary_limits[0], boundary_limits[1]};
-  std::vector<double> Ys;       // = {boundary_limits[2], boundary_limits[3]};
-  std::vector<double> Zs(2, 0); //  = {0, 0};
-
-  Xs.push_back(boundary_limits[0]);
-  Xs.push_back(boundary_limits[1]);
-  Ys.push_back(boundary_limits[2]);
-  Ys.push_back(boundary_limits[3]);
+  std::array<double, 2> Xs = {boundary_limits[0], boundary_limits[1]};
+  std::array<double, 2> Ys = {boundary_limits[2], boundary_limits[3]};
+  std::array<double, 2> Zs = {0., 0.};
 
   if (boundary_limits.size() == 6) {
     Zs[0] = boundary_limits[4];
@@ -625,12 +622,12 @@ double RadiusSum::getMaxDistance(const V3D &centre,
   }
 
   double max_distance = 0;
-  for (size_t x = 0; x < 2; x++)
-    for (size_t y = 0; y < 2; y++)
-      for (size_t z = 0; z < 2;
-           z++) { // define all the possible combinations for the limits
+  for (auto &x : Xs)
+    for (auto &y : Ys)
+      for (auto &z : Zs) {
+        // define all the possible combinations for the limits
 
-        double curr_distance = centre.distance(V3D(Xs[x], Ys[y], Zs[z]));
+        double curr_distance = centre.distance(V3D(x, y, z));
 
         if (curr_distance > max_distance)
           max_distance = curr_distance; // keep the maximum distance.
