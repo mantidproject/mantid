@@ -502,7 +502,7 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @returns :: LinePlot with x as linearly spaced points along the line 
+ * @returns :: LinePlot with x as linearly spaced points along the line
  * between start and end, y set to the normalized signal for each bin with
  * Length = length(x) - 1 and e as the error vector for each bin.
  */
@@ -561,7 +561,7 @@ MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @returns :: LinePlot with x as the boundaries of the bins, relative 
+ * @returns :: LinePlot with x as the boundaries of the bins, relative
  * to start of the line, y set to the normalized signal for each bin with
  * Length = length(x) - 1 and e as the error vector for each bin.
  */

@@ -170,8 +170,7 @@ void AlignAndFocusPowder::init() {
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
 }
 
-template <typename NumT>
-struct RegLowVectorPair {
+template <typename NumT> struct RegLowVectorPair {
   std::vector<NumT> reg;
   std::vector<NumT> low;
 };
