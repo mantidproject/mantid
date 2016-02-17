@@ -1,6 +1,8 @@
-#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+#pragma clang diagnostic ignored                                               \
+    "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
 #pragma clang diagnostic ignored "-Wreadability-named-parameter"
-#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-array-to-pointer-decay"
+#pragma clang diagnostic ignored                                               \
+    "-Wcppcoreguidelines-pro-bounds-array-to-pointer-decay"
 #pragma clang diagnostic ignored "-Wreadability-braces-around-statements"
 #pragma clang diagnostic ignored "-Wllvm-namespace-comment"
 
@@ -23,7 +25,7 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
            double *f, double *c__, double *g, double *a, double *acc, int *iter,
            int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
 ///@endcond
-}// namespace
+} // namespace
 
 /**
  * Perform the minimization using the SLSQP routine
