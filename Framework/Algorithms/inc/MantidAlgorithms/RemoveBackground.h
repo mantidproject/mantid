@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/GeometryInfoFactory.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -67,6 +68,8 @@ private:
   // shared pointer to the workspace where background should be removed
   API::MatrixWorkspace_const_sptr m_wkWS;
 
+  std::unique_ptr<API::GeometryInfoFactory> m_geometryInfoFactory;
+
   // logger from the hosting algorithm
   Kernel::Logger *m_pgLog;
   // perform background removal in-place
@@ -84,12 +87,8 @@ private:
   double m_ErrSq;
   // energy conversion mode
   int m_Emode;
-  // source-sample distance
-  double m_L1;
   // incident for direct or analysis for indirect energy for units conversion
   double m_Efix;
-  // shared pointer to the sample
-  Geometry::IComponent_const_sptr m_Sample;
   // if true, negative signals are nullified
   bool m_nullifyNegative;
   // removing negative values from ws with background removed previously.
