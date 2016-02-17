@@ -33,6 +33,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(GeometryInfoFactory factory(m_workspace));
   }
 
+  void test_constructor_no_instrument() {
+    WorkspaceTester ws;
+    size_t numberOfHistograms = 1;
+    size_t numberOfBins = 1;
+    ws.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    TS_ASSERT_THROWS(GeometryInfoFactory factory(ws), std::runtime_error);
+  }
+
   void test_create() {
     auto factory = GeometryInfoFactory(m_workspace);
     TS_ASSERT_THROWS_NOTHING(factory.create(0).getDetector());
