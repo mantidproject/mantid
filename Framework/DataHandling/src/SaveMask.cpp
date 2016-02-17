@@ -102,7 +102,6 @@ void SaveMask::exec() {
       const auto detids = spec->getDetectorIDs();
 
       // b) get detector id & Store
-      detid_t detid;
       for (const auto &det_id : detids) {
         // c) store
         detid0s.push_back(det_id);
