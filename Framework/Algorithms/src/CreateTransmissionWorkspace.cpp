@@ -110,9 +110,10 @@ void CreateTransmissionWorkspace::exec() {
   const OptionalMinMax monitorBackgroundWavelengthInterval = getOptionalMinMax(
       this, "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
       instrument, "MonitorBackgroundMin", "MonitorBackgroundMax");
-  const OptionalMinMax monitorIntegrationWavelengthInterval = getOptionalMinMax(
-      this, "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax",
-      instrument, "MonitorIntegralMin", "MonitorIntegralMax");
+  const OptionalMinMax monitorIntegrationWavelengthInterval =
+      getOptionalMinMax(this, "MonitorIntegrationWavelengthMin",
+                        "MonitorIntegrationWavelengthMax", instrument,
+                        "MonitorIntegralMin", "MonitorIntegralMax");
 
   const std::string processingCommands = getWorkspaceIndexList();
 
