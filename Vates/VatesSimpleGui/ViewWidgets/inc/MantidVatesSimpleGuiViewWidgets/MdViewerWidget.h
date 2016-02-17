@@ -15,6 +15,7 @@
 #include "boost/shared_ptr.hpp"
 
 #include <vtkSmartPointer.h>
+#include <unordered_set>
 
 // forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
@@ -214,7 +215,7 @@ private:
   /// Get the view for a specified instrument
   QString getViewForInstrument(const std::string& instrument) const;
   /// Check if a technique contains a keyword
-  bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
+  bool checkIfTechniqueContainsKeyword(const std::unordered_set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace

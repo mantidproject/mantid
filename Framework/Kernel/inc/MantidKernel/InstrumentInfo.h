@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <set>
+#include <unordered_set>
 #include <string>
 #include <map>
 
@@ -70,7 +71,7 @@ public:
   /// data stream
   const std::string &liveDataAddress() const;
   /// Return list of techniques
-  const std::set<std::string> &techniques() const;
+  const std::unordered_set<std::string> &techniques() const;
   /// The facility to which this instrument belongs
   const FacilityInfo &facility() const;
 
@@ -98,7 +99,7 @@ private:
   std::string m_delimiter; ///< Delimiter between instrument name and run number
   std::string m_liveListener;    ///< Name of the live listener class
   std::string m_liveDataAddress; ///< Host & port for live data connection
-  std::set<std::string>
+  std::unordered_set<std::string>
       m_technique; ///< List of techniques the instrument can do
 };
 
