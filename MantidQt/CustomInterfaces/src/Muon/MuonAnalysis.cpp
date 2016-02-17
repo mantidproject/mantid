@@ -1021,7 +1021,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     }
   }
 
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   updatePairTable();
   updateFrontAndCombo();
   
@@ -1070,7 +1070,7 @@ void MuonAnalysis::pairTableChanged(int row, int column)
         return;
       }
     }
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
   }
 
@@ -1105,7 +1105,7 @@ void MuonAnalysis::pairTableChanged(int row, int column)
       }
     }
 
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
 
     // check to see if alpha is specified (if name!="") and if not
@@ -1685,7 +1685,7 @@ void MuonAnalysis::guessAlphaClicked()
  */
 int MuonAnalysis::numGroups()
 {
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   return static_cast<int>(m_groupToRow.size());
 }
 
@@ -1696,7 +1696,7 @@ int MuonAnalysis::numGroups()
  */
 int MuonAnalysis::numPairs()
 {
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
   return static_cast<int>(m_pairToRow.size());
 }
 
@@ -1799,7 +1799,7 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
  */
 int MuonAnalysis::getGroupNumberFromRow(int row)
 {
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   for (unsigned int i = 0; i < m_groupToRow.size(); i++)
   {
     if ( m_groupToRow[i] == row )
@@ -1817,7 +1817,7 @@ int MuonAnalysis::getGroupNumberFromRow(int row)
  */
 int MuonAnalysis::getPairNumberFromRow(int row)
 {
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
   for (unsigned int i = 0; i < m_pairToRow.size(); i++)
   {
     if ( m_pairToRow[i] == row )
@@ -2097,8 +2097,7 @@ void MuonAnalysis::showAllPlotWindows()
  */
 bool MuonAnalysis::isGroupingSet() const
 {
-  std::vector<int> dummy;
-  whichGroupToWhichRow(m_uiForm, dummy);
+  auto dummy = whichGroupToWhichRow(m_uiForm);
 
   if (dummy.empty())
     return false;
