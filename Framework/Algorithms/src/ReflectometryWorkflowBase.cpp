@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -74,28 +75,24 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
       "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for "
       "rebinning intermediate workspaces converted into wavelength.");
 
-  declareProperty(new PropertyWithValue<double>(
-                      "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
-                  "Wavelength minimum for monitor background in angstroms.");
+  declareProperty(
+      new PropertyWithValue<double>("MonitorBackgroundWavelengthMin",
+                                    Mantid::EMPTY_DBL(), Direction::Input),
+      "Wavelength minimum for monitor background in angstroms.");
 
-  declareProperty(new PropertyWithValue<double>(
-                      "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
-                  "Wavelength maximum for monitor background in angstroms.");
+  declareProperty(
+      new PropertyWithValue<double>("MonitorBackgroundWavelengthMax",
+                                    Mantid::EMPTY_DBL(), Direction::Input),
+      "Wavelength maximum for monitor background in angstroms.");
 
-  declareProperty(new PropertyWithValue<double>(
-                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
-                  "Wavelength minimum for integration in angstroms.");
-  declareProperty(new PropertyWithValue<double>(
-                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
-                  "Wavelength maximum for integration in angstroms.");
+  declareProperty(
+      new PropertyWithValue<double>("MonitorIntegrationWavelengthMin",
+                                    Mantid::EMPTY_DBL(), Direction::Input),
+      "Wavelength minimum for integration in angstroms.");
+  declareProperty(
+      new PropertyWithValue<double>("MonitorIntegrationWavelengthMax",
+                                    Mantid::EMPTY_DBL(), Direction::Input),
+      "Wavelength maximum for integration in angstroms.");
 }
 
 /**
@@ -193,6 +190,23 @@ ReflectometryWorkflowBase::getMinMax(const std::string &minProperty,
         "Cannot have any WavelengthMin > WavelengthMax");
   }
   return MinMax(min, max);
+}
+
+ReflectometryWorkflowBase::OptionalMinMax
+ReflectometryWorkflowBase::getOptionalMinMax(
+    Mantid::API::Algorithm *alg, const std::string &minProperty,
+    const std::string &maxProperty,
+    Mantid::Geometry::Instrument_const_sptr inst, std::string minIdfName,
+    std::string maxIdfName) const {
+  const auto min = checkForOptionalInstrumentDefault<double>(alg, minProperty,
+                                                             inst, minIdfName);
+  const auto max = checkForOptionalInstrumentDefault<double>(alg, maxProperty,
+                                                             inst, maxIdfName);
+  if (min.is_initialized() && max.is_initialized()) {
+    return OptionalMinMax(MinMax(min.get(), max.get()));
+  } else {
+    return OptionalMinMax();
+  }
 }
 
 /**
@@ -345,10 +359,9 @@ void ReflectometryWorkflowBase::getTransmissionRunInfo(
  * correction.
  * @return The cropped and corrected monitor workspace.
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
-                                        const OptionalInteger monitorIndex,
-                                        const MinMax &backgroundMinMax) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
+    const MatrixWorkspace_sptr &toConvert, const OptionalInteger monitorIndex,
+    const OptionalMinMax &backgroundMinMax) {
   // Convert Units.
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
@@ -368,7 +381,8 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
   // If min&max are both 0, we won't do the flat background normalization.
-  if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
+  if (backgroundMinMax.get().get<0>() == 0 &&
+      backgroundMinMax.get().get<1>() == 0)
     return monitorWS;
 
   // Flat background correction
@@ -376,8 +390,8 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
       this->createChildAlgorithm("CalculateFlatBackground");
   correctMonitorsAlg->initialize();
   correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-  correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
-  correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+  correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get().get<0>());
+  correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get().get<1>());
   correctMonitorsAlg->setProperty("SkipMonitors", false);
   correctMonitorsAlg->execute();
   monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
@@ -473,14 +487,14 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
                                  const std::string &processingCommands,
                                  const OptionalInteger monitorIndex,
                                  const MinMax &wavelengthMinMax,
-                                 const MinMax &backgroundMinMax,
+                                 const OptionalMinMax &backgroundMinMax,
                                  const double &wavelengthStep) {
   // Detector Workspace Processing
   MatrixWorkspace_sptr detectorWS = toLamDetector(
       processingCommands, toConvert, wavelengthMinMax, wavelengthStep);
 
   MatrixWorkspace_sptr monitorWS;
-  if (monitorIndex.is_initialized()) {
+  if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {
     // Monitor Workspace Processing
     monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
   } else {

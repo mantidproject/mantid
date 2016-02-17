@@ -89,8 +89,8 @@ private:
   /// Perform a transmission correction on the input IvsLam workspace
   API::MatrixWorkspace_sptr transmissonCorrection(
       API::MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
-      const MinMax &wavelengthMonitorBackgroundInterval,
-      const MinMax &wavelengthMonitorIntegrationInterval,
+      const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+      const OptionalMinMax &wavelengthMonitorIntegrationInterval,
       const OptionalInteger &i0MonitorIndex,
       API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,

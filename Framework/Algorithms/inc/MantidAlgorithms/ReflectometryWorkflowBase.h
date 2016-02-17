@@ -40,6 +40,7 @@ class DLLExport ReflectometryWorkflowBase : public API::DataProcessorAlgorithm {
 public:
   // Class typedefs
   using MinMax = boost::tuple<double, double>;
+  using OptionalMinMax = boost::optional<boost::tuple<double, double>>;
   using OptionalDouble = boost::optional<double>;
   using OptionalMatrixWorkspace_sptr =
       boost::optional<Mantid::API::MatrixWorkspace_sptr>;
@@ -59,7 +60,7 @@ public:
   toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
         const std::string &processingCommands,
         const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
-        const MinMax &backgroundMinMax, const double &wavelengthStep);
+        const OptionalMinMax &backgroundMinMax, const double &wavelengthStep);
 
   /// Convert the detector spectrum of the input workspace to wavelength
   API::MatrixWorkspace_sptr
@@ -82,7 +83,12 @@ protected:
   /// Get the min/max property values
   MinMax getMinMax(const std::string &minProperty,
                    const std::string &maxProperty) const;
-
+  OptionalMinMax getOptionalMinMax(Mantid::API::Algorithm *alg,
+                                   const std::string &minProperty,
+                                   const std::string &maxProperty,
+                                   Mantid::Geometry::Instrument_const_sptr inst,
+                                   std::string minIdfName,
+                                   std::string maxIdfName) const;
   /// Get the transmission correction properties
   void getTransmissionRunInfo(
       OptionalMatrixWorkspace_sptr &firstTransmissionRun,
@@ -110,7 +116,7 @@ private:
   API::MatrixWorkspace_sptr
   toLamMonitor(const API::MatrixWorkspace_sptr &toConvert,
                const OptionalInteger monitorIndex,
-               const MinMax &backgroundMinMax);
+               const OptionalMinMax &backgroundMinMax);
 
   /// Make a unity workspace
   API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);
