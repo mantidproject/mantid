@@ -8,6 +8,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include <vector>
 #include <set>
+#include <unordered_set>
 
 namespace Json {
 class Value;
@@ -79,8 +80,8 @@ public:
   */
   virtual void setPropertiesWithSimpleString(
       const std::string &propertiesString,
-      const std::set<std::string> &
-          ignoreProperties = std::set<std::string>()) = 0;
+      const std::unordered_set<std::string> &
+          ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
@@ -90,8 +91,8 @@ public:
    */
   virtual void
   setProperties(const std::string &propertiesJson,
-                const std::set<std::string> &
-                    ignoreProperties = std::set<std::string>()) = 0;
+                const std::unordered_set<std::string>
+                &ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a json object
      @param jsonValue :: A json name value pair collection
@@ -100,8 +101,8 @@ public:
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
-                const std::set<std::string> &
-                    ignoreProperties = std::set<std::string>()) = 0;
+                const std::unordered_set<std::string>
+                &ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets property value from a string
       @param name :: Property name

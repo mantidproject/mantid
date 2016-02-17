@@ -52,8 +52,8 @@ void PropertyManagerOwner::declareProperty(Property *p,
  *  @throw invalid_argument if error in parameters
  */
 void PropertyManagerOwner::setProperties(
-    const std::string &propertiesJson,
-    const std::set<std::string> &ignoreProperties) {
+  const std::string &propertiesJson,
+  const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setProperties(propertiesJson, this, ignoreProperties);
 }
 
@@ -63,8 +63,8 @@ void PropertyManagerOwner::setProperties(
   from the propertiesArray
   */
 void PropertyManagerOwner::setProperties(
-    const ::Json::Value &jsonValue,
-    const std::set<std::string> &ignoreProperties) {
+  const ::Json::Value &jsonValue,
+  const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setProperties(jsonValue, this, ignoreProperties);
 }
 
@@ -75,8 +75,8 @@ void PropertyManagerOwner::setProperties(
   from the propertiesArray
 */
 void PropertyManagerOwner::setPropertiesWithSimpleString(
-    const std::string &propertiesString,
-    const std::set<std::string> &ignoreProperties) {
+  const std::string &propertiesString,
+  const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setPropertiesWithSimpleString(propertiesString,
                                               ignoreProperties);
 }
