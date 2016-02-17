@@ -31,23 +31,24 @@ class PeakInfo(object):
     In order to manage some operations for a peak
     It does not contain peak workspace but will hold
     """
-    def __init__(self, parent):
+    def __init__(self, exp_number, scan_number, peak_ws_name):
         """ Init
         """
-        assert isinstance(parent, CWSCDReductionControl)
+        # TODO/NOW/ - Doc
+
+        assert isinstance(exp_number, int) and isinstance(scan_number, int)
+        assert isinstance(peak_ws_name) and AnalysisDataService.doesExist(peak_ws_name)
+
+        # Set
+        self._myExpNumber = exp_number
+        self._myScanNumber = scan_number
+        self._myPeakWorkspaceName = peak_ws_name
 
         # Define class variable
-        self._myParent = parent
         self._userHKL = [0, 0, 0]
-
-        self._myExpNumber = None
-        self._myScanNumber = None
-        self._myPtNumber = None
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
-        # IPeak instance
-        self._myPeak = None
 
         self._myLastPeakUB = None
 
@@ -58,16 +59,14 @@ class PeakInfo(object):
         Get peak workspace related
         :return:
         """
-        assert isinstance(self._myPeakWSKey, tuple)
-        exp_number, scan_number, pt_number = self._myPeakWSKey
-
-        return self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)[1]
+        return AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 
     def get_peak_ws_hkl(self):
         """ Get HKL from PeakWorkspace
         :return:
         """
-        hkl = self._myPeak.getHKL()
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+        hkl = peak_ws.getHKL()
 
         return hkl.getX(), hkl.getY(), hkl.getZ()
 
@@ -79,6 +78,17 @@ class PeakInfo(object):
         hkl = self._userHKL
 
         return hkl[0], hkl[1], hkl[2]
+
+    def set(self, peak_ws_name):
+        """
+
+        :param peak_ws_name:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+        self._peakWorkspaceName = peak_ws_name
+
+        return
 
     def set_from_run_info(self, exp_number, scan_number, pt_number):
         """ Set from run information with parent
@@ -208,7 +218,7 @@ class CWSCDReductionControl(object):
         # Container for loaded raw pt workspace
         self._myRawDataWSDict = dict()
         # Container for PeakWorkspaces for calculating UB matrix
-        self._myUBPeakWSDict = dict()
+        # self._myUBPeakWSDict = dict()
         # Container for UB  matrix
         self._myUBMatrixDict = dict()
         # Container for Merged:(merged_md_ws, target_frame, exp_no, scan_no, None)
@@ -231,33 +241,6 @@ class CWSCDReductionControl(object):
         # self._expDataDict = {}
 
         return
-
-    def add_peak_info(self, exp_number, scan_number, pt_number):
-        """ Add a peak info for calculating UB matrix
-        :param exp_number:
-        :param scan_number:
-        :param pt_number:
-        :return: (boolean, PeakInfo/string)
-        """
-        has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
-        if has_peak_ws is False:
-            err_msg = 'No peak workspace found for Exp %s Scan %s Pt %s' % (
-                exp_number, scan_number, pt_number)
-            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
-            return False, err_msg
-
-        if peak_ws.rowCount() > 1:
-            err_msg = 'There are more than 1 peak in PeaksWorkspace.'
-            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
-            return False, err_msg
-
-        peak_info = PeakInfo(self)
-        peak_info.set_from_run_info(exp_number, scan_number, pt_number)
-
-        # Add to data management
-        self._myPeakInfoDict[(exp_number, scan_number, pt_number)] = peak_info
-
-        return True, peak_info
 
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
@@ -347,7 +330,6 @@ class CWSCDReductionControl(object):
         file_url = get_spice_file_url(self._myServerURL, self._instrumentName, exp_number, scan_number)
 
         file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-        # file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
         file_name = os.path.join(self._dataDir, file_name)
         if os.path.exists(file_name) is True and over_write is False:
             return True, file_name
@@ -377,17 +359,17 @@ class CWSCDReductionControl(object):
             exp_no = self._expNumber
 
         # Form the target file name and path
-        xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, exp_no, scan_no, pt_no)
-        local_xml_file_name = os.path.join(self._dataDir, xml_file_name)
+        det_xml_file_name = get_det_xml_file_name(self._instrumentName, exp_no, scan_no, pt_no)
+        local_xml_file_name = os.path.join(self._dataDir, det_xml_file_name)
         if os.path.exists(local_xml_file_name) is True and overwrite is False:
             return True, local_xml_file_name
 
         # Generate the URL for XML file
-        xml_file_url = '%sexp%d/Datafiles/%s' % (self._myServerURL, exp_no, xml_file_name)
+        det_file_url = get_det_xml_file_url(self._myServerURL, self._instrumentName, exp_no, scan_no, pt_no)
 
         # Download
         try:
-            api.DownloadFile(Address=xml_file_url,
+            api.DownloadFile(Address=det_file_url,
                              Filename=local_xml_file_name)
         except RuntimeError as run_err:
             return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(run_err))
@@ -505,50 +487,86 @@ class CWSCDReductionControl(object):
 
         return os.path.exists(file_name)
 
-    def find_peak(self, exp_number, scan_number, pt_number=None):
+    def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param scan_number:
-        :param pt_number:
+        :param pt_number_list:
         :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
 
         This part will be redo as 11847_Load_HB3A_Experiment
         """
-        # Check
+        # Check & set pt. numbers
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int) or pt_number is None
-
-        # Download or make sure data are there
-        status_sp, err_msg_sp = self.download_spice_file(exp_number, scan_number, over_write=False)
-        status_det, err_msg_det = self.download_spice_xml_file(scan_number, pt_number, exp_number,
-                                                               overwrite=False)
-        if status_sp is False or status_det is False:
-            return False, 'Unable to access data (1) %s (2) %s' % (err_msg_sp, err_msg_det)
+        if pt_number_list is None:
+            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+        assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
 
         # Check whether the MDEventWorkspace used to find peaks exists
-        if self.has_merged_data(exp_number, scan_number):
+        if self.has_merged_data(exp_number, scan_number, pt_number_list):
             pass
         else:
-            self.merge_pts_in_scan(exp_number, scan_number, [pt_number])
+            raise RuntimeError('Data must be merged before')
 
-        # TODO/NOW/FIXME/1st - MODIFY the following codes for new workflow! Remember to update documentation!
         # Find peak in Q-space
-        pt_peak_ws_name = get_single_pt_peak_ws_name(exp_number, scan_number, pt_number)
-        print '[DB] Found peaks are output workspace %s.' % pt_peak_ws_name
-        api.FindPeaksMD(InputWorkspace=pt_md_ws_name, MaxPeaks=10,
-                        DensityThresholdFactor=0.01, OutputWorkspace=pt_peak_ws_name)
-        peak_ws = AnalysisDataService.retrieve(pt_peak_ws_name)
-        pt_md_ws = AnalysisDataService.retrieve(pt_md_ws_name)
-        self._myPtMDDict[(exp_number, scan_number, pt_number)] = pt_md_ws
+        merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
+        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
+        print '[DB] Found peaks are output workspace %s.' % peak_ws_name
+        api.FindPeaksMD(InputWorkspace=merged_ws_name,
+                        MaxPeaks=10,
+                        PeakDistanceThreshold=5.,
+                        DensityThresholdFactor=0.1,
+                        OutputWorkspace=peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name)
+
+        # Go through the peak workspaces to calculate peak center with weight (monitor and counts)
+        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+
+        spice_table_name = get_spice_table_name(exp_number, scan_number)
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+        pt_spice_row_dict = build_pt_spice_table_row_map(spice_table_ws)
+        det_col_index = spice_table_ws.getColumnNames().index('detector')
+        monitor_col_index = spice_table_ws.getColumnNames().index('monitor')
+
+        num_found_peaks = peak_ws.rowCount()
+
+        q_sample_sum = numpy.array([0., 0., 0.])
+
+        for i_peak in xrange(num_found_peaks):
+            # get peak
+            peak_i = peak_ws.getPeak(i_peak)
+            run_number = peak_i.getRunNumber()
+            # get Pt. number
+            pt_number = run_number % scan_number
+            # get row number and then detector counts and monitor counts
+            row_index = pt_spice_row_dict[pt_number]
+            det_counts = spice_table_ws.cell(row_index, det_col_index)
+            monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
+            # convert q sample from V3D to ndarray
+            q_i = peak_i.getQSampleFrame()
+            q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
+            # add
+            # TODO/NOW : do weighted average to q_sample_sum
+
+            q_sample_sum += q_array
+        # END-FOR
+
+        avg_peak_center = q_sample_sum/num_found_peaks
+
+        # add peak to UB matrix workspace to manager
+        self._add_ub_peak_ws(exp_number, scan_number, peak_ws_name, merged_ws_name, avg_peak_center)
+
+        """
+        # self._myPtMDDict[(exp_number, scan_number, pt_number_list)] = pt_md_ws
 
         num_peaks = peak_ws.getNumberPeaks()
         if num_peaks != 1:
-            err_msg = 'Find %d peak from scan %d pt %d.  ' \
-                      'For UB matrix calculation, 1 and only 1 peak is allowed' % (num_peaks, scan_number, pt_number)
+            err_msg = 'Find %d peak from scan %d pt %d.  '
+                      'For UB matrix calculation, 1 and only 1 peak is allowed' % (num_peaks, scan_number, pt_number_list)
             return False, err_msg
         else:
-            self._add_ub_peak_ws(exp_number, scan_number, pt_number, peak_ws)
-            status, ret_obj = self.add_peak_info(exp_number, scan_number, pt_number)
+            self._add_ub_peak_ws(exp_number, scan_number, pt_number_list, peak_ws)
+            status, ret_obj = self.add_peak_info(exp_number, scan_number, pt_number_list)
             if status is True:
                 pass
                 # peak_info = ret_obj
@@ -556,6 +574,7 @@ class CWSCDReductionControl(object):
             else:
                 err_msg = ret_obj
                 return False, err_msg
+        """
 
         return True, ''
 
@@ -580,6 +599,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_no, int)
 
         # Get workspace
+        # TODO/FIXME: better to refactor the part to load SPICE out
         table_ws = self._get_spice_workspace(exp_no, scan_no)
         if table_ws is None:
             if load_spice_scan is False:
@@ -680,32 +700,29 @@ class CWSCDReductionControl(object):
 
         return True, self._mergedWSManager[ws_name]
 
-    def get_peak_info(self, exp_number, scan_number, pt_number):
+    def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
-        get peak information instance
-        :param exp_number: experiment number.  if it is None, then use the current exp number
+        get PeakInfo instance
+        :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
-        :return: 2-tuple as (True, PeakInfo) or (False, string)
+        :return: PeakInfo instance
         """
         # Check for type
-        if exp_number is None:
-            exp_number = self._expNumber
-
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+        assert isinstance(pt_number, int) or pt_number is None
+
+        # construct key
+        if pt_number is None:
+            p_key = (exp_number, scan_number)
+        else:
+            p_key = (exp_number, scan_number, pt_number)
 
         # Check for existence
-        if (exp_number, scan_number, pt_number) not in self._myUBPeakWSDict:  # self._myPeakInfoDict:
-            err_msg = 'Unable to find PeakInfo for Exp %d Scan %d Pt %d. ' \
-                      'Existing keys are %s' % (exp_number, scan_number, pt_number,
-                                                str(self._myUBPeakWSDict.keys()))
-            return False, err_msg
+        assert p_key in self._myPeakInfoDict, 'Exp/Scan/Pt %s does not exist in PeakInfo dictionary.' % str(p_key)
 
-        print '[DB] PeakInfoDictionary Keys = %s' % str(self._myPeakInfoDict.keys())
-
-        return True, self._myPeakInfoDict[(exp_number, scan_number, pt_number)]
+        return self._myPeakInfoDict[p_key]
 
     def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
         """
@@ -728,14 +745,25 @@ class CWSCDReductionControl(object):
 
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
-
+        Check whether the data has been merged to an MDEventWorkspace
+        :param exp_number:
         :param scan_number:
         :param pt_number_list:
         :return:
         """
-        # TODO/NOW/1st - everything
+        # check and retrieve pt number list
+        assert isinstance(exp_number, int) and isinstance(scan_number, int)
+        if pt_number_list is None:
+            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+            if status is False:
+                return False
+        else:
+            assert isinstance(pt_number_list, list)
 
-        return
+        # get MD workspace name
+        md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
+
+        return AnalysisDataService.doesExist(md_ws_name)
 
     def index_peak(self, ub_matrix, scan_number, pt_number):
         """ Index peaks in a Pt.
@@ -810,7 +838,7 @@ class CWSCDReductionControl(object):
             self.download_spice_xml_file(scan_no, pt_no, exp_no)
             # self.load_spice_xml_file(exp_no, scan_no, pt_no)
             self.find_peak(exp_no, scan_no, pt_no)
-            peak_ws_name = get_single_pt_peak_ws_name(exp_no, scan_no, pt_no)
+            peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
             peak_ws = AnalysisDataService.retrieve(peak_ws_name)
             if peak_ws.getNumberPeaks() == 1:
                 peak = peak_ws.getPeak(0)
@@ -839,7 +867,7 @@ class CWSCDReductionControl(object):
         for i_row in xrange(num_rows):
             pt_no = spice_table.cell(i_row, 0)
             md_ws_name = get_single_pt_md_name(exp_no, scan_no, pt_no)
-            peak_ws_name = get_single_pt_peak_ws_name(exp_no, scan_no, pt_no)
+            peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
             out_ws_name = peak_ws_name + '_integrated'
             api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                    PeaksWorkspace=peak_ws_name,
@@ -1052,41 +1080,38 @@ class CWSCDReductionControl(object):
 
         return
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_list, target_ws_name, target_frame):
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, target_frame):
         """
         Merge Pts in Scan
         All the workspaces generated as internal results will be grouped
+        Requirements:
+          1. target_frame must be either 'q-sample' or 'hkl'
+          2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
+        Guarantees: blablabla
         :param exp_no:
         :param scan_no:
-        :param pt_list:
-        :param target_ws_name:
-        :param target_frame:
+        :param pt_num_list:
+        :param target_frame: string, either 'hkl' or 'q-sample'
         :return: (merged workspace name, workspace group name)
         """
-        # TODO/1st: (1) refactor workspace name (2) Create a dictionary to store the result
         # Check
         if exp_no is None:
             exp_no = self._expNumber
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
-        assert isinstance(pt_list, list)
+        assert isinstance(exp_no, int) and isinstance(scan_no, int)
+        assert isinstance(pt_num_list, list)
         assert isinstance(target_frame, str)
-        assert isinstance(target_ws_name, str)
 
         # Get list of Pt.
-        if len(pt_list) > 0:
+        if len(pt_num_list) > 0:
             # user specified
-            pt_num_list = pt_list
+            pt_num_list = pt_num_list
         else:
             # default: all Pt. of scan
             status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
             if status is False:
                 err_msg = pt_num_list
                 return False, err_msg
-            else:
-                print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
-                print '[DB] Data directory: %s' % self._dataDir
-        # END-IF
+        # END-IF-ELSE
 
         # construct a list of Pt as the input of CollectHB3AExperimentInfo
         pt_list_str = '-1'  # header
@@ -1105,25 +1130,24 @@ class CWSCDReductionControl(object):
             return False, err_msg
 
         # Collect HB3A Exp/Scan information
-        try:
-            # construct a configuration with 1 scan and multiple Pts.
-            scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
-            # 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
-            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
-                                          ScanList='%d' % scan_no,
-                                          PtLists=pt_list_str,
-                                          DataDirectory=self._dataDir,
-                                          GenerateVirtualInstrument=False,
-                                          OutputWorkspace=scan_info_ws_name,
-                                          DetectorTableWorkspace='MockDetTable')
-            assert AnalysisDataService.doesExist(scan_info_ws_name)
+        # construct a configuration with 1 scan and multiple Pts.
+        scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
+        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                      ScanList='%d' % scan_no,
+                                      PtLists=pt_list_str,
+                                      DataDirectory=self._dataDir,
+                                      GenerateVirtualInstrument=False,
+                                      OutputWorkspace=scan_info_ws_name,
+                                      DetectorTableWorkspace='MockDetTable')
+        assert AnalysisDataService.doesExist(scan_info_ws_name)
+        """
         except RuntimeError as e:
             err_msg += 'Unable to reduce scan %d due to %s' % (scan_no, str(e))
             return False, err_msg
-        # END-FOR(pt)
+        """
 
         # Convert to Q-sample
-        out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_list)
+        out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
         try:
             api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
                                          CreateVirtualInstrument=False,
@@ -1139,7 +1163,7 @@ class CWSCDReductionControl(object):
             assert exp_no in self._myUBMatrixDict
             ub_matrix_1d = self._myUBMatrixDict[exp_no].reshape(9,)
             # convert to HKL
-            out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_list)
+            out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
             try:
                 api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
                                        UBMatrix=ub_matrix_1d,
@@ -1443,47 +1467,47 @@ class CWSCDReductionControl(object):
 
         return
 
-    def _add_md_workspace(self, exp_no, scan_no, pt_no, md_ws):
-        """
-         Add MD workspace to storage
-        :param exp_no:
-        :param scan_no:
-        :param pt_no:
-        :param md_ws:
-        :return:
-        """
-        # Check input
-        print '[DB] Type of md_ws is %s.' % str(type(md_ws))
-        assert isinstance(md_ws, mantid.dataobjects.MDEventWorkspace)
-
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
-        assert isinstance(pt_no)
-
-        self._myPtMDDict[(exp_no, scan_no, pt_no)] = md_ws
-
-        return
-
-    def _add_ub_peak_ws(self, exp_number, scan_number, pt_number, peak_ws):
-        """
-        Add peak workspace for UB matrix
+    def _set_peak_info(self, exp_number, scan_number, peak_ws_name, md_ws_name, peak_centre):
+        """ Add or modify a PeakInfo object for UB matrix calculation and etc.
         :param exp_number:
         :param scan_number:
-        :param pt_number:
-        :param peak_ws:
-        :return:
+        :param peak_ws_name:
+        :param md_ws_name:
+        :param peak_centre: calculated peak center
+        :return: (boolean, PeakInfo/string)
         """
-        # Check
-        assert isinstance(peak_ws, mantid.dataobjects.PeaksWorkspace)
-
+        # check
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+        assert isinstance(peak_ws_name, str)
+        assert isinstance(md_ws_name, str)
+        assert isinstance(peak_centre, numpy.ndarray) and peak_centre.shape == (3,)
 
-        # Add
-        self._myUBPeakWSDict[(exp_number, scan_number, pt_number)] = peak_ws
+        # create a PeakInfo instance if it does not exist
+        peak_info = PeakInfo(exp_number, scan_number, peak_ws_name)
+        self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
 
-        return
+        # TODO/NOW/1st Continue from here!
+
+        has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
+        if has_peak_ws is False:
+            err_msg = 'No peak workspace found for Exp %s Scan %s Pt %s' % (
+                exp_number, scan_number, pt_number)
+            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
+            return False, err_msg
+
+        if peak_ws.rowCount() > 1:
+            err_msg = 'There are more than 1 peak in PeaksWorkspace.'
+            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
+            return False, err_msg
+
+        peak_info = PeakInfo(self)
+        peak_info.set_from_run_info(exp_number, scan_number, pt_number)
+
+        # Add to data management
+        self._myPeakInfoDict[(exp_number, scan_number, pt_number)] = peak_info
+
+        return True, peak_info
 
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
@@ -1613,6 +1637,23 @@ class CWSCDReductionControl(object):
         return True, scan_sum_list
 
 
+def build_pt_spice_table_row_map(spice_table_ws):
+    """
+    Build a lookup dictionary for Pt number and row number
+    :param spice_table_ws:
+    :return:
+    """
+    pt_spice_row_dict = dict()
+    num_rows = spice_table_ws.rowCount()
+    pt_col_index = spice_table_ws.getColumnNames().index('Pt.')
+
+    for i_row in xrange(num_rows):
+        pt_number = int(spice_table_ws.cell(i_row, pt_col_index))
+        pt_spice_row_dict[pt_number] = i_row
+
+    return pt_spice_row_dict
+
+
 def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
     """
     Get detector XML file name (from SPICE)
@@ -1642,7 +1683,11 @@ def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, p
     assert isinstance(server_url, str) and isinstance(instrument_name, str)
     assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
 
-    base_file_name = get_det_xml_file_name(instrument_name, )
+    base_file_name = get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number)
+    file_url = '%sexp%d/Datafiles/%s' % (self._instrumentName, exp_number, base_file_name)
+
+    return file_url
+
 
 def get_spice_file_name(instrument_name, exp_number, scan_number):
     """
@@ -1749,33 +1794,26 @@ def get_merge_pt_info_ws_name(exp_no, scan_no):
     :param scan_no:
     :return:
     """
-    ws_name =  'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
+    ws_name = 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
 
     return ws_name
 
 
-def get_pt_info_ws_name(exp_number, scan_number):
-    """
-    Information table workspace'name from CollectHB3AInfo
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    ws_name = 'ScanPtInfo_Exp%d_Scan%d'  % (exp_number, scan_number)
-
-    return ws_name
-
-
-def get_single_pt_peak_ws_name(exp_number, scan_number, pt_number):
+def get_peak_ws_name(exp_number, scan_number, pt_number_list):
     """
     Form the name of the peak workspace
     :param exp_number:
     :param scan_number:
-    :param pt_number:
+    :param pt_number_list:
     :return:
     """
-    ws_name = 'Peak_Exp%d_Scan%d_Pt%d' % (exp_number, scan_number, pt_number)
+    # check
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+
+    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number,
+                                             pt_number_list[0],
+                                             pt_number_list[-1])
 
     return ws_name
 

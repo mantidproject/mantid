@@ -392,9 +392,10 @@ class MainWindow(QtGui.QMainWindow):
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         for i_row in row_index_list:
             scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-            status, peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-            if status is False:
-                self.pop_one_button_dialog(peak_info)
+            try:
+                peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+            except AssertionError as ass_err:
+                self.pop_one_button_dialog(str(ass_err))
                 return
             assert isinstance(peak_info, r4c.PeakInfo)
             peak_info_list.append(peak_info)
@@ -496,15 +497,13 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(2)
 
         # Find and index peak
-        self._myControl.find_peak(exp_no, scan_no, pt_no)
-        status, ret_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-        if status is False:
-            err_msg = ret_obj
-            self.pop_one_button_dialog(err_msg)
-            return
-        else:
-            peak_info = ret_obj
+        self._myControl.find_peak(exp_no, scan_no, [pt_no])
+        try:
+            peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
             self.set_ub_peak_table(peak_info)
+        except AssertionError as ass_err:
+            self.pop_one_button_dialog(str(ass_err))
+            return
 
         return
 
@@ -514,12 +513,11 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Add peak
         status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                         self.ui.lineEdit_scanNumber,
-                                                         self.ui.lineEdit_ptNumber])
+                                                         self.ui.lineEdit_scanNumber])
         if status is False:
             self.pop_one_button_dialog(int_list)
             return
-        exp_no, scan_no, pt_no = int_list
+        exp_no, scan_no = int_list
 
         # Get HKL from GUI
         status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
@@ -531,13 +529,13 @@ class MainWindow(QtGui.QMainWindow):
             return
         h, k, l = float_list
 
-        status, peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-        if status is False:
-            error_message = peak_info_obj
-            self.pop_one_button_dialog(error_message)
+        try:
+            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        except AssertionError as ass_err:
+            self.pop_one_button_dialog(str(ass_err))
             return
-        assert isinstance(peak_info_obj, r4c.PeakInfo)
 
+        assert isinstance(peak_info_obj, r4c.PeakInfo)
         if self.ui.checkBox_roundHKLInt.isChecked():
             h = math.copysign(1, h)*int(abs(h)+0.5)
             k = math.copysign(1, k)*int(abs(k)+0.5)
@@ -547,7 +545,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Clear
         self.ui.lineEdit_scanNumber.setText('')
-        self.ui.lineEdit_ptNumber.setText('')
 
         self.ui.lineEdit_sampleQx.setText('')
         self.ui.lineEdit_sampleQy.setText('')
@@ -578,13 +575,12 @@ class MainWindow(QtGui.QMainWindow):
         Add the scan/pt to the next
         :return:
         """
+        # peak finding will use all points in the selected scan.
         scan_no = self.ui.lineEdit_run.text()
-        pt_no = self.ui.lineEdit_rawDataPtNo.text()
-
-        self.ui.lineEdit_scanNumber.setText(scan_no)
-        self.ui.lineEdit_ptNumber.setText(pt_no)
-
         self.ui.tabWidget.setCurrentIndex(2)
+        self.ui.lineEdit_scanNumber.setText(scan_no)
+
+        return
 
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
@@ -650,7 +646,7 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in xrange(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-                status, peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+                peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
                 peak_info.set_peak_ws_hkl_from_user()
                 if status is False:
                     self.pop_one_button_dialog(peak_info)
@@ -768,40 +764,37 @@ class MainWindow(QtGui.QMainWindow):
 
         # merge peak if necessary
         if self._myControl.has_merged_data(exp_no, scan_no) is False:
-            self._myControl.merge_pts_in_scan(exp_no, scan_no)
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [], 'q-sample')
+            if status is False:
+                self.pop_one_button_dialog(err_msg)
 
         # Find peak
         status, err_msg = self._myControl.find_peak(exp_no, scan_no)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
+
+        # Get information from the latest (integrated) peak
         if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
             # This is the first time that in the workflow to get HKL from MD workspace
-            status, err_msg = self._myControl.set_hkl_to_peak(exp_no, scan_no, pt_no)
-            if status is False:
-                self.pop_one_button_dialog('Unable to locate peak info due to %s.' % err_msg)
+            peak_info = self._myControl.get_peak_info(exp_no, scan_no)
+            try:
+                peak_info.retrieve_hkl_from_spice()
+            except RuntimeError as run_err:
+                self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
+        # END-IF
 
         # Set up correct values to table tableWidget_peaksCalUB
-        self._myControl.add_peak_info(exp_no, scan_no, pt_no)
-        status, peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-        if status is False:
-            err_msg = peak_info
-            raise KeyError(err_msg)
-        assert isinstance(peak_info, r4c.PeakInfo)
-
-        # Set the HKL value from PeakInfo directly
-        # BAD PROGRAMMING! THERE ARE TOO MANY WAYS TO ACCESS STORED HKL
-        h, k, l = peak_info.get_peak_ws_hkl()
+        peak_info = self._myControl.get_peak_info(exp_no, scan_no)
+        h, k, l = peak_info.get_user_hkl()
         self.ui.lineEdit_H.setText('%.2f' % h)
         self.ui.lineEdit_K.setText('%.2f' % k)
         self.ui.lineEdit_L.setText('%.2f' % l)
 
-        q_sample = peak_info.getQSample()
+        q_sample = peak_info.get_peak_centre()
         self.ui.lineEdit_sampleQx.setText('%.5E' % q_sample[0])
         self.ui.lineEdit_sampleQy.setText('%.5E' % q_sample[1])
         self.ui.lineEdit_sampleQz.setText('%.5E' % q_sample[2])
-
-        # self.set_ub_peak_table(peak_info)
 
         return
 
@@ -1038,9 +1031,7 @@ class MainWindow(QtGui.QMainWindow):
             group_name = '???'
 
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
-                                                                pt_list=[],
-                                                                target_ws_name=out_ws_name,
-                                                                target_frame=frame)
+                                                                pt_num_list=[], target_frame=frame)
             merge_status = 'Done'
             merged_name = ret_tup[0]
             group_name = ret_tup[1]
@@ -1069,10 +1060,7 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in xrange(num_rows):
             print '[DB] Update row %d' % (i_row)
             scan, pt = self.ui.tableWidget_peaksCalUB.get_scan_pt(i_row)
-            status, peak_info = self._myControl.get_peak_info(None, scan, pt)
-            if status is False:
-                error_message = peak_info
-                raise RuntimeError(error_message)
+            peak_info = self._myControl.get_peak_info(None, scan, pt)
             h, k, l = peak_info.get_user_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
