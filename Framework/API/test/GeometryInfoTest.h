@@ -3,63 +3,89 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/GeometryInfo.h"
 
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
+
 using namespace Mantid;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 
 class GeometryInfoTest : public CxxTest::TestSuite {
 public:
   static GeometryInfoTest *createSuite() { return new GeometryInfoTest(); }
   static void destroySuite(GeometryInfoTest *suite) { delete suite; }
 
-  GeometryInfoTest()
-      : workspace(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            5, 1, true, true)),
-        m_instrument_info(*workspace) {}
+  GeometryInfoTest() : m_workspace(nullptr) {
+    size_t numberOfHistograms = 5;
+    size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+
+    bool includeMonitors = true;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+
+    std::set<int64_t> toMask{0, 3};
+    ParameterMap &pmap = m_workspace.instrumentParameters();
+    for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
+      if (toMask.find(i) != toMask.end()) {
+        IDetector_const_sptr det = m_workspace.getDetector(i);
+        pmap.addBool(det.get(), "masked", true);
+      }
+    }
+
+    m_instrument_info = Kernel::make_unique<GeometryInfoFactory>(m_workspace);
+  }
 
   void test_constructor() {
     TS_ASSERT_THROWS_NOTHING(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(0))));
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(0))));
   }
 
   void test_isMonitor() {
-    TS_ASSERT_EQUALS(GeometryInfo(m_instrument_info,
-                                  *(workspace->getSpectrum(0))).isMonitor(),
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(0))).isMonitor(),
                      false);
-    TS_ASSERT_EQUALS(GeometryInfo(m_instrument_info,
-                                  *(workspace->getSpectrum(1))).isMonitor(),
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(1))).isMonitor(),
                      false);
-    TS_ASSERT_EQUALS(GeometryInfo(m_instrument_info,
-                                  *(workspace->getSpectrum(2))).isMonitor(),
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(2))).isMonitor(),
                      false);
-    TS_ASSERT_EQUALS(GeometryInfo(m_instrument_info,
-                                  *(workspace->getSpectrum(3))).isMonitor(),
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(3))).isMonitor(),
                      true);
-    TS_ASSERT_EQUALS(GeometryInfo(m_instrument_info,
-                                  *(workspace->getSpectrum(4))).isMonitor(),
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(4))).isMonitor(),
                      true);
   }
 
   void test_isMasked() {
-    auto ws = WorkspaceCreationHelper::maskSpectra(workspace, {0, 3});
-    auto instrument_info = GeometryInfoFactory(*ws);
-    TS_ASSERT_EQUALS(
-        GeometryInfo(instrument_info, *(ws->getSpectrum(0))).isMasked(), true);
-    TS_ASSERT_EQUALS(
-        GeometryInfo(instrument_info, *(ws->getSpectrum(1))).isMasked(), false);
-    TS_ASSERT_EQUALS(
-        GeometryInfo(instrument_info, *(ws->getSpectrum(2))).isMasked(), false);
-    TS_ASSERT_EQUALS(
-        GeometryInfo(instrument_info, *(ws->getSpectrum(3))).isMasked(), true);
-    TS_ASSERT_EQUALS(
-        GeometryInfo(instrument_info, *(ws->getSpectrum(4))).isMasked(), false);
+    auto instrument_info = GeometryInfoFactory(m_workspace);
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(0))).isMasked(),
+                     true);
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(1))).isMasked(),
+                     false);
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(2))).isMasked(),
+                     false);
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(3))).isMasked(),
+                     true);
+    TS_ASSERT_EQUALS(GeometryInfo(*m_instrument_info,
+                                  *(m_workspace.getSpectrum(4))).isMasked(),
+                     false);
   }
 
   void test_getL1() {
-    auto info = GeometryInfo(m_instrument_info, *(workspace->getSpectrum(0)));
+    auto info = GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(0)));
     TS_ASSERT_EQUALS(info.getL1(), 20.0);
   }
 
@@ -67,53 +93,53 @@ public:
     double x2 = 5.0 * 5.0;
     double y2 = 2.0 * 2.0 * 0.05 * 0.05;
     TS_ASSERT_EQUALS(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(0))).getL2(),
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(0))).getL2(),
         sqrt(x2 + 1 * 1 * y2));
     TS_ASSERT_EQUALS(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(1))).getL2(),
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(1))).getL2(),
         sqrt(x2 + 0 * 0 * y2));
     TS_ASSERT_EQUALS(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(2))).getL2(),
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(2))).getL2(),
         sqrt(x2 + 1 * 1 * y2));
     TS_ASSERT_EQUALS(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(3))).getL2(),
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(3))).getL2(),
         -9.0);
     TS_ASSERT_EQUALS(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(4))).getL2(),
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(4))).getL2(),
         -2.0);
   }
 
   void test_getTwoTheta() {
-    TS_ASSERT_DELTA(GeometryInfo(m_instrument_info,
-                                 *(workspace->getSpectrum(0))).getTwoTheta(),
+    TS_ASSERT_DELTA(GeometryInfo(*m_instrument_info,
+                                 *(m_workspace.getSpectrum(0))).getTwoTheta(),
                     0.0199973, 1e-6);
-    TS_ASSERT_DELTA(GeometryInfo(m_instrument_info,
-                                 *(workspace->getSpectrum(1))).getTwoTheta(),
+    TS_ASSERT_DELTA(GeometryInfo(*m_instrument_info,
+                                 *(m_workspace.getSpectrum(1))).getTwoTheta(),
                     0.0, 1e-6);
-    TS_ASSERT_DELTA(GeometryInfo(m_instrument_info,
-                                 *(workspace->getSpectrum(2))).getTwoTheta(),
+    TS_ASSERT_DELTA(GeometryInfo(*m_instrument_info,
+                                 *(m_workspace.getSpectrum(2))).getTwoTheta(),
                     0.0199973, 1e-6);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
   // removed at some point.
   void test_getTwoThetaLegacy() {
-    auto info = GeometryInfo(m_instrument_info, *(workspace->getSpectrum(2)));
+    auto info = GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(2)));
     TS_ASSERT_EQUALS(info.getTwoTheta(),
-                     workspace->detectorTwoTheta(info.getDetector()));
+                     m_workspace.detectorTwoTheta(info.getDetector()));
   }
 
   void test_getSignedTwoTheta() {
     TS_ASSERT_DELTA(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(0)))
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(0)))
             .getSignedTwoTheta(),
         -0.0199973, 1e-6);
     TS_ASSERT_DELTA(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(1)))
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(1)))
             .getSignedTwoTheta(),
         0.0, 1e-6);
     TS_ASSERT_DELTA(
-        GeometryInfo(m_instrument_info, *(workspace->getSpectrum(2)))
+        GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(2)))
             .getSignedTwoTheta(),
         0.0199973, 1e-6);
   }
@@ -121,14 +147,14 @@ public:
   // Legacy test via the workspace method detectorSignedTwoTheta(), which might
   // be removed at some point.
   void test_getSignedTwoThetaLegacy() {
-    auto info = GeometryInfo(m_instrument_info, *(workspace->getSpectrum(2)));
+    auto info = GeometryInfo(*m_instrument_info, *(m_workspace.getSpectrum(2)));
     TS_ASSERT_EQUALS(info.getSignedTwoTheta(),
-                     workspace->detectorSignedTwoTheta(info.getDetector()));
+                     m_workspace.detectorSignedTwoTheta(info.getDetector()));
   }
 
 private:
-  Workspace2D_sptr workspace;
-  GeometryInfoFactory m_instrument_info;
+  WorkspaceTester m_workspace;
+  std::unique_ptr<GeometryInfoFactory> m_instrument_info;
 };
 
 #endif /* MANTID_API_GEOMETRYINFOTEST_H_ */

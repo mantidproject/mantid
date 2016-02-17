@@ -7,6 +7,7 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
