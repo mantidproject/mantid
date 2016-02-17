@@ -1,6 +1,5 @@
 #include "MantidGeometry/Surfaces/General.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 

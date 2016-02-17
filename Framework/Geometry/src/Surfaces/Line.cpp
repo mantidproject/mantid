@@ -1,7 +1,6 @@
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"

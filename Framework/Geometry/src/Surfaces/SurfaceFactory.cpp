@@ -7,7 +7,6 @@
 #include <map>
 #include <list>
 #include <stack>
-#include <string>
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
@@ -17,7 +16,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"

@@ -2,7 +2,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <cfloat>
 #include <iostream>
 
 #ifdef ENABLE_OPENCASCADE

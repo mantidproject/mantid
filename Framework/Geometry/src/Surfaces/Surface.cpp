@@ -3,12 +3,10 @@
 #include <iostream>
 #include <sstream>
 #include <complex>
-#include <cmath>
 #include <list>
 #include <vector>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
@@ -16,7 +14,6 @@
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Math/PolyBase.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 
