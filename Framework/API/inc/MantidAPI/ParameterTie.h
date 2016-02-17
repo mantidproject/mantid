@@ -57,7 +57,7 @@ public:
   /// Evaluate the expression
   virtual double eval();
   /// Return the string that can be used to recreate this tie
-  virtual std::string asString(const IFunction *fun = NULL) const;
+  virtual std::string asString(const IFunction *fun = nullptr) const;
 
   /// Check if the tie has any references to certain parameters
   bool findParametersOf(const IFunction *fun) const;

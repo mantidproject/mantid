@@ -166,7 +166,7 @@ public:
   //-------------------------------------------------------------------------------
   Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -219,7 +219,7 @@ class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
   //-------------------------------------------------------------------------------
   Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -271,7 +271,7 @@ public:
   //-------------------------------------------------------------------------------
   Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = NULL;
+    Task *temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.

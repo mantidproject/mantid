@@ -61,9 +61,10 @@ public:
   ObjComponent(const IComponent *base, const ParameterMap *map);
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
-  explicit ObjComponent(const std::string &name, IComponent *parent = 0);
+  explicit ObjComponent(const std::string &name, IComponent *parent = nullptr);
   explicit ObjComponent(
-      const std::string &name, Object_const_sptr shape, IComponent *parent = 0,
+      const std::string &name, Object_const_sptr shape,
+      IComponent *parent = nullptr,
       Kernel::Material_sptr material = Kernel::Material_sptr());
   ~ObjComponent() override;
 
