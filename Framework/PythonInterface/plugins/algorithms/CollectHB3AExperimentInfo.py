@@ -136,6 +136,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._myScanPtFileTableWS.addColumn("int", "Pt")
         self._myScanPtFileTableWS.addColumn("str", "Filename")
         self._myScanPtFileTableWS.addColumn("int", "StartDetID")
+        # FIXME/TODO - Make this part work!
+        self._myScanPtFileTableWS.addColumkn('int', 'MonitorCounts')
 
         return
 

@@ -208,6 +208,8 @@ class CWSCDReductionControl(object):
         self._myUBPeakWSDict = dict()
         # Container for UB  matrix
         self._myUBMatrixDict = dict()
+        # Container for Merged:(merged_md_ws, target_frame, exp_no, scan_no, None)
+        self._mergedWSManager = dict()
 
         # Peak Info
         self._myPeakInfoDict = dict()
@@ -608,6 +610,17 @@ class CWSCDReductionControl(object):
 
         return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
 
+    def get_merged_scan_info(self, ws_name):
+        """
+        Get some information of merged scan
+        :param ws_name:
+        :return:
+        """
+        if ws_name in self._mergedWSManager is False:
+            return False, 'Unable to locate merged scan MDWorkspace %s' % ws_name
+
+        return True, self._mergedWSManager[ws_name]
+
     def get_peak_info(self, exp_number, scan_number, pt_number):
         """
         get peak information instance
@@ -697,6 +710,65 @@ class CWSCDReductionControl(object):
             hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
 
         return True, (hkl, error)
+
+    def integrate_peaks(self, exp_no, scan_no, pt_list, md_ws_name,
+                        peak_radius, bkgd_inner_radius, bkgd_outer_radius,
+                        is_cylinder):
+        """
+        Integrate peaks
+        :return: Boolean as successful or failed
+        """
+        # Check input
+        if is_cylinder is True:
+            raise RuntimeError('Cylinder peak shape has not been implemented yet!')
+
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(peak_radius, float)
+        assert isinstance(bkgd_inner_radius, float)
+        assert isinstance(bkgd_outer_radius, float)
+        assert bkgd_inner_radius >= peak_radius
+        assert bkgd_outer_radius >= bkgd_inner_radius
+
+        # Get MD WS
+        if md_ws_name is None:
+            raise RuntimeError('Implement how to locate merged MD workspace name from '
+                               'Exp %d Scan %d Pt %s' % (exp_no, scan_no, str(pt_list)))
+        # Peak workspace
+        # create an empty peak workspace
+        if AnalysisDataService.doesExist('spicematrixws') is False:
+            raise RuntimeError('Workspace spicematrixws does not exist.')
+        api.LoadInstrument(Workspace='', InstrumentName='HB3A')
+        target_peak_ws_name = 'MyPeakWS'
+        api.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
+        target_peak_ws = AnalysisDataService.retrieve(target_peak_ws_name)
+        # copy a peak
+        temp_peak_ws_name = 'peak1'
+        api.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
+                        PeakDistanceThreshold=0.5,
+                        MaxPeaks=10,
+                        DensityThresholdFactor=100,
+                        OutputWorkspace=temp_peak_ws_name)
+
+        src_peak_ws = AnalysisDataService.retrieve(temp_peak_ws_name)
+        centre_peak = src_peak_ws.getPeak(0)
+        target_peak_ws.addPeak(centre_peak)
+        target_peak_ws.removePeak(0)
+
+        # Integrate peak
+        api.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
+                             PeakRadius=1.5,
+                             BackgroundInnerRadius=1.5,
+                             BackgroundOuterRadius=3,
+                             PeaksWorkspace=target_peak_ws_name,
+                             OutputWorkspace='SinglePeak1',
+                             IntegrateIfOnEdge=False,
+                             AdaptiveQBackground=True,
+                             Cylinder=False)
+
+        return
 
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
@@ -853,7 +925,7 @@ class CWSCDReductionControl(object):
                                               DetectorTableWorkspace='MockDetTable')
 
                 out_q_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_no, scan_no, pt)
-                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp406_Scan%d' % scan_no,
+                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
                                              CreateVirtualInstrument=False,
                                              OutputWorkspace=out_q_name,
                                              Directory=self._dataDir)
@@ -887,12 +959,110 @@ class CWSCDReductionControl(object):
 
         ws_names_str = ws_names_str[:-1]
         api.MergeMD(InputWorkspaces=ws_names_str, OutputWorkspace=out_ws_name, SplitInto=max_pts)
+        out_ws = AnalysisDataService.retrieve(out_ws_name)
+        self._mergedWSManager[out_ws_name] = (out_ws, target_frame, exp_no, scan_no, None)
 
         # Group workspaces
         group_name = 'Group_Exp406_Scan%d' % scan_no
         api.GroupWorkspaces(InputWorkspaces=ws_names_to_group, OutputWorkspace=group_name)
         spice_table_name = get_spice_table_name(exp_no, scan_no)
         api.GroupWorkspaces(InputWorkspaces='%s,%s' % (group_name, spice_table_name), OutputWorkspace=group_name)
+
+        ret_tup = out_ws_name, group_name
+
+        return ret_tup
+
+    def merge_pts_in_scan_v2(self, exp_no, scan_no, target_ws_name, target_frame):
+        """
+        Merge Pts in Scan
+        All the workspaces generated as internal results will be grouped
+        :param exp_no:
+        :param scan_no:
+        :param target_ws_name:
+        :param target_frame:
+        :return: (merged workspace name, workspace group name)
+        """
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(target_frame, str)
+        assert isinstance(target_ws_name, str)
+
+        ub_matrix_1d = None
+
+        # Target frame
+        if target_frame.lower().startswith('hkl'):
+            target_frame = 'hkl'
+            ub_matrix_1d = self._myUBMatrixDict[self._expNumber].reshape(9,)
+        elif target_frame.lower().startswith('q-sample'):
+            target_frame = 'qsample'
+
+        else:
+            raise RuntimeError('Target frame %s is not supported.' % target_frame)
+
+        # Process data and save
+        status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
+        if status is False:
+            err_msg = pt_num_list
+            return False, err_msg
+        else:
+            print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
+            print '[DB] Data directory: %s' % self._dataDir
+        max_pts = 0
+        ws_names_str = ''
+        ws_names_to_group = ''
+
+        # construct a list of Pt as the input of CollectHB3AExperimentInfo
+        pt_list_str = '-1'
+        err_msg = ''
+        for pt in pt_num_list:
+            # Download file
+            try:
+                self.download_spice_xml_file(scan_no, pt, overwrite=False)
+            except RuntimeError as e:
+                err_msg += 'Unable to download xml file for pt %d due to %s\n' % (pt, str(e))
+                continue
+            pt_list_str += ',%d' % pt
+        # END-FOR (pt)
+        print '[DB] Pt list = %s' % pt_list_str
+        if pt_list_str == '-1':
+            return False, err_msg
+
+        # Collect HB3A Exp/Scan information
+        try:
+            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no, ScanList='%d' % scan_no, PtLists=pt_list_str,
+                                          DataDirectory=self._dataDir,
+                                          GenerateVirtualInstrument=False,
+                                          OutputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                          DetectorTableWorkspace='MockDetTable')
+        except RuntimeError as e:
+            err_msg += 'Unable to reduce scan %d due to %s' % (scan_no, str(e))
+            return False, err_msg
+        # END-FOR(pt)
+
+        # Convert to Q-sample
+        out_q_name = 'HB3A_Exp%d_Scan%d_MD' % (exp_no, scan_no)
+        try:
+            api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                         CreateVirtualInstrument=False,
+                                         OutputWorkspace=out_q_name,
+                                         Directory=self._dataDir)
+        except RuntimeError as e:
+            err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
+            return False, err_msg
+
+        if target_frame == 'hkl':
+            out_hkl_name = 'HKL_Scan%d' % (scan_no)
+            try:
+                api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
+                                       UBMatrix=ub_matrix_1d,
+                                       OutputWorkspace=out_hkl_name)
+
+            except RuntimeError as e:
+                err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
+                return False, err_msg
 
         ret_tup = out_ws_name, group_name
 
@@ -1176,6 +1346,38 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
+    def estimate_detector_background(self, bkgd_scan_list):
+        """ Integrate peak with background and etc...
+        Purpose:
+        
+        Requirements:
+
+        Guarantees:
+
+        :param bkgd_scan_list: 
+        :return:
+        """
+        raise RuntimeError('Incorrect note and documentation: Add me into workflow!')
+        # Check
+        assert isinstance(bkgd_scan_list, list)
+        assert len(bkgd_scan_list) > 2
+
+        # Load and sum
+        bkgd_ws = None
+        for pt_num in bkgd_scan_list:
+            self.load_spice_xml_file(exp_no=exp_number, scan_no=scan_number, pt_no=pt_num)
+            this_matrix_ws = AnalysisDataService.retrieve(get_raw_data_workspace_name(exp_number, scan_number, pt_num))
+            if bkgd_ws is None:
+                bkgd_ws = api.CloneWorkspace(InputWorkspace=this_matrix_ws, OutputWorkspace=special_name)
+            else:
+                bkgd_ws = bkgd_ws + this_matrix_ws
+        # END-FOR
+
+        # Average
+        bkgd_ws *= 1./len(bkgd_scan_list)
+
+        return bkgd_ws.name()
+
 
 def get_spice_file_name(exp_number, scan_number):
     """
@@ -1261,3 +1463,22 @@ def get_virtual_instrument_table_name(exp_number, scan_number, pt_number):
     ws_name = 'VirtualInstrument_Exp%d_Scan%d_Pt%d_Table' % (exp_number, scan_number, pt_number)
 
     return ws_name
+
+
+def convert_spice_ub_to_mantid(spice_ub):
+    """ Convert SPICE UB matrix to Mantid UB matrix
+    :param spice_ub:
+    :return: UB matrix in Mantid format
+    """
+    mantid_ub = numpy.ndarray((3, 3), 'float')
+    # row 0
+    for i in xrange(3):
+        mantid_ub[0][i] = spice_ub[0][i]
+    # row 1
+    for i in xrange(3):
+        mantid_ub[1][i] = spice_ub[2][i]
+    # row 2
+    for i in xrange(3):
+        mantid_ub[2][i] = -1.*spice_ub[1][i]
+
+    return mantid_ub

@@ -34,7 +34,7 @@ class NTableWidget(QtGui.QTableWidget):
         """
 
         :param row_value_list:
-        :return:
+        :return: 2-tuple as (boolean, message)
         """
         # Check input
         assert isinstance(row_value_list, list)
@@ -81,17 +81,28 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
-    def get_selected_rows(self):
+    def get_selected_rows(self, status=None):
         """
 
         :return: list of row numbers that are selected
         """
         rows_list = list()
         index_status = self._myColumnTypeList.index('checkbox')
+
         for i_row in xrange(self.rowCount()):
+            # check selected
             is_checked = self.get_row_value(i_row)[index_status]
-            if is_checked:
-                rows_list.append(i_row)
+            # exclude non-selected
+            if is_checked is False:
+                continue
+            # exclude non-matched
+            if status is not None:
+                j_status = self._myHeaderList.index('Status')
+                this_status = self.get_cell_value(i_row, j_status)
+                if this_status != status:
+                    continue
+
+            rows_list.append(i_row)
 
         return rows_list
 
@@ -104,21 +115,22 @@ class NTableWidget(QtGui.QTableWidget):
         """
         c_type = self._myColumnTypeList[col_index]
 
-        return_value = None
         if c_type == 'checkbox':
             # Check box
             cell_i_j = self.cellWidget(row_index, col_index)
             assert isinstance(cell_i_j, QtGui.QCheckBox)
+
             return_value = cell_i_j.isChecked()
         else:
-            # Regular cell
+            # Regular cell for int, float and string
             item_i_j = self.item(row_index, col_index)
             assert isinstance(item_i_j, QtGui.QTableWidgetItem)
-            value = str(item_i_j.text())
+
+            return_value = str(item_i_j.text())
             if c_type == 'int':
-                return_value = int(value)
+                return_value = int(return_value)
             elif c_type == 'float':
-                return_value = float(value)
+                return_value = float(return_value)
 
         return return_value
 

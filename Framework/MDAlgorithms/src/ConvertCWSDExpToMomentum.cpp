@@ -25,8 +25,9 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
-      m_isBaseName(false) {}
+    : m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
+      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.),
+      m_removeBackground(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -67,6 +68,19 @@ void ConvertCWSDExpToMomentum::init() {
                                       "file names listed in InputWorkspace are "
                                       "base name without directory.");
 
+  declareProperty("NormalizeByMonitor", true,
+                  "Flag to normalize the signal of each MDEvent by "
+                  "monitor counts");
+
+  declareProperty("ScaleFactor", EMPTY_DBL(),
+                  "If it is given, then all the signals of MDEvent "
+                  "shall be scaled up by this factor");
+
+  declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>(
+          "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Name of optional background workspace.");
+
   declareProperty(
       new FileProperty("Directory", "", FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
@@ -85,6 +99,25 @@ void ConvertCWSDExpToMomentum::exec() {
   if (!inputvalid) {
     g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
+  }
+  m_normalizeByMon = getProperty("NormalizeByMonitor");
+  if (m_normalizeByMon) {
+    m_scaleFactor = getProperty("ScaleFactor");
+    if (isEmpty(m_scaleFactor))
+      throw std::runtime_error(
+          "As NormalizeByMonitor is true, ScaleFactor must be given!");
+  }
+  // background
+  std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
+  if (bkgdwsname.size() > 0) {
+    m_removeBackground = true;
+    m_backgroundWS = getProperty("BackgroundWorkspace");
+    // check background
+    if (m_backgroundWS->getNumberHistograms() != 256 * 256)
+      throw std::invalid_argument("Input background workspace does not have "
+                                  "correct number of spectra.");
+  } else {
+    m_removeBackground = false;
   }
 
   // Create output MDEventWorkspace
@@ -253,9 +286,13 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       ++numFileNotLoaded;
       continue;
     }
+    if (m_removeBackground) {
+      removeBackground(spicews);
+    }
 
     // Convert from MatrixWorkspace to MDEvents and add events to
-    int runid = static_cast<int>(ir) + 1;
+    // int runid = static_cast<int>(ir) + 1;
+    int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
     if (!usevirtual)
       start_detid = 0;
     convertSpiceMatrixToMomentumMDEvents(spicews, usevirtual, start_detid,
@@ -343,6 +380,9 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);
+  double monitor_counts(1);
+  if (m_normalizeByMon)
+    monitor_counts = dataws->run().getPropertyAsSingleValue("Monitor");
 
   g_log.information() << "Before insert new event, output workspace has "
                       << m_outputWS->getNEvents() << "Events.\n";
@@ -375,9 +415,11 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     // Get detector positions and signal
     double signal = dataws->readY(iws)[0];
     // Skip event with 0 signal
-    if (signal < 0.001)
+    if (fabs(signal) < 0.001)
       continue;
-    double error = dataws->readE(iws)[0];
+    if (m_normalizeByMon)
+      signal *= monitor_counts * m_scaleFactor;
+    double error = sqrt(fabs(signal));
     Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
     std::vector<Mantid::coord_t> q_sample(3);
 
@@ -404,8 +446,9 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     ++nummdevents;
   }
 
-  g_log.information() << "Imported Matrixworkspace: Max. Signal = " << maxsignal
-                      << ", Add " << nummdevents << " MDEvents "
+  g_log.information() << "Imported Matrixworkspace of run number " << runnumber
+                      << ": Max. Signal = " << maxsignal << ", Add "
+                      << nummdevents << " MDEvents "
                       << "\n";
 
   // Add experiment info including instrument, goniometer and run number
@@ -465,6 +508,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
             << "\n";
   }
   g_log.warning("Finished parsing Data Table");
+
+  // FIXME/TODO: Add the code to read monitor counts from input table workspace
 
   // Set up parameters for creating virtual instrument
   g_log.warning() << "About to deal with virtual instrument"
@@ -623,6 +668,27 @@ void ConvertCWSDExpToMomentum::updateQRange(
       m_minQVec[i] = vec_q[i];
     else if (vec_q[i] > m_maxQVec[i])
       m_maxQVec[i] = vec_q[i];
+  }
+
+  return;
+}
+
+/** Remove background per pixel
+ * @brief ConvertCWSDExpToMomentum::removeBackground
+ * @param dataws
+ */
+void ConvertCWSDExpToMomentum::removeBackground(
+    API::MatrixWorkspace_sptr dataws) {
+  if (dataws->getNumberHistograms() != m_backgroundWS->getNumberHistograms())
+    throw std::runtime_error("Impossible to have this situation");
+
+  size_t numhist = dataws->getNumberHistograms();
+  for (size_t i = 0; i < numhist; ++i) {
+    double bkgd_y = m_backgroundWS->readY(i)[0];
+    if (fabs(bkgd_y) > 1.E-2) {
+      dataws->dataY(i)[0] -= bkgd_y;
+      dataws->dataE(i)[0] = std::sqrt(dataws->readY(i)[0]);
+    }
   }
 
   return;

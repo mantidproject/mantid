@@ -91,7 +91,7 @@ void ConvertCWSDMDtoHKL::exec() {
   getUBMatrix();
 
   // Test indexing.  Will be delete soon
-  if (true) {
+  if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
     qsample.setX(1.36639);
     qsample.setY(-2.52888);
@@ -133,6 +133,13 @@ void ConvertCWSDMDtoHKL::exec() {
   // Create output workspace
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
+  // Experiment info
+  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
+  expinfo->mutableRun().setGoniometer(
+      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().addProperty("run_number", 1);
+  m_outputWS->addExperimentInfo(expinfo);
 
   setProperty("OutputWorkspace", m_outputWS);
 }
