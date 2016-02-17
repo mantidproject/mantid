@@ -983,6 +983,8 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
         #remove workspaces from mantid
         for sample in self.samples:
             DeleteWorkspace(sample)
+        DeleteWorkspace(params)
+        DeleteWorkspace(fit_group)
         DeleteWorkspace(self.resolution)
 
     def _validate_properties(self):
