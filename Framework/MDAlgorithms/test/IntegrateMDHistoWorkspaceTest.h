@@ -106,7 +106,7 @@ public:
     double step = 0;
     // Test equal to
     double max = min;
-    std::vector<double> p1BinVec = {min, max};
+    std::vector<double> p1BinVec = {min, step, max};
     alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);

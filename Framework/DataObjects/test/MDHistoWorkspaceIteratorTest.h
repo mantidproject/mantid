@@ -381,9 +381,8 @@ public:
     TS_ASSERT(!iterator.isWithinBounds(end));
   }
 
-  void do_test_neighbours_1d(
-      boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-          findNeighbourMemberFunction) {
+  void do_test_neighbours_1d(boost::function<std::vector<size_t>(
+      MDHistoWorkspaceIterator *)> findNeighbourMemberFunction) {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
