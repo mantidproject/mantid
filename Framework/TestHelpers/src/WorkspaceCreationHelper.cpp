@@ -13,6 +13,7 @@
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -344,75 +345,8 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
-  auto testInst = boost::make_shared<Instrument>(instrumentName);
-  testInst->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
-  space->setInstrument(testInst);
-
-  const double pixelRadius(0.05);
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-      pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-
-  const double detXPos(5.0);
-  int ndets = nhist;
-  if (includeMonitors)
-    ndets -= 2;
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream lexer;
-    lexer << "pixel-" << i << ")";
-    Detector *physicalPixel =
-        new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape,
-                     testInst.get());
-    int ycount(i);
-    if (startYNegative)
-      ycount -= 1;
-    const double ypos = ycount * 2.0 * pixelRadius;
-    physicalPixel->setPos(detXPos, ypos, 0.0);
-    testInst->add(physicalPixel);
-    testInst->markAsDetector(physicalPixel);
-    space->getSpectrum(i)->addDetectorID(physicalPixel->getID());
-  }
-
-  // Monitors last
-  if (includeMonitors) // These occupy the last 2 spectra
-  {
-    Detector *monitor1 =
-        new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(),
-                     testInst.get());
-    monitor1->setPos(-9.0, 0.0, 0.0);
-    testInst->add(monitor1);
-    testInst->markAsMonitor(monitor1);
-
-    Detector *monitor2 =
-        new Detector("mon2", space->getAxis(1)->spectraNo(ndets) + 1,
-                     Object_sptr(), testInst.get());
-    monitor2->setPos(-2.0, 0.0, 0.0);
-    testInst->add(monitor2);
-    testInst->markAsMonitor(monitor2);
-  }
-
-  // Define a source and sample position
-  // Define a source component
-  ObjComponent *source = new ObjComponent(
-      "moderator",
-      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-      testInst.get());
-  source->setPos(V3D(-20, 0.0, 0.0));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  ObjComponent *sample = new ObjComponent(
-      "samplePos",
-      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-      testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
-  // chopper position
-  Component *chop_pos =
-      new Component("chopper-position", Kernel::V3D(-10, 0, 0), testInst.get());
-  testInst->add(chop_pos);
+  InstrumentCreationHelper::addFullInstrumentToWorkspace(
+      *space, includeMonitors, startYNegative, instrumentName);
 
   return space;
 }
