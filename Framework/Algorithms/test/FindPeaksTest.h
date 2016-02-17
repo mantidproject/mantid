@@ -222,7 +222,7 @@ public:
     */
   MatrixWorkspace_sptr getSinglePeakData() {
 
-		const size_t size = 83;
+    const size_t size = 83;
 
     std::array<double, size> vecX = {
         1.210120, 1.210600, 1.211080, 1.211570, 1.212050, 1.212540, 1.213020,

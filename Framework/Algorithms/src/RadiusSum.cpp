@@ -259,8 +259,7 @@ void RadiusSum::inputValidationSanityCheck() {
   g_log.information() << "Boundary limits are: " << s.str() << std::endl;
 
   g_log.debug() << "Check: centre is defined inside the region defined by the "
-                   "image or instrument"
-                << std::endl;
+                   "image or instrument" << std::endl;
   centerIsInsideLimits(getProperty("centre"), boundary_limits);
 
   g_log.debug() << "Recalculate MaxRadius if default value is given"
@@ -534,8 +533,7 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size)
-                    << std::endl;
+                                        min_bin_size) << std::endl;
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
