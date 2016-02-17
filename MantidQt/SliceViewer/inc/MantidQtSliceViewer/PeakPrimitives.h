@@ -36,7 +36,7 @@ struct PeakPrimitivesCross : public PeakPrimitives {
 
 struct PeakPrimitivesSphere : public PeakPrimitives {
     PeakPrimitivesSphere(Mantid::Kernel::V3D peakOrigin,
-                         double peakOpacityAtDistance, double peakLineWidthd,
+                         double peakOpacityAtDistance, int peakLineWidth,
                          double peakInnerRadiusX, double peakInnerRadiusY,
                          double backgroundOuterRadiusX,
                          double backgroundOuterRadiusY,

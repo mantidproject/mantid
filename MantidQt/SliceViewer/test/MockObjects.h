@@ -46,8 +46,10 @@ public:
   MOCK_METHOD0(changeShownDim, bool());
   MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string &));
   MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
-  MOCK_METHOD1(setForegroundColor, void(const QColor));
-  MOCK_METHOD1(setBackgroundColor, void(const QColor));
+  MOCK_METHOD1(setForegroundColor, void(const PeakViewColor));
+  MOCK_METHOD1(setBackgroundColor, void(const PeakViewColor));
+  MOCK_CONST_METHOD0(getBackgroundPeakViewColor, PeakViewColor());
+  MOCK_CONST_METHOD0(getForegroundPeakViewColor, PeakViewColor());
   MOCK_CONST_METHOD0(getTransformName, std::string());
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_METHOD1(setShown, void(const bool));
@@ -120,8 +122,6 @@ public:
   MOCK_METHOD0(hideView, void());
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
-  MOCK_METHOD1(changeForegroundColour, void(const QColor));
-  MOCK_METHOD1(changeBackgroundColour, void(const QColor));
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
   MOCK_METHOD1(changeOccupancyInView, void(const double));
@@ -131,10 +131,8 @@ public:
   MOCK_CONST_METHOD0(positionOnly, bool());
   MOCK_CONST_METHOD0(getRadius, double());
   MOCK_CONST_METHOD0(isBackgroundShown, bool());
-  MOCK_CONST_METHOD0(getForegroundColour, QColor());
-  MOCK_CONST_METHOD0(getBackgroundColour, QColor());
-  MOCK_METHOD1(changeForegroundColour, void(const PeakViewColor));
-  MOCK_METHOD1(changeBackgroundColour, void(const PeakViewColor));
+  MOCK_METHOD1(changeForegroundColour, void(PeakViewColor));
+  MOCK_METHOD1(changeBackgroundColour, void(PeakViewColor));
   MOCK_CONST_METHOD0(getBackgroundPeakViewColor, PeakViewColor());
   MOCK_CONST_METHOD0(getForegroundPeakViewColor, PeakViewColor());
   MOCK_METHOD0(peakDeletionMode, void());

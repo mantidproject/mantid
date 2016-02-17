@@ -177,7 +177,7 @@ void PeaksViewer::addPeaksModeRequest(const PeaksWorkspaceWidget * const originW
  * @param newColor : New color to apply.
  */
 void PeaksViewer::onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
-  m_presenter->setForegroundColour(peaksWS, newColor);
+  m_presenter->setForegroundColor(peaksWS, newColor);
 }
 
 /**
@@ -186,7 +186,7 @@ void PeaksViewer::onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr pea
  * @param newColor : New color to apply to the background.
  */
 void PeaksViewer::onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
-  m_presenter->setBackgroundColour(peaksWS, newColor);
+  m_presenter->setBackgroundColor(peaksWS, newColor);
 }
 
 /**

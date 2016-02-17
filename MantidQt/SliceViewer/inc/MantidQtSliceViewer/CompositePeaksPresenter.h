@@ -46,6 +46,18 @@ public:
   virtual void setBackgroundColor(const PeakViewColor) {
     /*Do nothing*/
   }
+  /// Get the foreground colour. This should never be used on the composite
+  PeakViewColor getForegroundPeakViewColor( ) const {
+    std::runtime_error("Error: Trying to access getForegroundPeaViewColor on a"
+                       "composite presenter");
+    return PeakViewColor();
+  }
+  /// Get the background colour corresponding to the workspace
+  PeakViewColor getBackgroundPeakViewColor() const {
+    std::runtime_error("Error: Trying to access getBackgroundPeaViewColor on a"
+                       "composite presenter");
+    return PeakViewColor();
+  }
   void showBackgroundRadius(const bool) { /*Do nothing*/
   }
   void setShown(const bool) { /*Do nothing*/
@@ -92,11 +104,11 @@ public:
   /// Enter peak edit mode.
   void peakEditMode(EditMode mode);
   void
-  setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+  setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const PeakViewColor);
   /// Change the background representation for the peaks of this workspace
   void
-  setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+  setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const PeakViewColor);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(

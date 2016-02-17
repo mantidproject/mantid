@@ -208,11 +208,13 @@ namespace MantidQt
 
     PeakViewColor PeakOverlayMultiCross::getBackgroundPeakViewColor() const {
       // DO NOTHING
+      return PeakViewColor();
     }
 
 
     PeakViewColor PeakOverlayMultiCross::getForegroundPeakViewColor() const {
       return m_foregroundPeakViewColor;
+      return PeakViewColor();
     }
 
 

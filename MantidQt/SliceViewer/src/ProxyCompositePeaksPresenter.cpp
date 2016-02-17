@@ -36,9 +36,9 @@ Set the foreground colour of the peaks.
 @ workspace containing the peaks to re-colour
 @ color to use for re-colouring
 */
-void ProxyCompositePeaksPresenter::setForegroundColour(
+void ProxyCompositePeaksPresenter::setForegroundColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
-  m_compositePresenter->setForegroundColour(ws, color);
+  m_compositePresenter->setForegroundColor(ws, color);
 }
 
 
@@ -47,9 +47,9 @@ Set the background colour of the peaks.
 @ workspace containing the peaks to re-colour
 @ colour to use for re-colouring
 */
-void ProxyCompositePeaksPresenter::setBackgroundColour(
+void ProxyCompositePeaksPresenter::setBackgroundColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
-  m_compositePresenter->setBackgroundColour(ws, color);
+  m_compositePresenter->setBackgroundColor(ws, color);
 }
 
 PeakViewColor ProxyCompositePeaksPresenter::getBackgroundPeakViewColor(

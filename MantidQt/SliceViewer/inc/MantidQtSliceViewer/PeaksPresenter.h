@@ -75,18 +75,8 @@ public:
     virtual double getPeakSizeIntoProjection() const = 0;
     virtual bool getShowBackground() const = 0;
     virtual void registerOwningPresenter(UpdateableOnDemand *owner) = 0;
-    virtual PeakViewColor getBackgroundPeakViewColor() const
-    {
-        throw std::runtime_error(
-            "PeaksPresenter getBackgroundPeakViewColour() is not implemented");
-        return PeakViewColor();
-    }
-    virtual PeakViewColor getForegroundPeakViewColor() const
-    {
-        throw std::runtime_error(
-            "PeaksPresenter getForegroundPeakViewColour() is not implemented");
-        return PeakViewColor();
-    }
+    virtual PeakViewColor getBackgroundPeakViewColor() const = 0;
+    virtual PeakViewColor getForegroundPeakViewColor() const = 0;
     virtual void zoomToPeak(const int peakIndex) = 0;
     virtual bool isHidden() const = 0;
     virtual bool contentsDifferent(PeaksPresenter const *other) const = 0;

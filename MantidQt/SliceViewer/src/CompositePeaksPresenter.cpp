@@ -206,7 +206,7 @@ Set the foreground colour of the peaks.
 @ workspace containing the peaks to re-colour
 @ colour to use for re-colouring
 */
-void CompositePeaksPresenter::setForegroundColour(
+void CompositePeaksPresenter::setForegroundColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
     const PeakViewColor color) {
   SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
@@ -224,7 +224,7 @@ Set the background colour of the peaks.
 @ workspace containing the peaks to re-colour
 @ colour to use for re-colouring
 */
-void CompositePeaksPresenter::setBackgroundColour(
+void CompositePeaksPresenter::setBackgroundColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
     const PeakViewColor color) {
   SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
