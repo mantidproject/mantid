@@ -14,7 +14,7 @@ double ZERO_EPS = 1e-12;
 void throwDomainError(const std::string &msg, const double value);
 /// Forward declaration of helper to calculate distribution
 double yOver1MinusExpY(const double y);
-}//namespace
+} // namespace
 
 /**
  * Calculate the expected number of particles in an energy state at a given
@@ -30,16 +30,16 @@ double BoseEinsteinDistribution::n(const double energy,
                                    const double temperature) {
   const double kbT = PhysicalConstants::BoltzmannConstant * temperature;
   if (std::abs(temperature) < ZERO_EPS) {
-	  throwDomainError("BoseEinsteinDistribution::n - Temperature very small, "
-		  "function not well behaved",
-		  temperature);
+    throwDomainError("BoseEinsteinDistribution::n - Temperature very small, "
+                     "function not well behaved",
+                     temperature);
   }
 
   const double beta = energy / kbT;
   if (std::abs(beta) < ZERO_EPS) {
-	  throwDomainError("BoseEinsteinDistribution::n - Exponent very small, "
-		  "function not well-behaved",
-		  beta);
+    throwDomainError("BoseEinsteinDistribution::n - Exponent very small, "
+                     "function not well-behaved",
+                     beta);
   }
 
   return 1.0 / std::expm1(beta);

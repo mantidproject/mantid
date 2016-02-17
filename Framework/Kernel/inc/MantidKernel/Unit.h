@@ -92,7 +92,8 @@ public:
    *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
+   * (in
    * meV)
    *  @param _delta ::    Not currently used
    */
@@ -126,7 +127,8 @@ public:
    *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
+   * (in
    * meV)
    *  @param _delta ::    Not currently used
    */
