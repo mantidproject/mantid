@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <functional>
 #include <cassert>
-#include <numeric>
+#include <iterator> //cbegin,cend
 
 namespace {
 
@@ -116,9 +116,9 @@ splitIgnoringWhitespaceEmptyTokens(const std::string &str,
  * @throw Throws std::runtime_error if options > 7.
  * @return a const reference to the index'th token.
  */
-Mantid::Kernel::StringTokenizer::StringTokenizer(
-    const std::string &str, const std::string &separators,
-    std::initializer_list<Options> options) {
+Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
+                                                 const std::string &separators,
+                                                 unsigned options) {
 
   // if str is empty, then there is no work to do. exit early.
   if (str.empty())
@@ -129,14 +129,7 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(
   // cases 0-3 will check for a separator in the last place and insert an empty
   // token at the end.
   // cases 4-7 will not check and ignore a potential empty token at the end.
-
-  unsigned enumvalue = std::accumulate(options.begin(), options.end(), 0,
-                                       [](const unsigned &a, const Options &b) {
-                                         return static_cast<unsigned>(a) |
-                                                static_cast<signed>(b);
-                                       });
-
-  switch (enumvalue) {
+  switch (options) {
   case 0:
     m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
     emptyFinalToken(str, separators, m_tokens);
@@ -164,4 +157,10 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(
     m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
     break;
   }
+
+  // check options variable is in the range 0-7.
+  if (options > 7)
+    throw std::runtime_error(
+        "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
+        std::to_string(options));
 }

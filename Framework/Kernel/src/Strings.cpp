@@ -436,9 +436,8 @@ std::map<std::string, std::string>
 splitToKeyValues(const std::string &input, const std::string &keyValSep,
                  const std::string &listSep) {
   std::map<std::string, std::string> keyValues;
-  auto splitOptions = {
-      Mantid::Kernel::StringTokenizer::Options::TOK_IGNORE_EMPTY,
-      Mantid::Kernel::StringTokenizer::Options::TOK_TRIM};
+  const int splitOptions = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY +
+                           Mantid::Kernel::StringTokenizer::TOK_TRIM;
   Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
   for (const auto &iter : listSplitter) {
     Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep,
@@ -1056,15 +1055,14 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     // because in that case
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
-    Tokenizer ranges(str, rangeSep, {Tokenizer::Options::TOK_TRIM});
+    Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
     std::string new_str =
         join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
-    elements =
-        Tokenizer(new_str, elemSep, {Tokenizer::Options::TOK_IGNORE_EMPTY,
-                                     Tokenizer::Options::TOK_TRIM});
+    elements = Tokenizer(new_str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
-    elements = Tokenizer(str, elemSep, {Tokenizer::Options::TOK_IGNORE_EMPTY,
-                                        Tokenizer::Options::TOK_TRIM});
+    elements = Tokenizer(str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   }
 
   std::vector<int> result;
@@ -1074,8 +1072,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 
   for (const auto &elementString : elements) {
     // See above for the reason space is added
-    Tokenizer rangeElements(elementString, rangeSep,
-                            {Tokenizer::Options::TOK_TRIM});
+    Tokenizer rangeElements(elementString, rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 

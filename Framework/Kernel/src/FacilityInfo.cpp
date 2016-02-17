@@ -73,8 +73,8 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
     throw std::runtime_error("No file extensions defined");
   }
   typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer exts(extsStr, ",", {tokenizer::Options::TOK_IGNORE_EMPTY,
-                                tokenizer::Options::TOK_TRIM});
+  tokenizer exts(extsStr, ",",
+                 tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &ext : exts) {
     addExtension(ext);
   }
