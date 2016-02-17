@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 

@@ -151,25 +151,25 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 0.92237)
-            self.assertEquals(round(result.dataY(1)[0], 4), 6.9651)
-            self.assertEquals(round(result.dataY(2)[0], 7), 0.0620143)
-            self.assertEquals(round(result.dataY(3)[0], 7), 0.1169424)
+            self.assertEquals(round(result.dataY(0)[0], 5), 6.06105)
+            self.assertEquals(round(result.dataY(1)[0], 4), 68.5744)
+            self.assertEquals(round(result.dataY(2)[0], 7), 0.0589315)
+            self.assertEquals(round(result.dataY(3)[0], 7), 0.0812087)
 
             # Test values of probability
             prob_y = probability.dataY(0)
-            self.assertEquals(round(probability.dataY(0)[0], 1), -65487.5)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -375.124)
-            self.assertEquals(round(probability.dataY(2)[0], 6), 0.000000)
+            self.assertEquals(round(probability.dataY(0)[0], 1), -74176.1)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -404.884)
+            self.assertEquals(round(probability.dataY(2)[0], 6), -0.222565)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01887)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00653)
-            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01605)
-            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00935)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01903)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00638)
+            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01614)
+            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00926)
 
 
         def _validate_QLr_value_with_resnorm(self, result, probability, group):
@@ -184,25 +184,25 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 3), 23.326)
-            self.assertEquals(round(result.dataY(1)[0], 3), 181.527)
-            self.assertEquals(round(result.dataY(2)[0], 6), 0.061821)
-            self.assertEquals(round(result.dataY(3)[0], 6), 0.113868)
+            self.assertEquals(round(result.dataY(0)[0], 3), 153.471)
+            self.assertEquals(round(result.dataY(1)[0], 2), 1785.06)
+            self.assertEquals(round(result.dataY(2)[0], 7), 0.0588549)
+            self.assertEquals(round(result.dataY(3)[0], 7), 0.0791689)
 
             # Test values of probability
             prob_y = probability.dataY(0)
-            self.assertEquals(round(probability.dataY(0)[0], 1), -66251.4)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -378.749)
-            self.assertEquals(round(probability.dataY(2)[0], 6), 0.000000)
+            self.assertEquals(round(probability.dataY(0)[0], 1), -74887.1)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -407.593)
+            self.assertEquals(round(probability.dataY(2)[0], 6), -0.480316)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
-            self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.65205)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.48074)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.17131)
-            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.40834)
-            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.24371)
+            self.assertEquals(round(sub_ws.dataY(0)[0], 6), 0.652046)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.48846)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 6), -0.163586)
+            self.assertEquals(round(sub_ws.dataY(3)[0], 6), 0.414406)
+            self.assertEquals(round(sub_ws.dataY(4)[0], 6), -0.23764)
 
         def _validate_QSe_shape(self, result, group):
             """
@@ -242,16 +242,16 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 8.28044)
-            self.assertEquals(round(result.dataY(1)[0], 7), 0.0335993)
-            self.assertEquals(round(result.dataY(2)[0], 5), 0.77844)
+            self.assertEquals(round(result.dataY(0)[0], 5), 81.12644)
+            self.assertEquals(round(result.dataY(1)[0], 7), 0.0319747)
+            self.assertEquals(round(result.dataY(2)[0], 5), 0.77168)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01656)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00884)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01632)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00908)
 
     if __name__=="__main__":
         unittest.main()

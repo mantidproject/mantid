@@ -56,8 +56,8 @@ public:
 	* @param parent :: parent widget (only affects placement of the widget)
 	*/
 	ContourLinesEditor(const QLocale& locale = QLocale::system(), int precision = 6, QWidget* parent = 0);
-	~ContourLinesEditor();
-	//! Use this function to initialize the values.
+        ~ContourLinesEditor() override;
+        //! Use this function to initialize the values.
 	void setSpectrogram(Spectrogram *sp);
 	//! Updates levels in the target spectrogram and replots it.
 	void updateContourLevels();
@@ -74,7 +74,7 @@ protected slots:
 	void spinBoxActivated(DoubleSpinBox *);
 	void updatePen();
 
-	bool eventFilter(QObject *object, QEvent *e);
+        bool eventFilter(QObject *object, QEvent *e) override;
 
 private:
 	void updatePenColumn();

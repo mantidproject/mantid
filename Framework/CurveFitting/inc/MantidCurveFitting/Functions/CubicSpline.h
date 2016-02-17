@@ -50,19 +50,21 @@ public:
   /// Constructor
   CubicSpline();
   /// Destructor
-  ~CubicSpline();
+  ~CubicSpline() override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "CubicSpline"; }
-  virtual const std::string category() const { return "Background"; }
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  std::string name() const override { return "CubicSpline"; }
+  const std::string category() const override { return "Background"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   void derivative1D(double *out, const double *xValues, size_t nData,
-                    const size_t order) const;
-  void setParameter(size_t i, const double &value, bool explicitlySet = true);
+                    const size_t order) const override;
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
   using ParamFunction::setParameter;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
   /// Set the value of a data point location to x
   void setXAttribute(const size_t index, double x);

@@ -2,12 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBins.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
@@ -50,9 +56,7 @@ void RemoveBins::init() {
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("None");
-  propOptions.push_back("Linear");
+  std::vector<std::string> propOptions{"None", "Linear"};
   declareProperty("Interpolation", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "

@@ -5,7 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/IComponent.h"
+
 namespace Mantid {
+
+// forward declarations from other Mantid modules
+namespace Kernel {
+class Unit;
+}
+
 namespace Algorithms {
 /** Performs removal of constant (and possibly non-constant after simple
 modification) background calculated in TOF units
@@ -44,7 +53,7 @@ public:
 
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
-                  Kernel::Logger *pLog = NULL, int nTreads = 1,
+                  Kernel::Logger *pLog = nullptr, int nTreads = 1,
                   bool inPlace = true, bool nullifyNegative = false);
   void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
                         MantidVec &e_data, int tread_num = 0) const;
@@ -97,26 +106,26 @@ public:
   /// Default constructor
   RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
   /// Destructor
-  virtual ~RemoveBackground(){};
+  ~RemoveBackground() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RemoveBackground"; }
+  const std::string name() const override { return "RemoveBackground"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Removes background (constant for now) calculated in TOF units "
            "from a matrix workspace, expressed in units, different from TOF";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\BackgroundCorrections";
   }
 
 protected:
   // Overridden Algorithm methods
-  void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
 
 private:
   // class responsible for background removal

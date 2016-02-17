@@ -36,27 +36,27 @@ namespace DataHandling {
 class DLLExport SaveDetectorsGrouping : public API::Algorithm {
 public:
   SaveDetectorsGrouping();
-  virtual ~SaveDetectorsGrouping();
+  ~SaveDetectorsGrouping() override;
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveDetectorsGrouping"; };
+  const std::string name() const override { return "SaveDetectorsGrouping"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a GroupingWorkspace to an XML file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Grouping;Transforms\\Grouping";
   }
 
 private:
   /// Define input parameters
-  void init();
+  void init() override;
 
   /// Main body to execute algorithm
-  void exec();
+  void exec() override;
 
   /// Create map for GroupID -- vector<detector ID>
   void

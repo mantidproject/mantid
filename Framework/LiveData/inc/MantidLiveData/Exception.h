@@ -46,7 +46,7 @@ public:
   explicit NotYet(const std::string &message) : std::runtime_error(message) {}
 
   /// Destructor
-  ~NotYet() throw() {}
+  ~NotYet() throw() override {}
 };
 
 } // namespace Exception

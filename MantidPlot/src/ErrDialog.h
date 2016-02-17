@@ -75,7 +75,7 @@ private:
 
 protected slots:
   //! Set all string in the current language
-  virtual void languageChange();
+  void languageChange() override;
 
 public slots:
   //! Add a plot definition

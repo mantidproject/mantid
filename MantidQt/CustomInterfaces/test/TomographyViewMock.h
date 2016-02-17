@@ -102,10 +102,10 @@ public:
   //    localStatus) = 0;
   MOCK_METHOD2(
       updateJobsInfoDisplay,
-      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-               status,
-           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-               localStatus));
+      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+               &status,
+           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+               &localStatus));
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
   // reconToolsSettings() const {}

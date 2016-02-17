@@ -33,16 +33,16 @@ namespace Crystal {
 class DLLExport IntegratePeaksHybrid : public API::Algorithm {
 public:
   IntegratePeaksHybrid();
-  virtual ~IntegratePeaksHybrid();
+  ~IntegratePeaksHybrid() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  virtual const std::string summary() const;
-  void init();
-  void exec();
+  const std::string summary() const override;
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

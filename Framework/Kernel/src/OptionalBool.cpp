@@ -51,11 +51,9 @@ const std::string OptionalBool::StrFalse = "False";
 const std::string OptionalBool::StrTrue = "True";
 
 std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
-  std::map<std::string, Value> map;
-  map.insert(std::make_pair(StrUnset, OptionalBool::Unset));
-  map.insert(std::make_pair(StrFalse, OptionalBool::False));
-  map.insert(std::make_pair(StrTrue, OptionalBool::True));
-  return map;
+  return {{StrUnset, OptionalBool::Unset},
+          {StrFalse, OptionalBool::False},
+          {StrTrue, OptionalBool::True}};
 }
 
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {

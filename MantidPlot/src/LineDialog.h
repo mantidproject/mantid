@@ -61,8 +61,8 @@ public slots:
 	void setDefaultValues();
 	void displayCoordinates(int unit);
 	void setLineStyle(Qt::PenStyle style);
-	void accept();
-	void apply();
+        void accept() override;
+        void apply();
 
 private:
 	ArrowMarker *lm;

@@ -1108,7 +1108,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
         max_indexed = num_indexed;
       }
       if (num_indexed >= max_indexed) {
-        selected_dirs.push_back(V3D(dir_temp));
+        selected_dirs.emplace_back(dir_temp);
       }
     }
   }
@@ -2138,13 +2138,13 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
     hkl = UB_inverse * q_vector / (2.0 * M_PI);
     if (ValidIndex(hkl, tolerance)) {
       count++;
-      miller_indices.push_back(V3D(hkl));
+      miller_indices.emplace_back(hkl);
       h_error = fabs(round(hkl[0]) - hkl[0]);
       k_error = fabs(round(hkl[1]) - hkl[1]);
       l_error = fabs(round(hkl[2]) - hkl[2]);
       ave_error += h_error + k_error + l_error;
     } else
-      miller_indices.push_back(V3D(0, 0, 0));
+      miller_indices.emplace_back(0, 0, 0);
   }
 
   if (count > 0) {

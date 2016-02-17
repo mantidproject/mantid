@@ -16,6 +16,7 @@
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
+using Mantid::Kernel::IntMatrix;
 
 class MatrixTest : public CxxTest::TestSuite {
 
@@ -38,23 +39,23 @@ public:
   Test that a matrix can be inverted
   */
   void testInvert() {
+    // 3x3
     Matrix<double> A(3, 3);
-
-    A[0][0] = 1.0;
-    A[1][0] = 3.0;
-    A[0][1] = 4.0;
-    A[0][2] = 6.0;
-    A[2][0] = 5.0;
-    A[1][1] = 3.0;
-    A[2][1] = 1.0;
-    A[1][2] = 6.0;
-    A[2][2] = -7.0;
-
+    makeMatrix(A);
     TS_ASSERT_DELTA(A.Invert(), 105.0, 1e-5);
+
+    // 1x1
     Matrix<double> B(1, 1);
     B[0][0] = 2.;
     TS_ASSERT_DELTA(B.Invert(), 2, 1e-5);
     TS_ASSERT_DELTA(B[0][0], 0.5, 1e-5);
+
+    // 2x2
+    std::vector<double> data{1, 2, 3, 4}, expected{-2, 1, 1.5, -0.5};
+    DblMatrix C(data);
+    TS_ASSERT_DELTA(C.Invert(), -2, 1e-5);
+    DblMatrix expectedInverse(expected);
+    TS_ASSERT(C == expectedInverse);
   }
 
   void testIdent() {
@@ -159,6 +160,16 @@ public:
     Eval *= Diag;
     Eval *= EvalT;
     TS_ASSERT(Eval == A);
+  }
+
+  /// Can't diagonalise a non-square or non-symmetric matrix
+  void testDiagonaliseThrows() {
+    DblMatrix notSquare(2, 3);
+    const std::vector<double> data{1, 2, 3, 4};
+    DblMatrix notSymm(data);
+    DblMatrix eigenVectors, eigenValues;
+    TS_ASSERT_EQUALS(0, notSquare.Diagonalise(eigenVectors, eigenValues));
+    TS_ASSERT_EQUALS(0, notSymm.Diagonalise(eigenVectors, eigenValues));
   }
 
   void testFromVectorThrows() {
@@ -391,37 +402,428 @@ public:
     }
   }
 
+  /// Tests both V3D and std::vector
   void testMultiplicationWithVector() {
     DblMatrix M = boost::lexical_cast<DblMatrix>(
         "Matrix(3,3)-0.23,0.55,5.22,2.96,4.2,0.1,-1.453,3.112,-2.34");
 
     V3D v(2.3, 4.5, -0.45);
+    std::vector<double> stdvec(v);
 
     V3D nv = M * v;
+    std::vector<double> stdNewVec = M * stdvec;
 
     // Results from octave.
     TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
     TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
     TS_ASSERT_DELTA(nv.Z(), 11.715100000000003, 1e-15);
+    TS_ASSERT_DELTA(stdNewVec[0], -0.403000000000000, 1e-15);
+    TS_ASSERT_DELTA(stdNewVec[1], 25.663000000000000, 1e-15);
+    TS_ASSERT_DELTA(stdNewVec[2], 11.715100000000003, 1e-15);
 
     DblMatrix M4(4, 4, true);
     TS_ASSERT_THROWS(M4.operator*(v),
+                     Mantid::Kernel::Exception::MisMatch<size_t>);
+    TS_ASSERT_THROWS(M4.operator*(stdvec),
                      Mantid::Kernel::Exception::MisMatch<size_t>);
 
     DblMatrix M23 = boost::lexical_cast<DblMatrix>(
         "Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
     TS_ASSERT_THROWS_NOTHING(M23.operator*(v));
+    TS_ASSERT_THROWS_NOTHING(M23.operator*(stdvec));
 
     nv = M23 * v;
+    stdNewVec = M23 * stdvec;
 
     TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
     TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
     TS_ASSERT_EQUALS(nv.Z(), 0);
+    TS_ASSERT_DELTA(stdNewVec[0], -0.403000000000000, 1e-15);
+    TS_ASSERT_DELTA(stdNewVec[1], 25.663000000000000, 1e-15);
+    TS_ASSERT_EQUALS(stdNewVec.size(), 2);
 
     DblMatrix M43 = boost::lexical_cast<DblMatrix>(
         "Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
     TS_ASSERT_THROWS(M43.operator*(v),
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     Mantid::Kernel::Exception::MisMatch<size_t>); // V3D only
+  }
+
+  /// Test that the constructor taking preset sizes returns a zero matrix
+  void testConstructorPresetSizes() {
+    constexpr int nRows(2), nCols(3);
+    IntMatrix mat(nRows, nCols);
+    for (int iRow = 0; iRow < nRows; iRow++) {
+      for (int iCol = 0; iCol < nCols; iCol++) {
+        TS_ASSERT_EQUALS(mat.item(iRow, iCol), 0);
+      }
+    }
+  }
+
+  /// Test that the 'make identity' option in the preset size constructor works
+  void testConstructorPresetSizes_makeIdentity() {
+    constexpr int nRowsCols(2);
+    constexpr bool makeIdentity(true);
+    IntMatrix mat(nRowsCols, nRowsCols, makeIdentity);
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
+        const int expected = iRow == iCol ? 1 : 0;
+        TS_ASSERT_EQUALS(mat.item(iRow, iCol), expected);
+      }
+    }
+  }
+
+  /// Constructor multiplying two vectors
+  void testConstructorTwoVectors() {
+    const std::vector<int> vecA{1, 2, 3}, vecB{4, 5, 6};
+    IntMatrix mat(vecA, vecB);
+    const int nRowsCols = static_cast<int>(vecA.size());
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
+        const int expected = vecA[iRow] * vecB[iCol];
+        TS_ASSERT_EQUALS(mat.item(iRow, iCol), expected);
+      }
+    }
+  }
+
+  /// Constructor with missing row or column
+  void testConstructorMissingRowColumn() {
+    constexpr int nRows(4), nCols(4), missingRow(3), missingCol(1);
+    const std::vector<double> data{1, 86,  2, 3, 4,  55,  5,  6,
+                                   7, -25, 8, 9, 42, -33, 15, 0};
+    DblMatrix original(data);
+    TS_ASSERT_THROWS(DblMatrix badMat(original, nRows + 1, missingCol),
+                     Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS(DblMatrix badMat(original, missingRow, nCols + 1),
+                     Mantid::Kernel::Exception::IndexError);
+    DblMatrix mat(original, missingRow, missingCol);
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  void testCopyConstructor() {
+    const std::vector<double> data{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    DblMatrix original(data);
+    DblMatrix copy(original);
+    checkMatrixHasExpectedValuesForSquareMatrixTest(copy);
+  }
+
+  void testAssignment() {
+    const std::vector<double> data{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    DblMatrix original(data);
+    DblMatrix copy = original;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(copy);
+  }
+
+  /// Test + and +=
+  void testAddition() {
+    const std::vector<double> data{0, 2, 3, 4, 4, 6, 7, 8, 8};
+    DblMatrix mat(data);
+    DblMatrix ident(3, 3);
+    ident.identityMatrix();
+    DblMatrix plus = mat + ident;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(plus);
+    mat += ident;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  /// Test - and -=
+  void testSubtraction() {
+    const std::vector<double> data{2, 2, 3, 4, 6, 6, 7, 8, 10};
+    DblMatrix mat(data);
+    DblMatrix ident(3, 3);
+    ident.identityMatrix();
+    DblMatrix minus = mat - ident;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(minus);
+    mat -= ident;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  /// Test * and *=
+  void testMultiplicationByMatrix() {
+    const std::vector<int> dataA{1, 2, 3, 4}, dataB{5, 6, 7, 8};
+    IntMatrix matA(dataA), matB(dataB);
+    IntMatrix multiplied = matA * matB;
+    TS_ASSERT_EQUALS(multiplied[0][0], 19);
+    TS_ASSERT_EQUALS(multiplied[0][1], 22);
+    TS_ASSERT_EQUALS(multiplied[1][0], 43);
+    TS_ASSERT_EQUALS(multiplied[1][1], 50);
+    matA *= matB;
+    TS_ASSERT_EQUALS(matA[0][0], 19);
+    TS_ASSERT_EQUALS(matA[0][1], 22);
+    TS_ASSERT_EQUALS(matA[1][0], 43);
+    TS_ASSERT_EQUALS(matA[1][1], 50);
+  }
+
+  /// Test * and *=
+  void testMultiplicationByConstant() {
+    const std::vector<int> data{1, 2, 3, 4};
+    IntMatrix mat(data);
+    IntMatrix multiplied = mat * 2;
+    TS_ASSERT_EQUALS(multiplied[0][0], 2);
+    TS_ASSERT_EQUALS(multiplied[0][1], 4);
+    TS_ASSERT_EQUALS(multiplied[1][0], 6);
+    TS_ASSERT_EQUALS(multiplied[1][1], 8);
+    mat *= 2;
+    TS_ASSERT_EQUALS(mat[0][0], 2);
+    TS_ASSERT_EQUALS(mat[0][1], 4);
+    TS_ASSERT_EQUALS(mat[1][0], 6);
+    TS_ASSERT_EQUALS(mat[1][1], 8);
+  }
+
+  void testDivisionByConstant() {
+    const std::vector<double> data{2, 4, 6, 8, 10, 12, 14, 16, 18};
+    DblMatrix mat(data);
+    mat /= 2.0;
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  void testComparisonOperators() {
+    constexpr int nRowsCols(3);
+    DblMatrix mat(nRowsCols, nRowsCols);
+    makeMatrix(mat);
+    // self-comparison
+    TS_ASSERT_EQUALS(mat < mat, false);
+    TS_ASSERT_EQUALS(mat >= mat, true);
+    // wrong size
+    DblMatrix wrong(nRowsCols - 1, nRowsCols);
+    TS_ASSERT_EQUALS(mat < wrong, false);
+    TS_ASSERT_EQUALS(mat >= wrong, false);
+    // less than
+    DblMatrix less(mat);
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
+        less[iRow][iCol] = mat[iRow][iCol] - 1;
+      }
+    }
+    TS_ASSERT_EQUALS(mat < less, false);
+    TS_ASSERT_EQUALS(less < mat, true);
+    TS_ASSERT_EQUALS(mat >= less, true);
+    TS_ASSERT_EQUALS(less >= mat, false);
+    // greater than
+    DblMatrix greater(mat);
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
+        greater[iRow][iCol] = mat[iRow][iCol] + 1;
+      }
+    }
+    TS_ASSERT_EQUALS(mat < greater, true);
+    TS_ASSERT_EQUALS(greater < mat, false);
+    TS_ASSERT_EQUALS(mat >= greater, false);
+    TS_ASSERT_EQUALS(greater >= mat, true);
+  }
+
+  void testWrite() {
+    std::ostringstream os;
+    DblMatrix mat(3, 3);
+    makeMatrix(mat);
+    mat.write(os, 10);
+    std::string output = os.str();
+    std::string expected = "1.000000e+00  4.000000e+00  6.000000e+00  "
+                           "\n3.000000e+00  3.000000e+00  6.000000e+00  "
+                           "\n5.000000e+00  1.000000e+00  -7.000000e+00  \n";
+    TS_ASSERT_EQUALS(output, expected);
+  }
+
+  void testToString() {
+    DblMatrix mat(3, 3);
+    makeMatrix(mat);
+    std::string output = mat.str();
+    std::string expected = "1 4 6 3 3 6 5 1 -7 ";
+    TS_ASSERT_EQUALS(output, expected);
+  }
+
+  void testToVector() {
+    constexpr int nRowsCols(3);
+    DblMatrix mat(nRowsCols, nRowsCols);
+    makeMatrix(mat);
+    std::vector<double> converted = mat.getVector();
+    std::vector<double> implicit(mat);
+    int iVectorIndex(0);
+    for (int iRow = 0; iRow < nRowsCols; iRow++) {
+      for (int iCol = 0; iCol < nRowsCols; iCol++) {
+        TS_ASSERT_EQUALS(converted[iVectorIndex], mat[iRow][iCol]);
+        TS_ASSERT_EQUALS(implicit[iVectorIndex], mat[iRow][iCol]);
+        iVectorIndex++;
+      }
+    }
+  }
+
+  void testSetColumn() {
+    const std::vector<double> data{1, -2, 3, 4, -5, 6, 7, -8, 9};
+    const std::vector<double> newCol{2, 5, 8};
+    DblMatrix mat(data);
+    size_t badCol(3), goodCol(1);
+    TS_ASSERT_THROWS(mat.setColumn(badCol, newCol), std::invalid_argument);
+    mat.setColumn(goodCol, newCol);
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  void testSetRow() {
+    const std::vector<double> data{1, 2, 3, 4, 5, 6, -7, -8, -9};
+    const std::vector<double> newRow{7, 8, 9};
+    DblMatrix mat(data);
+    size_t badRow(3), goodRow(2);
+    TS_ASSERT_THROWS(mat.setRow(badRow, newRow), std::invalid_argument);
+    mat.setRow(goodRow, newRow);
+    checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
+  }
+
+  void testZeroMatrix() {
+    constexpr int nRowCol(3);
+    DblMatrix mat(nRowCol, nRowCol);
+    makeMatrix(mat);
+    TS_ASSERT_DIFFERS(mat[0][0], 0);
+    mat.zeroMatrix();
+    for (int iRow = 0; iRow < nRowCol; iRow++) {
+      for (int iCol = 0; iCol < nRowCol; iCol++) {
+        TS_ASSERT_EQUALS(mat[iRow][iCol], 0);
+      }
+    }
+  }
+
+  void testNormVert() {
+    constexpr int nRowCol(3);
+    DblMatrix mat(nRowCol, nRowCol);
+    makeMatrix(mat);
+    mat.normVert();
+    const std::string expected("0.137361 0.549442 0.824163 0.408248 0.408248 "
+                               "0.816497 0.57735 0.11547 -0.80829 ");
+    TS_ASSERT_EQUALS(mat.str(), expected);
+    TS_ASSERT_DELTA(std::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1] +
+                              mat[0][2] * mat[0][2]),
+                    1.0, 0.001);
+    TS_ASSERT_DELTA(std::sqrt(mat[1][0] * mat[1][0] + mat[1][1] * mat[1][1] +
+                              mat[1][2] * mat[1][2]),
+                    1.0, 0.001);
+    TS_ASSERT_DELTA(std::sqrt(mat[2][0] * mat[2][0] + mat[2][1] * mat[2][1] +
+                              mat[2][2] * mat[2][2]),
+                    1.0, 0.001);
+  }
+
+  void testTrace() {
+    constexpr int nRowCol(3);
+    DblMatrix mat(nRowCol, nRowCol);
+    makeMatrix(mat);
+    double trace = mat.Trace();
+    double expected = 0;
+    for (int i = 0; i < nRowCol; i++) {
+      expected += mat[i][i];
+    }
+    TS_ASSERT_EQUALS(trace, expected);
+  }
+
+  void testDiagonal() {
+    constexpr int nRowCol(3);
+    DblMatrix mat(nRowCol, nRowCol);
+    makeMatrix(mat);
+    std::vector<double> diag = mat.Diagonal();
+    TS_ASSERT_EQUALS(diag.size(), nRowCol);
+    for (int i = 0; i < nRowCol; i++) {
+      TS_ASSERT_EQUALS(diag[i], mat[i][i]);
+    }
+  }
+
+  void testPreMultiplyDiagonal() {
+    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
+        dataBad{5, 6, 7};
+    DblMatrix mat(dataA);
+    TS_ASSERT_THROWS(mat.preMultiplyByDiagonal(dataBad), std::runtime_error);
+    DblMatrix result = mat.preMultiplyByDiagonal(dataDiag);
+    TS_ASSERT_EQUALS(result[0][0], 5);
+    TS_ASSERT_EQUALS(result[0][1], 10);
+    TS_ASSERT_EQUALS(result[1][0], 18);
+    TS_ASSERT_EQUALS(result[1][1], 24);
+  }
+
+  void testPostMultiplyDiagonal() {
+    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
+        dataBad{5, 6, 7};
+    DblMatrix mat(dataA);
+    TS_ASSERT_THROWS(mat.postMultiplyByDiagonal(dataBad), std::runtime_error);
+    DblMatrix result = mat.postMultiplyByDiagonal(dataDiag);
+    TS_ASSERT_EQUALS(result[0][0], 5);
+    TS_ASSERT_EQUALS(result[0][1], 12);
+    TS_ASSERT_EQUALS(result[1][0], 15);
+    TS_ASSERT_EQUALS(result[1][1], 24);
+  }
+
+  void testSetMem() {
+    DblMatrix mat(3, 3);
+    mat.setMem(5, 5);
+    double x = 0;
+    TS_ASSERT_THROWS_NOTHING(x = mat[4][4]);
+    (void)x; // fixes compiler warning
+  }
+
+  void testSize() {
+    constexpr size_t nRows(5), nCols(4);
+    DblMatrix mat(nRows, nCols);
+    auto size = mat.size();
+    TS_ASSERT_EQUALS(nRows, size.first);
+    TS_ASSERT_EQUALS(nCols, size.second);
+    TS_ASSERT_EQUALS(std::min(nRows, nCols), mat.Ssize());
+  }
+
+  void testAverageSymmetric() {
+    const std::vector<double> data{1, 2, 3, 4}, expected{1, 2.5, 2.5, 4};
+    DblMatrix mat(data), expectedResult(expected);
+    mat.averSymmetric();
+    TS_ASSERT(mat == expectedResult);
+  }
+
+  void testDeterminant() {
+    DblMatrix mat(3, 3);
+    makeMatrix(mat);
+    double det = mat.determinant();
+    TS_ASSERT_EQUALS(det, 105);
+  }
+
+  /// Test Gauss-Jordan factorisation
+  void testFactor() {
+    DblMatrix mat(3, 3);
+    makeMatrix(mat);
+    TS_ASSERT_EQUALS(mat.factor(), 105);
+    const std::vector<double> expectedData{6, 1, 4, 0, 2, -1, 0, 0, 8.75};
+    DblMatrix expected(expectedData);
+    TS_ASSERT(mat == expected);
+  }
+
+  // Test inverting a matrix using Gauss-Jordan method
+  void testGaussJordan() {
+    constexpr size_t nRowsCols(3);
+    DblMatrix mat(nRowsCols, nRowsCols);
+    makeMatrix(mat);
+    DblMatrix B(nRowsCols, nRowsCols);
+    makeMatrix(B);
+    DblMatrix expected(mat);
+    expected.Invert();
+    mat.GaussJordan(B);
+    // test the two inverses agree
+    TS_ASSERT(mat == expected);
+    // B should be an identity matrix
+    for (size_t iRow = 0; iRow < nRowsCols; iRow++) {
+      for (size_t iCol = 0; iCol < nRowsCols; iCol++) {
+        TS_ASSERT_EQUALS(B[iRow][iCol], iRow == iCol ? 1 : 0);
+      }
+    }
+  }
+
+  // sum of squares of all elements
+  void testCompSum() {
+    DblMatrix mat(3, 3);
+    makeMatrix(mat);
+    double result = mat.compSum();
+    TS_ASSERT_EQUALS(result, 182);
+  }
+
+  // test orthogonality - rotations and non-rotational matrices
+  void testIsOrthogonal() {
+    const std::vector<double> rotationData{0, -1, 1, 0},
+        nonRotationData{0, 1, 1, 0};
+    DblMatrix rotation(rotationData), reflection(nonRotationData);
+    TS_ASSERT(rotation.isRotation());
+    TS_ASSERT(rotation.isOrthogonal());
+    TS_ASSERT(!reflection.isRotation());
+    TS_ASSERT(reflection.isOrthogonal());
   }
 
 private:

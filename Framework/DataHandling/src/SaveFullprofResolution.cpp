@@ -44,7 +44,7 @@ void SaveFullprofResolution::init() {
       "Input TableWorkspace containing the parameters for .irf file.");
 
   std::vector<std::string> exts;
-  exts.push_back(".irf");
+  exts.emplace_back(".irf");
   declareProperty(new API::FileProperty("OutputFilename", "",
                                         API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
@@ -58,7 +58,7 @@ void SaveFullprofResolution::init() {
   vector<string> supportedfunctions;
   supportedfunctions.push_back(
       "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
-  supportedfunctions.push_back("Jason Hodge's function (profile 10)");
+  supportedfunctions.emplace_back("Jason Hodge's function (profile 10)");
   auto funcvalidator =
       boost::make_shared<StringListValidator>(supportedfunctions);
   declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)",
@@ -224,7 +224,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   for (size_t ir = 0; ir < numpars; ++ir) {
     double parvalue =
         m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
-    m_profileParamMap.insert(std::make_pair(vec_parnames[ir], parvalue));
+    m_profileParamMap.emplace(vec_parnames[ir], parvalue);
   }
 
   // Debug output

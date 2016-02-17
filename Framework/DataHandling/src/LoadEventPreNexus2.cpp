@@ -1,14 +1,7 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
-#include <functional>
-#include <set>
-#include <vector>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/timer.hpp>
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -24,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -33,8 +27,16 @@
 #include "MantidKernel/InstrumentInfo.h"
 
 #include <algorithm>
+#include <functional>
+#include <set>
 #include <sstream>
-#include "MantidAPI/MemoryManager.h"
+#include <stdexcept>
+#include <vector>
+
+#include <boost/timer.hpp>
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -278,10 +280,7 @@ void LoadEventPreNexus2::init() {
   setPropertySettings("TotalChunks",
                       new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"

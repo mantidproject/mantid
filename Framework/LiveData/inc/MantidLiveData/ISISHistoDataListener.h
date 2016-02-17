@@ -49,22 +49,22 @@ namespace LiveData {
 class ISISHistoDataListener : public API::ILiveListener {
 public:
   ISISHistoDataListener();
-  ~ISISHistoDataListener();
+  ~ISISHistoDataListener() override;
 
-  std::string name() const { return "ISISHistoDataListener"; }
-  bool supportsHistory() const { return false; }
-  bool buffersEvents() const { return false; }
+  std::string name() const override { return "ISISHistoDataListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return false; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  bool isConnected();
-  ILiveListener::RunStatus runStatus();
-  int runNumber() const;
+  bool isConnected() override;
+  ILiveListener::RunStatus runStatus() override;
+  int runNumber() const override;
 
 private:
-  void setSpectra(const std::vector<specid_t> &specList);
+  void setSpectra(const std::vector<specid_t> &specList) override;
   void setPeriods(const std::vector<specid_t> &periodList);
   int getInt(const std::string &par) const;
   std::string getString(const std::string &par) const;

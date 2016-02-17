@@ -5,6 +5,7 @@
 
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAlgorithms/FilterByXValue.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

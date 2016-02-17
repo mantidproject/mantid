@@ -57,7 +57,7 @@ typedef void *AlgorithmID;
 class MANTID_API_DLL IAlgorithm : virtual public Kernel::IPropertyManager {
 public:
   /// Virtual destructor (always needed for abstract classes)
-  virtual ~IAlgorithm() {}
+  ~IAlgorithm() override {}
 
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms

@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidKernel/ListValidator.h"
@@ -85,10 +86,7 @@ void IFittingAlgorithm::init() {
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
-  std::vector<std::string> domainTypes;
-  domainTypes.push_back("Simple");
-  domainTypes.push_back("Sequential");
-  domainTypes.push_back("Parallel");
+  std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
   declareProperty(
       "DomainType", "Simple",
       Kernel::IValidator_sptr(

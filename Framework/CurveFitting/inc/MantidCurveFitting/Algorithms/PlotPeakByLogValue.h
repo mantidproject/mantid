@@ -82,23 +82,23 @@ public:
   /// Default constructor
   PlotPeakByLogValue() : API::Algorithm(){};
   /// Destructor
-  virtual ~PlotPeakByLogValue(){};
+  ~PlotPeakByLogValue() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PlotPeakByLogValue"; }
+  const std::string name() const override { return "PlotPeakByLogValue"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fits a number of spectra with the same function.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Optimization"; }
+  const std::string category() const override { return "Optimization"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Get a workspace
   InputData getWorkspace(const InputData &data);

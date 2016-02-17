@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -75,20 +76,20 @@ public:
   /// Default constructor
   ModeratorTzero();
   /// Virtual destructor
-  virtual ~ModeratorTzero() {}
+  ~ModeratorTzero() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ModeratorTzero"; }
+  const std::string name() const override { return "ModeratorTzero"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Corrects the time of flight of an indirect geometry instrument by "
            "a time offset that is dependent on the energy of the neutron after "
            "passing through the moderator.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }
   /// set attribute m_formula
@@ -100,9 +101,9 @@ private:
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
   // Initialisation code
-  void init();
+  void init() override;
   /// Execution code for histogram workspace
-  void exec();
+  void exec() override;
   /// Execution code for event workspace
   void execEvent(const std::string &emode);
   /// Calculate emission time from the moderator for a given

@@ -1,12 +1,13 @@
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
-#include <sys/stat.h>
 #include <sstream>
+#include <sys/stat.h>
 
 using std::size_t;
 using std::vector;

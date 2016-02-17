@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 //#include "MantidDataObjects/Events.h"
@@ -430,8 +432,7 @@ void TOPAZLiveEventDataListener::run() {
                   << "Thread will exit." << std::endl;
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can throw
@@ -444,8 +445,7 @@ void TOPAZLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
   } catch (Poco::Exception &e) { // Generic POCO exception handler
     g_log.fatal("Uncaught POCO exception in TOPAZLiveEventDataListener network "
                 "read thread.");

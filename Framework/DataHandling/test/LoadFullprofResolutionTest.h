@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -749,7 +750,7 @@ public:
       double value;
       string name;
       row >> name >> value;
-      parammap.insert(make_pair(name, value));
+      parammap.emplace(name, value);
     }
 
     return;
@@ -768,7 +769,7 @@ public:
       double value1, value2;
       string name;
       row >> name >> value1 >> value2;
-      parammap.insert(make_pair(name, value2));
+      parammap.emplace(name, value2);
     }
 
     return;

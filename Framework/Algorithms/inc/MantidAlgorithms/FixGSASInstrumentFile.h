@@ -33,28 +33,28 @@ namespace Algorithms {
 class DLLExport FixGSASInstrumentFile : public API::Algorithm {
 public:
   FixGSASInstrumentFile();
-  virtual ~FixGSASInstrumentFile();
+  ~FixGSASInstrumentFile() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FixGSASInstrumentFile"; }
+  const std::string name() const override { return "FixGSASInstrumentFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fix format error in an GSAS instrument file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling";
   }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

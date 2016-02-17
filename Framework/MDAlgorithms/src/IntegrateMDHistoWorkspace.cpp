@@ -446,7 +446,7 @@ Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {
     std::vector<double> binning = this->getProperty(propertyName);
     std::string result = checkBinning(binning);
     if (!result.empty()) {
-      errors.insert(std::make_pair(propertyName, result));
+      errors.emplace(propertyName, result);
     }
   }
   return errors;

@@ -9,7 +9,7 @@
 #include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
 #include "MantidQtAPI/ScaleEngine.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QWidget>
 #include <QCheckBox>

@@ -2,8 +2,9 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -155,8 +156,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   yvalB.assign(xRef.size(), 0.0);
 
   if (N < 4) // If not well indexed
-    return boost::shared_ptr<DataObjects::Workspace2D>(
-        new DataObjects::Workspace2D);
+    return boost::make_shared<DataObjects::Workspace2D>();
 
   MatrixWorkspace_sptr mwkspc =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
@@ -308,7 +308,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   bool xml = (preprocessCommand == "C)Apply a LoadParameter.xml type file");
 
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
+  auto pmap1 = boost::make_shared<ParameterMap>();
 
   for (auto bankName : AllBankNames) {
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
@@ -900,11 +900,11 @@ void SCDCalibratePanels::exec() {
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
 
-      boost::shared_ptr<ParameterMap> pmap(new ParameterMap());
+      auto pmap = boost::make_shared<ParameterMap>();
       boost::shared_ptr<const ParameterMap> pmapOld =
           instrument->getParameterMap();
-      boost::shared_ptr<const Instrument> NewInstrument(
-          new Instrument(instrument->baseInstrument(), pmap));
+      boost::shared_ptr<const Instrument> NewInstrument =
+          boost::make_shared<Instrument>(instrument->baseInstrument(), pmap);
 
       boost::shared_ptr<const RectangularDetector> bank_rect;
       double rotx, roty, rotz;
@@ -1320,10 +1320,8 @@ void SCDCalibratePanels::init() {
                       "PeakWorkspace", "", Kernel::Direction::Input),
                   "Workspace of Indexed Peaks");
 
-  vector<string> choices;
-  choices.push_back("OnePanelPerGroup");
-  choices.push_back("AllPanelsInOneGroup");
-  choices.push_back("SpecifyGroups");
+  vector<string> choices{"OnePanelPerGroup", "AllPanelsInOneGroup",
+                         "SpecifyGroups"};
   declareProperty(string("PanelGroups"), string("OnePanelPerGroup"),
                   boost::make_shared<Kernel::StringListValidator>(choices),
                   "Select grouping of Panels");
@@ -1371,19 +1369,16 @@ void SCDCalibratePanels::init() {
   declareProperty("SampleZoffset", 0.0, "Specify Sample z offset");
 
   // ---------- preprocessing
-  vector<string> preProcessOptions;
-  preProcessOptions.push_back(string("A)No PreProcessing"));
-  preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
-  preProcessOptions.push_back("C)Apply a LoadParameter.xml type file");
+  vector<string> preProcessOptions{"A)No PreProcessing",
+                                   "B)Apply a ISAW.DetCal File",
+                                   "C)Apply a LoadParameter.xml type file"};
 
   declareProperty(
       string("PreProcessInstrument"), string("A)No PreProcessing"),
       boost::make_shared<Kernel::StringListValidator>(preProcessOptions),
       "Select PreProcessing info");
 
-  vector<string> exts2;
-  exts2.push_back(".DetCal");
-  exts2.push_back(".xml");
+  vector<string> exts2{".DetCal", ".xml"};
   declareProperty(new FileProperty("PreProcFilename", "",
                                    FileProperty::OptionalLoad, exts2),
                   "Path to file with preprocessing information");

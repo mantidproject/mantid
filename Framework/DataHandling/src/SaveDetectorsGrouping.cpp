@@ -94,8 +94,6 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     auto it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
       std::vector<detid_t> tempvector;
-      // groupwkspmap.insert(std::pair<int, std::vector<detid_t> >(groupid,
-      // tempvector));
       groupwkspmap[groupid] = tempvector;
     }
     it = groupwkspmap.find(groupid);

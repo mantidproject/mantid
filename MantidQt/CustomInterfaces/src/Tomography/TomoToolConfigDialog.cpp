@@ -7,8 +7,7 @@ TomoToolConfigTomoPy::TomoToolConfigTomoPy(QWidget *parent) : QDialog(parent) {}
 
 TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
 
-TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {
-}
+TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
 
 TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
 

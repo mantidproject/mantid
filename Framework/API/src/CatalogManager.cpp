@@ -36,7 +36,7 @@ CatalogSession_sptr CatalogManagerImpl::login(const std::string &username,
       catalog->login(username, password, endpoint, facility);
   // Creates a new catalog and adds it to the compositeCatalog and activeCatalog
   // list.
-  m_activeCatalogs.insert(std::make_pair(session, catalog));
+  m_activeCatalogs.emplace(session, catalog);
   return session;
 }
 

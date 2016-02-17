@@ -44,17 +44,17 @@ public:
 
   void copy(const QwtErrorPlotCurve *e);
 
-  QwtDoubleRect boundingRect() const;
+  QwtDoubleRect boundingRect() const override;
 
   double errorValue(int i);
   QwtArray<double> errors(){return err;};
   void setErrors(const QwtArray<double>&data){err=data;};
 
-  double width() const {return pen().widthF();};
-  void setWidth(double w);
+  double width() const override { return pen().widthF(); };
+  void setWidth(double w) override;
 
-  QColor color() const {return pen().color();};
-  void setColor(const QColor& c);
+  QColor color() const override { return pen().color(); };
+  void setColor(const QColor &c) override;
 
   int direction(){return type;};
   void setDirection(int o){type = o;};
@@ -69,15 +69,15 @@ public:
   //! Causes the master curve to delete this curve from its managed error bars list.
   void detachFromMasterCurve(){d_master_curve->removeErrorBars(this);};
 
-  QString plotAssociation() const;
+  QString plotAssociation() const override;
 
-  bool updateData(Table *t, const QString& colName);
-  void loadData();
+  bool updateData(Table *t, const QString &colName) override;
+  void loadData() override;
 
 private:
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-  virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
-                     const QwtScaleMap &yMap, int from, int to) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            int from, int to) const override;
 
   void drawErrorBars(QPainter *painter, const QwtScaleMap &xMap,
                      const QwtScaleMap &yMap, int from, int to) const;

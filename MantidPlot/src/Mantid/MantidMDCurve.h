@@ -47,12 +47,12 @@ public:
   /// Copy constructor 
   MantidMDCurve(const MantidMDCurve& c);
 
-  ~MantidMDCurve();
+  ~MantidMDCurve() override;
 
-  MantidMDCurve* clone(const Graph*)const;
+  MantidMDCurve *clone(const Graph *) const override;
 
   /// Curve type. Used in the QtiPlot API.
-  int rtti() const{return Rtti_PlotUserItem;}
+  int rtti() const override { return Rtti_PlotUserItem; }
 
   /// Used for waterfall plots: updates the data curves with an offset
   //void loadData();
@@ -61,21 +61,20 @@ public:
   void setData(const QwtData &data);
 
   /// Overrides qwt_plot_curve::boundingRect
-  QwtDoubleRect boundingRect() const;
+  QwtDoubleRect boundingRect() const override;
 
   /// Return pointer to the data if it of the right type or 0 otherwise
-  MantidQwtIMDWorkspaceData* mantidData();
+  MantidQwtIMDWorkspaceData *mantidData() override;
 
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  virtual const MantidQwtIMDWorkspaceData* mantidData() const;
+  const MantidQwtIMDWorkspaceData *mantidData() const override;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
 
-  virtual void draw(QPainter *p, 
-    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-    const QRect &) const;
- 
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &) const override;
+
   /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
 
@@ -87,11 +86,10 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph* g, bool distr, Graph::CurveType style);
+  void init(Graph *g, bool distr, Graph::CurveType style) override;
 
   /// Handles delete notification
-  void postDeleteHandle(const std::string& wsName)
-  {
+  void postDeleteHandle(const std::string &wsName) override {
     if (wsName == m_wsName.toStdString())
     {
       observePostDelete(false);
@@ -99,13 +97,12 @@ private:
     }
   }
   /// Handles afterReplace notification
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
   /// Handle an ADS clear notificiation
-  void clearADSHandle()
-  {
-    emit removeMe(this);
-  }
+  void clearADSHandle() override { emit removeMe(this); }
 
 signals:
 
