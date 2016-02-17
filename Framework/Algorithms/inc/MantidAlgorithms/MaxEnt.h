@@ -3,6 +3,8 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -64,24 +66,24 @@ public:
   /// Constructor
   MaxEnt();
   /// Destructor
-  virtual ~MaxEnt();
+  ~MaxEnt() override;
 
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's summary
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
 private:
   /// Initialise the algorithm's properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Validate the input properties
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   /// Transforms from image space to data space
   std::vector<double> transformImageToData(const std::vector<double> &input);
   /// Transforms from data space to image space

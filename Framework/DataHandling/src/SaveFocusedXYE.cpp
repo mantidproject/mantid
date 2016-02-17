@@ -2,7 +2,10 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
 #include <Poco/File.h>
@@ -308,7 +311,7 @@ void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
                                    const size_t spectrum, double &l1,
                                    double &l2, double &tth) {
   Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;
@@ -316,7 +319,7 @@ void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
   }
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;

@@ -67,8 +67,8 @@ Kernel::Logger g_log("ResolutionConvolvedCrossSection");
  * Constructor
  */
 ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-    : ParamFunction(), IFunctionMD(), m_simulation(false), m_convolution(NULL),
-      m_inputWS() {}
+    : ParamFunction(), IFunctionMD(), m_simulation(false),
+      m_convolution(nullptr), m_inputWS() {}
 
 /**
  * Destructor
@@ -142,8 +142,7 @@ void ResolutionConvolvedCrossSection::function(
   }
   CHECK_PARALLEL_EXCEPTIONS // Not standard macros. See top of file for reason
 
-      for (auto it = iterators.begin(); it != iterators.end(); ++it) {
-    API::IMDIterator *boxIterator = *it;
+      for (auto boxIterator : iterators) {
     delete boxIterator;
   }
 }
@@ -302,8 +301,8 @@ void ResolutionConvolvedCrossSection::setupResolutionFunction(
       name, fgModelName, *this);
   // Pass on the attributes
   auto names = m_convolution->getAttributeNames();
-  for (auto iter = names.begin(); iter != names.end(); ++iter) {
-    this->declareAttribute(*iter, m_convolution->getAttribute(*iter));
+  for (auto &name : names) {
+    this->declareAttribute(name, m_convolution->getAttribute(name));
   }
   // Pull the foreground parameters on to here
   const ForegroundModel &fgModel = m_convolution->foregroundModel();
@@ -315,8 +314,8 @@ void ResolutionConvolvedCrossSection::setupResolutionFunction(
   }
   // Pull the foreground attributes on to here
   names = fgModel.getAttributeNames();
-  for (auto iter = names.begin(); iter != names.end(); ++iter) {
-    this->declareAttribute(*iter, fgModel.getAttribute(*iter));
+  for (auto &name : names) {
+    this->declareAttribute(name, fgModel.getAttribute(name));
   }
 }
 

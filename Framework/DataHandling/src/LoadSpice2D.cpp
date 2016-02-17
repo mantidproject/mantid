@@ -3,14 +3,17 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/XmlHandler.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidAPI/AlgorithmFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -24,11 +27,11 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <vector>
 #include <string>
-#include <algorithm>
+#include <vector>
 
 //-----------------------------------------------------------------------
 
@@ -206,10 +209,10 @@ void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 void LoadSpice2D::addMetadataAsRunProperties(
     const std::map<std::string, std::string> &metadata) {
 
-  for (auto it = metadata.begin(); it != metadata.end(); it++) {
-    std::string key = it->first;
+  for (const auto &keyValuePair : metadata) {
+    std::string key = keyValuePair.first;
     std::replace(key.begin(), key.end(), '/', '_');
-    m_workspace->mutableRun().addProperty(key, it->second, true);
+    m_workspace->mutableRun().addProperty(key, keyValuePair.second, true);
   }
 }
 
@@ -317,12 +320,11 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
               m_dwavelength);
 
   // Store detector pixels
-  for (auto it = data.begin(); it != data.end(); ++it) {
-    double count = static_cast<double>(*it);
+  for (auto count : data) {
     // Data uncertainties, computed according to the HFIR/IGOR reduction code
     // The following is what I would suggest instead...
     // error = count > 0 ? sqrt((double)count) : 0.0;
-    double error = sqrt(0.5 + fabs(count - 0.5));
+    double error = sqrt(0.5 + fabs(static_cast<double>(count) - 0.5));
     store_value(m_workspace, specID++, count, error, m_wavelength,
                 m_dwavelength);
   }

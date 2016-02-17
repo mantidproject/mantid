@@ -6,6 +6,7 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/LogFilter.h"

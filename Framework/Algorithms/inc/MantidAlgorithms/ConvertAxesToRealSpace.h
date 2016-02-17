@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <map>
 
@@ -37,16 +38,16 @@ namespace Algorithms {
 class DLLExport ConvertAxesToRealSpace : public API::Algorithm {
 public:
   ConvertAxesToRealSpace();
-  virtual ~ConvertAxesToRealSpace();
+  ~ConvertAxesToRealSpace() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Local cache data about a spectra
   struct SpectraData {

@@ -19,11 +19,7 @@ using namespace Mantid::DataObjects;
 void ProjectMD::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
-  std::vector<std::string> projectOptions;
-  projectOptions.push_back("X");
-  projectOptions.push_back("Y");
-  projectOptions.push_back("Z");
-  projectOptions.push_back("K");
+  std::vector<std::string> projectOptions{"X", "Y", "Z", "K"};
   this->declareProperty("ProjectDirection", "Z",
                         boost::make_shared<StringListValidator>(projectOptions),
                         "The project direction");

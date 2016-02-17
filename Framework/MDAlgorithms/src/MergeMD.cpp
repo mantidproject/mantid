@@ -1,8 +1,5 @@
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
@@ -91,8 +88,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   std::vector<coord_t> dimMax(numDims, -1e30f);
 
   // Validate each workspace
-  for (size_t i = 0; i < m_workspaces.size(); i++) {
-    IMDEventWorkspace_const_sptr ws = m_workspaces[i];
+  for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
           "Workspace " + ws->name() +
@@ -218,7 +214,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
-    Progress *prog2 = NULL;
+    Progress *prog2 = nullptr;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0, prog2);
     ws1->splitAllIfNeeded(ts);
@@ -243,16 +239,15 @@ void MergeMD::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 

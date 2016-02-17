@@ -36,22 +36,22 @@ public:
   /// no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  virtual ~HelloWorldAlgorithm() {}
+  ~HelloWorldAlgorithm() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "HelloWorldAlgorithm"; }
+  const std::string name() const override { return "HelloWorldAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples"; }
-  virtual const std::string summary() const {
+  const std::string category() const override { return "Examples"; }
+  const std::string summary() const override {
     return "Summary of this algorithm - Outputs Hello World!.";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

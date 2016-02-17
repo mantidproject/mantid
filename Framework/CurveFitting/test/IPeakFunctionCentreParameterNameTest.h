@@ -23,11 +23,11 @@ public:
   IPeakFunctionCentreParameterNameTest() {
     FrameworkManager::Instance();
 
-    m_expectedResults.insert(std::make_pair("Gaussian", "PeakCentre"));
-    m_expectedResults.insert(std::make_pair("Lorentzian", "PeakCentre"));
-    m_expectedResults.insert(std::make_pair("IkedaCarpenterPV", "X0"));
-    m_expectedResults.insert(std::make_pair("Voigt", "LorentzPos"));
-    m_expectedResults.insert(std::make_pair("BackToBackExponential", "X0"));
+    m_expectedResults.emplace("Gaussian", "PeakCentre");
+    m_expectedResults.emplace("Lorentzian", "PeakCentre");
+    m_expectedResults.emplace("IkedaCarpenterPV", "X0");
+    m_expectedResults.emplace("Voigt", "LorentzPos");
+    m_expectedResults.emplace("BackToBackExponential", "X0");
   }
 
   /* Test that all functions give the expected result.
@@ -35,8 +35,8 @@ public:
   void testAllFunctions() {
     for (auto it = m_expectedResults.begin(); it != m_expectedResults.end();
          ++it) {
-      std::string peakFunctionName = it->first;
-      std::string centreParameterName = it->second;
+      const std::string &peakFunctionName = it->first;
+      const std::string &centreParameterName = it->second;
 
       IPeakFunction_sptr fn = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peakFunctionName));

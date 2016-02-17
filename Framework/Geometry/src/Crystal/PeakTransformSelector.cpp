@@ -34,10 +34,8 @@ PeakTransformFactory_sptr PeakTransformSelector::makeDefaultChoice() const {
 
   PeakTransformFactory_sptr selected;
   bool found = false;
-  for (auto it = m_candidateFactories.begin(); it != m_candidateFactories.end();
-       ++it) {
+  for (auto temp : m_candidateFactories) {
     try {
-      PeakTransformFactory_sptr temp = (*it);
       temp->createDefaultTransform();
       selected = temp;
       found = true;
@@ -72,10 +70,8 @@ PeakTransformSelector::makeChoice(const std::string labelX,
 
   PeakTransformFactory_sptr selected;
   bool found = false;
-  for (auto it = m_candidateFactories.begin(); it != m_candidateFactories.end();
-       ++it) {
+  for (auto temp : m_candidateFactories) {
     try {
-      PeakTransformFactory_sptr temp = (*it);
       temp->createTransform(labelX, labelY);
       selected = temp;
       found = true;

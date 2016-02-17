@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "MantidAlgorithms/RemoveBins.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -218,8 +219,10 @@ public:
     testWorkspace->setTitle("input2D");
     testWorkspace->initialize(2, 5, 4);
 
-    boost::shared_ptr<Mantid::MantidVec> X(new Mantid::MantidVec);
-    boost::shared_ptr<Mantid::MantidVec> Y(new Mantid::MantidVec);
+    boost::shared_ptr<Mantid::MantidVec> X =
+        boost::make_shared<Mantid::MantidVec>();
+    boost::shared_ptr<Mantid::MantidVec> Y =
+        boost::make_shared<Mantid::MantidVec>();
 
     for (int i = 0; i < 4; ++i) {
       X->push_back(10 * i);

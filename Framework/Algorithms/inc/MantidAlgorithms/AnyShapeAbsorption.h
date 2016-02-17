@@ -86,11 +86,11 @@ public:
   /// (Empty) Constructor
   AnyShapeAbsorption();
   /// Virtual destructor
-  virtual ~AnyShapeAbsorption() {}
+  ~AnyShapeAbsorption() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "AbsorptionCorrection"; }
+  const std::string name() const override { return "AbsorptionCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates an approximation of the attenuation due to absorption "
            "and single scattering in a generic sample shape. The sample shape "
            "can be defined by, e.g., the CreateSampleShape algorithm.\nNote "
@@ -100,13 +100,13 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
-  void defineProperties();
-  void retrieveProperties();
-  std::string sampleXML();
-  void initialiseCachedDistances();
+  void defineProperties() override;
+  void retrieveProperties() override;
+  std::string sampleXML() override;
+  void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
   Geometry::Object constructGaugeVolume();
 

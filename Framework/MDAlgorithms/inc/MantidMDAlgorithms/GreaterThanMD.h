@@ -36,26 +36,27 @@ namespace MDAlgorithms {
 class DLLExport GreaterThanMD : public BooleanBinaryOperationMD {
 public:
   GreaterThanMD();
-  virtual ~GreaterThanMD();
+  ~GreaterThanMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform the GreaterThan boolean operation on two "
            "MDHistoWorkspaces.";
   }
 
-  virtual int version() const;
+  int version() const override;
 
 private:
-  bool acceptScalar() const { return true; }
-  bool commutative() const { return false; }
+  bool acceptScalar() const override { return true; }
+  bool commutative() const override { return false; }
 
-  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
-  void
-  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                  Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+  void execHistoHisto(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoScalar(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

@@ -149,9 +149,8 @@ public:
 
   void test_integrate_single_peak() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
     // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const double backgroundOuterRadius = peakRadius * 3;
     const size_t nBins = 10;
@@ -200,9 +199,8 @@ public:
 
   void test_integrate_with_differnent_outer_radius() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
     // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const size_t nBins = 10;
     const size_t nEventsInPeak = 10000;
@@ -239,12 +237,7 @@ public:
 
   void test_integrate_two_separate_but_identical_peaks() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
-    // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
-    // Add another peak
-    hklValues.push_back(V3D(5, 5, 5));
-
+    std::vector<V3D> hklValues{{2, 2, 2}, {5, 5, 5}};
     const double peakRadius = 1;
     const double backgroundOuterRadius = peakRadius * 3;
     const size_t nBins = 10;
@@ -316,11 +309,7 @@ public:
 
   void test_integrate_two_peaks_of_different_magnitude() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
-    // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
-    // Add another peak
-    hklValues.push_back(V3D(5, 5, 5));
+    std::vector<V3D> hklValues{{2, 2, 2}, {5, 5, 5}};
 
     const std::vector<double> peakRadiusVec(2, 1.0);
     const double backgroundOuterRadius = peakRadiusVec[0] * 3;
@@ -412,7 +401,7 @@ public:
     for (double i = -10; i < 10; i += 4) {
       for (double j = -10; j < 10; j += 4) {
         for (double k = -10; k < 10; k += 4) {
-          hklValues.push_back(V3D(i, j, k));
+          hklValues.emplace_back(i, j, k);
         }
       }
     }

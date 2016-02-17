@@ -69,9 +69,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   AlgorithmDialogFactoryImpl& operator = (const AlgorithmDialogFactoryImpl&);
   ///Private Destructor
-  virtual ~AlgorithmDialogFactoryImpl()
-  {
-  }
+  ~AlgorithmDialogFactoryImpl() override {}
 };
 
 #ifdef _WIN32
@@ -131,7 +129,7 @@ public:
 
 public:
   // Override createUnwrapped to search through the alias list
-  UserSubWindow * createUnwrapped(const std::string & name) const;
+  UserSubWindow *createUnwrapped(const std::string &name) const override;
 
   QSet<QString> getInterfaceCategories(const QString & interfaceName) const;
   
@@ -149,7 +147,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   UserSubWindowFactoryImpl& operator = (const UserSubWindowFactoryImpl&);
   ///Private Destructor
-  virtual ~UserSubWindowFactoryImpl() {}
+  ~UserSubWindowFactoryImpl() override {}
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow * createFromAlias(const std::string & name) const;
 

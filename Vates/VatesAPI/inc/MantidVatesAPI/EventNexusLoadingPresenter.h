@@ -39,15 +39,16 @@ namespace Mantid
     public:
       EventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                                  const std::string fileName);
-      virtual vtkSmartPointer<vtkDataSet>
+      vtkSmartPointer<vtkDataSet>
       execute(vtkDataSetFactory *factory, ProgressAction &loadingProgressUpdate,
-              ProgressAction &drawingProgressUpdate);
-      virtual void executeLoadMetadata();
-      virtual bool hasTDimensionAvailable() const;
-      virtual std::vector<double> getTimeStepValues() const;
-      virtual ~EventNexusLoadingPresenter();
-      virtual bool canReadFile() const;
-      virtual std::string getWorkspaceTypeName();
+              ProgressAction &drawingProgressUpdate) override;
+      void executeLoadMetadata() override;
+      bool hasTDimensionAvailable() const override;
+      std::vector<double> getTimeStepValues() const override;
+      ~EventNexusLoadingPresenter() override;
+      bool canReadFile() const override;
+      std::string getWorkspaceTypeName() override;
+
     private:
       const std::string m_filename;
       std::string m_wsTypeName;

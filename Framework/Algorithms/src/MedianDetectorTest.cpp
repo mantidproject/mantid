@@ -101,7 +101,7 @@ void MedianDetectorTest::exec() {
   // 0. Correct for solid angle, if desired
   if (m_solidAngle) {
     MatrixWorkspace_sptr solidAngle = getSolidAngles(m_minSpec, m_maxSpec);
-    if (solidAngle != NULL) {
+    if (solidAngle != nullptr) {
       countsWS = countsWS / solidAngle;
     }
   }
@@ -240,31 +240,31 @@ int MedianDetectorTest::maskOutliers(
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
-    std::vector<size_t> hists = indexmap.at(i);
-    double median = medianvec.at(i);
+    std::vector<size_t> &hists = indexmap[i];
+    double median = medianvec[i];
 
     PARALLEL_FOR1(countsWS)
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) {
-      const double value = countsWS->readY(hists.at(j))[0];
+      const double value = countsWS->readY(hists[j])[0];
       if ((value == 0.) && checkForMask) {
         const std::set<detid_t> &detids =
-            countsWS->getSpectrum(hists.at(j))->getDetectorIDs();
+            countsWS->getSpectrum(hists[j])->getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
           numFailed -= 1; // it was already masked
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hists.at(j));
+        countsWS->maskWorkspaceIndex(hists[j]);
         PARALLEL_ATOMIC
         ++numFailed;
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hists.at(j));
+        countsWS->maskWorkspaceIndex(hists[j]);
         PARALLEL_ATOMIC
         ++numFailed;
       }
@@ -308,9 +308,9 @@ int MedianDetectorTest::doDetectorTests(
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   PARALLEL_FOR2(countsWS, maskWS)

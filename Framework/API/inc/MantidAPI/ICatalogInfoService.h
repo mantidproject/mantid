@@ -2,6 +2,7 @@
 #define MANTID_API_ICATLOGINFOSERVICE_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace API {

@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RealFFT.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -49,9 +50,7 @@ void RealFFT::init() {
       "WorkspaceIndex", 0, mustBePositive,
       "The index of the spectrum in the input workspace to transform.");
 
-  std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty(
       "Transform", "Forward", boost::make_shared<StringListValidator>(fft_dir),
       "The direction of the transform: \"Forward\" or \"Backward\".");

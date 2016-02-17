@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -89,8 +90,8 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
     std::vector<std::pair<double, V3D>> qList;
-    for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
-      double val = unitConverter.convertUnits(event->tof());
+    for (const auto &raw_event : raw_events) {
+      double val = unitConverter.convertUnits(raw_event.tof());
       qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
       for (size_t dim = 0; dim < DIMS; ++dim) {
         buffer[dim] = locCoord[dim];
@@ -98,7 +99,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
       V3D qVec(buffer[0], buffer[1], buffer[2]);
       if (hkl_integ)
         qVec = UBinv * qVec;
-      qList.push_back(std::make_pair(event->m_weight, qVec));
+      qList.emplace_back(raw_event.m_weight, qVec);
     } // end of loop over events in list
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
@@ -179,7 +180,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
         // Account for counts in histograms by increasing the qList with the
         // same q-point
-        qList.push_back(std::make_pair(yVal, qVec));
+        qList.emplace_back(yVal, qVec);
       }
     }
     PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
@@ -357,12 +358,12 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
                                                        // just check for (0,0,0)
     {
-      peak_q_list.push_back(V3D(peaks[i].getQLabFrame()));
-      qList.push_back(std::make_pair(1., V3D(peaks[i].getQLabFrame())));
+      peak_q_list.emplace_back(peaks[i].getQLabFrame());
+      qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
       V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
                      static_cast<double>(boost::math::iround<double>(hkl[1])),
                      static_cast<double>(boost::math::iround<double>(hkl[2])));
-      hkl_vectors.push_back(V3D(miller_ind));
+      hkl_vectors.push_back(miller_ind);
       indexed_count++;
     }
   }
@@ -596,8 +597,8 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
 void IntegrateEllipsoids::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+  for (auto &detectorID : detectorIDs) {
+    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
     if (det->isMonitor())
       continue; // skip monitor
     if (!det->isMasked())

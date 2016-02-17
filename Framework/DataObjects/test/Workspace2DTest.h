@@ -92,7 +92,8 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    boost::shared_ptr<MantidVec> v(new MantidVec(nbins, aNumber));
+    boost::shared_ptr<MantidVec> v =
+        boost::make_shared<MantidVec>(nbins, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
@@ -132,8 +133,10 @@ public:
 
   void testSetData() {
     double aNumber = 5.7;
-    const boost::shared_ptr<MantidVec> v(new MantidVec(nbins, aNumber));
-    const boost::shared_ptr<MantidVec> e(new MantidVec(nbins, aNumber * 2));
+    const boost::shared_ptr<MantidVec> v =
+        boost::make_shared<MantidVec>(nbins, aNumber);
+    const boost::shared_ptr<MantidVec> e =
+        boost::make_shared<MantidVec>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
@@ -225,7 +228,7 @@ public:
 
   /** Get spectrum() */
   void testGetSpectrum() {
-    boost::shared_ptr<MatrixWorkspace> ws(new Workspace2D());
+    boost::shared_ptr<MatrixWorkspace> ws = boost::make_shared<Workspace2D>();
     ws->initialize(4, 1, 1);
     ISpectrum *spec = NULL;
     TS_ASSERT_THROWS_NOTHING(spec = ws->getSpectrum(0));

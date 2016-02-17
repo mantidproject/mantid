@@ -12,10 +12,11 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
-#include "MantidQtSliceViewer/ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include "MantidQtMantidWidgets/MWView.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 #include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -117,7 +118,7 @@ DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
     "Select a workspace for use in this operation");
 
 DECLARE_WIDGET_PLUGIN(ColorBarWidgetPlugin,
-    MantidQt::SliceViewer::ColorBarWidget,
+    MantidQt::MantidWidgets::ColorBarWidget,
     "Shows a color scale and allow user to change it");
 
 DECLARE_WIDGET_PLUGIN(SliceViewerPlugin,
@@ -131,6 +132,10 @@ DECLARE_WIDGET_PLUGIN(LineViewerPlugin,
 DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
     MantidQt::MantidWidgets::SafeQwtPlot,
     "Version of QwtPlot with workspace-level thread safety");
+
+DECLARE_WIDGET_PLUGIN(MWViewPlugin,
+    MantidQt::MantidWidgets::MWView,
+    "2D view of a MatrixWorkspace");
 
 DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
     MantidQt::API::AlgorithmPropertiesWidget,
@@ -147,5 +152,4 @@ DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
 DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
     MantidQt::MantidWidgets::DataSelector,
     "Choose a file path or workspace to work with");
-
 #endif

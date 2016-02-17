@@ -32,7 +32,7 @@ class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
                                          public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
-  virtual ~IMDEventWorkspace() {}
+  ~IMDEventWorkspace() override {}
 
   /// Returns a clone of the workspace
   IMDEventWorkspace_uptr clone() const {
@@ -80,7 +80,7 @@ public:
 
   void setFileNeedsUpdating(bool value);
 
-  virtual bool threadSafe() const;
+  bool threadSafe() const override;
 
   virtual void setCoordinateSystem(
       const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
@@ -89,12 +89,12 @@ public:
   /// from this.
   virtual void setDisplayNormalizationHisto(
       Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
-  virtual Mantid::API::MDNormalization displayNormalizationHisto() const = 0;
+  Mantid::API::MDNormalization displayNormalizationHisto() const override = 0;
 
   /// Preferred visual normalization method.
   virtual void setDisplayNormalization(
       Mantid::API::MDNormalization preferredNormalization) = 0;
-  virtual Mantid::API::MDNormalization displayNormalization() const = 0;
+  Mantid::API::MDNormalization displayNormalization() const override = 0;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -102,13 +102,13 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IMDEventWorkspace &operator=(const IMDEventWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
   /// Marker set to true when a file-backed workspace needs its back-end file
   /// updated (by calling SaveMD(UpdateFileBackEnd=1) )
   bool m_fileNeedsUpdating;
 
 private:
-  virtual IMDEventWorkspace *doClone() const = 0;
+  IMDEventWorkspace *doClone() const override = 0;
 };
 
 } // namespace MDEvents

@@ -2,8 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumRowColumn.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -25,9 +29,7 @@ void SumRowColumn::init() {
       "The name of the workspace in which to store the result.");
 
   // Need to select whether to sum rows or columns
-  std::vector<std::string> orientation;
-  orientation.push_back("D_H");
-  orientation.push_back("D_V");
+  std::vector<std::string> orientation{"D_H", "D_V"};
   declareProperty("Orientation", "",
                   boost::make_shared<StringListValidator>(orientation),
                   "Whether to sum rows (D_H) or columns (D_V).");

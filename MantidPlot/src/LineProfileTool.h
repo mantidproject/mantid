@@ -67,9 +67,11 @@ class LineProfileTool : public QWidget, public PlotToolInterface
 		LineProfileTool(Graph *graph, ApplicationWindow *app, int average_pixels);
 		void calculateLineProfile(const QPoint &start, const QPoint &end);
 
-        virtual int rtti() const {return PlotToolInterface::Rtti_LineProfileTool;};
+                int rtti() const override {
+                  return PlotToolInterface::Rtti_LineProfileTool;
+                };
 
-	signals:
+        signals:
 		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
@@ -81,20 +83,20 @@ class LineProfileTool : public QWidget, public PlotToolInterface
 		void addLineMarker(const QPoint &start, const QPoint &end);
 		/**\brief Draw line during operation (replaced by a LineMarker at the end).
 		 */
-		virtual void paintEvent(QPaintEvent *e);
-		/**\brief Pressing the left mouse button starts line selection.
+                void paintEvent(QPaintEvent *e) override;
+                /**\brief Pressing the left mouse button starts line selection.
 		 *
 		 * Clicks with anything else than the left button are propagated to the parent as usual.
 		 */
-		virtual void mousePressEvent(QMouseEvent *e);
-		/**\brief Mouse movements need to be monitored for updating the line during operation.
+                void mousePressEvent(QMouseEvent *e) override;
+                /**\brief Mouse movements need to be monitored for updating the line during operation.
 		 */
-		virtual void mouseMoveEvent(QMouseEvent *e);
-		/**\brief Mouse releases end line selection and cause the profile to be displayed.
+                void mouseMoveEvent(QMouseEvent *e) override;
+                /**\brief Mouse releases end line selection and cause the profile to be displayed.
 		 */
-		virtual void mouseReleaseEvent(QMouseEvent *e);
+                void mouseReleaseEvent(QMouseEvent *e) override;
 
-	private:
+        private:
         ApplicationWindow *d_app;
 		//! Number of image pixels over which to average.
 		int d_average_pixels;

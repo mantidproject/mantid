@@ -2,11 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 
+#include <fstream>
 #include <limits>
 #include <map>
-#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -188,10 +192,7 @@ void DiffractionFocussing::RebinWorkspace(
   double step = 0;
 
   calculateRebinParams(workspace, min, max, step);
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(-step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray{min, -step, max};
 
   g_log.information() << "Rebinning from " << min << " to " << max << " in "
                       << step << " logaritmic steps.\n";
@@ -264,7 +265,7 @@ bool DiffractionFocussing::readGroupingFile(
     // if ( ! istr.good() ) return false;
     // only allow groups with +ve ids
     if ((sel) && (group > 0)) {
-      detectorGroups.insert(std::make_pair(group, udet));
+      detectorGroups.emplace(group, udet);
     }
   }
   return true;

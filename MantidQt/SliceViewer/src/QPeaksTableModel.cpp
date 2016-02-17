@@ -158,48 +158,47 @@ namespace MantidQt
         m_dataCachePeakIndex(-1),
         m_peaksWS(peaksWS)
     {
-      int index = 0;
-      m_columnNameMap.insert(std::make_pair(index++, RUNNUMBER));
-      m_columnNameMap.insert(std::make_pair(index++, DETID));
-      m_columnNameMap.insert(std::make_pair(index++, H));
-      m_columnNameMap.insert(std::make_pair(index++, K));
-      m_columnNameMap.insert(std::make_pair(index++, L));
-      m_columnNameMap.insert(std::make_pair(index++, WAVELENGTH));
-      m_columnNameMap.insert(std::make_pair(index++, INITIAL_ENERGY));
-      m_columnNameMap.insert(std::make_pair(index++, FINAL_ENERGY));
-      m_columnNameMap.insert(std::make_pair(index++, ENERGY));
-      m_columnNameMap.insert(std::make_pair(index++, TOF));
-      m_columnNameMap.insert(std::make_pair(index++, DSPACING));
-      m_columnNameMap.insert(std::make_pair(index++, INT));
-      m_columnNameMap.insert(std::make_pair(index++, SIGMINT));
-      m_columnNameMap.insert(std::make_pair(index++, INT_SIGINT));
-      m_columnNameMap.insert(std::make_pair(index++, BINCOUNT));
-      m_columnNameMap.insert(std::make_pair(index++, BANKNAME));
-      m_columnNameMap.insert(std::make_pair(index++, ROW));
-      m_columnNameMap.insert(std::make_pair(index++, COL));
-      m_columnNameMap.insert(std::make_pair(index++, QLAB));
-      m_columnNameMap.insert(std::make_pair(index++, QSAMPLE));
+      m_columnNameMap = {{0, RUNNUMBER},
+                         {1, DETID},
+                         {2, H},
+                         {3, K},
+                         {4, L},
+                         {5, WAVELENGTH},
+                         {6, INITIAL_ENERGY},
+                         {7, FINAL_ENERGY},
+                         {8, ENERGY},
+                         {9, TOF},
+                         {10, DSPACING},
+                         {11, INT},
+                         {12, SIGMINT},
+                         {13, INT_SIGINT},
+                         {14, BINCOUNT},
+                         {15, BANKNAME},
+                         {16, ROW},
+                         {17, COL},
+                         {18, QLAB},
+                         {19, QSAMPLE}};
 
-      m_sortableColumns.insert(std::make_pair(RUNNUMBER, true));
-      m_sortableColumns.insert(std::make_pair(DETID, true));
-      m_sortableColumns.insert(std::make_pair(H,true));
-      m_sortableColumns.insert(std::make_pair(K,true));
-      m_sortableColumns.insert(std::make_pair(L,true));
-      m_sortableColumns.insert(std::make_pair(WAVELENGTH,true));
-      m_sortableColumns.insert(std::make_pair(ENERGY,false));
-      m_sortableColumns.insert(std::make_pair(INITIAL_ENERGY,true));
-      m_sortableColumns.insert(std::make_pair(FINAL_ENERGY,true));
-      m_sortableColumns.insert(std::make_pair(TOF,true));
-      m_sortableColumns.insert(std::make_pair(DSPACING, true));
-      m_sortableColumns.insert(std::make_pair(INT, true));
-      m_sortableColumns.insert(std::make_pair(SIGMINT, true));
-      m_sortableColumns.insert(std::make_pair(INT_SIGINT, false));
-      m_sortableColumns.insert(std::make_pair(BINCOUNT, true));
-      m_sortableColumns.insert(std::make_pair(BANKNAME, true));
-      m_sortableColumns.insert(std::make_pair(ROW, true));
-      m_sortableColumns.insert(std::make_pair(COL, true));
-      m_sortableColumns.insert(std::make_pair(QLAB, false));
-      m_sortableColumns.insert(std::make_pair(QSAMPLE, false));
+      m_sortableColumns = {{RUNNUMBER, true},
+                           {DETID, true},
+                           {H, true},
+                           {K, true},
+                           {L, true},
+                           {WAVELENGTH, true},
+                           {ENERGY, false},
+                           {INITIAL_ENERGY, true},
+                           {FINAL_ENERGY, true},
+                           {TOF, true},
+                           {DSPACING, true},
+                           {INT, true},
+                           {SIGMINT, true},
+                           {INT_SIGINT, false},
+                           {BINCOUNT, true},
+                           {BANKNAME, true},
+                           {ROW, true},
+                           {COL, true},
+                           {QLAB, false},
+                           {QSAMPLE, false}};
 
       if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec", m_hklPrec))
         m_hklPrec = 2;

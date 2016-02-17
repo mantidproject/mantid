@@ -231,8 +231,8 @@ PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
   totalProfile->initialize();
 
   std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
-  for (auto it = peaks.begin(); it != peaks.end(); ++it) {
-    totalProfile->addFunction(getPeakProfile(*it));
+  for (auto &peak : peaks) {
+    totalProfile->addFunction(getPeakProfile(peak));
   }
 
   totalProfile->addFunction(FunctionFactory::Instance().createInitialized(
@@ -288,8 +288,7 @@ PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
   m_fitplots->removeAll();
 
-  for (size_t i = 0; i < reducedRanges.size(); ++i) {
-    RefinedRange_sptr currentRange = reducedRanges[i];
+  for (auto currentRange : reducedRanges) {
     int nMin = getBestChebyshevPolynomialDegree(dataWorkspace, currentRange);
 
     if (nMin > -1) {

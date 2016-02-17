@@ -5,6 +5,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -81,7 +83,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   }
   // Initialize the data
   m_noVectors = NVectors;
-  data.resize(m_noVectors, NULL);
+  data.resize(m_noVectors, nullptr);
   // Make sure SOMETHING exists for all initialized spots.
   for (size_t i = 0; i < m_noVectors; i++)
     data[i] = new EventList(mru, specid_t(i));
@@ -377,11 +379,10 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// The total number of events across all of the spectra.
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
-  size_t total = 0;
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    total += (*it)->getNumberEvents();
-  }
-  return total;
+  return std::accumulate(data.begin(), data.end(), size_t{0},
+                         [](size_t total, EventList *list) {
+                           return total + list->getNumberEvents();
+                         });
 }
 
 //-----------------------------------------------------------------------------
@@ -391,8 +392,8 @@ size_t EventWorkspace::getNumberEvents() const {
  */
 Mantid::API::EventType EventWorkspace::getEventType() const {
   Mantid::API::EventType out = Mantid::API::TOF;
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    Mantid::API::EventType thisType = (*it)->getEventType();
+  for (auto list : this->data) {
+    Mantid::API::EventType thisType = list->getEventType();
     if (static_cast<int>(out) < static_cast<int>(thisType)) {
       out = thisType;
       // This is the most-specialized it can get.
@@ -448,14 +449,13 @@ void EventWorkspace::clearData() {
 //-----------------------------------------------------------------------------
 /// Returns the amount of memory used in bytes
 size_t EventWorkspace::getMemorySize() const {
-  size_t total = 0;
-
   // TODO: Add the MRU buffer
 
   // Add the memory from all the event lists
-  for (auto it = this->data.begin(); it != this->data.end(); ++it) {
-    total += (*it)->getMemorySize();
-  }
+  size_t total = std::accumulate(data.begin(), data.end(), size_t{0},
+                                 [](size_t total, EventList *list) {
+                                   return total + list->getMemorySize();
+                                 });
 
   total += run().getMemorySize();
 
@@ -822,7 +822,7 @@ public:
   }
 
   // Execute the sort as specified.
-  void run() {
+  void run() override {
     if (!m_WS)
       return;
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
@@ -884,7 +884,7 @@ EventSortType EventWorkspace::getSortType() const {
 void EventWorkspace::sortAll(EventSortType sortType,
                              Mantid::API::Progress *prog) const {
   if (this->getSortType() == sortType) {
-    if (prog != NULL) {
+    if (prog != nullptr) {
       prog->reportIncrement(this->data.size());
     }
     return;

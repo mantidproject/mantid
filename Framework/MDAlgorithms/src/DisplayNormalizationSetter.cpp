@@ -39,14 +39,10 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
     Mantid::API::IMDWorkspace_sptr mdWorkspace,
     const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ,
     const Mantid::Kernel::DeltaEMode::Type &mode) {
-  auto isEventWorkspace = true;
-  if (boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-          underlyingWorkspace)) {
-    isEventWorkspace = true;
-  } else {
-    isEventWorkspace = false;
-  }
 
+  auto isEventWorkspace = static_cast<bool>(
+      boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+          underlyingWorkspace));
   Mantid::API::MDNormalization displayNormalization(
       Mantid::API::MDNormalization::VolumeNormalization);
   Mantid::API::MDNormalization displayNormalizationHisto(

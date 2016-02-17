@@ -4,8 +4,11 @@
  *WIKI*/
 
 #include "MantidDataHandling/LoadILLReflectometry.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
@@ -34,7 +37,7 @@ LoadILLReflectometry::LoadILLReflectometry() {
   m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
   m_numberOfChannels = 0;      // time channels - Z
   m_numberOfHistograms = 0;
-  m_supportedInstruments.push_back("D17");
+  m_supportedInstruments.emplace_back("D17");
 }
 
 //----------------------------------------------------------------------------------------------

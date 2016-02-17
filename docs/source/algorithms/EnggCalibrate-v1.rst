@@ -67,16 +67,16 @@ Usage
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
-   Difc1, Zero1 = EnggCalibrate(InputWorkspace=ws_name,
-                                VanIntegrationWorkspace=van_integ_ws,
-                                VanCurvesWorkspace=van_curves_ws,
-                                ExpectedPeaks=[1.097, 2.1], Bank='1',
-                                OutputParametersTableName=out_tbl_name)
+   Difc1, Zero1, peaks1 = EnggCalibrate(InputWorkspace=ws_name,
+                                        VanIntegrationWorkspace=van_integ_ws,
+                                        VanCurvesWorkspace=van_curves_ws,
+                                        ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                        OutputParametersTableName=out_tbl_name)
 
-   Difc2, Zero2 = EnggCalibrate(InputWorkspace=ws_name,
-                                VanIntegrationWorkspace=van_integ_ws,
-                                VanCurvesWorkspace=van_curves_ws,
-                                ExpectedPeaks=[1.097, 2.1], Bank='2')
+   Difc2, Zero2, peaks2 = EnggCalibrate(InputWorkspace=ws_name,
+                                        VanIntegrationWorkspace=van_integ_ws,
+                                        VanCurvesWorkspace=van_curves_ws,
+                                        ExpectedPeaks=[1.097, 2.1], Bank='2')
 
    # You can produce an instrument parameters (iparam) file for GSAS.
    # Note that this is very specific to ENGIN-X

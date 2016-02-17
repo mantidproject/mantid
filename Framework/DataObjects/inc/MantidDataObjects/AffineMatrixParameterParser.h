@@ -21,12 +21,12 @@ public:
   * @param parameterElement : xml element to parser from.
   * @return Fully constructed AffineMatrixParameter.
   */
-  virtual AffineMatrixParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  AffineMatrixParameter *
+  createParameter(Poco::XML::Element *parameterElement) override;
   /// Set a successor parser for chain-of-responsibility type reading.
-  virtual void setSuccessorParser(ImplicitFunctionParameterParser *);
+  void setSuccessorParser(ImplicitFunctionParameterParser *) override;
   /// Destructor
-  virtual ~AffineMatrixParameterParser();
+  ~AffineMatrixParameterParser() override;
 
 private:
   /// Assignment operator

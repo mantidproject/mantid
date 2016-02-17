@@ -37,20 +37,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport DgsReduction : public API::DataProcessorAlgorithm {
 public:
   DgsReduction();
-  virtual ~DgsReduction();
+  ~DgsReduction() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Top-level workflow algorithm for DGS reduction.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   API::Workspace_sptr loadInputData(const std::string prop,
                                     const bool mustLoad = true);
   API::MatrixWorkspace_sptr loadGroupingFile(const std::string prop);

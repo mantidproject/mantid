@@ -1,12 +1,15 @@
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -199,8 +202,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
           if (!dims.empty()) {
             size_t newPixels = 1;
-            for (size_t i = 0; i < dims.size(); i++)
-              newPixels *= dims[i];
+            for (auto dim : dims)
+              newPixels *= dim;
             m_numPixels += newPixels;
           }
         } else {
@@ -547,9 +550,8 @@ void LoadTOFRawNexus::exec() {
 
   // Load each bank sequentially
   // PARALLEL_FOR1(WS)
-  for (int i = 0; i < int(bankNames.size()); i++) {
+  for (auto bankName : bankNames) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << std::endl;
     loadBank(filename, entry_name, bankName, WS, id_to_wi);

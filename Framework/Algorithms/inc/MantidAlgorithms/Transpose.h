@@ -7,6 +7,12 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+// forward declarations
+namespace API {
+class Axis;
+}
+
 namespace Algorithms {
 /**
 This algorithm "transposes" the bins of the input workspace into a single
@@ -44,25 +50,25 @@ public:
   /// (Empty) Constructor
   Transpose() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~Transpose() {}
+  ~Transpose() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Transpose"; }
+  const std::string name() const override { return "Transpose"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Transposes a workspace, so that an N1 x N2 workspace becomes N2 x "
            "N1.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Axes"; }
+  const std::string category() const override { return "Transforms\\Axes"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Create the output workspace
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::MatrixWorkspace_const_sptr workspace);

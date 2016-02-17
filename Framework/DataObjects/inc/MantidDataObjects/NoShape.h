@@ -36,19 +36,19 @@ public:
   /// Constructor
   NoShape();
   /// Destructor
-  virtual ~NoShape();
+  ~NoShape() override;
   /// Serialize
-  std::string toJSON() const;
+  std::string toJSON() const override;
   /// Clone
-  NoShape *clone() const;
+  NoShape *clone() const override;
   /// Return the algorithn name
-  std::string algorithmName() const;
+  std::string algorithmName() const override;
   /// Return the algorithm version
-  int algorithmVersion() const;
+  int algorithmVersion() const override;
   /// Return the shape name
-  std::string shapeName() const;
+  std::string shapeName() const override;
   /// Get the coordinate frame
-  Kernel::SpecialCoordinateSystem frame() const;
+  Kernel::SpecialCoordinateSystem frame() const override;
 };
 
 } // namespace DataObjects
