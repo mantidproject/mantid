@@ -102,9 +102,7 @@ Example Algorithms
 Writing your own algorithm
 --------------------------
 
-A primer for this is `here <http://www.mantidproject.org/Writing_an_Algorithm>`__. Also look at the
-examples in the :ref:`UserAlgorithms <UserAlgorithms>` directory of your
-Mantid installation.
+A primer for this is `here <http://www.mantidproject.org/Writing_an_Algorithm>`__.
 
 
 
