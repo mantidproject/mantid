@@ -32,8 +32,8 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     std::ostringstream lexer;
     lexer << "pixel-" << i << ")";
     Detector *physicalPixel =
-        new Detector(lexer.str(), workspace.getAxis(1)->spectraNo(i), pixelShape,
-                     instrument.get());
+        new Detector(lexer.str(), workspace.getAxis(1)->spectraNo(i),
+                     pixelShape, instrument.get());
     int ycount(i);
     if (startYNegative)
       ycount -= 1;
@@ -48,8 +48,8 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   if (includeMonitors) // These occupy the last 2 spectra
   {
     Detector *monitor1 =
-        new Detector("mon1", workspace.getAxis(1)->spectraNo(ndets), Object_sptr(),
-                     instrument.get());
+        new Detector("mon1", workspace.getAxis(1)->spectraNo(ndets),
+                     Object_sptr(), instrument.get());
     monitor1->setPos(-9.0, 0.0, 0.0);
     instrument->add(monitor1);
     instrument->markAsMonitor(monitor1);
@@ -83,8 +83,8 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
   // chopper position
-  Component *chop_pos =
-      new Component("chopper-position", Kernel::V3D(-10, 0, 0), instrument.get());
+  Component *chop_pos = new Component("chopper-position",
+                                      Kernel::V3D(-10, 0, 0), instrument.get());
   instrument->add(chop_pos);
 }
 }
