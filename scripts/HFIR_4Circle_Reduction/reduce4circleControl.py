@@ -32,25 +32,73 @@ class PeakInfo(object):
     It does not contain peak workspace but will hold
     """
     def __init__(self, exp_number, scan_number, peak_ws_name):
-        """ Init
+        """ Initialization
+        Purpose: set up unchanged parameters including experiment number, scan number and peak workspace's name
         """
-        # TODO/NOW/ - Doc
-
+        # check
         assert isinstance(exp_number, int) and isinstance(scan_number, int)
         assert isinstance(peak_ws_name) and AnalysisDataService.doesExist(peak_ws_name)
 
-        # Set
+        # set
         self._myExpNumber = exp_number
         self._myScanNumber = scan_number
         self._myPeakWorkspaceName = peak_ws_name
 
+        #
+        self._myDataMDWorkspaceName = None
+
         # Define class variable
-        self._userHKL = [0, 0, 0]
+        self._userHKL = None
+        self._avgPeakCenter = None
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
 
         self._myLastPeakUB = None
+
+        return
+
+    def calculate_peak_center(self):
+        """ Calculate peak's center by averaging the peaks found and stored in PeakWorkspace
+        :return:
+        """
+        # Go through the peak workspaces to calculate peak center with weight (monitor and counts)
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+
+        # spice table workspace
+        spice_table_name = get_spice_table_name(self._myExpNumber, self._myExpNumber)
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+
+        pt_spice_row_dict = build_pt_spice_table_row_map(spice_table_ws)
+        det_col_index = spice_table_ws.getColumnNames().index('detector')
+        monitor_col_index = spice_table_ws.getColumnNames().index('monitor')
+
+        num_found_peaks = peak_ws.rowCount()
+
+        q_sample_sum = numpy.array([0., 0., 0.])
+        weight_sum = 0.
+
+        for i_peak in xrange(num_found_peaks):
+            # get peak
+            peak_i = peak_ws.getPeak(i_peak)
+            run_number = peak_i.getRunNumber()
+            # get Pt. number
+            pt_number = run_number % self._myScanNumber
+            # get row number and then detector counts and monitor counts
+            row_index = pt_spice_row_dict[pt_number]
+            det_counts = spice_table_ws.cell(row_index, det_col_index)
+            monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
+            # convert q sample from V3D to ndarray
+            q_i = peak_i.getQSampleFrame()
+            q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
+            # calculate weight
+            weight_i = float(det_counts)/float(monitor_counts)
+            # contribute to total
+            weight_sum += weight_i
+            q_sample_sum += q_array * weight_i
+        # END-FOR (i_peak)
+
+        self._avgPeakCenter = q_sample_sum/weight_sum
 
         return
 
@@ -79,16 +127,38 @@ class PeakInfo(object):
 
         return hkl[0], hkl[1], hkl[2]
 
-    def set(self, peak_ws_name):
-        """
-
-        :param peak_ws_name:
+    def retrieve_hkl_from_spice_table(self):
+        """ Get averaged HKL from SPICE table
+        HKL will be averaged from SPICE table by assuming the value in SPICE might be right
         :return:
         """
-        # TODO/NOW - Doc and check
-        self._peakWorkspaceName = peak_ws_name
+        # get SPICE table
+        spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
+        assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for exp %d scan %d cannot be found.' \
+                                                              '' % (self._myExpNumber, self._myScanNumber)
 
-        return
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+
+        # get HKL column indexes
+        h_col_index = spice_table_ws.getColumnNames().index('h')
+        k_col_index = spice_table_ws.getColumnNames().index('k')
+        l_col_index = spice_table_ws.getColumnNames().index('l')
+
+        # scan each Pt.
+        hkl = numpy.array([0., 0., 0.])
+
+        num_rows = spice_table_ws.rowCount()
+        for row_index in xrange(num_rows):
+            h = spice_table_ws.cell(row_index, h_col_index)
+            k = spice_table_ws.cell(row_index, k_col_index)
+            l = spice_table_ws.cell(row_index, l_col_index)
+            hkl += numpy.array([h, k, l])
+        # END-FOR
+
+        self._userHKL = hkl/num_rows
+
+        return self._userHKL
+
 
     def set_from_run_info(self, exp_number, scan_number, pt_number):
         """ Set from run information with parent
@@ -97,6 +167,7 @@ class PeakInfo(object):
         :param pt_number:
         :return:
         """
+        raise NotImplementedError('Not sure how to deal with this method!')
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
         assert isinstance(pt_number, int)
@@ -116,6 +187,18 @@ class PeakInfo(object):
 
         return True, ''
 
+    def set_data_ws_name(self, md_ws_name):
+        """ Set the name of MDEventWorkspace with merged Pts.
+        :param md_ws_name:
+        :return:
+        """
+        assert isinstance(md_ws_name, str)
+        assert AnalysisDataService.doesExist(md_ws_name)
+
+        self._myDataMDWorkspaceName = md_ws_name
+
+        return
+
     def set_from_peak_ws(self, peak_ws, peak_index):
         """
         Set from peak workspace
@@ -130,8 +213,6 @@ class PeakInfo(object):
             peak = peak_ws.getPeak(peak_index)
         except RuntimeError as run_err:
             raise RuntimeError(run_err)
-
-        self._myPeak = peak
 
         return
 
@@ -519,62 +600,8 @@ class CWSCDReductionControl(object):
                         OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name)
 
-        # Go through the peak workspaces to calculate peak center with weight (monitor and counts)
-        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
-
-        spice_table_name = get_spice_table_name(exp_number, scan_number)
-        spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
-        pt_spice_row_dict = build_pt_spice_table_row_map(spice_table_ws)
-        det_col_index = spice_table_ws.getColumnNames().index('detector')
-        monitor_col_index = spice_table_ws.getColumnNames().index('monitor')
-
-        num_found_peaks = peak_ws.rowCount()
-
-        q_sample_sum = numpy.array([0., 0., 0.])
-
-        for i_peak in xrange(num_found_peaks):
-            # get peak
-            peak_i = peak_ws.getPeak(i_peak)
-            run_number = peak_i.getRunNumber()
-            # get Pt. number
-            pt_number = run_number % scan_number
-            # get row number and then detector counts and monitor counts
-            row_index = pt_spice_row_dict[pt_number]
-            det_counts = spice_table_ws.cell(row_index, det_col_index)
-            monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
-            # convert q sample from V3D to ndarray
-            q_i = peak_i.getQSampleFrame()
-            q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
-            # add
-            # TODO/NOW : do weighted average to q_sample_sum
-
-            q_sample_sum += q_array
-        # END-FOR
-
-        avg_peak_center = q_sample_sum/num_found_peaks
-
         # add peak to UB matrix workspace to manager
-        self._add_ub_peak_ws(exp_number, scan_number, peak_ws_name, merged_ws_name, avg_peak_center)
-
-        """
-        # self._myPtMDDict[(exp_number, scan_number, pt_number_list)] = pt_md_ws
-
-        num_peaks = peak_ws.getNumberPeaks()
-        if num_peaks != 1:
-            err_msg = 'Find %d peak from scan %d pt %d.  '
-                      'For UB matrix calculation, 1 and only 1 peak is allowed' % (num_peaks, scan_number, pt_number_list)
-            return False, err_msg
-        else:
-            self._add_ub_peak_ws(exp_number, scan_number, pt_number_list, peak_ws)
-            status, ret_obj = self.add_peak_info(exp_number, scan_number, pt_number_list)
-            if status is True:
-                pass
-                # peak_info = ret_obj
-                # peak_info.set_md_ws(pt_md_ws)
-            else:
-                err_msg = ret_obj
-                return False, err_msg
-        """
+        self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
 
         return True, ''
 
@@ -1467,7 +1494,7 @@ class CWSCDReductionControl(object):
 
         return
 
-    def _set_peak_info(self, exp_number, scan_number, peak_ws_name, md_ws_name, peak_centre):
+    def _set_peak_info(self, exp_number, scan_number, peak_ws_name, md_ws_name):
         """ Add or modify a PeakInfo object for UB matrix calculation and etc.
         :param exp_number:
         :param scan_number:
@@ -1481,31 +1508,14 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
         assert isinstance(peak_ws_name, str)
         assert isinstance(md_ws_name, str)
-        assert isinstance(peak_centre, numpy.ndarray) and peak_centre.shape == (3,)
 
         # create a PeakInfo instance if it does not exist
         peak_info = PeakInfo(exp_number, scan_number, peak_ws_name)
         self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
 
-        # TODO/NOW/1st Continue from here!
-
-        has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
-        if has_peak_ws is False:
-            err_msg = 'No peak workspace found for Exp %s Scan %s Pt %s' % (
-                exp_number, scan_number, pt_number)
-            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
-            return False, err_msg
-
-        if peak_ws.rowCount() > 1:
-            err_msg = 'There are more than 1 peak in PeaksWorkspace.'
-            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
-            return False, err_msg
-
-        peak_info = PeakInfo(self)
-        peak_info.set_from_run_info(exp_number, scan_number, pt_number)
-
-        # Add to data management
-        self._myPeakInfoDict[(exp_number, scan_number, pt_number)] = peak_info
+        # set the other information
+        peak_info.set_data_ws_name(md_ws_name)
+        peak_info.calculate_peak_center()
 
         return True, peak_info
 
