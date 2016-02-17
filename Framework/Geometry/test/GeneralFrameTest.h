@@ -28,7 +28,7 @@ public:
   }
 
   void test_string_unit_construction() {
-    auto unit = Mantid::Kernel::make_unique<LabelUnit>(Units::Symbol::Metre);
+    auto unit = make_unique<LabelUnit>(Units::Symbol::Metre);
     GeneralFrame frame("Distance", std::move(unit) /*sink transfer ownership*/);
     TS_ASSERT(unit.get() == NULL);
     TS_ASSERT_EQUALS(Units::Symbol::Metre, frame.getUnitLabel());
