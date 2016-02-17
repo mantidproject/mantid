@@ -1,9 +1,10 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
