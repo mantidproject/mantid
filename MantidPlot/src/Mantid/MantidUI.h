@@ -420,7 +420,7 @@ signals:
     void manageMantidWorkspaces();
 
     //Python related functions
-    InstrumentWindow *getInstrumentView(const QString & wsName, int tab = -1);
+    InstrumentWindow *getInstrumentView(const QString &wsName, int tab = -1);
 
     void showMantidInstrument();
 

@@ -46,8 +46,8 @@ class NonLinearFit : public Fit
                 void setParametersList(const QStringList &lst) override;
                 void setFormula(const QString &s) override;
 
-        private:
-          void calculateFitCurveData(double *X, double *Y) override;
+              private:
+                void calculateFitCurveData(double *X, double *Y) override;
                 void init();
 };
 #endif

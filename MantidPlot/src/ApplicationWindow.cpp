@@ -4828,7 +4828,7 @@ void ApplicationWindow::openProjectFolder(std::string lines,
             mantidUI->getInstrumentView(QString::fromStdString(wsName)));
         if (iw) {
           iw->loadFromProject(*it, this, fileVersion);
-		}
+        }
       }
     }
   }

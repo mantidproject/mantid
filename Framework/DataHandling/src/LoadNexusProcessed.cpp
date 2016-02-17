@@ -30,9 +30,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
-#include <nexus/NeXusException.hpp>
+#include <MantidKernel/StringTokenizer.h>
 
-#include <Poco/StringTokenizer.h>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -1759,7 +1759,8 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
 void LoadNexusProcessed::getWordsInString(const std::string &words3,
                                           std::string &w1, std::string &w2,
                                           std::string &w3) {
-  Poco::StringTokenizer data(words3, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 3) {
     g_log.warning() << "Algorithm list line " + words3 +
                            " is not of the correct format\n";
@@ -1785,7 +1786,8 @@ void LoadNexusProcessed::getWordsInString(const std::string &words3,
 void LoadNexusProcessed::getWordsInString(const std::string &words4,
                                           std::string &w1, std::string &w2,
                                           std::string &w3, std::string &w4) {
-  Poco::StringTokenizer data(words4, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 4) {
     g_log.warning() << "Algorithm list line " + words4 +
                            " is not of the correct format\n";

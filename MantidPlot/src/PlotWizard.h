@@ -105,7 +105,7 @@ public slots:
 	//! Accept settings, close the dialog
         void accept() override;
         //! Add column as Z
-	void addZCol();
+        void addZCol();
 
 private:
     void plot3D(const QStringList& lst);

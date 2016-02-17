@@ -2045,7 +2045,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
-  
+
   try
   {
     InstrumentWindow *insWin = new InstrumentWindow(
@@ -2087,14 +2087,14 @@ void MantidUI::showMantidInstrument(const QString& wsName)
       m_lastShownInstrumentWin->close();
       QPoint p = m_lastShownInstrumentWin->pos();
       delete m_lastShownInstrumentWin;
-	  insWin->move(p);
+      insWin->move(p);
     }
   }
   m_lastShownInstrumentWin = insWin;
 
   if (!insWin->isVisible())
   {
-	  insWin->show();
+    insWin->show();
   }
 }
 

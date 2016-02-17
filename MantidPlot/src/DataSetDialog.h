@@ -49,7 +49,7 @@ public:
 
 public slots:
   void accept() override;
-        void setCurveNames(const QStringList& names);
+  void setCurveNames(const QStringList &names);
   void setOperationType(ApplicationWindow::Analysis operation){d_operation = operation;}
 	void setCurentDataSet(const QString& s);
 

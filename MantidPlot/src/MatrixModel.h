@@ -78,9 +78,9 @@ public:
                            const QModelIndex &parent = QModelIndex()) override;
 
         virtual double x(int col) const;
-	virtual double y(int row) const;
+        virtual double y(int row) const;
 
-	virtual double cell(int row, int col) const;
+        virtual double cell(int row, int col) const;
 	virtual void setCell(int row, int col, double val);
 
 	virtual QString text(int row, int col);
@@ -99,14 +99,15 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const override;
 
-        virtual void setImage(const QImage& image);
+    virtual void setImage(const QImage &image);
 
-	virtual 
-    bool importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
-					bool simplifySpaces, const QString& commentString, int importAs,
-					const QLocale& locale, int endLineChar = 0, int maxRows = -1);
+    virtual bool importASCII(const QString &fname, const QString &sep,
+                             int ignoredLines, bool stripSpaces,
+                             bool simplifySpaces, const QString &commentString,
+                             int importAs, const QLocale &locale,
+                             int endLineChar = 0, int maxRows = -1);
 
-	void setLocale(const QLocale& locale){d_locale = locale;};
+        void setLocale(const QLocale& locale){d_locale = locale;};
 	void setNumericFormat(char f, int prec);
 
 	virtual bool initWorkspace();

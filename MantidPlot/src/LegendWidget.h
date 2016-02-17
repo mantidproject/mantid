@@ -44,10 +44,10 @@ public:
   explicit LegendWidget(Plot *);
   ~LegendWidget() override;
 
-        void clone(LegendWidget* t);
-	QwtPlot *plot(){return d_plot;};
+  void clone(LegendWidget *t);
+  QwtPlot *plot() { return d_plot; };
 
-	//! The kinds of frame a LegendWidget can draw around the Text.
+        //! The kinds of frame a LegendWidget can draw around the Text.
 	enum FrameStyle{None = 0, Line = 1, Shadow = 2};
 
 	QString text(){return d_text->text();};
@@ -103,9 +103,9 @@ private:
         };
 
         //! Parent plot
-	Plot *d_plot;
+        Plot *d_plot;
 
-	//! Frame type
+        //! Frame type
 	int d_frame;
 
 	//! Rotation angle: not implemented yet

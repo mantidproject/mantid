@@ -13,10 +13,13 @@
   \date   March 2009
   \version 1.0
 
-  This class has the implementation for calling the children of ICompAssembly's IObjComponent to render themselves
-  and call the ICompAssemblys. This maintains the count of the children for easy lookup.
+  This class has the implementation for calling the children of ICompAssembly's
+  IObjComponent to render themselves
+  and call the ICompAssemblys. This maintains the count of the children for easy
+  lookup.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -35,59 +38,53 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-namespace Mantid
-{
-namespace Kernel
-{
-  class V3D;
+namespace Mantid {
+namespace Kernel {
+class V3D;
 }
-namespace Geometry
-{
-  class ICompAssembly;
-  class Object;
+namespace Geometry {
+class ICompAssembly;
+class Object;
+}
 }
 
-}
+namespace MantidQt {
+namespace MantidWidgets {
+class InstrumentActor;
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-		class InstrumentActor;
+class ObjComponentActor;
 
-		class ObjComponentActor;
+class CompAssemblyActor : public ICompAssemblyActor {
+public:
+  CompAssemblyActor(
+      const InstrumentActor &instrActor,
+      const Mantid::Geometry::ComponentID &compID); ///< Constructor
+  ~CompAssemblyActor() override;
+  std::string type() const override {
+    return "CompAssemblyActor";
+  }                                               ///< Type of the GL object
+  void draw(bool picking = false) const override; ///< Method that defines
+  /// ObjComponent geometry. Calls
+  /// ObjComponent draw method
+  void setChildVisibility(bool) override;
+  bool hasChildVisible() const override;
+  bool accept(GLActorVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) override;
+  bool accept(GLActorConstVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) const override;
+  void setColors() override;
 
-		class CompAssemblyActor : public ICompAssemblyActor
-		{
-		public:
-			CompAssemblyActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Constructor
-                        ~CompAssemblyActor() override;
-                        std::string type() const override {
-                          return "CompAssemblyActor";
-                        } ///< Type of the GL object
-                        void draw(bool picking = false)
-                            const override; ///< Method that defines
-                                            ///ObjComponent geometry. Calls
-                                            ///ObjComponent draw method
-                        void setChildVisibility(bool) override;
-                        bool hasChildVisible() const override;
-                        bool accept(GLActorVisitor &visitor,
-                                    VisitorAcceptRule rule = VisitAll) override;
-                        bool accept(
-                            GLActorConstVisitor &visitor,
-                            VisitorAcceptRule rule = VisitAll) const override;
-                        void setColors() override;
+protected:
+  mutable std::vector<ObjComponentActor *>
+      mChildObjCompActors; ///< List of ObjComponent Actors
+  mutable std::vector<ICompAssemblyActor *>
+      mChildCompAssemActors; ///< List of CompAssembly Actors
+private:
+  void AppendBoundingBox(const Mantid::Kernel::V3D &minBound,
+                         const Mantid::Kernel::V3D &maxBound);
+};
 
-                protected:
-			mutable std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
-			mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
-		private:
-			void AppendBoundingBox(const Mantid::Kernel::V3D& minBound, const Mantid::Kernel::V3D& maxBound);
-		};
-
-	}//MantidWidgets
-}//MantidQt
-
+} // MantidWidgets
+} // MantidQt
 
 #endif /*GLTRIANGLE_H_*/
-

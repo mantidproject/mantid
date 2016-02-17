@@ -63,7 +63,7 @@ private:
         QSize sizeHint() const override;
         void customEvent(QEvent *e) override;
 
-        ScriptEditor* commands;
+        ScriptEditor *commands;
     QPushButton* btnCancel;
 	QSpinBox *startRow, *endRow, *startCol, *endCol;
 	QPushButton *btnApply;

@@ -98,7 +98,7 @@ public:
   };
   bool fatalError(const QXmlParseException &) override { return false; };
   QString errorString() const override { return errorStr; };
-        QString parentName(){return d_widget_name;};
+  QString parentName() { return d_widget_name; };
 
 private:
     bool metFitTag;

@@ -59,10 +59,10 @@ public:
 	double transformValue(double value) const;
         QwtText label(double value) const override;
 
-        int labelNumericPrecision(){return d_prec;};
-	void setNumericPrecision(int prec){d_prec = prec;};
+        int labelNumericPrecision() { return d_prec; };
+        void setNumericPrecision(int prec) { d_prec = prec; };
 
-	int majorTicksStyle()const{return d_majTicks;};
+        int majorTicksStyle()const{return d_majTicks;};
 	void setMajorTicksStyle(TicksStyle type){d_majTicks = type;};
 
 	int minorTicksStyle()const{return d_minTicks;};
@@ -97,7 +97,7 @@ protected:
   void drawLabel(QPainter *painter, double value) const override;
   void drawTick(QPainter *p, double value, int len) const override;
   void drawBackbone(QPainter *painter) const override;
-        void drawBreak(QPainter *) const;
+  void drawBreak(QPainter *) const;
 
 private:
 	//! Pointer to the parent plot

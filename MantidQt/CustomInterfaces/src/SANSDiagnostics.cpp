@@ -379,8 +379,7 @@ namespace MantidQt
         Mantid::Geometry::IComponent_sptr comp=(*inst)[i];
         boost::shared_ptr<Mantid::Geometry::RectangularDetector> det = 
           boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>( comp );
-        if (det)
-        {
+        if (det) {
           auto rect = boost::make_shared<RectDetectorDetails>();
           rect->setDetectorName(QString::fromStdString(det->getName()));
           rect->setMinimumDetectorId(det->minDetectorID());
@@ -398,8 +397,7 @@ namespace MantidQt
             for (int j=0; j < assem->nelements(); j++)
             {
               det = boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>( (*assem)[j] );
-              if (det) 
-              {
+              if (det) {
 
                 auto rect = boost::make_shared<RectDetectorDetails>();
                 rect->setDetectorName(QString::fromStdString(det->getName()));
