@@ -271,7 +271,7 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 /** Generate statistic information table workspace
   */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");

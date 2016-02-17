@@ -667,7 +667,7 @@ void LeBailFit::execRefineBackground() {
   }
 
   // 5. Output background to table workspace
-  TableWorkspace_sptr outtablews(new TableWorkspace());
+  auto outtablews = boost::make_shared<TableWorkspace>();
   outtablews->addColumn("str", "Name");
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");

@@ -81,7 +81,7 @@ void ExtractMaskToTable::exec() {
         "XMin or XMax cannot be empty.  XMin must be less than XMax.");
 
   // Create and set up output workspace
-  TableWorkspace_sptr outws(new TableWorkspace());
+  auto outws = boost::make_shared<TableWorkspace>();
   outws->addColumn("double", "XMin");
   outws->addColumn("double", "XMax");
   outws->addColumn("str", "DetectorIDsList");
