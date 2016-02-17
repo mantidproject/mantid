@@ -1,6 +1,7 @@
 #include "MantidAPI/GeometryInfo.h"
 
 #include "MantidAPI/ISpectrum.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
