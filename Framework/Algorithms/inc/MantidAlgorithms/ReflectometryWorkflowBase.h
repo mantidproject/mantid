@@ -1,8 +1,9 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -83,7 +84,7 @@ protected:
   /// Get the min/max property values
   MinMax getMinMax(const std::string &minProperty,
                    const std::string &maxProperty) const;
-  OptionalMinMax getOptionalMinMax(Mantid::API::Algorithm *alg,
+  OptionalMinMax getOptionalMinMax(Mantid::API::Algorithm *const alg,
                                    const std::string &minProperty,
                                    const std::string &maxProperty,
                                    Mantid::Geometry::Instrument_const_sptr inst,

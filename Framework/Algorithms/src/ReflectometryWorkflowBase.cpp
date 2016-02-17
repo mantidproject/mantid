@@ -194,7 +194,7 @@ ReflectometryWorkflowBase::getMinMax(const std::string &minProperty,
 
 ReflectometryWorkflowBase::OptionalMinMax
 ReflectometryWorkflowBase::getOptionalMinMax(
-    Mantid::API::Algorithm *alg, const std::string &minProperty,
+    Mantid::API::Algorithm *const alg, const std::string &minProperty,
     const std::string &maxProperty,
     Mantid::Geometry::Instrument_const_sptr inst, std::string minIdfName,
     std::string maxIdfName) const {
