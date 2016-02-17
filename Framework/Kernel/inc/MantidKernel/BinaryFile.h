@@ -139,7 +139,6 @@ public:
   /**
    * Loads the entire contents of the file into a std::vector.
    * The file is closed once done.
-   * @param data :: The contents to load into the file
    * @returns :: vector with contents of the file
    */
   std::vector<T> loadAllIntoVector() {
