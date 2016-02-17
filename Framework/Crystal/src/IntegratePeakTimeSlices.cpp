@@ -1730,13 +1730,12 @@ int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
   if (sgn * (X[0] - time) >= 0)
     return 0;
 
-  if (sgn * (time - X[X.size() - 1]) >= 0)
+  if (sgn * (time - X[X.size() - 1u]) >= 0)
     return static_cast<int>(X.size()) - 1;
 
-  size_t end = static_cast<size_t>(X.size() - 1u);
+  size_t end = X.size() - 1u;
   for (size_t i = 0; i < end; i++) {
-    if (sgn * (time - X[i]) >= 0 &&
-        sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
+    if (sgn * (time - X[i]) >= 0 && sgn * (X[i + 1u] - time) >= 0)
       return static_cast<int>(i);
   }
 
