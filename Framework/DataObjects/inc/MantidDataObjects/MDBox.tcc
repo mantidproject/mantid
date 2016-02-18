@@ -727,9 +727,8 @@ TMDE(size_t MDBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
   size_t nEvents = sigErrSq.size() / 2;
   size_t nExisiting = data.size();
   data.reserve(nExisiting + nEvents);
-  this->m_dataMutex.lock();
+  Mantid::Kernel::LockGuardMutex lock(m_dataMutex);
   IF<MDE, nd>::EXEC(this->data, sigErrSq, Coord, runIndex, detectorId, nEvents);
-  this->m_dataMutex.unlock();
 
   return 0;
 }
@@ -745,10 +744,9 @@ TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal,
                                    const signal_t errorSq,
                                    const std::vector<coord_t> &point,
                                    uint16_t runIndex, uint32_t detectorId) {
-  this->m_dataMutex.lock();
+  Mantid::Kernel::LockGuardMutex lock(m_dataMutex);
   this->data.push_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
                                                 runIndex, detectorId));
-  this->m_dataMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -776,10 +774,8 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * @param Evnt :: reference to a MDEvent to add.
  * */
 TMDE(void MDBox)::addEvent(const MDE &Evnt) {
-  this->m_dataMutex.lock();
+  Mantid::Kernel::LockGuardMutex lock(m_dataMutex);
   this->data.push_back(Evnt);
-
-  this->m_dataMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -802,13 +798,11 @@ TMDE(void MDBox)::addEventUnsafe(const MDE &Evnt) {
  *bounds)
  */
 TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
-  this->m_dataMutex.lock();
+  Mantid::Kernel::LockGuardMutex lock(m_dataMutex);
   typename std::vector<MDE>::const_iterator start = events.begin();
   typename std::vector<MDE>::const_iterator end = events.end();
   // Copy all the events
   this->data.insert(this->data.end(), start, end);
-
-  this->m_dataMutex.unlock();
   return 0;
 }
 
@@ -899,7 +893,7 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver,
     throw(std::invalid_argument(
         " The data file has to be opened to use box loadAndAddFrom function"));
 
-  Poco::ScopedLock<Kernel::Mutex> _lock(this->m_dataMutex);
+  Mantid::Kernel::LockGuardMutex m_lock(m_dataMutex);
 
   std::vector<coord_t> TableData;
   FileSaver->loadBlock(TableData, filePosition, nEvents);
