@@ -14,8 +14,6 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/ScopedWorkspace.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -456,17 +454,15 @@ public:
   }
 
   void test_FullBinsOnly_Fixed() {
-    std::vector<double> xExpected = boost::assign::list_of(0.5)(2.5)(4.5)(6.5);
+    std::vector<double> xExpected = {0.5, 2.5, 4.5, 6.5};
     std::vector<double> yExpected(3, 8.0);
     std::string params = "2.0";
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
   void test_FullBinsOnly_Variable() {
-    std::vector<double> xExpected =
-        boost::assign::list_of(0.5)(1.5)(2.5)(3.2)(3.9)(4.6)(6.6);
-    std::vector<double> yExpected =
-        boost::assign::list_of(4.0)(4.0)(2.8)(2.8)(2.8)(8.0);
+    std::vector<double> xExpected = {0.5, 1.5, 2.5, 3.2, 3.9, 4.6, 6.6};
+    std::vector<double> yExpected = {4.0, 4.0, 2.8, 2.8, 2.8, 8.0};
     std::string params = "0.5, 1.0, 3.1, 0.7, 5.0, 2.0, 7.25";
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }

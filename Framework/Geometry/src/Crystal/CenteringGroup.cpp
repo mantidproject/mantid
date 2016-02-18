@@ -1,8 +1,6 @@
 #include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-#include <boost/assign.hpp>
-
 namespace Mantid {
 namespace Geometry {
 

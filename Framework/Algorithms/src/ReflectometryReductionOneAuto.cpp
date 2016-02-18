@@ -6,7 +6,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
-#include <boost/assign/list_of.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -153,8 +152,8 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("StrictSpectrumChecking", true,
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
-  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
-      "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "AutoDetect", "PolynomialCorrection", "ExponentialCorrection"};
   declareProperty("CorrectionAlgorithm", "AutoDetect",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");

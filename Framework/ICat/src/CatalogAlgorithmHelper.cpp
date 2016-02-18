@@ -1,6 +1,5 @@
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
-#include <boost/assign/list_of.hpp>
 #include <json/reader.h>
 #include <json/value.h>
 
