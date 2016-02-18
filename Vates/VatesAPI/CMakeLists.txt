@@ -75,6 +75,7 @@ inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
 inc/MantidVatesAPI/ColorScaleGuard.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
+inc/MantidVatesAPI/FactoryChains.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryView.h
@@ -99,7 +100,7 @@ inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
-inc/MantidVatesAPI/PresenterUtilities.h
+inc/MantidVatesAPI/PresenterFactories.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h

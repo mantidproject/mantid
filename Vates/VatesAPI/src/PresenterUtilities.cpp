@@ -1,4 +1,5 @@
-#include "MantidVatesAPI/PresenterUtilities.h"
+#include "MantidVatesAPI/PresenterFactories.h"
+#include "MantidVatesAPI/FactoryChains.h"
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
 #include "MantidVatesAPI/ThresholdRange.h"

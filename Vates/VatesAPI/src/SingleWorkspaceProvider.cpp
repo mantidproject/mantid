@@ -1,10 +1,12 @@
-#include "MantidVatesAPI/SingleWorkspaceProvider.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidVatesAPI/SingleWorkspaceProvider.h"
 
 namespace Mantid {
 namespace VATES {
 
-SingleWorkspaceProvider::SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace) : m_workspace(workspace) { }
+SingleWorkspaceProvider::SingleWorkspaceProvider(
+    Mantid::API::Workspace_sptr workspace)
+    : m_workspace(workspace) {}
 
 /**
  * SingleWorkspaceProvider::canProvideWorkspace
@@ -18,15 +20,16 @@ bool SingleWorkspaceProvider::canProvideWorkspace(std::string) const {
  * SingleWorkspaceProvider::fetchWorkspace
  * @returns the underlying workspace
  */
-Mantid::API::Workspace_sptr SingleWorkspaceProvider::fetchWorkspace(std::string) const {
+Mantid::API::Workspace_sptr
+    SingleWorkspaceProvider::fetchWorkspace(std::string) const {
   return m_workspace;
 }
 
 /**
- * SingleWorkspaceProvider::disposeWorkspace: this is left blank, as we don't want
+ * SingleWorkspaceProvider::disposeWorkspace: this is left blank, as we don't
+ * want
  *        to be able to dispose of the workspace
  */
 void SingleWorkspaceProvider::disposeWorkspace(std::string) const {}
-
 }
 }

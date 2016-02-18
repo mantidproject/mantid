@@ -1,5 +1,5 @@
-#ifndef MANTID_VATES_PRESENTER_UTILITIES_H
-#define MANTID_VATES_PRESENTER_UTILITIES_H
+#ifndef MANTID_VATES_FACTORY_CHAINS_H
+#define MANTID_VATES_FACTORY_CHAINS_H
 
 #include "MantidKernel/System.h"
 
@@ -18,48 +18,6 @@ namespace VATES
 
 // Forward Decalaration
 class MDLoadingPresenter;
-
-class DLLExport EmptyWorkspaceNamePolicy
-{
-protected:
-    std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr)
-    {
-        return "__EmptyWorkspaceNamePolicy";
-    }
-};
-
-class DLLExport NonEmptyWorkspaceNamePolicy
-{
-protected:
-    std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr workspace)
-    {
-        return workspace->name();
-    }
-};
-
-/**
- * This templated function sets up an in memory loading presenter.
- * @param view: the loading view type
- * @param wsName: the name of the workspace which is to be displayed
- * @param worksapceProvider: a worksapce provider
- * @returns a new in memory loading presenter.
- */
-template <class Presenter, class WorkspaceNamePolicy>
-class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy
-{
-    using WorkspaceNamePolicy::getWorkspaceName;
-
-public:
-    std::unique_ptr<Presenter>
-    create(std::unique_ptr<MDLoadingView> view,
-           Mantid::API::IMDWorkspace_sptr workspace,
-           std::unique_ptr<WorkspaceProvider> workspaceProvider)
-    {
-        return Mantid::Kernel::make_unique<Presenter>(
-            std::move(view), workspaceProvider.release(),
-            getWorkspaceName(workspace));
-    }
-};
 
 /// Creates a facotry chain for MDHisto workspaces
 std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>> DLLExport createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,

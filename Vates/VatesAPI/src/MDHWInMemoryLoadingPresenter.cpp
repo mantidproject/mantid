@@ -3,7 +3,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidVatesAPI/PresenterUtilities.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"

@@ -2,7 +2,7 @@
 #define VATES_API_PRESENTER_UTILITIES_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/PresenterUtilities.h"
+#include "MantidVatesAPI/FactoryChains.h"
 
 class PresenterUtilitiesTest : public CxxTest::TestSuite
 {
