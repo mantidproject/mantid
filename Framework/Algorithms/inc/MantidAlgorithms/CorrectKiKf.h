@@ -94,10 +94,6 @@ private:
   template <class T>
   void correctKiKfEventHelper(std::vector<T> &events, double efixed,
                               const std::string emodeStr);
-  /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr inputWS;
-  /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr outputWS;
 };
 
 } // namespace Algorithm
