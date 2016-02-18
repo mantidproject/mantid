@@ -893,7 +893,7 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver,
     throw(std::invalid_argument(
         " The data file has to be opened to use box loadAndAddFrom function"));
 
-  Mantid::Kernel::LockGuardMutex _lock(this->m_dataMutex));
+  Mantid::Kernel::LockGuardMutex _lock(this->m_dataMutex);
 
   std::vector<coord_t> TableData;
   FileSaver->loadBlock(TableData, filePosition, nEvents);

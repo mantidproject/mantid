@@ -7,7 +7,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 
-#include <Poco/ScopedLock.h>
 
 namespace Mantid {
 namespace API {
