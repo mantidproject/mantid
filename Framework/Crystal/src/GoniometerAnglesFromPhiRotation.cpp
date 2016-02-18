@@ -213,7 +213,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
   std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
   int Npeaks = PeaksRun2->getNumberPeaks();
 
-  std::array<double, 5> MinData; // n indexed, av err, phi, chi,omega
+  // n indexed, av err, phi, chi,omega
+  std::array<double, 5> MinData = {{0., 0., 0., 0., 0.}};
   MinData[0] = 0.0;
   std::vector<V3D> directionList = IndexingUtils::MakeHemisphereDirections(50);
 

@@ -610,9 +610,9 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
 double RadiusSum::getMaxDistance(const V3D &centre,
                                  const std::vector<double> &boundary_limits) {
 
-  std::array<double, 2> Xs = {boundary_limits[0], boundary_limits[1]};
-  std::array<double, 2> Ys = {boundary_limits[2], boundary_limits[3]};
-  std::array<double, 2> Zs = {0., 0.};
+  std::array<double, 2> Xs = {{boundary_limits[0], boundary_limits[1]}};
+  std::array<double, 2> Ys = {{boundary_limits[2], boundary_limits[3]}};
+  std::array<double, 2> Zs = {{0., 0.}};
 
   if (boundary_limits.size() == 6) {
     Zs[0] = boundary_limits[4];

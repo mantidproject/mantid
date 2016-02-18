@@ -70,8 +70,8 @@ public:
 
     const size_t size = 20;
 
-    std::array<double, size> data = {1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                                     28, 48, 42, 77, 67, 33, 27, 20, 9,  2};
+    std::array<double, size> data = {{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48,
+                                      42, 77, 67, 33, 27, 20, 9, 2}};
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
