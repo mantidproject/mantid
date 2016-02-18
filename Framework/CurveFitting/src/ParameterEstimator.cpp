@@ -6,8 +6,7 @@
 #include "MantidAPI/FunctionValues.h"
 
 #include "MantidKernel/Logger.h"
-
-#include <Poco/Mutex.h>
+#include "MantidKernel/MultiThreaded.h"
 
 #include <cmath>
 
@@ -22,7 +21,7 @@ Kernel::Logger g_log("ParameterEstimator");
 
 namespace {
 /// Mutex to prevent simultaneous access to functionMap
-Poco::Mutex FUNCTION_MAP_MUTEX;
+Mantid::Kernel::RecursiveMutex FUNCTION_MAP_MUTEX;
 }
 
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
@@ -44,8 +43,7 @@ void initFunctionLookup(FunctionMapType &functionMapType) {
 /// Returns a reference to the static functionMapType
 /// @returns :: a const reference to the functionMapType
 const FunctionMapType &getFunctionMapType() {
-
-  Poco::Mutex::ScopedLock lock(FUNCTION_MAP_MUTEX);
+  Mantid::Kernel::LockGuardRecursiveMutex lock(FUNCTION_MAP_MUTEX);
 
   static FunctionMapType functionMapType;
 
