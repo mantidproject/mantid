@@ -286,7 +286,7 @@ public:
    *boxes.
    */
   void trackNumBoxes(size_t depth) {
-    m_mutexNumMDBoxes.lock();
+    Mantid::Kernel::LockGuardMutex lock(m_mutexNumMDBoxes);
     if (m_numMDBoxes[depth] > 0) {
       m_numMDBoxes[depth]--;
     }
@@ -303,7 +303,6 @@ public:
     } else {
       m_numMDBoxes[depth + 1] += m_numSplit;
     }
-    m_mutexNumMDBoxes.unlock();
   }
 
   /** Return the vector giving the number of MD Boxes as a function of depth */
@@ -357,13 +356,12 @@ public:
 
   /** Reset the number of boxes tracked in m_numMDBoxes */
   void resetNumBoxes() {
-    m_mutexNumMDBoxes.lock();
+    Mantid::Kernel::LockGuardMutex lock(m_mutexNumMDBoxes);
     m_numMDBoxes.clear();
     m_numMDBoxes.resize(m_maxDepth + 1, 0);     // Reset to 0
     m_numMDGridBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
     m_numMDBoxes[0] = 1;                        // Start at 1 at depth 0.
     resetMaxNumBoxes();                         // Also the maximums
-    m_mutexNumMDBoxes.unlock();
   }
 
   // { return m_useWriteBuffer; }
