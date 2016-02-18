@@ -26,7 +26,6 @@
 %End
 
 %InitialisationCode
-/*registerMetaTypes();*/
 qRegisterMetaType<Mantid::API::Workspace_sptr>();
 qRegisterMetaType<std::string>();
 %End
