@@ -8,7 +8,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 
-using Mantid::Kernel::Mutex;
 
 namespace Mantid {
 namespace API {
@@ -66,7 +65,7 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
                                              const int &version,
                                              bool makeProxy) {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
     Algorithm_sptr unmanagedAlg = AlgorithmFactory::Instance().create(
@@ -122,7 +121,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
  * Clears all managed algorithm objects.
  */
 void AlgorithmManagerImpl::clear() {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   m_managed_algs.clear();
   return;
 }
@@ -148,7 +147,7 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
  * @returns A shared pointer to the algorithm
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   for (const auto &managed_alg : m_managed_algs) {
     if ((*managed_alg).getAlgorithmID() == id)
       return managed_alg;
@@ -161,7 +160,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
  * @param id :: The ID of the algorithm
  */
 void AlgorithmManagerImpl::removeById(AlgorithmID id) {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   auto itend = m_managed_algs.end();
   for (auto it = m_managed_algs.begin(); it != itend; ++it) {
     if ((**it).getAlgorithmID() == id) {
@@ -206,7 +205,7 @@ AlgorithmManagerImpl::newestInstanceOf(const std::string &algorithmName) const {
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
     const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   for (auto currentAlgorithm : m_managed_algs) {
     if (currentAlgorithm->name() == algorithmName &&
         currentAlgorithm->isRunning()) {
@@ -219,7 +218,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
 
 /// Requests cancellation of all running algorithms
 void AlgorithmManagerImpl::cancelAll() {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  Mantid::Kernel::LockGuardMutex _lock(this->m_managedMutex);
   for (auto &managed_alg : m_managed_algs) {
     if (managed_alg->isRunning())
       managed_alg->cancel();
