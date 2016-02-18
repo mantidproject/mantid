@@ -914,8 +914,8 @@ std::string ParameterMap::getString(const IComponent *comp,
  * @param comp :: A pointer to the component of interest
  * @returns A set of names of parameters for the given component
  */
-std::set<std::string> ParameterMap::names(const IComponent *comp) const {
-  std::set<std::string> paramNames;
+std::unordered_set<std::string> ParameterMap::names(const IComponent *comp) const {
+  std::unordered_set<std::string> paramNames;
   const ComponentID id = comp->getComponentID();
   auto it_found = m_map.find(id);
   if (it_found == m_map.end()) {
@@ -1045,7 +1045,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+  auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map

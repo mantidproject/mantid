@@ -9,7 +9,7 @@
 
 #include <string>
 #include <vector>
-#include <set>
+#include <unordered_set>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -144,7 +144,7 @@ public:
   /** @name ParameterMap access */
   //@{
   /// Return the names of the parameters for this component
-  virtual std::set<std::string>
+  virtual std::unordered_set<std::string>
   getParameterNames(bool recursive = true) const = 0;
   /// return the parameter names and the component they are from
   virtual std::map<std::string, ComponentID>

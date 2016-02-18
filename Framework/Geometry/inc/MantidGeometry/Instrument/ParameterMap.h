@@ -297,7 +297,7 @@ public:
   }
 
   /// Returns a set with all parameter names for component
-  std::set<std::string> names(const IComponent *comp) const;
+  std::unordered_set<std::string> names(const IComponent *comp) const;
   /// Returns a string with all component names, parameter names and values
   std::string asString() const;
 

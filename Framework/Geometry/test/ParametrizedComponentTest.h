@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <string>
+#include <unordered_set>
 #include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
@@ -126,7 +127,7 @@ public:
 
   void testThatCorrectParametersAreListed() {
     Component *paramComp = createSingleParameterizedComponent();
-    std::set<std::string> paramNames = paramComp->getParameterNames();
+    auto paramNames = paramComp->getParameterNames();
 
     TS_ASSERT_EQUALS(paramNames.size(), 4);
     checkBaseParameterNamesExist(paramNames);
@@ -141,7 +142,7 @@ public:
     Component *grandchild = new Component(m_childTwoComp, m_paramMap.get());
 
     // Parent
-    std::set<std::string> paramNames = parent->getParameterNames();
+    auto paramNames = parent->getParameterNames();
     TS_ASSERT_EQUALS(paramNames.size(), 4);
     checkBaseParameterNamesExist(paramNames);
     // Child
@@ -165,7 +166,7 @@ public:
   void testThatNonRecursiveParameterSearchReturnsOnlyComponentParameters() {
     createParameterizedTree();
     Component *child = new Component(m_childOneComp, m_paramMap.get());
-    std::set<std::string> paramNames = child->getParameterNames(false);
+    auto paramNames = child->getParameterNames(false);
     TS_ASSERT_EQUALS(paramNames.size(), 1);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child1"), paramNames.end());
 
@@ -198,7 +199,7 @@ public:
   }
 
 private:
-  void checkBaseParameterNamesExist(const std::set<std::string> &paramNames) {
+  void checkBaseParameterNamesExist(const std::unordered_set<std::string> &paramNames) {
     TS_ASSERT_DIFFERS(paramNames.find(m_strName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_dblName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_posName), paramNames.end());
