@@ -147,6 +147,18 @@ public:
   void test_StringTokenizer_invalidOptionThrows() {
     TS_ASSERT_THROWS_ANYTHING(Mantid::Kernel::StringTokenizer(" ", "-:", 8));
   }
+
+  void test_StringTokenizer_multipleSeparators() {
+    auto tokenizer = Mantid::Kernel::StringTokenizer("1,2,3,-5,6", ",-");
+    std::vector<std::string> expected{"1", "2", "3", "", "5", "6"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
+  }
+
+  void test_StringTokenizer_emptySeparators() {
+    auto tokenizer = Mantid::Kernel::StringTokenizer("1,2,3,-5,6", "");
+    std::vector<std::string> expected{"1,2,3,-5,6"};
+    TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
+  }
 };
 
 class RandomCharacter {
