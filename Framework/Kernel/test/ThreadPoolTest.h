@@ -17,8 +17,6 @@
 
 using namespace Mantid::Kernel;
 
-//#include <boost/thread.hpp>
-
 //=======================================================================================
 
 class TimeWaster {

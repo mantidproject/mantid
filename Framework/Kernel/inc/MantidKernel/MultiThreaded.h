@@ -1,7 +1,6 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
-#include <Poco/Mutex.h>
 #include <mutex>
 
 namespace Mantid {
@@ -10,11 +9,7 @@ namespace Kernel {
 //==============================================================================================
 // Typedefs for ThreadPool
 
-/// General mutex (typedef'd to Poco::FastMutex). Not recursive in general;
-/// don't assume it is!
-//typedef Poco::FastMutex Mutex;
-//typedef Poco::Mutex RecursiveMutex;
-
+/// Define Mutex (std::mutex) and RecursiveMutex.
 typedef std::mutex Mutex;
 typedef std::recursive_mutex RecursiveMutex;
 

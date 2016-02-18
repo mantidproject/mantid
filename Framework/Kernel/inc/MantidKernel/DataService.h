@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -547,7 +548,7 @@ private:
   /// Map of objects in the data service
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications
-  mutable Kernel::RecursiveMutex m_mutex;
+  mutable Mantid::Kernel::RecursiveMutex m_mutex;
   /// Logger for this DataService
   Logger g_log;
 }; // End Class Data service
