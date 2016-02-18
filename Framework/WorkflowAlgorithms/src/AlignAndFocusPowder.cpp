@@ -317,29 +317,14 @@ void AlignAndFocusPowder::exec() {
 
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
-  if (m_outputW == m_inputW) {
-    if (m_inputEW) {
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  if (m_inputEW) {
+    if (m_outputW != m_inputW) {
+      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
     }
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
-    if (m_inputEW) {
-      // Make a brand new EventWorkspace
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      WorkspaceFactory::Instance().initializeFromParent(m_inputEW, m_outputEW,
-                                                        false);
-      // You need to copy over the data as well.
-      m_outputEW->copyDataFrom((*m_inputEW));
-
-      // Cast to the matrixOutputWS and save it
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
-    } else {
-      // Not-an-event workspace
+    if (m_outputW != m_inputW) {
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
 

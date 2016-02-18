@@ -120,6 +120,13 @@ void RemoveLowResTOF::exec() {
   else
     m_outputLowResTOF = false;
 
+  // Only create the output workspace if it's different to the input one
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != m_inputWS) {
+    outputWS = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    setProperty("OutputWorkspace", outputWS);
+  }
+
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if (m_inputEvWS != nullptr) {
@@ -129,24 +136,11 @@ void RemoveLowResTOF::exec() {
 
   // set up the progress bar
   m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
-  size_t xSize = m_inputWS->dataX(0).size();
-
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (outputWS != m_inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, m_numberOfSpectra,
-                                                   xSize, xSize - 1);
-    setProperty("OutputWorkspace", outputWS);
-  }
 
   this->getTminData(false);
 
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    // copy the data from the input workspace
-    outputWS->dataX(workspaceIndex) = m_inputWS->readX(workspaceIndex);
-    outputWS->dataY(workspaceIndex) = m_inputWS->readY(workspaceIndex);
-    outputWS->dataE(workspaceIndex) = m_inputWS->readE(workspaceIndex);
-
     // calculate where to zero out to
     double tofMin = this->calcTofMin(workspaceIndex);
     const MantidVec &X = m_inputWS->readX(0);
@@ -169,38 +163,15 @@ void RemoveLowResTOF::exec() {
   */
 void RemoveLowResTOF::execEvent() {
   // set up the output workspace
-  MatrixWorkspace_sptr matrixOutW = this->getProperty("OutputWorkspace");
-  DataObjects::EventWorkspace_sptr outW;
-  if (matrixOutW == m_inputWS)
-    outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
-  else {
-    outW = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                                 m_numberOfSpectra, 2, 1));
-    // Copy required stuff from it
-    API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, outW,
-                                                           false);
-    outW->copyDataFrom((*m_inputEvWS));
-
-    // cast to the matrixoutput workspace and save it
-    matrixOutW = boost::dynamic_pointer_cast<MatrixWorkspace>(outW);
-    this->setProperty("OutputWorkspace", matrixOutW);
-  }
+  MatrixWorkspace_sptr matrixOutW = getProperty("OutputWorkspace");
+  auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   MatrixWorkspace_sptr matrixLowResW = getProperty("LowResTOFWorkspace");
-  DataObjects::EventWorkspace_sptr lowW;
   if (m_outputLowResTOF) {
-    // Duplicate input workspace to output workspace
-    lowW = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                                 m_numberOfSpectra, 2, 1));
-    API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, lowW,
-                                                           false);
-    lowW->copyDataFrom((*m_inputEvWS));
-
-    matrixLowResW = boost::dynamic_pointer_cast<MatrixWorkspace>(lowW);
+    matrixLowResW = MatrixWorkspace_sptr(m_inputWS->clone().release());
     setProperty("LowResTOFWorkspace", matrixLowResW);
   }
+  auto lowW = boost::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
 
   g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to "
                 << m_inputEvWS->getTofMax() << " microseconds\n";
