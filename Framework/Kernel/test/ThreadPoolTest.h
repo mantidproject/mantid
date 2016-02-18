@@ -13,7 +13,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-#include <Poco/Mutex.h>
 #include <cstdlib>
 
 using namespace Mantid::Kernel;
@@ -42,7 +41,7 @@ public:
 
   void waste_time_with_lock(double seconds) {
     {
-      Mutex::ScopedLock lock(m_mutex);
+      Mantid::Kernel::LockGuardMutex lock(m_mutex);
       std::cout << "waste_time for " << seconds << " seconds." << std::endl;
     }
     waste_time(seconds);
@@ -51,7 +50,7 @@ public:
   /** Add a number but use a lock to avoid contention */
   void add_to_number(size_t adding) {
     {
-      Mutex::ScopedLock lock(m_mutex);
+      Mantid::Kernel::LockGuardMutex lock(m_mutex);
       total += adding;
     }
   }
@@ -100,7 +99,7 @@ public:
       }
     } else {
       // Lock to ensure you don't step on yourself.
-      Mutex::ScopedLock lock(TaskThatAddsTasks_mutex);
+      Mantid::Kernel::LockGuardMutex lock(TaskThatAddsTasks_mutex);
       // Increment the counter only at the lowest level.
       TaskThatAddsTasks_counter += 1;
     }
