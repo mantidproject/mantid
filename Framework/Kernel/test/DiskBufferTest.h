@@ -736,7 +736,7 @@ public:
 
   /// Fake a seek followed by a write
   static void fakeSeekAndWrite(uint64_t newPos) {
-    streamMutex.lock();
+    Kernel::LockGuardMutex lock(streamMutex);
     int64_t seek = int64_t(filePos) - int64_t(newPos);
     if (seek < 0)
       seek = -seek;
@@ -748,7 +748,6 @@ public:
     while (tim.elapsed_no_reset() < seekTime) { /*Wait*/
     }
     filePos = newPos;
-    streamMutex.unlock();
   }
   virtual void load() {
     if (this->wasSaved() && !this->isLoaded()) {
