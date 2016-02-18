@@ -1,7 +1,6 @@
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include <boost/assign.hpp>
 
 using namespace Mantid::Kernel;
 typedef std::vector<double> VecDouble;
@@ -180,12 +179,10 @@ VecVecV3D PeaksOnSurface::createFaces() const {
   // p1|---|p4
   //*
 
-  using boost::assign::list_of;
   const int numberOfFaces = this->numberOfFaces();
   VecVecV3D faces(numberOfFaces);
-  faces[0] = list_of(m_vertex1)(m_vertex2)(m_vertex3)
-                 .convert_to_container<VecV3D>(); // These define a face normal
-                                                  // to x at xmin.
+  faces[0] = {m_vertex1, m_vertex2, m_vertex3}; // These define a face normal
+                                                // to x at xmin.
   return faces;
 }
 

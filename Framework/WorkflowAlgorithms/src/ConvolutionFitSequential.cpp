@@ -553,7 +553,8 @@ void ConvolutionFitSequential::calculateEISF(
     // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
     auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
     std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                   sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+                   sqrtESqOverYSq.begin(),
+                   static_cast<double (*)(double)>(sqrt));
     // eisfYSumRoot = eisfY * sqrtESqOverYSq
     auto eisfYSumRoot = cloneVector(eisfY);
     std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),

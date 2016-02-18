@@ -301,7 +301,7 @@ void DiffractionFocussing2::exec() {
 
     // Take the square root of the errors
     std::transform(Eout.begin(), Eout.end(), Eout.begin(),
-                   static_cast<double (*)(double)>(std::sqrt));
+                   static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used

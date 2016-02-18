@@ -75,7 +75,7 @@ public:
   uint64_t getNEvents() const override;
   std::vector<Mantid::API::IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
                        const Mantid::Kernel::VMD &end,

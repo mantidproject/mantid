@@ -139,7 +139,7 @@ public:
   // methods
   void close();
   bool read(void *buffer, uint32_t size);
-  bool seek(int64_t offset, int whence, int64_t *newPosition = NULL);
+  bool seek(int64_t offset, int whence, int64_t *newPosition = nullptr);
 };
 
 namespace Tar {

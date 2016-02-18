@@ -9,7 +9,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/assign/list_of.hpp>
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto;
 using namespace Mantid::API;
@@ -18,7 +17,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using namespace boost::assign;
 
 namespace {
 class PropertyFinder {
@@ -69,10 +67,8 @@ public:
         outWSLamName("ReflectometryReductionOneAutoTest_OutputWS_Lam"),
         inWSName("ReflectometryReductionOneAutoTest_InputWS"),
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
-    MantidVec xData =
-        boost::assign::list_of(0)(0)(0)(0).convert_to_container<MantidVec>();
-    MantidVec yData =
-        boost::assign::list_of(0)(0)(0).convert_to_container<MantidVec>();
+    MantidVec xData = {0, 0, 0, 0};
+    MantidVec yData = {0, 0, 0};
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -189,8 +185,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params =
-        boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
+    MantidVec params = {0.0, 0.1, 1.0};
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);
@@ -253,8 +248,7 @@ public:
   test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "PointDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam =
-        boost::assign::list_of(1)(2).convert_to_container<std::vector<int>>();
+    std::vector<int> RegionOfDirectBeam = {1, 2};
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
@@ -262,8 +256,7 @@ public:
   void test_region_of_direct_beam_indexes_cannot_be_negative_or_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam =
-        boost::assign::list_of(0)(-1).convert_to_container<std::vector<int>>();
+    std::vector<int> RegionOfDirectBeam = {0, -1};
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
@@ -272,8 +265,7 @@ public:
   test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam =
-        boost::assign::list_of(1)(0).convert_to_container<std::vector<int>>();
+    std::vector<int> RegionOfDirectBeam = {1, 0};
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }

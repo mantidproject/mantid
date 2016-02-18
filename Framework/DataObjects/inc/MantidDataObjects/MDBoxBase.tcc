@@ -18,7 +18,7 @@ TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_BoxController(boxController),
       m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
-      m_depth(depth), m_parent(NULL), m_fileID(boxID) {
+      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == std::numeric_limits<size_t>::max()) // Give it a fresh ID from
@@ -36,7 +36,7 @@ TMDE(MDBoxBase)::MDBoxBase(
         extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_BoxController(boxController), m_inverseVolume(UNDEF_COORDT),
-      m_depth(depth), m_parent(NULL), m_fileID(boxID) {
+      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == UNDEF_SIZET) // Give it a fresh ID from the controller.
