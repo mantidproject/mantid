@@ -56,10 +56,14 @@ box has been enabled.
 
 The plot Calibrated Workspace check-box will enable user to plot
 vanadium curves and Ceria peaks. For Ceria peaks there will be two
-workspace generated and plotted, one for each bank, whereas for cropped
-calibration there will only be only one workspace generate and
-plotted, depending on the selected bank. The Ceria peaks utilises the
-difc/tzero fitting per bank.
+workspace generated and plotted, one for each bank, whereas for
+cropped calibration there will only be only one workspace generate
+and plotted, depending on the selected bank or provided Spectrum
+IDs. The workspace contains difc and tzero data which is then
+utilised to plot the Ceria peaks per bank, the graph will plot Peaks
+Fitted and Difc/TZero Straight Line for comparison. More information
+regarding the fit peaks can be found on the
+:ref:`EnggFitPeaks<algm-EnggFitPeaks>` documentation.
 
 Parameters
 ^^^^^^^^^^

@@ -960,16 +960,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                               boost::lexical_cast<std::string>(specNos));
       else
         alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      // TODO: figure out what should be done about the list of expected peaks
-      // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
-      // should be fixed in a nother ticket/issue
-      alg->setPropertyValue(
-          "ExpectedPeaks",
-          "3.1243, 2.7057, 1.9132, 1.6316, 1.5621, "
-          "1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, "
-          "0.8556, 0.8252, 0.8158, 0.7811");
+
       const std::string outFitParamsTblName =
-          "engggui_calibration_bank_" + boost::lexical_cast<std::string>(i + 1);
+          outFitParamsTblNameGenerator(specNos, i);
       alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
       alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
@@ -2134,9 +2127,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
     m_view->plotVanCurvesCalibOutput();
-    if (specNos == "" || g_calibCropIdentifier == "Bank") {
-      m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
-    }
+    m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
   }
 }
 
@@ -2313,6 +2304,32 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+/**
+* Generates appropriate names for table workspaces
+*
+* @param specNos specIDs or bank name to be passed
+* @param bank_i current loop of the bank during calibration
+*/
+std::string
+EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
+                                                       size_t bank_i) {
+  std::string outFitParamsTblName;
+  bool specNumUsed = specNos != "";
+
+  if (specNumUsed) {
+    if (specNos == "North")
+      outFitParamsTblName = "engggui_calibration_bank_1";
+    else if (specNos == "South")
+      outFitParamsTblName = "engggui_calibration_bank_2";
+    else
+      outFitParamsTblName = "engggui_calibration_bank_cropped";
+  } else {
+    outFitParamsTblName = "engggui_calibration_bank_" +
+                          boost::lexical_cast<std::string>(bank_i + 1);
+  }
+  return outFitParamsTblName;
 }
 
 /**
