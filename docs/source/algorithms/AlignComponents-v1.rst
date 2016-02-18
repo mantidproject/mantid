@@ -10,12 +10,13 @@
 Description
 -----------
 
-This algorithm will take the output of
-:ref:`algm-GetDetOffsetsMultiPeaks` in the form of a
+This algorithm will take a calibration in the form of a
 :ref:`diffractioncalibration
-workspace<DiffractionCalibrationWorkspace>` and minimize the
-difference between the DIFC of the instrument and calibration
-workspace by moving and rotating instrument components.
+workspace<DiffractionCalibrationWorkspace>` from the output of *for
+example* :ref:`algm-GetDetOffsetsMultiPeaks` or
+:ref:`algm-CalibrateRectangularDetectors` and minimize the difference
+between the DIFC of the instrument and calibration workspace by moving
+and rotating instrument components.
 
 The resulting calibrated geometry can be exported by
 :ref:`algm-ExportGeometry`.
@@ -23,13 +24,17 @@ The resulting calibrated geometry can be exported by
 ComponentList
 #############
 
-The *ComponentList* can be any instrument component that can be moved
-and rotated. For example in POWGEN you can list *bank46* or *Column4*
-(which includes banks 42-46) or *Group3* (which all the banks in
-Column 3 and 4). In the case of a component group it is treated as one
-object and not individual banks. You can list multiple components
-which will be refined in turn (*e.g.* in the *Align the Y rotation of
-bank26 and bank46 in POWGEN* usage example below).
+The *ComponentList* can include any instrument component that can be
+moved and rotated by :ref:`algm-MoveInstrumentComponent` and
+:ref:`algm-RotateInstrumentComponent`. For example in POWGEN you can
+list *bank46* or *Column4* (which includes banks 42-46) or *Group3*
+(which all the banks in Column 3 and 4). In the case of a component
+group it is treated as one object and not individual banks. In some
+instruments you can also specify individual tubes or pixel, *e.g.*
+*bank20/tube3* and *bank20/tube3/pixel7*, although that is not the
+intention of the algorithm. You can list multiple components which
+will be refined in turn (*e.g.* in the *Align the Y rotation of bank26
+and bank46 in POWGEN* usage example below).
 
 Masking
 #######
