@@ -347,7 +347,7 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore)
  * Note: This takes about 0.1 ms on a Ubuntu 10.10 system.
  */
 void MemoryStats::update() {
-  MemoryStats::mutexMemory.lock();
+  Mantid::Kernel::LockGuardMutex lock(MemoryStats::mutexMemory);
   // get what is used by the process
   if (this->ignore != MEMORY_STATS_IGNORE_PROCESS) {
     process_mem_usage(this->vm_usage, this->res_usage);
@@ -357,7 +357,6 @@ void MemoryStats::update() {
   if (this->ignore != MEMORY_STATS_IGNORE_SYSTEM) {
     process_mem_system(this->avail_memory, this->total_memory);
   }
-  MemoryStats::mutexMemory.unlock();
 }
 
 /**
