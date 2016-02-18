@@ -198,7 +198,7 @@ protected:
   /// Used to buffer events between calls to extractData()
   std::vector<DataObjects::EventWorkspace_sptr> m_eventBuffer;
   /// Protects m_eventBuffer
-  Poco::FastMutex m_mutex;
+  Kernel::Mutex m_mutex;
   /// Run start time
   Kernel::DateAndTime m_startTime;
   /// Run number
