@@ -194,6 +194,10 @@ struct Pulse {
   /// less than one second.
   uint32_t nanoseconds;
 
+  /// The index of the first event for this pulse.
+  // cppcheck-suppress unusedStructMember
+  uint64_t event_index;
+
   /// The number of seconds since January 1, 1990.
   uint32_t seconds;
 
