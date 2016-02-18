@@ -376,13 +376,8 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   center = gaussianpeak->centre();
   height = gaussianpeak->height();
   double fwhm = gaussianpeak->fwhm();
-  if (fwhm <= 0.0) {
-    return false;
-  }
-  //    sigma = fwhm*2;
-  //  sigma = fwhm/2.35;
 
-  return true;
+  return fwhm > 0.0;
 }
 
 /**
