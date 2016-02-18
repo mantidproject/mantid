@@ -41,14 +41,14 @@ public:
   /// Factory Method
   NearestNeighbours *create(boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
-                            bool ignoreMasked = false);
+                            bool ignoreMasked = false) override;
   /// Factory Method
   NearestNeighbours *create(int numberOfNeighbours,
                             boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
-                            bool ignoreMasked = false);
+                            bool ignoreMasked = false) override;
   /// Destructor
-  virtual ~NearestNeighboursFactory();
+  ~NearestNeighboursFactory() override;
 };
 
 } // namespace Geometry

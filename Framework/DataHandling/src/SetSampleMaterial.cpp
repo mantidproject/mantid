@@ -1,7 +1,6 @@
 //--------------------------------
 // Includes
 //--------------------------------
-#include <math.h>
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Workspace.h"
@@ -13,6 +12,10 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+
+#include <boost/scoped_ptr.hpp>
+
+#include <math.h>
 
 using namespace Mantid::PhysicalConstants;
 

@@ -111,8 +111,8 @@ public:
 	QRect rect() const {return QRect(startPoint(), endPoint()).normalize();};
 
 	//! Returns the bounding rectangle in plot coordinates.
-	QwtDoubleRect boundingRect() const;
-	void setBoundingRect(double xs, double ys, double xe, double ye);
+        QwtDoubleRect boundingRect() const override;
+        void setBoundingRect(double xs, double ys, double xe, double ye);
 
 	//! Recalculates the bounding rectangle in values coordinates using the pixel coordinats when the scales change
 	void updateBoundingRect();
@@ -123,11 +123,12 @@ public:
 	void setEditable(bool yes);
 
 	//! Filters events for the canvas while #d_editable is true.
-	bool eventFilter(QObject *o, QEvent *e);
+        bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
-	void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const;
-	double theta(int xs, int ys, int xe, int ye) const;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &r) const override;
+        double theta(int xs, int ys, int xe, int ye) const;
 
 	//! Flag specifying if the start arrow is visible
 	bool d_start_arrow;

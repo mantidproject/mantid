@@ -1,14 +1,17 @@
 #include "MantidDataHandling/LoadLLB.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <limits>
 #include <algorithm>
-#include <vector>
 #include <cmath>
+#include <limits>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -27,7 +30,7 @@ LoadLLB::LoadLLB()
       m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfHistograms(0), m_wavelength(0.0), m_channelWidth(0.0),
       m_loader() {
-  m_supportedInstruments.push_back("MIBEMOL");
+  m_supportedInstruments.emplace_back("MIBEMOL");
 }
 
 //----------------------------------------------------------------------------------------------

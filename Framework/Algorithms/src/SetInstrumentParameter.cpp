@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -60,9 +61,7 @@ void SetInstrumentParameter::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("String");
-  propOptions.push_back("Number");
+  std::vector<std::string> propOptions{"String", "Number"};
   declareProperty("ParameterType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");

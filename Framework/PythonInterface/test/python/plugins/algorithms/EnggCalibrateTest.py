@@ -79,10 +79,10 @@ class EnggCalibrateTest(unittest.TestCase):
         Checks normal operation.
         """
 
-        difc, zero = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                        VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                        ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
+        difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                               VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                               VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                               ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
@@ -93,12 +93,12 @@ class EnggCalibrateTest(unittest.TestCase):
         """
         # This file has: 1.6, 1.1, 1.8 (as the test above)
         filename = 'EnginX_3_expected_peaks_unittest.csv'
-        difc, zero = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                        VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                        ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
-                                        ExpectedPeaksFromFile=filename,
-                                        Bank='2')
+        difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                               VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                               VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                               ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
+                                               ExpectedPeaksFromFile=filename,
+                                               Bank='2')
 
         self.check_3peaks_values(difc, zero)
 

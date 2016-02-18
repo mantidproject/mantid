@@ -43,17 +43,17 @@ public:
   /// Constructor
   StretchExp();
   /// Destructor
-  virtual ~StretchExp() {}
+  ~StretchExp() override {}
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "StretchExp"; }
-  virtual const std::string category() const { return "General"; }
+  std::string name() const override { return "StretchExp"; }
+  const std::string category() const override { return "General"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
 };
 
 } // namespace Functions

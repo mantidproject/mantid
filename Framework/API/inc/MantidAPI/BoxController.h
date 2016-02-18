@@ -369,7 +369,7 @@ public:
   // { return m_useWriteBuffer; }
   /// Returns if current box controller is file backed. Assumes that
   /// BC(workspace) is fileBackd if fileIO is defined;
-  bool isFileBacked() const { return (m_fileIO != 0); }
+  bool isFileBacked() const { return bool(m_fileIO); }
   /// returns the pointer to the class, responsible for fileIO operations;
   IBoxControllerIO *getFileIO() { return m_fileIO.get(); }
   /// makes box controller file based by providing class, responsible for

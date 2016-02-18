@@ -1,11 +1,12 @@
 #include "MantidLiveData/LiveDataAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
+
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 
@@ -81,10 +82,7 @@ void LiveDataAlgorithm::initProps() {
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Add");
-  propOptions.push_back("Replace");
-  propOptions.push_back("Append");
+  std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(
       "AccumulationMethod", "Add",
       boost::make_shared<StringListValidator>(propOptions),
@@ -121,10 +119,7 @@ void LiveDataAlgorithm::initProps() {
                                          Direction::Input),
       "A Python script that will be run to process the accumulated data.");
 
-  std::vector<std::string> runOptions;
-  runOptions.push_back("Restart");
-  runOptions.push_back("Stop");
-  runOptions.push_back("Rename");
+  std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
                   boost::make_shared<StringListValidator>(runOptions),
                   "What to do at run start/end boundaries?\n"

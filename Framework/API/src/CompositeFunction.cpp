@@ -72,7 +72,8 @@ std::string CompositeFunction::asString() const {
   }
   for (size_t i = 0; i < nFunctions(); i++) {
     IFunction_sptr fun = getFunction(i);
-    bool isComp = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;
+    bool isComp =
+        boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     ostr << fun->asString();

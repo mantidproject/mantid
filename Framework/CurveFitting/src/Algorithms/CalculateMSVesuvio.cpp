@@ -7,9 +7,12 @@
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -51,13 +54,13 @@ DECLARE_ALGORITHM(CalculateMSVesuvio)
 
 /// Constructor
 CalculateMSVesuvio::CalculateMSVesuvio()
-    : Algorithm(), m_randgen(NULL), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
+    : Algorithm(), m_randgen(nullptr), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
       m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
-      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(NULL),
-      m_sampleProps(NULL), m_detHeight(-1.0), m_detWidth(-1.0),
+      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
+      m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0),
       m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
       m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
-      m_progress(NULL), m_inputWS() {}
+      m_progress(nullptr), m_inputWS() {}
 
 /// Destructor
 CalculateMSVesuvio::~CalculateMSVesuvio() {

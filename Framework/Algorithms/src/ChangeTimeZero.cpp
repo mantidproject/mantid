@@ -248,7 +248,7 @@ DateAndTime
 ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
-  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = NULL;
+  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
   } catch (std::invalid_argument) {
@@ -281,23 +281,23 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
 
   // If both inputs are being used, then return straight away.
   if (isRelative && absoluteTimeInput) {
-    invalidProperties.insert(std::make_pair(
-        "RelativeTimeOffset", "You can either sepcify a relative time shift or "
-                              "an absolute time shift."));
-    invalidProperties.insert(std::make_pair(
-        "AbsoluteTimeOffset", "You can either sepcify a relative time shift or "
-                              "an absolute time shift."));
+    invalidProperties.emplace("RelativeTimeOffset",
+                              "You can either sepcify a relative time shift or "
+                              "an absolute time shift.");
+    invalidProperties.emplace("AbsoluteTimeOffset",
+                              "You can either sepcify a relative time shift or "
+                              "an absolute time shift.");
 
     return invalidProperties;
   } else if (!isRelative && !isAbsolute) {
-    invalidProperties.insert(std::make_pair(
+    invalidProperties.emplace(
         "RelativeTimeOffset",
         "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp."));
-    invalidProperties.insert(std::make_pair(
+        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
+    invalidProperties.emplace(
         "AbsoluteTimeOffset",
         "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp."));
+        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
   }
 
   // If we are dealing with an absolute time we need to ensure that the

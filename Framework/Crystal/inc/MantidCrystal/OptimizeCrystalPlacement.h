@@ -49,23 +49,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport OptimizeCrystalPlacement : public API::Algorithm {
 public:
   OptimizeCrystalPlacement();
-  virtual ~OptimizeCrystalPlacement();
+  ~OptimizeCrystalPlacement() override;
 
-  virtual const std::string name() const { return "OptimizeCrystalPlacement"; };
+  const std::string name() const override {
+    return "OptimizeCrystalPlacement";
+  };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm  optimizes goniometer settings  and sample "
            "orientation to better index the peaks.";
   }
 
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
-  const std::string category() const { return "Crystal\\Corrections"; };
+  const std::string category() const override {
+    return "Crystal\\Corrections";
+  };
 
 private:
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 };
 }
 }

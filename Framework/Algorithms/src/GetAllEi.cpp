@@ -1,18 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <string>
-
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
+
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,7 +31,7 @@ GetAllEi::GetAllEi()
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper(), m_pFilterLog(NULL) {}
+      m_chopper(), m_pFilterLog(nullptr) {}
 
 /// Initialization method.
 void GetAllEi::init() {
@@ -982,7 +987,7 @@ GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
   if (boost::iequals(LogName, "Defined in IDF")) {
     auto AllNames = m_chopper->getStringParameter(propertyName);
     if (AllNames.size() != 1)
-      return NULL;
+      return nullptr;
     LogName = AllNames[0];
   }
   auto pIProperty = (inputWS->run().getProperty(LogName));

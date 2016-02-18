@@ -64,7 +64,8 @@ public:
   void populateAlgHistoryTreeWidget(const Mantid::API::WorkspaceHistory& wsHist);
 
 protected:
-  void selectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );
+  void selectionChanged(const QItemSelection &selected,
+                        const QItemSelection &deselected) override;
 
 private slots:
   void onItemChanged(QTreeWidgetItem* item, int index);
@@ -90,7 +91,7 @@ class AlgExecSummaryGrpBox: public QGroupBox
   public:
     explicit AlgExecSummaryGrpBox(QWidget *w);
   AlgExecSummaryGrpBox(QString,QWidget*w);
-  ~AlgExecSummaryGrpBox();
+  ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate);
 private:
   QLineEdit* getAlgExecDurationCtrl()const {return m_execDurationEdit;}
@@ -111,7 +112,7 @@ class AlgEnvHistoryGrpBox: public QGroupBox
   public:
     explicit AlgEnvHistoryGrpBox(QWidget *w);
   AlgEnvHistoryGrpBox(QString,QWidget*w);
-  ~AlgEnvHistoryGrpBox();
+  ~AlgEnvHistoryGrpBox() override;
 
   QLineEdit* getosNameEdit()const {return m_osNameEdit;}
   QLineEdit* getosVersionEdit()const {return m_osVersionEdit;}
@@ -137,7 +138,7 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
 
 public:
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
-  ~AlgorithmHistoryWindow();
+  ~AlgorithmHistoryWindow() override;
 public slots:
   void updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistmakeory);
   void doUnroll(const std::vector<int>& unrollIndicies );

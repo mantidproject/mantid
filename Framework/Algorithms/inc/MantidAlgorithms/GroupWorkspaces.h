@@ -46,24 +46,24 @@ public:
   /// Default constructor
   GroupWorkspaces();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupWorkspaces"; }
+  const std::string name() const override { return "GroupWorkspaces"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes workspaces as input and groups similar workspaces together.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Grouping;Utility\\Workspaces";
   }
 
 private:
   /// Overridden Init method
-  void init();
+  void init() override;
   /// overridden execute method
-  void exec();
+  void exec() override;
   /// Add a list of names to the new group
   void addToGroup(const std::vector<std::string> &names);
   /// Add a workspace to the new group, checking for a WorkspaceGroup and

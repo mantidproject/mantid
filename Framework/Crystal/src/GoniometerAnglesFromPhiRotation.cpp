@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -159,8 +160,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
     findUB->initialize();
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace",
                                              getProperty("PeaksWorkspace1"));
-    findUB->setProperty("MIND", (double)getProperty("MIND"));
-    findUB->setProperty("MAXD", (double)getProperty("MAXD"));
+    findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));
+    findUB->setProperty("MAXD", static_cast<double>(getProperty("MAXD")));
     findUB->setProperty("Tolerance", Tolerance);
 
     findUB->executeAsChildAlg();
@@ -199,9 +200,10 @@ void GoniometerAnglesFromPhiRotation::exec() {
   PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
 
   if (!Run1HasOrientedLattice)
-    PeaksRun1->mutableSample().setOrientedLattice(NULL);
+    PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
-  double dphi = (double)getProperty("Phi2") - (double)getProperty("Run1Phi");
+  double dphi = static_cast<double>(getProperty("Phi2")) -
+                static_cast<double>(getProperty("Run1Phi"));
   Kernel::Matrix<double> Gon22(3, 3, true);
 
   for (int i = 0; i < PeaksRun2->getNumberPeaks(); i++) {
@@ -348,7 +350,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     ax3 = -ax3;
   }
 
-  double phi2 = (double)getProperty("Run1Phi") + dphi;
+  double phi2 = static_cast<double>(getProperty("Run1Phi")) + dphi;
   double chi2 = acos(ax2) / M_PI * 180;
   double omega2 = atan2(ax3, -ax1) / M_PI * 180;
 

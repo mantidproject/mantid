@@ -63,7 +63,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
                    int backMin, int backMax,
                    int tofMin,  int tofMax);
 
-    ~RefImageView();
+     ~RefImageView() override;
 
     RefIVConnections* getIVConnections();
 

@@ -19,6 +19,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "boost/pointer_cast.hpp"
 
 using namespace Mantid::VATES;

@@ -50,26 +50,27 @@ public:
   /// Default constructor
   Power();
   /// Destructor
-  virtual ~Power(){};
+  ~Power() override{};
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "Power"; }
+  const std::string name() const override { return "Power"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The Power algorithm will raise the base workspace to a particular "
            "power. Corresponding error values will be created.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
 private:
   // Overridden UnaryOperation methods
-  void defineProperties();
-  void retrieveProperties();
+  void defineProperties() override;
+  void retrieveProperties() override;
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
   /// calculate the power
   inline double calculatePower(const double base, const double exponent);
   /// Exponent to raise the base workspace to

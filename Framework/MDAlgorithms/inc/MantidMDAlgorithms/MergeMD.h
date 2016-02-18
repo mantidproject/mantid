@@ -37,20 +37,20 @@ namespace MDAlgorithms {
 class DLLExport MergeMD : public BoxControllerSettingsAlgorithm {
 public:
   MergeMD();
-  virtual ~MergeMD();
+  ~MergeMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Merge several MDWorkspaces into one.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void createOutputWorkspace(std::vector<std::string> &inputs);
 
   template <typename MDE, size_t nd>

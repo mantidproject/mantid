@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/UnaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -42,7 +44,7 @@ void UnaryOperation::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(in_work);
-  if ((eventW != NULL) && !(this->useHistogram)) {
+  if ((eventW != nullptr) && !(this->useHistogram)) {
     this->execEvent();
     return;
   }

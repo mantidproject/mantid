@@ -1,16 +1,18 @@
 #include "MantidLiveData/ISISHistoDataListener.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -44,7 +46,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
+    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
@@ -94,7 +96,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
   if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, address.port()) != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -121,7 +123,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 bool ISISHistoDataListener::isConnected() {
-  if (m_daeHandle == NULL)
+  if (m_daeHandle == nullptr)
     return false;
   // try to read a parameter, success means connected
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;
@@ -271,7 +273,8 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
   const int maxSize = 1024;
   char buffer[maxSize];
   int dim = maxSize, ndims = 1;
-  if (IDCgetparc(m_daeHandle, par.c_str(), (char *)buffer, &dim, &ndims) != 0) {
+  if (IDCgetparc(m_daeHandle, par.c_str(), static_cast<char *>(buffer), &dim,
+                 &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
     throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
                                        m_daeName);

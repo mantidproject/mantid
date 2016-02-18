@@ -104,18 +104,18 @@ public:
     bkt = b;   // the bucket
   }
 
-  ~ANNkd_leaf() {} // destructor (none)
+  ~ANNkd_leaf() override {} // destructor (none)
 
-  virtual void getStats(                       // get tree statistics
-      int dim,                                 // dimension of space
-      ANNkdStats &st,                          // statistics
-      ANNorthRect &bnd_box);                   // bounding box
-  virtual void print(int level, ostream &out); // print node
-  virtual void dump(ostream &out);             // dump node
+  void getStats(                                // get tree statistics
+      int dim,                                  // dimension of space
+      ANNkdStats &st,                           // statistics
+      ANNorthRect &bnd_box) override;           // bounding box
+  void print(int level, ostream &out) override; // print node
+  void dump(ostream &out) override;             // dump node
 
-  virtual void ann_search(ANNdist);     // standard search
-  virtual void ann_pri_search(ANNdist); // priority search
-  virtual void ann_FR_search(ANNdist);  // fixed-radius search
+  void ann_search(ANNdist) override;     // standard search
+  void ann_pri_search(ANNdist) override; // priority search
+  void ann_FR_search(ANNdist) override;  // fixed-radius search
 };
 
 //----------------------------------------------------------------------
@@ -151,11 +151,11 @@ class ANNkd_split : public ANNkd_node // splitting node of a kd-tree
                        // rectangle along cut_dim
   ANNkd_ptr child[2];  // left and right children
 public:
-  ANNkd_split(                                  // constructor
-      int cd,                                   // cutting dimension
-      ANNcoord cv,                              // cutting value
-      ANNcoord lv, ANNcoord hv,                 // low and high values
-      ANNkd_ptr lc = NULL, ANNkd_ptr hc = NULL) // children
+  ANNkd_split(                                        // constructor
+      int cd,                                         // cutting dimension
+      ANNcoord cv,                                    // cutting value
+      ANNcoord lv, ANNcoord hv,                       // low and high values
+      ANNkd_ptr lc = nullptr, ANNkd_ptr hc = nullptr) // children
   {
     cut_dim = cd;         // cutting dimension
     cut_val = cv;         // cutting value
@@ -165,24 +165,24 @@ public:
     child[ANN_HI] = hc;   // right child
   }
 
-  ~ANNkd_split() // destructor
+  ~ANNkd_split() override // destructor
   {
-    if (child[ANN_LO] != NULL && child[ANN_LO] != KD_TRIVIAL)
+    if (child[ANN_LO] != nullptr && child[ANN_LO] != KD_TRIVIAL)
       delete child[ANN_LO];
-    if (child[ANN_HI] != NULL && child[ANN_HI] != KD_TRIVIAL)
+    if (child[ANN_HI] != nullptr && child[ANN_HI] != KD_TRIVIAL)
       delete child[ANN_HI];
   }
 
-  virtual void getStats(                       // get tree statistics
-      int dim,                                 // dimension of space
-      ANNkdStats &st,                          // statistics
-      ANNorthRect &bnd_box);                   // bounding box
-  virtual void print(int level, ostream &out); // print node
-  virtual void dump(ostream &out);             // dump node
+  void getStats(                                // get tree statistics
+      int dim,                                  // dimension of space
+      ANNkdStats &st,                           // statistics
+      ANNorthRect &bnd_box) override;           // bounding box
+  void print(int level, ostream &out) override; // print node
+  void dump(ostream &out) override;             // dump node
 
-  virtual void ann_search(ANNdist);     // standard search
-  virtual void ann_pri_search(ANNdist); // priority search
-  virtual void ann_FR_search(ANNdist);  // fixed-radius search
+  void ann_search(ANNdist) override;     // standard search
+  void ann_pri_search(ANNdist) override; // priority search
+  void ann_FR_search(ANNdist) override;  // fixed-radius search
 };
 
 //----------------------------------------------------------------------

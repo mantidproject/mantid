@@ -40,7 +40,7 @@
 #include "SigmoidalFit.h"
 #include "LogisticFit.h"
 #include "Matrix.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QListWidget>
 #include <QTableWidget>

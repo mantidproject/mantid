@@ -67,7 +67,7 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   parentBox->getBoxes(boxes, 1000, true);
 
   bool fileBackedTarget(false);
-  Kernel::DiskBuffer *dbuff(NULL);
+  Kernel::DiskBuffer *dbuff(nullptr);
   if (ws->isFileBacked()) {
     fileBackedTarget = true;
     dbuff = ws->getBoxController()->getFileIO();

@@ -1,6 +1,7 @@
 #ifndef LoadRaw3TEST_H_
 #define LoadRaw3TEST_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"

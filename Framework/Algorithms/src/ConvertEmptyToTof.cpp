@@ -3,10 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -373,13 +376,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   center = gaussianpeak->centre();
   height = gaussianpeak->height();
   double fwhm = gaussianpeak->fwhm();
-  if (fwhm <= 0.0) {
-    return false;
-  }
-  //    sigma = fwhm*2;
-  //  sigma = fwhm/2.35;
-
-  return true;
+  return fwhm > 0.0;
 }
 
 /**

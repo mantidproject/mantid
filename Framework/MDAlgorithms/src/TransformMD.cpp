@@ -175,7 +175,7 @@ void TransformMD::exec() {
   } else if (event) {
     // Call the method for this type of MDEventWorkspace.
     CALL_MDEVENT_FUNCTION(this->doTransform, outWS);
-    Progress *prog2 = NULL;
+    Progress *prog2 = nullptr;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0, prog2);
     event->splitAllIfNeeded(ts);

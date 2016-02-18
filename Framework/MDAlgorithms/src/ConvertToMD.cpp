@@ -67,11 +67,11 @@ void ConvertToMD::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
-  auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int>>();
-  mustBeMoreThen1->setLower(1);
+  auto mustBeMoreThan1 = boost::make_shared<BoundedValidator<int>>();
+  mustBeMoreThan1->setLower(1);
 
   declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 1, mustBeMoreThen1),
+      new PropertyWithValue<int>("MinRecursionDepth", 1, mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -138,8 +138,7 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper =
-        boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
+    m_OutWSWrapper = boost::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -320,9 +319,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
     if (!dets.empty()) {
-      std::vector<detid_t> id_vector;
-      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
-      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+      mapping->emplace(*dets.begin(),
+                       std::vector<detid_t>(dets.begin(), dets.end()));
     }
   }
 

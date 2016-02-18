@@ -38,8 +38,8 @@ namespace MDAlgorithms {
 class DLLExport ImportMDHistoWorkspaceBase : public API::Algorithm {
 public:
   ImportMDHistoWorkspaceBase();
-  virtual ~ImportMDHistoWorkspaceBase();
-  virtual std::map<std::string, std::string> validateInputs();
+  ~ImportMDHistoWorkspaceBase() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 protected:
   /// Vector containing the number of bins in each dimension.

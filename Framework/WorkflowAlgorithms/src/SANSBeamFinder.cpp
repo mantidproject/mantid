@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "Poco/Path.h"
-#include "Poco/String.h"
-#include "Poco/NumberFormatter.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+
+#include "Poco/NumberFormatter.h"
+#include "Poco/Path.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

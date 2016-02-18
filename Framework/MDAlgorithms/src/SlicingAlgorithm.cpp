@@ -422,7 +422,7 @@ void SlicingAlgorithm::createGeneralTransform() {
         "the OutDimX, etc. properties.");
 
   // Now the reverse transformation
-  m_transformToOriginal = NULL;
+  m_transformToOriginal = nullptr;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
     auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
@@ -598,10 +598,11 @@ void SlicingAlgorithm::createAlignedTransform() {
     m_transformToOriginal = tmp;
   } else {
     // Changed # of dimensions - can't reverse the transform
-    m_transformToOriginal = NULL;
-    g_log.warning("SlicingAlgorithm: Your slice will cause the output "
-                  "workspace to have less dimensions than the input. This will "
-                  "affect your ability to create subsequent slices.");
+    m_transformToOriginal = nullptr;
+    g_log.warning(
+        "SlicingAlgorithm: Your slice will cause the output "
+        "workspace to have fewer dimensions than the input. This will "
+        "affect your ability to create subsequent slices.");
   }
 }
 
@@ -684,7 +685,7 @@ void SlicingAlgorithm::createTransform() {
   }
 
   // Create the coordinate transformation
-  m_transform = NULL;
+  m_transform = nullptr;
   if (m_axisAligned)
     this->createAlignedTransform();
   else
@@ -819,9 +820,9 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     double xMin = m_binDimensions[d]->getMinimum();
     double xMax = m_binDimensions[d]->getMaximum();
     // Move the position if you're using a chunk
-    if (chunkMin != NULL)
+    if (chunkMin != nullptr)
       xMin = m_binDimensions[d]->getX(chunkMin[d]);
-    if (chunkMax != NULL)
+    if (chunkMax != nullptr)
       xMax = m_binDimensions[d]->getX(chunkMax[d]);
     // Offset the origin by the position along the basis vector
     o1 += (m_bases[d] * xMin);

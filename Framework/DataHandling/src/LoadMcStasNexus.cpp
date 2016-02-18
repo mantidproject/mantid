@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadMcStasNexus.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -141,14 +142,14 @@ void LoadMcStasNexus::exec() {
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption
-      boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+      auto lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
       Axis *axis2 = new NumericAxis(axis2Length);
       axis2->title() = axis2Name;
       // Set caption
-      lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+      lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis2Name, "");
       axis2->unit() = lblUnit;
 

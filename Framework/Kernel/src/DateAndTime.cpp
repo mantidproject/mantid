@@ -90,7 +90,7 @@ time_t utc_mktime(struct tm *utctime) {
   result = mktime(&tmp);
   if (result == static_cast<time_t>(-1))
     return static_cast<time_t>(-1);
-  if (gmtime_r_portable(&result, &check) == NULL)
+  if (gmtime_r_portable(&result, &check) == nullptr)
     return static_cast<time_t>(-1);
 
   // loop until match
@@ -111,7 +111,7 @@ time_t utc_mktime(struct tm *utctime) {
     if (result == static_cast<time_t>(-1))
       return static_cast<time_t>(-1);
     gmtime_r_portable(&result, &check);
-    if (gmtime_r_portable(&result, &check) == NULL)
+    if (gmtime_r_portable(&result, &check) == nullptr)
       return static_cast<time_t>(-1);
     // Seems like there can be endless loops at the end of a month? E.g. sep 30,
     // 2010 at 4:40 pm. This is to avoid it.

@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -40,7 +41,7 @@ SmoothNeighbours::SmoothNeighbours()
     : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
       WeightedSum(new NullWeighting), PreserveEvents(false),
       expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
-      m_prog(NULL) {}
+      m_prog(nullptr) {}
 
 /** Initialisation method.
  *
@@ -63,11 +64,8 @@ void SmoothNeighbours::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Flat");
-  propOptions.push_back("Linear");
-  propOptions.push_back("Parabolic");
-  propOptions.push_back("Gaussian");
+  std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic",
+                                       "Gaussian"};
   declareProperty("WeightedSum", "Flat",
                   boost::make_shared<StringListValidator>(propOptions),
                   "What sort of Weighting scheme to use?\n"
@@ -130,9 +128,7 @@ void SmoothNeighbours::init() {
   // -- Non-uniform properties
   // ----------------------------------------------------------------------
 
-  std::vector<std::string> radiusPropOptions;
-  radiusPropOptions.push_back("Meters");
-  radiusPropOptions.push_back("NumberOfPixels");
+  std::vector<std::string> radiusPropOptions{"Meters", "NumberOfPixels"};
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),
@@ -810,7 +806,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
   // Ensure thread-safety
-  outWS->sortAll(TOF_SORT, NULL);
+  outWS->sortAll(TOF_SORT, nullptr);
 
   this->setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));

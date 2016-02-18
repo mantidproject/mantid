@@ -1,6 +1,7 @@
 #include "MantidSINQ/PoldiPeakSummary.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"

@@ -390,7 +390,7 @@ AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
 /// Inserts the provided prototype into the factory.
 void SymmetryElementFactoryImpl::insertPrototype(
     const std::string &identifier, const SymmetryElement_sptr &prototype) {
-  m_prototypes.insert(std::make_pair(identifier, prototype));
+  m_prototypes.emplace(identifier, prototype);
 }
 
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator)

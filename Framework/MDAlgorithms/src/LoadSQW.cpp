@@ -243,7 +243,7 @@ void LoadSQW::readEvents(
   // For tracking when to split boxes
   size_t eventsAdded = 0;
   BoxController_sptr bc = ws->getBoxController();
-  DiskBuffer *dbuf(NULL);
+  DiskBuffer *dbuf(nullptr);
   if (bc->isFileBacked())
     dbuf = bc->getFileIO();
 

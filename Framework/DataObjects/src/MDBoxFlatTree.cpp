@@ -1,8 +1,9 @@
-#include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
 typedef std::unique_ptr<::NeXus::File> file_holder_type;
@@ -498,7 +499,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
                                        bool BoxStructureOnly) {
 
   size_t numBoxes = this->getNBoxes();
-  Boxes.assign(numBoxes, NULL);
+  Boxes.assign(numBoxes, nullptr);
 
   uint64_t totalNumEvents(0);
   m_nDim = static_cast<int>(bc->getNDims());
@@ -522,7 +523,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     if (box_type == 0)
       continue;
 
-    API::IMDNode *ibox = NULL;
+    API::IMDNode *ibox = nullptr;
 
     // Extents of the box, as a vector
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(

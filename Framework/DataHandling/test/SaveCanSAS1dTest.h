@@ -2,12 +2,15 @@
 #define SAVECANSAS1DTEST_H
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
-#include <Poco/Path.h>
+
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <fstream>
 #include <sstream>

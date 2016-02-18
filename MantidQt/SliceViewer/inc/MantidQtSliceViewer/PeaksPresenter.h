@@ -79,7 +79,7 @@ namespace SliceViewer
     virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
     virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) =0;
     virtual bool hasPeakAddMode() const = 0;
-    virtual ~PeaksPresenter(){};
+    ~PeaksPresenter() override{};
   };
 
 

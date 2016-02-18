@@ -41,23 +41,23 @@ public:
   /// Constructor
   SetupEQSANSReduction() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SetupEQSANSReduction() {}
+  ~SetupEQSANSReduction() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SetupEQSANSReduction"; }
+  const std::string name() const override { return "SetupEQSANSReduction"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Set up EQSANS SANS reduction options.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   std::string _findFile(std::string dataRun);
   void
   setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);

@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -274,8 +275,9 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
   // lexical_cast function
   typedef std::string (*from_size_t)(const size_t &);
 
-  std::transform(indices.begin(), indices.end(), indexStrings.begin(),
-                 (from_size_t)boost::lexical_cast<std::string, size_t>);
+  std::transform(
+      indices.begin(), indices.end(), indexStrings.begin(),
+      static_cast<from_size_t>(boost::lexical_cast<std::string, size_t>));
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;

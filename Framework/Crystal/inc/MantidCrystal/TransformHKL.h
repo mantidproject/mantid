@@ -37,19 +37,19 @@ namespace Crystal {
 class DLLExport TransformHKL : public API::Algorithm {
 public:
   TransformHKL();
-  ~TransformHKL();
+  ~TransformHKL() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Specify a 3x3 matrix to apply to (HKL) vectors as a list of 9 "
            "comma separated numbers. Both the UB and HKL values will be "
            "updated";
@@ -57,10 +57,10 @@ public:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

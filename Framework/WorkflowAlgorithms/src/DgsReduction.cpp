@@ -137,9 +137,9 @@ void DgsReduction::init() {
   // this->declareProperty("FilterBadPulses", false, "If true, filter bad pulses
   // from data.");
   std::vector<std::string> incidentBeamNormOptions;
-  incidentBeamNormOptions.push_back("None");
-  incidentBeamNormOptions.push_back("ByCurrent");
-  incidentBeamNormOptions.push_back("ToMonitor");
+  incidentBeamNormOptions.emplace_back("None");
+  incidentBeamNormOptions.emplace_back("ByCurrent");
+  incidentBeamNormOptions.emplace_back("ToMonitor");
   this->declareProperty(
       "IncidentBeamNormalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
@@ -212,9 +212,9 @@ void DgsReduction::init() {
       "DetVanIntRangeHigh",
       new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
   std::vector<std::string> detvanIntRangeUnits;
-  detvanIntRangeUnits.push_back("Energy");
-  detvanIntRangeUnits.push_back("Wavelength");
-  detvanIntRangeUnits.push_back("TOF");
+  detvanIntRangeUnits.emplace_back("Energy");
+  detvanIntRangeUnits.emplace_back("Wavelength");
+  detvanIntRangeUnits.emplace_back("TOF");
   this->declareProperty(
       "DetVanIntRangeUnits", "Energy",
       boost::make_shared<StringListValidator>(detvanIntRangeUnits),

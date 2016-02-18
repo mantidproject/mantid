@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ResetNegatives.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/System.h"
@@ -94,7 +95,7 @@ void ResetNegatives::exec() {
   DataObjects::EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
   if (eventWS)
-    eventWS->sortAll(DataObjects::TOF_SORT, NULL);
+    eventWS->sortAll(DataObjects::TOF_SORT, nullptr);
 
   Progress prog(this, .1, 1., 2 * nHist);
 

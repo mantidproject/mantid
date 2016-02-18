@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "Poco/NumberFormatter.h"

@@ -382,10 +382,10 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
 
   // Initialize all the arrays
   int64_t num = index;
-  double *tofs = NULL;
-  float *weights = NULL;
-  float *errorSquareds = NULL;
-  int64_t *pulsetimes = NULL;
+  double *tofs = nullptr;
+  float *weights = nullptr;
+  float *errorSquareds = nullptr;
+  int64_t *pulsetimes = nullptr;
 
   // overall event type.
   EventType type = m_eventWorkspace->getEventType();

@@ -4,14 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <algorithm>
-#include <math.h>
+
 #include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions.hpp>
 #include <boost/make_shared.hpp>
+
+#include <algorithm>
+#include <math.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -70,11 +71,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 void LoadDaveGrp::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".grp");
-  exts.push_back(".sqe");
-  exts.push_back(".txt");
-  exts.push_back(".dat");
+  std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
   this->declareProperty(
       new API::FileProperty("Filename", "", API::FileProperty::Load, exts),

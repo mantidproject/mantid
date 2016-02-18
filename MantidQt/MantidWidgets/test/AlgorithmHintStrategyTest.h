@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 

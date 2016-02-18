@@ -53,19 +53,19 @@ public:
   /// Default constructor
   PoissonErrors() : BinaryOperation(){};
   /// Destructor
-  virtual ~PoissonErrors(){};
+  ~PoissonErrors() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PoissonErrors"; }
+  const std::string name() const override { return "PoissonErrors"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the gaussian approxiamtion of Poisson error based on a "
            "matching workspace containing the original counts.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;Arithmetic\\Errors";
   }
 
@@ -74,21 +74,21 @@ private:
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+                              MantidVec &EOut) override;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
 
   /// The name of the first input workspace property for BinaryOperation
-  virtual std::string inputPropName1() const { return "InputWorkspace"; }
+  std::string inputPropName1() const override { return "InputWorkspace"; }
   /// The name of the second input workspace property for BinaryOperation
-  virtual std::string inputPropName2() const { return "CountsWorkspace"; }
+  std::string inputPropName2() const override { return "CountsWorkspace"; }
   /// The name of the output workspace property for BinaryOperation
-  virtual std::string outputPropName() const { return "OutputWorkspace"; }
+  std::string outputPropName() const override { return "OutputWorkspace"; }
 };
 
 } // namespace Algorithm

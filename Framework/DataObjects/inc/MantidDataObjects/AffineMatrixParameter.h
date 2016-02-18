@@ -20,15 +20,15 @@ class DLLExport AffineMatrixParameter
     : public Mantid::API::ImplicitFunctionParameter {
 public:
   // ImplcitFunctionParameter Methods.
-  virtual std::string getName() const;
-  virtual bool isValid() const;
-  virtual std::string toXMLString() const;
-  virtual AffineMatrixParameter *clone() const;
+  std::string getName() const override;
+  bool isValid() const override;
+  std::string toXMLString() const override;
+  AffineMatrixParameter *clone() const override;
   void setMatrix(const AffineMatrixType newMatrix);
   AffineMatrixParameter(size_t outD, size_t inD);
   AffineMatrixParameter(const AffineMatrixParameter &);
   AffineMatrixParameter &operator=(const AffineMatrixParameter &other);
-  ~AffineMatrixParameter();
+  ~AffineMatrixParameter() override;
 
   coord_t **getRawMatrix();
   AffineMatrixType getAffineMatrix() const;

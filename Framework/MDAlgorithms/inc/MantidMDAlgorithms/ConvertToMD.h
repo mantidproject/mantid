@@ -51,12 +51,12 @@ namespace MDAlgorithms {
 class DLLExport ConvertToMD : public ConvertToMDParent {
 public:
   ConvertToMD();
-  ~ConvertToMD();
+  ~ConvertToMD() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a MDEventWorkspace with selected dimensions, e.g. the "
            "reciprocal space of momentums (Qx, Qy, Qz) or momentums modules "
            "mod(Q), energy transfer dE if available and any other user "
@@ -64,12 +64,12 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
 
 private:
-  std::map<std::string, std::string> validateInputs();
-  void exec();
-  void init();
+  std::map<std::string, std::string> validateInputs() override;
+  void exec() override;
+  void init() override;
   /// progress reporter
   boost::scoped_ptr<API::Progress> m_Progress;
 

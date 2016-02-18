@@ -62,24 +62,24 @@ public:
   SaveVTK();
 
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveVTK"; };
+  const std::string name() const override { return "SaveVTK"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a workspace out to a VTK file format for use with 3D "
            "visualisation tools such as Paraview.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category
-  virtual const std::string category() const { return "DataHandling\\XML"; }
+  const std::string category() const override { return "DataHandling\\XML"; }
 
 private:
   /// Override virtual init function
-  void init();
+  void init() override;
 
   /// Override virtual exec function
-  void exec();
+  void exec() override;
 
   /// Check the optional properties
   void checkOptionalProperties();

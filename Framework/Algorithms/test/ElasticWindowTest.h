@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/System.h"
-
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

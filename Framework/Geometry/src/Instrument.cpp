@@ -3,7 +3,9 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Exception.h"
 
+#include <boost/make_shared.hpp>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -19,16 +21,16 @@ Kernel::Logger g_log("Instrument");
 
 /// Default constructor
 Instrument::Instrument()
-    : CompAssembly(), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
-      m_defaultView("3D"), m_defaultViewAxis("Z+"),
+    : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>),
+      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
-    : CompAssembly(name), m_detectorCache(), m_sourceCache(0),
-      m_chopperPoints(new std::vector<const ObjComponent *>), m_sampleCache(0),
-      m_defaultView("3D"), m_defaultViewAxis("Z+"),
+    : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
+      m_chopperPoints(new std::vector<const ObjComponent *>),
+      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /** Constructor to create a parametrized instrument
@@ -50,9 +52,9 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
  *  in indirect instruments.
  */
 Instrument::Instrument(const Instrument &instr)
-    : CompAssembly(instr), m_sourceCache(NULL),
+    : CompAssembly(instr), m_sourceCache(nullptr),
       m_chopperPoints(new std::vector<const ObjComponent *>),
-      m_sampleCache(NULL), /* Should only be temporarily null */
+      m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
       m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
@@ -183,9 +185,8 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
         static_cast<const Instrument *>(m_base)->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.insert(std::pair<detid_t, IDetector_sptr>(
-          in_det.first,
-          ParComponentFactory::createDetector(in_det.second.get(), m_map)));
+      out_map.emplace(in_det.first, ParComponentFactory::createDetector(
+                                        in_det.second.get(), m_map));
     }
   } else {
     // You can just return the detector cache directly.
@@ -395,7 +396,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 */
 boost::shared_ptr<const IComponent>
 Instrument::getComponentByID(ComponentID id) const {
-  const IComponent *base = (const IComponent *)(id);
+  const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
         boost::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
@@ -483,7 +484,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end()) {
-    return NULL;
+    return nullptr;
   }
   return it->second.get();
 }
@@ -495,7 +496,7 @@ bool Instrument::isMonitor(const detid_t &detector_id) const {
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   return det->isMonitor();
 }
@@ -527,7 +528,7 @@ bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
     return false;
   // This is the detector
   const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == NULL)
+  if (det == nullptr)
     return false;
   // Access the parameter map directly.
   Parameter_sptr maskedParam = m_map->get(det, "masked");
@@ -570,7 +571,8 @@ Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const {
   if (ndets == 1) {
     return this->getDetector(det_ids[0]);
   } else {
-    boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
+    boost::shared_ptr<DetectorGroup> det_group =
+        boost::make_shared<DetectorGroup>();
     bool warn(false);
     for (size_t i = 0; i < ndets; ++i) {
       det_group->addDetector(this->getDetector(det_ids[i]), warn);
@@ -975,7 +977,7 @@ void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                          Kernel::V3D &samplePos) const {
   // Get some positions
   const IComponent_const_sptr sourceObj = this->getSource();
-  if (sourceObj == NULL) {
+  if (sourceObj == nullptr) {
     throw Exception::InstrumentDefinitionError(
         "Failed to get source component from instrument");
   }

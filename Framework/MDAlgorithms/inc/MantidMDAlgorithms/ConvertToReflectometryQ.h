@@ -36,21 +36,21 @@ class DLLExport ConvertToReflectometryQ
     : public BoxControllerSettingsAlgorithm {
 public:
   ConvertToReflectometryQ();
-  virtual ~ConvertToReflectometryQ();
+  ~ConvertToReflectometryQ() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Transforms from real-space to Q or momentum space for "
            "reflectometry workspaces";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace MDAlgorithms

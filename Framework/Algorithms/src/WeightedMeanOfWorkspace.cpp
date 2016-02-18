@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -60,7 +61,7 @@ void WeightedMeanOfWorkspace::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     throw std::runtime_error(
         "WeightedMeanOfWorkspace cannot handle EventWorkspaces!");
   }

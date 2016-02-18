@@ -45,8 +45,8 @@ DECLARE_ALGORITHM(LoadMask)
 /** Constructor
  */
 LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL), m_pRootElem(NULL),
-      m_defaultToUse(true) {}
+    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(nullptr),
+      m_pRootElem(nullptr), m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -60,8 +60,8 @@ LoadMask::~LoadMask() {
   // actually cause a double free corruption, as
   // Poco::DOM::Document::documentElement() does not require a
   // release(). So just to be explicit that they're gone:
-  m_pDoc = NULL;
-  m_pRootElem = NULL;
+  m_pDoc = nullptr;
+  m_pRootElem = nullptr;
 }
 
 /// Initialise the properties
@@ -612,7 +612,7 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
 
   // 2. Set to data storage
   if (tomask) {
-    mask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
+    mask_detid_single.insert(mask_detid_single.end(), singles.begin(),
                              singles.end());
     for (size_t i = 0; i < pairs.size() / 2; i++) {
       mask_detid_pair_low.push_back(pairs[2 * i]);

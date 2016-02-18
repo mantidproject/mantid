@@ -1,5 +1,5 @@
 digraph FocusChunks {
-  labe="FocusAndSum Flowchart"
+  label="FocusAndSum Flowchart"
   $global_style
 
   subgraph params {
@@ -13,16 +13,15 @@ digraph FocusChunks {
 
   subgraph algorithms {
     $algorithm_style
+    getChunk [label="Get a chunk to process"]
     alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
     getRunNumber [label="Get a run number"]
-    plus [label="Plus v1\nsummed workspace"]
     load [label="Load v1"]
     split [label="SplitEvents v1"]
-    mergeWorkspace [label="Merge chunked workspaces"]
     gatherWorkspace [label="Gather workspaces MPI"]
     compressEvents [label="CompressEvents v1"]
     normaliseByCurrent [label="NormaliseByCurrent v1"]
-    plusAmongChunks [label="Plus v1\n workspaces from different chunks but same time range."]
+    plusAmongChunks [label="Plus v1\n workspaces from different chunks \nbut same time range."]
     setGSASParamFile [label="Set GSAS iparam file to run"]
     compressEvents [label="CompressEvents v1"]
     normaliseByCurrent [label="NormaliseByCurrent v1"]
@@ -31,35 +30,51 @@ digraph FocusChunks {
   subgraph decisions{
     $decision_style
     doSplitWorkspace  [label="Do split workspaces?"]
-
     haveMPI [label="Have MPI?"]
-    isSum [label="Is Sum True?"]
     isLastRunNumber [label="Is Last Run Number?"]
+    allChunksProcessed [label="Are All Chunks Reduced?"]
   }
 
-  setChunk0	      -> loadData
-  loadData	      -> doSplitWorkspace
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+    RunOutputWorkspacesList [label="OutputWorkspaces\nfor a run number"]
+  }
 
-  doSplitWorkspace	-> splitWorkspace	    [label="Yes"]
-  SplittersWorkspace	-> splitWorkspace
-  splitWorkspace	-> alignAndFocusWorkspaces
+  RunNumberList       -> getRunNumber
+  getRunNumber        -> RunNumber
 
-  doSplitWorkspace	-> alignAndFocusWorkspaces  [label="No"]
+  RunNumber	      -> getChunk
+  getChunk	      -> load
+  FilterWall          -> load
+  load	  	      -> doSplitWorkspace
 
-  alignAndFocusWorkspaces -> plusAmongChunks
-  plusAmongChunks	  -> haveMPI
+  doSplitWorkspace	-> split	    [label="Yes"]
+  SplittersWorkspace	-> split
+  CalibrationFile       -> alignAndFocusPowder
+  split	                -> alignAndFocusPowder
 
-  haveMPI	      -> gatherWorkspaces [label="Yes"]
-  gatherWorkspaces    -> setGSASParamFile
+  doSplitWorkspace	-> alignAndFocusPowder  [label="No"]
+
+  alignAndFocusPowder	-> plusAmongChunks
+  plusAmongChunks	-> allChunksProcessed
+
+  allChunksProcessed	-> getChunk  [label="No"]
+ 
+  allChunksProcessed	-> haveMPI [label="Yes"]
+
+  haveMPI	      -> gatherWorkspace [label="Yes"]
+  gatherWorkspace    -> setGSASParamFile
 
   haveMPI	      -> setGSASParamFile [label="No"]
 
-
-  setGSASParamFile    -> compresseEvents
+  setGSASParamFile    -> compressEvents
   compressEvents      -> normaliseByCurrent
-  normaliseByCurrent  -> OutputWorkspacesList
+  normaliseByCurrent  -> RunOutputWorkspacesList
 
+  RunOutputWorkspacesList -> isLastRunNumber
+  isLastRunNumber      -> getRunNumber [label="No"]
 
+  isLastRunNumber      -> OutputWorkspacesList [label="Yes"]
 
 }
-

@@ -202,7 +202,7 @@ void LoadMcStas::readEventData(
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instrument = parser.parseXML(NULL);
+      instrument = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -488,14 +488,14 @@ void LoadMcStas::readHistogramData(
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
-    boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+    auto lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
     Axis *axis2 = new NumericAxis(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+    lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 

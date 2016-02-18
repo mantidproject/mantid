@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <iostream>
@@ -65,7 +66,7 @@ void CopyInstrumentParameters::exec() {
     for (; it != givParams.end(); it++) {
       IComponent *oldComponent = it->first;
 
-      const Geometry::IComponent *targComp = 0;
+      const Geometry::IComponent *targComp = nullptr;
 
       IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
       if (pOldDet) {

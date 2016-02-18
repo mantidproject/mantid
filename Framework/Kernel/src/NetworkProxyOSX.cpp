@@ -109,10 +109,11 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
               dict, kSCPropNetProxiesProxyAutoConfigURLString));
       CFDataRef pacData;
       CFURLRef pacURL =
-          CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, NULL);
+          CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, nullptr);
       SInt32 errorCode;
-      if (!CFURLCreateDataAndPropertiesFromResource(
-              kCFAllocatorDefault, pacURL, &pacData, NULL, NULL, &errorCode)) {
+      if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL,
+                                                    &pacData, nullptr, nullptr,
+                                                    &errorCode)) {
         logger.debug() << "Unable to get the PAC script at "
                        << toString(cfPacLocation) << "Error code: " << errorCode
                        << std::endl;
@@ -123,8 +124,9 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
           kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
 
       CFURLRef targetURL = CFURLCreateWithBytes(
-          kCFAllocatorDefault, (UInt8 *)targetURLString.c_str(),
-          targetURLString.size(), kCFStringEncodingUTF8, NULL);
+          kCFAllocatorDefault, reinterpret_cast<UInt8 *>(
+                                   const_cast<char *>(targetURLString.c_str())),
+          targetURLString.size(), kCFStringEncodingUTF8, nullptr);
       if (!targetURL) {
         logger.debug("Problem with Target URI for proxy script");
         return proxyInfoVec;
@@ -210,7 +212,7 @@ ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
 ProxyInfo findHttpProxy(const std::string &targetURLString,
                         Mantid::Kernel::Logger &logger) {
   ProxyInfo httpProxy;
-  CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+  CFDictionaryRef dict = SCDynamicStoreCopyProxies(nullptr);
   if (!dict) {
     logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
   }

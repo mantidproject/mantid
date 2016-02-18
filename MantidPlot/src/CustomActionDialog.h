@@ -87,14 +87,18 @@ class CustomActionHandler : public QXmlDefaultHandler
 public:
   explicit CustomActionHandler(QAction *action);
 
-    bool startElement(const QString &namespaceURI, const QString &localName,
-                       const QString &qName, const QXmlAttributes &attributes);
-    bool endElement(const QString &namespaceURI, const QString &localName,
-                     const QString &qName);
-    bool characters(const QString &str){currentText += str; return true;};
-    bool fatalError(const QXmlParseException &){return false;};
-    QString errorString() const {return errorStr;};
-	QString parentName(){return d_widget_name;};
+  bool startElement(const QString &namespaceURI, const QString &localName,
+                    const QString &qName,
+                    const QXmlAttributes &attributes) override;
+  bool endElement(const QString &namespaceURI, const QString &localName,
+                  const QString &qName) override;
+  bool characters(const QString &str) override {
+    currentText += str;
+    return true;
+  };
+  bool fatalError(const QXmlParseException &) override { return false; };
+  QString errorString() const override { return errorStr; };
+        QString parentName(){return d_widget_name;};
 
 private:
     bool metFitTag;

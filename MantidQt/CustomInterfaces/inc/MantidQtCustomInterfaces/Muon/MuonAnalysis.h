@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/GroupingLoader.h"
 
 #include "MantidGeometry/Instrument.h"
 
@@ -34,7 +35,6 @@ namespace Muon
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
   class MuonAnalysisResultTableTab;
-  struct Grouping;
 
   struct LoadResult {
     Workspace_sptr loadedWorkspace;
@@ -48,7 +48,7 @@ namespace Muon
 
   struct GroupResult {
     bool usedExistGrouping;
-    boost::shared_ptr<Grouping> groupingUsed;
+    boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
   };
 }
 

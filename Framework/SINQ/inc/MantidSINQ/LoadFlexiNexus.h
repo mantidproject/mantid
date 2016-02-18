@@ -55,24 +55,24 @@ public:
   /// (Empty) Constructor
   LoadFlexiNexus() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~LoadFlexiNexus() {}
+  ~LoadFlexiNexus() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadFlexiNexus"; }
+  const std::string name() const override { return "LoadFlexiNexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a NeXus file directed by a dictionary file";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   // A dictionary
   std::map<std::string, std::string> dictionary;

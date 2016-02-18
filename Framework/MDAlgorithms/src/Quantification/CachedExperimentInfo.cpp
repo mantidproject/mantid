@@ -3,6 +3,7 @@
 //
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -22,7 +23,7 @@ CachedExperimentInfo::CachedExperimentInfo(const API::ExperimentInfo &exptInfo,
       m_modToChop(0.0), m_apertureToChop(0.0), m_chopToSample(0.0),
       m_sampleToDet(0.0), m_beam(Geometry::Z), m_up(Geometry::Y),
       m_horiz(Geometry::X), m_apertureSize(0.0, 0.0), m_sampleWidths(),
-      m_detBox(), m_gonimeter(NULL), m_sampleToDetMatrix(0, 0) {
+      m_detBox(), m_gonimeter(nullptr), m_sampleToDetMatrix(0, 0) {
   Instrument_const_sptr instrument = exptInfo.getInstrument();
   initCaches(instrument, detID);
 }

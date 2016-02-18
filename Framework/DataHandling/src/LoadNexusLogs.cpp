@@ -431,7 +431,7 @@ void LoadNexusLogs::loadSELog(
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
-  Kernel::Property *logValue(NULL);
+  Kernel::Property *logValue(nullptr);
   std::map<std::string, std::string> entries = file.getEntries();
   if (entries.find("value_log") != entries.end()) {
     try {

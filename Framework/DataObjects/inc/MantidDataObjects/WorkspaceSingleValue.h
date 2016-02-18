@@ -39,11 +39,11 @@ class DLLExport WorkspaceSingleValue : public API::MatrixWorkspace {
 public:
   /**	Gets the name of the workspace type
    * @return Standard string name  */
-  virtual const std::string id() const { return "WorkspaceSingleValue"; }
+  const std::string id() const override { return "WorkspaceSingleValue"; }
 
   WorkspaceSingleValue(double value = 0.0, double error = 0.0);
 
-  virtual ~WorkspaceSingleValue();
+  ~WorkspaceSingleValue() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {
@@ -51,28 +51,28 @@ public:
   }
 
   /// Returns the number of single indexable items in the workspace
-  virtual std::size_t size() const { return 1; }
+  std::size_t size() const override { return 1; }
 
   /// Returns the size of each block of data returned by the dataX accessors
-  virtual std::size_t blocksize() const { return 1; }
+  std::size_t blocksize() const override { return 1; }
 
   /// @return the number of histograms (spectra)
-  std::size_t getNumberHistograms() const { return 1; }
+  std::size_t getNumberHistograms() const override { return 1; }
 
   //------------------------------------------------------------
   // Return the underlying ISpectrum ptr at the given workspace index.
-  virtual Mantid::API::ISpectrum *getSpectrum(const size_t index);
+  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
 
   // Return the underlying ISpectrum ptr (const version) at the given workspace
   // index.
-  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
 
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
-                         bool skipError = false) const;
+                         bool skipError = false) const override;
 
   /// Returns the number of dimensions, 0 in this case.
-  virtual size_t getNumDims() const;
+  size_t getNumDims() const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -81,13 +81,13 @@ protected:
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
 
 private:
-  virtual WorkspaceSingleValue *doClone() const {
+  WorkspaceSingleValue *doClone() const override {
     return new WorkspaceSingleValue(*this);
   }
 
   // allocates space in a new workspace - does nothing in this case
-  virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
-                    const std::size_t &YLength);
+  void init(const std::size_t &NVectors, const std::size_t &XLength,
+            const std::size_t &YLength) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data;

@@ -141,7 +141,7 @@ void PropertyManager::splitByTime(
         output_properties.push_back(
             outputs[i]->getPointerToPropertyOrNull(prop->name()));
       else
-        output_properties.push_back(NULL);
+        output_properties.push_back(nullptr);
     }
 
     // Now the property does the splitting.
@@ -499,7 +499,7 @@ PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
   if (it != m_properties.end()) {
     return it->second;
   }
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
