@@ -126,7 +126,7 @@ private:
  */
 template <typename FunctionType>
 const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
-  Kernel::Mutex::ScopedLock _lock(m_mutex);
+  Kernel::LockGuardMutex _lock(m_mutex);
 
   const std::string soughtType(typeid(FunctionType).name());
   if (m_cachedFunctionNames.find(soughtType) != m_cachedFunctionNames.end()) {
