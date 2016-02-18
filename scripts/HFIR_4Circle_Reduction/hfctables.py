@@ -586,6 +586,21 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return
 
+    def get_scan_numbers(self, row_index_list):
+        """
+        Get scan numbers with specified rows
+        :param row_index_list:
+        :return:
+        """
+        scan_list = list()
+        scan_col_index = self.Table_Setup.index(('Scan', 'int'))
+        for row_index in row_index_list:
+            scan_number_i = self.get_cell_value(row_index, scan_col_index)
+            scan_list.append(scan_number_i)
+        scan_list.sort()
+
+        return scan_list
+
     def get_selected_run_surveyed(self):
         """
         Purpose: Get selected pt number and run number that is set as selected

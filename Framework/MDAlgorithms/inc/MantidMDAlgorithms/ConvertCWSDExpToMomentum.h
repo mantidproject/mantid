@@ -64,7 +64,7 @@ private:
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
                                             bool usevirtual,
                                             const detid_t &startdetid,
-                                            const int scannnumber,
+                                            const int scannumber,
                                             const int runnumber,
                                             int monitor_counts);
 

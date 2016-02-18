@@ -15,11 +15,14 @@ class MplPlot3dCanvas(FigureCanvas):
     """
     Matplotlib 3D canvas class
     """
-    def __init__(self):
+    def __init__(self, parent=None):
         """
         Initialization
         :return:
         """
+        #
+        self._myParentWindow = parent
+
         # Initialize the figure
         self._myFigure = Figure()
 

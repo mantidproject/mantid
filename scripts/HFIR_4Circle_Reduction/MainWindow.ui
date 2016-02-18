@@ -949,6 +949,16 @@ p, li { white-space: pre-wrap; }
                  <string>Add Peak</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="0" column="8">
+                  <widget class="QLineEdit" name="lineEdit_H">
+                   <property name="maximumSize">
+                    <size>
+                     <width>60</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="3" column="14">
                   <widget class="QLineEdit" name="lineEdit_sampleQz">
                    <property name="enabled">
@@ -966,16 +976,6 @@ p, li { white-space: pre-wrap; }
                   <widget class="QLabel" name="label_scanNo">
                    <property name="text">
                     <string>Scan Number</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="8">
-                  <widget class="QLineEdit" name="lineEdit_H">
-                   <property name="maximumSize">
-                    <size>
-                     <width>60</width>
-                     <height>40</height>
-                    </size>
                    </property>
                   </widget>
                  </item>
@@ -1165,20 +1165,7 @@ p, li { white-space: pre-wrap; }
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="15">
-                  <widget class="QPushButton" name="pushButton_addPeakToCalUB">
-                   <property name="font">
-                    <font>
-                     <weight>75</weight>
-                     <bold>true</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Add Peak</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="15">
+                 <item row="3" column="4">
                   <widget class="QCheckBox" name="checkBox_loadHKLfromFile">
                    <property name="font">
                     <font>
@@ -1190,10 +1177,29 @@ p, li { white-space: pre-wrap; }
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="4">
+                 <item row="0" column="15">
                   <widget class="QPushButton" name="pushButton_viewScan3D">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
                    <property name="text">
-                    <string>View Peak (3D)</string>
+                    <string>View Peak</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="15">
+                  <widget class="QPushButton" name="pushButton_addPeakToCalUB">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Add Peak</string>
                    </property>
                   </widget>
                  </item>
@@ -1211,6 +1217,13 @@ p, li { white-space: pre-wrap; }
                    <widget class="QPushButton" name="pushButton_selectAllPeaks">
                     <property name="text">
                      <string>Select All</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_plotSelectedData">
+                    <property name="text">
+                     <string>Plot Selected</string>
                     </property>
                    </widget>
                   </item>
@@ -1454,6 +1467,22 @@ p, li { white-space: pre-wrap; }
                     </property>
                    </widget>
                   </item>
+                  <item row="4" column="2">
+                   <spacer name="verticalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Minimum</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
                   <item row="0" column="6">
                    <widget class="QLabel" name="label_22">
                     <property name="sizePolicy">
@@ -1476,21 +1505,8 @@ p, li { white-space: pre-wrap; }
                   <item row="2" column="6">
                    <widget class="QLineEdit" name="lineEdit_gammaError"/>
                   </item>
-                  <item row="3" column="2">
-                   <spacer name="verticalSpacer">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeType">
-                     <enum>QSizePolicy::Minimum</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
+                  <item row="2" column="3">
+                   <widget class="QLineEdit" name="lineEdit_cError"/>
                   </item>
                   <item row="0" column="4">
                    <widget class="QLabel" name="label_20">
@@ -1526,9 +1542,6 @@ p, li { white-space: pre-wrap; }
                      </size>
                     </property>
                    </spacer>
-                  </item>
-                  <item row="2" column="3">
-                   <widget class="QLineEdit" name="lineEdit_cError"/>
                   </item>
                   <item row="2" column="1">
                    <widget class="QLineEdit" name="lineEdit_aError"/>
@@ -1665,6 +1678,18 @@ p, li { white-space: pre-wrap; }
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item row="3" column="9">
+                   <widget class="QPushButton" name="pushButton_refineUBFFT">
+                    <property name="font">
+                     <font>
+                      <pointsize>10</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Refine UB FFT</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>

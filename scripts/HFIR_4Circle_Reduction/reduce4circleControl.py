@@ -17,6 +17,7 @@ import numpy
 import mantid
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
+from mantid.kernel import V3D
 
 DebugMode = True
 
@@ -112,12 +113,23 @@ class PeakInfo(object):
         assert isinstance(self._avgPeakCenter, numpy.ndarray)
         return self._avgPeakCenter[0], self._avgPeakCenter[1], self._avgPeakCenter[2]
 
+    def get_peak_centre_v3d(self):
+        """ Returned the statistically averaged peak center in V3D
+        :return:
+        """
+        q_x, q_y, q_z = self.get_peak_centre()
+        q_3d = V3D(q_x, q_y, q_z)
+
+        return q_3d
+
     def get_peak_workspace(self):
         """
         Get peak workspace related
         :return:
         """
-        return AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+        assert peak_ws
+        return peak_ws
 
     def get_peak_ws_hkl(self):
         """ Get HKL from PeakWorkspace
@@ -201,7 +213,7 @@ class PeakInfo(object):
 
     def set_peak_ws_hkl_from_user(self):
         """
-
+        Use HKL specified by client or SPICE
         :return:
         """
         # Get peak workspace
@@ -241,13 +253,14 @@ class PeakInfo(object):
         """
         return self._myExpNumber, self._myScanNumber
 
-    def get_sample_frame_q(self):
+    def get_sample_frame_q(self, peak_index):
         """
         Get Q in sample frame
         :return: 3-tuple of floats as Qx, Qy, Qz
         """
-        peak_ws = AnalysisDataService.retrieves(self._myPeakWorkspaceName)
-        q_sample = peak_ws.getQSampleFrame()
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+        peak = peak_ws.getPeak(peak_index)
+        q_sample = peak.getQSampleFrame()
 
         return q_sample.getX(), q_sample.getY(), q_sample.getZ()
 
@@ -311,9 +324,9 @@ class CWSCDReductionControl(object):
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
-
+        Requirements: two or more than 2 peaks (PeakInfo) are specified
         Set Miller index from raw data in Workspace2D.
-        :param peakws:
+        :param peak_info_list:
         :param a:
         :param b:
         :param c:
@@ -324,28 +337,38 @@ class CWSCDReductionControl(object):
         """
         # Check
         assert isinstance(peak_info_list, list)
+        num_peak_info = len(peak_info_list)
+        if num_peak_info < 2:
+            return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
         for peak_info in peak_info_list:
             if isinstance(peak_info, PeakInfo) is False:
                 raise NotImplementedError('Input PeakList is of type %s.' % str(type(peak_info_list[0])))
             assert isinstance(peak_info, PeakInfo)
 
-        if len(peak_info_list) < 2:
-            return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
-
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
-        ub_peak_ws = api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace(),
-                                        OutputWorkspace=ub_peak_ws_name)
+        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=ub_peak_ws_name)
+        assert AnalysisDataService.doesExist(ub_peak_ws_name)
+        ub_peak_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
 
-        for i_peak_info in xrange(1, len(peak_info_list)):
+        for i_peak_info in xrange(num_peak_info):
             # Set HKL as optional
-            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
+            peak_info_i = peak_info_list[i_peak_info]
+            peak_ws = peak_info_i.get_peak_workspace()
+            assert peak_ws.getNumberPeaks() > 0
+            # get any peak to add
+            peak_temp = peak_ws.getPeak(0)
+            ub_peak_ws.addPeak(peak_temp)
 
-            # Combine peak workspace
-            ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws,
-                                                    RHSWorkspace=peak_ws,
-                                                    CombineMatchingPeaks=False,
-                                                    OutputWorkspace=ub_peak_ws_name)
+            # set the peak in ub peak workspace right
+            peak_i = ub_peak_ws.getPeak(i_peak_info)
+            # user HKL
+            h, k, l = peak_info_i.get_user_hkl()
+            peak_i.setHKL(h, k, l)
+            # q-sample
+            q_x, q_y, q_z = peak_info_i.get_peak_centre()
+            q_sample = V3D(q_x, q_y, q_z)
+            peak_i.setQSampleFrame(q_sample)
         # END-FOR(i_peak_info)
 
         # Calculate UB matrix
@@ -438,11 +461,12 @@ class CWSCDReductionControl(object):
             api.DownloadFile(Address=det_file_url,
                              Filename=local_xml_file_name)
         except RuntimeError as run_err:
-            return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(run_err))
+            return False, 'Unable to download Detector XML file %s from %s ' \
+                          'due to %s.' % (local_xml_file_name, det_file_url, str(run_err))
 
         # Check file exist?
         if os.path.exists(local_xml_file_name) is False:
-            return False, "Unable to locate downloaded file %s."%(local_xml_file_name)
+            return False, "Unable to locate downloaded file %s." % local_xml_file_name
 
         return True, local_xml_file_name
 
@@ -711,7 +735,11 @@ class CWSCDReductionControl(object):
         assert isinstance(pt_number, int)
         assert isinstance(log_name, str)
         try:
-            md_ws = self._myPtMDDict[(exp_number, scan_number, pt_number)]
+            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+            assert status
+            md_ws_name = get_merged_md_name(self._instrumentName, exp_number,
+                                            scan_number, pt_number_list)
+            md_ws = AnalysisDataService.retrieve(md_ws_name)
         except KeyError as ke:
             return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
 
@@ -811,7 +839,7 @@ class CWSCDReductionControl(object):
 
         return AnalysisDataService.doesExist(md_ws_name)
 
-    def index_peak(self, ub_matrix, scan_number, pt_number):
+    def index_peak(self, ub_matrix, scan_number):
         """ Index peaks in a Pt.
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
@@ -822,27 +850,40 @@ class CWSCDReductionControl(object):
         assert isinstance(ub_matrix, numpy.ndarray)
         assert ub_matrix.shape == (3, 3)
         assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+
+        # Find out the PeakInfo
+        exp_number = self._expNumber
+        peak_info = self.get_peak_info(exp_number, scan_number)
 
         # Find out the peak workspace
-        exp_num = self._expNumber
-        if (exp_num, scan_number, pt_number) in self._myUBPeakWSDict is False:
-            err_msg = 'No PeakWorkspace is found for exp %d scan %d pt %d' % (
-                exp_num, scan_number, pt_number)
-            return False, err_msg
+        status, pt_list = self.get_pt_numbers(exp_number, scan_number)
+        assert status
+        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_list)
+        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+        assert peak_ws.getNumberPeaks() > 0
 
-        peak_ws = self._myUBPeakWSDict[(exp_num, scan_number, pt_number)]
+        # Create a temporary peak workspace for indexing
+        temp_index_ws_name = 'TempIndexExp%dScan%dPeak' % (exp_number, scan_number)
+        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=temp_index_ws_name)
+        temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
+
+        temp_index_ws.addPeak(peak_ws.getPeak(0))
+        virtual_peak = temp_index_ws.getPeak(0)
+        virtual_peak.setHKL(0, 0, 0)
+        virtual_peak.setQSampleFrame(peak_info.get_peak_centre_v3d())
+
+        # Set UB matrix to the peak workspace
         ub_1d = ub_matrix.reshape(9,)
-        print '[DB] UB matrix = ', ub_1d
 
         # Set UB
-        api.SetUB(Workspace=peak_ws, UB=ub_1d)
+        api.SetUB(Workspace=temp_index_ws_name, UB=ub_1d)
 
-        # Note: IndexPeaks and CalcualtePeaksHKL do the same job
+        # Note: IndexPeaks and CalculatePeaksHKL do the same job
         #       while IndexPeaks has more control on the output
-        num_peak_index, error = api.IndexPeaks(PeaksWorkspace=peak_ws,
+        num_peak_index, error = api.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
                                                Tolerance=0.4,
                                                RoundHKLs=False)
+        temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
             return False, 'No peak can be indexed.'
@@ -850,8 +891,10 @@ class CWSCDReductionControl(object):
             raise RuntimeError('Case for PeaksWorkspace containing more than 1 peak is not '
                                'considered. Contact developer for this issue.')
         else:
-            hkl_v3d = peak_ws.getPeak(0).getHKL()
+            hkl_v3d = temp_index_ws.getPeak(0).getHKL()
             hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
+
+        # TODO/After Test - Delete temporary peak workspace
 
         return True, (hkl, error)
 
@@ -1136,7 +1179,7 @@ class CWSCDReductionControl(object):
         Guarantees: An MDEventWorkspace is created containing merged Pts.
         :param exp_no:
         :param scan_no:
-        :param pt_num_list:
+        :param pt_num_list: If empty, then merge all Pt. in the scan
         :param target_frame: string, either 'hkl' or 'q-sample'
         :return: (merged workspace name, workspace group name)
         """
@@ -1623,8 +1666,10 @@ class CWSCDReductionControl(object):
             # Load SPICE file and retrieve information
             try:
                 spice_table_ws_name = 'TempTable'
-                api.LoadSpiceAscii(Filename=spice_file_name, OutputWorkspace=spice_table_ws_name, RunInfoWorkspace='TempInfo')
-                spice_table_ws = AnalysisDataService.retrieves(spice_table_ws_name)
+                api.LoadSpiceAscii(Filename=spice_file_name,
+                                   OutputWorkspace=spice_table_ws_name,
+                                   RunInfoWorkspace='TempInfo')
+                spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
                 num_rows = spice_table_ws.rowCount()
                 col_name_list = spice_table_ws.getColumnNames()
                 h_col_index = col_name_list.index('h')
@@ -1710,7 +1755,7 @@ def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, p
     assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
 
     base_file_name = get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number)
-    file_url = '%sexp%d/Datafiles/%s' % (self._instrumentName, exp_number, base_file_name)
+    file_url = '%s/exp%d/Datafiles/%s' % (server_url, exp_number, base_file_name)
 
     return file_url
 

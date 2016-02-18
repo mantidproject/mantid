@@ -105,9 +105,13 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_select_all_peaks)
         self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
                      self.do_view_data_3d)
+        self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
+                     self.do_view_data_set_3d)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub)
+        self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub_fft)
 
         # Tab 'Merge'
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
@@ -144,6 +148,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_load_survey)
         self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
                      self.do_view_survey_peak)
+        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
+                     self.do_add_peaks_for_ub)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -440,6 +446,15 @@ class MainWindow(QtGui.QMainWindow):
 
         raise RuntimeError('Next Release')
 
+    def do_refine_ub_fft(self):
+        """
+        Refine UB matrix by calling FFT method
+        :return:
+        """
+        # TODO/NOW/Combine with do_refine_ub()
+
+        return
+
     def change_data_access_mode(self):
         """ Change data access mode between downloading from server and local
         Event handling methods
@@ -583,6 +598,44 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_add_peaks_for_ub(self):
+        """ In tab-survey, merge selected scans, find peaks in merged data and
+         switch to UB matrix calculation tab and add to table
+        :return:
+        """
+        # get selected scans
+        selected_row_index_list = self.ui.tableWidget_surveyTable.get_selected_rows(True)
+        scan_number_list = self.ui.tableWidget_surveyTable.get_scan_numbers(selected_row_index_list)
+        if len(scan_number_list) == 0:
+            self.pop_one_button_dialog('No scan is selected.')
+            return
+
+        # get experiment number
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        assert status
+
+        # switch to tab-3
+        self.ui.tabWidget.setCurrentIndex(2)
+
+        # find peak and add peak
+        for scan_number in scan_number_list:
+            # merge peak and find peak
+            self._myControl.merge_pts_in_scan(exp_number, scan_number, [], 'q-sample')
+            self._myControl.find_peak(exp_number, scan_number)
+
+            # get PeakInfo
+            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+            assert isinstance(peak_info, r4c.PeakInfo)
+
+            # retrieve and set HKL from spice table
+            peak_info.retrieve_hkl_from_spice_table()
+
+            # add to table
+            self.set_ub_peak_table(peak_info)
+        # END-FOR
+
+        return
+
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
         :return:
@@ -640,18 +693,17 @@ class MainWindow(QtGui.QMainWindow):
     def do_cal_ub_matrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
-        # Get reflections
+        # Get reflections selected to calculate UB matrix
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         peak_info_list = list()
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        assert status
         for i_row in xrange(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
+                if pt_num < 0:
+                    pt_num = None
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-                peak_info.set_peak_ws_hkl_from_user()
-                if status is False:
-                    self.pop_one_button_dialog(peak_info)
-                    return
                 assert isinstance(peak_info, r4c.PeakInfo)
                 peak_info_list.append(peak_info)
         # END-FOR
@@ -805,19 +857,18 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        print '[DB] Get UB matrix ', ub_matrix
+        print '[Info] Get UB matrix from table ', ub_matrix
 
-        # Do it for each peak
+        # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
         err_msg = ''
         for i_peak in xrange(num_peaks):
             scan_no, pt_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)
-            status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no,
-                                                         pt_number=pt_no)
+            status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no)
             if status is True:
-                new_hkl = ret_obj[0]
-                error = ret_obj[1]
-                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, new_hkl, error)
+                hkl_value = ret_obj[0]
+                hkl_error = ret_obj[1]
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, hkl_error)
             else:
                 err_msg += ret_obj + '\n'
         # END-FOR
@@ -1088,7 +1139,7 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        # TODO/NOW/1st:
+        # TODO/NOW/1st: Implement ASAP
 
         return
 
@@ -1256,6 +1307,19 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
         return url_is_good
+
+    def do_view_data_set_3d(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW/ Think of share codes with do_view_data_3d()
+        import plot3dwindow
+
+        self.plot3dform = plot3dwindow.Plot3DWindow(self)
+        self.plot3dform.show()
+
+        return
 
     def do_view_data_3d(self):
         """
@@ -1452,12 +1516,12 @@ class MainWindow(QtGui.QMainWindow):
         # Get data
         exp_number, scan_number = peakinfo.getExpInfo()
         h, k, l = peakinfo.get_user_hkl()
-        q_sample = peakinfo.get_sample_frame_q()
+        q_x, q_y, q_z = peakinfo.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, -1, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1, ''])
+            [scan_number, -1, h, k, l, q_x, q_y, q_z, False, m1, ''])
         if status is False:
             self.pop_one_button_dialog(err_msg)
 
