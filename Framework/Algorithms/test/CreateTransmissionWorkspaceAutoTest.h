@@ -6,13 +6,11 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <boost/assign/list_of.hpp>
 #include <boost/lexical_cast.hpp>
 
 using Mantid::Algorithms::CreateTransmissionWorkspaceAuto;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace boost::assign;
 using Mantid::MantidVec;
 
 namespace {
