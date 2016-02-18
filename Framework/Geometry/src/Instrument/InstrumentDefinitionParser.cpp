@@ -2399,7 +2399,7 @@ void InstrumentDefinitionParser::adjust(
   // added
   // to pElem, and these <component>'s are deleted after loop
 
-  std::set<Element *> allComponentInType;   // used to hold <component>'s found
+  std::unordered_set<Element *> allComponentInType;   // used to hold <component>'s found
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++) {
     Element *pLoc = static_cast<Element *>(pNL->item(i));
@@ -2472,8 +2472,7 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  std::set<Element *>::iterator it;
-  for (it = allComponentInType.begin(); it != allComponentInType.end(); ++it)
+  for (auto it = allComponentInType.begin(); it != allComponentInType.end(); ++it)
     pElem->removeChild(*it);
 }
 

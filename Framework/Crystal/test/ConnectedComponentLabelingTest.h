@@ -26,7 +26,7 @@ using namespace testing;
 namespace {
 // Helper function for determining if a set contains a specific value.
 template <typename T>
-bool does_set_contain(const std::set<T> &container, const T &value) {
+bool does_set_contain(const std::unordered_set<T> &container, const T &value) {
   return std::find(container.begin(), container.end(), value) !=
          container.end();
 }
@@ -40,9 +40,9 @@ bool does_vector_contain(const std::vector<size_t> &container,
 
 // Helper function for converting a IMDHistoWorkspace of labels into a set of
 // unique labels.
-std::set<size_t>
+std::unordered_set<size_t>
 connection_workspace_to_set_of_labels(IMDHistoWorkspace const *const ws) {
-  std::set<size_t> unique_values;
+  std::unordered_set<size_t> unique_values;
   for (size_t i = 0; i < ws->getNPoints(); ++i) {
     const size_t signal = static_cast<size_t>(ws->getSignalAt(i));
     unique_values.insert(signal);
@@ -171,7 +171,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3,
                       uniqueEntries.size());
@@ -210,7 +210,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 4,
                       uniqueEntries.size());
@@ -238,7 +238,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object", 1, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -281,7 +281,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too",
                       2, uniqueEntries.size());
@@ -363,7 +363,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too",
                       2, uniqueEntries.size());
@@ -374,7 +374,7 @@ public:
 
   void do_test_cluster_labeling(const std::vector<size_t> &clusterIndexes,
                                 IMDHistoWorkspace const *const ws) {
-    std::set<double> valuesInCluster;
+    std::unordered_set<double> valuesInCluster;
     for (size_t i = 0; i < ws->getNPoints(); ++i) {
       if (does_vector_contain(clusterIndexes, i)) {
         valuesInCluster.insert(ws->getSignalAt(i));
@@ -432,7 +432,7 @@ public:
 
     // ----------- Basic cluster checks
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS(
         "Should have 3 clusters, but we have some 'empty' entries too", 4,
@@ -494,7 +494,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3,
                       uniqueEntries.size());
@@ -518,7 +518,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("1 object covering entire space", 1,
                       uniqueEntries.size());
@@ -542,7 +542,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("3 objects", 3, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -614,7 +614,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("One unique real label (and one empty)", 2,
                       uniqueEntries.size());
@@ -681,7 +681,7 @@ public:
 
     // ----------- Basic cluster checks
 
-    std::set<size_t> uniqueEntries =
+    auto uniqueEntries =
         connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Should be chequered pattern", 2, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, size_t(0)));
