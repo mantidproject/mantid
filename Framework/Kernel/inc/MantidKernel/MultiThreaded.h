@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_MULTITHREADED_H_
 
 #include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -11,9 +12,15 @@ namespace Kernel {
 
 /// General mutex (typedef'd to Poco::FastMutex). Not recursive in general;
 /// don't assume it is!
-typedef Poco::FastMutex Mutex;
-typedef Poco::Mutex RecursiveMutex;
+//typedef Poco::FastMutex Mutex;
+//typedef Poco::Mutex RecursiveMutex;
 
+typedef std::mutex Mutex;
+typedef std::recursive_mutex RecursiveMutex;
+
+typedef std::lock_guard<Mutex> LockGuardMutex;
+typedef std::lock_guard<RecursiveMutex> LockGuardRecursiveMutex;
+typedef std::unique_lock<Mutex> UniqueLockMutex;
 } // namespace
 } // namespace
 
