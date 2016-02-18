@@ -240,7 +240,6 @@ protected:
   DynamicFactory() : notificationCenter(), _map(), m_notifyStatus(Disabled) {}
 
 private:
-
   /// Send an update notification if they are enabled
   void sendUpdateNotificationIfEnabled() {
     if (m_notifyStatus == Enabled)

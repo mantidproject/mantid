@@ -382,7 +382,6 @@ protected:
   size_t m_groupSize;
 
 private:
-
   void lockWorkspaces();
   void unlockWorkspaces();
 
