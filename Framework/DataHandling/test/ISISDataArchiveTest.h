@@ -15,7 +15,7 @@ public:
   void xtestSearch() {
     ISISDataArchive arch;
 
-    std::set<std::string> filename;
+    std::unordered_set<std::string> filename;
     filename.insert("hrpd273");
     std::vector<std::string> extension = std::vector<std::string>(1, "");
     std::string path = arch.getArchivePath(filename, extension);
