@@ -71,7 +71,7 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
 */
 bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(
     Mantid::API::IMDWorkspace *rebinnedWS, bool useRebinMode) {
-  return (rebinnedWS != nullptr) && useRebinMode;
+  return rebinnedWS && useRebinMode;
 }
 }
 }

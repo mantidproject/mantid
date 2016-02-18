@@ -640,7 +640,7 @@ const API::IMDNode *MDGridBox<MDE, nd>::getBoxAtCoord(const coord_t *coords) {
   if (index < numBoxes) // avoid segfaults for floating point round-off errors.
     return m_Children[index]->getBoxAtCoord(coords);
   else
-    return NULL;
+    return nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -674,7 +674,7 @@ TMDE(void MDGridBox)::splitContents(size_t index, ThreadScheduler *ts) {
     ts->push(new FunctionTask(
         boost::bind(&MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridbox, ts)));
   } else {
-    gridbox->splitAllIfNeeded(NULL);
+    gridbox->splitAllIfNeeded(nullptr);
   }
 }
 
@@ -719,7 +719,7 @@ TMDE(void MDGridBox)::splitAllIfNeeded(ThreadScheduler *ts) {
           delete box;
           // Now recursively check if this NEW grid box's contents should be
           // split too
-          gridBox->splitAllIfNeeded(NULL);
+          gridBox->splitAllIfNeeded(nullptr);
         } else {
           // ------ Perform split in parallel (using ThreadPool) ------
           // So we create a task to split this MDBox,

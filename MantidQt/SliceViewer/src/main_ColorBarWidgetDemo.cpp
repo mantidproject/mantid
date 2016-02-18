@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "qmainwindow.h"
 #include <QApplication>
 #include <QDir>
@@ -36,7 +36,7 @@ int main( int argc, char ** argv )
   QLayout * layout = new QVBoxLayout(frame);
   frame->setLayout(layout);
 
-  ColorBarWidget * widget = new ColorBarWidget(frame);
+  MantidQt::MantidWidgets::ColorBarWidget * widget = new ColorBarWidget(frame);
 
   widget->setViewRange(min, max);
   widget->setLog(false);
