@@ -305,7 +305,7 @@ void WorkspaceSelector::refresh()
   clear();
   if ( m_optional ) addItem("");
   auto& ads = Mantid::API::AnalysisDataService::Instance();
-  std::set<std::string> items;
+  std::unordered_set<std::string> items;
   if ( showHiddenWorkspaces() )
   {
     items = ads.getObjectNamesInclHidden();
@@ -315,7 +315,7 @@ void WorkspaceSelector::refresh()
     items = ads.getObjectNames();
   }
 
-  for ( std::set<std::string>::iterator it = items.begin(); it != items.end(); ++it )
+  for ( auto it = items.begin(); it != items.end(); ++it )
   {
     QString name = QString::fromStdString(*it);
     if ( checkEligibility( name, ads.retrieve(*it) ) )
