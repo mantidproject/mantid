@@ -2366,7 +2366,7 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
     double bar =
         exp(-(new_goodness - cur_goodness) / (cur_goodness * m_Temperature));
 
-	accept = dice < bar;
+    accept = dice < bar;
   }
 
   return accept;
