@@ -100,7 +100,7 @@ public:
                             VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
@@ -124,7 +124,7 @@ public:
                             VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdater));
 
@@ -138,7 +138,7 @@ public:
                             VATES::VolumeNormalization);
     // factory.SetSuccessor(mockSuccessor); No Successor set.
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 

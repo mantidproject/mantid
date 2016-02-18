@@ -82,24 +82,21 @@ public:
     std::string filename = alg.getProperty("Filename");
     std::ifstream file(filename.c_str(), std::ifstream::in);
     std::string notebookLine;
-    int lineCount = 0;
 
+    int lineCount = 0;
+    std::vector<std::string> notebookLines;
     while (std::getline(file, notebookLine)) {
+      notebookLines.push_back(notebookLine);
       if (lineCount < 8) {
-        TS_ASSERT_EQUALS(result[lineCount], notebookLine)
-      } else if (lineCount == 88) {
-        TS_ASSERT_EQUALS("               \"input\" : "
-                         "\"Power(InputWorkspace='testGenerateIPythonNotebook',"
-                         " OutputWorkspace='testGenerateIPythonNotebook', "
-                         "Exponent=1.5)\",",
-                         notebookLine)
-      } else if (lineCount == 64) {
-        TS_ASSERT_EQUALS(
-            "               \"input\" : \"NonExistingAlgorithm()\",",
-            notebookLine)
+        TS_ASSERT_EQUALS(result[lineCount], notebookLine);
+        lineCount++;
       }
-      // else if (lineCount == )
-      lineCount++;
+    }
+
+    // Check that the expected lines do appear in the output
+    for (auto const expected_line : result) {
+      TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                          expected_line) != notebookLines.cend())
     }
 
     // Verify that if we set the content of NotebookText that it is set

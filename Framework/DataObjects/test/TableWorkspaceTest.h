@@ -649,7 +649,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    TableWorkspace_sptr wsInput(new TableWorkspace());
+    auto wsInput = boost::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 
@@ -681,7 +681,7 @@ public:
   */
   void testGetProperty_ITableWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    ITableWorkspace_sptr wsInput(new TableWorkspace());
+    ITableWorkspace_sptr wsInput = boost::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 

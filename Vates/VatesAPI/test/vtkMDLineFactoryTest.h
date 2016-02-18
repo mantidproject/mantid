@@ -69,7 +69,7 @@ public:
                              Mantid::VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
@@ -146,7 +146,7 @@ public:
 
   void setUp()
   {
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input 
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input
       = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
@@ -178,9 +178,8 @@ public:
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
               NULL);
     TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
-    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());    
+    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
   }
 };
 
 #endif
-  

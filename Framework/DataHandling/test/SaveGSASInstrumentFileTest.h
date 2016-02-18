@@ -183,7 +183,7 @@ public:
   void loadProfileTable(string wsname) {
     // The data befow is from Bank1 in pg60_2011B.irf
 
-    TableWorkspace_sptr tablews(new TableWorkspace);
+    auto tablews = boost::make_shared<TableWorkspace>();
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value_1");
 

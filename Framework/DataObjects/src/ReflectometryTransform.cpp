@@ -18,7 +18,6 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/assign.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -436,10 +435,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   std::vector<double> xBinsVec;
   std::vector<double> zBinsVec;
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d1Min)(widthD1)(m_d1Max), zBinsVec);
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d0Min)(widthD0)(m_d0Max), xBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d1Min, widthD1, m_d1Max},
+                                          zBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d0Min, widthD0, m_d0Max},
+                                          xBinsVec);
 
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = new BinEdgeAxis(zBinsVec);

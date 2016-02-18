@@ -278,17 +278,13 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
-    bool useprefiltertime;
-    if (m_values[istart].time() == start) {
-      // The filter time is on the mark.  Erase [begin(),  istart)
-      useprefiltertime = false;
-    } else {
-      // The filter time is larger than T[istart]. Erase[begin(), istart) ...
-      // filter start(time)
-      // and move istart to filter startime
-      useprefiltertime = true;
-    }
+    // false: The filter time is on the mark.  Erase [begin(),  istart)
 
+    // true: The filter time is larger than T[istart]. Erase[begin(), istart)
+    // ...
+    // filter start(time)
+    // and move istart to filter startime
+    bool useprefiltertime = !(m_values[istart].time() == start);
     // Remove the series
     m_values.erase(m_values.begin(), iterhead);
 

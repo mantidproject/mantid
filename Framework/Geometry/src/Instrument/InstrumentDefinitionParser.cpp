@@ -29,7 +29,6 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -2287,7 +2286,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  Instrument_sptr physical(new Instrument(*m_instrument));
+  auto physical = boost::make_shared<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(physical);
 
@@ -2610,13 +2609,11 @@ InstrumentDefinitionParser::convertLocationsElement(
   }
 
   // A list of numeric attributes which are allowed to have corresponding -end
-  std::set<std::string> rangeAttrs =
-      boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
+  std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
   // Numeric attributes related to rotation. Doesn't make sense to have -end for
   // those
-  std::set<std::string> rotAttrs =
-      boost::assign::list_of("axis-x")("axis-y")("axis-z");
+  std::set<std::string> rotAttrs = {"axis-x", "axis-y", "axis-z"};
 
   // A set of all numeric attributes for convenience
   std::set<std::string> allAttrs;

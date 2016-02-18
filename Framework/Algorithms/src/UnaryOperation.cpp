@@ -111,37 +111,20 @@ void UnaryOperation::exec() {
 void UnaryOperation::execEvent() {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty(inputPropName());
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty(inputPropName());
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty(outputPropName());
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty(outputPropName());
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    setProperty(outputPropName(), matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Now fetch any properties defined by concrete algorithm
   retrieveProperties();
 
-  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numHistograms; ++i) {
@@ -171,6 +154,7 @@ void UnaryOperation::execEvent() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->clearMRU();
+  auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
     g_log.information() << "Number of events has changed!!!" << std::endl;
   }

@@ -25,7 +25,7 @@ BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
 }
 
 BitmapGeometryHandler::BitmapGeometryHandler()
-    : GeometryHandler((Object *)nullptr), m_rectDet(nullptr) {}
+    : GeometryHandler(static_cast<Object *>(nullptr)), m_rectDet(nullptr) {}
 
 ///< Create an instance of concrete geometry handler for ObjComponent
 BitmapGeometryHandler *

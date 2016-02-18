@@ -2,7 +2,6 @@
 #define MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <boost/assign.hpp>
 
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
 
@@ -102,10 +101,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     core.setCountData(testWorkspace);
     core.m_timeBinCount = 2;
-    core.m_detectorElements =
-        boost::assign::list_of(0)(1).convert_to_container<std::vector<int>>();
-    core.m_indices =
-        boost::assign::list_of(0)(1).convert_to_container<std::vector<int>>();
+    core.m_detectorElements = {0, 1};
+    core.m_indices = {0, 1};
 
     // sum of counts = 2, number of cells = 4, that means ratio = 0.5, which is
     // subtracted from all counts.
@@ -120,9 +117,7 @@ public:
   void testCalculateAverage() {
     TestablePoldiResidualCorrelationCore core(m_log);
 
-    std::vector<double> numbers =
-        boost::assign::list_of(1.0)(2.0)(3.0)(4.0)(5.0)(6.0)
-            .convert_to_container<std::vector<double>>();
+    std::vector<double> numbers = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
     TS_ASSERT_EQUALS(core.calculateAverage(numbers), 3.5);
 
     std::vector<double> empty;
@@ -132,9 +127,7 @@ public:
   void testCalculateAverageDeviationFromValue() {
     TestablePoldiResidualCorrelationCore core(m_log);
 
-    std::vector<double> numbers =
-        boost::assign::list_of(1.0)(2.0)(3.0)(4.0)(5.0)(6.0)
-            .convert_to_container<std::vector<double>>();
+    std::vector<double> numbers = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
     TS_ASSERT_EQUALS(core.calculateAverageDeviationFromValue(numbers, 3.5),
                      1.5);
 
