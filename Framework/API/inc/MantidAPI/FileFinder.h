@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <set>
+#include <unordered_set>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ public:
   std::string getFullPath(const std::string &filename,
                           const bool ignoreDirs = false) const;
   std::string getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                      const std::set<std::string> &filename,
+                      const std::unordered_set<std::string> &filename,
                       const std::vector<std::string> &extensions) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hint,
@@ -61,7 +62,7 @@ public:
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
   std::string findRun(const std::string &hintstr,
-                      const std::set<std::string> &exts) const;
+                      const std::unordered_set<std::string> &exts) const;
   std::string findRun(
       const std::string &hintstr,
       const std::vector<std::string> &exts = std::vector<std::string>()) const;
@@ -87,7 +88,7 @@ private:
   std::pair<std::string, std::string>
   toInstrumentAndNumber(const std::string &hint) const;
   std::string getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                             const std::set<std::string> &filenames,
+                             const std::unordered_set<std::string> &filenames,
                              const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive

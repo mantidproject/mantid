@@ -40,7 +40,7 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
  * @returns The full path to the first found
  */
 std::string
-ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
+ISISDataArchive::getArchivePath(const std::unordered_set<std::string> &filenames,
                                 const std::vector<std::string> &exts) const {
   for (const auto &filename : filenames) {
     g_log.debug() << filename << ")\n";

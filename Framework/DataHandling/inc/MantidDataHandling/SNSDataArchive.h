@@ -42,7 +42,7 @@ class DLLExport SNSDataArchive : public API::IArchiveSearch {
 public:
   /// Find the archive location of a set of files.
   std::string
-  getArchivePath(const std::set<std::string> &filenames,
+  getArchivePath(const std::unordered_set<std::string> &filenames,
                  const std::vector<std::string> &exts) const override;
 };
 }
