@@ -110,7 +110,7 @@ private:
 
   int m_runNumber;
 
-  Poco::FastMutex m_mutex; // protects m_eventBuffer & m_status
+  Kernel::Mutex m_mutex; // protects m_eventBuffer & m_status
   Poco::Thread m_thread;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits
