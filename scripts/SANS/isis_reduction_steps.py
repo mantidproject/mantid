@@ -1,5 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, super-on-old-class, protected-access, too-few-public-methods,
-# too-few-public-methods
+﻿# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
+# too-few-public-methods,too-few-public-methods, too-many-arguments
 """
     This file defines what happens in each step in the data reduction, it's
     the guts of the reduction. See ISISReducer for order the steps are run
@@ -13,10 +13,8 @@ import re
 import math
 from mantid.kernel import Logger
 
-sanslog = Logger("SANS")
-
-from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
+from mantid.simpleapi import *
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
@@ -32,6 +30,8 @@ import SANSUserFileParser as UserFileParser
 from collections import namedtuple
 
 from reducer_singleton import ReductionStep
+
+sanslog = Logger("SANS")
 
 DEBUG = False
 
@@ -151,6 +151,8 @@ class LoadRun(object):
             @param extra_options: arguments to pass on to the Load Algorithm.
             @return: number of periods in the workspace
         """
+        _inst = inst
+        _is_can = is_can
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
             if not can_load_as_event_workspace(self._data_file):
@@ -250,6 +252,7 @@ class LoadRun(object):
         If reload is True, it will try to get all the information necessary to reload this
         workspace from the data file.
         """
+        _reducer = reducer
         assert isinstance(self._data_file, Workspace)
         ws_pointer = self._data_file
 
@@ -423,7 +426,7 @@ class LoadRun(object):
                 'There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
 
-class LoadTransmissions():
+class LoadTransmissions:
     """
         Loads the file used to apply the transmission correction to the
         sample or can
@@ -456,6 +459,7 @@ class LoadTransmissions():
         self._period_d = period
 
     def execute(self, reducer, workspace):
+        _workspace = workspace
         if self._trans_name not in [None, '']:
             self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.trans._assignHelper(reducer)
@@ -545,7 +549,7 @@ class CanSubtraction(ReductionStep):
         if not original_ws.hasDx(0):
             return
         for index in range(0, original_ws.getNumHistograms()):
-            subtraced_ws.setDx(index, original_ws.dataDX(index))
+            subtracted_ws.setDx(index, original_ws.dataDX(index))
 
 
 class Mask_ISIS(ReductionStep):
@@ -557,6 +561,7 @@ class Mask_ISIS(ReductionStep):
 
     def __init__(self, timemask='', timemask_r='', timemask_f='',
                  specmask='', specmask_r='', specmask_f=''):
+        _specmask = specmask
         self._xml = []
 
         # these spectra will be masked by the algorithm MaskDetectors
@@ -760,7 +765,7 @@ class Mask_ISIS(ReductionStep):
                 if 'S' in typeSplit[1].upper():
                     _issueWarning('MASK command of type ' + details +
                                   ' deprecated. Please use instead MASK Ssp1[>Ssp2]')
-                if 'REAR' != typeSplit[0].upper() and instName == 'LOQ':
+                if typeSplit[0].upper() != 'REAR' and instName == 'LOQ':
                     _issueWarning('MASK command of type ' + details +
                                   ' can, until otherwise requested, only be used for the REAR (default) Main detector of LOQ. ' +
                                   'Default to the Main detector of LOQ for this mask command')
@@ -1017,9 +1022,9 @@ class Mask_ISIS(ReductionStep):
         # reset the xml, as execute can be run more than once
         self._xml = []
 
-        if (not self.min_radius is None) and (self.min_radius > 0.0):
+        if (self.min_radius is not None) and (self.min_radius > 0.0):
             self.add_cylinder(self.min_radius, 0, 0, 'beam_stop')
-        if (not self.max_radius is None) and (self.max_radius > 0.0):
+        if (self.max_radius is not None) and (self.max_radius > 0.0):
             self.add_outside_cylinder(self.max_radius, 0, 0, 'beam_area')
         # now do the masking
         for shape in self._xml:
@@ -1066,13 +1071,13 @@ class Mask_ISIS(ReductionStep):
         instrum.load_empty(wksp_name)
 
         # apply masking to the current detector
-        self.execute(None, wksp_name, instrum)
+        self.execute(None, wksp_name)
 
         # now the other detector
         other = instrum.other_detector().name()
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
-        self.execute(None, wksp_name, instrum)
+        self.execute(None, wksp_name)
         # reset the instrument to mask the currecnt detector
         instrum.setDetector(original)
 
@@ -1980,6 +1985,7 @@ class TransmissionCalc(ReductionStep):
     YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
 
     def __init__(self, loader=None):
+        _loader = loader
         super(TransmissionCalc, self).__init__()
         # set these variables to None, which means they haven't been set and defaults will be set further down
         self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
@@ -2064,7 +2070,7 @@ class TransmissionCalc(ReductionStep):
         if max_:
             sel_settings[LAMBDAMAX] = float(max_) if fit_method not in ['OFF', 'CLEAR'] else None
 
-        # apply the propertis to self.fit_settings
+        # apply the properties to self.fit_settings
         for prop in self.fit_props:
             self.fit_settings[select + prop] = sel_settings[prop]
 
@@ -2206,6 +2212,7 @@ class TransmissionCalc(ReductionStep):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
+        _workspace = workspace
         self.output_wksp = None
 
         # look for run files that contain transmission data
