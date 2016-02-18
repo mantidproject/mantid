@@ -47,7 +47,7 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 //------------------------------------------------
 
 /// Python algorithm registration mutex in anonymous namespace (aka static)
-Poco::Mutex FUNCTION_REGISTER_MUTEX;
+Mantid::Kernel::RecursiveMutex FUNCTION_REGISTER_MUTEX;
 
 /**
  * A free function to register a fit function from Python
@@ -56,7 +56,7 @@ Poco::Mutex FUNCTION_REGISTER_MUTEX;
  *              or an instance of a class type derived from IFunction
  */
 void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
-  Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
+  Mantid::Kernel::LockGuardRecursiveMutex lock(FUNCTION_REGISTER_MUTEX);
   static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
 

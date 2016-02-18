@@ -1,14 +1,14 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
-#include <Poco/ScopedLock.h>
-#include <Poco/ScopedLock.h>
+
 
 // Python frameobject. This is under the boost includes so that boost will have
 // done the
@@ -61,7 +61,7 @@ PyObject *getRegisteredAlgorithms(AlgorithmFactoryImpl &self,
 //------------------------------------------------
 
 // Python algorithm registration mutex in anonymous namespace (aka static)
-Poco::Mutex PYALG_REGISTER_MUTEX;
+Mantid::Kernel::RecursiveMutex PYALG_REGISTER_MUTEX;
 
 // clang-format off
 GCC_DIAG_OFF(cast-qual)
@@ -74,7 +74,7 @@ GCC_DIAG_OFF(cast-qual)
  *              or an instance of a class type derived from PythonAlgorithm
  */
 void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
-  Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
+  Mantid::Kernel::LockGuardRecursiveMutex lock(PYALG_REGISTER_MUTEX);
 
   static PyObject *const pyAlgClass =
       (PyObject *)
