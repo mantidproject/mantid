@@ -20,7 +20,7 @@ struct MANTID_KERNEL_DLL MagneticIon {
   /// Default constructor
   MagneticIon();
   /// Construct the Ion with data
-  MagneticIon(const std::string symbol, const uint16_t charge,
+  MagneticIon(const char * symbol, const uint16_t charge,
               const double j0i[8], const double j2i[8], const double j4i[8],
               const double j6i[8]);
 
