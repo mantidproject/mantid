@@ -57,20 +57,20 @@ class MultiPeakFit : public Fit
                 double eval(double *par, double x) override;
                 double evalPeak(double *par, double x, int peak);
 
-              private:
-                void init(int);
+	private:
+		void init(int);
 
                 QString logFitInfo(int iterations, int status) override;
                 void generateFitCurve() override;
                 static QString peakFormula(int peakIndex, PeakProfile profile);
-                //! Inserts a peak function curve into the plot
-                void insertPeakFunctionCurve(double *x, double *y, int peak);
+		//! Inserts a peak function curve into the plot
+		void insertPeakFunctionCurve(double *x, double *y, int peak);
                 void customizeFitResults() override;
 
                 //! Number of peaks
-                int d_peaks;
+		int d_peaks;
 
-                //! Tells weather the peak curves should be displayed together with the best line fit.
+		//! Tells weather the peak curves should be displayed together with the best line fit.
 		bool generate_peak_curves;
 
 		//! Color index for the peak curves
@@ -121,8 +121,8 @@ class GaussAmpFit : public Fit
                 void guessInitialValues() override;
                 double eval(double *par, double x) override;
 
-              private:
-                void init();
+        private:
+		void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif

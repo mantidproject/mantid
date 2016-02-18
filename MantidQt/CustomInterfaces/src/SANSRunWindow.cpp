@@ -40,7 +40,7 @@
 #include <QTreeWidgetItem>
 #include <QUrl>
 
-#include <MantidKernel/StringTokenizer.h>
+#include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
 
 #include <boost/lexical_cast.hpp>
@@ -49,7 +49,6 @@
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
-#include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -435,8 +434,7 @@ void SANSRunWindow::initLocalPython() {
   // Make sure that user file is valid
   if (!isValidUserFile()) {
     m_cfg_loaded = false;
-  }
-  else {
+  } else {
     loadUserFile();
     handleInstrumentChange();
     m_cfg_loaded = true;
@@ -3363,11 +3361,9 @@ void SANSRunWindow::checkList() {
 
   bool valid(false);
   // split up the comma separated list ignoring spaces
-  Mantid::Kernel::StringTokenizer in(input, ",",
-                                     Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (Mantid::Kernel::StringTokenizer::Iterator i = in.begin(),
-                                                   end = in.end();
+    for (Poco::StringTokenizer::Iterator i = in.begin(), end = in.end();
          i != end; ++i) { // try a lexical cast, we don't need its result only
                           // if there was an error
       boost::lexical_cast<double>(*i);
@@ -4922,7 +4918,7 @@ void SANSRunWindow::initQResolutionSettings() {
 }
 
 /**
- * Initialize the background corrections, ie reset all fields 
+ * Initialize the background corrections, ie reset all fields
  */
 void SANSRunWindow::initializeBackgroundCorrection() {
   m_uiForm.sansBackgroundCorrectionWidget->resetEntries();
@@ -5038,7 +5034,8 @@ void SANSRunWindow::addBackgroundCorrectionToPythonScript(
  */
 bool SANSRunWindow::hasUserFileValidFileExtension() {
   auto userFile = m_uiForm.userfile_edit->text().trimmed();
-  QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
+  QString checkValidity =
+      "i.has_user_file_valid_extension('" + userFile + "')\n";
 
   QString resultCheckValidity(runPythonCode(checkValidity, false));
   resultCheckValidity = resultCheckValidity.simplified();
@@ -5048,10 +5045,11 @@ bool SANSRunWindow::hasUserFileValidFileExtension() {
   }
 
   if (!isValid) {
-    QMessageBox::critical(this, "User File extension issue",
-                                "The specified user file does not seem to have a \n"
-				"valid file extension. Make sure that the user file \n" 
-				"has a .txt extension.");
+    QMessageBox::critical(
+        this, "User File extension issue",
+        "The specified user file does not seem to have a \n"
+        "valid file extension. Make sure that the user file \n"
+        "has a .txt extension.");
   }
 
   return isValid;
@@ -5076,7 +5074,7 @@ bool SANSRunWindow::isValidUserFile() {
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if (filetext.isEmpty()) {
     QMessageBox::warning(this, "Error loading user file",
-      "No user file has been specified");
+                         "No user file has been specified");
     m_cfg_loaded = false;
     return false;
   }
@@ -5084,7 +5082,7 @@ bool SANSRunWindow::isValidUserFile() {
   QFile user_file(filetext);
   if (!user_file.open(QIODevice::ReadOnly)) {
     QMessageBox::critical(this, "Error loading user file",
-      "Could not open user file \"" + filetext + "\"");
+                          "Could not open user file \"" + filetext + "\"");
     m_cfg_loaded = false;
     return false;
   }
@@ -5092,7 +5090,6 @@ bool SANSRunWindow::isValidUserFile() {
 
   return true;
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

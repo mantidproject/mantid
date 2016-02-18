@@ -46,8 +46,8 @@ class ExponentialFit : public Fit
                   return par[0] * exp(-par[1] * x) + par[2];
                 };
 
-              private:
-                void init();
+        private:
+		void init();
                 void customizeFitResults() override;
                 void calculateFitCurveData(double *X, double *Y) override;
 
@@ -69,8 +69,8 @@ class TwoExpFit : public Fit
                          par[4];
                 };
 
-              private:
-                void init();
+        private:
+		void init();
                 void customizeFitResults() override;
                 void calculateFitCurveData(double *X, double *Y) override;
 };
@@ -90,8 +90,8 @@ class ThreeExpFit : public Fit
                          par[4] * exp(-x * par[5]) + par[6];
                 };
 
-              private:
-                void init();
+        private:
+		void init();
                 void customizeFitResults() override;
                 void calculateFitCurveData(double *X, double *Y) override;
 };

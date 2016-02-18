@@ -36,16 +36,24 @@ namespace SpectrumView
  *                       at location will be displayed.
  * @param isTrackingOn  Flag to start SpectrumDisplay with tracking on or off.
  */
-SpectrumDisplay::SpectrumDisplay(QwtPlot *spectrumPlot,
-                                 ISliderHandler *sliderHandler,
-                                 IRangeHandler *rangeHander,
-                                 GraphDisplay *hGraph, GraphDisplay *vGraph,
-                                 QTableWidget *tableWidget, bool isTrackingOn)
-    : m_spectrumPlot(spectrumPlot), m_sliderHandler(sliderHandler),
-      m_rangeHandler(rangeHander), m_hGraphDisplay(hGraph),
-      m_vGraphDisplay(vGraph), m_pointedAtX(0.0), m_pointedAtY(0.0),
-      m_imageTable(tableWidget), m_totalXMin(0.0), m_totalXMax(0.0),
-      m_totalYMin(0.0), m_totalYMax(0.0), m_imagePicker(NULL) {
+SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
+                                   ISliderHandler*  sliderHandler,
+                                   IRangeHandler*   rangeHander,
+                                   GraphDisplay*    hGraph,
+                                   GraphDisplay*    vGraph,
+                                   QTableWidget*    tableWidget,
+                                   bool             isTrackingOn) :
+  m_spectrumPlot(spectrumPlot),
+  m_sliderHandler(sliderHandler),
+  m_rangeHandler(rangeHander),
+  m_hGraphDisplay(hGraph),
+  m_vGraphDisplay(vGraph),
+  m_pointedAtX(0.0), m_pointedAtY(0.0),
+  m_imageTable(tableWidget),
+  m_totalXMin(0.0), m_totalXMax(0.0),
+  m_totalYMin(0.0), m_totalYMax(0.0),
+  m_imagePicker(NULL)
+{
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
                           m_positiveColorTable );

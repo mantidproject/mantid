@@ -100,11 +100,8 @@ namespace MantidQt
       @param viewHeight : height of the view area in natural coordinates
       @return SphericalPeakPrimites. Information object for rendering.
       */
-      MantidQt::SliceViewer::SphericalPeakPrimitives
-      PhysicalSphericalPeak::draw(const double &windowHeight,
-                                  const double &windowWidth,
-                                  const double &viewHeight,
-                                  const double &viewWidth) const {
+      MantidQt::SliceViewer::SphericalPeakPrimitives PhysicalSphericalPeak::draw(const double& windowHeight, const double& windowWidth, const double& viewHeight, const double& viewWidth) const
+      {
         SphericalPeakPrimitives drawingObjects = {0, 0, 0, 0, 0,0, 0, Mantid::Kernel::V3D()};
 
         // Scale factor for going from viewX to windowX

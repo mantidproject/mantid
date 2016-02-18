@@ -13,18 +13,21 @@ namespace DynamicPDF {
 class WorkspaceRecord;
 class SliceSelector;
 
-class BackgroundRemover : public QDialog {
+class BackgroundRemover: public QDialog
+{
   Q_OBJECT
 
 public:
+
   BackgroundRemover(SliceSelector *parent);
 
   void refreshSlice(const boost::shared_ptr<WorkspaceRecord> loadedWorkspace,
-                    const size_t &workspaceIndex);
+                const size_t &workspaceIndex);
 
 private:
   Ui::BackgroundRemover m_uiForm;
 };
+
 }
 }
 }

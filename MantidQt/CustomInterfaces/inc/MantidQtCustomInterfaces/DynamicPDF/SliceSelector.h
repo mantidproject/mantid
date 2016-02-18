@@ -8,16 +8,16 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-class MWView;
+  class MWView;
 }
 namespace CustomInterfaces {
 namespace DynamicPDF {
 
 // Forward Declarations
-// class BackgroundRemover;
+//class BackgroundRemover;
 
 /// Helper class containing pointer and some metadata for the loaded workspace
-class WorkspaceRecord {
+class WorkspaceRecord{
 
 public:
   WorkspaceRecord(const std::string &workspaceName);
@@ -57,9 +57,10 @@ private:
   boost::shared_ptr<WorkspaceRecord> m_loadedWorkspace;
   size_t m_selectedWorkspaceIndex;
   /// The child dialog to remove the multiphonon background
-  // boost::shared_ptr<BackgroundRemover> m_BackgroundRemover;
+  //boost::shared_ptr<BackgroundRemover> m_BackgroundRemover;
 };
+
 }
 }
 }
-#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
+#endif //MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_

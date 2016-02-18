@@ -13,11 +13,9 @@
   \date   04/07/2011
   \version 1.0
 
-   This class has the implementation for rendering SampleActor in OpenGL and it
-  inherits from the GLActor
+   This class has the implementation for rendering SampleActor in OpenGL and it inherits from the GLActor
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -36,44 +34,46 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-namespace Mantid {
-namespace API {
-class Sample;
-}
-namespace Geometry {
-class IObjComponent;
-}
-}
-
-namespace MantidQt {
-namespace MantidWidgets {
-class InstrumentActor;
-
-class SampleActor : public GLActor {
-public:
-  SampleActor(const InstrumentActor &instrActor,
-              const Mantid::API::Sample &sample,
-              const ObjComponentActor *samplePosActor); ///< Constructor
-  virtual std::string type() const {
-    return "SampleActor";
-  } ///< Type of the GL object
-  void draw(bool picking) const override;
-  void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const override;
-  void setColor(const GLColor &c) { m_color = c; }
-  const ObjComponentActor *getSamplePosActor() const {
-    return m_samplePosActor;
+namespace Mantid
+{
+  namespace API
+  {
+    class Sample;
   }
+  namespace Geometry
+  {
+    class IObjComponent;
+  }
+}
 
-protected:
-  const InstrumentActor &m_instrActor;
-  const Mantid::API::Sample &m_sample;
-  const ObjComponentActor *m_samplePosActor;
-  boost::shared_ptr<const Mantid::Geometry::IObjComponent> m_samplePos;
-  GLColor m_color;
-};
+namespace MantidQt
+{
+	namespace MantidWidgets
+	{
+		class InstrumentActor;
 
-} // MantidWidgets
-} // MantidQt
+		class SampleActor : public GLActor
+		{
+		public:
+			SampleActor(const InstrumentActor& instrActor, const Mantid::API::Sample& sample, const ObjComponentActor* samplePosActor); ///< Constructor
+			virtual std::string type()const { return "SampleActor"; } ///< Type of the GL object
+                        void draw(bool picking) const override;
+                        void getBoundingBox(
+                            Mantid::Kernel::V3D &minBound,
+                            Mantid::Kernel::V3D &maxBound) const override;
+                        void setColor(const GLColor& c) { m_color = c; }
+			const ObjComponentActor* getSamplePosActor()const { return m_samplePosActor; }
+		protected:
+			const InstrumentActor& m_instrActor;
+			const Mantid::API::Sample& m_sample;
+			const ObjComponentActor* m_samplePosActor;
+			boost::shared_ptr<const Mantid::Geometry::IObjComponent> m_samplePos;
+			GLColor m_color;
+		};
+
+	}//MantidWidgets
+}//MantidQt
+
 
 #endif /*SMAPLE_ACTOR_H_*/
+

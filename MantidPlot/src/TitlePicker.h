@@ -48,6 +48,6 @@ signals:
 
 private:
   bool eventFilter(QObject *, QEvent *) override;
-  QwtTextLabel *title;
-  bool d_selected;
+        QwtTextLabel *title;
+	bool d_selected;
 };

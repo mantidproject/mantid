@@ -49,8 +49,8 @@ class SigmoidalFit : public Fit
                 void guessInitialValues() override;
                 void setLogistic(bool on = true);
 
-              private:
-                void init();
+	private:
+		void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 
                 bool d_logistic;

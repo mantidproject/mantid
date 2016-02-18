@@ -59,10 +59,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
   public:
 
      /// Make an SpectrumDisplay to display with the given widgets and controls
-    SpectrumDisplay(QwtPlot *spectrumPlot, ISliderHandler *sliderHandler,
-                    IRangeHandler *rangeHandler, GraphDisplay *hGraph,
-                    GraphDisplay *vGraph, QTableWidget *tableWidget,
-                    bool isTrackingOn = true);
+     SpectrumDisplay( QwtPlot*        spectrumPlot,
+                      ISliderHandler* sliderHandler,
+                      IRangeHandler*  rangeHandler,
+                      GraphDisplay*   hGraph,
+                      GraphDisplay*   vGraph,
+                      QTableWidget*   tableWidget,
+                      bool            isTrackingOn = true);
 
      virtual ~SpectrumDisplay();
 

@@ -44,10 +44,10 @@ class CanvasPicker: public QObject
 public:
   explicit CanvasPicker(Graph *plot);
   bool eventFilter(QObject *, QEvent *) override;
-  void selectPoints(int n);
-  void selectPeak(const QPoint &p);
+         void selectPoints(int n);
+	 void selectPeak(const QPoint& p);
 
-         //! Disable editing of #d_editing_marker on a TAB-key event.
+	 //! Disable editing of #d_editing_marker on a TAB-key event.
 	 /**\brief Called by Graph::focusNextPrevChild ()
 	 */
 	void disableEditing();

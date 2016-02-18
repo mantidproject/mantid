@@ -38,8 +38,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
   //m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs,SIGNAL(currentChanged(int)),this,SLOT(changeSpectrumDisplay(int)));
   connect(m_ui->imageTabs,SIGNAL(tabCloseRequested(int)),this,SLOT(respondToTabCloseReqest(int)));
-  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this,
-          SLOT(changeTracking(bool)));
+  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this, SLOT(changeTracking(bool)));
   updateHandlers();
   setAcceptDrops(true);
   loadSettings();
@@ -125,9 +124,12 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
     m_ui->imageTabs->setTabsClosable(true);
   }
 
-  auto spectrumDisplay = boost::make_shared<SpectrumDisplay>(
-      spectrumPlot, m_sliderHandler, m_rangeHandler, m_hGraph.get(),
-      m_vGraph.get(), m_ui->image_table, isTrackingOn());
+  auto spectrumDisplay = boost::make_shared<SpectrumDisplay>( spectrumPlot,
+                                           m_sliderHandler,
+                                           m_rangeHandler,
+                                           m_hGraph.get(), m_vGraph.get(),
+                                           m_ui->image_table,
+                                           isTrackingOn());
   spectrumDisplay->setDataSource( dataSource );
 
   if (isFirstPlot)
@@ -274,15 +276,14 @@ void SpectrumView::changeTracking(bool on) {
 void SpectrumView::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
-  m_ui->tracking_always_on->setChecked(
-      settings.value("CursorTracking", true).toBool());
+  m_ui->tracking_always_on->setChecked(settings.value("CursorTracking", true).toBool());
 }
 
 /// Save settings
 void SpectrumView::saveSettings() const {
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
-  settings.setValue("CursorTracking", m_ui->tracking_always_on->isChecked());
+  settings.setValue("CursorTracking",m_ui->tracking_always_on->isChecked());
 }
 
 } // namespace SpectrumView

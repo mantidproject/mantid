@@ -50,26 +50,26 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
                 ~DataPickerTool() override;
     Mode getMode()const{return d_mode;}
     bool eventFilter(QObject *obj, QEvent *event) override;
-    bool keyEventFilter(QKeyEvent *ke);
-    QwtPlotCurve *selectedCurve() const { return d_selected_curve; }
+                bool keyEventFilter(QKeyEvent *ke);
+		QwtPlotCurve *selectedCurve() const { return d_selected_curve; }
 
-    int rtti() const override { return PlotToolInterface::Rtti_DataPicker; };
+                int rtti() const override {
+                  return PlotToolInterface::Rtti_DataPicker;
+                };
 
-  signals:
-    /** Emitted whenever a new message should be presented to the user.
-     *
-     * You don't have to connect to this signal if you alreay specified a
-     * reciever during initialization.
-     */
-                void statusText(const QString&);
+        signals:
+		/** Emitted whenever a new message should be presented to the user.
+		 *
+		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
+		 */
+		void statusText(const QString&);
 		//! Emitted whenever a new data point has been selected.
 		void selected(QwtPlotCurve*, int);
 	protected:
           void append(const QPoint &point) override;
-          void setSelection(QwtPlotCurve *curve, int point_index);
-
-        private:
-                ApplicationWindow *d_app;
+                void setSelection(QwtPlotCurve *curve, int point_index);
+	private:
+		ApplicationWindow *d_app;
 		QwtPlotMarker d_selection_marker;
 		Mode d_mode;
 		QwtPlotCurve *d_selected_curve;

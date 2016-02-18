@@ -58,14 +58,12 @@ class TranslateCurveTool : public QObject, public PlotToolInterface
                 int rtti() const override {
                   return PlotToolInterface::Rtti_TranslateCurveTool;
                 };
-              signals:
-                /**\brief Emitted whenever a new message should be presented to
-                 * the user.
-                 *
-                 * You don't have to connect to this signal if you alreay
-                 * specified a reciever during initialization.
-                 */
-                void statusText(const QString&);
+        signals:
+		/**\brief Emitted whenever a new message should be presented to the user.
+		 *
+		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
+		 */
+		void statusText(const QString&);
 	public slots:
 		//! Select curve to translate, using the specified point as base point.
 		void selectCurvePoint(QwtPlotCurve *curve, int point_index);

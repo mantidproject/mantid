@@ -134,8 +134,9 @@ DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
     MantidQt::MantidWidgets::SafeQwtPlot,
     "Version of QwtPlot with workspace-level thread safety");
 
-DECLARE_WIDGET_PLUGIN(MWViewPlugin, MantidQt::MantidWidgets::MWView,
-                      "2D view of a MatrixWorkspace");
+DECLARE_WIDGET_PLUGIN(MWViewPlugin,
+    MantidQt::MantidWidgets::MWView,
+    "2D view of a MatrixWorkspace");
 
 DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
     MantidQt::API::AlgorithmPropertiesWidget,

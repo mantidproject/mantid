@@ -4,169 +4,154 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt
+{
+	namespace MantidWidgets
+	{
 
-/**
-\class  Viewport
-\brief  class handling OpenGL Viewport
-\author Chapon Laurent & Srikanth Nagella
-\date   August 2008
-\author Roman Tolchenov
-\date   March 2013
-\version 1.0
 
-Viewport sets up OpenGL projection (orthographic or perspective) and privides
-methods for
-navigating around a 3D scene. With the orthographic projection it rotates,
-scales and translates
-the scene in plane parallel to the screen. Navigation in the persective
-projection isn't fully
-implemented.
+		/**
+		\class  Viewport
+		\brief  class handling OpenGL Viewport
+		\author Chapon Laurent & Srikanth Nagella
+		\date   August 2008
+		\author Roman Tolchenov
+		\date   March 2013
+		\version 1.0
 
-A Viewport is initialized with the size of a GL widget it will be used with.
-When the widget is
-resized the viewport must also be resized by calling resize() method.
+		Viewport sets up OpenGL projection (orthographic or perspective) and privides methods for
+		navigating around a 3D scene. With the orthographic projection it rotates, scales and translates
+		the scene in plane parallel to the screen. Navigation in the persective projection isn't fully
+		implemented.
 
-The projection type must be set along with the dimensions of the scene by
-calling
-setProjection(...) method. This method doesn't issue any GL commands only sets
-the projection type.
+		A Viewport is initialized with the size of a GL widget it will be used with. When the widget is
+		resized the viewport must also be resized by calling resize() method.
 
-Call applyProjection() to issue the GL projection command and applyRotation() to
-apply the
-transformation to the model.
+		The projection type must be set along with the dimensions of the scene by calling
+		setProjection(...) method. This method doesn't issue any GL commands only sets the projection type.
 
-*/
-class Viewport {
-public:
-  enum ProjectionType { ORTHO, PERSPECTIVE };
-  Viewport(int w,
-           int h); ///< Constructor with Width (w) and Height(h) as inputs
-                   /// Called by the display device when viewport is resized
-  void resize(int, int);
-  /// Get the viewport width and height.
-  void getViewport(int &w, int &h) const;
-  /// Return the projection type.
-  ProjectionType getProjectionType() const;
-  /// Set a projection.
-  void setProjection(double, double, double, double, double, double,
-                     ProjectionType type = Viewport::ORTHO);
-  /// Set a projection.
-  void setProjection(const Mantid::Kernel::V3D &minBounds,
-                     const Mantid::Kernel::V3D &maxBounds,
-                     ProjectionType type = Viewport::ORTHO);
-  /// Apply the projection to OpenGL engine
-  void applyProjection() const;
-  /// Rotate the model
-  void applyRotation() const;
-  /// Clear all transforamtions (rotation, translation. scaling)
-  void reset();
+		Call applyProjection() to issue the GL projection command and applyRotation() to apply the
+		transformation to the model.
 
-  /* Rotation */
+		*/
+		class Viewport
+		{
+		public:
+			enum ProjectionType { ORTHO, PERSPECTIVE };
+			Viewport(int w, int h); ///< Constructor with Width (w) and Height(h) as inputs
+									/// Called by the display device when viewport is resized
+			void resize(int, int);
+			/// Get the viewport width and height.
+			void getViewport(int& w, int& h) const;
+			/// Return the projection type.
+			ProjectionType getProjectionType()const;
+			/// Set a projection.
+			void setProjection(double, double, double, double, double, double, ProjectionType type = Viewport::ORTHO);
+			/// Set a projection.
+			void setProjection(const Mantid::Kernel::V3D& minBounds, const Mantid::Kernel::V3D& maxBounds, ProjectionType type = Viewport::ORTHO);
+			/// Apply the projection to OpenGL engine
+			void applyProjection() const;
+			/// Rotate the model
+			void applyRotation() const;
+			/// Clear all transforamtions (rotation, translation. scaling)
+			void reset();
 
-  /// Call to set the View to X+ direction
-  void setViewToXPositive();
-  /// Call to set the View to Y+ direction
-  void setViewToYPositive();
-  /// Call to set the View to Z+ direction
-  void setViewToZPositive();
-  /// Call to set the View to X- direction
-  void setViewToXNegative();
-  /// Call to set the View to Y- direction
-  void setViewToYNegative();
-  /// Call to set the View to Z- direction
-  void setViewToZNegative();
+			/* Rotation */
 
-  /// Init rotation at a point on the screen
-  void initRotationFrom(int a, int b);
-  /// Generate a new rotation matrix
-  void generateRotationTo(int a, int b);
-  /// Set rotation programmatically
-  void setRotation(const Mantid::Kernel::Quat &rot);
-  /// Get current rotation
-  Mantid::Kernel::Quat getRotation() const { return m_quaternion; }
+			/// Call to set the View to X+ direction
+			void setViewToXPositive();
+			/// Call to set the View to Y+ direction
+			void setViewToYPositive();
+			/// Call to set the View to Z+ direction
+			void setViewToZPositive();
+			/// Call to set the View to X- direction
+			void setViewToXNegative();
+			/// Call to set the View to Y- direction
+			void setViewToYNegative();
+			/// Call to set the View to Z- direction
+			void setViewToZNegative();
 
-  /* Zooming */
+			/// Init rotation at a point on the screen
+			void initRotationFrom(int a, int b);
+			/// Generate a new rotation matrix
+			void generateRotationTo(int a, int b);
+			/// Set rotation programmatically
+			void setRotation(const Mantid::Kernel::Quat& rot);
+			/// Get current rotation
+			Mantid::Kernel::Quat getRotation() const { return m_quaternion; }
 
-  /// Init zooming with a point on the screen
-  void initZoomFrom(int a, int b);
-  /// Generate new zooming factor
-  void generateZoomTo(int a, int b);
-  /// Generate zooming factor using mouse wheel
-  void wheelZoom(int a, int b, int d);
-  /// Set zoom programmatically
-  void setZoom(double zoom);
+			/* Zooming */
 
-  /* Translation */
+			/// Init zooming with a point on the screen
+			void initZoomFrom(int a, int b);
+			/// Generate new zooming factor
+			void generateZoomTo(int a, int b);
+			/// Generate zooming factor using mouse wheel
+			void wheelZoom(int a, int b, int d);
+			/// Set zoom programmatically
+			void setZoom(double zoom);
 
-  /// Call when the mouse button is pressed to start translation
-  void initTranslateFrom(int, int);
-  /// Call when the mouse is moving during a translation
-  void generateTranslationTo(int, int);
-  /// Set translation programmatically
-  void setTranslation(double, double);
+			/* Translation */
 
-  // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double &, double &, double &, double &, double &,
-                            double &) const;
+			/// Call when the mouse button is pressed to start translation
+			void initTranslateFrom(int, int);
+			/// Call when the mouse is moving during a translation
+			void generateTranslationTo(int, int);
+			/// Set translation programmatically
+			void setTranslation(double, double);
 
-  /// Apply the transformation to a vector
-  void transform(Mantid::Kernel::V3D &pos) const;
+			// void getProjection(double&,double&,double&,double&,double&,double&);
+			void getInstantProjection(double&, double&, double&, double&, double&, double&)const;
 
-protected:
-  /// Correct for aspect ratio
-  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin,
-                                    double &ymax, double &zmin,
-                                    double &zmax) const;
-  /// Project a point onto a sphere centered at rotation point
-  void projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const;
-  /// Generate a 3D point coordinates from coordinates on the viewport.
-  void generateTranslationPoint(int x, int y, Mantid::Kernel::V3D &p) const;
+			/// Apply the transformation to a vector 
+			void transform(Mantid::Kernel::V3D& pos) const;
 
-  /* Projection */
+		protected:
+			/// Correct for aspect ratio
+			void correctForAspectRatioAndZoom(double& xmin, double& xmax, double& ymin, double& ymax, double& zmin, double& zmax)const;
+			/// Project a point onto a sphere centered at rotation point
+			void projectOnSphere(int a, int b, Mantid::Kernel::V3D& point) const;
+			/// Generate a 3D point coordinates from coordinates on the viewport.
+			void generateTranslationPoint(int x, int y, Mantid::Kernel::V3D& p) const;
 
-  ProjectionType m_projectionType; ///< Type of display projection
-  int m_width;                     ///< Width of the viewport in pixels
-  int m_height;                    ///< Height of the viewport in pixels
-  double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
-  /// x axis)
-  double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
-  /// the x axis)
-  double m_bottom; ///< Ortho/Prespective Projection ymin value (Bottom side of
-  /// the y axis)
-  double m_top; ///< Ortho/Prespective Projection ymax value (Top side of the y
-  /// axis)
-  double m_near; ///< Ortho/Prespective Projection zmin value (Near side of the
-  /// z axis)
-  double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
-  /// axis)
+			/* Projection */
 
-  /* Trackball rotation */
+			ProjectionType m_projectionType; ///< Type of display projection
+			int m_width;       ///< Width of the viewport in pixels
+			int m_height;      ///< Height of the viewport in pixels
+			double m_left;     ///< Ortho/Prespective Projection xmin value (Left side of the x axis)
+			double m_right;    ///< Ortho/Prespective Projection xmax value (Right side of the x axis)
+			double m_bottom;   ///< Ortho/Prespective Projection ymin value (Bottom side of the y axis)
+			double m_top;      ///< Ortho/Prespective Projection ymax value (Top side of the y axis)
+			double m_near;     ///< Ortho/Prespective Projection zmin value (Near side of the z axis)
+			double m_far;      ///< Ortho/Prespective Projection zmax value (Far side of the z axis)
 
-  /// Previous point selected on sphere
-  Mantid::Kernel::V3D m_lastpoint;
-  /// Rotation matrix stored as a quaternion
-  Mantid::Kernel::Quat m_quaternion;
-  /// Rotation matrix (4x4 stored as linear array) used in OpenGL
-  mutable double m_rotationmatrix[16];
-  /// Rotation speed of the trackball
-  double m_rotationspeed;
+								/* Trackball rotation */
 
-  /* Zooming */
+								/// Previous point selected on sphere
+			Mantid::Kernel::V3D m_lastpoint;
+			/// Rotation matrix stored as a quaternion
+			Mantid::Kernel::Quat m_quaternion;
+			/// Rotation matrix (4x4 stored as linear array) used in OpenGL
+			mutable double m_rotationmatrix[16];
+			/// Rotation speed of the trackball
+			double m_rotationspeed;
 
-  double m_zoomFactor;
+			/* Zooming */
 
-  /* Translation */
+			double m_zoomFactor;
 
-  /// Translation in x direction
-  double m_xTrans;
-  /// Translation in y direction
-  double m_yTrans;
-  /// Translation in z direction
-  mutable double m_zTrans;
-};
-} // MantidWidgets
-} // MantidQt
+			/* Translation */
+
+			/// Translation in x direction 
+			double m_xTrans;
+			/// Translation in y direction 
+			double m_yTrans;
+			/// Translation in z direction 
+			mutable double m_zTrans;
+
+		};
+	}//MantidWidgets
+}//MantidQt
 
 #endif /*VIEWPORT_H_*/
