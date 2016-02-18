@@ -53,7 +53,7 @@ public:
   std::unique_ptr<SplittersWorkspace> clone() const {
     return std::unique_ptr<SplittersWorkspace>(doClone());
   }
-
+  SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
   void addSplitter(Kernel::SplittingInterval splitter) override;
 
   Kernel::SplittingInterval getSplitter(size_t index) override;
@@ -65,8 +65,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   SplittersWorkspace(const SplittersWorkspace &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
 
 private:
   SplittersWorkspace *doClone() const override {

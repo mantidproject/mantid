@@ -164,23 +164,19 @@ public:
   /// and throws CancelException if needed.
   class CancelException : public std::exception {
   public:
-    CancelException() : outMessage("Algorithm terminated") {}
-    CancelException(const CancelException &A)
-        : outMessage(A.outMessage) {} ///< Copy constructor
-    /// Assignment operator
-    CancelException &operator=(const CancelException &A);
-
     /// Returns the message string.
     const char *what() const throw() override { return outMessage.c_str(); }
 
   private:
     /// The message returned by what()
-    std::string outMessage;
+    std::string outMessage{"Algorithm terminated"};
   };
 
   //============================================================================
   Algorithm();
   ~Algorithm() override;
+  Algorithm(const Algorithm &) = delete;
+  Algorithm &operator=(const Algorithm &) = delete;
 
   /** @name Algorithm Information */
   /// function to return a name of the algorithm, must be overridden in all
@@ -386,10 +382,6 @@ protected:
   size_t m_groupSize;
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  Algorithm(const Algorithm &) = delete;
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  Algorithm &operator=(const Algorithm &) = delete;
 
   void lockWorkspaces();
   void unlockWorkspaces();

@@ -69,9 +69,6 @@ protected:
   checkValidity(const boost::shared_ptr<IAlgorithm> &value) const override;
 
 private:
-  /// Default constructor
-  AlgorithmHasProperty();
-
   /// Store the property name
   std::string m_propName;
 };

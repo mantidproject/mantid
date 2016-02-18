@@ -43,6 +43,7 @@ public:
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
   }
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
 
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
@@ -106,8 +107,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
 
   const std::string toString() const override;
 

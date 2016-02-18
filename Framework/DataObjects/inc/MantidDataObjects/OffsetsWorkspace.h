@@ -25,7 +25,7 @@ public:
   std::unique_ptr<OffsetsWorkspace> clone() const {
     return std::unique_ptr<OffsetsWorkspace>(doClone());
   }
-
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "OffsetsWorkspace"; }
@@ -33,8 +33,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   OffsetsWorkspace(const OffsetsWorkspace &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
 
 private:
   OffsetsWorkspace *doClone() const override {

@@ -77,7 +77,8 @@ public:
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
                             const MatrixWorkspace_sptr child,
                             const bool differentSize) const;
-
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
+  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;
@@ -91,10 +92,6 @@ private:
 
   /// Private Constructor for singleton class
   WorkspaceFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
   /// Private Destructor
   ~WorkspaceFactoryImpl() override = default;
   // Unhide the inherited create method but make it private

@@ -48,16 +48,15 @@ class MANTID_KERNEL_DLL LibraryManagerImpl {
 public:
   // opens all suitable libraries on a given path
   int OpenAllLibraries(const std::string &, bool isRecursive = false);
+  LibraryManagerImpl(const LibraryManagerImpl &) = delete;
+  LibraryManagerImpl &operator=(const LibraryManagerImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LibraryManagerImpl>;
 
   /// Private Constructor
   LibraryManagerImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  LibraryManagerImpl(const LibraryManagerImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  LibraryManagerImpl &operator=(const LibraryManagerImpl &) = delete;
+
   /// Private Destructor
   virtual ~LibraryManagerImpl() = default;
 

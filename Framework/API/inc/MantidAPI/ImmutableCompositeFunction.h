@@ -41,9 +41,6 @@ namespace API {
 */
 class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction {
 public:
-  /// Default constructor
-  ImmutableCompositeFunction() : CompositeFunction() {}
-
   /* Overriden methods */
 
   /// Returns the function's name

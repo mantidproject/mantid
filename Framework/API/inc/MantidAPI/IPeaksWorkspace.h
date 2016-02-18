@@ -55,7 +55,7 @@ public:
 
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
-
+  IPeaksWorkspace &operator=(const IPeaksWorkspace &other) = delete;
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
    */
@@ -161,10 +161,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IPeaksWorkspace(const IPeaksWorkspace &other)
-      : ITableWorkspace(other), ExperimentInfo(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  IPeaksWorkspace &operator=(const IPeaksWorkspace &other) = delete;
+  IPeaksWorkspace(const IPeaksWorkspace &other) = default;
 
   const std::string toString() const override;
 

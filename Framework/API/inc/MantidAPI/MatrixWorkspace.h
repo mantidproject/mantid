@@ -77,6 +77,8 @@ public:
   /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+
+  MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
   ~MatrixWorkspace() override;
 
@@ -467,8 +469,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
 
   MatrixWorkspace(
       Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);

@@ -41,7 +41,6 @@ namespace API {
 
 class MANTID_API_DLL LinearScale : public API::ITransformScale {
 public:
-  LinearScale(){};
   /// The scaling transformation. First and last elements of the grid remain
   /// unchanged
   const std::string name() const override { return "LinearScale"; }

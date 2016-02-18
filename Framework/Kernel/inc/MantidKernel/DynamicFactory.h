@@ -83,7 +83,6 @@ public:
   /// Defines replacement behaviour
   enum SubscribeAction { ErrorIfExists, OverwriteCurrent };
 
-public:
   /**
    * Base class for dynamic factory notifications
    */
@@ -105,10 +104,11 @@ public:
    */
   void disableNotifications() { m_notifyStatus = Disabled; }
 
-public:
   /// A typedef for the instantiator
   typedef AbstractInstantiator<Base> AbstractFactory;
 
+  DynamicFactory(const DynamicFactory &) = delete;
+  DynamicFactory &operator=(const DynamicFactory &) = delete;
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
   virtual ~DynamicFactory() {
@@ -240,10 +240,6 @@ protected:
   DynamicFactory() : notificationCenter(), _map(), m_notifyStatus(Disabled) {}
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  DynamicFactory(const DynamicFactory &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  DynamicFactory &operator=(const DynamicFactory &) = delete;
 
   /// Send an update notification if they are enabled
   void sendUpdateNotificationIfEnabled() {

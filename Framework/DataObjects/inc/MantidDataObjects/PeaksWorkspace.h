@@ -66,7 +66,7 @@ public:
   const std::string id() const override { return "PeaksWorkspace"; }
 
   PeaksWorkspace();
-
+  PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to
@@ -182,8 +182,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   PeaksWorkspace(const PeaksWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }

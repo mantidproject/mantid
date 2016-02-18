@@ -23,6 +23,7 @@ public:
   GroupingWorkspace(Geometry::Instrument_const_sptr inst);
   GroupingWorkspace();
   GroupingWorkspace(size_t numvectors);
+  GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
   /// Returns a clone of the workspace
   std::unique_ptr<GroupingWorkspace> clone() const {
@@ -41,8 +42,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   GroupingWorkspace(const GroupingWorkspace &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
 private:
   GroupingWorkspace *doClone() const override {

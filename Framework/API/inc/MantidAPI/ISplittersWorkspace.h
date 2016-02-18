@@ -39,7 +39,7 @@ public:
    * Constructor
    */
   ISplittersWorkspace() = default;
-
+  ISplittersWorkspace &operator=(const ISplittersWorkspace &other) = delete;
   /*
    * Destructor
    */
@@ -73,9 +73,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ISplittersWorkspace(const ISplittersWorkspace &other) { UNUSED_ARG(other) }
-  /// Protected copy assignment operator. Assignment not implemented.
-  ISplittersWorkspace &operator=(const ISplittersWorkspace &other) = delete;
+  ISplittersWorkspace(const ISplittersWorkspace &) = default;
 
 private:
   virtual ISplittersWorkspace *doClone() const = 0;

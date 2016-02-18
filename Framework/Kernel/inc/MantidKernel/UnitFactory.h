@@ -69,16 +69,16 @@ class Unit;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit> {
+public:
+  UnitFactoryImpl(const UnitFactoryImpl &) = delete;
+  UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
 
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
 
   /// Private Constructor for singleton class
   UnitFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  UnitFactoryImpl(const UnitFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
+
   /// Private Destructor
   ~UnitFactoryImpl() override = default;
 };

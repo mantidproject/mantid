@@ -54,16 +54,16 @@ class ScriptRepository;
 class MANTID_API_DLL ScriptRepositoryFactoryImpl
     : public Kernel::DynamicFactory<ScriptRepository> {
 public:
+  ScriptRepositoryFactoryImpl(const ScriptRepositoryFactoryImpl &) = delete;
+  ScriptRepositoryFactoryImpl &
+  operator=(const ScriptRepositoryFactoryImpl &) = delete;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ScriptRepositoryFactoryImpl>;
 
   /// Private Constructor for singleton class
   ScriptRepositoryFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ScriptRepositoryFactoryImpl(const ScriptRepositoryFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ScriptRepositoryFactoryImpl &
-  operator=(const ScriptRepositoryFactoryImpl &) = delete;
+
   /// Private Destructor
   ~ScriptRepositoryFactoryImpl() override = default;
 };

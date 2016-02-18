@@ -23,7 +23,7 @@ public:
   std::unique_ptr<MaskWorkspace> clone() const {
     return std::unique_ptr<MaskWorkspace>(doClone());
   }
-
+  MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
@@ -43,9 +43,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MaskWorkspace(const MaskWorkspace &) = default;
-
-  /// Protected copy assignment operator. Assignment not implemented.
-  MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
 
   /// Return human-readable string
   const std::string toString() const override;

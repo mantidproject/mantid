@@ -34,7 +34,7 @@ public:
   std::unique_ptr<SpecialWorkspace2D> clone() const {
     return std::unique_ptr<SpecialWorkspace2D>(doClone());
   }
-
+  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "SpecialWorkspace2D"; }
@@ -64,8 +64,6 @@ private:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   SpecialWorkspace2D(const SpecialWorkspace2D &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
 
   void init(const size_t &NVectors, const size_t &XLength,
             const size_t &YLength) override;

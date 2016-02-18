@@ -46,6 +46,9 @@ public:
   Mantid::Geometry::MDImplicitFunction_sptr
   create(const std::string &className) const override;
 
+  ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
+  ImplicitFunctionFactoryImpl &
+  operator=(const ImplicitFunctionFactoryImpl &) = delete;
   virtual Mantid::Geometry::MDImplicitFunction *
   createUnwrapped(Poco::XML::Element *processXML) const;
 
@@ -57,11 +60,7 @@ public:
 private:
   /// Private Constructor for singleton class
   ImplicitFunctionFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionFactoryImpl &
-  operator=(const ImplicitFunctionFactoryImpl &) = delete;
+
   /// Private Destructor
   ~ImplicitFunctionFactoryImpl() override = default;
 };

@@ -44,6 +44,10 @@ class MANTID_API_DLL ImplicitFunctionParameterParserFactoryImpl
 public:
   boost::shared_ptr<ImplicitFunctionParameterParser>
   create(const std::string &xmlString) const override;
+  ImplicitFunctionParameterParserFactoryImpl(
+      const ImplicitFunctionParameterParserFactoryImpl &) = delete;
+  ImplicitFunctionParameterParserFactoryImpl &
+  operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
 
   ImplicitFunctionParameterParser *createImplicitFunctionParameterParserFromXML(
       Poco::XML::Element *parametersElement) const;
@@ -54,12 +58,6 @@ private:
 
   /// Private Constructor for singleton class
   ImplicitFunctionParameterParserFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionParameterParserFactoryImpl(
-      const ImplicitFunctionParameterParserFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionParameterParserFactoryImpl &
-  operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   /// Private Destructor
   ~ImplicitFunctionParameterParserFactoryImpl() override = default;
 };

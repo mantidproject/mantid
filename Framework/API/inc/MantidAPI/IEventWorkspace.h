@@ -38,7 +38,7 @@ namespace API {
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
   IEventWorkspace() : MatrixWorkspace() {}
-
+  IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
 
@@ -64,8 +64,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IEventWorkspace(const IEventWorkspace &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  IEventWorkspace &operator=(const IEventWorkspace &) = delete;
 
   const std::string toString() const override;
 

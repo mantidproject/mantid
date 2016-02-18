@@ -75,6 +75,8 @@ public:
 
   DiskBuffer();
   DiskBuffer(uint64_t m_writeBufferSize);
+  DiskBuffer(const DiskBuffer &) = delete;
+  DiskBuffer &operator=(const DiskBuffer &) = delete;
   virtual ~DiskBuffer() = default;
 
   void toWrite(ISaveable *item);
@@ -166,10 +168,6 @@ protected:
   mutable uint64_t m_fileLength;
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  DiskBuffer(const DiskBuffer &) = delete;
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  DiskBuffer &operator=(const DiskBuffer &) = delete;
 };
 
 } // namespace Kernel

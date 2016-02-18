@@ -47,6 +47,7 @@ public:
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
   }
+  RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Get the workspace ID.
   const std::string id() const override;
@@ -69,8 +70,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   RebinnedOutput(const RebinnedOutput &) = default;
-  /// Protected copy assignment operator. Assignment not implemented.
-  RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Called by initialize() in MatrixWorkspace
   void init(const std::size_t &NVectors, const std::size_t &XLength,

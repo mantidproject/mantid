@@ -84,6 +84,7 @@ public:
   std::unique_ptr<TableWorkspace> clone() const {
     return std::unique_ptr<TableWorkspace>(doClone());
   }
+  TableWorkspace &operator=(const TableWorkspace &other) = delete;
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
@@ -293,8 +294,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   TableWorkspace(const TableWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  TableWorkspace &operator=(const TableWorkspace &other) = delete;
 
 private:
   TableWorkspace *doClone() const override { return new TableWorkspace(*this); }

@@ -42,8 +42,6 @@ namespace API {
 */
 class MANTID_API_DLL FunctionParameterDecorator : virtual public IFunction {
 public:
-  FunctionParameterDecorator() : IFunction(), m_wrappedFunction() {}
-
   void setDecoratedFunction(const std::string &wrappedFunctionName);
   IFunction_sptr getDecoratedFunction() const;
 

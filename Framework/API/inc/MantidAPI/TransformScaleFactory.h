@@ -50,6 +50,9 @@ public:
   /// Returns scaling transform
   boost::shared_ptr<ITransformScale>
   create(const std::string &type) const override;
+  TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
+  TransformScaleFactoryImpl &
+  operator=(const TransformScaleFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<TransformScaleFactoryImpl>;
@@ -60,11 +63,7 @@ private:
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.
   ITransformScale *createUnwrapped(const std::string &className) const override;
-  /// Private copy constructor - NO COPY ALLOWED
-  TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  TransformScaleFactoryImpl &
-  operator=(const TransformScaleFactoryImpl &) = delete;
+
   // Do not use default methods
 };
 
