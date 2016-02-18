@@ -4,10 +4,6 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-//#include <QMetaType>
-
-
-
 namespace MantidQt
 {
   namespace API
@@ -62,14 +58,6 @@ namespace MantidQt
       m_rename_observed(false), m_clr_observed(false)
     {
       m_proxy = new ObserverCallback(this);
-
-	  static bool registered_addtional_types = false;
-	  if (!registered_addtional_types)
-	  {
-		  registered_addtional_types = true;
-		  qRegisterMetaType<Mantid::API::Workspace_sptr>();
-		  qRegisterMetaType<std::string>();
-	  }
     }
 
     /// Destructor
