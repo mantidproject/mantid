@@ -65,7 +65,7 @@ EventWorkspace_sptr
 createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   double binDelta = 10.0;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   // --------- Load the instrument -----------
@@ -349,7 +349,7 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
         " invalid or unsupported number of dimensions given");
 
   ws_sptr->setTo(signal, errorSquared, numEvents);
-  ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
+  ws_sptr->addExperimentInfo(boost::make_shared<ExperimentInfo>());
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
   return ws_sptr;

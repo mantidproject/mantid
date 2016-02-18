@@ -1051,7 +1051,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     map<string, Parameter> parameters, double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
-  TableWorkspace_sptr tablews(new TableWorkspace);
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");

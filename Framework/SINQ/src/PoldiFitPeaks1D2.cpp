@@ -182,7 +182,7 @@ void PoldiFitPeaks1D2::setPeakFunction(const std::string &peakFunction) {
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D2::getInitializedPeakCollection(
     const DataObjects::TableWorkspace_sptr &peakTable) const {
-  PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
+  auto peakCollection = boost::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
@@ -227,7 +227,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
 API::IFunction_sptr
 PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
-  CompositeFunction_sptr totalProfile(new CompositeFunction);
+  auto totalProfile = boost::make_shared<CompositeFunction>();
   totalProfile->initialize();
 
   std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
