@@ -397,7 +397,7 @@ public:
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
     {
-      Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
+      Kernel::LockGuardMutex _lock(alg->m_tofMutex);
       if (my_shortest_tof < alg->shortest_tof) {
         alg->shortest_tof = my_shortest_tof;
       }

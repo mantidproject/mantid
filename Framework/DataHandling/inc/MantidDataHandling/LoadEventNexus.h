@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include <memory>
 #include <boost/lexical_cast.hpp>
@@ -184,7 +185,7 @@ public:
   size_t eventsPerChunk;
 
   /// Mutex protecting tof limits
-  Poco::FastMutex m_tofMutex;
+  Kernel::Mutex m_tofMutex;
 
   /// Limits found to tof
   double longest_tof;
@@ -211,7 +212,7 @@ public:
   std::vector<std::vector<EventVector_pt>> eventVectors;
 
   /// Mutex to protect eventVectors from each task
-  Poco::Mutex m_eventVectorMutex;
+  Kernel::RecursiveMutex m_eventVectorMutex;
 
   /// Maximum (inclusive) event ID possible for this instrument
   int32_t eventid_max;
