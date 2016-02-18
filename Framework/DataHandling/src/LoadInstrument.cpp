@@ -42,7 +42,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-Poco::Mutex LoadInstrument::m_mutex;
+Mantid::Kernel::RecursiveMutex LoadInstrument::m_mutex;
 
 /// Empty default constructor
 LoadInstrument::LoadInstrument() : Algorithm() {}
@@ -169,7 +169,7 @@ void LoadInstrument::exec() {
   // Check whether the instrument is already in the InstrumentDataService
   {
     // Make InstrumentService access thread-safe
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    Mantid::Kernel::LockGuardRecursiveMutex lock(m_mutex);
 
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there

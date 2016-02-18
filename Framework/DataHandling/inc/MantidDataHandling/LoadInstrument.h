@@ -119,7 +119,7 @@ private:
   std::string m_instName;
 
   /// Mutex to avoid simultaneous access
-  static Poco::Mutex m_mutex;
+  static Mantid::Kernel::RecursiveMutex m_mutex;
 };
 
 } // namespace DataHandling
