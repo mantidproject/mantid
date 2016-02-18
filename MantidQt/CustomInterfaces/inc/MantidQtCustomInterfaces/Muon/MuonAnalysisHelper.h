@@ -54,6 +54,12 @@ MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Worksp
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
 
+/// Mounts SMB share if current system is Linux/Mac
+MANTIDQT_CUSTOMINTERFACES_DLL std::string mountSharedDrive(const std::string &source);
+
+/// Unmounts mounted SMB share if current system is Linux/Mac
+MANTIDQT_CUSTOMINTERFACES_DLL void unmountSharedDrive();
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.

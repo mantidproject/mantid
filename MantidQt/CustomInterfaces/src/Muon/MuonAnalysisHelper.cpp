@@ -12,9 +12,29 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QProcess>
 
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+
+// free functions
+namespace {
+  /**
+  * If current system is Unix-like, run the supplied shell command
+  * @param command Command to run in the shell
+  */
+  void sendCommand(const QString &command) {
+#ifndef _WIN32
+    QString shell("/bin/bash");
+    QString argument = QString("-c \"%1\"").arg(command);
+    QStringList args;
+    args.push_back(argument);
+    QProcess process;
+    process.start(shell, args);
+    process.waitForFinished();
+#endif
+  }
+}
 
 namespace MantidQt
 {
@@ -535,6 +555,31 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
     groupingAlg->execute();
   }
 }
+
+/**
+ * If current system is not Windows, mounts the supplied shared drive to
+ * /mnt/currentdata
+ * Probably requires root permissions
+ * @param source Windows-style path
+ * @returns mount point, or nothing if no mount performed
+ */
+std::string mountSharedDrive(const std::string &source) {
+  QString mountPoint("");
+#ifndef _WIN32
+  mountPoint = "/mnt/currentdata";
+  QString path(source.c_str());
+  path.replace("\\", "/");
+  sendCommand(QString("mount -t cifs %1 %2").arg(path).arg(mountPoint));
+#endif
+  return mountPoint.toStdString();
+}
+
+/**
+* If current system is not Windows, unmounts whatever is mounted on
+* /mnt/currentdata
+* Probably requires root permissions
+*/
+void unmountSharedDrive() { sendCommand("umount /mnt/currentdata"); }
 
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces

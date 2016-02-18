@@ -770,40 +770,33 @@ void MuonAnalysis::runLoadCurrent()
 {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-  // If Argus data then simple
-  if ( instname == "ARGUS" )
-  {
-    QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
-    Poco::File l_path( argusDAE.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis",
-          QString("Can't load ARGUS Current data since\n") +
-          argusDAE + QString("\n") +
-          QString("does not seem to exist"));
-        return;
-      }
-    }
-    catch(Poco::Exception&)
-    {
-       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
-         "\nto access is down or your computer is not currently connected to the network.");
-       return;
-    }
-    m_uiForm.mwRunFiles->setUserInput(argusDAE);
-    m_uiForm.mwRunFiles->setText("CURRENT RUN");
-    return;
-  }
-
-  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS")
-  {
+  if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
+      instname == "CHRONUS" || instname == "ARGUS") {
     QString instDirectory = instname;
     if ( instname == "CHRONUS" )
       instDirectory = "NDW1030";
     std::string autosavePointsTo = "";
-    std::string autosaveFile = "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
+    std::string separator = "\\";
+    std::string dataDirectory =
+        "\\\\" + instDirectory.toStdString() + separator + "data";
+
+    // If not Windows, must mount the share and convert the path
+    bool mounted = false;
+#ifndef _WIN32
+    try {
+      dataDirectory = mountSharedDrive(dataDirectory);
+      mounted = true;
+    } catch (const std::exception &ex) {
+      QMessageBox::warning(
+          this, "MantidPlot - MuonAnalysis",
+          "Can't mount the remote data share, error given was " +
+              QString(ex.what()) +
+              "\nEnsure you have root permissions and are connected to the "
+              "network.");
+    }
+    separator = "/";
+#endif
+    std::string autosaveFile = dataDirectory + separator + "autosave.run";
     Poco::File pathAutosave( autosaveFile );
     
     try // check if exists
@@ -818,14 +811,18 @@ void MuonAnalysis::runLoadCurrent()
     {
        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
          "\nto access is down or your computer is not currently connected to the network.");
+       if (mounted) {
+         unmountSharedDrive();
+       }
        return;
     }
 
     QString psudoDAE;
     if ( autosavePointsTo.empty() )
-      psudoDAE = "\\\\" + instDirectory + "\\data\\" + instDirectory + "auto_A.tmp";
+      psudoDAE = QString((dataDirectory + separator).c_str()) + instDirectory +
+                 separator.c_str() + "auto_A.tmp";
     else
-      psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
+      psudoDAE = (dataDirectory + separator + autosavePointsTo).c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
     try
@@ -836,6 +833,9 @@ void MuonAnalysis::runLoadCurrent()
           QString("Can't load ") + "Current data since\n" +
           psudoDAE + QString("\n") +
           QString("does not seem to exist"));
+        if (mounted) {
+          unmountSharedDrive();
+        }
         return;
       }
     }
@@ -845,10 +845,16 @@ void MuonAnalysis::runLoadCurrent()
         QString("Can't load ") + "Current data since\n" +
         psudoDAE + QString("\n") +
         QString("does not seem to exist"));
+      if (mounted) {
+        unmountSharedDrive();
+      }
       return;
     }
     m_uiForm.mwRunFiles->setUserInput(psudoDAE);
     m_uiForm.mwRunFiles->setText("CURRENT RUN");
+    if (mounted) {
+      unmountSharedDrive();
+    }
     return;
   }
 
