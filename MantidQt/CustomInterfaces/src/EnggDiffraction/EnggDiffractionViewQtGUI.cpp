@@ -640,6 +640,7 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
   size_t bank1 = size_t(0);
   size_t bank2 = size_t(1);
   std::string pyRange;
+  std::string plotSpecNum = "False";
 
   // sets the range to plot appropriate graph for the particular bank
   if (specNo == "North") {
@@ -650,15 +651,24 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
     // as bank 2 data will be located in difc[0] & tzero[0] - refactor
     pyRange = "2, 3";
     bank2 = size_t(0);
+  } else if (specNo != "") {
+    pyRange = "1, 2";
+    plotSpecNum = "True";
   } else {
     // enables python script to plot bank 1 & 2
     pyRange = "1, 3";
   }
 
   std::string pyCode =
-      "for i in range(" + pyRange +
+      "plotSpecNum = " + plotSpecNum + "\n"
+                                       "for i in range(" +
+      pyRange +
       "):\n"
-      " bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+
+      " if (plotSpecNum == False):\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+      " else:\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
 
       " xVal = []\n"
       " yVal = []\n"
@@ -684,19 +694,32 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
       " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
       "us)\")\n"
       " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n"
-      " output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
-      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
 
+      " if (plotSpecNum == False):\n"
+      "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
       " DeleteWorkspace(ws1)\n"
       " DeleteWorkspace(ws2)\n"
 
-      " DifcZeroWs = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " if (plotSpecNum == False):\n"
+      "  DifcZeroWs = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  DifcZeroWs = \"engggui_difc_zero_peaks_cropped\"\n"
 
       " DifcZeroWs = workspace(DifcZeroWs)\n"
       " DifcZeroWs = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
 
-      " DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      " if (plotSpecNum == False):\n"
+      "  DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
       "str(i))\n"
+      " else:\n"
+      "  DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+
+      " DifcZeroWs.setCurveTitle(0, \"Peaks Fitted\")\n"
+      " DifcZeroWs.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
       " DifcZeroWs.setAxisTitle(Layer.Bottom, \"Expected Peaks "
       "Centre(dSpacing, "
       " A)\")\n"
