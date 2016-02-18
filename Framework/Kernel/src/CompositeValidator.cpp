@@ -17,7 +17,7 @@ CompositeValidator::~CompositeValidator() { m_children.clear(); }
  * @return
  */
 std::vector<std::string> CompositeValidator::allowedValues() const {
-  std::set<std::string> elem_unique;
+  std::unordered_set<std::string> elem_unique;
   std::unordered_multiset<std::string> elem_all;
   // how many validators return non-empty list of allowed values
   int n_combinations(0);
@@ -37,7 +37,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
     auto im = elem_all.find(its);
     elem_all.erase(im);
   }
-  std::set<std::string> rez;
+  std::unordered_set<std::string> rez;
   for (const auto &im : elem_all) {
     rez.insert(im);
   }

@@ -417,7 +417,7 @@ void CreateGroupingWorkspace::exec() {
     // Make the groups, if any
     std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
     std::map<detid_t, int>::const_iterator it;
-    std::set<int> groupCount;
+    std::unordered_set<int> groupCount;
     for (it = detIDtoGroup.begin(); it != it_end; ++it) {
       int detID = it->first;
       int group = it->second;

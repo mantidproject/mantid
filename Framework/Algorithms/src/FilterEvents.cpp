@@ -520,16 +520,13 @@ void FilterEvents::createOutputWorkspaces() {
   }
 
   // Set up new workspaces
-  std::set<int>::iterator groupit;
   int numoutputws = 0;
   double numnewws = static_cast<double>(m_workGroupIndexes.size());
   double wsgindex = 0.;
 
-  for (groupit = m_workGroupIndexes.begin();
-       groupit != m_workGroupIndexes.end(); ++groupit) {
+  for (auto const wsgroup : m_workGroupIndexes) {
     // Generate new workspace name
     bool add2output = true;
-    int wsgroup = *groupit;
     std::stringstream wsname;
     if (wsgroup >= 0) {
       wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);

@@ -29,8 +29,8 @@ const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
  */
 void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
                           bool strictSpectrumChecking, Logger &logger) {
-  std::set<int> uniqueSpectrumNumbers(spectrumNumbers.begin(),
-                                      spectrumNumbers.end());
+  std::unordered_set<int> uniqueSpectrumNumbers(spectrumNumbers.begin(),
+                                                spectrumNumbers.end());
   if (uniqueSpectrumNumbers.size() != spectrumNumbers.size()) {
     throw std::invalid_argument("Spectrum numbers are not unique.");
   }

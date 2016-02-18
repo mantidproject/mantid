@@ -6,6 +6,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_set>
 #include <string>
 #include <utility>
 
@@ -115,7 +116,7 @@ private:
   /// First entry name/type
   std::pair<std::string, std::string> m_firstEntryNameType;
   /// Root attributes
-  std::set<std::string> m_rootAttrs;
+  std::unordered_set<std::string> m_rootAttrs;
   /// Map of full path strings to types. Can check if path exists quickly
   std::map<std::string, std::string> m_pathsToTypes;
 
