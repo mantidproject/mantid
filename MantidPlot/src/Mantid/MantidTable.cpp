@@ -92,6 +92,7 @@ void MantidTable::fillTable()
 
   // temporarily allow resizing
   d_table->blockResizing(false);
+  d_table->blockSignals(true);
 
   setNumRows(0);
   setNumCols(0);
@@ -155,6 +156,7 @@ void MantidTable::fillTable()
 
   // block resizing
   d_table->blockResizing(true);
+  d_table->blockSignals(false);
 
 }
 
