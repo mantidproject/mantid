@@ -150,7 +150,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    Kernel::LockGuardMutex _lock(m_queueLock);
     return m_queue.empty();
   }
 
@@ -255,7 +255,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    Kernel::LockGuardMutex _lock(m_queueLock);
     return m_map.empty();
   }
 
