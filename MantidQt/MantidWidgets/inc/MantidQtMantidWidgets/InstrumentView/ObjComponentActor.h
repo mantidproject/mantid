@@ -58,17 +58,17 @@ namespace MantidQt
                         } ///< Type of the GL object
                         void draw(bool picking = false)
                             const override; ///< Method that defines
-                        /// ObjComponent geometry. Calls
-                        /// ObjComponent draw method
+                                            ///ObjComponent geometry. Calls
+                                            ///ObjComponent draw method
                         void getBoundingBox(
                             Mantid::Kernel::V3D &minBound,
                             Mantid::Kernel::V3D &maxBound) const override;
                         void setColors() override;
 
-                        void setColor(const GLColor &c) { m_dataColor = c; }
+                        void setColor(const GLColor& c) { m_dataColor = c; }
 
-                      private:
-                        void setPickColor(const GLColor& c) { m_pickColor = c; }
+		private:
+			void setPickColor(const GLColor& c) { m_pickColor = c; }
 
 			GLColor m_dataColor;
 			GLColor m_pickColor;

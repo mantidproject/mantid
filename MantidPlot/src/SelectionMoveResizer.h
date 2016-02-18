@@ -101,12 +101,12 @@ class SelectionMoveResizer : public QWidget
           explicit SelectionMoveResizer(QWidget *target);
                 //! Clean up after myself.
           ~SelectionMoveResizer() override;
-          /**\brief React on geometry changes of parent and targets.
-           */
+                /**\brief React on geometry changes of parent and targets.
+		 */
           bool eventFilter(QObject *o, QEvent *e) override;
-          //! Returns true if w is one of targets, false else.
-          bool contains(QWidget *w) const { return d_widgets.contains(w); };
-                //! Returns true if m is one of targets, false else.
+                //! Returns true if w is one of targets, false else.
+		bool contains(QWidget *w) const { return d_widgets.contains(w); };
+		//! Returns true if m is one of targets, false else.
 		bool contains(LegendWidget *m) const { return d_legend_markers.contains(m); };
 		//! Returns true if m is one of targets, false else.
 		bool contains(ArrowMarker *m) const { return d_line_markers.contains(m); };
@@ -148,38 +148,33 @@ class SelectionMoveResizer : public QWidget
 		 */
                 void paintEvent(QPaintEvent *e) override;
                 /**\brief Mouse button presses start move/resize operations.
-                 *
-                 * Clicks outside of #d_bounding_rect or with anything else than
-                 *the left button
-                 * are propagated to the parent as usual.
-                 */
+		 *
+		 * Clicks outside of #d_bounding_rect or with anything else than the left button
+		 * are propagated to the parent as usual.
+		 */
                 void mousePressEvent(QMouseEvent *e) override;
-                /**\brief Mouse movements need to be monitored for updating the
-                 *frame during operation.
-                 *
-                 * When no operation is in progress, the mouse cursor is updated
-                 *based on its position
-                 * before the event is passed on to the parent.
-                 */
+                /**\brief Mouse movements need to be monitored for updating the frame during operation.
+		 *
+		 * When no operation is in progress, the mouse cursor is updated based on its position
+		 * before the event is passed on to the parent.
+		 */
                 void mouseMoveEvent(QMouseEvent *e) override;
-                /**\brief Mouse releases end the current operation and apply it
-                 *to the targets.
-                 *
-                 * When there is no operation in progress, the event is passed
-                 *on to the parent.
-                 */
+                /**\brief Mouse releases end the current operation and apply it to the targets.
+		 *
+		 * When there is no operation in progress, the event is passed on to the parent.
+		 */
                 void mouseReleaseEvent(QMouseEvent *e) override;
                 /**\brief Allow keyboard-based moving of the selection.
-                 *
-                 * Unused keys are passed on to the parent.
-                 */
+		 *
+		 * Unused keys are passed on to the parent.
+		 */
                 void keyPressEvent(QKeyEvent *e) override;
                 //! Ignore double-clicks so that they can be used by my parent.
                 void mouseDoubleClickEvent(QMouseEvent *e) override;
 
-              private:
-                //! Size of resize handle in pixels.
-                static const int handler_size = 10;
+        private:
+		//! Size of resize handle in pixels.
+		static const int handler_size = 10;
 		//! Return one of the rectangles to be filled for starting resize operations.
 		static const QRect handlerRect(QRect rect, Operation op);
 		//! Apply operation specified by #d_op and #d_op_dp to in.

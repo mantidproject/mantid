@@ -67,8 +67,8 @@ namespace MantidQt
                         } ///< Type of the GL object
                         void draw(bool picking = false)
                             const override; ///< Method that defines
-                        /// ObjComponent geometry. Calls
-                        /// ObjComponent draw method
+                                            ///ObjComponent geometry. Calls
+                                            ///ObjComponent draw method
                         void setChildVisibility(bool) override;
                         bool hasChildVisible() const override;
                         bool accept(GLActorVisitor &visitor,
@@ -78,11 +78,9 @@ namespace MantidQt
                             VisitorAcceptRule rule = VisitAll) const override;
                         void setColors() override;
 
-                      protected:
-                        mutable std::vector<ObjComponentActor *>
-                            mChildObjCompActors; ///< List of ObjComponent
-                                                 ///Actors
-                        mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
+                protected:
+			mutable std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
+			mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
 		private:
 			void AppendBoundingBox(const Mantid::Kernel::V3D& minBound, const Mantid::Kernel::V3D& maxBound);
 		};

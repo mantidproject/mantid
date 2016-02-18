@@ -62,12 +62,10 @@ namespace MantidQt
 			/// Destructor
                         ~RectangularDetectorActor() override;
 
-                      private:
-                        void
-                        AppendBoundingBox(const Mantid::Kernel::V3D &minBound,
-                                          const Mantid::Kernel::V3D &maxBound);
+                private:
+			void AppendBoundingBox(const Mantid::Kernel::V3D& minBound, const Mantid::Kernel::V3D& maxBound);
 
-                protected:
+		protected:
 			/// The rectangular detector
 			boost::shared_ptr<const Mantid::Geometry::RectangularDetector> mDet;
 
@@ -83,11 +81,11 @@ namespace MantidQt
 
                   void
                   draw(bool picking = false) const override; ///< Method that
-                  /// defines
-                  /// ObjComponent
-                  /// geometry. Calls
-                  /// ObjComponent
-                  /// draw method
+                                                             ///defines
+                                                             ///ObjComponent
+                                                             ///geometry. Calls
+                                                             ///ObjComponent
+                                                             ///draw method
                   void
                   getBoundingBox(Mantid::Kernel::V3D &minBound,
                                  Mantid::Kernel::V3D &maxBound) const override;
@@ -95,15 +93,13 @@ namespace MantidQt
                               VisitorAcceptRule rule = VisitAll) override;
                   bool accept(GLActorConstVisitor &visitor,
                               VisitorAcceptRule rule = VisitAll) const override;
-                  bool isChildDetector(
-                      const Mantid::Geometry::ComponentID &id) const;
-                  void setColors() override;
+                        bool isChildDetector(const Mantid::Geometry::ComponentID& id) const;
+                        void setColors() override;
 
-                  int genTexture(char *&image_data, std::vector<GLColor> &list,
-                                 bool useDetectorIDs);
-                  void uploadTexture(char *&image_data) const;
+                        int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
+			void uploadTexture(char * & image_data)const;
 
-                private:
+		private:
 			/// Texture ID that holds the texture.
 			mutable unsigned int mTextureID;
 

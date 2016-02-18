@@ -61,10 +61,8 @@ namespace MantidQt
 			///< Destructor
                         ~InstrumentActor() override;
                         ///< Type of the GL object
-                        virtual std::string type() const {
-                          return "InstrumentActor";
-                        }
-                        /// Draw the instrument in 3D
+			virtual std::string type()const { return "InstrumentActor"; }
+			/// Draw the instrument in 3D
                         void draw(bool picking = false) const override;
                         /// Return the bounding box in 3D
                         void getBoundingBox(
@@ -75,20 +73,17 @@ namespace MantidQt
                         /// Run visitors callback on each component
                         bool accept(GLActorVisitor &visitor,
                                     VisitorAcceptRule rule = VisitAll) override;
-                        /// Run visitors callback on each component (const
-                        /// version)
+                        /// Run visitors callback on each component (const version)
                         bool accept(
                             GLActorConstVisitor &visitor,
                             VisitorAcceptRule rule = VisitAll) const override;
-                        /// Toggle the visibility of the child actors (if
-                        /// exist).
+                        /// Toggle the visibility of the child actors (if exist).
                         void setChildVisibility(bool) override;
                         /// Check if any child is visible
                         bool hasChildVisible() const override;
                         /// Get the underlying instrument
-                        boost::shared_ptr<const Mantid::Geometry::Instrument>
-                        getInstrument() const;
-                        /// Get the associated data workspace
+			boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
+			/// Get the associated data workspace
 			boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
 			/// Get the mask displayed but not yet applied as a MatrxWorkspace
 			boost::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
@@ -296,12 +291,9 @@ namespace MantidQt
                         bool visit(ObjCompAssemblyActor *actor) override;
                         bool visit(InstrumentActor *actor) override;
                         bool visit(RectangularDetectorActor *actor) override;
-                        Mantid::Geometry::ComponentID getID() const {
-                          return m_id;
-                        }
-
-                      private:
-                        Mantid::Geometry::ComponentID m_id;
+                        Mantid::Geometry::ComponentID getID()const { return m_id; }
+		private:
+			Mantid::Geometry::ComponentID m_id;
 		};
 
 		/**
@@ -317,9 +309,9 @@ namespace MantidQt
 			using GLActorVisitor::visit;
                         bool visit(GLActor *) override;
 
-                      private:
-                        bool m_on;
-                };
+                private:
+			bool m_on;
+		};
 
 		/**
 		* Finds an actor with a particular ComponentID
@@ -331,10 +323,9 @@ namespace MantidQt
 				: m_id(id), m_actor(NULL) {}
 			using GLActorVisitor::visit;
                         bool visit(GLActor *) override;
-                        ComponentActor *getActor() const { return m_actor; }
-
-                      private:
-                        Mantid::Geometry::ComponentID m_id;
+                        ComponentActor* getActor()const { return m_actor; }
+		private:
+			Mantid::Geometry::ComponentID m_id;
 			mutable ComponentActor* m_actor;
 		};
 

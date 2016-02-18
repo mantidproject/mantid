@@ -38,10 +38,9 @@ namespace MantidQt
                         void initSurface() override;
                         void saveSettings(QSettings &) const override;
                         void loadSettings(const QSettings &) override;
-                        void setupColorBarScaling(const MantidColorMap &,
-                                                  double);
-                        GraphOptions::ScaleType getScaleType() const;
-                        void setScaleType(GraphOptions::ScaleType type);
+                        void setupColorBarScaling(const MantidColorMap&, double);
+			GraphOptions::ScaleType getScaleType()const;
+			void setScaleType(GraphOptions::ScaleType type);
 			void setAxis(const QString& axisName);
 			bool areAxesOn()const;
 			void setupColorBar(const MantidColorMap&, double, double, double, bool);
@@ -80,9 +79,9 @@ namespace MantidQt
 
 		private:
                   void showEvent(QShowEvent *) override;
-                  QMenu *createPeaksMenu();
-                  QFrame *setupAxisFrame();
-                        void setPrecisionMenuItemChecked(int n);
+                        QMenu* createPeaksMenu();
+			QFrame * setupAxisFrame();
+			void setPrecisionMenuItemChecked(int n);
 			void enable3DSurface(bool on);
 			QPointF getUCorrection() const;
 

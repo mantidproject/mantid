@@ -17,13 +17,9 @@ namespace MantidQt
 		public:
 			RotationSurface(const InstrumentActor* rootActor, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& axis);
                         void init() override;
-                        // Get the value of the u-correction - a shift in the
-                        // u-coord added to automatically determined uv
-                        // coordinates
-                        QPointF getUCorrection() const {
-                          return QPointF(m_u_min, m_u_max);
-                        }
-                        // Set new value for the u-correction
+                        // Get the value of the u-correction - a shift in the u-coord added to automatically determined uv coordinates
+			QPointF getUCorrection() const { return QPointF(m_u_min, m_u_max); }
+			// Set new value for the u-correction
 			void setUCorrection(double umin, double umax);
 			// Set automatic u-correction
 			void setAutomaticUCorrection();

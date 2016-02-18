@@ -22,9 +22,8 @@ namespace MantidQt
 			explicit SimpleWidget(QWidget *parent);
                         ~SimpleWidget() override;
                         /// Assign a surface to draw on
-                        void setSurface(
-                            boost::shared_ptr<ProjectionSurface> surface);
-                        /// Return the surface
+			void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+			/// Return the surface
 			boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 			/// Redraw the view
 			void updateView(bool picking = true);
@@ -42,9 +41,9 @@ namespace MantidQt
                   void keyPressEvent(QKeyEvent *) override;
                   void enterEvent(QEvent *) override;
                   void leaveEvent(QEvent *) override;
-                  ///< The projection surface
-                  boost::shared_ptr<ProjectionSurface> m_surface;
-                };
+                        ///< The projection surface
+			boost::shared_ptr<ProjectionSurface> m_surface;
+		};
 	}//MantidWidgets
 }//MantidQt
 

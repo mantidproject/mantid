@@ -93,8 +93,8 @@ namespace MantidQt
 				bool setDefaultView = true);
                         ~InstrumentWidget() override;
                         QString getWorkspaceName() const;
-                        std::string getWorkspaceNameStdString() const;
-                        void renameWorkspace(const std::string &workspace);
+			std::string getWorkspaceNameStdString() const;
+			void renameWorkspace(const std::string &workspace);
 			SurfaceType getSurfaceType() const { return m_surfaceType; }
 			/// Get pointer to the projection surface
 			boost::shared_ptr<ProjectionSurface> getSurface() const;
@@ -159,9 +159,9 @@ namespace MantidQt
                   void dropEvent(QDropEvent *e) override;
                   bool eventFilter(QObject *obj, QEvent *ev) override;
 
-                public slots:
-                  void tabChanged(int);
-                        void componentSelected(Mantid::Geometry::ComponentID id);
+                        public slots:
+			void tabChanged(int);
+			void componentSelected(Mantid::Geometry::ComponentID id);
 			void executeAlgorithm(const QString &, const QString &);
 			void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 

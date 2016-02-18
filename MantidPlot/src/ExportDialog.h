@@ -81,8 +81,8 @@ private slots:
 protected slots:
 	//! Accept changes
   void accept() override;
-  //! Display help
-  void help();
+        //! Display help
+	void help();
 };
 
 #endif // ExportDialog_H

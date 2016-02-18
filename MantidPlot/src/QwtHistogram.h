@@ -42,8 +42,8 @@ public:
         QwtDoubleRect boundingRect() const override;
 
         void setBinning(bool autoBin, double size, double begin, double end);
-        bool autoBinning() { return d_autoBin; };
-        double begin(){return d_begin;};
+	bool autoBinning(){return d_autoBin;};
+	double begin(){return d_begin;};
 	double end(){return d_end;};
 	double binSize(){return d_bin_size;};
 
@@ -60,13 +60,12 @@ public:
 private:
   void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             int from, int to) const override;
-  // Implement overloaded virtual method to just pass up to the base class to
-  // avoid
-  // an Intel compiler warning
+        // Implement overloaded virtual method to just pass up to the base class to avoid
+	// an Intel compiler warning
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &rect) const override {
-    DataCurve::draw(p, xMap, yMap, rect);
-  }
+          DataCurve::draw(p,xMap,yMap,rect);
+	}
 
     void loadDataFromMatrix();
     Matrix *d_matrix;

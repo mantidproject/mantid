@@ -46,13 +46,9 @@ namespace MantidQt
                         int columnCount(const QModelIndex &parent =
                                             QModelIndex()) const override;
 
-                      private:
-                        const InstrumentActor *m_instrumentActor; ///< actor of
-                                                                  ///instrument
-                                                                  ///to which
-                                                                  ///the model
-                                                                  ///corresponds
-                };
+                private:
+			const InstrumentActor *m_instrumentActor; ///< actor of instrument to which the model corresponds
+		};
 	}//MantidWidgets
 }//MantidQt
 

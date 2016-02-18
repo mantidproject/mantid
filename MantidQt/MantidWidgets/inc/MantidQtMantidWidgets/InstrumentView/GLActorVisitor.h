@@ -76,9 +76,9 @@ namespace MantidQt
                         bool visit(GLActor *) override;
                         bool visit(ComponentActor *actor) override;
 
-                      private:
-                        bool m_showNonDet;
-                };
+                private:
+			bool m_showNonDet;
+		};
 	}//MantidWidgets
 }//MantidQt
 

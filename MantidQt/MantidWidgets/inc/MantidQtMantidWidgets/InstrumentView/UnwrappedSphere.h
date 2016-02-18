@@ -26,7 +26,7 @@ namespace MantidQt
                                double &vscale) const override;
                 };
 
-                } // MantidWidgets
+	}//MantidWidgets
 }//MantidQt
 
 

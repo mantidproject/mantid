@@ -69,12 +69,10 @@ namespace MantidQt
                         std::string type() const override {
                           return "ICompAssemblyActor";
                         } ///< Type of the GL object
-                        int getNumberOfDetectors() const {
-                          return mNumberOfDetectors;
-                        }
+                        int getNumberOfDetectors() const { return mNumberOfDetectors; }
 
-                      protected:
-                        int mNumberOfDetectors;
+		protected:
+			int mNumberOfDetectors;
 			Mantid::Kernel::V3D minBoundBox;
 			Mantid::Kernel::V3D maxBoundBox;
 		};

@@ -25,7 +25,7 @@ namespace MantidQt
                   void rotate(const UnwrappedDetector &udet,
                               Mantid::Kernel::Quat &R) const override;
                 };
-                } // MantidWidgets
+	}//MantidWidgets
 }//MantidQt
 
 

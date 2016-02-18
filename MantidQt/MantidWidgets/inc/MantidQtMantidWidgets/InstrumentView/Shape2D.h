@@ -183,17 +183,17 @@ namespace MantidQt
                         void setPoint(const QString &prop,
                                       const QPointF &value) override;
 
-                      protected:
-                        void drawShape(QPainter &painter) const override;
-                        void refit() override {}
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override {}
                 };
 
-                /**
-                * A axis aligned rectangle.
-                *
-                * No specific properties.
-                */
-                class Shape2DRectangle : public Shape2D
+		/**
+		* A axis aligned rectangle.
+		*
+		* No specific properties.
+		*/
+		class Shape2DRectangle : public Shape2D
 		{
 		public:
 			Shape2DRectangle();
@@ -208,22 +208,19 @@ namespace MantidQt
                         }
                         void addToPath(QPainterPath &path) const override;
 
-                      protected:
-                        void drawShape(QPainter &painter) const override;
-                        void refit() override {}
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override {}
                 };
 
-                /**
-                * A ring: area bounded by two curves of the same shape but
-                *different size.
-                *
-                * The constructor takes a curve shape and the ring widths in the
-                *x and y
-                * directions.
-                * It has QPointF "centre" property and "xwidth" and "ywidth"
-                *double properties.
-                */
-                class Shape2DRing : public Shape2D
+		/**
+		* A ring: area bounded by two curves of the same shape but different size.
+		*
+		* The constructor takes a curve shape and the ring widths in the x and y
+		* directions.
+		* It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
+		*/
+		class Shape2DRing : public Shape2D
 		{
 		public:
 			Shape2DRing(Shape2D* shape, double xWidth = 0.000001, double yWidth = 0.000001);
@@ -250,20 +247,18 @@ namespace MantidQt
                           return m_outer_shape->getColor();
                         }
 
-                      protected:
-                        void drawShape(QPainter &painter) const override;
-                        void addToPath(QPainterPath &) const override {}
-                        void refit() override;
-                        void resetBoundingRect() override;
-                        size_t getShapeNControlPoints() const override {
-                          return 4;
-                        }
-                        QPointF getShapeControlPoint(size_t i) const override;
-                        void setShapeControlPoint(size_t i,
-                                                  const QPointF &pos) override;
-                        Shape2D *m_outer_shape;
-                        Shape2D *m_inner_shape;
-                        double m_xWidth;
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void addToPath(QPainterPath &) const override {}
+                  void refit() override;
+                  void resetBoundingRect() override;
+                  size_t getShapeNControlPoints() const override { return 4; }
+                  QPointF getShapeControlPoint(size_t i) const override;
+                  void setShapeControlPoint(size_t i,
+                                            const QPointF &pos) override;
+                        Shape2D* m_outer_shape;
+			Shape2D* m_inner_shape;
+			double m_xWidth;
 			double m_yWidth;
 		};
 
@@ -283,17 +278,16 @@ namespace MantidQt
                         bool selectAt(const QPointF &p) const override;
                         bool contains(const QPointF &p) const override;
                         void addToPath(QPainterPath &path) const override;
-                        void addPolygon(const QPolygonF &polygon);
-                        void subtractPolygon(const QPolygonF &polygon);
-
-                protected:
+                        void addPolygon(const QPolygonF& polygon);
+			void subtractPolygon(const QPolygonF& polygon);
+		protected:
                   void drawShape(QPainter &painter) const override;
                   void refit() override;
                   void resetBoundingRect() override;
 
                 private:
-                  RectF getPolygonBoundingRect() const;
-                        QPolygonF m_polygon;    ///< Implements the shape.
+			RectF getPolygonBoundingRect() const;
+			QPolygonF m_polygon;    ///< Implements the shape.
 			QPainterPath m_outline; ///< Object to draw the shape's border.
 		};
 	}//MantidWidgets

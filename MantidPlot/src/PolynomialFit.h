@@ -44,20 +44,20 @@ class PolynomialFit : public Fit
                 QString legendInfo() override;
                 void fit() override;
 
-                int order() { return d_order; };
-                void setOrder(int order);
+                int order(){return d_order;};
+		void setOrder(int order);
 
-                static QString generateFormula(int order);
+		static QString generateFormula(int order);
 		static QStringList generateParameterList(int order);
 
                 double eval(double *par, double x) override;
 
-              private:
-                void init();
+        private:
+		void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 
                 int d_order;
-                bool show_legend;
+		bool show_legend;
 };
 
 class LinearFit : public Fit
@@ -75,8 +75,8 @@ class LinearFit : public Fit
                   return par[0] + par[1] * x;
                 };
 
-              private:
-                void init();
+        private:
+		void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 };
 
@@ -95,8 +95,8 @@ class LinearSlopeFit : public Fit
                   return par[0] * x;
                 };
 
-              private:
-                void init();
+        private:
+		void init();
                 void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif

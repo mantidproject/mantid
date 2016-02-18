@@ -60,11 +60,9 @@ namespace MantidQt
                         bool accept(
                             GLActorConstVisitor &visitor,
                             VisitorAcceptRule rule = VisitAll) const override;
-                        boost::shared_ptr<const Mantid::Geometry::IComponent>
-                        getComponent() const;
-                        boost::shared_ptr<const Mantid::Geometry::IObjComponent>
-                        getObjComponent() const;
-                        boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
+                        boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
+			boost::shared_ptr<const Mantid::Geometry::IObjComponent> getObjComponent() const;
+			boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
 			boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> getObjCompAssembly() const;
 			boost::shared_ptr<const Mantid::Geometry::CompAssembly> getCompAssembly() const;
 			virtual void setColors() {}

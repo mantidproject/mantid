@@ -90,8 +90,8 @@ private slots:
 	//! Accept changes and close dialog
         void accept() override;
         //! Apply changes
-        void apply();
-        void setDefaultValues();
+	void apply();
+	void setDefaultValues();
 
 	void updateTransparency(int alpha);
 

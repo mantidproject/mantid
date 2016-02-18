@@ -58,8 +58,8 @@ public:
 	ContourLinesEditor(const QLocale& locale = QLocale::system(), int precision = 6, QWidget* parent = 0);
         ~ContourLinesEditor() override;
         //! Use this function to initialize the values.
-        void setSpectrogram(Spectrogram *sp);
-        //! Updates levels in the target spectrogram and replots it.
+	void setSpectrogram(Spectrogram *sp);
+	//! Updates levels in the target spectrogram and replots it.
 	void updateContourLevels();
 	void updateContourPens();
 	//! Updates cell items when spectrogram contour lines changed.

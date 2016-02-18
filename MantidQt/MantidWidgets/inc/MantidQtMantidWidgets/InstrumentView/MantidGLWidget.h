@@ -25,15 +25,10 @@ namespace MantidQt
 			public:
 				explicit MantidGLWidget(QWidget *parent = 0); ///< Constructor
                                 ~MantidGLWidget() override; ///< Destructor
-                                void
-                                setSurface(boost::shared_ptr<ProjectionSurface>
-                                               surface);
-                                boost::shared_ptr<ProjectionSurface>
-                                getSurface() {
-                                  return m_surface;
-                                }
+                                void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+				boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
-                                void setBackgroundColor(QColor);
+				void setBackgroundColor(QColor);
 				QColor currentBackgroundColor() const;
 				void saveToFile(const QString & filename);
 				//int getLightingState() const {return m_lightingState;}
@@ -46,8 +41,8 @@ namespace MantidQt
 
 			protected:
                           void initializeGL() override;
-                          void resetWidget();
-                          void MakeObject();
+                                void resetWidget();
+				void MakeObject();
                                 void paintEvent(QPaintEvent *event) override;
                                 void resizeGL(int, int) override;
                                 void
@@ -61,9 +56,8 @@ namespace MantidQt
                                 void enterEvent(QEvent *) override;
                                 void leaveEvent(QEvent *) override;
                                 void draw();
-                                void checkGLError(const QString &funName);
-
-                        private:
+				void checkGLError(const QString& funName);
+			private:
 				void setRenderingOptions();
 
 				//int m_lightingState;           ///< 0 = light off; 2 = light on

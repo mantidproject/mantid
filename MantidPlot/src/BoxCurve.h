@@ -46,10 +46,10 @@ public:
 
         QwtDoubleRect boundingRect() const override;
 
-        QwtSymbol::Style minStyle() { return min_style; };
-        void setMinStyle(QwtSymbol::Style s) { min_style = s; };
+        QwtSymbol::Style minStyle(){return min_style;};
+	void setMinStyle(QwtSymbol::Style s){min_style = s;};
 
-        QwtSymbol::Style maxStyle(){return max_style;};
+	QwtSymbol::Style maxStyle(){return max_style;};
 	void setMaxStyle(QwtSymbol::Style s){max_style = s;};
 
 	void setMeanStyle(QwtSymbol::Style s){mean_style = s;};
@@ -82,10 +82,9 @@ private:
         void draw(QPainter *painter, const QwtScaleMap &xMap,
                   const QwtScaleMap &yMap, int from, int to) const override;
         void drawBox(QPainter *painter, const QwtScaleMap &xMap,
-                     const QwtScaleMap &yMap, double *dat, int size) const;
-        using DataCurve::drawSymbols; // Unhide base class method (avoids Intel
-                                      // compiler warning)
-        void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
+				const QwtScaleMap &yMap, double *dat, int size) const;
+	using DataCurve::drawSymbols; // Unhide base class method (avoids Intel compiler warning)
+	void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
 				const QwtScaleMap &yMap, double *dat, int size) const;
 
 	QwtSymbol::Style min_style, max_style, mean_style, p99_style, p1_style;

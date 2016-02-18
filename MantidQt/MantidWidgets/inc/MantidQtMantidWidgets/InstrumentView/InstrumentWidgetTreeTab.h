@@ -21,14 +21,13 @@ namespace MantidQt
 		public:
 			explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);
                         void initSurface() override;
-                      public slots:
-                        void selectComponentByName(const QString &name);
-
-                private:
+                        public slots:
+			void selectComponentByName(const QString& name);
+		private:
                   void showEvent(QShowEvent *) override;
-                  /// Widget to display instrument tree
-                  InstrumentTreeWidget *m_instrumentTree;
-                };
+                        /// Widget to display instrument tree
+			InstrumentTreeWidget* m_instrumentTree;
+		};
 	}//MantidWidgets
 }//MantidQt
 

@@ -49,8 +49,8 @@ public:
 
 public slots:
   void accept() override;
-  void setFunction(Graph3D *);
-  void setParametricSurface(Graph3D *);
+        void setFunction(Graph3D *);
+	void setParametricSurface(Graph3D *);
 
 private slots:
 	void clearList();
