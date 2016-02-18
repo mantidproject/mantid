@@ -39,7 +39,7 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c) {
     m_messages[Poco::Thread::currentTid()] = "";
     logger().log(msg);
   } else {
-    Poco::FastMutex::ScopedLock lock(m_mutex);
+    Mantid::Kernel::LockGuardMutex lock(m_mutex);
     m_messages[Poco::Thread::currentTid()] += c;
   }
   return static_cast<int>(c);
