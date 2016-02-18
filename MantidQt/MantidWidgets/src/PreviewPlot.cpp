@@ -243,6 +243,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr ws,
                               const size_t specIndex,
                               const QColor &curveColour) {
+  std::cerr<<"Entered PreviewPlot::addSpectrum()\n";
   if (curveName.isEmpty()) {
     g_log.warning("Cannot plot with empty curve name");
     return;
