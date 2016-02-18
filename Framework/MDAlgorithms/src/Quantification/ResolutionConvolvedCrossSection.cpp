@@ -327,7 +327,7 @@ void ResolutionConvolvedCrossSection::setupResolutionFunction(
 void ResolutionConvolvedCrossSection::storeCalculatedWithMutex(
     const size_t index, const double signal,
     API::FunctionValues &functionValues) const {
-  Poco::FastMutex::ScopedLock lock(m_valuesMutex);
+  Mantid::Kernel::LockGuardMutex lock(m_valuesMutex);
   functionValues.setCalculated(index, signal);
 }
 }

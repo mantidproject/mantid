@@ -91,7 +91,7 @@ private:
                                 API::FunctionValues &functionValues) const;
 
   /// Mutex to protect storing the function values
-  mutable Poco::FastMutex m_valuesMutex;
+  mutable Mantid::Kernel::Mutex m_valuesMutex;
   /// Flag that marks if this is a simulation store each event
   bool m_simulation;
   /// The meat of the calculation for each MD point
