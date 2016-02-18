@@ -359,7 +359,7 @@ public:
    * @param name :: name of the object */
   boost::shared_ptr<T> retrieve(const std::string &name) const {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     std::string foundName;
     svc_it it = findNameWithCaseSearch(name, foundName);
@@ -376,7 +376,7 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     std::string foundName;
     svc_it it = findNameWithCaseSearch(name, foundName);
@@ -387,7 +387,7 @@ public:
 
   /// Return the number of objects stored by the data service
   size_t size() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     if (showingHiddenObjects()) {
       return datamap.size();
@@ -406,7 +406,7 @@ public:
     if (showingHiddenObjects())
       return getObjectNamesInclHidden();
 
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     std::set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
@@ -419,7 +419,7 @@ public:
 
   /// Get the names of the data objects stored by the service
   std::set<std::string> getObjectNamesInclHidden() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     std::set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
@@ -430,7 +430,7 @@ public:
 
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector<boost::shared_ptr<T>> getObjects() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
 
     const bool showingHidden = showingHiddenObjects();
     std::vector<boost::shared_ptr<T>> objects;
@@ -547,7 +547,7 @@ private:
   /// Map of objects in the data service
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications
-  mutable Poco::Mutex m_mutex;
+  mutable Kernel::RecursiveMutex m_mutex;
   /// Logger for this DataService
   Logger g_log;
 }; // End Class Data service

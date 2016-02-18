@@ -39,7 +39,7 @@ public:
   // Handler for an observer, called each time an object is added
   void handleAddNotification(
       const Poco::AutoPtr<FakeDataService::AddNotification> &) {
-    Poco::ScopedLock<Mutex> _lock(m_vectorMutex);
+    Kernel::LockGuardMutex _lock(m_vectorMutex);
     vector.push_back(123);
     ++notificationFlag;
   }
