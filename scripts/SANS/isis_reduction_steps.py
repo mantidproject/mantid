@@ -8,7 +8,6 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
-import os
 import re
 import math
 from mantid.kernel import Logger
@@ -23,7 +22,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
                          can_load_as_event_workspace, is_convertible_to_float, correct_q_resolution_for_can,
-                         is_valid_user_file_extension, ADD_TAG, ADD_MONITORS_TAG)
+                         is_valid_user_file_extension, ADD_TAG)
 import DarkRunCorrection as DarkCorr
 
 import SANSUserFileParser as UserFileParser
@@ -2122,7 +2121,7 @@ class TransmissionCalc(ReductionStep):
         tmp = mtd[tmpWS]
         # We perform a FlatBackground correction. We do this in two parts.
         # First we find the workspace indices which correspond to monitors
-        # and perform the correction on these indicies.
+        # and perform the correction on these indices.
         # Second we perform the correction on all indices which are not
         # monitors
         if tmp.getNumberHistograms() > 0:
@@ -2400,7 +2399,7 @@ class TransmissionCalc(ReductionStep):
     def fitMethod(self, selector):
         """It will return LINEAR, LOGARITHM, POLYNOMIALx for x in 2,3,4,5"""
         resp = self._get_fit_property(selector.lower(), 'fit_method')
-        if 'POLYNOMIAL' == resp:
+        if resp == 'POLYNOMIAL':
             resp += str(self._get_fit_property(selector.lower(), 'order'))
         if resp in ['LIN', 'STRAIGHT']:
             resp = 'LINEAR'
@@ -2527,7 +2526,8 @@ class CalculateNormISIS(object):
             @return True for point data, false for histogram
         """
         handle = mtd[wksp]
-        if len(handle.readX(0)) == len(handle.readY(0)):
+        is_x_len_equal_to_y_len = len(handle.readX(0)) == len(handle.readY(0))
+        if is_x_len_equal_to_y_len:
             return True
         else:
             return False
@@ -2547,7 +2547,7 @@ class CalculateNormISIS(object):
 
             if self._is_point_data(self.TMP_ISIS_NAME):
                 ConvertToHistogram(InputWorkspace=self.TMP_ISIS_NAME, OutputWorkspace=self.TMP_ISIS_NAME)
-        ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
+        # try to redefine self._pixel_file to pass to CalculateNORM method calculate.
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
         if detect_pixel_file != "":
             self._pixel_file = detect_pixel_file
@@ -2777,7 +2777,7 @@ class ConvertToQISIS(ReductionStep):
         @returns the QResolution workspace or None
         '''
         # Check if the a calculation is asked for by the user
-        if self.use_q_resolution == False:
+        if not self.use_q_resolution:
             return None
 
         # Make sure that all parameters that are needed are available
@@ -3012,6 +3012,7 @@ class UnitsConvert(ReductionStep):
 
     # TODO: consider how to remove the extra argument after workspace
     def execute(self, reducer, workspace, bin_alg=None):
+        _reducer = reducer
         """
             Runs the ConvertUnits() and a rebin algorithm on the specified
             workspace
@@ -3058,13 +3059,13 @@ class UnitsConvert(ReductionStep):
             @param w_step: bin width
             @param w_high: high bin boundary
         """
-        if not w_low is None:
+        if w_low is not None:
             if self.wav_low is None or override:
                 self.wav_low = float(w_low)
-        if not w_step is None:
+        if w_step is not None:
             if self.wav_step is None or override:
                 self.wav_step = float(w_step)
-        if not w_high is None:
+        if w_high is not None:
             if self.wav_high is None or override:
                 self.wav_high = float(w_high)
 
@@ -3149,6 +3150,8 @@ class BaseBeamFinder(ReductionStep):
         return [self._beam_center_x, self._beam_center_y]
 
     def execute(self, reducer, workspace=None):
+        _reducer = reducer
+        _workspace = workspace
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
@@ -3201,6 +3204,7 @@ class UserFile(ReductionStep):
         return fresh
 
     def execute(self, reducer, workspace=None):
+        _workspace = workspace
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
@@ -3362,11 +3366,11 @@ class UserFile(ReductionStep):
                 elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
                 else:
-                    raise 1
+                    raise ValueError
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
                                                               fit_method=fit_type, override=True,
                                                               selector=selector)
-            except:
+            except ValueError:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
         elif upper_line.startswith('FIT/MONITOR'):
@@ -3421,7 +3425,7 @@ class UserFile(ReductionStep):
             _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
             return
         limits = limits[1]
-        limit_type = ''
+        _limit_type = ''
 
         if limits.startswith('SP '):
             # We don't use the L/SP line
@@ -3445,7 +3449,7 @@ class UserFile(ReductionStep):
             return
 
         rebin_str = None
-        if not ',' in limit_line:
+        if ',' not in limit_line:
             # Split with no arguments defaults to any whitespace character and in particular
             # multiple spaces are include
             elements = limits.split()
@@ -3642,7 +3646,7 @@ class UserFile(ReductionStep):
         elif det_axis == 'YTILT':
             detector.y_tilt = shift
         else:
-            raise NotImplemented('Detector correction on "' + det_axis + '" is not supported')
+            raise NotImplementedError('Detector correction on "' + det_axis + '" is not supported')
 
     def _readFrontRescaleShiftSetup(self, details, reducer):
         """
@@ -3873,9 +3877,10 @@ class UserFile(ReductionStep):
             # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])
-            except:
+            except StandardError, reason:
                 sanslog.error(
                     "The specified moderator file could not be found. Please specify a file which exists in the search directories.")
+                sanslog.error(reason)
             return
 
         # All arguments need to be convertible to a float
@@ -3929,7 +3934,7 @@ class UserFile(ReductionStep):
     def _check_instrument(self, inst_name, reducer):
         if reducer.instrument is None:
             raise RuntimeError('Use SANS2D() or LOQ() to set the instrument before Maskfile()')
-        if not inst_name == reducer.instrument.name():
+        if inst_name != reducer.instrument.name():
             raise RuntimeError(
                 'User settings file not compatible with the selected instrument ' + reducer.instrument.name())
 
@@ -3982,6 +3987,7 @@ class GetOutputName(ReductionStep):
         self.name_holder = ['problem_setting_name']
 
     def execute(self, reducer, workspace=None):
+        _workspace = workspace
         """
             Generates the name of the sample workspace and changes the
             loaded workspace to that.
@@ -3997,6 +4003,7 @@ class ReplaceErrors(ReductionStep):
         self.name = None
 
     def execute(self, reducer, workspace):
+        _reducer = reducer
         ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
 
 
@@ -4164,7 +4171,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_height = False
 
         # For a cylinder and sphere the height=width=radius
-        if (not self._shape is None) and (self._shape.startswith('cylinder')):
+        if (self._shape is not None) and (self._shape.startswith('cylinder')):
             self._width = self._height
         self._use_wksp_width = False
 
@@ -4203,6 +4210,7 @@ class GetSampleGeom(ReductionStep):
     thickness = property(get_thickness, set_thickness, None, None)
 
     def execute(self, reducer, workspace):
+        _reducer = reducer
         """
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
@@ -4261,7 +4269,7 @@ class SampleGeomCor(ReductionStep):
                 volume = geo.thickness * math.pi
                 volume *= math.pow(geo.width, 2) / 4.0
             else:
-                raise NotImplemented('Shape "' + geo.shape + '" is not in the list of supported shapes')
+                raise NotImplementedError('Shape "' + geo.shape + '" is not in the list of supported shapes')
         except TypeError:
             raise TypeError('Error calculating sample volume with width=' + str(geo.width) + ' height=' + str(
                 geo.height) + 'and thickness=' + str(geo.thickness))
