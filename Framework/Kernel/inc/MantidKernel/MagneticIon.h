@@ -20,9 +20,8 @@ struct MANTID_KERNEL_DLL MagneticIon {
   /// Default constructor
   MagneticIon();
   /// Construct the Ion with data
-  MagneticIon(const char * symbol, const uint16_t charge,
-              const double j0i[8], const double j2i[8], const double j4i[8],
-              const double j6i[8]);
+  MagneticIon(const char *symbol, const uint16_t charge, const double j0i[8],
+              const double j2i[8], const double j4i[8], const double j6i[8]);
 
   /// Returns the value of the form factor for the given J/L
   double analyticalFormFactor(const double qsqr, const uint16_t j,
