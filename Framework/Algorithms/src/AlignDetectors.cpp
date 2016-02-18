@@ -162,7 +162,6 @@ AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
 /// Destructor
 AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
 
-//-----------------------------------------------------------------------
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   // Workspace unit must be TOF.
@@ -281,7 +280,6 @@ void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::FileError If the calibration file cannot be opened and
  * read successfully
@@ -356,16 +354,12 @@ void AlignDetectors::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-//-----------------------------------------------------------------------
 /**
  * Execute the align detectors algorithm for an event workspace.
  */
 void AlignDetectors::execEvent() {
-  // g_log.information("Processing event workspace");
-
   // the calibration information is already read in at this point
 
-  // convert the input workspace into the event workspace we already know it is
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
 
