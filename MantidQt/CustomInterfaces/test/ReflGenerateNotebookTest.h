@@ -125,7 +125,6 @@ public:
   }
 
   void testGenerateNotebook() {
-    std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
     auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
         m_wsName, m_model, m_instrument, col_nums.runs, col_nums.transmission,
         col_nums.options, col_nums.angle, col_nums.qmin, col_nums.qmax,
