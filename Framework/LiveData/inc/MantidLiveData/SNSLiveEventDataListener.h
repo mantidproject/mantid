@@ -149,7 +149,7 @@ private:
   bool m_isConnected;
 
   Poco::Thread m_thread;
-  Poco::FastMutex m_mutex; // protects m_buffer & m_status
+  Kernel::Mutex m_mutex; // protects m_buffer & m_status
   bool m_pauseNetRead;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits
