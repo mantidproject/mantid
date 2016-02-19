@@ -14,6 +14,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+#include <set>
 
 namespace
 {

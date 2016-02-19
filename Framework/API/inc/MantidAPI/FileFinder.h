@@ -9,7 +9,6 @@
 #include "MantidAPI/IArchiveSearch.h"
 
 #include <vector>
-#include <set>
 #include <unordered_set>
 
 namespace Mantid {

@@ -7,7 +7,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/OptionalBool.h"
 #include <vector>
-#include <set>
 #include <unordered_set>
 
 namespace Json {

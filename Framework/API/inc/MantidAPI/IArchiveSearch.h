@@ -11,7 +11,6 @@
 #endif
 #include <string>
 #include <vector>
-#include <set>
 #include <unordered_set>
 
 #define DECLARE_ARCHIVESEARCH(classname, facility)                             \

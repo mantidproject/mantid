@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <set>
 #include <unordered_set>
 #include <string>
 #include <map>
