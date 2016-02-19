@@ -78,9 +78,9 @@ std::vector<std::string> splitPath(const std::string &path) {
   if (path.find(";") == std::string::npos) { // don't bother tokenizing
     splitted.push_back(path);
   } else {
-    int options = Poco::StringTokenizer::TOK_TRIM +
-                  Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
+    int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
+                  Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+    Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
