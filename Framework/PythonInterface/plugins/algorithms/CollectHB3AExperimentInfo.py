@@ -267,7 +267,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             if twotheta_curr - twotheta_prev < self._tol2Theta:
                 # two keys (2theta) are close enough, combine then
                 self._2thetaScanPtDict[twotheta_prev].extend(self._2thetaScanPtDict[twotheta_curr][:])
-                del self._2thetaScanPtDict[twotehta]
+                del self._2thetaScanPtDict[twotheta_curr]
             else:
                 # advanced to current 2theta and no more operation is required
                 twotheta_prev = twotheta_curr
