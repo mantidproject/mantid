@@ -49,8 +49,8 @@ void GetEi2::init()
   validator->add<InstrumentValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::InOut,
-                              validator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
+                                       validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

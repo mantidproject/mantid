@@ -47,12 +47,12 @@ SmoothNeighbours::SmoothNeighbours()
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 

@@ -31,14 +31,14 @@ int AppendSpectra::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void AppendSpectra::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the first input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the second input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace1", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the first input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace2", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the second input workspace");
 
   declareProperty(
       "ValidateInputs", true,
@@ -49,9 +49,9 @@ void AppendSpectra::init() {
                   "Append the spectra from InputWorkspace2 multiple times (for "
                   "MatrixWorkspaces only)");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace");
 
   declareProperty("MergeLogs", false,
                   "Whether to combine the logs of the two input workspaces");

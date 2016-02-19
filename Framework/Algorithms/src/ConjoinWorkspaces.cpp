@@ -28,17 +28,17 @@ ConjoinWorkspaces::~ConjoinWorkspaces() {}
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace1", "", Direction::InOut,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the first input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the second input workspace");
-  declareProperty(
-      new PropertyWithValue<bool>("CheckOverlapping", true, Direction::Input),
-      "Verify that the supplied data do not overlap");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace1", "", Direction::InOut,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the first input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace2", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the second input workspace");
+  declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
+                                                       Direction::Input),
+                  "Verify that the supplied data do not overlap");
 }
 
 //----------------------------------------------------------------------------------------------

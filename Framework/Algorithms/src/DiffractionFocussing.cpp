@@ -34,15 +34,15 @@ using API::FileProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
-      "The name of the CalFile with grouping data");
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::Load, ".cal"),
+                  "The name of the CalFile with grouping data");
 }
 
 /** Executes the algorithm

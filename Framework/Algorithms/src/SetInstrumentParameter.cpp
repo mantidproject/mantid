@@ -47,14 +47,14 @@ const std::string SetInstrumentParameter::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetInstrumentParameter::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to add the log entry to");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::InOut,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to add the log entry to");
   declareProperty("ComponentName", "", "The name of the component to attach "
                                        "the parameter to. Default: the whole "
                                        "instrument");
-  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
   declareProperty("ParameterName", "",

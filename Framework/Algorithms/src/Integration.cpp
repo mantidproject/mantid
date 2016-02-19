@@ -28,11 +28,11 @@ using namespace DataObjects;
  */
 void Integration::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace to integrate.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace with the results of the integration.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace with the results of the integration.");
 
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The lower integration limit (an X value).");

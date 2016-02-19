@@ -28,12 +28,13 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<HistogramValidator>()),
       "The name of the input workspace. Must contain histogram data.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the Workspace containing the masked bins.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the Workspace containing the masked bins.");
 
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but
@@ -46,7 +47,7 @@ void MaskBins::init() {
                   "The value to end masking at.");
 
   // which pixels to load
-  this->declareProperty(new ArrayProperty<int>("SpectraList"),
+  this->declareProperty(make_unique<ArrayProperty<int>>("SpectraList"),
                         "Optional: A list of individual which spectra to mask "
                         "(specified using the workspace index). If not set, "
                         "all spectra are masked. Can be entered as a "

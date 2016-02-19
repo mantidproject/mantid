@@ -26,9 +26,9 @@ RecordPythonScript::RecordPythonScript()
 */
 void RecordPythonScript::init() {
 
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, {".py"}),
-      "The file into which the Python script will be generated.");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, ".py"),
+                  "The file into which the Python script will be generated.");
 }
 
 //----------------------------------------------------------------------------------------------

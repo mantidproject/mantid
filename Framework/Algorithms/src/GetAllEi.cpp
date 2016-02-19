@@ -36,10 +36,11 @@ GetAllEi::GetAllEi()
 /// Initialization method.
 void GetAllEi::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "Workspace", "", Kernel::Direction::Input),
-                  "The input workspace containing the monitor's spectra "
-                  "measured after the last chopper");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Kernel::Direction::Input),
+      "The input workspace containing the monitor's spectra "
+      "measured after the last chopper");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
@@ -124,8 +125,8 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"
       "together with total intensity within each peak.");

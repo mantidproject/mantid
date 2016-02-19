@@ -55,15 +55,15 @@ void RemoveLowResTOF::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, wsValidator),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "LowResTOFWorkspace", "", Direction::Output, PropertyMode::Optional),
       "The name of the optional output workspace that contains low resolution "
       "TOF which are removed "

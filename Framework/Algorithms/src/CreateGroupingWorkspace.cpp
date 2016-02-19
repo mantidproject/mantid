@@ -54,22 +54,22 @@ const std::string CreateGroupingWorkspace::category() const {
  */
 void CreateGroupingWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  declareProperty(new PropertyWithValue<std::string>("InstrumentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "InstrumentName", "", Direction::Input),
                   "Optional: Name of the instrument to base the "
                   "GroupingWorkspace on which to base the GroupingWorkspace.");
 
-  declareProperty(new FileProperty("InstrumentFilename", "",
-                                   FileProperty::OptionalLoad, ".xml"),
+  declareProperty(make_unique<FileProperty>("InstrumentFilename", "",
+                                            FileProperty::OptionalLoad, ".xml"),
                   "Optional: Path to the instrument definition file on which "
                   "to base the GroupingWorkspace.");
 
-  declareProperty(new FileProperty("OldCalFilename", "",
-                                   FileProperty::OptionalLoad, ".cal"),
+  declareProperty(make_unique<FileProperty>("OldCalFilename", "",
+                                            FileProperty::OptionalLoad, ".cal"),
                   "Optional: Path to the old-style .cal grouping/calibration "
                   "file (multi-column ASCII). You must also specify the "
                   "instrument.");
@@ -95,7 +95,7 @@ void CreateGroupingWorkspace::init() {
   declareProperty("ComponentName", "", "Specify the instrument component to "
                                        "group into a fixed number of groups");
 
-  declareProperty(new WorkspaceProperty<GroupingWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output GroupingWorkspace.");
 

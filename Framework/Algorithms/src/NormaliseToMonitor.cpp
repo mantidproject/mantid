@@ -178,7 +178,8 @@ void NormaliseToMonitor::init() {
   // It's been said that we should restrict the unit to being wavelength, but
   // I'm not sure about that...
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       val),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
   //
@@ -187,9 +188,9 @@ void NormaliseToMonitor::init() {
   //   monitor one");
   // Can either set a spectrum within the workspace to be the monitor
   // spectrum.....
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace");
   // should be any spectrum ID, but named this property MonitorSpectrum to keep
   // compatibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor
@@ -215,9 +216,9 @@ void NormaliseToMonitor::init() {
                                            "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(new WorkspaceProperty<>("MonitorWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional, val),
+  declareProperty(make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional, val),
                   "A workspace containing one or more spectra to normalize the "
                   "InputWorkspace by.");
   setPropertySettings("MonitorWorkspace", new Kernel::EnabledWhenProperty(
@@ -252,8 +253,8 @@ void NormaliseToMonitor::init() {
       "end of the integration range are also included");
 
   declareProperty(
-      new WorkspaceProperty<>("NormFactorWS", "", Direction::Output,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("NormFactorWS", "", Direction::Output,
+                                       PropertyMode::Optional),
       "Name of the workspace, containing the normalization factor.\n"
       "If this name is empty, normalization workspace is not returned. If the "
       "name coincides with the output workspace name, _normFactor suffix is "

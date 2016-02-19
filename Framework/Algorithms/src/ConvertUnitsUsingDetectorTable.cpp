@@ -76,21 +76,21 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
  */
 void ConvertUnitsUsingDetectorTable::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
   declareProperty("Target", "", boost::make_shared<StringListValidator>(
                                     UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorParameters",
-                                                        "", Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Name of a TableWorkspace containing the detector parameters "
-                  "to use instead of the IDF.");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+      "Name of a TableWorkspace containing the detector parameters "
+      "to use instead of the IDF.");
 
   // TODO: Do we need this ?
   declareProperty("AlignBins", false,

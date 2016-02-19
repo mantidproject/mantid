@@ -43,28 +43,29 @@ GenerateEventsFilter::~GenerateEventsFilter() {}
  */
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
-  declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input event workspace");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input event workspace");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output SplittersWorkspace object, "
                   "i.e., the filter.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>("InformationWorkspace",
-                                                       "", Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "InformationWorkspace", "", Direction::Output),
       "Optional output for the information of each splitter workspace index");
 
   declareProperty(
       "FastLog", false,
-      "Fast log will make output workspace to be a maxtrix workspace. ");
+      "Fast log will make output workspace to be a matrix workspace. ");
 
   // Time (general) range
   declareProperty(
       "StartTime", "",
-      "The start time, such that all event before this time are filtered out. "
+      "The start time, such that all events before this time are filtered out. "
       "It could be (1) relative time to run start time "
       "in unit as specified property 'UnitOfTime' or "
       "(2) absolute time. "
@@ -81,7 +82,7 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty(new ArrayProperty<double>("TimeInterval"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("TimeInterval"),
                   "Array for lengths of time intervals for splitters.  "
                   "If the array is empty, then there will be one splitter "
                   "created from StartTime and StopTime. "

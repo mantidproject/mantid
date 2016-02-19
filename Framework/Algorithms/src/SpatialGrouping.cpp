@@ -45,11 +45,11 @@ DECLARE_ALGORITHM(SpatialGrouping)
 * init() method implemented from Algorithm base class
 */
 void SpatialGrouping::init() {
-  declareProperty(new Mantid::API::WorkspaceProperty<>(
+  declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input),
                   "Name of the input workspace, which is used only as a means "
                   "of retrieving the instrument geometry.");
-  declareProperty(new Mantid::API::FileProperty(
+  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");

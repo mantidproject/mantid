@@ -39,19 +39,19 @@ void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, sourceValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to give the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to give the output workspace");
 
   auto vsValidator = boost::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
-      new WorkspaceProperty<>("BkgWorkspace", "", Direction::Input,
-                              vsValidator),
+      make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input,
+                                       vsValidator),
       "An optional histogram workspace in the units of TOF defining background "
       "for removal during rebinning."
       "The workspace has to have single value or contain the same number of "
