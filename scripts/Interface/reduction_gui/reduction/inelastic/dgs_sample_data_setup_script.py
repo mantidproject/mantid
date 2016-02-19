@@ -40,8 +40,8 @@ class SampleSetupScript(BaseScriptElement):
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
-        SampleSetupScript.monitor1_specid = int(ip.get_parameter("ei-mon1-spec"))
-        SampleSetupScript.monitor2_specid = int(ip.get_parameter("ei-mon2-spec"))
+        SampleSetupScript.monitor1_specid = str(int(ip.get_parameter("ei-mon1-spec")))
+        SampleSetupScript.monitor2_specid = str(int(ip.get_parameter("ei-mon2-spec")))
 
     def to_script(self):
         script = ""
@@ -68,9 +68,17 @@ class SampleSetupScript(BaseScriptElement):
             if self.tzero_guess != SampleSetupScript.tzero_guess:
                 script += "TimeZeroGuess=%s,\n" % str(self.tzero_guess)
         if self.monitor1_specid != SampleSetupScript.monitor1_specid:
-            script += "Monitor1SpecId=%s,\n" % self.monitor1_specid
+            try:
+                temp=int(self.monitor1_specid)
+                script += "Monitor1SpecId=%s,\n" % self.monitor1_specid
+            except ValueError:
+                pass
         if self.monitor2_specid != SampleSetupScript.monitor2_specid:
-            script += "Monitor2SpecId=%s,\n" % self.monitor2_specid
+            try:
+                temp=int(self.monitor2_specid)
+                script += "Monitor2SpecId=%s,\n" % self.monitor2_specid
+            except ValueError:
+                pass
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
@@ -150,10 +158,10 @@ class SampleSetupScript(BaseScriptElement):
             self.tzero_guess = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "tzero_guess",
                                                                  default=SampleSetupScript.tzero_guess)
-            self.monitor1_specid = BaseScriptElement.getIntElement(instrument_dom,
+            self.monitor1_specid = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "monitor1_specid",
                                                                    default=SampleSetupScript.monitor1_specid)
-            self.monitor2_specid = BaseScriptElement.getIntElement(instrument_dom,
+            self.monitor2_specid = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "monitor2_specid",
                                                                    default=SampleSetupScript.monitor2_specid)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,
