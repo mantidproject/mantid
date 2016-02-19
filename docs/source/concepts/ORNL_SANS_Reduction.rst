@@ -30,7 +30,7 @@ Contents
  - `Transmission correction`_
  - `Background subtraction`_
  - `I(Q) calculation`_
- - `General options`_
+ - `General commands`_
 
 
 .. _`Reduction script`:
@@ -188,6 +188,9 @@ Pixel masking
 ``MaskDetectors(det_list)``
     Masks the given detector IDs.
 
+``MaskDetectorSide(side_to_mask=None)``
+    Masks a detector plane. Choices are 'Front', 'Back', and 'None'. 
+
 
 .. _`Sensitivity correction`:
 
@@ -252,7 +255,7 @@ Transmission correction
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 ``SetTransmission(trans, error)``
-    Sets the sample transmission. For each detector pixel, the transmission correction is applied as follows:
+    [**HFIR only**] Sets the sample transmission. For each detector pixel, the transmission correction is applied as follows:
 
 .. math::
 
@@ -260,18 +263,19 @@ Transmission correction
 
     \sigma_{I'(x,y)} = \left[ \left[ \frac{\sigma_I}{T^{[1+\sec(2\theta)]/2}} \right]^2 + \left[ \frac{I(x,y)\sigma_T\left( \frac{1+\sec(2\theta)}{2}\right)}{T^{[\sec(2\theta)-1]/2}} \right]^2 \right]^{1/2}
 
-``DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)``
+
+``DirectBeamTransmissionsample_file, empty_file, beam_radius=3.0, theta_dependent=True, use_sample_dc=True)``
     Tells the reducer to use the direct beam method to calculate the sample transmission. The transmission is calculated as follows:
 
         :math:`T=\frac{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{sample}(i,j)}{T_{sample}}}}{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{beam}(i,j)}{T_{beam}}}}`
 
     where :math:`I_{sample}` and :math:`I_{beam}` are the pixel counts for the sample data set and the direct beam data set, respectively. The sums for each data set runs only over the pixels within a distance ``R=beam_radium`` of the beam center. :math:`T_{sample}` and :math:`T_{sample}` are the counting times for each of the two data sets. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize the sample and direct beam data sets instead of the timer.
     
-    If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from both data sets before the transmission is calculated.
+    If ``use_sample_dc`` is set to True, the dark current data that was chosen to be subtracted from the sample data will also be subtracted from the flood data.
 
     Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
 
-``BeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0 )``
+``BeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0, theta_dependent=True)``
     Tells the reducer to use the beam spreader ("glassy carbon") method to calculate the sample transmission. The transmission is calculated as follows:
 
         :math:`T=\frac{N_{gc, sample}/T_{gc, sample} - T_{gc}N_{sample}/T_{sample}}{N_{gc, empty}/T_{gc, empty} - T_{gc}N_{empty}/T_{empty}}`
@@ -291,6 +295,11 @@ Transmission correction
 ``ThetaDependentTransmission(theta_dependence=True)``
     If set to False, the transmission correction will be applied by dividing each pixel by the zero-angle transmission, without theta dependence.
 
+``SetTransmissionBeamCenter(x, y)``
+    Sets the beam center position to be used when applying the transmission correction. The beam center position of the sample data is otherwise used.
+    
+``TransmissionDirectBeamCenter(datafile)``
+    Specifies a direct beam data file to use to determine a beam center to use when applying the transmission correction. The beam center position of the sample data is otherwise used.
 
 .. _`Background subtraction`:
 
@@ -303,13 +312,16 @@ Background subtraction
 ``NoBackground()``
     Tells the reducer not to subtract background.
 
-``SetBckTransmission(trans, error)``
+``NoBckTransmission()``
+    Specifies that we do not want a transmission correction for the background.
+    
+``SetBckTransmission(trans, error, theta_dependent=True)``
     Sets the background transmission.
 
-``BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)``
+``BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True)``
     Similar to ``DirectBeamTransmission``, this command sets the options to measure the background transmission.
 
-``BckBeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0)``
+``BckBeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0, theta_dependent=True)``
     Similar to ``BeamSpreaderTransmission``, this command sets the options to measure the background transmission.
 
 ``BckTransmissionDarkCurrent(dark_current)``
@@ -318,13 +330,19 @@ Background subtraction
 ``BckThetaDependentTransmission(theta_dependence=True)``
     Similar to ``ThetaDependentTransmission``, this command sets the theta-dependence option of the transmission correction for the background.
 
+``SetBckTransmissionBeamCenter(x, y)``
+    Similar to ``SetTransmissionBeamCenter``, sets the beam center position to be used when applying the transmission correction. The beam center position of the background data is otherwise used.
+    
+``BckTransmissionDirectBeamCenter(datafile)``
+    Similar to ``TransmissionDirectBeamCenter``,  specifies a direct beam data file to use to determine a beam center to use when applying the transmission correction. The beam center position of the background data is otherwise used.
+
 .. _`I(Q) calculation`:
 
 I(Q) calculation
 ^^^^^^^^^^^^^^^^
 
-``AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False, n_bins=100, log_binning=False)``
-    Sets the options for azimuthal averaging. The binning parameter sets the binning of the output I(q) distribution in the following format: :math:`Q_{min}, \Delta Q, Q_{max}` (the binning will be found automatically if the ``binning`` parameter is not supplied). When letting the binning be calculated automatically, setting log_binning=True will tell the reducer to find the best log binning. The ``suffix`` parameter sets the suffix appended to the I(q) workspace name. If ``error_weighting`` is set to True, the pixel counts will be weighted by a function of the error when computing I(q) (see below).
+``AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False, align_log_with_decades=False)``
+    Sets the options for azimuthal averaging. The binning parameter sets the binning of the output I(q) distribution in the following format: :math:`Q_{min}, \Delta Q, Q_{max}` (the binning will be found automatically if the ``binning`` parameter is not supplied). When letting the binning be calculated automatically, setting ``log_binning=True`` will tell the reducer to find the best log binning. Setting ``align_log_with_decades=True`` will ensure that ``q`` points fall on decades. The ``suffix`` parameter sets the suffix appended to the I(q) workspace name. If ``error_weighting`` is set to True, the pixel counts will be weighted by a function of the error when computing I(q) (see below).
 
     The binning of the output *I(Q)* distribution is defined by the user.
     It runs from :math:`Q_{min}` to :math:`Q_{max}` in steps of :math:`\Delta Q`.
@@ -345,34 +363,54 @@ I(Q) calculation
 ``IQxQy(nbins=100)``
     Option to produce the reduced I(Qx, Qy).
 
-``NoIQxQy(nbins=100)``
+``NoIQxQy()``
     Turns off the option to produce the reduced I(Qx, Qy).
 
+``SaveIq(output_dir)``
+    Tells the reducer to save the output I(q) to an ascii file. The file will have a name similar to the input file, with "_Iq" appended to it. The file will be located in the specified directory.
+
 ``NoSaveIq()``
-    Tells the reducer not to save the output I(q).
+    Do not save the I(q) result.
 
 
+.. _`General commands`:
 
-
-.. _`General options`:
-
-General options
-^^^^^^^^^^^^^^^
+General commands
+^^^^^^^^^^^^^^^^
 
 ``DataPath(path)``
     Sets the directory containing all data files.
 
-**Reduce1D()**: Tells the reducer to execute the reduction process.
+``Reduce()``
+    Tells the reducer to execute the reduction process.
 
-**AppendDataFile(datafile, workspace=None)**: Appends a data file to the list of files to be reduced.
+``AppendDataFile(datafile, workspace=None)``
+    Appends a data file to the list of files to be reduced.
 
-**SaveIqAscii()**: Tells the reducer to save the output I(q) to an ascii file. The file will have a name similar to the input file, with "_Iq" appended to it. The file will be located in the directory chosen with DataPath.
+``SetSampleDetectorOffset(distance)``
+    Sets an additive sample-detector distance offset, in mm.
 
+``SetSampleDetectorDistance(distance)``
+    Sets the sample-detector distance, in mm. If set, this distance will take priority over the distance found in the data file.
 
-**SetSampleDetectorOffset(distance)**: Sets an additive sample-detector distance offset, in mm.
+``SetWavelength(wavelength, spread)``
+    Sets the wavelength, in Angstrom. If set, this wavelength will take priority over the wavelength found in the data file.
 
-**SetSampleDetectorDistance(distance)**: Sets the sample-detector distance, in mm. If set, this distance will take priority over the distance found in the data file.
-
-**SetWavelength(wavelength, spread)**: Sets the wavelength, in Angstrom. If set, this wavelength will take priority over the wavelength found in the data file.
-
-**ResetWavelength()**: Resets the wavelength to the value found in the data file.
+``ResetWavelength()``
+    Resets the wavelength to the value found in the data file.
+    
+``DivideByThickness(thickness=1.0)``
+    Specifies a thickness to normalize the output I(q) by, in cm.
+    
+``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
+    Specifies I(q) wedges to compute.
+    
+``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
+    Stitches a set of SANS data sets
+    
+    - ``data_list``: List of workspaces to stitch.
+    - ``q_min``: Minimum Q-value of the overlap between two consecutive data sets. The q_min argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
+    - ``q_max``: Maximum Q-value of the overlap between two consecutive data sets (must be an array for more than two data sets). The q_max argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
+    - ``output_workspace``: Name of the output workspace containing the stitched data.
+    - ``scale``: Scaling factor. The scaling factor should either be a single number or a list of length equal to the number of data sets. The former will scale everything by the given factor, while the latter will assign the given scaling factors to the data sets.
+    - ``save_output``: If true, the output will be saved in the current working directory.
