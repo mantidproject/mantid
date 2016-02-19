@@ -83,4 +83,46 @@ private:
   WorkspaceTester m_workspace;
 };
 
+class GeometryInfoFactoryTestPerformance : public CxxTest::TestSuite {
+public:
+  static GeometryInfoFactoryTestPerformance *createSuite() {
+    return new GeometryInfoFactoryTestPerformance();
+  }
+  static void destroySuite(GeometryInfoFactoryTestPerformance *suite) {
+    delete suite;
+  }
+
+  GeometryInfoFactoryTestPerformance() : m_workspace(nullptr) {
+    size_t numberOfHistograms = 10000;
+    size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  void test_typical() {
+    // Typically:
+    // - workspace with > 10k histograms
+    // - need L1, L2, and 2-theta
+    // Note that the instrument in this case is extremely simple, with few
+    // detectors and no parameters, so the actual performance will be worse.
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+    for (size_t i = 0; i < 10000; ++i) {
+      auto info = factory.create(i);
+      result += info.getL1();
+      result += info.getL2();
+      result += info.getTwoTheta();
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+  }
+
+private:
+  WorkspaceTester m_workspace;
+};
+
 #endif /* MANTID_API_GEOMETRYINFOFACTORY_TEST_H_ */
