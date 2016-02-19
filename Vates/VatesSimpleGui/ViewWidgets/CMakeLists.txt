@@ -164,6 +164,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
 
   include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
