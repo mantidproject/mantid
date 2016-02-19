@@ -25,6 +25,7 @@ Contents
  - Solid_angle_correction_
  - Transmission_correction_
  - Absolute_normalization_
+ - `Background subtraction`_
  - `I(Q) calculation`_
 
 
@@ -188,34 +189,42 @@ Transmission correction
 ``SetTransmission(trans, error)``
     Sets the sample transmission. For each detector pixel, the transmission correction is applied as follows:
 
+.. math::
 
+    I'(x,y) = \frac{I(x,y)}{T^{[1+\sec(2\theta)]/2}}
 
+    \sigma_{I'(x,y)} = \left[ \left[ \frac{\sigma_I}{T^{[1+\sec(2\theta)]/2}} \right]^2 + \left[ \frac{I(x,y)\sigma_T\left( \frac{1+\sec(2\theta)}{2}\right)}{T^{[\sec(2\theta)-1]/2}} \right]^2 \right]^{1/2}
 
 ``DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)``
     Tells the reducer to use the direct beam method to calculate the sample transmission. The transmission is calculated as follows:
 
+        :math:`T=\frac{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{sample}(i,j)}{T_{sample}}}}{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{beam}(i,j)}{T_{beam}}}}`
 
-
-where  and  are the pixel counts for the sample data set and the direct beam data set, respectively. The sums for each data set runs only over the pixels within a distance  of the beam center.  and  are the counting times for each of the two data sets. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize the sample and direct beam data sets instead of the timer.
+    where :math:`I_{sample}` and :math:`I_{beam}` are the pixel counts for the sample data set and the direct beam data set, respectively. The sums for each data set runs only over the pixels within a distance ``R=beam_radium`` of the beam center. :math:`T_{sample}` and :math:`T_{sample}` are the counting times for each of the two data sets. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize the sample and direct beam data sets instead of the timer.
 If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from both data sets before the transmission is calculated.
-Once the transmission is calculated, it is applied to the input data set in the same way as described for SetTransmission().
+Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
 
-**BeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0 )**: Tells the reducer to use the beam spreader ("glassy carbon") method to calculate the sample transmission. The transmission is calculated as follows:
+``BeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0 )``
+    Tells the reducer to use the beam spreader ("glassy carbon") method to calculate the sample transmission. The transmission is calculated as follows:
 
 
 
-where , sample and , empty are the sums of all pixel counts for the sample and direct beam data sets with glass carbon, and  and  are the sums of all the pixel counts for the sample and direct beam without glassy carbon. The T values are the corresponding counting times. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize all data sets instead of the timer.
+    where , sample and , empty are the sums of all pixel counts for the sample and direct beam data sets with glass carbon, and  and  are the sums of all the pixel counts for the sample and direct beam without glassy carbon. The T values are the corresponding counting times. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize all data sets instead of the timer.
 If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from all data sets before the transmission is calculated.
 Once the transmission is calculated, it is applied to the input data set in the same way as described for SetTransmission().
 
-**NoTransmission()**: Tells the reducer not to apply a transmission correction.
+``NoTransmission()``
+    Tells the reducer not to apply a transmission correction.
 TransmissionDarkCurrent(dark_current): Sets the dark current to be subtracted for the transmission measurement.
 
 ``ThetaDependentTransmission(theta_dependence=True)``
     If set to False, the transmission correction will be applied by dividing each pixel by the zero-angle transmission, without theta dependence.
 
 
+.. _`Background subtraction`:
+
 Background subtraction
+^^^^^^^^^^^^^^^^^^^^^^
 
 ``Background(datafile)``
     The same reduction steps that are applied to the sample data are applied to the background data set. Those are the dark current subtraction, the data normalization, applying the detector mask, the sensitivity correction, the solid angle correction and the transmission correction. Although the same sensitivity correction is used for both sample and background, the background transmission is calculated separately from the sample transmission. Once all those reduction steps are applied to the background data set, the resulting background is subtracted from the sample data.
