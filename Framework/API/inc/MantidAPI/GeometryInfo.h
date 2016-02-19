@@ -66,9 +66,9 @@ public:
   /// via GeometryInfoFactory.
   GeometryInfo(const GeometryInfoFactory &factory, const ISpectrum &spectrum);
 
-  /// Returns true is the spectrum is a monitor.
+  /// Returns true if the spectrum is a monitor.
   bool isMonitor() const;
-  /// Returns true is the spectrum is masked.
+  /// Returns true if the spectrum is masked.
   bool isMasked() const;
   /// Returns L1 (distance from source to sample).
   double getL1() const;
