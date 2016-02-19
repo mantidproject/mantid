@@ -349,7 +349,7 @@ void CreateGroupingWorkspace::exec() {
     inst = inWS->getInstrument();
   } else {
     Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
+    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setProperty("RewriteSpectraMap",
@@ -388,7 +388,7 @@ void CreateGroupingWorkspace::exec() {
   }
 
   // --------------------------- Create the output --------------------------
-  GroupingWorkspace_sptr outWS(new GroupingWorkspace(inst));
+  auto outWS = boost::make_shared<GroupingWorkspace>(inst);
   this->setProperty("OutputWorkspace", outWS);
 
   // This will get the grouping

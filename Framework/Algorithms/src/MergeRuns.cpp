@@ -264,15 +264,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
-  // You need to copy over the data as well.
-  outWS->copyDataFrom((*inputWS));
+  EventWorkspace_sptr outWS(inputWS->clone().release());
 
   int64_t n = m_inEventWS.size() - 1;
   m_progress = new Progress(this, 0.0, 1.0, n);

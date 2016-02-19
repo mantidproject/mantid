@@ -181,29 +181,17 @@ void ModeratorTzeroLinear::execEvent() {
 
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  const size_t numHists = inputWS->getNumberHistograms();
   MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
-    // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Loop over the spectra
+  const size_t numHists = outputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < static_cast<int>(numHists); ++i) {

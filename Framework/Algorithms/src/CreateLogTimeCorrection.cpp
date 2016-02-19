@@ -144,7 +144,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
 /** Write L2 map and correction map to a TableWorkspace
   */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");

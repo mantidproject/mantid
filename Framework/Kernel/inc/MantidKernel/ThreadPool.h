@@ -49,7 +49,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ThreadPool {
 public:
   ThreadPool(ThreadScheduler *scheduler = new ThreadSchedulerFIFO(),
-             size_t numCores = 0, ProgressBase *prog = NULL);
+             size_t numCores = 0, ProgressBase *prog = nullptr);
 
   ~ThreadPool();
 

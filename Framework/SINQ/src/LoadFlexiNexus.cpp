@@ -207,7 +207,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
     dimensions.push_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   signal_t *dd = ws->getSignalArray();
   signal_t *ddE = ws->getErrorSquaredArray();

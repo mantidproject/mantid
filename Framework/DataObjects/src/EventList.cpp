@@ -2026,7 +2026,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
 
   // Now do the sqrt of all errors
   std::transform(E.begin(), E.end(), E.begin(),
-                 static_cast<double (*)(double)>(std::sqrt));
+                 static_cast<double (*)(double)>(sqrt));
 }
 
 // --------------------------------------------------------------------------
@@ -2373,7 +2373,7 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
 
   // windows can get confused about std::sqrt
   std::transform(Y.begin(), Y.end(), E.begin(),
-                 static_cast<double (*)(double)>(std::sqrt));
+                 static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.

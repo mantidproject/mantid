@@ -287,7 +287,7 @@ public:
     }
 
     // Generate a TableWorksapce
-    TableWorkspace_sptr tablews(new TableWorkspace());
+    auto tablews = boost::make_shared<TableWorkspace>();
     tablews->addColumn("str", "DetectorIDsList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");

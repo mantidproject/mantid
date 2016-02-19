@@ -78,7 +78,7 @@ void SliceMDHisto::exec() {
         arDim->getName(), arDim->getName(), arDim->getMDFrame(),
         arDim->getX(start[k]), arDim->getX(end[k]), end[k] - start[k])));
   }
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   coord_t *sourceDim =
       reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));

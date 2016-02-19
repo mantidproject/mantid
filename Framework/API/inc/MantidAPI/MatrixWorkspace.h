@@ -422,7 +422,7 @@ public:
   /// cores.
   std::vector<IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Apply masking.
   void
@@ -470,7 +470,8 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   MatrixWorkspace &operator=(const MatrixWorkspace &other);
 
-  MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
+  MatrixWorkspace(
+      Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.

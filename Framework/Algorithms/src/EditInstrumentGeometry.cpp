@@ -289,7 +289,7 @@ void EditInstrumentGeometry::exec() {
   }
 
   // Create a new instrument from scratch any way.
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(name));
+  auto instrument = boost::make_shared<Geometry::Instrument>(name);
   if (!bool(instrument)) {
     stringstream errss;
     errss << "Trying to use a Parametrized Instrument as an Instrument.";

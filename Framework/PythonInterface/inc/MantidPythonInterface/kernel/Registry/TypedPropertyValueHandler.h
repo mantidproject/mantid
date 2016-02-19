@@ -76,7 +76,7 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
                            const unsigned int direction) const override {
     using boost::python::extract;
     const ValueType valueInC = extract<ValueType>(defaultValue)();
-    Kernel::Property *valueProp(NULL);
+    Kernel::Property *valueProp(nullptr);
     if (isNone(validator)) {
       valueProp =
           new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
@@ -135,7 +135,7 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
     using boost::python::extract;
     const PropertyValueType valueInC =
         extract<PropertyValueType>(defaultValue)();
-    Kernel::Property *valueProp(NULL);
+    Kernel::Property *valueProp(nullptr);
     if (isNone(validator)) {
       valueProp = new Kernel::PropertyWithValue<PropertyValueType>(
           name, valueInC, direction);

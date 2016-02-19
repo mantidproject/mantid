@@ -5,7 +5,6 @@
 #include <gmock/gmock.h>
 #include <set>
 #include <algorithm>
-#include <boost/assign/list_of.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "MantidAPI/IMDIterator.h"
@@ -395,16 +394,15 @@ public:
 
     // Now add some objects
     // First cluster amongst 3 dimensions.
-    std::vector<size_t> clusterOneIndexes =
-        boost::assign::list_of(1)(1 + 1)(1 + 5 - 1);
+    std::vector<size_t> clusterOneIndexes = {(1), (1 + 1), (1 + 5 - 1)};
 
     // Another cluster amongst 3 dimensions. Rough center of block.
-    std::vector<size_t> clusterTwoIndexes =
-        boost::assign::list_of(5 * 5 * 2)((5 * 5 * 2) + 1)((5 * 5 * 2) + 5);
+    std::vector<size_t> clusterTwoIndexes = {(5 * 5 * 2), ((5 * 5 * 2) + 1),
+                                             ((5 * 5 * 2) + 5)};
 
     // Another cluster amongst 3 dimensions. Far side of block.
-    std::vector<size_t> clusterThreeIndexes = boost::assign::list_of(
-        (5 * 5 * 5) - 1)((5 * 5 * 5) - 2)((5 * 5 * 5) - (5 * 5) - 1);
+    std::vector<size_t> clusterThreeIndexes = {
+        ((5 * 5 * 5) - 1), ((5 * 5 * 5) - 2), ((5 * 5 * 5) - (5 * 5) - 1)};
 
     // Accumulate all cluster indexes
     std::vector<size_t> allClusterIndexes;

@@ -110,9 +110,9 @@ void GetDetectorOffsets::exec() {
 
   int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
-  OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+  auto outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
   // Create the output MaskWorkspace
-  MaskWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
+  auto maskWS = boost::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
       maskWS->getDetectorIDToWorkspaceIndexMap(true);

@@ -162,7 +162,7 @@ void ChopData::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
   for (auto &workspace : workspaces) {
     wsgroup->addWorkspace(workspace);
