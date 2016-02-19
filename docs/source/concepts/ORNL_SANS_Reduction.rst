@@ -13,18 +13,18 @@ Contents
 
 - Introduction_
 
-- Reduction_script_
+- `Reduction script`_
 
-- Command_set_
+- `Reduction commands`_
 
- - Beam_center_
- - Dark_current_subtraction_
- - Normalization_options_
- - Pixel_masking_
- - Sensitivity_correction_
- - Solid_angle_correction_
- - Transmission_correction_
- - Absolute_normalization_
+ - `Beam center`_
+ - `Dark current subtraction`_
+ - `Normalization options`_
+ - `Pixel masking`_
+ - `Sensitivity correction`_
+ - `Solid angle correction`_
+ - `Transmission correction`_
+ - `Absolute normalization`_
  - `Background subtraction`_
  - `I(Q) calculation`_
 
@@ -37,10 +37,10 @@ Introduction
 
 
 
-.. _Reduction_Script:
+.. _`Reduction script`:
 
-Example script
---------------
+Reduction script
+----------------
 
 .. code-block:: python
 
@@ -68,7 +68,7 @@ Example script
     Reduce1D()
 
 The first two lines are optional and need only be used when you run the code outside of MantidPlot. The hfir_command_interface import statement gives us access the the various commands we will use to set up the reduction process.
-The **Clear()** command re-initializes the reduction process.
+The ``Clear()`` command re-initializes the reduction process.
 The first important part of the script is to declare which instrument you are using. This will define the general flow of the reduction process. In this particular case, this is done by calling HFIRSANS().
 The DataPath() command sets the directory where the data file will be found. Once this has been done, only the name of the data files need to be supplied to the various reduction commands.
 The following commands are used to set options for the reduction process:
@@ -84,104 +84,137 @@ The following commands are used to set options for the reduction process:
 
 Those commands do not need to be typed in any particular order. They only set options and define the reduction process that will be used later when processing each data file. See the list of commands for more details.
 
-The **AppendDataFile()** command appends a data file to the list of files to be reduced. The reducer can process any number of data files, and the same reduction process will be applied to each of them.
+The ``AppendDataFile()`` command appends a data file to the list of files to be reduced. The reducer can process any number of data files, and the same reduction process will be applied to each of them.
 The Reduce1D() command tell the reducer to start the reduction process. Since this command does the actual execution, it needs to be the last command in the reduction script.
 
-.. _command_set:
+.. _`Reduction commands`:
 
-Command Set
------------
+Reduction commands
+------------------
+
+The following is a list of reduction commands to apply corrections to the data and produce :math:`I(Q)`.
 
 
-.. _beam_center:
+.. _`Beam center`:
 
 Beam Center
 ^^^^^^^^^^^
 
 Options for finding the beam center
 
-**SetBeamCenter(x,y)**: Sets the beam center location to be used, in pixel coordinates.
+``SetBeamCenter(x,y)``
+    Sets the beam center location to be used, in pixel coordinates.
 
-**DirectBeamCenter(datafile)**: Finds the beam center using the direct beam method. The position of the beam center p is given by
+``DirectBeamCenter(datafile)``
+   Finds the beam center using the direct beam method. The position of the beam center p is given by
 
+        :math:`p(x,y) = \frac{\sum_i I_i \ d_i(x,y)}{\sum_i I_i}`
 
+    where ``i`` runs over all pixels within the largest square detector area centered on the initial guess for the beam center position. The initial guess is the center of the detector. :math:`I_i` is the detector count for pixel ``i``, and :math:`d_i(x,y)` is the pixel coordinates. The calculation above is repeated iteratively by replacing the initial guess with the position found with the previous iteration. The process stops when the difference between the positions found with two consecutive iterations is smaller than 0.25 pixel.
 
-where i runs over all pixels within the largest square detector area centered on the initial guess for the beam center position. The initial guess is the center of the detector. Ii is the detector count for pixel i, and  is the pixel coordinates. The calculation above is repeated iteratively by replacing the initial guess with the position found with the previous iteration. The process stops when the difference between the positions found with two consecutive iterations is smaller than 0.25 pixel.
+``ScatteringBeamCenter(datafile, beam_radius=3.0)``
+    Finds the beam center using the scattered beam method. The process is identical to the direct beam method, with the only difference being that the pixels within a distance R (the beam radius) of the beam center guess are excluded from the calculation. The direct beam is thus excluded and only the scattered data is used.
 
-**ScatteringBeamCenter(datafile, beam_radius=3.0)**: Finds the beam center using the scattered beam method. The process is identical to the direct beam method, with the only difference being that the pixels within a distance R (the beam radius) of the beam center guess are excluded from the calculation. The direct beam is thus excluded and only the scattered data is used.
-
-.. _dark_current_subtraction:
+.. _`Dark current subtraction`:
 
 Dark current subtraction
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-**NoDarkCurrent()**: Lets the reducer know that no dark current should be subtracted.
+``NoDarkCurrent()``
+    Lets the reducer know that no dark current should be subtracted.
 
-**DarkCurrent(datafile)**: Specifies which data file to use for the dark current. The dark current is subtracted pixel by pixel by normalizing the dark current data by counting time, as follows:
+``DarkCurrent(datafile)``
+    Specifies which data file to use for the dark current. The dark current is subtracted pixel by pixel by normalizing the dark current data by counting time, as follows:
+
+        :math:`I'(x,y) = I_{data}(x,y) - \frac{T_{data}}{T_{dc}} \ I_{dc}(x,y)`
+
+    where the T-values are the counting times for the data set and the dark current (dc).
 
 
-where the T-values are the counting times for the data set and the dark current (dc).
-
-.. _normalization_options:
+.. _`Normalization options`:
 
 Normalization options
 ^^^^^^^^^^^^^^^^^^^^^
 
-**TimeNormalization()**: Tells the reducer to normalize the data to counting time.
+``TimeNormalization()``
+    Tells the reducer to normalize the data to counting time.
 
-**MonitorNormalization()**: Tells the reducer to normalize the data to the beam monitor.
+``MonitorNormalization()``
+    Tells the reducer to normalize the data to the beam monitor.
 
-**NoNormalization()**: Tells the reducer not to normalize the data.
+``NoNormalization()``
+    Tells the reducer not to normalize the data.
 
-.. _pixel_masking:
+
+.. _`Pixel masking`:
 
 Pixel masking
 ^^^^^^^^^^^^^
 
-**Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0)**: A band of pixels on each side of the detector is masked according to the input parameters.
+``Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0)``
+    A band of pixels on each side of the detector is masked according to the input parameters.
 
-**MaskRectangle(x_min, x_max, y_min, y_max)**: Masks a rectangular region on the detector defined by the given pixel numbers.
+``MaskRectangle(x_min, x_max, y_min, y_max)``
+    Masks a rectangular region on the detector defined by the given pixel numbers.
 
-**MaskDetectors(det_list)**: Masks the given detector IDs.
+``MaskDetectors(det_list)``
+    Masks the given detector IDs.
 
-.. _sensitivity_correction:
+
+.. _`Sensitivity correction`:
 
 Sensitivity correction
 ^^^^^^^^^^^^^^^^^^^^^^
 
-**SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5)**: The relative detector efficiency is computed the following way
+``SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5)``
+    The relative detector efficiency is computed the following way
+
+        :math:`S(x,y) = \frac{I_{flood}(x,y)}{1/N_{pixels} \ \sum_{i,j} \ I_{flood}(i,j)}`
+
+    where :math:`I_{flood}(x,y)` is the pixel count of the flood data in pixel (x,y). If a minimum and/or maximum sensitivity is given, the pixels having an efficiency outside the given limits are masked and the efficiency is recomputed without using those pixels.
+    The sample data is then corrected by dividing the intensity in each pixels by the efficiency S
+
+        :math:`I'_{sample}(x,y) = \frac{I_{sample}(x,y)}{S(x,y)}`
+
+    The pixels found to have an efficiency outside the given limits are also masked in the sample data so that they don’t enter any subsequent calculations.
+
+    If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from the flood data. The subtraction is done before the sensitivity is calculated.
+
+    If the user chose to use the solid angle correction for the reduction process, that correction will be applied to the flood data before the sensitivity is calculated.
+
+    **Note**: The solid angle correction is either not applied at all, or applied to both the flood data to calculate the sensitivity correction and applied to the sample data as part of the reduction process.
+
+``NoSensitivityCorrection()``
+    Tells the reducer not to correct for detector sensitivity.
+
+``SetSensitivityBeamCenter(x,y)``
+    Sets the beam center for the flood data (may be different from the sample data).
+
+``SensitivityDirectBeamCenter(datafile)``
+    Tells the reducer to use the direct beam center finding method for the flood data (see DirectBeamCenter for details).
+
+``SensitivityScatteringBeamCenter(datafile, beam_radius=3.0)``
+    Tells the reducer to use the scattering beam center finding method for the flood data (see ScatteringBeamCenter for details).
 
 
-
-where  is the pixel count of the flood data in pixel (x,y). If a minimum and/or maximum sensitivity is given, the pixels having an efficiency outside the given limits are masked and the efficiency is recomputed without using those pixels.
-The sample data is then corrected by dividing the intensity in each pixels by the efficiency S
-
-
-
-The pixels found to have an efficiency outside the given limits are also masked in the sample data so that they don’t enter any subsequent calculations.
-If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from the flood data. The subtraction is done before the sensitivity is calculated.
-If the user chose to use the solid angle correction for the reduction process, that correction will be applied to the flood data before the sensitivity is calculated.
-Note: The solid angle correction is either not applied at all, or applied to both the flood data to calculate the sensitivity correction and applied to the sample data as part of the reduction process.
-
-**NoSensitivityCorrection()**: Tells the reducer not to correct for detector sensitivity.
-
-**SetSensitivityBeamCenter(x,y)**: Sets the beam center for the flood data (may be different from the sample data).
-
-**SensitivityDirectBeamCenter(datafile)**: Tells the reducer to use the direct beam center finding method for the flood data (see DirectBeamCenter for details).
-SensitivityScatteringBeamCenter(datafile, beam_radius=3.0): Tells the reducer to use the scattering beam center finding method for the flood data (see ScatteringBeamCenter for details).
-
-.. _solid_angle_correction:
+.. _`Solid angle correction`:
 
 Solid angle correction
 ^^^^^^^^^^^^^^^^^^^^^^
 
-**SolidAngle()**: Tells the reducer to apply the solid angle correction. The solid angle correction is applied as follows:
+``SolidAngle()``
+    Tells the reducer to apply the solid angle correction. The solid angle correction is applied as follows:
 
+.. math::
 
+    I'(x,y) = \frac{I(x,y)}{\cos^3(2\theta)}
 
-**NoSolidAngle()**: Tells the reducer not to apply the solid angle correction.
+    \sigma_{i'(x,y)} = \frac{\sigma_{I(x,y)}}{|\cos^3(2\theta)|}
 
-.. _transmission_correction:
+``NoSolidAngle()``
+    Tells the reducer not to apply the solid angle correction.
+
+.. _`Transmission correction`:
 
 Transmission correction
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -201,21 +234,27 @@ Transmission correction
         :math:`T=\frac{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{sample}(i,j)}{T_{sample}}}}{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{beam}(i,j)}{T_{beam}}}}`
 
     where :math:`I_{sample}` and :math:`I_{beam}` are the pixel counts for the sample data set and the direct beam data set, respectively. The sums for each data set runs only over the pixels within a distance ``R=beam_radium`` of the beam center. :math:`T_{sample}` and :math:`T_{sample}` are the counting times for each of the two data sets. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize the sample and direct beam data sets instead of the timer.
-If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from both data sets before the transmission is calculated.
-Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
+    
+    If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from both data sets before the transmission is calculated.
+
+    Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
 
 ``BeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0 )``
     Tells the reducer to use the beam spreader ("glassy carbon") method to calculate the sample transmission. The transmission is calculated as follows:
 
+        :math:`T=\frac{N_{gc, sample}/T_{gc, sample} - T_{gc}N_{sample}/T_{sample}}{N_{gc, empty}/T_{gc, empty} - T_{gc}N_{empty}/T_{empty}}`
 
+    where :math:`N_{gc, sample}` and :math:`N_{gc, empty}` are the sums of all pixel counts for the sample and direct beam data sets with glass carbon, and :math:`N_{sample}` and :math:`N_{empty}` are the sums of all the pixel counts for the sample and direct beam without glassy carbon. The T values are the corresponding counting times. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize all data sets instead of the timer.
 
-    where , sample and , empty are the sums of all pixel counts for the sample and direct beam data sets with glass carbon, and  and  are the sums of all the pixel counts for the sample and direct beam without glassy carbon. The T values are the corresponding counting times. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize all data sets instead of the timer.
-If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from all data sets before the transmission is calculated.
-Once the transmission is calculated, it is applied to the input data set in the same way as described for SetTransmission().
+    If the user chose to use a dark current data set when starting the reduction process, that dark current data will be subtracted from all data sets before the transmission is calculated.
+
+    Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
 
 ``NoTransmission()``
     Tells the reducer not to apply a transmission correction.
-TransmissionDarkCurrent(dark_current): Sets the dark current to be subtracted for the transmission measurement.
+
+``TransmissionDarkCurrent(dark_current)``
+    Sets the dark current to be subtracted for the transmission measurement.
 
 ``ThetaDependentTransmission(theta_dependence=True)``
     If set to False, the transmission correction will be applied by dividing each pixel by the zero-angle transmission, without theta dependence.
@@ -304,7 +343,7 @@ Other
 **ResetWavelength()**: Resets the wavelength to the value found in the data file.
 
 
-.. _absolute_normalization:
+.. _`Absolute normalization`:
 
 Absolute Normalization
 ^^^^^^^^^^^^^^^^^^^^^^
