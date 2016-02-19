@@ -1776,7 +1776,9 @@ class CWSCDReductionControl(object):
                         max_l = l
                 # END-FOR
 
-                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l])
+                # FIXME/TODO/NOW
+                q_range = 4*math.pi*math.sin(twotheta*0.5)/wavelength
+                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l, q_range])
 
             except RuntimeError as e:
                 print e

@@ -574,6 +574,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
                    ('H', 'float'),
                    ('K', 'float'),
                    ('L', 'float'),
+                   ('Q-range', 'float'),
                    ('Selected', 'checkbox')]
 
     def __init__(self, parent):

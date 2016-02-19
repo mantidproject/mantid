@@ -312,6 +312,14 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def sort_by_column_name(self, column_name, order=0):
+        """
+
+        :param column_name:
+        :return:
+        """
+        # TODO/NOW/1st
+
     def update_cell_value(self, row, col, value):
         """
 

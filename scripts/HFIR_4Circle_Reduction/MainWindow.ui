@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2609,7 +2609,7 @@ p, li { white-space: pre-wrap; }
                   <item>
                    <widget class="QPushButton" name="pushButton_sortInfoTable">
                     <property name="text">
-                     <string>Sort</string>
+                     <string>Sort &amp; Filter</string>
                     </property>
                    </widget>
                   </item>
