@@ -386,28 +386,7 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix
         :return:
         """
-        # Collecting all peaks that will be used to refine UB matrix
-        row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
-        if len(row_index_list) < 3:
-            err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
-                      'Now it is only %d selected.' % len(row_index_list)
-            self.pop_one_button_dialog(err_msg)
-            return
-
-        # loop over all peaks for peak information
-        peak_info_list = list()
-        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
-        assert status
-        for i_row in row_index_list:
-            scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-            try:
-                peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-            except AssertionError as ass_err:
-                self.pop_one_button_dialog(str(ass_err))
-                return
-            assert isinstance(peak_info, r4c.PeakInfo)
-            peak_info_list.append(peak_info)
-        # END-FOR
+        peak_info_list = self._build_peak_info_list()
 
         # Refine UB matrix
         try:
@@ -416,7 +395,70 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(str(error))
             return
 
+        # FIXME/NOW/1st: replace the following by method _show_refined_ub_result()
         # Deal with result
+        ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
+        # ub matrix
+        self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
+
+        # lattice parameter
+        assert isinstance(lattice, list)
+        assert len(lattice) == 6
+        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
+        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
+        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
+        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
+        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
+        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
+
+        assert isinstance(lattice_error, list)
+        assert len(lattice_error) == 6
+        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
+        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
+        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
+        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
+        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
+        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
+
+        return
+
+    def do_refine_ub_fft(self):
+        """
+        Refine UB matrix by calling FFT method
+        :return:
+        """
+        # get PeakInfo list and check
+        peak_info_list = self._build_peak_info_list()
+        assert len(peak_info_list) >= 3, 'PeakInfo must be larger or equal to 3 (.' \
+                                         'now given %d) to refine UB matrix' % len(peak_info_list)
+
+        # get lattice range information
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_minD,
+                                                        self.ui.lineEdit_maxD])
+        assert status
+        min_d, max_d = ret_obj
+        if (0 < min_d < max_d) is False:
+            self.pop_one_button_dialog('Range of d is not correct!')
+            return
+
+        # friendly suggestion
+        if len(peak_info_list) <= 9:
+            self.pop_one_button_dialog('It is recommended to use at least 9 reflections'
+                                       'to refine UB matrix without prior knowledge.')
+
+        # refine
+        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d)
+
+        # set value
+
+        return
+
+    def _show_refined_ub_result(self):
+        """
+        Show the result from refined UB matrix
+        :return:
+        """
+       # Deal with result
         ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
         # ub matrix
         self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
@@ -443,17 +485,34 @@ class MainWindow(QtGui.QMainWindow):
         # TODO/NOW/1st: need to offer users with different types of UB matrix refinement tool!
         # call mantid.FindUBUsingIndexedPeaks()
         # refer to Calculate UB matrix to build PeakWorkspace
-
-        raise RuntimeError('Next Release')
-
-    def do_refine_ub_fft(self):
-        """
-        Refine UB matrix by calling FFT method
+    def _build_peak_info_list(self):
+        """ Build a list of PeakInfo to build peak workspace
         :return:
         """
-        # TODO/NOW/Combine with do_refine_ub()
+        # Collecting all peaks that will be used to refine UB matrix
+        row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
+        if len(row_index_list) < 3:
+            err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
+                      'Now it is only %d selected.' % len(row_index_list)
+            self.pop_one_button_dialog(err_msg)
+            return
 
-        return
+        # loop over all peaks for peak information
+        peak_info_list = list()
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        assert status
+        for i_row in row_index_list:
+            scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
+            try:
+                peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+            except AssertionError as ass_err:
+                self.pop_one_button_dialog(str(ass_err))
+                return
+            assert isinstance(peak_info, r4c.PeakInfo)
+            peak_info_list.append(peak_info)
+        # END-FOR
+
+        return peak_info_list
 
     def change_data_access_mode(self):
         """ Change data access mode between downloading from server and local

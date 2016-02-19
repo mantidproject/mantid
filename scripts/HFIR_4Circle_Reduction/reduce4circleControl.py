@@ -346,6 +346,7 @@ class CWSCDReductionControl(object):
             assert isinstance(peak_info, PeakInfo)
 
         # Construct a new peak workspace by combining all single peak
+        # TODO/FIXME/NOW - replace by _build_peaks_workspace
         ub_peak_ws_name = 'Temp_UB_Peak'
         api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=ub_peak_ws_name)
         assert AnalysisDataService.doesExist(ub_peak_ws_name)
@@ -1403,21 +1404,7 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_Refine_UB_Peak'
-        api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace(),
-                           OutputWorkspace=ub_peak_ws_name)
-
-        for i_peak_info in xrange(1, len(peak_info_list)):
-            # Get peak workspace
-            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
-            assert peak_ws is not None
-            assert peak_ws is not tuple
-
-            # Combine peak workspace
-            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name,
-                                       RHSWorkspace=peak_ws,
-                                       CombineMatchingPeaks=False,
-                                       OutputWorkspace=ub_peak_ws_name)
-        # END-FOR(i_peak_info)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
 
         # Calculate UB matrix
         try:
@@ -1426,6 +1413,7 @@ class CWSCDReductionControl(object):
             return False, 'Unable to refine UB matrix due to %s.' % str(e)
 
         # Get peak workspace
+        # TODO/NOW/1st - replace this part by method _get_refined_ub_data
         refined_ub_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
         assert refined_ub_ws is not None
 
@@ -1445,16 +1433,100 @@ class CWSCDReductionControl(object):
 
         return True, (refined_ub_matrix, lattice, lattice_error)
 
-    def refine_ub_matrix_least_info(self):
+    def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max):
         """
-        Refine UB matrix with least information from user
+        Refine UB matrix with least information from user, i.e., using FindUBFFT
+        Requirements: at least 6 PeakInfo objects are given
+        Guarantees: Refine UB matrix by FFT
         :return:
         """
-        # TODO/NOW/1st: Implement!
-        api.FindUBFFT()
+        # Check
+        assert isinstance(peak_info_list, list) and len(peak_info_list) > 6
+        assert 0 < d_min < d_max
+
+        # Build a new PeaksWorkspace
+        peak_ws_name = 'TempUBFFTPeaks'
+        self._build_peaks_workspace(peak_info_list, peak_ws_name)
+
+        # Refine
+        api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
+                           Tolerance=0.15,
+                           MinD=d_min,
+                           MaxD=d_max)
+
+        # Get result
+        self._refinedUBTup = self._get_refined_ub_data(peak_ws_name)
 
         return
 
+    @staticmethod
+    def _get_refined_ub_data(peak_ws_name):
+        """ Get UB matrix, lattice parameters and their errors from refined UB matrix
+        :param peak_ws_name:
+        :return:
+        """
+        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+        assert peak_ws is not None
+
+        oriented_lattice = peak_ws.sample().getOrientedLattice()
+
+        refined_ub_matrix = oriented_lattice.getUB()
+        lattice = [oriented_lattice.a(), oriented_lattice.b(),
+                   oriented_lattice.c(), oriented_lattice.alpha(),
+                   oriented_lattice.beta(), oriented_lattice.gamma()]
+        lattice_error = [oriented_lattice.errora(), oriented_lattice.errorb(),
+                         oriented_lattice.errorc(), oriented_lattice.erroralpha(),
+                         oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
+
+        print '[DB-BAT] Refined UB = ', refined_ub_matrix, 'of type', type(refined_ub_matrix)
+
+        result_tuple = (peak_ws, refined_ub_matrix, lattice, lattice_error)
+
+        return result_tuple
+
+    @staticmethod
+    def _build_peaks_workspace(peak_info_list, peak_ws_name):
+        """ From a list of PeakInfo, using the averaged peak centre of each of them
+        to build a new PeaksWorkspace
+        Requirements: a list of PeakInfo
+        Guarantees: a PeaksWorkspace is created in AnalysisDataService.
+        :param peak_info_list:
+        :param peak_ws_name:
+        :return:
+        """
+        # check
+        assert isinstance(peak_info_list, list)
+        assert len(peak_info_list) > 0
+        assert isinstance(peak_ws_name, str)
+
+        # create an empty
+        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name)
+        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+
+        # add peak
+        num_peak_info = len(peak_info_list)
+        for i_peak_info in xrange(num_peak_info):
+            # Set HKL as optional
+            peak_info_i = peak_info_list[i_peak_info]
+            peak_ws = peak_info_i.get_peak_workspace()
+            assert peak_ws.getNumberPeaks() > 0
+            # get any peak to add
+            peak_temp = peak_ws.getPeak(0)
+            peak_ws.addPeak(peak_temp)
+
+            # set the peak in ub peak workspace right
+            peak_i = peak_ws.getPeak(i_peak_info)
+            # user HKL
+            h, k, l = peak_info_i.get_user_hkl()
+            peak_i.setHKL(h, k, l)
+            # q-sample
+            q_x, q_y, q_z = peak_info_i.get_peak_centre()
+            q_sample = V3D(q_x, q_y, q_z)
+            peak_i.setQSampleFrame(q_sample)
+        # END-FOR(i_peak_info)
+
+        return
 
     def save_scan_survey(self, file_name):
         """
