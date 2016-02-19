@@ -2,6 +2,7 @@
 #define MANTID_VATES_PRESENTER_FACTORIES_H
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace VATES {
