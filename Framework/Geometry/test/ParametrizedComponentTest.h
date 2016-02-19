@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <string>
-#include <unordered_set>
 #include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
@@ -200,7 +199,7 @@ public:
 
 private:
   void checkBaseParameterNamesExist(
-      const std::unordered_set<std::string> &paramNames) {
+      const std::set<std::string> &paramNames) {
     TS_ASSERT_DIFFERS(paramNames.find(m_strName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_dblName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_posName), paramNames.end());

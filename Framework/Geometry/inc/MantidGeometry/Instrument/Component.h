@@ -10,7 +10,6 @@
 #include <sstream>
 #include <typeinfo>
 #include <vector>
-#include <unordered_set>
 #include <Poco/SAX/Attributes.h>
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from
@@ -170,7 +169,7 @@ public:
   // resort to
   // one for each type, luckily there won't be too many
   /// Return the parameter names
-  std::unordered_set<std::string>
+  std::set<std::string>
   getParameterNames(bool recursive = true) const override;
   /// return the parameter names and the component they are from
   std::map<std::string, ComponentID>

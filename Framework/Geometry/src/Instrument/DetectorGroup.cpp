@@ -315,10 +315,10 @@ int DetectorGroup::getPointInObject(V3D &point) const {
 * are also included
 * @returns A set of strings giving the parameter names for this component
 */
-std::unordered_set<std::string>
+std::set<std::string>
 DetectorGroup::getParameterNames(bool recursive) const {
   (void)recursive; // Avoid compiler warning
-  return std::unordered_set<std::string>();
+  return std::set<std::string>();
 }
 
 /**
