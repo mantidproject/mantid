@@ -222,8 +222,8 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(0)(1e-3)(
-        6e-3); // Provide rebin arguments. Arguments are in seconds.
+    Mantid::MantidVec rebinArgs = {
+        0, 1e-3, 6e-3}; // Provide rebin arguments. Arguments are in seconds.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -238,7 +238,8 @@ public:
      0e-3    1e-3   2e-3    3e-3    4e-3    5e-3    6e-3
      |       |      |       |       |       |       |         X array
      -----------^      ^                   ^
-     -----------|      |                   |                  TOF pulse times
+     -----------|      |                   |                  TOF pulse
+     times
      ----------5*1/3  5*1/2               5*1/1
      ----------spec3  spec2               spec1
 

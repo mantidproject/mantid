@@ -614,7 +614,7 @@ Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   Instrument_const_sptr inst;
 
   Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-  MatrixWorkspace_sptr tempWS(new Workspace2D());
+  MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("InstrumentName", InstrumentName);
   childAlg->setProperty("RewriteSpectraMap",

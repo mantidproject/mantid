@@ -213,18 +213,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   // the output
   if (outputWS != inputWS) {
     if (m_inputEvents) {
-      // Need to create by name as WorkspaceFactory otherwise spits out
-      // Workspace2D when EventWS passed in
-      outputWS = WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1);
-      // Copy geometry etc. over
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        false);
-      // Need to copy over the data as well
-      EventWorkspace_const_sptr inputEventWS =
-          boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS)
-          ->copyDataFrom(*inputEventWS);
+      outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
     } else {
       // Create the output workspace
       outputWS = WorkspaceFactory::Instance().create(inputWS);

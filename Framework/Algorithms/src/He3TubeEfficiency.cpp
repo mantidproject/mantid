@@ -409,42 +409,25 @@ void He3TubeEfficiency::execEvent() {
   this->g_log.information("Processing event workspace");
 
   const API::MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  DataObjects::EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
-          matrixInputWS);
+      getProperty("InputWorkspace");
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  DataObjects::EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-        matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
     matrixOutputWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+        API::MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS =
+      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
-  std::size_t numHistograms = inputWS->getNumberHistograms();
+  std::size_t numHistograms = outputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
+    Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
     if (det->isMonitor() || det->isMasked()) {
       continue;
     }
@@ -455,7 +438,7 @@ void He3TubeEfficiency::execEvent() {
     } catch (std::out_of_range &) {
       // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid) {
-        this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
+        this->spectraSkipped.push_back(outputWS->getAxis(1)->spectraNo(i));
         outputWS->maskWorkspaceIndex(i);
       }
     }
