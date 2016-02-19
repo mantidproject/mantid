@@ -70,7 +70,7 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
  */
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {
-  return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
+  return std::vector<size_t>(0, this->parameterIndex(AMP_PARAM));
 }
 
 /**
@@ -100,7 +100,7 @@ size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
  */
 void MultivariateGaussianComptonProfile::massProfile(double *result,
                                                      const size_t nData) const {
-  const double amplitude(getParameter(1));
+  const double amplitude(getParameter(0));
   this->massProfile(result, nData, amplitude);
 }
 
@@ -109,9 +109,9 @@ void MultivariateGaussianComptonProfile::massProfile(
   std::vector<double> s2Cache;
   buildS2Cache(s2Cache);
 
-  const double sigmaX(getParameter(0));
-  const double sigmaY(getParameter(1));
-  const double sigmaZ(getParameter(2));
+  const double sigmaX(getParameter(1));
+  const double sigmaY(getParameter(2));
+  const double sigmaZ(getParameter(3));
 
   const double prefactor =
       (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
@@ -165,9 +165,9 @@ void MultivariateGaussianComptonProfile::buildS2Cache(
     std::vector<double> &s2Cache) const {
   s2Cache.clear();
 
-  double sigmaX2(getParameter(0));
-  double sigmaY2(getParameter(1));
-  double sigmaZ2(getParameter(2));
+  double sigmaX2(getParameter(1));
+  double sigmaY2(getParameter(2));
+  double sigmaZ2(getParameter(3));
 
   sigmaX2 *= sigmaX2;
   sigmaY2 *= sigmaY2;
