@@ -119,7 +119,13 @@ Options for finding the beam center
 ``ScatteringBeamCenter(datafile, beam_radius=3.0)``
     Finds the beam center using the scattered beam method. The process is identical to the direct beam method, with the only difference being that the pixels within a distance R (the ``beam_radius`` parameter) of the beam center guess are excluded from the calculation. The direct beam is thus excluded and only the scattered data is used.
 
+``TotalChargeNormalization(normalize_to_beam=True, beam_file='')``
+    [**EQSANS only**] Specifies that we want to normalize by the total proton charge, using the specified ``beam_file`` for the beam profile.
 
+``BeamMonitorNormalization(reference_flux_file)``
+    [**EQSANS only**] Specifies that we want to normalize by the beam monitor, using the specified reference flux file.
+    
+    
 .. _`Normalization options`:
 
 Normalization options
@@ -373,6 +379,28 @@ I(Q) calculation
     Do not save the I(q) result.
 
 
+    
+``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
+    Specifies I(q) wedges to compute.
+    
+.. figure:: /images/SANS_wedge_definition.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Wedge definition.
+    
+``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
+    Stitches a set of SANS data sets
+    
+    - ``data_list``: List of workspaces to stitch.
+    - ``q_min``: Minimum Q-value of the overlap between two consecutive data sets. The q_min argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
+    - ``q_max``: Maximum Q-value of the overlap between two consecutive data sets (must be an array for more than two data sets). The q_max argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
+    - ``output_workspace``: Name of the output workspace containing the stitched data.
+    - ``scale``: Scaling factor. The scaling factor should either be a single number or a list of length equal to the number of data sets. The former will scale everything by the given factor, while the latter will assign the given scaling factors to the data sets.
+    - ``save_output``: If true, the output will be saved in the current working directory.
+
+
+
+
 .. _`General commands`:
 
 General commands
@@ -402,20 +430,33 @@ General commands
 ``DivideByThickness(thickness=1.0)``
     Specifies a thickness to normalize the output I(q) by, in cm.
     
-``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
-    Specifies I(q) wedges to compute.
-    
-.. figure:: /images/SANS_wedge_definition.png
-   :figwidth: 10 cm
-   :align: right
-   :alt: Wedge definition.
-    
-``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
-    Stitches a set of SANS data sets
-    
-    - ``data_list``: List of workspaces to stitch.
-    - ``q_min``: Minimum Q-value of the overlap between two consecutive data sets. The q_min argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
-    - ``q_max``: Maximum Q-value of the overlap between two consecutive data sets (must be an array for more than two data sets). The q_max argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
-    - ``output_workspace``: Name of the output workspace containing the stitched data.
-    - ``scale``: Scaling factor. The scaling factor should either be a single number or a list of length equal to the number of data sets. The former will scale everything by the given factor, while the latter will assign the given scaling factors to the data sets.
-    - ``save_output``: If true, the output will be saved in the current working directory.
+``PerformFlightPathCorrection(do_correction=True)``
+    Specifies that we want to perform the flight path correction.
+
+``SetTOFTailsCutoff(low_cut=0.0, high_cut=0.0)``
+    Specifies the TOF width to cut on each side of the TOF distribution.
+
+``UseConfigTOFTailsCutoff(use_config=True)``
+    Use the TOF cut specified in the instrument configuration on /SNS/EQSANS.
+
+``SkipTOFCorrection(skip=True)``
+    Skips the TOF correction. This is likely to give you bad results unless you know what you are doing.
+
+``UseConfigMask(use_config=True)``
+    Use the mask configuration defined in the instrument configuration on /SNS/EQSANS.
+
+``SetWavelengthStep(step=0.1)``
+    Sets the wavelength step size used when binning the TOF data after converting to wavelength. The I(q) is computed independently for each wavelength bin and combined afterwards.
+
+``UseConfig(use_config=True)``
+    Use the instrument configuration on /SNS/EQSANS.
+
+``CombineTransmissionFits(combine_frames=True)``
+    If True and we are running in frame-skipping mode, both frames will be processed together when measuring the transmission.
+
+``BckCombineTransmissionFits(combine_frames=True)``
+    Similar to ``CombineTransmissionFits``, but for the background.
+
+``Resolution(sample_aperture_diameter=10.0)``
+    Specifies that we want to q-resolution to be computed.
+
