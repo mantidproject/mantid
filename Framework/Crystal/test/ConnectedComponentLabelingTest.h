@@ -170,8 +170,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3,
                       uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -209,8 +208,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 4,
                       uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -237,8 +235,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object", 1, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockStrategy));
@@ -280,8 +277,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too",
                       2, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -362,8 +358,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too",
                       2, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -430,8 +425,7 @@ public:
 
     // ----------- Basic cluster checks
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS(
         "Should have 3 clusters, but we have some 'empty' entries too", 4,
         uniqueEntries.size());
@@ -492,8 +486,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3,
                       uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -516,8 +509,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("1 object covering entire space", 1,
                       uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -540,8 +532,7 @@ public:
     ConnectedComponentLabeling ccl(labelingId, nThreads);
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("3 objects", 3, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));
@@ -612,8 +603,7 @@ public:
     Progress prog;
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("One unique real label (and one empty)", 2,
                       uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
@@ -679,8 +669,7 @@ public:
 
     // ----------- Basic cluster checks
 
-    auto uniqueEntries =
-        connection_workspace_to_set_of_labels(outWS.get());
+    auto uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Should be chequered pattern", 2, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, size_t(0)));
     TS_ASSERT(does_set_contain(uniqueEntries, size_t(1)));

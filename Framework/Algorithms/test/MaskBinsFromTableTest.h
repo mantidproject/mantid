@@ -280,7 +280,8 @@ public:
         return;
       } else {
         auto detidset = spec->getDetectorIDs();
-        for (auto setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
+        for (auto setiter = detidset.begin(); setiter != detidset.end();
+             ++setiter)
           cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter
                << ".\n";
       }

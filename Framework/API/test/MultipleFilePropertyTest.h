@@ -131,7 +131,8 @@ public:
         // when multifileloading is turned off via the preferences file.
         "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt"};
 
-    std::unordered_set<std::string> whiteSpaceDirFilenames = {"file with whitespace.txt"};
+    std::unordered_set<std::string> whiteSpaceDirFilenames = {
+        "file with whitespace.txt"};
 
     createFilesInDirectory(dummyFilenames, m_dummyFilesDir);
     createFilesInDirectory(whiteSpaceDirFilenames, m_dummyFilesDir);

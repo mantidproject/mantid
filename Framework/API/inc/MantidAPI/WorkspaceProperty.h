@@ -322,8 +322,7 @@ public:
     if (this->direction() == Kernel::Direction::Input ||
         this->direction() == Kernel::Direction::InOut) {
       // If an input workspace, get the list of workspaces currently in the ADS
-      auto vals =
-          AnalysisDataService::Instance().getObjectNames();
+      auto vals = AnalysisDataService::Instance().getObjectNames();
       if (isOptional()) // Insert an empty option
       {
         vals.insert("");

@@ -199,7 +199,8 @@ public:
   }
 
 private:
-  void checkBaseParameterNamesExist(const std::unordered_set<std::string> &paramNames) {
+  void checkBaseParameterNamesExist(
+      const std::unordered_set<std::string> &paramNames) {
     TS_ASSERT_DIFFERS(paramNames.find(m_strName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_dblName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_posName), paramNames.end());

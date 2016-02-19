@@ -227,13 +227,16 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it, s_it;
+  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
+      s_it;
 
   for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator,
-              std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator>
-        keyRange = mymap.equal_range(theKey);
+    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator,
+              std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator> keyRange =
+        mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

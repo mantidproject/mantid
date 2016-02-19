@@ -177,8 +177,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   static boost::python::object getObjectNamesAsList(SvcType &self) {
     boost::python::list names;
     const auto keys = self.getObjectNames();
-    for (auto itr = keys.begin(); itr != keys.end();
-         ++itr) {
+    for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }
     assert(names.attr("__len__")() == keys.size());

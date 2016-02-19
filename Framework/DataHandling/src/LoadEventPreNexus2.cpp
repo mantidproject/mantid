@@ -530,7 +530,8 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
  */
 void LoadEventPreNexus2::processImbedLogs() {
   std::map<PixelType, size_t>::iterator mit;
-  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
+       ++pit) {
     // a. pixel ID -> index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);

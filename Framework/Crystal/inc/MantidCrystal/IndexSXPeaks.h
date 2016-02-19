@@ -90,8 +90,7 @@ public:
   }
   size_t candidateHKLSize() const { return _hkls.size(); }
   void delHKL(int h, int k, int l) {
-    auto it =
-        std::find(_hkls.cbegin(), _hkls.cend(), index(h, k, l));
+    auto it = std::find(_hkls.cbegin(), _hkls.cend(), index(h, k, l));
     if (it != _hkls.cend())
       _hkls.erase(it);
   }
