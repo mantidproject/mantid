@@ -385,19 +385,27 @@ I(Q) calculation
 
 Wedge calculation
 ^^^^^^^^^^^^^^^^^
-``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
-    Specifies I(q) wedges to compute.
-    
+
+Wedge calculation is done as part of the azimuthal averaging algorithm. The image below shows how the wedges are defined. A wedge includes both the forward and backward direction relative to the beam center. Any number of wedges can be used. They will be uniformly distributed around :math:`2\pi`. Each wedge is computed independently, so overlapping wedges are possible. As shown on the figure below, the angular offset is definited with respect to the x-axis.
+
 .. figure:: /images/SANS_wedge_definition.png
    :figwidth: 10 cm
    :align: right
    :alt: Wedge definition.
     
+``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
+    Specifies I(q) wedges to compute.
+    
+
     
 .. _`Data stitching`:
 
 Data Stitching
 ^^^^^^^^^^^^^^
+
+Data stitching can be done using the SANS reduction UI, or by calling the underlying command directly.
+
+
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets
     
