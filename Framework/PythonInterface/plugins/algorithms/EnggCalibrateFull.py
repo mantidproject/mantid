@@ -52,6 +52,14 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "new positions in spherical coordinates, the change in L2, and the DIFC and "
                              "ZERO parameters.")
 
+        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+                             doc = "Information on fitted peaks. The table has one row per calibrated "
+                             "detector contains. In each row, the parameters of all the peaks fitted "
+                             "are specified together with the the expected peak value (in d-spacing). "
+                             "The expected values are given in the field labelled 'dSpacing'. When "
+                             "fitting back-to-back exponential functions, the 'X0' column has the fitted "
+                             "peak center.")
+
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
@@ -113,10 +121,11 @@ class EnggCalibrateFull(PythonAlgorithm):
         EnggUtils.applyVanadiumCorrections(self, inWS, WSIndices, vanWS, vanIntegWS, vanCurvesWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
-        posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
+        pos_tbl, peaks_tbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
-        self.setProperty("OutDetPosTable", posTbl)
+        self.setProperty("OutDetPosTable", pos_tbl)
+        self.setProperty("FittedPeaks", peaks_tbl)
         self._applyCalibrationTable(inWS, posTbl)
         self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), posTbl)
 
@@ -148,10 +157,12 @@ class EnggCalibrateFull(PythonAlgorithm):
         indices of a bank)
         @param expectedPeaksD :: expected peaks in d-spacing
 
-        @return table with the detector positions, one row per detector
+        @return Two tables. A positions table, with the detector positions, one row per detector.
+        A peaks details table with the fitted parameters for every of the peaks of every detector.
 
         """
         posTbl = self._createPositionsTable()
+        peaksTbl = self._createPeaksFittedDetailsTable()
 
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 
@@ -177,9 +188,13 @@ class EnggCalibrateFull(PythonAlgorithm):
             # TODO: add information about peaks
             posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
                            difc, zero])
+
+            # fitted parameter details as a string for every peak for one detector
+            peaks_details = self._build_peaks_details_string(fitted_peaks_table)
+            peaksTbl.addRow([det.getID(), peaks_details])
             prog.report()
 
-        return posTbl
+        return posTbl, peaksTbl
 
     def _fitPeaks(self, ws, wsIndex, expectedPeaksD):
         """
@@ -194,12 +209,13 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
+        # TODO: remove this!
         alg.setPropertyValue('OutFittedPeaksTable', 'table_fitted_peaks_internal')
         alg.execute()
 
         difc = alg.getProperty('Difc').value
         zero = alg.getProperty('Zero').value
-        fitted_peaks_table = alg.getProperty('FittedPeaks')
+        fitted_peaks_table = alg.getProperty('FittedPeaks').value
 
         return (zero, difc, fitted_peaks_table)
 
@@ -227,6 +243,44 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return table
 
+    def _createPeaksFittedDetailsTable(self):
+        """
+        TODO
+        """
+        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.execute()
+        table = alg.getProperty('OutputWorkspace').value
+
+        table.addColumn('int', 'Detector ID')
+        table.addColumn('str', 'Parameters')
+
+        return table
+
+    def _build_peaks_details_string(self, fitted_params_tbl):
+        """
+        Puts all the parameters from every peak (row) of the input table into a JSON string,
+        with the keys set to the row/peak index, and values as the string of parameter names:fitted
+        values
+
+        @param fitted_params :: table with each row containing fitted parameters as a dictionary of
+        (parameter name:fitted value), as returned by EnggFitPeaks
+
+        Returns::
+        Fitted parameters as a JSON string, for every peak (corresponding to a detector or spectrum).
+        For example:
+        '{{"1": {"A": 0.7349963692408943, "X0_Err": 58.963668189178975, "B": 0.16836661002332443,
+        "A0": 0.05055372128720299, "I": 28.933988934616544, ... "B_Err": 1.827671204959159}}'
+        ...
+        '{"15": {"A": 0.7349963692408943, "X0_Err": 58.963668189178975, ... B_Err": 1.827671204959159}}}'
+
+        """
+        import json
+        all_dict = {}
+        for row_idx, row_txt in enumerate(fitted_params_tbl):
+            all_dict[row_idx+1] = row_txt
+
+        return json.dumps(all_dict)
+
     def _outputDetPosFile(self, filename, tbl):
         """
         Writes a text (csv) file with the detector positions information that also goes into the
@@ -249,6 +303,9 @@ class EnggCalibrateFull(PythonAlgorithm):
             for r in range(0, tbl.rowCount()):
                 f.write("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" %
                         (tbl.cell(r,0),
+                         #                 f.write("{0:d}, {1:.10f}, {1:.10f}, {3:.10f}, {4:.10f}, {5:.10f}, {6:.10f}, "
+                         #"{7:.10f}, {8:.10f}, {9:.10f}, {10:.10f}, {11:.10f}, {12:.10f}\n".
+                         #format(tbl.cell(r,0),
                          tbl.cell(r,1).getX(), tbl.cell(r,1).getY(), tbl.cell(r,1).getZ(),
                          tbl.cell(r,2).getX(), tbl.cell(r,2).getY(), tbl.cell(r,2).getZ(),
                          tbl.cell(r,3), tbl.cell(r,4), tbl.cell(r,5),
