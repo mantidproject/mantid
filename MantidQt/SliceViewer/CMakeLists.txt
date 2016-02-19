@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
+	src/EllipsoidPlaneSliceCalculator.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
@@ -13,7 +14,7 @@ set ( SRC_FILES
 	src/PeakPalette.cpp
 	src/PeakRepresentation.cpp
 	src/PeakRepresentationCross.cpp
-        #src/PeakRepresentationEllipsoid.cpp
+        src/PeakRepresentationEllipsoid.cpp
         src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
 	src/PeakView.cpp
@@ -37,6 +38,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
+	inc/MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h
 	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
@@ -53,7 +55,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakPrimitives.h
         inc/MantidQtSliceViewer/PeakRepresentation.h
 	inc/MantidQtSliceViewer/PeakRepresentationCross.h
-        #inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
+        inc/MantidQtSliceViewer/PeakRepresentationEllipsoid.h
         inc/MantidQtSliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/PeakView.h

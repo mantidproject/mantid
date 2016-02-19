@@ -1,16 +1,17 @@
 #include "MantidQtSliceViewer/PeakViewFactory.h"
-#include "MantidQtSliceViewer/PeakRepresentation.h"
 #include "MantidQtSliceViewer/PeakRepresentationCross.h"
 #include "MantidQtSliceViewer/PeakRepresentationSphere.h"
+#include "MantidQtSliceViewer/PeakRepresentationEllipsoid.h"
 #include "MantidQtSliceViewer/PeakView.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 
 namespace
 {
-
 struct ZMinAndMax {
     double zMax;
     double zMin;
@@ -38,6 +39,28 @@ ZMinAndMax getZMinAndMax(Mantid::API::IMDWorkspace_sptr workspace,
     zMinAndMax.zMin = zMin;
 
     return zMinAndMax;
+}
+
+std::vector<Mantid::Kernel::V3D> getDirectionsForEllipticalPeak(
+    const Mantid::Geometry::IPeak &peak,
+    const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+    const Mantid::Geometry::MDFrame &frame)
+{
+    std::vector<Mantid::Kernel::V3D> directions;
+    if (frame.name() == Mantid::Geometry::QSample::QSampleName) {
+        Mantid::Kernel::Matrix<double> goniometerMatrix
+            = peak.getGoniometerMatrix();
+        if (goniometerMatrix.Invert()) {
+            directions
+                = ellipticalShape.getDirectionInSpecificFrame(goniometerMatrix);
+        } else {
+            directions = ellipticalShape.directions();
+        }
+    } else {
+
+        directions = ellipticalShape.directions();
+    }
+    return directions;
 }
 }
 
@@ -141,10 +164,28 @@ PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationSphere(
 }
 
 PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationEllipsoid(
-    Mantid::Kernel::V3D position, const Mantid::Geometry::IPeak &) const
+    Mantid::Kernel::V3D position, const Mantid::Geometry::IPeak &peak) const
 {
-    // TODO Replace with correct implementation
-    return std::make_shared<PeakRepresentationCross>(position, -1.0, 1.0);
+    const auto &shape = peak.getPeakShape();
+    const auto &ellipsoidShape
+        = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid &>(shape);
+
+    // Ellipsoidd paramters
+    const auto abcRadii = ellipsoidShape.abcRadii();
+    const auto abcRadiiBackgroundInner
+        = ellipsoidShape.abcRadiiBackgroundInner();
+    const auto abcRadiiBackgroundOuter
+        = ellipsoidShape.abcRadiiBackgroundOuter();
+
+    // Extract directions for the displayed frame
+    const auto dimension0 = m_mdWS->getDimension(0);
+    const auto &frame = dimension0->getMDFrame();
+    auto directions
+        = getDirectionsForEllipticalPeak(peak, ellipsoidShape, frame);
+
+    return std::make_shared<PeakRepresentationEllipsoid>(
+        position, abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter,
+        directions);
 }
 
 void PeakViewFactory::swapPeaksWorkspace(

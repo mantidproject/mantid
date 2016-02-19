@@ -58,6 +58,8 @@ struct PeakPrimitivesSphere : public PeakPrimitives {
     double backgroundInnerRadiusX;
     double backgroundInnerRadiusY;
 };
+
+
 }
 }
 

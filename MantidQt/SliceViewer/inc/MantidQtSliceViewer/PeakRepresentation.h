@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include <boost/optional.hpp>
 
 class QPainter;
 
@@ -22,6 +23,10 @@ struct PeakRepresentationViewInformation {
 };
 
 class PeakBoundingBox;
+
+
+/// Alisas for a boost optional double.
+typedef boost::optional<double> optional_double;
 
 /** PeakRepresentation : Allows the draw a general visual peak shape.
 

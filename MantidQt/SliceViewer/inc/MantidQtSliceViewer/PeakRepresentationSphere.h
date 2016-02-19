@@ -2,15 +2,11 @@
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_SPHERE_H
 
 #include "MantidQtSliceViewer/PeakRepresentation.h"
-#include <boost/optional.hpp>
 
 namespace MantidQt
 {
 namespace SliceViewer
 {
-
-/// Alisas for a boost optional double.
-typedef boost::optional<double> optional_double;
 
 /** PeakRepresentationSphere : Draws a circle for spherical peaks.
 
