@@ -315,8 +315,7 @@ int DetectorGroup::getPointInObject(V3D &point) const {
 * are also included
 * @returns A set of strings giving the parameter names for this component
 */
-std::set<std::string>
-DetectorGroup::getParameterNames(bool recursive) const {
+std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const {
   (void)recursive; // Avoid compiler warning
   return std::set<std::string>();
 }

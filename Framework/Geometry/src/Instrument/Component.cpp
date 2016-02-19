@@ -418,8 +418,7 @@ void Component::getBoundingBox(BoundingBox &boundingBox) const {
 * are also included
 * @returns A set of strings giving the parameter names for this component
 */
-std::set<std::string>
-Component::getParameterNames(bool recursive) const {
+std::set<std::string> Component::getParameterNames(bool recursive) const {
   if (!m_map)
     return std::set<std::string>();
 
@@ -429,8 +428,7 @@ Component::getParameterNames(bool recursive) const {
     // components
     boost::shared_ptr<const IComponent> parent = getParent();
     if (parent) {
-      std::set<std::string> parentNames =
-          parent->getParameterNames(true);
+      std::set<std::string> parentNames = parent->getParameterNames(true);
       names.insert(parentNames.begin(), parentNames.end());
     }
   }

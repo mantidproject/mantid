@@ -914,8 +914,7 @@ std::string ParameterMap::getString(const IComponent *comp,
  * @param comp :: A pointer to the component of interest
  * @returns A set of names of parameters for the given component
  */
-std::set<std::string>
-ParameterMap::names(const IComponent *comp) const {
+std::set<std::string> ParameterMap::names(const IComponent *comp) const {
   std::set<std::string> paramNames;
   const ComponentID id = comp->getComponentID();
   auto it_found = m_map.find(id);
