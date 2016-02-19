@@ -7,9 +7,9 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/NObserver.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -145,7 +145,7 @@ private:
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
-  mutable Mantid::Kernel::RecursiveMutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;
