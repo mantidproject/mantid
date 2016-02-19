@@ -326,13 +326,13 @@ void ReflMainViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
     return;
   }
 
-  std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+  auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(),
       ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
       ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
       ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
       ReflTableSchema::COL_DQQ, ReflTableSchema::COL_SCALE,
-      ReflTableSchema::COL_GROUP));
+      ReflTableSchema::COL_GROUP);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -1756,6 +1756,7 @@ void ReflMainViewPresenter::initOptions() {
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
+  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
@@ -1763,22 +1764,22 @@ ReflMainViewPresenter::getTransferStrategy() {
         makeCatalogConfigServiceAdapter(ConfigService::Instance()));
 
     // We make a user-based Catalog Info object for the transfer
-    auto catInfo = std::unique_ptr<ICatalogInfo>(new UserCatalogInfo(
+    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
         ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService));
+        *catConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source = std::unique_ptr<ReflMeasurementItemSource>(
-        new ReflNexusMeasurementItemSource);
+    std::unique_ptr<ReflMeasurementItemSource> source =
+        make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflMeasureTransferStrategy(std::move(catInfo), std::move(source)));
+    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+        std::move(catInfo), std::move(source));
+    return rtnStrategy;
   } else if (currentMethod == LegacyTransferMethod) {
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflLegacyTransferStrategy);
-
+    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
+    return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);
