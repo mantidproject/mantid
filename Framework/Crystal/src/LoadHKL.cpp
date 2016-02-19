@@ -33,12 +33,12 @@ LoadHKL::~LoadHKL() {}
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".hkl"}),
-      "Path to an hkl file to save.");
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, ".hkl"),
+                  "Path to an hkl file to save.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 

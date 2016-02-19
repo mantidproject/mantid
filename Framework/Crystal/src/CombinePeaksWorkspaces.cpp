@@ -37,14 +37,14 @@ const std::string CombinePeaksWorkspaces::category() const {
 /** Initialises the algorithm's properties.
  */
 void CombinePeaksWorkspaces::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("LHSWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "LHSWorkspace", "", Direction::Input),
                   "The first set of peaks.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("RHSWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The combined peaks list.");
 
   declareProperty(

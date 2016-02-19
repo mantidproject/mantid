@@ -72,20 +72,20 @@ OptimizeCrystalPlacement::OptimizeCrystalPlacement() : Algorithm() {}
 OptimizeCrystalPlacement::~OptimizeCrystalPlacement() {}
 
 void OptimizeCrystalPlacement::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
-  declareProperty(new ArrayProperty<int>(std::string("KeepGoniometerFixedfor"),
-                                         Direction::Input),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      std::string("KeepGoniometerFixedfor"), Direction::Input),
                   "List of run Numbers for which the goniometer settings will "
                   "NOT be changed");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("ModifiedPeaksWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("ModifiedPeaksWorkspace",
+                                                     "", Direction::Output),
       "Output Workspace of Peaks with optimized sample Orientations");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "FitInfoTable", "FitInfoTable", Direction::Output),
                   "Workspace of Results");
 
@@ -394,7 +394,7 @@ void OptimizeCrystalPlacement::exec() {
   g_log.notice() << "Output Status=" << OutputStatus << std::endl;
 
   //------------------ Fix up Covariance output --------------------
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
                       Direction::Output),
                   "The name of the TableWorkspace in which to store the final "

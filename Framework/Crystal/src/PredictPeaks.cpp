@@ -41,29 +41,31 @@ PredictPeaks::~PredictPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
-      "PeaksWorkspace) containing:\n"
-      "  - The relevant Instrument (calibrated as needed).\n"
-      "  - A sample with a UB matrix.\n"
-      "  - The goniometer rotation matrix.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
+                  "PeaksWorkspace) containing:\n"
+                  "  - The relevant Instrument (calibrated as needed).\n"
+                  "  - A sample with a UB matrix.\n"
+                  "  - The goniometer rotation matrix.");
 
   declareProperty(
-      new PropertyWithValue<double>("WavelengthMin", 0.1, Direction::Input),
+      make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
+                                             Direction::Input),
       "Minimum wavelength limit at which to start looking for single-crystal "
       "peaks.");
   declareProperty(
-      new PropertyWithValue<double>("WavelengthMax", 100.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
+                                             Direction::Input),
       "Maximum wavelength limit at which to stop looking for single-crystal "
       "peaks.");
 
-  declareProperty(
-      new PropertyWithValue<double>("MinDSpacing", 1.0, Direction::Input),
-      "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(
-      new PropertyWithValue<double>("MaxDSpacing", 100.0, Direction::Input),
-      "Maximum d-spacing of peaks to consider.");
+  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 1.0,
+                                                         Direction::Input),
+                  "Minimum d-spacing of peaks to consider. Default = 1.0");
+  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
+                                                         Direction::Input),
+                  "Maximum d-spacing of peaks to consider.");
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
@@ -79,13 +81,13 @@ void PredictPeaks::init() {
                   "option only works if the sample of the input workspace has "
                   "a crystal structure assigned.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional: An input PeaksWorkspace with the HKL of the peaks "
-                  "that we should predict. \n"
-                  "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
-                  "unused if this is specified.");
+  declareProperty(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "HKLPeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional: An input PeaksWorkspace with the HKL of the peaks "
+      "that we should predict. \n"
+      "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
+      "unused if this is specified.");
 
   declareProperty("RoundHKL", true,
                   "When using HKLPeaksWorkspace, this will round the HKL "
@@ -104,8 +106,8 @@ void PredictPeaks::init() {
   setPropertySettings("MaxDSpacing", set->clone());
   setPropertySettings("ReflectionCondition", set->clone());
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 }
 
