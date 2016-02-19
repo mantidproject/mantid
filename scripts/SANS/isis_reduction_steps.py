@@ -105,7 +105,8 @@ class LoadRun(object):
 
     wksp_name = property(get_wksp_name, None, None, None)
 
-    def _load_transmission(self, inst=None, is_can=False, extra_options=dict()):
+    def _load_transmission(self, inst=None, is_can=False, extra_options=None):
+        extra_options = dict()
         if '.raw' in self._data_file or '.RAW' in self._data_file:
             self._load(inst, is_can, extra_options)
             return
@@ -142,7 +143,7 @@ class LoadRun(object):
                     # except:
                     # self._load(inst, is_can, extra_options)
 
-    def _load(self, inst=None, is_can=False, extra_options=dict()):
+    def _load(self, inst=None, is_can=False, extra_options=None):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
@@ -150,6 +151,7 @@ class LoadRun(object):
             @param extra_options: arguments to pass on to the Load Algorithm.
             @return: number of periods in the workspace
         """
+        extra_options = dict()
         _inst = inst
         _is_can = is_can
         if self._period != self.UNSET_PERIOD:
@@ -2452,8 +2454,9 @@ class CalculateNormISIS(object):
     WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
     PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
 
-    def __init__(self, wavelength_deps=[]):
+    def __init__(self, wavelength_deps=None):
         super(CalculateNormISIS, self).__init__()
+        wavelength_deps = []
         self._wave_steps = wavelength_deps
         self._high_angle_pixel_file = ""
         self._low_angle_pixel_file = ""
@@ -2532,13 +2535,14 @@ class CalculateNormISIS(object):
         else:
             return False
 
-    def calculate(self, reducer, wave_wks=[]):
+    def calculate(self, reducer, wave_wks=None):
         """
             Multiplies all the wavelength scalings into one workspace and all the detector
             dependent scalings into another workspace that can be used by ConvertToQ
             @param reducer: settings used for this reduction
             @param wave_wks: additional wavelength dependent correction workspaces to include
         """
+        wave_wks = []
         # use the instrument's correction file
         corr_file = reducer.instrument.cur_detector().correction_file
         if corr_file:
@@ -3987,13 +3991,13 @@ class GetOutputName(ReductionStep):
         self.name_holder = ['problem_setting_name']
 
     def execute(self, reducer, workspace=None):
-        _workspace = workspace
         """
             Generates the name of the sample workspace and changes the
             loaded workspace to that.
             @param reducer the reducer object that called this step
             @param workspace un-used
         """
+        _workspace = workspace
         reducer.output_wksp = reducer.get_out_ws_name()
 
 
@@ -4053,6 +4057,7 @@ class StripEndNans(ReductionStep):
             @param reducer: unused
             @param workspace: the workspace to convert
         """
+        _reducer = reducer
         result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
@@ -4210,11 +4215,11 @@ class GetSampleGeom(ReductionStep):
     thickness = property(get_thickness, set_thickness, None, None)
 
     def execute(self, reducer, workspace):
-        _reducer = reducer
         """
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
+        _reducer = reducer
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
