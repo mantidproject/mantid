@@ -91,6 +91,9 @@ class PeakInfo(object):
             row_index = pt_spice_row_dict[pt_number]
             det_counts = spice_table_ws.cell(row_index, det_col_index)
             monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
+            if monitor_counts < 1.:
+                # skip zero-count
+                continue
             # convert q sample from V3D to ndarray
             q_i = peak_i.getQSampleFrame()
             q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
