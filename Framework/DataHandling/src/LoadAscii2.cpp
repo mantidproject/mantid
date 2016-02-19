@@ -9,15 +9,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include <MantidKernel/StringTokenizer.h>
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
 // String utilities
+#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-
-#include <Poco/StringTokenizer.h>
 
 #include <fstream>
 

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -58,6 +59,10 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  /// Perform validation of inputs
+  std::map<std::string, std::string> validateInputs() override;
+  /// Check whether supplied values are evenly spaced
+  bool areBinWidthsUneven(const MantidVec &xValues) const;
 };
 
 } // namespace Algorithm
