@@ -204,7 +204,7 @@ unsigned long vtkMDHWNexusReader::GetMTime()
 */
 void vtkMDHWNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  Mantid::Kernel::LockGuardMutex lockGuard(progressMutex);
+  std::lock_guard<std::mutex> lockGuard(progressMutex);
   this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
 }

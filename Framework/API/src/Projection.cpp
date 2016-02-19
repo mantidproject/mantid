@@ -4,6 +4,8 @@
 namespace Mantid {
 namespace API {
 
+using Mantid::Kernel::V3D;
+
 Projection::Projection() {
   m_dimensions[0][0] = 1.0;
   m_dimensions[1][1] = 1.0;

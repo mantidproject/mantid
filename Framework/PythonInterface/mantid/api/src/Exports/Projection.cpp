@@ -14,7 +14,6 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
-
 // clang-format off
 GCC_DIAG_OFF(strict-aliasing)
 // clang-format on
@@ -103,11 +102,11 @@ void export_Projection() {
   class_<Projection>(
       "Projection",
       init<>("Default constructor creates a two dimensional projection"))
-      .def(init<const V3D &, const V3D &>(
+      .def(init<const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &>(
           "Constructs a 3 dimensional projection, with w as the cross product "
           "of u and v.",
           args("u", "v")))
-      .def(init<const V3D &, const V3D &, const V3D &>(
+      .def(init<const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &>(
           "Constructs a 3 dimensional projection", args("u", "v", "w")))
       .def("__init__", make_constructor(&projCtor2),
            "Constructs a 3 dimensional projection, with w as the cross product "
@@ -133,37 +132,37 @@ void export_Projection() {
            "Sets the unit for the given dimension")
       .add_property(
            "u", make_function(&Projection::U, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(boost::bind(&Projection::setAxis, _1, 0, _2),
                          default_call_policies(),
-                         boost::mpl::vector3<void, Projection &, V3D>()))
+                         boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
            "v", make_function(&Projection::V, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(boost::bind(&Projection::setAxis, _1, 1, _2),
                          default_call_policies(),
-                         boost::mpl::vector3<void, Projection &, V3D>()))
+                         boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
            "w", make_function(&Projection::W, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(boost::bind(&Projection::setAxis, _1, 2, _2),
                          default_call_policies(),
-                         boost::mpl::vector3<void, Projection &, V3D>()))
+                         boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
            "u", make_function(&Projection::U, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(
                boost::bind(&projSetAxis, _1, 0, _2), default_call_policies(),
                boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
            "v", make_function(&Projection::V, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(
                boost::bind(&projSetAxis, _1, 1, _2), default_call_policies(),
                boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
            "w", make_function(&Projection::W, return_internal_reference<>(),
-                              boost::mpl::vector2<V3D &, Projection &>()),
+                              boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
            make_function(
                boost::bind(&projSetAxis, _1, 2, _2), default_call_policies(),
                boost::mpl::vector3<void, Projection &, const object &>()))
