@@ -116,7 +116,7 @@ void DataProcessorAlgorithm::mapPropertyName(
 /**
  * Copy a property from an existing algorithm.
  *
- * @warning This only works if you algorithm is in the WorkflowAlgorithms
+ * @warning This only works if your algorithm is in the WorkflowAlgorithms
  *sub-project.
  *
  * @param alg
@@ -134,12 +134,13 @@ void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg,
   }
 
   auto prop = alg->getPointerToProperty(name);
-  declareProperty(prop->clone(), prop->documentation());
+  declareProperty(std::unique_ptr<Property>(prop->clone()),
+                  prop->documentation());
 }
 
 /**
  * Get the property held by this object. If the value is the default see if it
- * contained in the PropertyManager. @see Algorithm::getPropertyValue(const
+ * is contained in the PropertyManager. @see Algorithm::getPropertyValue(const
  *string &)
  *
  * @param name
@@ -147,7 +148,7 @@ void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg,
  */
 std::string
 DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
-  // explicitely specifying a property wins
+  // explicitly specifying a property wins
   if (!isDefault(name)) {
     return Algorithm::getPropertyValue(name);
   }
