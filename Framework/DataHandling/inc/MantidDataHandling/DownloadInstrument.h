@@ -63,7 +63,7 @@ private:
 
   size_t
   removeOrphanedFiles(const std::string &directoryPath,
-                      const std::set<std::string> &filenamesToKeep) const;
+                      const std::unordered_set<std::string> &filenamesToKeep) const;
 
   Kernel::ProxyInfo m_proxyInfo;
 };
