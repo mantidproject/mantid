@@ -55,7 +55,8 @@ public:
   ~PropertyManagerOwner() override {}
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(Property *p, const std::string &doc = "") override;
+  void declareProperty(std::unique_ptr<Property> p,
+                       const std::string &doc = "") override;
 
   using IPropertyManager::declareProperty;
 

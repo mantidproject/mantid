@@ -36,9 +36,9 @@ operator=(const PropertyManagerOwner &po) {
 * exists
 *  @throw std::invalid_argument  if the property declared has an empty name.
 */
-void PropertyManagerOwner::declareProperty(Property *p,
+void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
                                            const std::string &doc) {
-  m_properties->declareProperty(p, doc);
+  m_properties->declareProperty(std::move(p), doc);
 }
 
 /** Set the ordered list of properties by one string of values, separated by
