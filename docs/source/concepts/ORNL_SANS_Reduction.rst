@@ -25,6 +25,7 @@ Contents
  - Solid_angle_correction_
  - Transmission_correction_
  - Absolute_normalization_
+ - `I(Q) calculation`_
 
 
 
@@ -184,12 +185,14 @@ Solid angle correction
 Transmission correction
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-**SetTransmission(trans, error)**: Sets the sample transmission. For each detector pixel, the transmission correction is applied as follows:
+``SetTransmission(trans, error)``
+    Sets the sample transmission. For each detector pixel, the transmission correction is applied as follows:
 
 
 
 
-**DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)**: Tells the reducer to use the direct beam method to calculate the sample transmission. The transmission is calculated as follows:
+``DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)``
+    Tells the reducer to use the direct beam method to calculate the sample transmission. The transmission is calculated as follows:
 
 
 
@@ -208,37 +211,69 @@ Once the transmission is calculated, it is applied to the input data set in the 
 **NoTransmission()**: Tells the reducer not to apply a transmission correction.
 TransmissionDarkCurrent(dark_current): Sets the dark current to be subtracted for the transmission measurement.
 
-**ThetaDependentTransmission(theta_dependence=True)**: If set to False, the transmission correction will be applied by dividing each pixel by the zero-angle transmission, without theta dependence.
+``ThetaDependentTransmission(theta_dependence=True)``
+    If set to False, the transmission correction will be applied by dividing each pixel by the zero-angle transmission, without theta dependence.
+
+
 Background subtraction
 
-**Background(datafile)**: The same reduction steps that are applied to the sample data are applied to the background data set. Those are the dark current subtraction, the data normalization, applying the detector mask, the sensitivity correction, the solid angle correction and the transmission correction. Although the same sensitivity correction is used for both sample and background, the background transmission is calculated separately from the sample transmission. Once all those reduction steps are applied to the background data set, the resulting background is subtracted from the sample data.
+``Background(datafile)``
+    The same reduction steps that are applied to the sample data are applied to the background data set. Those are the dark current subtraction, the data normalization, applying the detector mask, the sensitivity correction, the solid angle correction and the transmission correction. Although the same sensitivity correction is used for both sample and background, the background transmission is calculated separately from the sample transmission. Once all those reduction steps are applied to the background data set, the resulting background is subtracted from the sample data.
 
-**NoBackground()**: Tells the reducer not to subtract background.
+``NoBackground()``
+    Tells the reducer not to subtract background.
 
-**SetBckTransmission(trans, error)**: Sets the background transmission.
+``SetBckTransmission(trans, error)``
+    Sets the background transmission.
 
-**BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)**: Similar to DirectBeamTransmission, this command sets the options to measure the background transmission.
+``BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0)``
+    Similar to ``DirectBeamTransmission``, this command sets the options to measure the background transmission.
 
-**BckBeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0)**: Similar to BeamSpreaderTransmission, this command sets the options to measure the background transmission.
+``BckBeamSpreaderTransmission(sample_spreader, direct_spreader, sample_scattering, direct_scattering, spreader_transmission=1.0, spreader_transmission_err=0.0)``
+    Similar to ``BeamSpreaderTransmission``, this command sets the options to measure the background transmission.
 
-**BckTransmissionDarkCurrent(dark_current)**: Similar to TransmissionDarkCurrent, this command sets the dark current for the background.
+``BckTransmissionDarkCurrent(dark_current)``
+    Similar to ``TransmissionDarkCurrent``, this command sets the dark current for the background.
 
-**BckThetaDependentTransmission(theta_dependence=True)**: Similar to ThetaDependentTransmission, this command sets the theta-dependence option of the transmission correction for the background.
-Various commands
+``BckThetaDependentTransmission(theta_dependence=True)``
+    Similar to ``ThetaDependentTransmission``, this command sets the theta-dependence option of the transmission correction for the background.
 
-**AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False, n_bins=100, log_binning=False)**: Sets the options for azimuthal averaging. The binning parameter sets the binning of the output I(q) distribution in the following format:  (the binning will be found automatically if the binning parameter is not supplied). When letting the binning be calculated automatically, setting log_binning=True will tell the reducer to find the best log binning. The suffix parameter sets the suffix appended to the I(q) workspace name. If error_weighting is set to True, the pixel counts will be weighted by a function of the error when computing I(q) (see below).
+.. _`I(Q) calculation`:
 
-The binning of the output I(Q) distribution is defined by the user. It runs from  to  in steps of . Each pixel is divided in  sub-pixels. Each sub-pixel is assigned a count equal to  of the original pixel count.
-The intensity I(Q) in each Q bin is given by
+I(Q) calculation
+^^^^^^^^^^^^^^^^
+
+``AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False, n_bins=100, log_binning=False)``
+    Sets the options for azimuthal averaging. The binning parameter sets the binning of the output I(q) distribution in the following format: :math:`Q_{min}, \Delta Q, Q_{max}` (the binning will be found automatically if the ``binning`` parameter is not supplied). When letting the binning be calculated automatically, setting log_binning=True will tell the reducer to find the best log binning. The ``suffix`` parameter sets the suffix appended to the I(q) workspace name. If ``error_weighting`` is set to True, the pixel counts will be weighted by a function of the error when computing I(q) (see below).
+
+    The binning of the output *I(Q)* distribution is defined by the user.
+    It runs from :math:`Q_{min}` to :math:`Q_{max}` in steps of :math:`\Delta Q`.
+    Each pixel is divided in :math:`N_{sub} \times N_{sub}` sub-pixels. Each sub-pixel is assigned a count equal to  of the original pixel count.
+
+    The intensity I(Q) in each Q bin is given by
+
+        :math:`I(Q_j) = \frac{1}{\sum_i \ w} \ \sum_i \ wI_i`
+
+    where the sum runs over all sub-pixels *i* such that :math:`Q_j < q_i < Q_{j+1}`, where :math:`q_i` is the q-value of the given sub-pixel:
+
+        :math:`q_i = \frac{4\pi \ \sin(\theta)}{\lambda}`
+
+    The *w* factor is a weight that is set to 1 by default. Alternatively, pixels can be weighted as a function of their error by setting :math:`w=1/\Delta I_i`.
+
+    The resolution in Q is computed using Mildner-Carpenter.
+
+``IQxQy(nbins=100)``
+    Option to produce the reduced I(Qx, Qy).
+
+``NoIQxQy(nbins=100)``
+    Turns off the option to produce the reduced I(Qx, Qy).
+
+``NoSaveIq()``
+    Tells the reducer not to save the output I(q).
 
 
-
-where the sum runs over all sub-pixels i such that , where  is the q-value of the given sub-pixel:
-
-
-
-The w factor is a weight that is set to 1 by default. Alternatively, pixels can be weighted as a function of their error by setting .
-The resolution in Q is computed using Mildner-Carpenter.
+Other
+^^^^^
 
 **Clear()**: Re-initializes the reducer. All options are set to default values.
 
@@ -250,7 +285,6 @@ The resolution in Q is computed using Mildner-Carpenter.
 
 **SaveIqAscii()**: Tells the reducer to save the output I(q) to an ascii file. The file will have a name similar to the input file, with "_Iq" appended to it. The file will be located in the directory chosen with DataPath.
 
-**NoSaveIq()**: Tells the reducer not to save the output I(q).
 
 **SetSampleDetectorOffset(distance)**: Sets an additive sample-detector distance offset, in mm.
 
@@ -260,12 +294,8 @@ The resolution in Q is computed using Mildner-Carpenter.
 
 **ResetWavelength()**: Resets the wavelength to the value found in the data file.
 
-**IQxQy(nbins=100)**: Option to produce the reduced I(Qx, Qy).
-
-**NoIQxQy(nbins=100)**: Turns off the option to produce the reduced I(Qx, Qy).
 
 .. _absolute_normalization:
-
 
 Absolute Normalization
 ^^^^^^^^^^^^^^^^^^^^^^
