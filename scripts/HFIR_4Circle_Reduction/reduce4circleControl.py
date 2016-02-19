@@ -11,6 +11,7 @@
 import os
 import urllib2
 import csv
+import math
 
 import numpy
 
@@ -50,6 +51,7 @@ class PeakInfo(object):
 
         # Define class variable
         self._userHKL = None
+        self._calculatedHKL = numpy.array([0., 0., 0.])
         self._avgPeakCenter = None
 
         self._myPeakWSKey = (None, None, None)
@@ -208,6 +210,20 @@ class PeakInfo(object):
         assert AnalysisDataService.doesExist(md_ws_name)
 
         self._myDataMDWorkspaceName = md_ws_name
+
+        return
+
+    def set_indexed_hkl(self, hkl):
+        """
+
+        :param hkl:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+        assert isinstance(hkl, list)
+
+        for i in xrange(3):
+            self._calculatedHKL[i] = hkl[i]
 
         return
 
@@ -799,25 +815,6 @@ class CWSCDReductionControl(object):
 
         return self._myPeakInfoDict[p_key]
 
-    def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
-        """
-        Get peak workspace for the peak picked to calculate UB matrix
-        :param exp_number:
-        :param scan_number:
-        :param pt_number:
-        :return:
-        """
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
-
-        if (exp_number, scan_number, pt_number) not in self._myUBPeakWSDict:
-            return False, 'Exp %d Scan %d Pt %d has no peak workspace.' % (exp_number,
-                                                                           scan_number,
-                                                                           pt_number)
-
-        return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
-
     def has_merged_data(self, exp_number, scan_number, pt_number_list=None):
         """
         Check whether the data has been merged to an MDEventWorkspace
@@ -894,6 +891,8 @@ class CWSCDReductionControl(object):
         else:
             hkl_v3d = temp_index_ws.getPeak(0).getHKL()
             hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
+
+        peak_info.set_indexed_hkl(hkl)
 
         # TODO/After Test - Delete temporary peak workspace
 
@@ -1388,7 +1387,7 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub_matrix(self, peak_info_list):
+    def refine_ub_matrix(self, peak_info_list, set_hkl_int):
         """ Refine UB matrix
         Requirements: input is a list of PeakInfo objects and there are at least 3
                         non-degenerate peaks
@@ -1404,7 +1403,7 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_Refine_UB_Peak'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
 
         # Calculate UB matrix
         try:
@@ -1441,12 +1440,12 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Check
-        assert isinstance(peak_info_list, list) and len(peak_info_list) > 6
+        assert isinstance(peak_info_list, list) and len(peak_info_list) >= 6
         assert 0 < d_min < d_max
 
         # Build a new PeaksWorkspace
         peak_ws_name = 'TempUBFFTPeaks'
-        self._build_peaks_workspace(peak_info_list, peak_ws_name)
+        self._build_peaks_workspace(peak_info_list, peak_ws_name, True, False)
 
         # Refine
         api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
@@ -1485,7 +1484,7 @@ class CWSCDReductionControl(object):
         return result_tuple
 
     @staticmethod
-    def _build_peaks_workspace(peak_info_list, peak_ws_name):
+    def _build_peaks_workspace(peak_info_list, peak_ws_name, zero_hkl, hkl_to_int):
         """ From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
         Requirements: a list of PeakInfo
@@ -1509,16 +1508,25 @@ class CWSCDReductionControl(object):
         for i_peak_info in xrange(num_peak_info):
             # Set HKL as optional
             peak_info_i = peak_info_list[i_peak_info]
-            peak_ws = peak_info_i.get_peak_workspace()
-            assert peak_ws.getNumberPeaks() > 0
+            peak_ws_i = peak_info_i.get_peak_workspace()
+            assert peak_ws_i.getNumberPeaks() > 0
             # get any peak to add
-            peak_temp = peak_ws.getPeak(0)
+            peak_temp = peak_ws_i.getPeak(0)
             peak_ws.addPeak(peak_temp)
 
             # set the peak in ub peak workspace right
             peak_i = peak_ws.getPeak(i_peak_info)
             # user HKL
-            h, k, l = peak_info_i.get_user_hkl()
+            if zero_hkl is True:
+                h = k = l = 0.
+            else:
+                h, k, l = peak_info_i.get_user_hkl()
+                if hkl_to_int:
+                    # convert hkl to integer
+                    h = float(math.copysign(1, h)*int(abs(h)+0.5))
+                    k = float(math.copysign(1, k)*int(abs(k)+0.5))
+                    l = float(math.copysign(1, l)*int(abs(l)+0.5))
+            # END-IF
             peak_i.setHKL(h, k, l)
             # q-sample
             q_x, q_y, q_z = peak_info_i.get_peak_centre()

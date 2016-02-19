@@ -49,7 +49,7 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return
 
-    def clear_canvas(self):
+    def clear_3d_plots(self):
         """
         Clear all the figures from canvas
         :return:
@@ -118,12 +118,14 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return return_value
 
-    def plot_scatter(self, data_key):
+    def plot_scatter(self, data_key, base_color=None):
         """
         Plot data in scatter plot
         :param data_key:
         :return:
         """
+        # TODO/Now - Doc and check input
+
         # get data and check
         points = self._dataDict[data_key][0]
         intensities = self._dataDict[data_key][1]
@@ -155,8 +157,12 @@ class MplPlot3dCanvas(FigureCanvas):
 
         # color map for intensity
         color_list = list()
-        color_r = self._colorMap[0]
-        color_g = self._colorMap[1]
+        if base_color is None:
+            color_r = self._colorMap[0]
+            color_g = self._colorMap[1]
+        else:
+            color_r = base_color[0]
+            color_g = base_color[1]
 
         if len(intensities) > 1:
             min_intensity = min(intensities)

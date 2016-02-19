@@ -16,6 +16,7 @@ from mantidqtpython import MantidQt
 import reduce4circleControl as r4c
 import guiutility as gutil
 import fourcircle_utility as fcutil
+import plot3dwindow
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -150,6 +151,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_survey_peak)
         self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
                      self.do_add_peaks_for_ub)
+        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_select_all_survey)
+        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
+                     self.do_sort_survey_table)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -171,6 +176,10 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl = r4c.CWSCDReductionControl(self._instrument)
         self._allowDownload = True
         self._dataAccessMode = 'Download'
+        self._surveyTableFlag = True
+
+        # Sub window
+        self._my3DWindow = None
 
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
@@ -387,10 +396,11 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         peak_info_list = self._build_peak_info_list()
+        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
 
         # Refine UB matrix
         try:
-            self._myControl.refine_ub_matrix(peak_info_list)
+            self._myControl.refine_ub_matrix(peak_info_list, set_hkl_int)
         except AssertionError as error:
             self.pop_one_button_dialog(str(error))
             return
@@ -429,13 +439,17 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list()
-        assert len(peak_info_list) >= 3, 'PeakInfo must be larger or equal to 3 (.' \
-                                         'now given %d) to refine UB matrix' % len(peak_info_list)
+        assert isinstance(peak_info_list, list), \
+            'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
+        assert len(peak_info_list) >= 3, \
+            'PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix' % len(peak_info_list)
 
         # get lattice range information
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_minD,
                                                         self.ui.lineEdit_maxD])
-        assert status
+        if status is False:
+            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
+            return
         min_d, max_d = ret_obj
         if (0 < min_d < max_d) is False:
             self.pop_one_button_dialog('Range of d is not correct!')
@@ -450,6 +464,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d)
 
         # set value
+        self._show_refined_ub_result()
 
         return
 
@@ -458,7 +473,7 @@ class MainWindow(QtGui.QMainWindow):
         Show the result from refined UB matrix
         :return:
         """
-       # Deal with result
+        # Deal with result
         ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
         # ub matrix
         self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
@@ -485,6 +500,9 @@ class MainWindow(QtGui.QMainWindow):
         # TODO/NOW/1st: need to offer users with different types of UB matrix refinement tool!
         # call mantid.FindUBUsingIndexedPeaks()
         # refer to Calculate UB matrix to build PeakWorkspace
+
+        return
+
     def _build_peak_info_list(self):
         """ Build a list of PeakInfo to build peak workspace
         :return:
@@ -504,10 +522,11 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in row_index_list:
             scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
             try:
+                if pt_num < 0:
+                    pt_num = None
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
             except AssertionError as ass_err:
-                self.pop_one_button_dialog(str(ass_err))
-                return
+                raise RuntimeError('Unable to retrieve PeakInfo due to %s.' % str(ass_err))
             assert isinstance(peak_info, r4c.PeakInfo)
             peak_info_list.append(peak_info)
         # END-FOR
@@ -1167,11 +1186,18 @@ class MainWindow(QtGui.QMainWindow):
         Reset user specified HKL value to peak table
         :return:
         """
+        # get experiment number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+        assert status, ret_obj
+        exp_number = ret_obj[0]
+
+        # reset all rows back to SPICE HKL
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for i_row in xrange(num_rows):
-            print '[DB] Update row %d' % (i_row)
             scan, pt = self.ui.tableWidget_peaksCalUB.get_scan_pt(i_row)
-            peak_info = self._myControl.get_peak_info(None, scan, pt)
+            if pt < 0:
+                pt = None
+            peak_info = self._myControl.get_peak_info(exp_number, scan, pt)
             h, k, l = peak_info.get_user_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
@@ -1199,6 +1225,16 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # TODO/NOW/1st: Implement ASAP
+
+        return
+
+    def do_select_all_survey(self):
+        """
+        Select or de-select all rows in survey items
+        :return:
+        """
+        self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
+        self._surveyTableFlag = not self._surveyTableFlag
 
         return
 
@@ -1326,6 +1362,16 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_sort_survey_table(self):
+        """
+
+        :return:
+        """
+        # TODO/DOC
+        self.ui.tableWidget_surveyTable.sortByColumn(2, 1)
+
+        return
+
     def do_survey(self):
         """
         Purpose: survey for the strongest reflections
@@ -1373,10 +1419,8 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # TODO/NOW/ Think of share codes with do_view_data_3d()
-        import plot3dwindow
-
-        self.plot3dform = plot3dwindow.Plot3DWindow(self)
-        self.plot3dform.show()
+        self._my3DWindow = plot3dwindow.Plot3DWindow(self)
+        self._my3DWindow.show()
 
         return
 
