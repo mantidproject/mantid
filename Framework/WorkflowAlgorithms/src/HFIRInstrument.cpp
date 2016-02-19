@@ -6,8 +6,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidGeometry/Instrument.h"
-#include "Poco/StringTokenizer.h"
 #include "Poco/NumberParser.h"
 
 namespace Mantid {
@@ -98,8 +98,8 @@ double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
         "Unable to find [aperture-distances] instrument parameter");
 
   double SSD = 0;
-  Poco::StringTokenizer tok(pars[0], ",",
-                            Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tok(
+      pars[0], ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
     const std::string distance_as_string = tok[8 - nguides];
     if (!Poco::NumberParser::tryParseFloat(distance_as_string, SSD))
