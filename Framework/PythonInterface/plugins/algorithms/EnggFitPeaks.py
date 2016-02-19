@@ -92,7 +92,8 @@ class EnggFitPeaks(PythonAlgorithm):
                                "expected peaks. " + txt)
 
         peaks_table_name = self.getPropertyValue("OutFittedPeaksTable")
-        difc, zero, fitted_peaks = self._fit_all_peaks(in_wks, wks_index, (found_peaks, expected_peaks_dsp), peaks_table_name)
+        difc, zero, fitted_peaks = self._fit_all_peaks(in_wks, wks_index,
+                                                       (found_peaks, expected_peaks_dsp), peaks_table_name)
         self._produce_outputs(difc, zero, fitted_peaks)
 
     def _get_default_peaks(self):
@@ -139,14 +140,17 @@ class EnggFitPeaks(PythonAlgorithm):
         # Magic numbers, approx. represanting the shape/proportions of a B2BExponential peak
         COEF_LEFT = 2
         COEF_RIGHT = 3
-        MIN_RANGE_WIDTH = 175
+        # Current approach: don't force a minimum width. If the width initial guess is too
+        # narrow we might miss some peaks.
+        # To prevent that, the minimum could be set to for example the arbitrary '175' which
+        # seemed to have good effects overall, but that can lead to fitting the wrong
+        # (neighbor) peaks.
+        MIN_RANGE_WIDTH = 1
 
         startx = center - (width * COEF_LEFT)
         endx = center + (width * COEF_RIGHT)
-        # force startx-endx > 175, etc
         x_diff = endx-startx
-        min_width = MIN_RANGE_WIDTH
-        if x_diff < min_width:
+        if x_diff < MIN_RANGE_WIDTH:
             inc = (min_width-x_diff)/5
             endx = endx + 3*inc
             startx = startx - 2*inc
@@ -200,8 +204,14 @@ class EnggFitPeaks(PythonAlgorithm):
                                   format(peaks[1][i], detailTxt))
                 continue
 
-
-            param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
+            try:
+                param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
+            except StandardError:
+                self.log().warning("Problem found when trying to fit a peak centered at {0} (dSpacing), "
+                                   "for which the initial guess from FindPeaks is at {1} (ToF). Single "
+                                   "peak fitting failed. Skipping this peak."
+                                   .format(peaks[1][i], initial_params[0]))
+                continue
 
             fitted_params = {}
             fitted_params['dSpacing'] = peaks[1][i]
@@ -496,7 +506,7 @@ class EnggFitPeaks(PythonAlgorithm):
         """
         spec_x_axis = wks.readX(wks_index)
         center = self._find_peak_center_in_params(fitted_params)
-        return (center >= spec_x_axis.min() and center <= spec_x_axis.max() and 
+        return (center >= spec_x_axis.min() and center <= spec_x_axis.max() and
                 fitted_params['Chi'] < 10 and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
@@ -523,21 +533,19 @@ class EnggFitPeaks(PythonAlgorithm):
             True if the Bk2BkExponential parameters and error estimates look acceptable
             so the peak should be used.
         """
-        # ban: negative centers, negative left (A) and right (B) exponential coefficient
+        # Ban: negative centers, negative left (A) and right (B) exponential coefficient
         # also ban strange error estimates
-        # and make sure that the error on X0 is not absurdly big
+        # and make sure that the error on the center (X0) is not too big in relative terms
         return (fitted_params['X0'] > 0 and fitted_params['A'] > 0 and fitted_params['B'] > 0
                 and not math.isnan(fitted_params['X0_Err'])
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
-                and fitted_params['X0_Err'] < fitted_params['X0']/10
+                and fitted_params['X0_Err'] < fitted_params['X0']/5
                 and
                 (not 0 == fitted_params['X0_Err'] and not 0 == fitted_params['A_Err'] and
                  not 0 == fitted_params['B_Err'] and not 0 == fitted_params['S_Err'] and
                  not 0 == fitted_params['I_Err'])
-                #and fitted_params['X0'] < 100000 # and fitted_params['X0_Err'] < 500
                )
-                #                fitted_params['X0_Err'] < 500 and fitted_params['X0'] < 100000
 
     def _add_parameters_to_map(self, param_map, param_table):
         """

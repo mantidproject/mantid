@@ -126,8 +126,8 @@ class EnggCalibrateFull(PythonAlgorithm):
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", pos_tbl)
         self.setProperty("FittedPeaks", peaks_tbl)
-        self._applyCalibrationTable(inWS, posTbl)
-        self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), posTbl)
+        self._applyCalibrationTable(inWS, pos_tbl)
+        self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), pos_tbl)
 
     def _prepareWsForFitting(self, ws):
         """
@@ -185,7 +185,6 @@ class EnggCalibrateFull(PythonAlgorithm):
             detPhi = det.getPhi()
             oldPos = det.getPos()
 
-            # TODO: add information about peaks
             posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
                            difc, zero])
 
@@ -209,7 +208,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
-        # TODO: remove this!
+        # TODO: remove this - here just for convenience!
         alg.setPropertyValue('OutFittedPeaksTable', 'table_fitted_peaks_internal')
         alg.execute()
 
@@ -245,7 +244,10 @@ class EnggCalibrateFull(PythonAlgorithm):
 
     def _createPeaksFittedDetailsTable(self):
         """
-        TODO
+        Prepare a table to output details about every peak fitted for every detector.
+
+        Returns::
+           Empty table that needs to be populated with peaks information (one row per detector)
         """
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.execute()
