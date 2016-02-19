@@ -721,10 +721,11 @@ void GroupDetectors2::processMatrixWorkspace(
 */
 int GroupDetectors2::readInt(std::string line) {
   // remove comments and white space (TOK_TRIM)
-  Poco::StringTokenizer dataComment(line, "#", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer dataComment(
+      line, "#", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (dataComment.begin() != dataComment.end()) {
-    Poco::StringTokenizer data(*(dataComment.begin()), " ",
-                               Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        *(dataComment.begin()), " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     if (data.count() == 1) {
       if (!data[0].empty()) {
         try {
@@ -844,7 +845,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
                                          std::vector<int64_t> &unUsedSpec,
                                          std::string seperator) {
   // remove comments and white space
-  Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
+  Mantid::Kernel::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
   for (const auto &itr : dataComment) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
@@ -1233,12 +1234,13 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
                       // function
     return;
   }
-  Poco::StringTokenizer ranges(line, "-");
+  Mantid::Kernel::StringTokenizer ranges(line, "-");
 
   try {
     size_t loop = 0;
     do {
-      Poco::StringTokenizer beforeHyphen(ranges[loop], " ", IGNORE_SPACES);
+      Mantid::Kernel::StringTokenizer beforeHyphen(ranges[loop], " ",
+                                                   IGNORE_SPACES);
       auto readPostion = beforeHyphen.begin();
       if (readPostion == beforeHyphen.end()) {
         throw std::invalid_argument("'-' found at the start of a list, can't "
@@ -1254,7 +1256,8 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
         break;
       }
 
-      Poco::StringTokenizer afterHyphen(ranges[loop + 1], " ", IGNORE_SPACES);
+      Mantid::Kernel::StringTokenizer afterHyphen(ranges[loop + 1], " ",
+                                                  IGNORE_SPACES);
       readPostion = afterHyphen.begin();
       if (readPostion == afterHyphen.end()) {
         throw std::invalid_argument("A '-' follows straight after another '-', "

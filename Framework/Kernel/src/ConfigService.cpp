@@ -19,7 +19,7 @@
 #include <Poco/LoggingFactory.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -80,7 +80,7 @@ std::vector<std::string> splitPath(const std::string &path) {
   } else {
     int options = Poco::StringTokenizer::TOK_TRIM +
                   Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-    Poco::StringTokenizer tokenizer(path, ";,", options);
+  Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {

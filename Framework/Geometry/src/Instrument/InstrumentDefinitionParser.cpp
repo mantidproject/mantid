@@ -2290,7 +2290,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  Instrument_sptr physical(new Instrument(*m_instrument));
+  auto physical = boost::make_shared<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(physical);
 

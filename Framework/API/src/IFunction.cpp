@@ -25,7 +25,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <limits>
 #include <sstream>
@@ -253,10 +253,11 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -576,8 +577,8 @@ protected:
         m_value.erase(m_value.size() - 1);
       }
     }
-    Poco::StringTokenizer tokenizer(m_value, ",",
-                                    Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     v.resize(tokenizer.count());
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);

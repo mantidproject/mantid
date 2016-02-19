@@ -183,7 +183,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    TableWorkspace_sptr existtablews(new TableWorkspace());
+    auto existtablews = boost::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");
@@ -289,7 +289,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    TableWorkspace_sptr existtablews(new TableWorkspace());
+    auto existtablews = boost::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");

@@ -349,8 +349,8 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   // Create output workspaces
   m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  MatrixWorkspace_sptr tempmaskws(
-      new MaskWorkspace(m_inputWS->getInstrument()));
+  MatrixWorkspace_sptr tempmaskws =
+      boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
 
   // Input resolution

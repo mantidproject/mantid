@@ -171,42 +171,26 @@ void SANSSolidAngleCorrection::exec() {
 
 void SANSSolidAngleCorrection::execEvent() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  EventWorkspace_sptr inputEventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
-
-  const int numberOfSpectra =
-      static_cast<int>(inputEventWS->getNumberHistograms());
-  Progress progress(this, 0.0, 1.0, inputEventWS->getNumberHistograms());
 
   // generate the output workspace pointer
-  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputEventWS;
-  if (outputWS == inputWS)
-    outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputEventWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(inputEventWS,
-                                                      outputEventWS, false);
-    // You need to copy over the data as well.
-    outputEventWS->copyDataFrom((*inputEventWS));
-
-    // Cast to the matrixOutputWS and save it
-    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS);
-    this->setProperty("OutputWorkspace", outputWS);
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != inputWS) {
+    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    setProperty("OutputWorkspace", outputWS);
   }
+  auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
+  const int numberOfSpectra =
+      static_cast<int>(outputEventWS->getNumberHistograms());
+  Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");
 
-  PARALLEL_FOR2(inputEventWS, outputEventWS)
+  PARALLEL_FOR1(outputEventWS)
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;
     try {
-      det = inputEventWS->getDetector(i);
+      det = outputEventWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Spectrum index " << i
                       << " has no detector assigned to it - discarding"
@@ -226,7 +210,7 @@ void SANSSolidAngleCorrection::execEvent() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(inputEventWS->detectorTwoTheta(det));
+    const double tanTheta = tan(outputEventWS->detectorTwoTheta(det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {
