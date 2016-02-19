@@ -396,7 +396,10 @@ Wedge calculation is done as part of the azimuthal averaging algorithm. The imag
 ``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
     Specifies I(q) wedges to compute.
     
-
+    - ``number_of_wedges``: number of wedges to calculate
+    - ``wedge_angle``: opening angle of each wedge, in degrees
+    - ``wedge_offset``: angular offset relative to the x-axis, defining the first wedge.
+    
     
 .. _`Data stitching`:
 
