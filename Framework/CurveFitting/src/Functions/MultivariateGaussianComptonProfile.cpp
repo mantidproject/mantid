@@ -13,6 +13,12 @@ namespace Functions {
 using namespace CurveFitting;
 DECLARE_FUNCTION(MultivariateGaussianComptonProfile)
 
+const char* MultivariateGaussianComptonProfile::AMP_PARAM = "Intensity";
+const char* MultivariateGaussianComptonProfile::SIGMA_X_PARAM = "SigmaX";
+const char* MultivariateGaussianComptonProfile::SIGMA_Y_PARAM = "SigmaY";
+const char* MultivariateGaussianComptonProfile::SIGMA_Z_PARAM = "SigmaZ";
+const char* MultivariateGaussianComptonProfile::STEPS_ATTR = "IntegrationSteps";
+
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()

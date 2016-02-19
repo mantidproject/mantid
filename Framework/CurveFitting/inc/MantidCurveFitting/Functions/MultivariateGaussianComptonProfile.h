@@ -33,12 +33,11 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile
     : public ComptonProfile {
 public:
-  static constexpr char *AMP_PARAM = "Intensity";
-  static constexpr char *SIGMA_X_PARAM = "SigmaX";
-  static constexpr char *SIGMA_Y_PARAM = "SigmaY";
-  static constexpr char *SIGMA_Z_PARAM = "SigmaZ";
-
-  static constexpr char *STEPS_ATTR = "IntegrationSteps";
+  static const char *AMP_PARAM;
+  static const char *SIGMA_X_PARAM;
+  static const char *SIGMA_Y_PARAM;
+  static const char *SIGMA_Z_PARAM;
+  static const char *STEPS_ATTR;
 
   /// Default constructor required for factory
   MultivariateGaussianComptonProfile();
