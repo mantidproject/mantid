@@ -481,3 +481,4 @@ General commands
 ``Resolution(sample_aperture_diameter=10.0)``
     Specifies that we want to q-resolution to be computed.
 
+.. categories:: Concepts
