@@ -7,6 +7,9 @@ import math
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
     PEAK_TYPE = 'BackToBackExponential'
+    # Max limit on the estimated error of a center for it to be accepted as a good fit
+    # (in percentage of the center value)
+    CENTER_ERROR_LIMIT = 10
 
     def category(self):
         return "Diffraction\\Engineering"
@@ -220,9 +223,11 @@ class EnggFitPeaks(PythonAlgorithm):
             if self._peak_is_acceptable(fitted_params, in_wks, wks_index):
                 fitted_peaks.addRow(fitted_params)
             else:
-                self.log().notice("Discarding peak found with wrong center and/or excessive error in the "
-                                  "center estimate: {0} (ToF), with error: {1}, for dSpacing {2}".
-                                  format(fitted_params['X0'], fitted_params['X0_Err'], fitted_params['dSpacing']))
+                self.log().notice("Discarding peak found with wrong center and/or excessive or suspicious "
+                                  "error esimate in the center estimate: {0} (ToF) ({1}, dSpacing), "
+                                  "with error: {2}, for dSpacing {3}".
+                                  format(fitted_params['X0'], peaks[1][i],
+                                         fitted_params['X0_Err'], fitted_params['dSpacing']))
 
         # Check if we were able to really fit any peak
         if 0 == fitted_peaks.rowCount():
@@ -506,7 +511,9 @@ class EnggFitPeaks(PythonAlgorithm):
         """
         spec_x_axis = wks.readX(wks_index)
         center = self._find_peak_center_in_params(fitted_params)
+        intensity = self._find_peak_intensity_in_params(fitted_params)
         return (center >= spec_x_axis.min() and center <= spec_x_axis.max() and
+                intensity > 0 and
                 fitted_params['Chi'] < 10 and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
@@ -521,6 +528,19 @@ class EnggFitPeaks(PythonAlgorithm):
         else:
             raise ValueError('Inconsistency found. I do not know how to deal with centers of peaks '
                              'of types other than {0}'.format(PEAK_TYPE))
+
+    def _find_peak_intensity_in_params(self, fitted_params):
+        """
+        Retrieve the fitted peak intensity/height/amplitude from the set of parameters fitted.
+
+        Returns:
+            The peak intensity from the fitted parameters
+        """
+        if 'BackToBackExponential' == self.PEAK_TYPE:
+            return fitted_params['I']
+        else:
+            raise ValueError('Inconsistency found. I do not know how to deal with intensities of '
+                             'peaks of types other than {0}'.format(PEAK_TYPE))
 
     def _b2bexp_is_acceptable(self, fitted_params):
         """
@@ -540,7 +560,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 and not math.isnan(fitted_params['X0_Err'])
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
-                and fitted_params['X0_Err'] < fitted_params['X0']/5
+                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0/self.CENTER_ERROR_LIMIT)
                 and
                 (not 0 == fitted_params['X0_Err'] and not 0 == fitted_params['A_Err'] and
                  not 0 == fitted_params['B_Err'] and not 0 == fitted_params['S_Err'] and
