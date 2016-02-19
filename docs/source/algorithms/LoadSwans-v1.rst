@@ -10,35 +10,11 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+The LoadSwans algorithm loads data from a binary file into an
+:ref:`EventWorkspace <EventWorkspace>`.
 
-
-Usage
------
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
-
-**Example - LoadSwans**
-
-.. testcode:: LoadSwansExample
-
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = LoadSwans()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: LoadSwansExample
-
-  The output workspace has ?? spectra
+This is a temporary loader for an LDRD. The file is produced by labview.
+The documentation will be updated when a definitive file format will be available.
 
 .. categories::
 

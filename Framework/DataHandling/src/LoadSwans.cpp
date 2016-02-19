@@ -74,22 +74,16 @@ void LoadSwans::init() {
  */
 void LoadSwans::exec() {
 
-	// Load this here to get the necessary Parameters ffrom the XML file
+	// Load this here to get the necessary Parameters from the XML file
 	loadInstrument();
 	m_detector_size = setDetectorSize();
-
 	std::map<uint32_t, std::vector<uint32_t>> pos_tof_map =
 			LoadSwans::loadData();
-
 	loadDataIntoTheWorkspace(pos_tof_map);
-
 	loadInstrument();
 	setTimeAxis();
 	placeDetectorInSpace();
-
-	// Set the output workspace property
 	setProperty("OutputWorkspace", m_ws);
-	return;
 }
 
 /**
@@ -114,7 +108,7 @@ void LoadSwans::loadInstrument() {
 
 /**
  * Place the detector in space according to the distance and angle
- * Need in the IDF Parameters file the entries:
+ * Needs in the IDF Parameters file the entries:
  * detector-name, detector-sample-distance, detector-rotation-angle
  */
 void LoadSwans::placeDetectorInSpace() {
@@ -149,7 +143,7 @@ void LoadSwans::placeDetectorInSpace() {
 /**
  * Load the data into a map. The map is indexed by pixel id (0 to 128*128-1 = m_detector_size)
  * The map values are the events TOF
- * @return the map
+ * @returns the map of events indexed by pixel index
  */
 std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
 
@@ -222,6 +216,10 @@ void LoadSwans::setTimeAxis() {
 	m_ws->setAllX(axis);
 }
 
+/**
+ * From the Parameters XML file gets number-of-x-pixels and number-of-y-pixels
+ * and calculates the detector size/shape
+ */
 unsigned int LoadSwans::setDetectorSize() {
 	const unsigned int x_size =
 			static_cast<unsigned int>(m_ws->getInstrument()->getNumberParameter(

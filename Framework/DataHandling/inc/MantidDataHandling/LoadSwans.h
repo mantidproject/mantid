@@ -57,6 +57,7 @@ private:
 	unsigned int m_detector_size;
 
 	// Constants:
+	// This has to be here because the data file to date has no metadata
 	const std::string m_instrumentName = "SWANS";
 
 };
