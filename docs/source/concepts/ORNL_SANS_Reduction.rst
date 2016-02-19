@@ -405,6 +405,11 @@ General commands
 ``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
     Specifies I(q) wedges to compute.
     
+.. figure:: /images/SANS_wedge_definition.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Wedge definition.
+    
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets
     
