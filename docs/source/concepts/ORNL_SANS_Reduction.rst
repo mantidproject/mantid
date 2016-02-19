@@ -7,11 +7,13 @@ Reduction for ORNL SANS
 =======================
 
 
-This document explains how to use Mantid to perform reduction of HFIR SANS data.
+This document explains how to use Mantid to perform reduction of ORNL SANS data.
+Information about the underlying Mantid algorithms involved can be found in the 
+:ref:`SANSReduction <algm-SANSReduction>` algorithm documentation.
+For HFIR reduction specefically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
+
 
 Contents
-
-- Introduction_
 
 - `Reduction script`_
 
@@ -27,14 +29,6 @@ Contents
  - `Absolute normalization`_
  - `Background subtraction`_
  - `I(Q) calculation`_
-
-
-
-.. _Introduction: 
-
-Introduction
-------------
-
 
 
 .. _`Reduction script`:
