@@ -25,31 +25,25 @@ public:
 	}
 
 	void test_exec() {
-		// Create test input if necessary
-
-		std::string filename = "/SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80814.dat";
-
+		// Data file
+		std::string filename = "SWANS_RUN80814.dat";
 		LoadSwans alg;
-		// Don't put output in ADS by default
+
 		alg.setChild(true);
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
 
-		alg.setPropertyValue("Filename", filename);
-
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
 		TS_ASSERT_THROWS_NOTHING(
 				alg.setPropertyValue("OutputWorkspace", "Output_ws_name"));
 
-		TS_ASSERT_THROWS_NOTHING(alg.execute()
-		; );
+		TS_ASSERT_THROWS_NOTHING(alg.execute());
 		TS_ASSERT(alg.isExecuted());
+		Mantid::DataObjects::EventWorkspace_sptr outputWS = alg.getProperty(
+				"OutputWorkspace");
 
-		// Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-		// be the type using in declareProperty for the "OutputWorkspace" type.
-		// We can't use auto as it's an implicit conversion.
-		Mantid::DataObjects::EventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+		TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16384);
 
-		//TS_ASSERT(outputWS);
 	}
 
 };

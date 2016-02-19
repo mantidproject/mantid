@@ -4,11 +4,12 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <map>
 
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadSwans : TODO: DESCRIPTION
+/** LoadSwans : Test Loader to read data from the LDRD new SWANS detector
 
  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -44,8 +45,20 @@ public:
 private:
 	void init();
 	void exec();
+	std::map<uint32_t, std::vector<uint32_t>> loadData();
+	void loadDataIntoTheWorkspace(const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map);
+	void setTimeAxis();
+	void loadInstrument();
+	void placeDetectorInSpace();
+	unsigned int setDetectorSize();
 
+	// Member variables
 	DataObjects::EventWorkspace_sptr m_ws;
+	unsigned int m_detector_size;
+
+	// Constants:
+	const std::string m_instrumentName = "SWANS";
+
 };
 
 } // namespace DataHandling
