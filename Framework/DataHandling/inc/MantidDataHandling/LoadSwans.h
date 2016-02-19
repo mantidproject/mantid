@@ -32,34 +32,34 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_DATAHANDLING_DLL LoadSwans: public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSwans : public API::Algorithm {
 public:
-	LoadSwans();
-	virtual ~LoadSwans();
+  LoadSwans();
+  virtual ~LoadSwans();
 
-	virtual const std::string name() const;
-	virtual int version() const;
-	virtual const std::string category() const;
-	virtual const std::string summary() const;
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
 
 private:
-	void init();
-	void exec();
-	std::map<uint32_t, std::vector<uint32_t>> loadData();
-	void loadDataIntoTheWorkspace(const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map);
-	void setTimeAxis();
-	void loadInstrument();
-	void placeDetectorInSpace();
-	unsigned int setDetectorSize();
+  void init();
+  void exec();
+  std::map<uint32_t, std::vector<uint32_t>> loadData();
+  void loadDataIntoTheWorkspace(
+      const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map);
+  void setTimeAxis();
+  void loadInstrument();
+  void placeDetectorInSpace();
+  unsigned int setDetectorSize();
 
-	// Member variables
-	DataObjects::EventWorkspace_sptr m_ws;
-	unsigned int m_detector_size;
+  // Member variables
+  DataObjects::EventWorkspace_sptr m_ws;
+  unsigned int m_detector_size;
 
-	// Constants:
-	// This has to be here because the data file to date has no metadata
-	const std::string m_instrumentName = "SWANS";
-
+  // Constants:
+  // This has to be here because the data file to date has no metadata
+  const std::string m_instrumentName = "SWANS";
 };
 
 } // namespace DataHandling
