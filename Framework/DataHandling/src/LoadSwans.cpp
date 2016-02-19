@@ -22,7 +22,9 @@ DECLARE_ALGORITHM(LoadSwans)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSwans::LoadSwans() { m_ws = EventWorkspace_sptr(new EventWorkspace()); }
+LoadSwans::LoadSwans() : m_detector_size(0) {
+  m_ws = EventWorkspace_sptr(new EventWorkspace());
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -38,10 +40,24 @@ const std::string LoadSwans::name() const { return "LoadSwans"; }
 int LoadSwans::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSwans::category() const { return "DataHandling"; }
+const std::string LoadSwans::category() const {
+  return "DataHandling\\Text;SANS\\DataHandling";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
+int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
+  if (descriptor.extension().compare(".dat") != 0)
+    return 0;
+  return 0;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADSWANS_H_
 #define MANTID_DATAHANDLING_LOADSWANS_H_
 
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -32,7 +33,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_DATAHANDLING_DLL LoadSwans : public API::Algorithm {
+class DLLExport LoadSwans : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
   virtual ~LoadSwans();
@@ -41,6 +42,8 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   void init();
