@@ -101,10 +101,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
-Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
-  Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
 
 class MantidUI:public QObject
 {
