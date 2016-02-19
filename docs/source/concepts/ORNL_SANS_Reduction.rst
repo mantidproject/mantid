@@ -7,11 +7,6 @@ Reduction for ORNL SANS
 =======================
 
 
-
-.. math::
-    
-    Q= 2 \pi
-
 This document explains how to use Mantid to perform reduction of HFIR SANS data.
 
 Contents
@@ -271,15 +266,22 @@ The resolution in Q is computed using Mildner-Carpenter.
 
 .. _absolute_normalization:
 
+
 Absolute Normalization
 ^^^^^^^^^^^^^^^^^^^^^^
-**SetAbsoluteScale(factor=1.0)**: Sets a multiplicative scale factor to obtain I(Q) in absolute scale.
 
-**SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False)**: Tells the reducer to use the direct beam method to compute the absolute scale factor. The direct_beam parameter is a valid file path to the direct beam data file. attenuator_trans is the attenuator transmission. The sample_thickness should be given in cm. If apply_sensitivity=True, the sensitivity correction will be applied to the direct beam data before the absolute scale factor is computed.
-The absolute cross-section in 1/cm is computed after all corrections including the transmission correction have been applied to the sample data. It is given by:
+``SetAbsoluteScale(factor=1.0)``
+    Sets a multiplicative scale factor to obtain I(Q) in absolute scale.
 
-where  is the sample thickness in cm and  is given by
+``SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False)``
+    Tells the reducer to use the direct beam method to compute the absolute scale factor. The direct_beam parameter is a valid file path to the direct beam data file. attenuator_trans is the attenuator transmission. The sample_thickness should be given in cm. If apply_sensitivity=True, the sensitivity correction will be applied to the direct beam data before the absolute scale factor is computed.
 
-where
- is the total empty beam detector counts per monitor count divided by the attenuation factor at the used wavelength.
- is the square of the ration of the pixel size to the sample-detector distance.
+    The absolute cross-section in 1/cm is computed after all corrections including the transmission correction have been applied to the sample data. It is given by:
+    
+        :math:`d\Sigma/d\Omega = \frac{I(Q)}{KD}`
+
+    where *D* is the sample thickness in *cm* and *K* is given by
+
+        :math:`K=N \ \Delta\Omega`
+
+    where *N* is the total empty beam detector counts per monitor count divided by the attenuation factor at the used wavelength, and :math:`\Delta\Omega` is the square of the ratio of the pixel size to the sample-detector distance.
