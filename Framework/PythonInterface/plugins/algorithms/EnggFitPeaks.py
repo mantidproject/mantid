@@ -553,14 +553,16 @@ class EnggFitPeaks(PythonAlgorithm):
             True if the Bk2BkExponential parameters and error estimates look acceptable
             so the peak should be used.
         """
-        # Ban: negative centers, negative left (A) and right (B) exponential coefficient
-        # also ban strange error estimates
-        # and make sure that the error on the center (X0) is not too big in relative terms
-        return (fitted_params['X0'] > 0 and fitted_params['A'] > 0 and fitted_params['B'] > 0
+        # Ban: negative centers, negative left (A) and right (B) exponential coefficient,
+        # and Gaussian spread (S).
+        # Also ban strange error estimates (nan, all zero error)
+        # And make sure that the error on the center (X0) is not too big in relative terms
+        return (fitted_params['X0'] > 0
+                and fitted_params['A'] > 0 and fitted_params['B'] > 0 and fitted_params['S'] > 0
                 and not math.isnan(fitted_params['X0_Err'])
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
-                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0/self.CENTER_ERROR_LIMIT)
+                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
                 and
                 (not 0 == fitted_params['X0_Err'] and not 0 == fitted_params['A_Err'] and
                  not 0 == fitted_params['B_Err'] and not 0 == fitted_params['S_Err'] and

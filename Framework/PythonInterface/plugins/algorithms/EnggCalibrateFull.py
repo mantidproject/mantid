@@ -208,8 +208,6 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
-        # TODO: remove this - here just for convenience!
-        alg.setPropertyValue('OutFittedPeaksTable', 'table_fitted_peaks_internal')
         alg.execute()
 
         difc = alg.getProperty('Difc').value
