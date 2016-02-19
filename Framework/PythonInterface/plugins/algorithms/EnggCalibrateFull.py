@@ -109,44 +109,44 @@ class EnggCalibrateFull(PythonAlgorithm):
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
-        inWS = self.getProperty('Workspace').value
-        WSIndices = EnggUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
-                                                           self.getProperty(self.INDICES_PROP_NAME).value)
+        in_wks = self.getProperty('Workspace').value
+        wks_indices = EnggUtils.getWsIndicesFromInProperties(in_wks, self.getProperty('Bank').value,
+                                                             self.getProperty(self.INDICES_PROP_NAME).value)
 
-        vanWS = self.getProperty("VanadiumWorkspace").value
-        vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
-        vanCurvesWS = self.getProperty('VanCurvesWorkspace').value
+        van_wks = self.getProperty("VanadiumWorkspace").value
+        van_integ_wks = self.getProperty('VanIntegrationWorkspace').value
+        van_curves_wks = self.getProperty('VanCurvesWorkspace').value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnggUtils.applyVanadiumCorrections(self, inWS, WSIndices, vanWS, vanIntegWS, vanCurvesWS)
+        EnggUtils.applyVanadiumCorrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
-        rebinnedWS = self._prepareWsForFitting(inWS)
-        pos_tbl, peaks_tbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
+        rebinned_ws = self._prepare_ws_for_fitting(in_wks)
+        pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", pos_tbl)
         self.setProperty("FittedPeaks", peaks_tbl)
-        self._applyCalibrationTable(inWS, pos_tbl)
-        self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), pos_tbl)
+        self._apply_calibration_table(in_wks, pos_tbl)
+        self._output_det_pos_file(self.getPropertyValue('OutDetPosFilename'), pos_tbl)
 
-    def _prepareWsForFitting(self, ws):
+    def _prepare_ws_for_fitting(self, ws):
         """
         Rebins the workspace and converts it to distribution
         """
-        rebinAlg = self.createChildAlgorithm('Rebin')
-        rebinAlg.setProperty('InputWorkspace', ws)
-        rebinAlg.setProperty('Params', '-0.0005') # The value is borrowed from OG routines
-        rebinAlg.execute()
-        result = rebinAlg.getProperty('OutputWorkspace').value
+        rebin_alg = self.createChildAlgorithm('Rebin')
+        rebin_alg.setProperty('InputWorkspace', ws)
+        rebin_alg.setProperty('Params', '-0.0005') # The value is borrowed from OG routines
+        rebin_alg.execute()
+        result = rebin_alg.getProperty('OutputWorkspace').value
 
         if result.isDistribution()==False:
-            convertAlg = self.createChildAlgorithm('ConvertToDistribution')
-            convertAlg.setProperty('Workspace', result)
-            convertAlg.execute()
+            convert_alg = self.createChildAlgorithm('ConvertToDistribution')
+            convert_alg.setProperty('Workspace', result)
+            convert_alg.execute()
 
         return result
 
-    def _calculateCalibPositionsTbl(self, ws, indices, expectedPeaksD):
+    def _calculate_calib_positions_tbl(self, ws, indices, expectedPeaksD):
         """
         Makes a table of calibrated positions (and additional parameters). It goes through
         the detectors of the workspace and calculates the difc and zero parameters by fitting
@@ -161,15 +161,15 @@ class EnggCalibrateFull(PythonAlgorithm):
         A peaks details table with the fitted parameters for every of the peaks of every detector.
 
         """
-        posTbl = self._createPositionsTable()
-        peaksTbl = self._createPeaksFittedDetailsTable()
+        pos_tbl = self._create_positions_table()
+        peaks_tbl = self._create_peaks_fitted_details_table()
 
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 
         for i in indices:
 
             try:
-                zero, difc, fitted_peaks_table = self._fitPeaks(ws, i, expectedPeaksD)
+                zero, difc, fitted_peaks_table = self._fit_peaks(ws, i, expectedPeaksD)
             except RuntimeError as re:
                 raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
                                    "This calibration algorithm cannot continue. Please check the expected "
@@ -177,25 +177,25 @@ class EnggCalibrateFull(PythonAlgorithm):
                                    "FindPeaks: %s"%(i, str(re)))
 
             det = ws.getDetector(i)
-            newPos, newL2 = self._getCalibratedDetPos(difc, det, ws)
+            new_pos, new_L2 = self._get_calibrated_det_pos(difc, det, ws)
 
             # get old (pre-calibration) detector coordinates
-            oldL2 = det.getDistance(ws.getInstrument().getSample())
-            det2Theta = ws.detectorTwoTheta(det)
-            detPhi = det.getPhi()
-            oldPos = det.getPos()
+            old_L2 = det.getDistance(ws.getInstrument().getSample())
+            det_2Theta = ws.detectorTwoTheta(det)
+            det_phi = det.getPhi()
+            old_pos = det.getPos()
 
-            posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
-                           difc, zero])
+            pos_tbl.addRow([det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi,
+                            new_L2-old_L2, difc, zero])
 
             # fitted parameter details as a string for every peak for one detector
             peaks_details = self._build_peaks_details_string(fitted_peaks_table)
-            peaksTbl.addRow([det.getID(), peaks_details])
+            peaks_tbl.addRow([det.getID(), peaks_details])
             prog.report()
 
-        return posTbl, peaksTbl
+        return pos_tbl, peaks_tbl
 
-    def _fitPeaks(self, ws, wsIndex, expectedPeaksD):
+    def _fit_peaks(self, ws, wsIndex, expectedPeaksD):
         """
         Fits expected peaks to the spectrum, and returns calibrated zero and difc values.
 
@@ -218,7 +218,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return (zero, difc, fitted_peaks_table)
 
-    def _createPositionsTable(self):
+    def _create_positions_table(self):
         """
         Helper method to create an empty table for storing detector positions
 
@@ -242,7 +242,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return table
 
-    def _createPeaksFittedDetailsTable(self):
+    def _create_peaks_fitted_details_table(self):
         """
         Prepare a table to output details about every peak fitted for every detector.
 
@@ -283,7 +283,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return json.dumps(all_dict)
 
-    def _outputDetPosFile(self, filename, tbl):
+    def _output_det_pos_file(self, filename, tbl):
         """
         Writes a text (csv) file with the detector positions information that also goes into the
         output DetectorPostions table workspace.
@@ -305,32 +305,32 @@ class EnggCalibrateFull(PythonAlgorithm):
             for r in range(0, tbl.rowCount()):
                 f.write("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" %
                         (tbl.cell(r,0),
-                         #                 f.write("{0:d}, {1:.10f}, {1:.10f}, {3:.10f}, {4:.10f}, {5:.10f}, {6:.10f}, "
-                         #"{7:.10f}, {8:.10f}, {9:.10f}, {10:.10f}, {11:.10f}, {12:.10f}\n".
+                         #                 f.write('{0:d}, {1:.10f}, {1:.10f}, {3:.10f}, {4:.10f}, {5:.10f}, {6:.10f}, '
+                         #'{7:.10f}, {8:.10f}, {9:.10f}, {10:.10f}, {11:.10f}, {12:.10f}\n'.
                          #format(tbl.cell(r,0),
                          tbl.cell(r,1).getX(), tbl.cell(r,1).getY(), tbl.cell(r,1).getZ(),
                          tbl.cell(r,2).getX(), tbl.cell(r,2).getY(), tbl.cell(r,2).getZ(),
                          tbl.cell(r,3), tbl.cell(r,4), tbl.cell(r,5),
                          tbl.cell(r,6), tbl.cell(r,7), tbl.cell(r,8)))
 
-    def _getCalibratedDetPos(self, newDifc, det, ws):
+    def _get_calibrated_det_pos(self, newDifc, det, ws):
         """
         Returns a detector position which corresponds to the newDifc value.
 
         The two_theta and phi of the detector are preserved, L2 is changed.
     	"""
-        # This is how detL2 would be calculated
-        # detL2 = det.getDistance(ws.getInstrument().getSample())
-        detTwoTheta = ws.detectorTwoTheta(det)
-        detPhi = det.getPhi()
+        # This is how det_L2 would be calculated
+        # det_L2 = det.getDistance(ws.getInstrument().getSample())
+        det_two_theta = ws.detectorTwoTheta(det)
+        det_phi = det.getPhi()
 
-        newL2 = (newDifc / (252.816 * 2 * math.sin(detTwoTheta / 2.0))) - 50
+        new_L2 = (newDifc / (252.816 * 2 * math.sin(det_two_theta / 2.0))) - 50
 
-        newPos = self._V3DFromSpherical(newL2, detTwoTheta, detPhi)
+        new_pos = self._V3D_from_spherical(new_L2, det_two_theta, det_phi)
 
-        return (newPos, newL2)
+        return (new_pos, new_L2)
 
-    def _applyCalibrationTable(self, ws, detPos):
+    def _apply_calibration_table(self, ws, detPos):
         """
         Corrects the detector positions using the result of calibration (if one is specified).
         The parameters of the instrument definition of the workspace are updated in place using the
@@ -348,16 +348,16 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.setProperty('PositionTable', detPos)
         alg.execute()
 
-    def _V3DFromSpherical(self, R, polar, azimuth):
+    def _V3D_from_spherical(self, R, polar, azimuth):
         """
         Returns a cartesian 3D vector for the given spherical coordinates.
 
         Borrowed from V3D::spherical (C++).
     	"""
-        z = R*math.cos(polar)
-        ct=R*math.sin(polar)
-        x=ct*math.cos(azimuth)
-        y=ct*math.sin(azimuth)
+        z = R * math.cos(polar)
+        ct = R * math.sin(polar)
+        x = ct * math.cos(azimuth)
+        y = ct * math.sin(azimuth)
 
         return V3D(x,y,z)
 
