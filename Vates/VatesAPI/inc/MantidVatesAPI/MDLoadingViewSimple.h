@@ -1,20 +1,16 @@
-#ifndef MANTID_VATESAPI_BOXINFO_H
-#define MANTID_VATESAPI_BOXINFO_H
+#ifndef MANTID_VATES_MD_LOADING_VIEW_SIMPLE_H
+#define MANTID_VATES_MD_LOADING_VIEW_SIMPLE_H
 
-#include "MantidKernel/System.h"
-#include "MantidVatesAPI/WorkspaceProvider.h"
-#include <boost/optional.hpp>
+#include "MantidVatesAPI/MDLoadingView.h"
 
-namespace Mantid
-{
-namespace VATES
-{
-/**
-Collection of functions related to box information
+namespace Mantid {
+namespace VATES {
 
-@date 21/05/2015
+/** MDLoadingViewSimple : Provides an almost hollow MDLoadingView
+which is used by non-paraview based implementations such as the
+SaveMDWorkspaceToVTK algorithm.
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -35,16 +31,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class DLLExport MDLoadingViewSimple : public MDLoadingView {
+public:
+  double getTime() const override;
+  void setTime(double time);
 
-/**
- * Function for finding an appropriate initial recursion depth.
- * @param workspaceName :: name of the workspace
- * @param workspaceProvider :: an instance of the a workspace provider
- * @returns the appropriate recursion depth or nothing
- */
-boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(
-    const std::string &workspaceName,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider);
+  size_t getRecursionDepth() const override;
+  void setRecursionDepth(size_t recursionDepth);
+
+  bool getLoadInMemory() const override;
+  void setLoadInMemory(bool loadInMemory);
+
+private:
+  double m_time = 0.0;
+  size_t m_recursionDepth = 5;
+  bool m_loadInMemory = true;
+};
 }
 }
 

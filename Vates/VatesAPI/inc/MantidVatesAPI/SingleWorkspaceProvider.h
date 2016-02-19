@@ -1,20 +1,16 @@
-#ifndef MANTID_VATESAPI_BOXINFO_H
-#define MANTID_VATESAPI_BOXINFO_H
+#ifndef VATES_API_SINGLE_WORKSPACE_PROVIDER_H_
+#define VATES_API_SINGLE_WORKSPACE_PROVIDER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidVatesAPI/WorkspaceProvider.h"
-#include <boost/optional.hpp>
+#include "MantidAPI/Workspace_fwd.h"
+#include "WorkspaceProvider.h"
 
-namespace Mantid
-{
-namespace VATES
-{
-/**
-Collection of functions related to box information
+namespace Mantid {
+namespace VATES {
 
-@date 21/05/2015
+/** SingleWorkspaceProvider : Provides a single workspace instead of
+    serving a client with workspaces from the ADS
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -35,16 +31,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class DLLExport SingleWorkspaceProvider : public WorkspaceProvider {
+public:
+  SingleWorkspaceProvider(Mantid::API::Workspace_sptr workspace);
+  bool canProvideWorkspace(std::string wsName) const override;
+  Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const override;
+  void disposeWorkspace(std::string wsName) const override;
 
-/**
- * Function for finding an appropriate initial recursion depth.
- * @param workspaceName :: name of the workspace
- * @param workspaceProvider :: an instance of the a workspace provider
- * @returns the appropriate recursion depth or nothing
- */
-boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(
-    const std::string &workspaceName,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider);
+private:
+  Mantid::API::Workspace_sptr m_workspace;
+};
 }
 }
 
