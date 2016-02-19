@@ -30,6 +30,8 @@ Contents
  - `Transmission correction`_
  - `Background subtraction`_
  - `I(Q) calculation`_
+ - `Wedge calculation`_
+ - `Data stitching`_
  - `General commands`_
 
 
@@ -379,7 +381,10 @@ I(Q) calculation
     Do not save the I(q) result.
 
 
-    
+.. _`Wedge calculation`:
+
+Wedge calculation
+^^^^^^^^^^^^^^^^^
 ``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
     Specifies I(q) wedges to compute.
     
@@ -388,6 +393,11 @@ I(Q) calculation
    :align: right
    :alt: Wedge definition.
     
+    
+.. _`Data stitching`:
+
+Data Stitching
+^^^^^^^^^^^^^^
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets
     
