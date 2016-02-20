@@ -1141,7 +1141,7 @@ void EventList::sortTof() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1177,7 +1177,7 @@ void EventList::sortTof2() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1211,7 +1211,7 @@ void EventList::sortTof4() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1248,7 +1248,7 @@ void EventList::sortTimeAtSample(const double &tofFactor,
     return;
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TIMEATSAMPLE_SORT && !forceResort)
     return;
@@ -1280,7 +1280,7 @@ void EventList::sortPulseTime() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIME_SORT)
     return;
@@ -1311,7 +1311,7 @@ void EventList::sortPulseTimeTOF() const {
     return; // already ordered.
 
   // Avoid sorting from multiple threads
-  Mantid::Kernel::LockGuardMutex _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIMETOF_SORT)
     return;

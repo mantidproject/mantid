@@ -347,7 +347,7 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore)
  * Note: This takes about 0.1 ms on a Ubuntu 10.10 system.
  */
 void MemoryStats::update() {
-  Mantid::Kernel::LockGuardMutex lock(MemoryStats::mutexMemory);
+  std::lock_guard<std::mutex> lock(MemoryStats::mutexMemory);
   // get what is used by the process
   if (this->ignore != MEMORY_STATS_IGNORE_PROCESS) {
     process_mem_usage(this->vm_usage, this->res_usage);
@@ -583,7 +583,7 @@ size_t MemoryStats::getCurrentRSS() const {
 template DLLExport string memToString<uint32_t>(const uint32_t);
 template DLLExport string memToString<uint64_t>(const uint64_t);
 // To initialize the static class variable.
-Mutex MemoryStats::mutexMemory;
+std::mutex MemoryStats::mutexMemory;
 
 } // namespace Kernel
 } // namespace Mantid

@@ -91,12 +91,12 @@ public:
   virtual void flushData() const {}
 
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 
 // Declare the static members here.
 std::string SaveableTesterWithFile::fakeFile;
-Kernel::Mutex SaveableTesterWithFile::streamMutex;
+std::mutex SaveableTesterWithFile::streamMutex;
 
 //====================================================================================
 class DiskBufferTest : public CxxTest::TestSuite {
@@ -736,7 +736,7 @@ public:
 
   /// Fake a seek followed by a write
   static void fakeSeekAndWrite(uint64_t newPos) {
-    Kernel::LockGuardMutex lock(streamMutex);
+    std::lock_guard<std::mutex> lock(streamMutex);
     int64_t seek = int64_t(filePos) - int64_t(newPos);
     if (seek < 0)
       seek = -seek;
@@ -758,12 +758,12 @@ public:
 
   static uint64_t filePos;
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 uint64_t SaveableTesterWithSeek::filePos;
 // Declare the static members here.
 std::string SaveableTesterWithSeek::fakeFile;
-Kernel::Mutex SaveableTesterWithSeek::streamMutex;
+std::mutex SaveableTesterWithSeek::streamMutex;
 
 //====================================================================================
 class DiskBufferTestPerformance : public CxxTest::TestSuite {

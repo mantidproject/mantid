@@ -6,6 +6,8 @@
 #include "MantidKernel/DiskBuffer.h"
 #include <nexus/NeXusFile.hpp>
 
+#include <mutex>
+
 namespace Mantid {
 namespace DataObjects {
 
@@ -102,7 +104,7 @@ private:
   /// column an event is composed into and this class reads/writres
   std::vector<int64_t> m_BlockSize;
   /// lock Nexus file operations as Nexus is not thread safe 
-  mutable Mantid::Kernel::Mutex m_fileMutex;
+  mutable std::mutex m_fileMutex;
 
   // Mainly static information which may be split into different IO classes
   // selected through chein of responsibility.

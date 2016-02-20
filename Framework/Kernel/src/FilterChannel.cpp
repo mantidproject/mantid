@@ -13,7 +13,7 @@ FilterChannel::~FilterChannel() { close(); }
 
 void FilterChannel::addChannel(Channel *pChannel) {
   poco_check_ptr(pChannel);
-  Mantid::Kernel::LockGuardMutex lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
 
   pChannel->duplicate();
   _channel = pChannel;
@@ -34,7 +34,7 @@ void FilterChannel::setProperty(const std::string &name,
 }
 
 void FilterChannel::log(const Message &msg) {
-  Mantid::Kernel::LockGuardMutex lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
 
   if (msg.getPriority() <= _priority) {
     _channel->log(msg);
@@ -42,7 +42,7 @@ void FilterChannel::log(const Message &msg) {
 }
 
 void FilterChannel::close() {
-  Mantid::Kernel::LockGuardMutex lock(_mutex);
+  std::lock_guard<std::mutex> lock(_mutex);
   if (_channel != nullptr) {
     _channel->release();
   }

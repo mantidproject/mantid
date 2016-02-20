@@ -13,7 +13,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -360,7 +361,7 @@ public:
    * @param name :: name of the object */
   boost::shared_ptr<T> retrieve(const std::string &name) const {
     // Make DataService access thread-safe
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
     svc_it it = findNameWithCaseSearch(name, foundName);
@@ -377,7 +378,7 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
     svc_it it = findNameWithCaseSearch(name, foundName);
@@ -388,7 +389,7 @@ public:
 
   /// Return the number of objects stored by the data service
   size_t size() const {
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     if (showingHiddenObjects()) {
       return datamap.size();
@@ -407,7 +408,7 @@ public:
     if (showingHiddenObjects())
       return getObjectNamesInclHidden();
 
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
@@ -420,7 +421,7 @@ public:
 
   /// Get the names of the data objects stored by the service
   std::set<std::string> getObjectNamesInclHidden() const {
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
@@ -431,7 +432,7 @@ public:
 
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector<boost::shared_ptr<T>> getObjects() const {
-    Kernel::LockGuardRecursiveMutex _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     const bool showingHidden = showingHiddenObjects();
     std::vector<boost::shared_ptr<T>> objects;
@@ -548,7 +549,7 @@ private:
   /// Map of objects in the data service
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications
-  mutable Mantid::Kernel::RecursiveMutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
   /// Logger for this DataService
   Logger g_log;
 }; // End Class Data service

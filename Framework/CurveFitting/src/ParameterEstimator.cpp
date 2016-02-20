@@ -6,9 +6,9 @@
 #include "MantidAPI/FunctionValues.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <cmath>
+#include <mutex>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -21,7 +21,7 @@ Kernel::Logger g_log("ParameterEstimator");
 
 namespace {
 /// Mutex to prevent simultaneous access to functionMap
-Mantid::Kernel::RecursiveMutex FUNCTION_MAP_MUTEX;
+std::recursive_mutex FUNCTION_MAP_MUTEX;
 }
 
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
@@ -43,7 +43,7 @@ void initFunctionLookup(FunctionMapType &functionMapType) {
 /// Returns a reference to the static functionMapType
 /// @returns :: a const reference to the functionMapType
 const FunctionMapType &getFunctionMapType() {
-  Mantid::Kernel::LockGuardRecursiveMutex lock(FUNCTION_MAP_MUTEX);
+  std::lock_guard<std::recursive_mutex> lock(FUNCTION_MAP_MUTEX);
 
   static FunctionMapType functionMapType;
 

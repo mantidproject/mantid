@@ -10,9 +10,9 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -199,7 +199,7 @@ private:
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
-  mutable Mantid::Kernel::RecursiveMutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 };
 
 /// Shared pointer to ExperimentInfo

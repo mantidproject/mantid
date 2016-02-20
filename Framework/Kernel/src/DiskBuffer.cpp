@@ -52,7 +52,7 @@ void DiskBuffer::toWrite(ISaveable *item) {
                              // its size in memory
   {
     // forget old memory size
-    Kernel::UniqueLockMutex uniqueLock(m_mutex);
+    std::unique_lock<std::mutex> uniqueLock(m_mutex);
     m_writeBufferUsed -= item->getBufferSize();
     // add new size
     size_t newMemorySize = item->getDataMemorySize();
@@ -60,7 +60,7 @@ void DiskBuffer::toWrite(ISaveable *item) {
     uniqueLock.unlock();
     item->setBufferSize(newMemorySize);
   } else {
-    Kernel::LockGuardMutex lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_toWriteBuffer.push_front(item);
     m_writeBufferUsed += item->setBufferPosition(m_toWriteBuffer.begin());
     m_nObjectsToWrite++;
@@ -83,7 +83,7 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
   if (item == nullptr)
     return;
   // have it ever been in the buffer?
-  Kernel::UniqueLockMutex uniqueLock(m_mutex);
+  std::unique_lock<std::mutex> uniqueLock(m_mutex);
   auto opt2it = item->getBufPostion();
   if (opt2it) {
     m_writeBufferUsed -= item->getBufferSize();
@@ -107,7 +107,7 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
  */
 void DiskBuffer::writeOldObjects() {
 
-  Kernel::LockGuardMutex _lock(m_mutex);
+  std::lock_guard<std::mutex> _lock(m_mutex);
   // Holder for any objects that you were NOT able to write.
   std::list<ISaveable *> couldNotWrite;
   size_t objectsNotWritten(0);
@@ -206,7 +206,7 @@ void DiskBuffer::flushCache() {
 void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
   if (size == 0 || size == std::numeric_limits<uint64_t>::max())
     return;
-  Kernel::LockGuardMutex lock(m_freeMutex);
+  std::lock_guard<std::mutex> lock(m_freeMutex);
 
   // Make the block
   FreeBlock newBlock(pos, size);
@@ -259,7 +259,7 @@ void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
  * automatically defrags neighboring blocks.
  */
 void DiskBuffer::defragFreeBlocks() {
-  Kernel::LockGuardMutex lock(m_freeMutex);
+  std::lock_guard<std::mutex> lock(m_freeMutex);
 
   freeSpace_t::iterator it = m_free.begin();
   FreeBlock thisBlock;
@@ -294,7 +294,7 @@ void DiskBuffer::defragFreeBlocks() {
  * @return a new position at which the data can be saved.
  */
 uint64_t DiskBuffer::allocate(uint64_t const newSize) {
-  Kernel::UniqueLockMutex uniqueLock(m_freeMutex);
+  std::unique_lock<std::mutex> uniqueLock(m_freeMutex);
 
   // Now, find the first available block of sufficient size.
   freeSpace_bySize_t::iterator it;

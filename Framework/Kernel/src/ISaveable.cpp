@@ -36,7 +36,7 @@ ISaveable::ISaveable(const ISaveable &other)
 */
 void ISaveable::setFilePosition(uint64_t newPos, size_t newSize,
                                 bool wasSaved) {
-  Mantid::Kernel::LockGuardMutex lock(m_setter);
+  std::lock_guard<std::mutex> lock(m_setter);
   this->m_fileIndexStart = newPos;
   this->m_fileNumEvents = static_cast<uint64_t>(newSize);
   m_wasSaved = wasSaved;
@@ -50,7 +50,7 @@ void ISaveable::setFilePosition(uint64_t newPos, size_t newSize,
  @param newSize -- new size of the saveable object
 */
 void ISaveable::saveAt(uint64_t newPos, uint64_t newSize) {
-  Mantid::Kernel::LockGuardMutex lock(m_setter);
+  std::lock_guard<std::mutex> lock(m_setter);
   // load old contents if it was there
   if (this->wasSaved())
     this->load();
@@ -71,7 +71,7 @@ void ISaveable::saveAt(uint64_t newPos, uint64_t newSize) {
 */
 size_t
 ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition) {
-  Mantid::Kernel::LockGuardMutex lock(m_setter);
+  std::lock_guard<std::mutex> lock(m_setter);
   m_BufPosition =
       boost::optional<std::list<ISaveable *>::iterator>(bufPosition);
   m_BufMemorySize = this->getDataMemorySize();
@@ -82,7 +82,7 @@ ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition) {
 /// clears the state of the object, and indicate that it is not stored in buffer
 /// any more
 void ISaveable::clearBufferState() {
-  Mantid::Kernel::LockGuardMutex lock(m_setter);
+  std::lock_guard<std::mutex> lock(m_setter);
 
   m_BufMemorySize = 0;
   m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();

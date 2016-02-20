@@ -39,7 +39,7 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
  * @param thread_num :: thread number that wants a MRU buffer
  */
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
     m_bufferedDataE.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataE) {
@@ -54,7 +54,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
  * @param thread_num :: thread number that wants a MRU buffer
  */
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
     m_bufferedDataY.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataY) {
@@ -67,7 +67,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
 //---------------------------------------------------------------------------
 /// Clear all the data in the MRU buffers
 void EventWorkspaceMRU::clear() {
-  Mantid::Kernel::LockGuardMutex _lock(this->m_toDeleteMutex);
+  std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
 
   // FIXME: don't clear the locked ones!
   for (auto &marker : m_markersToDelete)
@@ -96,7 +96,7 @@ void EventWorkspaceMRU::clear() {
  *found.
  */
 MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   return m_bufferedDataY[thread_num]->find(index);
 }
 
@@ -108,7 +108,7 @@ MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
  *found.
  */
 MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   return m_bufferedDataE[thread_num]->find(index);
 }
 
@@ -120,12 +120,12 @@ MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  *needs to be deleted.
  */
 void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   MantidVecWithMarker *oldData = m_bufferedDataY[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
-      Mantid::Kernel::LockGuardMutex _lock(this->m_toDeleteMutex);
+      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
       m_markersToDelete.push_back(oldData);
     } else
       delete oldData;
@@ -140,12 +140,12 @@ void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
  *needs to be deleted.
  */
 void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
-  Mantid::Kernel::LockGuardMutex _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   MantidVecWithMarker *oldData = m_bufferedDataE[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
-      Mantid::Kernel::LockGuardMutex _lock(this->m_toDeleteMutex);
+      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
       m_markersToDelete.push_back(oldData);
     } else
       delete oldData;
@@ -157,11 +157,11 @@ void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
  * @param index :: index to delete.
  */
 void EventWorkspaceMRU::deleteIndex(size_t index) {
-  Mantid::Kernel::LockGuardMutex _lock1(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock1(m_changeMruListsMutexE);
   for (auto &data : m_bufferedDataE)
     if (data)
       data->deleteIndex(index);
-  Mantid::Kernel::LockGuardMutex _lock2(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock2(m_changeMruListsMutexY);
   for (auto &data : m_bufferedDataY)
     if (data)
       data->deleteIndex(index);

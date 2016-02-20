@@ -45,7 +45,7 @@ void ProgressText::doReport(const std::string &msg) {
   // Print out
   int pct = static_cast<int>(p * 100.0);
 
-  Mantid::Kernel::LockGuardMutex lock(coutMutex);
+  std::lock_guard<std::mutex> lock(coutMutex);
 
   // Return at the start of the line if not doing new lines
   if (!m_newLines)

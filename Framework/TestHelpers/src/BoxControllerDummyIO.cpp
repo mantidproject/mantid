@@ -126,7 +126,7 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
   size_t nEvents = DataBlock.size() / m_EventSize;
   uint64_t position = blockPosition;
   // uint64_t fileLength = this->getFileLength();
-  Mantid::Kernel::LockGuardMutex lock(m_fileMutex);
+  std::lock_guard<std::mutex> lock(m_fileMutex);
  
   if (m_EventSize * (position + nEvents) > fileContents.size()) {
     fileContents.resize((position + nEvents) * m_EventSize);
@@ -151,7 +151,7 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
 void BoxControllerDummyIO::loadBlock(std::vector<float> &Block,
                                      const uint64_t blockPosition,
                                      const size_t nPoints) const {
-  Mantid::Kernel::LockGuardMutex _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
   if (blockPosition + nPoints > this->getFileLength())
     throw Mantid::Kernel::Exception::FileError(
         "Attemtp to read behind the file end", m_fileName);

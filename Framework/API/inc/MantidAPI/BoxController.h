@@ -2,7 +2,6 @@
 #define BOXCONTROLLER_H_
 
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/Exception.h"
@@ -84,7 +83,7 @@ public:
 
   //-----------------------------------------------------------------------------------
   /** @return the mutex for avoiding simultaneous assignments of box Ids. */
-  inline Kernel::Mutex &getIdMutex() { return m_idMutex; }
+  inline std::mutex &getIdMutex() { return m_idMutex; }
 
   //-----------------------------------------------------------------------------------
   /** Return true if the MDBox should split, given :
@@ -286,7 +285,7 @@ public:
    *boxes.
    */
   void trackNumBoxes(size_t depth) {
-    Mantid::Kernel::LockGuardMutex lock(m_mutexNumMDBoxes);
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     if (m_numMDBoxes[depth] > 0) {
       m_numMDBoxes[depth]--;
     }
@@ -356,7 +355,7 @@ public:
 
   /** Reset the number of boxes tracked in m_numMDBoxes */
   void resetNumBoxes() {
-    Mantid::Kernel::LockGuardMutex lock(m_mutexNumMDBoxes);
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDBoxes.clear();
     m_numMDBoxes.resize(m_maxDepth + 1, 0);     // Reset to 0
     m_numMDGridBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
@@ -493,14 +492,14 @@ private:
   std::vector<size_t> m_numMDGridBoxes;
 
   /// Mutex for changing the number of MD Boxes.
-  Mantid::Kernel::Mutex m_mutexNumMDBoxes;
+  std::mutex m_mutexNumMDBoxes;
 
   /// This is the maximum number of MD boxes there could be at each recursion
   /// level (e.g. (splitInto ^ ndims) ^ depth )
   std::vector<double> m_maxNumMDBoxes;
 
   /// Mutex for getting IDs
-  Mantid::Kernel::Mutex m_idMutex;
+  std::mutex m_idMutex;
 
   // the class which does actual IO operations, including MRU support list
   boost::shared_ptr<IBoxControllerIO> m_fileIO;

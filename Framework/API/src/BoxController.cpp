@@ -116,7 +116,7 @@ BoxController::~BoxController() {
  * @returns initial ID to use in the range
  */
 size_t BoxController::claimIDRange(size_t range) {
-  Mantid::Kernel::LockGuardMutex lock(m_idMutex);
+  std::lock_guard<std::mutex> lock(m_idMutex);
   size_t tmp = m_maxId;
   m_maxId += range;
   return tmp;

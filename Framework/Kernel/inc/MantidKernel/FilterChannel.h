@@ -34,10 +34,10 @@
 #define Foundation_FilterChannel_INCLUDED
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <Poco/Foundation.h>
 #include <Poco/Channel.h>
 #include <vector>
+#include <mutex>
 
 namespace Poco {
 
@@ -81,7 +81,7 @@ private:
   /// The priority used to filter messages
   int _priority;
   /// A mutex lock to prevent race conditions
-  mutable Mantid::Kernel::Mutex _mutex;
+  mutable std::mutex _mutex;
 };
 
 } // namespace Poco
