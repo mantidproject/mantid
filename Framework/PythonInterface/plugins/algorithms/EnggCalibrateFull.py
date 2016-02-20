@@ -301,15 +301,13 @@ class EnggCalibrateFull(PythonAlgorithm):
                     'calibrated position (x), calibrated position (y), calibrated position (z), '
                     'calib. L2, calib. 2\\theta, calib. \\phi, delta L2 (calibrated - old), difc, zero\n')
             for r in range(0, tbl.rowCount()):
-                f.write("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" %
-                        (tbl.cell(r,0),
-                         #                 f.write('{0:d}, {1:.10f}, {1:.10f}, {3:.10f}, {4:.10f}, {5:.10f}, {6:.10f}, '
-                         #'{7:.10f}, {8:.10f}, {9:.10f}, {10:.10f}, {11:.10f}, {12:.10f}\n'.
-                         #format(tbl.cell(r,0),
-                         tbl.cell(r,1).getX(), tbl.cell(r,1).getY(), tbl.cell(r,1).getZ(),
-                         tbl.cell(r,2).getX(), tbl.cell(r,2).getY(), tbl.cell(r,2).getZ(),
-                         tbl.cell(r,3), tbl.cell(r,4), tbl.cell(r,5),
-                         tbl.cell(r,6), tbl.cell(r,7), tbl.cell(r,8)))
+                f.write('{0:d}, {1:.10f}, {1:.10f}, {3:.10f}, {4:.10f}, {5:.10f}, {6:.10f}, '
+                        '{7:.10f}, {8:.10f}, {9:.10f}, {10:.10f}, {11:.10f}, {12:.10f}\n'.
+                        format(tbl.cell(r,0),
+                               tbl.cell(r,1).getX(), tbl.cell(r,1).getY(), tbl.cell(r,1).getZ(),
+                               tbl.cell(r,2).getX(), tbl.cell(r,2).getY(), tbl.cell(r,2).getZ(),
+                               tbl.cell(r,3), tbl.cell(r,4), tbl.cell(r,5),
+                               tbl.cell(r,6), tbl.cell(r,7), tbl.cell(r,8)))
 
     def _get_calibrated_det_pos(self, newDifc, det, ws):
         """

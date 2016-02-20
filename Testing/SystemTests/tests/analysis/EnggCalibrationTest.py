@@ -18,7 +18,9 @@ def rel_err_less_delta(val, ref, epsilon):
         return False
     check = (abs((ref-val)/ref) < epsilon)
     if not check:
-        print "Val '{0}' differs from ref '{1}' by more than required epsilon '{2}'".format(val, ref, epsilon)
+        print ("Val '{0}' differs from ref '{1}' by more than required epsilon '{2}'"
+               .format(val, ref, epsilon))
+
     return check
 
 class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
@@ -169,10 +171,11 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         # This must be the (big) Vanadium (V-Nb) run for vanadium corrections
         van_ws = Load(Filename = 'ENGINX00236516.nxs')
 
-        positions = EnggCalibrateFull(Workspace = long_calib_ws,
-                                      VanadiumWorkspace = van_ws,
-                                      Bank = '1',
-                                      ExpectedPeaks = '1.3529, 1.6316, 1.9132')
+        positions, peaks_info = EnggCalibrateFull(Workspace = long_calib_ws,
+                                                  VanadiumWorkspace = van_ws,
+                                                  Bank = '1',
+                                                  ExpectedPeaks = '0.956610, 1.104599, 1.352852, '
+                                                  '1.631600, 1.913221')
         self.posTable = positions
 
         # Bank 1

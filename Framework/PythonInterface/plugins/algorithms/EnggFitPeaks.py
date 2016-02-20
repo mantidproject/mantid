@@ -224,7 +224,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 fitted_peaks.addRow(fitted_params)
             else:
                 self.log().notice("Discarding peak found with wrong center and/or excessive or suspicious "
-                                  "error esimate in the center estimate: {0} (ToF) ({1}, dSpacing), "
+                                  "error estimate in the center estimate: {0} (ToF) ({1}, dSpacing), "
                                   "with error: {2}, for dSpacing {3}".
                                   format(fitted_params['X0'], peaks[1][i],
                                          fitted_params['X0_Err'], fitted_params['dSpacing']))
