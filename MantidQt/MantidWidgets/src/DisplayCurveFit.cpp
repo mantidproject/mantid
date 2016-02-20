@@ -15,6 +15,7 @@ namespace MantidWidgets {
 //               ++++++++ Public members ++++++++
 //               ++++++++++++++++++++++++++++++++
 
+/// Curve types have a hard-coded name
 std::map<DisplayCurveFit::curveType, QString> const
     DisplayCurveFit::m_curveTypeToQString{
         {DisplayCurveFit::curveType::data, QString("data")},
@@ -30,6 +31,7 @@ std::map<DisplayCurveFit::curveType, Qt::GlobalColor> const
         {DisplayCurveFit::curveType::fit, Qt::red},
         {DisplayCurveFit::curveType::residuals, Qt::red}};
 
+/// Range types have a hard-coded name
 std::map<DisplayCurveFit::dcRange, QString> const
     DisplayCurveFit::m_dcRangeToQString{
         {DisplayCurveFit::dcRange::fit, QString("fit")},
@@ -62,7 +64,7 @@ void DisplayCurveFit::setAxisRange(QPair<double, double> range, int axisID) {
 /**
  * @brief Finds which stored fitting curves are associated with the query workspace
  * @param workspace Pointer to workspace
- * @return a vector containing the curve types
+ * @return a std::vector containing the curve types
  */
 DisplayCurveFit::curveTypes DisplayCurveFit::getCurvesForWorkspace(
     const Mantid::API::MatrixWorkspace_sptr workspace) {
@@ -75,7 +77,8 @@ DisplayCurveFit::curveTypes DisplayCurveFit::getCurvesForWorkspace(
 /**
  * @brief Gets the X range of a curve given its curve type.
  * @param atype the query curve type.
- * @exception there is no associated curve in any of the two PreviewPlot  panels.
+ * @exception std::runtime_error when there is no associated curve in any
+ * of the two PreviewPlot  panels.
  * @return a std::pair definining the range of the curve.
  */
 QPair<double, double> DisplayCurveFit::getCurveRange(const curveType &atype) {
@@ -84,7 +87,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(const curveType &atype) {
 
 /**
  * @brief Gets the X range of the first curve whose data is stored in the query workspace.
- * @param Pointer to workspace
+ * @param workspace pointer to query workspace
  * @retuns the range of the first curve associated to the workspace
  * @exception std::runtime_error no stored curves are associated to the query workspace
  */
@@ -171,8 +174,8 @@ void DisplayCurveFit::addResidualsZeroline(){
 //               ++++++++++++++++++++++++++++++++
 
 /**
- * @brief Search values of m_curveTypeToQString to find the curve
- * type, given its name.
+ * @brief Find in member m_curveTypeToQString the curve type
+ * corresponding to the query name.
  * @param name query name of the curve.
  * @return the curve type associated with the name.
  * @exception std::domain_error the name does not have a corresponding type.
@@ -194,7 +197,7 @@ DisplayCurveFit::nameToType(const QString &name) const {
 /**
  * @brief Translate a list of curve names to curve types.
  * @param names query curve names.
- * @return a vector of the corresponding curve types.
+ * @return a std::vector of the corresponding curve types.
  * @exception std::domain_error one (of more) of the names do not have a
  *correspoinding type.
  */

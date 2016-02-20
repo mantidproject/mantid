@@ -35,7 +35,7 @@ DisplayCurveFitTest::DisplayCurveFitTest(QWidget *parent)
 DisplayCurveFitTest::~DisplayCurveFitTest() {}
 
 /**
- * @brief Initialize the widgets defined in the form generated in
+ * @brief Initialize the widgets defined within the form generated in
  * Qt-Designer. Also, defined the SIGNALS to SLOTS connections.
  */
 void DisplayCurveFitTest::initLayout() {
@@ -49,7 +49,7 @@ void DisplayCurveFitTest::initLayout() {
 //           +++++++++++++++++++++++++++
 
 /**
- * @brief The proper test that loads the fit curves to be
+ * @brief The test proper that loads the fit curves to be
  * displayed and the two ranges.
  * @param workspaceName the name of the workspace containing
  * the data of the curves to be displayed.
@@ -65,7 +65,7 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
   auto curveRange = m_uiForm.displayFit->getCurveRange(curveType::data);
   static bool firstPass{TRUE};
 
-  /// Set up the range selector for the fit
+  // Set up the range selector for the fit
   m_uiForm.displayFit->addRangeSelector(dcRange::fit);
   auto rangeSelectorFit =
       m_uiForm.displayFit->m_rangeSelector.at(dcRange::fit);
@@ -75,7 +75,7 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
     rangeSelectorFit->setMaximum(0.95 * curveRange.second);
   }
 
-  /// Set up the range evaluate range selector
+  // Set up the range evaluate range selector
   m_uiForm.displayFit->addRangeSelector(dcRange::evaluate);
   auto rangeSelectorEvaluate =
       m_uiForm.displayFit->m_rangeSelector.at(dcRange::evaluate);

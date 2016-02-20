@@ -19,15 +19,17 @@ class RangeSelector;
  * - An upper panel to plot the data curve, the evaluation of the model with
  *   current model parameters (guess curve), and the evaluation of the
  *   model with optimized parameters (fit curve).
- * - A lower panel to plot the residuals curve, the different between
+ * - A lower panel to plot the residuals curve, the difference between
  *   the data curve  and the fit curve.
  * - A range limited by two vertical lines over which the fit should
  *   be carried out (fit-range).
  * - A range over which the model is evaluated (evaluate-range). Sometimes
  *   one may wish to evaluate the model over a range slightly bigger than
  *   the range over which the fit is carried out.
- * All curves to be plotted need to be stored in workspaces. The Analysis
- * Data Service notifies DisplayCurveFit of changes of these workspaces.
+ *
+ * All curves to be plotted need to be stored in workspaces. The
+ * AnalysisDataService notifies DisplayCurveFit of changes of these
+ * workspaces.
 
   @date 2016-02-11
 
@@ -63,9 +65,8 @@ public:
 
   /** Ranges on the X-axis */
   enum class dcRange {
-    fit = 1, /** range over which the fitting procedure is carried out */
-    evaluate /** range over which the fit and residuals curves are
-                evaluated. Usually extends beyond the boundaries of the fit
+    fit = 1, ///< range over which the fitting procedure is carried out */
+    evaluate ///< range over which the fit and residuals curves are evaluated. Usually extends beyond the boundaries of the fit
                 range */
   };
   DisplayCurveFit(QWidget *parent = nullptr);
@@ -89,7 +90,7 @@ public:
   static std::map<curveType, Qt::GlobalColor> const m_curveTypeToColor;
   static std::map<dcRange, QString> const m_dcRangeToQString;
 
-  /// Pointers to the range selector objects.
+  /// Pointers to the RangeSelector objects.
   std::map<dcRange, RangeSelector *> m_rangeSelector;
 
 private:
