@@ -75,7 +75,7 @@ void RebinToWorkspace::createRebinParameters(
   // params vector should have the form [x_1, delta_1,x_2, ...
   // ,x_n-1,delta_n-1,x_n), see Rebin.cpp
   rb_params.clear();
-  int xsize = (int)matchXdata.size();
+  int xsize = static_cast<int>(matchXdata.size());
   rb_params.reserve(xsize * 2);
   for (int i = 0; i < xsize; ++i) {
     // bin bound

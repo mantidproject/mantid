@@ -54,27 +54,27 @@ public:
   SaveToSNSHistogramNexus();
 
   /// Destructor
-  ~SaveToSNSHistogramNexus() {}
+  ~SaveToSNSHistogramNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveToSNSHistogramNexus"; };
+  const std::string name() const override { return "SaveToSNSHistogramNexus"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a workspace into SNS histogrammed NeXus format, using an "
            "original file as the starting point. This only works for "
            "instruments with Rectangular Detectors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of the output file
   std::string m_outputFilename;

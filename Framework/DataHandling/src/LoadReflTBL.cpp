@@ -4,12 +4,13 @@
 #include "MantidDataHandling/LoadReflTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
 
@@ -165,7 +166,7 @@ void LoadReflTBL::csvParse(
       if (lastComma + 1 < line.length()) {
         cols.push_back(line.substr(lastComma + 1));
       } else {
-        cols.push_back("");
+        cols.emplace_back("");
       }
     }
   }

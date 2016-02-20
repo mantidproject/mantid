@@ -30,36 +30,43 @@ Usage
 
 .. testcode:: ExStatisticsOfPeaksWorkspaceOption
 
-    #load a peaks workspace from file
+    # Load example peak data and find cell
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
-    LoadIsawUB(peaks,"ls5637.mat")
-    peak = peaks.getPeak(0)
+
+    FindUBUsingFFT(peaks, MinD=0.25, MaxD=10, Tolerance=0.2)
+    SelectCellWithForm(peaks, FormNumber=9, Apply=True, Tolerance=0.15)
+    OptimizeLatticeForCellType(peaks,
+                               CellType='Hexagonal', Apply=True, Tolerance=0.2)
+
+    # Run the SortHKL algorithm
+    sorted, statistics_table = StatisticsOfPeaksWorkspace(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
+                                                          LatticeCentering='Rhombohedrally centred, obverse',
+                                                          SortBy='Overall')
+
+    statistics = statistics_table.row(0)
+
+    peak = sorted.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
-    
-    pw,stats = StatisticsOfPeaksWorkspace(InputWorkspace=peaks, PointGroup='-31m (Trigonal - Hexagonal)', SortBy="Overall")
-    peak = pw.getPeak(0)
-    print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
-    print "Rmerge = %.9f" % stats.row(0)['Rmerge']
-    print "Multiplicity = %.9f" % stats.row(0)['Multiplicity']
-    print "Resolution Min = %.9f" % stats.row(0)['Resolution Min']
-    print "No. of Unique Reflections = %i" % stats.row(0)['No. of Unique Reflections']
-    print "Mean ((I)/sd(I)) = %.9f" % stats.row(0)['Mean ((I)/sd(I))']
-    print "Resolution Max = %.9f" % stats.row(0)['Resolution Max']
-    print "Rpim = %.9f" % stats.row(0)['Rpim']
+    print "Multiplicity = %.2f" % statistics['Multiplicity']
+    print "Resolution Min = %.2f" % statistics['Resolution Min']
+    print "Resolution Max = %.2f" % statistics['Resolution Max']
+    print "No. of Unique Reflections = %i" % statistics['No. of Unique Reflections']
+    print "Mean ((I)/sd(I)) = %.2f" % statistics['Mean ((I)/sd(I))']
+    print "Rmerge = %.2f" % statistics['Rmerge']
+    print "Rpim = %.2f" % statistics['Rpim']
 
 Output:
 
 .. testoutput:: ExStatisticsOfPeaksWorkspaceOption
 
-    HKL of first peak in table 1 4.0 -9.0
-    HKL of first peak in table -10 3.0 -40.0
-    Rmerge = 0.031365010
-    Multiplicity = 1.012437811
-    Resolution Min = 0.295741000
-    No. of Unique Reflections = 403
-    Mean ((I)/sd(I)) = 27.507261668
-    Resolution Max = 3.166076000
-    Rpim = 0.031365010
+    HKL of first peak in table -10 5.0 42.0
+    Multiplicity = 1.21
+    Resolution Min = 0.30
+    Resolution Max = 3.17
+    No. of Unique Reflections = 337
+    Mean ((I)/sd(I)) = 27.51
+    Rmerge = 10.08
+    Rpim = 10.08
 
 
 .. categories::

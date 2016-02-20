@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
+  AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
@@ -62,7 +63,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
-  SANSStitchTest.py
+  SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py
@@ -79,6 +80,7 @@ set ( TEST_PY_FILES
   SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py
@@ -91,6 +93,7 @@ set ( TEST_PY_FILES
   PoldiMergeTest.py
   VesuvioResolutionTest.py
   PoldiCreatePeaksFromFileTest.py
+  LoadCIFTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

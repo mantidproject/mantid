@@ -497,11 +497,10 @@ namespace Mantid
         dest->Copy(source, "vtkSMProxyProperty");
 
           // handle proxy properties.
-          vtkSMPropertyIterator* destIter = dest->NewPropertyIterator();
-          for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next())
-          {
-            if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty()))
-            {
+        auto destIter = vtkSmartPointer<vtkSMPropertyIterator>::Take(
+            dest->NewPropertyIterator());
+        for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next()) {
+          if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty())) {
             // skip input properties.
             continue;
             }
@@ -554,7 +553,6 @@ namespace Mantid
             }
           }
 
-          destIter->Delete();
           dest->UpdateVTKObjects();
           END_UNDO_SET();
         }

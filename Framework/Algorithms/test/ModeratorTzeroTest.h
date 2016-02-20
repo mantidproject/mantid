@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

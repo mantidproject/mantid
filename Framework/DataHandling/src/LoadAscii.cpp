@@ -1,20 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
-#include <fstream>
-
-#include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -278,11 +279,8 @@ int LoadAscii::splitIntoColumns(std::list<std::string> &columns,
 void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
-  std::list<std::string>::const_iterator iend = columns.end();
   int i = 0;
-  for (std::list<std::string>::const_iterator itr = columns.begin();
-       itr != iend; ++itr) {
-    std::string value = *itr;
+  for (auto value : columns) {
     boost::trim(value);
     boost::to_lower(value);
     if (value == "nan" || value == "1.#qnan") // ignores nans (not a number) and

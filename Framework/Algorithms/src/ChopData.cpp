@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -90,7 +91,7 @@ void ChopData::exec() {
       progress->report();
     }
 
-    std::map<int, double>::iterator nlow = intMap.find(lowest - 1);
+    auto nlow = intMap.find(lowest - 1);
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
@@ -161,10 +162,10 @@ void ChopData::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &workspace : workspaces) {
+    wsgroup->addWorkspace(workspace);
   }
   // set the output property
   setProperty("OutputWorkspace", wsgroup);

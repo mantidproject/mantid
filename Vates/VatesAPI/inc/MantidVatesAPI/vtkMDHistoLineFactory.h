@@ -8,6 +8,7 @@
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include <vtkNew.h>
 
 namespace Mantid
 {
@@ -53,23 +54,22 @@ namespace Mantid
       vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other);
 
       /// Destructor
-      virtual ~vtkMDHistoLineFactory();
+      ~vtkMDHistoLineFactory() override;
 
       /// Factory Method.
-      virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
+      vtkSmartPointer<vtkDataSet>
+      create(ProgressAction &progressUpdating) const override;
 
-      virtual void initialize(Mantid::API::Workspace_sptr);
+      void initialize(Mantid::API::Workspace_sptr) override;
 
       typedef std::vector<UnstructuredPoint> Column;
 
-      virtual std::string getFactoryTypeName() const
-      {
+      std::string getFactoryTypeName() const override {
         return "vtkMDHistoLineFactory";
       }
 
     protected:
-
-      virtual void validate() const;
+      void validate() const override;
 
     private:
 

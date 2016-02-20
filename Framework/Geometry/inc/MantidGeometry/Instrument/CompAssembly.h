@@ -53,59 +53,60 @@ protected:
 
 public:
   /// String description of the type of component
-  virtual std::string type() const { return "CompAssembly"; }
+  std::string type() const override { return "CompAssembly"; }
   //! Empty constructor
   CompAssembly();
   /// Constructor for parametrized version
   CompAssembly(const IComponent *base, const ParameterMap *map);
   //! Constructor with a name and parent reference
-  CompAssembly(const std::string &, IComponent *reference = 0);
+  CompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   CompAssembly(const CompAssembly &);
-  virtual ~CompAssembly();
+  ~CompAssembly() override;
   //! Make a clone of the present component
-  virtual IComponent *clone() const;
+  IComponent *clone() const override;
   //! Return the number of elements in the assembly
-  int nelements() const;
+  int nelements() const override;
   //! Add a component to the assembly
-  int add(IComponent *);
+  int add(IComponent *) override;
   //! Add a copy (clone) of a component
 
   void addChildren(IComponent *comp);
 
-  int addCopy(IComponent *);
+  int addCopy(IComponent *) override;
   //! Add a copy (clone) of a component and rename it
-  int addCopy(IComponent *, const std::string &);
+  int addCopy(IComponent *, const std::string &) override;
   /// Remove a component from the assembly
   int remove(IComponent *);
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
-  boost::shared_ptr<IComponent> getChild(const int i) const;
+  boost::shared_ptr<IComponent> getChild(const int i) const override;
   //! Returns a vector of all children contained.
   void getChildren(std::vector<IComponent_const_sptr> &outVector,
-                   bool recursive) const;
+                   bool recursive) const override;
   //! Get a pointer to the ith component in the assembly
-  boost::shared_ptr<IComponent> operator[](int i) const;
+  boost::shared_ptr<IComponent> operator[](int i) const override;
   /// Returns a pointer to the first component of assembly encountered with the
   /// given name
-  virtual boost::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
-  Kernel::V3D getPos() const;
+  Kernel::V3D getPos() const override;
 
-  const Kernel::Quat getRotation() const;
+  const Kernel::Quat getRotation() const override;
 
   /// Get the bounding box for this component and store it in the given argument
-  virtual void getBoundingBox(BoundingBox &boundingBox) const;
+  void getBoundingBox(BoundingBox &boundingBox) const override;
 
   //! Print information about all children
-  void printChildren(std::ostream &) const;
-  void printTree(std::ostream &) const;
+  void printChildren(std::ostream &) const override;
+  void printTree(std::ostream &) const override;
 
   /** Test the intersection of the ray with the children of the component
    * assembly, for InstrumentRayTracer  */
-  virtual void testIntersectionWithChildren(
-      Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const;
+  void testIntersectionWithChildren(
+      Track &testRay,
+      std::deque<IComponent_const_sptr> &searchQueue) const override;
 
 private:
   /// Private copy assignment operator

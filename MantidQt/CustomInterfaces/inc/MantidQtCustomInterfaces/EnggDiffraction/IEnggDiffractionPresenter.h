@@ -41,6 +41,7 @@ public:
     Start,             ///< Start and setup interface
     LoadExistingCalib, ///< Load a calibration already availble on disk
     CalcCalib,         ///< Calculate a (new) calibration
+	CropCalib,		   ///< Calculate a cropped calibration
     FocusRun,          ///< Focus one or more run files
     FocusCropped,      ///< Focus one or more run files, cropped variant
     FocusTexture,      ///< Focus one or more run files, texture variant

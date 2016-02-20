@@ -37,31 +37,31 @@ namespace Crystal {
 class DLLExport FindUBUsingLatticeParameters : public API::Algorithm {
 public:
   FindUBUsingLatticeParameters();
-  ~FindUBUsingLatticeParameters();
+  ~FindUBUsingLatticeParameters() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "FindUBUsingLatticeParameters";
   };
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\UBMatrix"; }
+  const std::string category() const override { return "Crystal\\UBMatrix"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the UB matrix from a peaks workspace, given lattice "
            "parameters.";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

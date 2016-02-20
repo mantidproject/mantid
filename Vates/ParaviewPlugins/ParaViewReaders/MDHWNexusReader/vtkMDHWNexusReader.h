@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/make_unique.h"
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y
@@ -59,7 +60,7 @@ private:
   char *FileName;
 
   /// Controller/Presenter.
-  Mantid::VATES::MDHWNexusLoadingPresenter* m_presenter;
+  std::unique_ptr<Mantid::VATES::MDHWNexusLoadingPresenter> m_presenter;
 
   /// Flag indicating that file loading algorithm should attempt to fully load the file into memory.
   bool m_loadInMemory;

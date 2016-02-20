@@ -84,8 +84,13 @@ namespace MantidQt
       return results;
   }
 
-  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::clone() const {
+  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::doClone() const {
     return new ReflLegacyTransferStrategy(*this);
+  }
+
+  std::unique_ptr<ReflLegacyTransferStrategy>
+  ReflLegacyTransferStrategy::clone() const {
+    return std::unique_ptr<ReflLegacyTransferStrategy>(doClone());
   }
 
   bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(

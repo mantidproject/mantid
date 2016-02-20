@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -170,7 +171,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
     return -1;
   }
 
-  std::set<detid_t>::const_iterator it = dets.begin();
+  auto it = dets.cbegin();
   if (*it < 0) // bad pixel id
     return -1;
 

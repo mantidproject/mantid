@@ -44,7 +44,7 @@ Kernel::Logger g_log("TobyFitResolutionModel");
  * Default constructor
  */
 TobyFitResolutionModel::TobyFitResolutionModel()
-    : MDResolutionConvolution(), m_randomNumbers(1, NULL), m_mcLoopMin(100),
+    : MDResolutionConvolution(), m_randomNumbers(1, nullptr), m_mcLoopMin(100),
       m_mcLoopMax(1000), m_mcType(4), m_mcRelErrorTol(1e-5),
       m_foregroundOnly(false), m_mosaicActive(true), m_bmatrix(1), m_yvector(1),
       m_etaInPlane(1, 0.0), m_etaOutPlane(1, 0.0),
@@ -60,7 +60,7 @@ TobyFitResolutionModel::TobyFitResolutionModel()
 TobyFitResolutionModel::TobyFitResolutionModel(
     const API::IFunctionMD &fittedFunction, const std::string &fgModel)
     : MDResolutionConvolution(fittedFunction, fgModel),
-      m_randomNumbers(1, NULL), m_mcLoopMin(100), m_mcLoopMax(1000),
+      m_randomNumbers(1, nullptr), m_mcLoopMin(100), m_mcLoopMax(1000),
       m_mcType(4), m_mcRelErrorTol(1e-5), m_foregroundOnly(false),
       m_mosaicActive(true), m_bmatrix(1), m_yvector(1), m_etaInPlane(1, 0.0),
       m_etaOutPlane(1, 0.0), m_deltaQE(1, std::vector<double>(4, 0.0)),
@@ -268,8 +268,8 @@ void TobyFitResolutionModel::setAttribute(
   } else if (name == FOREGROUNDONLY_NAME) {
     m_foregroundOnly = (value.asInt() != 0);
   } else {
-    for (auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter) {
-      iter->setAttribute(name, value);
+    for (auto &iter : m_yvector) {
+      iter.setAttribute(name, value);
     }
   }
 }
@@ -548,7 +548,7 @@ void TobyFitResolutionModel::setNThreads(int nthreads) {
     return; // done on construction
 
   m_randomNumbers =
-      std::vector<Kernel::NDRandomNumberGenerator *>(nthreads, NULL);
+      std::vector<Kernel::NDRandomNumberGenerator *>(nthreads, nullptr);
   m_bmatrix = std::vector<TobyFitBMatrix>(
       nthreads, m_bmatrix[0]); // Initialize with copy of current
   m_yvector = std::vector<TobyFitYVector>(nthreads, m_yvector[0]);

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -31,7 +32,8 @@ double readInstrumentParameter(const std::string &parameter,
  */
 int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
                          API::MatrixWorkspace_sptr dataWS) {
-  int ny_pixels = (int)(readInstrumentParameter("number-of-y-pixels", dataWS));
+  int ny_pixels =
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   return ny_pixels * pixel_x + pixel_y;
 }
 
@@ -43,9 +45,9 @@ void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
                             API::MatrixWorkspace_sptr dataWS, double &x,
                             double &y) {
   const int nx_pixels =
-      (int)(readInstrumentParameter("number-of-x-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
   const int ny_pixels =
-      (int)(readInstrumentParameter("number-of-y-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   x = (nx_pixels / 2.0 - 0.5 - pixel_x) * pixel_size_x / 1000.0;
@@ -63,9 +65,9 @@ void getPixelFromCoordinate(const double &x, const double &y,
                             API::MatrixWorkspace_sptr dataWS, double &pixel_x,
                             double &pixel_y) {
   const int nx_pixels =
-      (int)(readInstrumentParameter("number-of-x-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
   const int ny_pixels =
-      (int)(readInstrumentParameter("number-of-y-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   pixel_x = -x / pixel_size_x * 1000.0 + nx_pixels / 2.0 - 0.5;

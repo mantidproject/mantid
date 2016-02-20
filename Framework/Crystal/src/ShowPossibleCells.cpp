@@ -91,7 +91,7 @@ void ShowPossibleCells::exec() {
     g_log.notice(std::string(message));
   }
 
-  this->setProperty("NumberOfCells", (int)num_cells);
+  this->setProperty("NumberOfCells", static_cast<int>(num_cells));
 }
 
 } // namespace Mantid

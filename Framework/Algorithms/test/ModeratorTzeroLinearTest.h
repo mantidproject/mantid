@@ -2,12 +2,13 @@
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/ModeratorTzeroLinear.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

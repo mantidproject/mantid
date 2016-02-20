@@ -38,20 +38,20 @@ namespace DataHandling {
 class DLLExport SaveParameterFile : public API::Algorithm {
 public:
   SaveParameterFile();
-  virtual ~SaveParameterFile();
+  ~SaveParameterFile() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save an instrument's parameters to an instrument parameter file.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

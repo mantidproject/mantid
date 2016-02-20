@@ -36,20 +36,21 @@ namespace MDAlgorithms {
 class DLLExport TransformMD : public API::Algorithm {
 public:
   TransformMD();
-  virtual ~TransformMD();
+  ~TransformMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Scale and/or offset the coordinates of a MDWorkspace";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
+  void reverse(signal_t *array, size_t arrayLength);
 
   template <typename MDE, size_t nd>
   void

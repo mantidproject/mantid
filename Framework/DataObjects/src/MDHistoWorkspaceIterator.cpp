@@ -155,7 +155,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +245,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -366,25 +366,6 @@ signal_t MDHistoWorkspaceIterator::getNormalizedError() const {
     return m_ws->getErrorAt(m_pos) * m_ws->getInverseVolume();
   case NumEventsNormalization:
     return m_ws->getErrorAt(m_pos) / m_ws->getNumEventsAt(m_pos);
-  }
-  // Should not reach here
-  return std::numeric_limits<signal_t>::quiet_NaN();
-}
-
-//----------------------------------------------------------------------------------------------
-/// Returns the normalized signal for this box
-signal_t MDHistoWorkspaceIterator::getNormalizedSignalWithMask() const {
-  if (this->getIsMasked()) {
-    return MDMaskValue;
-  }
-  // What is our normalization factor?
-  switch (m_normalization) {
-  case NoNormalization:
-    return m_ws->getSignalAt(m_pos);
-  case VolumeNormalization:
-    return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
-  case NumEventsNormalization:
-    return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
   }
   // Should not reach here
   return std::numeric_limits<signal_t>::quiet_NaN();
@@ -545,12 +526,12 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
   std::vector<int> widths(
       m_nd, 3); // Face touching width is always 3 in each dimension
-  for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
-    if (m_permutationsFaceTouching[i] == 0) {
+  for (auto permutation : m_permutationsFaceTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -582,7 +563,7 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
 std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     const std::vector<int> &widths) const {
   // look-up
-  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
+  auto it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
 
     if (widths[0] % 2 == 0) {
@@ -674,12 +655,12 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   // Accumulate neighbour indexes.
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
-  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
+  for (auto permutation : permutationsVertexTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {

@@ -4,13 +4,14 @@
 #include <cmath>
 #include <vector>
 
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <MantidAPI/FileFinder.h>
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -97,12 +98,7 @@ void PlotAsymmetryByLogValue::init() {
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
 
-  std::vector<std::string> optionsLog;
-  optionsLog.push_back("Mean");
-  optionsLog.push_back("Min");
-  optionsLog.push_back("Max");
-  optionsLog.push_back("First");
-  optionsLog.push_back("Last");
+  std::vector<std::string> optionsLog{"Mean", "Min", "Max", "First", "Last"};
   declareProperty(
       "Function", "Last", boost::make_shared<StringListValidator>(optionsLog),
       "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
@@ -111,9 +107,7 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("Green", EMPTY_INT(),
                   "The period number for the 'green' data.");
 
-  std::vector<std::string> options;
-  options.push_back("Integral");
-  options.push_back("Differential");
+  std::vector<std::string> options{"Integral", "Differential"};
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
@@ -135,10 +129,8 @@ void PlotAsymmetryByLogValue::init() {
                   "available. The backward will use the second of these "
                   "groups.");
 
-  std::vector<std::string> deadTimeCorrTypes;
-  deadTimeCorrTypes.push_back("None");
-  deadTimeCorrTypes.push_back("FromRunData");
-  deadTimeCorrTypes.push_back("FromSpecifiedFile");
+  std::vector<std::string> deadTimeCorrTypes{"None", "FromRunData",
+                                             "FromSpecifiedFile"};
 
   declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),
@@ -384,32 +376,32 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
 
-  TextAxis *tAxis = new TextAxis(nplots);
+  auto tAxis = new TextAxis(nplots);
   if (nplots == 1) {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      outWS->dataX(0)[i] = it->second;
-      outWS->dataY(0)[i] = m_redY[it->first];
-      outWS->dataE(0)[i] = m_redE[it->first];
+    for (auto &value : m_logValue) {
+      outWS->dataX(0)[i] = value.second;
+      outWS->dataY(0)[i] = m_redY[value.first];
+      outWS->dataE(0)[i] = m_redE[value.first];
       i++;
     }
     tAxis->setLabel(0, "Asymmetry");
 
   } else {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      outWS->dataX(0)[i] = it->second;
-      outWS->dataY(0)[i] = m_diffY[it->first];
-      outWS->dataE(0)[i] = m_diffE[it->first];
-      outWS->dataX(1)[i] = it->second;
-      outWS->dataY(1)[i] = m_redY[it->first];
-      outWS->dataE(1)[i] = m_redE[it->first];
-      outWS->dataX(2)[i] = it->second;
-      outWS->dataY(2)[i] = m_greenY[it->first];
-      outWS->dataE(2)[i] = m_greenE[it->first];
-      outWS->dataX(3)[i] = it->second;
-      outWS->dataY(3)[i] = m_sumY[it->first];
-      outWS->dataE(3)[i] = m_sumE[it->first];
+    for (auto &value : m_logValue) {
+      outWS->dataX(0)[i] = value.second;
+      outWS->dataY(0)[i] = m_diffY[value.first];
+      outWS->dataE(0)[i] = m_diffE[value.first];
+      outWS->dataX(1)[i] = value.second;
+      outWS->dataY(1)[i] = m_redY[value.first];
+      outWS->dataE(1)[i] = m_redE[value.first];
+      outWS->dataX(2)[i] = value.second;
+      outWS->dataY(2)[i] = m_greenY[value.first];
+      outWS->dataE(2)[i] = m_greenE[value.first];
+      outWS->dataX(3)[i] = value.second;
+      outWS->dataY(3)[i] = m_sumY[value.first];
+      outWS->dataE(3)[i] = m_sumE[value.first];
       i++;
     }
     tAxis->setLabel(0, "Red-Green");
@@ -431,20 +423,20 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
 
   if (nplots == 2) {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      size_t run = it->first;
+    for (auto &value : m_logValue) {
+      size_t run = value.first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(0)[i] = value.second;             // log value
       outWS->dataY(1)[i] = m_redY[run];              // redY
       outWS->dataE(1)[i] = m_redE[run];              // redE
       i++;
     }
   } else {
     size_t i = 0;
-    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      size_t run = it->first;
+    for (auto &value : m_logValue) {
+      size_t run = value.first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(0)[i] = value.second;             // log value
       outWS->dataY(1)[i] = m_diffY[run];             // diffY
       outWS->dataE(1)[i] = m_diffE[run];             // diffE
       outWS->dataY(2)[i] = m_redY[run];              // redY

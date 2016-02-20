@@ -2,16 +2,20 @@
 // Includes
 //--------------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
+#include <boost/iterator/counting_iterator.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
+
 #include <cfloat>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 
@@ -519,7 +523,7 @@ DataObjects::MaskWorkspace_sptr
 DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  DataObjects::MaskWorkspace_sptr maskWS(new DataObjects::MaskWorkspace());
+  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>();
   maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
   maskWS->setTitle(inputWS->getTitle());
@@ -529,14 +533,9 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 
 std::vector<std::vector<size_t>>
 DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
-  std::vector<std::vector<size_t>> mymap;
-  std::vector<size_t> single;
-
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
-  }
-  mymap.push_back(single);
-  return mymap;
+  return {
+      {boost::counting_iterator<std::size_t>(0),
+       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *
@@ -572,8 +571,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
       m_parents = 0;
       return makeInstrumentMap(countsWS);
     }
-    mymap.insert(std::pair<Mantid::Geometry::ComponentID, size_t>(
-        anc[m_parents - 1]->getComponentID(), i));
+    mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;
@@ -619,19 +617,17 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
-  for (size_t j = 0; j < indexmap.size(); ++j) {
+  for (auto hists : indexmap) {
     std::vector<double> medianInput;
-    std::vector<size_t> hists = indexmap.at(j);
-
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
     bool checkForMask = false;
     Geometry::Instrument_const_sptr instrument = input->getInstrument();
-    if (instrument != NULL) {
-      checkForMask = ((instrument->getSource() != NULL) &&
-                      (instrument->getSample() != NULL));
+    if (instrument != nullptr) {
+      checkForMask = ((instrument->getSource() != nullptr) &&
+                      (instrument->getSample() != nullptr));
     }
 
     PARALLEL_FOR1(input)

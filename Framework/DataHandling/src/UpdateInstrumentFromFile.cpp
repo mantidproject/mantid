@@ -10,13 +10,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <nexus/NeXusException.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <fstream>
 
@@ -268,8 +269,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       else if (i == header.phiColIdx)
         phi = value;
       else if (header.detParCols.count(i) == 1) {
-        Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
-        pmap.addDouble(det->getComponentID(), header.colToName[i], value);
+        setDetectorParameter(det, header.colToName[i], value);
       }
     }
     // Check stream state. stringstream::EOF should have been reached, if not
@@ -311,7 +311,8 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
                                 "property is empty, cannot interpret columns");
   }
 
-  Poco::StringTokenizer splitter(header, ",", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer splitter(
+      header, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   headerInfo.colCount = splitter.count();
   auto it =
       splitter.begin(); // First column must be spectrum number or detector ID
@@ -340,12 +341,33 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
       continue;
     } else {
       headerInfo.detParCols.insert(counter);
-      headerInfo.colToName.insert(std::make_pair(counter, colName));
+      headerInfo.colToName.emplace(counter, colName);
     }
     ++counter;
   }
 
   return isSpectrum;
+}
+
+/**
+ * Attaches a detector parameter to the given detector
+ * @param det A pointer to the detector object
+ * @param name The name of the parameter
+ * @param value Value of the parameter
+ */
+void UpdateInstrumentFromFile::setDetectorParameter(
+    const Geometry::IDetector_const_sptr &det, const std::string &name,
+    double value) {
+  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
+  if (auto group =
+          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det)) {
+    auto dets = group->getDetectors();
+    for (const auto &comp : dets) {
+      pmap.addDouble(comp->getComponentID(), name, value);
+    }
+  } else {
+    pmap.addDouble(det->getComponentID(), name, value);
+  }
 }
 
 /**
@@ -397,8 +419,17 @@ void UpdateInstrumentFromFile::setDetectorPosition(
     det->getPos().getSpherical(r, t, p);
     pos.spherical(l2, theta, p);
   }
-  Geometry::ComponentHelper::moveComponent(*det, pmap, pos,
-                                           Geometry::ComponentHelper::Absolute);
+  if (auto group =
+          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det)) {
+    auto dets = group->getDetectors();
+    for (const auto &element : dets) {
+      Geometry::ComponentHelper::moveComponent(
+          *element, pmap, pos, Geometry::ComponentHelper::Absolute);
+    }
+  } else {
+    Geometry::ComponentHelper::moveComponent(
+        *det, pmap, pos, Geometry::ComponentHelper::Absolute);
+  }
 }
 
 } // namespace DataHandling

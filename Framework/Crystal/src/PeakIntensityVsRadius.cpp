@@ -1,7 +1,11 @@
 #include "MantidCrystal/PeakIntensityVsRadius.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -139,7 +143,7 @@ void PeakIntensityVsRadius::exec() {
       "Workspace2D", peaksWS->getNumberPeaks(), NumSteps, NumSteps);
 
   // Create a text axis for axis(1), with H K L of each peak
-  TextAxis *ax = new TextAxis(outWS->getNumberHistograms());
+  auto ax = new TextAxis(outWS->getNumberHistograms());
   for (int i = 0; i < peaksWS->getNumberPeaks(); i++) {
     V3D hkl = peaksWS->getPeak(i).getHKL();
     hkl.round(); // Round HKL to make the string prettier
@@ -150,7 +154,7 @@ void PeakIntensityVsRadius::exec() {
   MatrixWorkspace_sptr outWS2 =
       WorkspaceFactory::Instance().create("Workspace2D", 4, NumSteps, NumSteps);
   // Create a text axis for axis(1), with H K L of each peak
-  TextAxis *ax2 = new TextAxis(outWS2->getNumberHistograms());
+  auto ax2 = new TextAxis(outWS2->getNumberHistograms());
   ax2->setLabel(0, "I/SigI=2");
   ax2->setLabel(1, "I/SigI=3");
   ax2->setLabel(2, "I/SigI=5");

@@ -67,10 +67,8 @@ void NexusTester::init() {
       "Clear the linux disk cache before loading.\n"
       "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
-  std::vector<std::string> types;
-  types.push_back("Zeros");
-  types.push_back("Incrementing Numbers");
-  types.push_back("Random Numbers");
+  std::vector<std::string> types{"Zeros", "Incrementing Numbers",
+                                 "Random Numbers"};
   declareProperty("FakeData", "Incrementing Numbers",
                   boost::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
@@ -106,7 +104,7 @@ void NexusTester::exec() {
   // Size of the chunk in number of integers
   size_t chunkSize = ChunkSizeKb * 1024 / sizeof(uint32_t);
   // ----------- Generate the fake data -----------------------------
-  uint32_t *fakeData = new uint32_t[chunkSize];
+  auto fakeData = new uint32_t[chunkSize];
   if (FakeDataType == "Zeros") {
     for (size_t i = 0; i < chunkSize; i++)
       fakeData[i] = 0;

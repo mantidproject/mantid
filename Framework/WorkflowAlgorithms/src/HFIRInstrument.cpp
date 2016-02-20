@@ -6,7 +6,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "Poco/StringTokenizer.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidGeometry/Instrument.h"
 #include "Poco/NumberParser.h"
 
 namespace Mantid {
@@ -47,9 +48,9 @@ void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
                             API::MatrixWorkspace_sptr dataWS, double &x,
                             double &y) {
   const int nx_pixels =
-      (int)(readInstrumentParameter("number-of-x-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
   const int ny_pixels =
-      (int)(readInstrumentParameter("number-of-y-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   x = (pixel_x - nx_pixels / 2.0 + 0.5) * pixel_size_x / 1000.0;
@@ -68,9 +69,9 @@ void getPixelFromCoordinate(const double &x, const double &y,
                             API::MatrixWorkspace_sptr dataWS, double &pixel_x,
                             double &pixel_y) {
   const int nx_pixels =
-      (int)(readInstrumentParameter("number-of-x-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
   const int ny_pixels =
-      (int)(readInstrumentParameter("number-of-y-pixels", dataWS));
+      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   pixel_x = x / pixel_size_x * 1000.0 + nx_pixels / 2.0 - 0.5;
@@ -97,8 +98,8 @@ double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
         "Unable to find [aperture-distances] instrument parameter");
 
   double SSD = 0;
-  Poco::StringTokenizer tok(pars[0], ",",
-                            Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tok(
+      pars[0], ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
     const std::string distance_as_string = tok[8 - nguides];
     if (!Poco::NumberParser::tryParseFloat(distance_as_string, SSD))

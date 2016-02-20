@@ -6,16 +6,18 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
 
@@ -97,8 +99,8 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
                                    "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
 
   bool foundMonth(false);
-  for (size_t i = 0; i < 12; ++i) {
-    if (!boost::ifind_first(fileline, MONTHS[i]).empty()) {
+  for (auto &month : MONTHS) {
+    if (!boost::ifind_first(fileline, month).empty()) {
       foundMonth = true;
       break;
     }
@@ -342,9 +344,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);
-    for (MantidVec::iterator it = YOut.begin(), end = YOut.end(); it != end;
-         ++it) {
-      m_fileIn >> *it;
+    for (double &value : YOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading Y data");
   } // loop on to the next spectrum
@@ -352,9 +353,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
     MantidVec &EOut = outWrksp->dataE(i);
-    for (MantidVec::iterator it = EOut.begin(), end = EOut.end(); it != end;
-         ++it) {
-      m_fileIn >> *it;
+    for (double &value : EOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading error estimates");
   } // loop on to the next spectrum
@@ -413,8 +413,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   if (fileLine.size() < 5) {
     std::getline(m_fileIn, fileLine);
   }
-  Poco::StringTokenizer wsDimensions(fileLine, " ",
-                                     Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer wsDimensions(
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -429,7 +430,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 
-  NumericAxis *const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
+  auto const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
   axis1->unit() = Mantid::Kernel::UnitFactory::Instance().create(YUnit);
   outWrksp->replaceAxis(1, axis1);
   for (int i = 0; i < nAxis1Boundaries; ++i) {
@@ -462,7 +463,9 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 */
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
-  const Poco::StringTokenizer codes(line, " ", Poco::StringTokenizer::TOK_TRIM);
+  const Mantid::Kernel::StringTokenizer codes(
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -470,16 +473,13 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   // the symbol for the quantity q = MomentumTransfer, etc.
   const std::string symbol(codes[0]);
   // this is units used to measure the quantity e.g. angstroms, counts, ...
-  const std::string unit(*(codes.end() - 1));
+  auto itUnitsToken = codes.cend() - 1;
+  const std::string unit(*itUnitsToken);
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  Poco::StringTokenizer::Iterator current = codes.begin() + 1,
-                                  end = codes.end();
-  for (; current != end; ++current) {
-    if (current != end - 1) {
-      theQuantity += *current;
-    }
+  for (auto current = codes.cbegin() + 1; current != itUnitsToken; ++current) {
+    theQuantity += *current;
   }
 
   // this is a syntax check the line before returning its data

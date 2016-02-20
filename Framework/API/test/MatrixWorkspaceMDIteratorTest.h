@@ -16,7 +16,8 @@ using namespace Mantid::Geometry;
 class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite {
 public:
   boost::shared_ptr<MatrixWorkspace> makeFakeWS() {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    boost::shared_ptr<MatrixWorkspace> ws =
+        boost::make_shared<WorkspaceTester>();
     // Matrix with 4 spectra, 5 bins each
     ws->initialize(4, 6, 5);
     NumericAxis *ax1 = new NumericAxis(4);
@@ -124,54 +125,6 @@ public:
       TS_ASSERT_EQUALS(det->isMasked(), it->getIsMasked());
       it->next();
     }
-    delete it;
-  }
-
-  /*
-   * For MatrixWorkspaces, masks are applied by setting the actual data to 0
-   * rather than just returning 0 for masked data with
-   * getNormalizedSignalWithMask, therefore getNormalizedSignal and
-   * getNormalizedSignalWithMask should always return the same value.
-   */
-  void test_getNormalizedSignalWithMask() {
-    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-
-    // Mask a bin
-    ws->maskBin(0, 4, 1);
-
-    IMDIterator *it = NULL;
-    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(NULL));
-
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-    it->next();
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-
-    it->setNormalization(NoNormalization);
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-    // Area of each bin is 4.0
-    it->setNormalization(VolumeNormalization);
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-    it->setNormalization(NumEventsNormalization);
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-
-    it->next();
-    it->next();
-    it->next();
-    // This one is masked, the two functions should still return the same
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-    TS_ASSERT_DELTA(it->getNormalizedSignalWithMask(), 0.0, 1e-5);
-    it->next();
-    it->next();
-    // Workspace index 1, x index 1
-    TS_ASSERT_DELTA(it->getNormalizedSignal(),
-                    it->getNormalizedSignalWithMask(), 1e-5);
-
     delete it;
   }
 };

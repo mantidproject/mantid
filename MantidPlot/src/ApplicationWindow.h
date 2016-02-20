@@ -130,7 +130,7 @@ class ApplicationWindow: public QMainWindow, public Scripted
 public:
   ApplicationWindow(bool factorySettings, const QStringList& args);
   explicit ApplicationWindow(bool factorySettings = false);
-  ~ApplicationWindow();
+  ~ApplicationWindow() override;
 
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
   enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
@@ -673,12 +673,12 @@ public slots:
 
   //! \name Event Handlers
   //@{
-  void closeEvent( QCloseEvent*);
-  void timerEvent ( QTimerEvent *e);
-  void dragEnterEvent( QDragEnterEvent* e );
-  void dragMoveEvent( QDragMoveEvent* e );//Mantid
-  void dropEvent( QDropEvent* e );
-  void customEvent( QEvent* e);
+  void closeEvent(QCloseEvent *) override;
+  void timerEvent(QTimerEvent *e) override;
+  void dragEnterEvent(QDragEnterEvent *e) override;
+  void dragMoveEvent(QDragMoveEvent *e) override; // Mantid
+  void dropEvent(QDropEvent *e) override;
+  void customEvent(QEvent *e) override;
   //@}
 
   //! \name Dialogs
@@ -1065,10 +1065,10 @@ signals:
   //void changeToMDI(MdiSubWindow*);
 
 protected:
-  virtual bool event(QEvent * e);
+  bool event(QEvent *e) override;
 
 private:
-  virtual QMenu * createPopupMenu(){return NULL;}
+  QMenu *createPopupMenu() override { return NULL; }
 
   void populateMantidTreeWidget(const QString &s);
   void loadWsToMantidTree(const std::string& wsName);

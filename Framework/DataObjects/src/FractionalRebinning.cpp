@@ -43,17 +43,15 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
       yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
     return false;
 
-  MantidVec::const_iterator start_it =
-      std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
-  MantidVec::const_iterator end_it =
-      std::upper_bound(xAxis.begin(), xAxis.end(), xn_hi);
+  auto start_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_lo);
+  auto end_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_hi);
   x_start = 0;
   x_end = xAxis.size() - 1;
-  if (start_it != xAxis.begin()) {
-    x_start = (start_it - xAxis.begin() - 1);
+  if (start_it != xAxis.cbegin()) {
+    x_start = (start_it - xAxis.cbegin() - 1);
   }
-  if (end_it != xAxis.end()) {
-    x_end = end_it - xAxis.begin();
+  if (end_it != xAxis.cend()) {
+    x_end = end_it - xAxis.cbegin();
   }
 
   // Q region
@@ -188,12 +186,13 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_start, x_end))
     return;
 
+  const auto &inX = inputWS->readX(i);
   const auto &inY = inputWS->readY(i);
   const auto &inE = inputWS->readE(i);
   // Don't do the overlap removal if already RebinnedOutput.
   // This wreaks havoc on the data.
-  const bool removeOverlap(inputWS->isDistribution() &&
-                           inputWS->id() != "RebinnedOutput");
+  const bool removeBinWidth(inputWS->isDistribution() &&
+                            inputWS->id() != "RebinnedOutput");
   // It seems to be more efficient to construct this once and clear it before
   // each calculation
   // in the loop
@@ -217,9 +216,11 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
         double eValue = inE[j] * weight;
-        if (removeOverlap) {
-          const double overlapWidth =
-              intersectOverlap.maxX() - intersectOverlap.minX();
+        if (removeBinWidth) {
+          // If the input workspace was normalized by the bin width, we need to
+          // recover the original Y value, we do it by 'removing' the bin
+          // width
+          const double overlapWidth = inX[j + 1] - inX[j];
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }

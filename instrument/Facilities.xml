@@ -324,6 +324,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
+   <instrument name="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
    <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
@@ -380,6 +384,7 @@
 
    <instrument name="REF_L" beamline="4B">
       <technique>Reflectometry</technique>
+      <livedata address="bl4b-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="CNCS" beamline="5">

@@ -8,18 +8,22 @@
  *WIKI*/
 
 #include "MantidMDAlgorithms/LoadILLAscii.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
+
+#include <boost/shared_ptr.hpp>
+#include <Poco/TemporaryFile.h>
 
 #include <algorithm>
 #include <iterator> // std::distance
@@ -27,9 +31,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-
-#include <boost/shared_ptr.hpp>
-#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -45,7 +46,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
  */
 LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
   // Add here supported instruments by this loader
-  m_supportedInstruments.push_back("D2B");
+  m_supportedInstruments.emplace_back("D2B");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -248,16 +249,16 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
   thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
 
   size_t spec = 0;
-  for (size_t i = 0; i < thisSpectrum.size(); ++i) {
+  for (auto value : thisSpectrum) {
 
     if (spec > 0) {
       // just copy the time binning axis to every spectra
       thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
     }
     // Assign Y
-    thisWorkspace->dataY(spec)[0] = thisSpectrum[i];
+    thisWorkspace->dataY(spec)[0] = value;
     // Assign Error
-    thisWorkspace->dataE(spec)[0] = thisSpectrum[i] * thisSpectrum[i];
+    thisWorkspace->dataE(spec)[0] = value * value;
 
     ++spec;
   }

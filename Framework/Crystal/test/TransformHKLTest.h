@@ -71,7 +71,7 @@ public:
     // verify they were properly changed
     std::vector<V3D> original_hkl;
     for (size_t i = 0; i < n_peaks; i++) {
-      original_hkl.push_back(V3D(peaks[i].getHKL()));
+      original_hkl.emplace_back(peaks[i].getHKL());
     }
 
     TransformHKL alg;

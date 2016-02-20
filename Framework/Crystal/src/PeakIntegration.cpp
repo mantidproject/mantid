@@ -6,6 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -13,6 +14,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
@@ -93,7 +95,7 @@ void PeakIntegration::exec() {
   EventWorkspace_const_sptr inWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
-    inWS->sortAll(TOF_SORT, NULL);
+    inWS->sortAll(TOF_SORT, nullptr);
   }
 
   // Get some stuff from the input workspace

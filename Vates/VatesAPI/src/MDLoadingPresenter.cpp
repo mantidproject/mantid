@@ -33,12 +33,17 @@ void MDLoadingPresenter::setDefaultCOBandBoundaries(vtkDataSet* visualDataSet) {
 
 /**
  * Make the visual data set non-orthogonal
+ * @param visualDataSet: the vtk visual data set to which the transformation will be applied
+ * @param workspaceProvider: the provider of the underlying workspace
  */
-void MDLoadingPresenter::makeNonOrthogonal(vtkDataSet* visualDataSet)
+void MDLoadingPresenter::makeNonOrthogonal(vtkDataSet* visualDataSet,
+                                           std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider)
 {
   std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
-  vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+  vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName, std::move(workspaceProvider));
   converter.execute();
 }
+
+
 }
 }

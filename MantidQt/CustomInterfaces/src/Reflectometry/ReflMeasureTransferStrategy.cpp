@@ -130,7 +130,12 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   return results;
 }
 
-ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::clone() const {
+std::unique_ptr<ReflMeasureTransferStrategy>
+ReflMeasureTransferStrategy::clone() const {
+  return std::unique_ptr<ReflMeasureTransferStrategy>(doClone());
+}
+
+ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::doClone() const {
   return new ReflMeasureTransferStrategy(*this);
 }
 

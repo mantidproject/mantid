@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -86,14 +87,13 @@ bool UnknownFrameFactory::canInterpret(const MDFrameArgument &) const {
 }
 
 MDFrameFactory_uptr makeMDFrameFactoryChain() {
-  typedef MDFrameFactory_uptr FactoryType;
-  auto first = FactoryType(new QLabFrameFactory);
-  first->setSuccessor(FactoryType(new QSampleFrameFactory))
-      .setSuccessor(FactoryType(new HKLFrameFactory))
+  MDFrameFactory_uptr first = Kernel::make_unique<QLabFrameFactory>();
+  first->setSuccessor(Kernel::make_unique<QSampleFrameFactory>())
+      .setSuccessor(Kernel::make_unique<HKLFrameFactory>())
       // Make sure that GeneralFrameFactory is the last in the chain to give a
       // fall-through option
-      .setSuccessor(FactoryType(new GeneralFrameFactory))
-      .setSuccessor(FactoryType(new UnknownFrameFactory));
+      .setSuccessor(Kernel::make_unique<GeneralFrameFactory>())
+      .setSuccessor(Kernel::make_unique<UnknownFrameFactory>());
   return first;
 }
 

@@ -76,11 +76,11 @@ public:
   /// (Empty) Constructor
   ReadGroupsFromFile();
   /// Virtual destructor
-  virtual ~ReadGroupsFromFile() {}
+  ~ReadGroupsFromFile() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ReadGroupsFromFile"; }
+  const std::string name() const override { return "ReadGroupsFromFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Read a diffraction calibration file (*.cal) or an XML grouping "
            "file (*.xml) and an instrument name, and output a 2D workspace "
            "containing on the Y-axis the values of the Group each detector "
@@ -91,9 +91,9 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling\\CalFiles";
   }
 
@@ -102,9 +102,9 @@ private:
   /// the udet number, the value of is a pair of <group,selected>.
   typedef std::unordered_map<int, std::pair<int, int>> calmap;
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Read a grouping file and construct the calibration map
   void readGroupingFile(const std::string &filename);
   /// Read an XML Grouping File

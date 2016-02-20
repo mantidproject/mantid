@@ -16,26 +16,26 @@ namespace DataHandling {
 class DLLExport SaveDspacemap : public API::Algorithm {
 public:
   SaveDspacemap();
-  ~SaveDspacemap();
+  ~SaveDspacemap() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveDspacemap"; };
+  const std::string name() const override { return "SaveDspacemap"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves an OffsetsWorkspace into a POWGEN-format binary dspace map "
            "file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   void
   CalculateDspaceFromCal(Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,

@@ -14,23 +14,45 @@
 namespace Mantid {
 namespace Geometry {
 
-/// Functor for fuzzy comparison of V3D-objects using Kernel::Tolerance
-struct MANTID_GEOMETRY_DLL FuzzyV3DLessThan {
-  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) {
-    if (fabs(lhs.X() - rhs.X()) > Kernel::Tolerance) {
+/// Equality-functor for comparison of atom positions with specifiable precision
+class MANTID_GEOMETRY_DLL AtomPositionsEqual {
+public:
+  AtomPositionsEqual(double precision = 1.e-4) : m_precision(precision) {}
+
+  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) const {
+    return !(fabs(lhs.X() - rhs.X()) > m_precision ||
+             fabs(lhs.Y() - rhs.Y()) > m_precision ||
+             fabs(lhs.Z() - rhs.Z()) > m_precision);
+  }
+
+private:
+  double m_precision;
+};
+
+/// Less-than-functor for comparison of atom positions with specifiable
+/// precision
+class MANTID_GEOMETRY_DLL AtomPositionsLessThan {
+public:
+  AtomPositionsLessThan(double precision = 1.e-4) : m_precision(precision) {}
+
+  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) const {
+    if (fabs(lhs.X() - rhs.X()) > m_precision) {
       return lhs.X() < rhs.X();
     }
 
-    if (fabs(lhs.Y() - rhs.Y()) > Kernel::Tolerance) {
+    if (fabs(lhs.Y() - rhs.Y()) > m_precision) {
       return lhs.Y() < rhs.Y();
     }
 
-    if (fabs(lhs.Z() - rhs.Z()) > Kernel::Tolerance) {
+    if (fabs(lhs.Z() - rhs.Z()) > m_precision) {
       return lhs.Z() < rhs.Z();
     }
 
     return false;
   }
+
+private:
+  double m_precision;
 };
 
 /**

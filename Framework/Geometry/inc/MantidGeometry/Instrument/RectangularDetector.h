@@ -49,12 +49,12 @@ class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly,
 
 public:
   /// String description of the type of component
-  virtual std::string type() const { return "RectangularDetector"; }
+  std::string type() const override { return "RectangularDetector"; }
   //! Empty constructor
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string &, IComponent *reference = 0);
+  RectangularDetector(const std::string &, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
@@ -67,9 +67,9 @@ public:
 
   //  //! Copy constructor
   //  RectangularDetector(const RectangularDetector&);
-  virtual ~RectangularDetector();
+  ~RectangularDetector() override;
   //! Make a clone of the present component
-  virtual IComponent *clone() const;
+  IComponent *clone() const override;
 
   boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
 
@@ -104,8 +104,8 @@ public:
   int minDetectorID();
   /// maximum detector id
   int maxDetectorID();
-  virtual boost::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
   // but
@@ -113,44 +113,45 @@ public:
   // that here
   using CompAssembly::getBoundingBox;
 
-  virtual void testIntersectionWithChildren(
-      Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const;
+  void testIntersectionWithChildren(
+      Track &testRay,
+      std::deque<IComponent_const_sptr> &searchQueue) const override;
 
   // ------------ IObjComponent methods ----------------
 
   /// Does the point given lie within this object component?
-  bool isValid(const Kernel::V3D &point) const;
+  bool isValid(const Kernel::V3D &point) const override;
 
   /// Does the point given lie on the surface of this object component?
-  bool isOnSide(const Kernel::V3D &point) const;
+  bool isOnSide(const Kernel::V3D &point) const override;
 
   /// Checks whether the track given will pass through this Component.
-  int interceptSurface(Track &track) const;
+  int interceptSurface(Track &track) const override;
 
   /// Finds the approximate solid angle covered by the component when viewed
   /// from the point given
-  double solidAngle(const Kernel::V3D &observer) const;
+  double solidAngle(const Kernel::V3D &observer) const override;
   /// Retrieve the cached bounding box
-  void getBoundingBox(BoundingBox &assemblyBox) const;
+  void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   /// Try to find a point that lies within (or on) the object
-  int getPointInObject(Kernel::V3D &point) const;
+  int getPointInObject(Kernel::V3D &point) const override;
 
   // Rendering member functions
   /// Draws the objcomponent.
-  void draw() const;
+  void draw() const override;
 
   /// Draws the Object.
-  void drawObject() const;
+  void drawObject() const override;
 
   /// Initializes the ObjComponent for rendering, this function should be called
   /// before rendering.
-  void initDraw() const;
+  void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const;
+  const boost::shared_ptr<const Object> shape() const override;
   /// Returns the material of the detector
-  const boost::shared_ptr<const Kernel::Material> material() const {
+  const boost::shared_ptr<const Kernel::Material> material() const override {
     return boost::shared_ptr<const Kernel::Material>();
   }
 

@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SassenaFFT.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/FileProperty.h"
 
 namespace Mantid {
 namespace Algorithms {

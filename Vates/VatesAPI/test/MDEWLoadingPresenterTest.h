@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -11,6 +12,7 @@
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MockObjects.h"
 
@@ -41,16 +43,15 @@ private:
     {
       return MDEWLoadingPresenter::extractMetadata(eventWs);
     }
-  
-    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter(view)
-    {
+
+    ConcreteMDEWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
+        : MDEWLoadingPresenter(std::move(view)) {}
+
+    virtual vtkSmartPointer<vtkDataSet>
+    execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) {
+      return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
 
-    virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&, ProgressAction&)
-    {
-      return vtkUnstructuredGrid::New(); 
-    }
-    
     virtual void executeLoadMetadata()
     {
     }
@@ -80,91 +81,107 @@ public:
 
 void testShouldLoadFirstTimeRound()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(2); 
-  EXPECT_CALL(view, getLoadInMemory()).Times(2); 
-  EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDEWLoadingPresenter presenter(&view);
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Should NOT request load on second usage. Should have it's state syncrhonised with view and the view hasn't changed!", !presenter.shouldLoad());
   
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testTimeChanged()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(2); 
-  EXPECT_CALL(view, getLoadInMemory()).Times(2); 
-  EXPECT_CALL(view, getTime()).Times(2)
-    .WillOnce(Return(0)) 
-    .WillOnce(Return(1));// Time has changed on 2nd call
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime())
+      .Times(2)
+      .WillOnce(Return(0))
+      .WillOnce(Return(1)); // Time has changed on 2nd call
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDEWLoadingPresenter presenter(&view);
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-  TSM_ASSERT("Time has changed, but that shouldn't trigger load", !presenter.shouldLoad());
-  
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("Time has changed, but that shouldn't trigger load",
+             !presenter.shouldLoad());
+
+  TSM_ASSERT("View not used as expected.",
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testLoadInMemoryChanged()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(2); 
-  EXPECT_CALL(view, getLoadInMemory()).Times(2)
-    .WillOnce(Return(true)) 
-    .WillOnce(Return(false)); // Load in memory changed
-  EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
+  EXPECT_CALL(*mockView, getLoadInMemory())
+      .Times(2)
+      .WillOnce(Return(true))
+      .WillOnce(Return(false)); // Load in memory changed
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDEWLoadingPresenter presenter(&view);
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-  TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load", presenter.shouldLoad());
-  
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load",
+             presenter.shouldLoad());
+
+  TSM_ASSERT("View not used as expected.",
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
 void testDepthChanged()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(2)
-    .WillOnce(Return(10)) 
-    .WillOnce(Return(100)); // Recursion depth changed.
-  EXPECT_CALL(view, getLoadInMemory()).Times(2);
-  EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
+  EXPECT_CALL(*mockView, getRecursionDepth())
+      .Times(2)
+      .WillOnce(Return(10))
+      .WillOnce(Return(100)); // Recursion depth changed.
+  EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*mockView, getTime()).Times(2);
+  EXPECT_CALL(*mockView, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDEWLoadingPresenter presenter(&view);
+  ConcreteMDEWLoadingPresenter presenter(std::move(view));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-  TSM_ASSERT("Depth has changed, but that shouldn't trigger load", !presenter.shouldLoad());
-  
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("Depth has changed, but that shouldn't trigger load",
+             !presenter.shouldLoad());
+
+  TSM_ASSERT("View not used as expected.",
+             Mock::VerifyAndClearExpectations(mockView));
 }
 
-  void testhasTDimensionWhenIntegrated()
-  {
-    //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+void testhasTDimensionWhenIntegrated() {
+  // Setup view
+  ConcreteMDEWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>());
 
-    ConcreteMDEWLoadingPresenter presenter(view);
-    
-    //Test that it does work when setup.
-    Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true); //Integrated T Dimension
-    presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+  // Test that it does work when setup.
+  Mantid::API::Workspace_sptr ws =
+      get3DWorkspace(true, true); // Integrated T Dimension
+  presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
-    TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
+  TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
+             !presenter.hasTDimensionAvailable());
   }
 
   void testHasTDimensionWhenNotIntegrated()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    ConcreteMDEWLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>());
 
-    ConcreteMDEWLoadingPresenter presenter(view);
-    
     //Test that it does work when setup. 
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true); //Non-integrated T Dimension
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
@@ -175,9 +192,8 @@ void testDepthChanged()
   void testHasTimeLabelWithTDimension()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
-
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>());
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true); //Non-integrated T Dimension
@@ -189,14 +205,13 @@ void testDepthChanged()
   void testCanSetAxisLabelsFrom3DData()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
-
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>());
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkDataSet *ds = vtkUnstructuredGrid::New();
+    auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
                       getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
@@ -209,14 +224,13 @@ void testDepthChanged()
   void testCanSetAxisLabelsFrom4DData()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
-
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>());
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkDataSet *ds = vtkUnstructuredGrid::New();
+    auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
                       getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
@@ -228,9 +242,8 @@ void testDepthChanged()
 
   void testCanLoadFileBasedOnExtension()
   {
-    MockMDLoadingView* view = new MockMDLoadingView;
-
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>());
 
     // constructive tests
     TSM_ASSERT("Should be an exact match", presenter.canLoadFileBasedOnExtension("somefile.nxs", ".nxs"));
@@ -238,8 +251,6 @@ void testDepthChanged()
     TSM_ASSERT("Should strip off whitespace", presenter.canLoadFileBasedOnExtension("somefile.nxs ", ".nxs"));
     // destructive tests
     TSM_ASSERT("Extensions do not match, should return false.", !presenter.canLoadFileBasedOnExtension("somefile.nx", ".nxs"));
-
-    delete view;
   }
 
 

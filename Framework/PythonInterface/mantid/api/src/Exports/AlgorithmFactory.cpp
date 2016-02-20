@@ -8,6 +8,7 @@
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
 #include <Poco/ScopedLock.h>
+#include <Poco/ScopedLock.h>
 
 // Python frameobject. This is under the boost includes so that boost will have
 // done the
@@ -79,7 +80,7 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
       (PyObject *)
           converter::registered<Algorithm>::converters.to_python_target_type();
   // obj could be or instance/class, check instance first
-  PyObject *classObject(NULL);
+  PyObject *classObject(nullptr);
   if (PyObject_IsInstance(obj.ptr(), pyAlgClass)) {
     classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
   } else if (PyObject_IsSubclass(obj.ptr(), pyAlgClass)) {

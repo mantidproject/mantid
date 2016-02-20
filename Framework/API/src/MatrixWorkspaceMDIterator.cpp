@@ -1,9 +1,10 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/NumericAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -184,11 +185,6 @@ signal_t MatrixWorkspaceMDIterator::getNormalizedError() const {
   return std::numeric_limits<signal_t>::quiet_NaN();
 }
 
-/// Returns the normalized signal for this box
-signal_t MatrixWorkspaceMDIterator::getNormalizedSignalWithMask() const {
-  return this->getNormalizedSignal();
-}
-
 /// Returns the signal for this box, same as innerSignal
 signal_t MatrixWorkspaceMDIterator::getSignal() const { return m_Y[m_xIndex]; }
 
@@ -269,7 +265,7 @@ signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
 bool MatrixWorkspaceMDIterator::getIsMasked() const {
   Mantid::Geometry::IDetector_const_sptr det =
       m_ws->getDetector(m_workspaceIndex);
-  if (det != NULL) {
+  if (det != nullptr) {
     return det->isMasked();
   } else {
     return true; // TODO. Check whether it's better to return true or false

@@ -6,11 +6,12 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
-
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -357,6 +358,7 @@ void SequentialFitDialog::accept()
   }
   alg->setPropertyValue("Minimizer",m_fitBrowser->minimizer());
   alg->setPropertyValue("CostFunction",m_fitBrowser->costFunction());
+  alg->setProperty("MaxIterations",m_fitBrowser->maxIterations());
   if (ui.rbIndividual->isChecked())
   {
     alg->setPropertyValue("FitType","Individual");

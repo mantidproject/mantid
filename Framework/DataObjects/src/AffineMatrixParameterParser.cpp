@@ -29,7 +29,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
     boost::split(vecStrRows, sParameterValue, boost::is_any_of(";"));
     size_t nRows = vecStrRows.size();
 
-    VecStrings::iterator row_it = vecStrRows.begin();
+    auto row_it = vecStrRows.begin();
     VecStrings::iterator col_it;
 
     size_t nCols = 0;
@@ -59,8 +59,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
     }
 
     // Create the parameter and set the matrix.
-    AffineMatrixParameter *parameter =
-        new AffineMatrixParameter(nRows - 1, nCols - 1);
+    auto parameter = new AffineMatrixParameter(nRows - 1, nCols - 1);
     parameter->setMatrix(m);
 
     // Now return the fully constructed parameter.

@@ -61,10 +61,7 @@ public:
   }
 
   void test_getDValues() {
-    std::vector<V3D> hkls;
-    hkls.push_back(V3D(1, 0, 0));
-    hkls.push_back(V3D(0, 1, 0));
-    hkls.push_back(V3D(0, 0, 1));
+    std::vector<V3D> hkls{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
 
     ReflectionGenerator generator(
         CrystalStructure("2 3 5", "P -1", "Si 0 0 0 1.0 0.01"));

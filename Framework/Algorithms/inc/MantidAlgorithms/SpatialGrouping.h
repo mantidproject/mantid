@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -53,11 +54,11 @@ public:
   /// (Empty) Constructor
   SpatialGrouping() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SpatialGrouping() {}
+  ~SpatialGrouping() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SpatialGrouping"; }
+  const std::string name() const override { return "SpatialGrouping"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm creates an XML grouping file, which can be used in "
            "GroupDetectors or ReadGroupsFromFile, which groups the detectors "
            "of an instrument based on the distance between the detectors. It "
@@ -66,15 +67,15 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Grouping"; }
+  const std::string category() const override { return "Transforms\\Grouping"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// expand our search out to the next neighbours along
   bool expandNet(std::map<specid_t, Mantid::Kernel::V3D> &nearest,

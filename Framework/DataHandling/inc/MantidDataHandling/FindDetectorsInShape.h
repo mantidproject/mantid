@@ -58,25 +58,25 @@ namespace DataHandling {
 class DLLExport FindDetectorsInShape : public API::Algorithm {
 public:
   FindDetectorsInShape();
-  virtual ~FindDetectorsInShape();
+  ~FindDetectorsInShape() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindDetectorsInShape"; };
+  const std::string name() const override { return "FindDetectorsInShape"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Used to find which instrument detectors are contained within a "
            "user-defined 3-D shape.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Utility\\Instrument"; }
+  const std::string category() const override { return "Utility\\Instrument"; }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace DataHandling

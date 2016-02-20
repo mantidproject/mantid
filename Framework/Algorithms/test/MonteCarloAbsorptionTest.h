@@ -2,6 +2,7 @@
 #define MONTECARLOABSORPTIONTEST_H_
 
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"

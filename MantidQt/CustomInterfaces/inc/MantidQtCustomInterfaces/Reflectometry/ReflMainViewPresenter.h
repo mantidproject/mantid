@@ -126,6 +126,7 @@ protected:
   void exportTable();
   // searching
   void search();
+  void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   // plotting
   void plotRow();

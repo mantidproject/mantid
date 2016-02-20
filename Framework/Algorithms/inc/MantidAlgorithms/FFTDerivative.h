@@ -38,25 +38,25 @@ public:
   /// (Empty) Constructor
   FFTDerivative() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~FFTDerivative() {}
+  ~FFTDerivative() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "FFTDerivative"; }
+  const std::string name() const override { return "FFTDerivative"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculated derivatives of a spectra in the MatrixWorkspace using "
            "Fast Fourier Transform (FFT).";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic\\FFT"; }
+  const std::string category() const override { return "Arithmetic\\FFT"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void execRealFFT();
   void execComplexFFT();
 };

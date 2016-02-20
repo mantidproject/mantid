@@ -1,16 +1,17 @@
 #include "MantidCurveFitting/Functions/ProcessBackground.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidCurveFitting/Functions/Chebyshev.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -68,11 +69,8 @@ void ProcessBackground::init() {
                   "Output workspace containing processed background");
 
   // Function Options
-  std::vector<std::string> options;
-  options.push_back("SelectBackgroundPoints");
-  options.push_back("RemovePeaks");
-  options.push_back("DeleteRegion");
-  options.push_back("AddRegion");
+  std::vector<std::string> options{"SelectBackgroundPoints", "RemovePeaks",
+                                   "DeleteRegion", "AddRegion"};
 
   auto validator = boost::make_shared<Kernel::StringListValidator>(options);
   declareProperty("Options", "RemovePeaks", validator,
@@ -93,10 +91,7 @@ void ProcessBackground::init() {
       new VisibleWhenProperty("Options", IS_EQUAL_TO, "AddRegion"));
 
   // Optional Function Type
-  std::vector<std::string> bkgdtype;
-  bkgdtype.push_back("Polynomial");
-  bkgdtype.push_back("Chebyshev");
-  // bkgdtype.push_back("FullprofPolynomial");
+  std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev"};
   auto bkgdvalidator =
       boost::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty(
@@ -106,10 +101,7 @@ void ProcessBackground::init() {
                       new VisibleWhenProperty("Options", IS_EQUAL_TO,
                                               "SelectBackgroundPoints"));
 
-  vector<string> funcoptions;
-  funcoptions.push_back("N/A");
-  funcoptions.push_back("FitGivenDataPoints");
-  funcoptions.push_back("UserFunction");
+  vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
   auto fovalidator = boost::make_shared<StringListValidator>(funcoptions);
   declareProperty("SelectionMode", "N/A", fovalidator,
                   "If choise is UserFunction, background will be selected by "
@@ -154,9 +146,8 @@ void ProcessBackground::init() {
       new VisibleWhenProperty("SelectionMode", IS_EQUAL_TO, "UserFunction"));
 
   // Mode to select background
-  vector<string> pointsselectmode;
-  pointsselectmode.push_back("All Background Points");
-  pointsselectmode.push_back("Input Background Points Only");
+  vector<string> pointsselectmode{"All Background Points",
+                                  "Input Background Points Only"};
   auto modevalidator =
       boost::make_shared<StringListValidator>(pointsselectmode);
   declareProperty("BackgroundPointSelectMode", "All Background Points",
@@ -201,11 +192,9 @@ void ProcessBackground::init() {
                                               "SelectBackgroundPoints"));
 
   // Output background type.
-  std::vector<std::string> outbkgdtype;
-  outbkgdtype.push_back("Polynomial");
-  outbkgdtype.push_back("Chebyshev");
+  std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
   auto outbkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+      boost::make_shared<Kernel::StringListValidator>(outbkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",
@@ -257,7 +246,7 @@ void ProcessBackground::exec() {
   if (intemp < 0)
     throw std::invalid_argument(
         "WorkspaceIndex is not allowed to be less than 0. ");
-  m_wsIndex = size_t(intemp);
+  m_wsIndex = intemp;
   if (m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
     throw runtime_error("Workspace index is out of boundary.");
 
@@ -422,8 +411,7 @@ void ProcessBackground::addRegion() {
     double tmpe = refE[i];
 
     // Locate the position of tmpx in the array to be inserted
-    std::vector<double>::iterator newit =
-        std::lower_bound(vx.begin(), vx.end(), tmpx);
+    auto newit = std::lower_bound(vx.begin(), vx.end(), tmpx);
     size_t newindex = size_t(newit - vx.begin());
 
     // insert tmpx, tmpy, tmpe by iterator
@@ -593,16 +581,15 @@ void ProcessBackground::selectFromGivenFunction() {
     double parvalue;
     row >> parname >> parvalue;
     if (parname[0] == 'A')
-      parmap.insert(make_pair(parname, parvalue));
+      parmap.emplace(parname, parvalue);
   }
 
   int bkgdorder =
       static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
-  for (map<string, double>::iterator mit = parmap.begin(); mit != parmap.end();
-       ++mit) {
-    string parname = mit->first;
-    double parvalue = mit->second;
+  for (auto &mit : parmap) {
+    string parname = mit.first;
+    double parvalue = mit.second;
     bkgdfunc->setParameter(parname, parvalue);
   }
 
@@ -1098,8 +1085,8 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
 
   // Count non-excluded region
   size_t count = 0;
-  for (size_t i = 0; i < v_useX.size(); ++i)
-    if (v_useX[i])
+  for (auto &&useX : v_useX)
+    if (useX)
       ++count;
 
   return count;

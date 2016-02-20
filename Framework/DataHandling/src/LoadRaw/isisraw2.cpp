@@ -15,7 +15,7 @@ Mantid::Kernel::Logger g_log("ISISRAW2");
 
 /// No arg Constructor
 ISISRAW2::ISISRAW2()
-    : ISISRAW(NULL, false), ndes(0), outbuff(0), m_bufferSize(0) {
+    : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug() << "Determining ioRaw buffer size\n";
   if (Mantid::Kernel::ConfigService::Instance().getValue(
@@ -152,7 +152,7 @@ bool ISISRAW2::readData(FILE *file, int i) {
   int res = ISISRAW::ioRAW(file, outbuff, nwords, true);
   if (res != 0)
     return false;
-  byte_rel_expn(outbuff, nwords, 0, (int *)dat1, t_ntc1 + 1);
+  byte_rel_expn(outbuff, nwords, 0, reinterpret_cast<int *>(dat1), t_ntc1 + 1);
   return true;
 }
 

@@ -44,14 +44,19 @@ namespace Mantid
     class DLLExport MDEWInMemoryLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
-      virtual void executeLoadMetadata();
-      virtual ~MDEWInMemoryLoadingPresenter();
-      virtual bool canReadFile() const;
-      virtual std::string getWorkspaceTypeName();
-      virtual int getSpecialCoordinates();
-      
+      MDEWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                   WorkspaceProvider *repository,
+                                   std::string wsName);
+      vtkSmartPointer<vtkDataSet>
+      execute(vtkDataSetFactory *factory,
+              ProgressAction &rebinningProgressUpdate,
+              ProgressAction &drawingProgressUpdate) override;
+      void executeLoadMetadata() override;
+      ~MDEWInMemoryLoadingPresenter() override;
+      bool canReadFile() const override;
+      std::string getWorkspaceTypeName() override;
+      int getSpecialCoordinates() override;
+
     private:
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;

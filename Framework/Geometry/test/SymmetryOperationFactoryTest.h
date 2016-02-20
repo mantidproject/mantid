@@ -52,8 +52,7 @@ public:
   }
 
   void testCreateSymOpsVector() {
-    std::vector<std::string> opStrings;
-    opStrings.push_back("x,y,z");
+    std::vector<std::string> opStrings{"x,y,z"};
 
     std::vector<SymmetryOperation> symOps =
         SymmetryOperationFactory::Instance().createSymOps(opStrings);
@@ -61,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(symOps.front().identifier(), "x,y,z");
 
     // Add another one
-    opStrings.push_back("-x,-y,-z");
+    opStrings.emplace_back("-x,-y,-z");
 
     TS_ASSERT_THROWS_NOTHING(
         symOps = SymmetryOperationFactory::Instance().createSymOps(opStrings));
@@ -69,7 +68,7 @@ public:
     TS_ASSERT_EQUALS(symOps.front().identifier(), "x,y,z");
     TS_ASSERT_EQUALS(symOps.back().identifier(), "-x,-y,-z");
 
-    opStrings.push_back("doesNotWork");
+    opStrings.emplace_back("doesNotWork");
     TS_ASSERT_THROWS(
         symOps = SymmetryOperationFactory::Instance().createSymOps(opStrings),
         Mantid::Kernel::Exception::ParseError);

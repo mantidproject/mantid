@@ -59,9 +59,9 @@ void SortPeaksWorkspace::init() {
 PeaksWorkspace_sptr SortPeaksWorkspace::tryFetchOutputWorkspace() const {
   IPeaksWorkspace_sptr temp = getProperty("OutputWorkspace");
   PeaksWorkspace_sptr outputWS;
-  if (temp != NULL) {
+  if (temp != nullptr) {
     outputWS = boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
-    if (outputWS == NULL) {
+    if (outputWS == nullptr) {
       throw std::invalid_argument("OutputWorkspace is not a PeaksWorkspace.");
     }
   }
@@ -72,7 +72,7 @@ PeaksWorkspace_sptr SortPeaksWorkspace::tryFetchInputWorkspace() const {
   IPeaksWorkspace_sptr temp = getProperty("InputWorkspace");
   PeaksWorkspace_sptr inputWS =
       boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
-  if (inputWS == NULL) {
+  if (inputWS == nullptr) {
     throw std::invalid_argument("InputWorkspace is not a PeaksWorkspace.");
   }
   return inputWS;

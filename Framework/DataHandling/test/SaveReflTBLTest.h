@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <fstream>
 #include <Poco/File.h>
 

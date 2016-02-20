@@ -65,9 +65,9 @@ class Graph3D: public MdiSubWindow, public Mantid::IProjectSerialisable
 
 public:
 	Graph3D (const QString& label, QWidget* parent, const char* name=0, Qt::WFlags f=0);
-	~Graph3D();
+        ~Graph3D() override;
 
-	enum PlotType{Scatter = 0, Trajectory = 1, Bars = 2, Ribbon =  3};
+        enum PlotType{Scatter = 0, Trajectory = 1, Bars = 2, Ribbon =  3};
 	enum PointStyle{None = 0, Dots = 1, VerticalBars = 2, HairCross = 3, Cones = 4};
 
 public slots:
@@ -116,9 +116,9 @@ public slots:
 
 	//! \name Event Handlers
 	//@{
-	bool eventFilter(QObject *object, QEvent *e);
-	void resizeEvent (QResizeEvent *);
-	void scaleFonts(double factor);
+    bool eventFilter(QObject *object, QEvent *e) override;
+    void resizeEvent(QResizeEvent *) override;
+        void scaleFonts(double factor);
 	void setIgnoreFonts(bool ok){ignoreFonts = ok;};
 	//@}
 
@@ -239,17 +239,18 @@ public slots:
 	Qwt3D::FLOORSTYLE floorStyle();
 	Qwt3D::COORDSTYLE coordStyle();
 
-	void print();
-	void copyImage();
+        void print() override;
+        void copyImage();
 	void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
-    void exportPDF(const QString& fileName);
+        void exportPDF(const QString &fileName) override;
     void exportVector(const QString& fileName);
     void exportToFile(const QString& fileName);
 
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  std::string saveToProject(ApplicationWindow* app);
+    void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                         const int fileVersion) override;
+    std::string saveToProject(ApplicationWindow *app) override;
 
-	void zoomChanged(double);
+        void zoomChanged(double);
 	void rotationChanged(double, double, double);
 	void scaleChanged(double, double, double);
 	void shiftChanged(double, double, double);
@@ -403,9 +404,9 @@ class UserParametricSurface : public ParametricSurface
 public:
     UserParametricSurface(const QString& xFormula, const QString& yFormula,
 						  const QString& zFormula, SurfacePlot& pw);
-    Triple operator()(double u, double v);
+    Triple operator()(double u, double v) override;
 
-	unsigned int rows(){return d_rows;};
+        unsigned int rows(){return d_rows;};
 	unsigned int columns(){return d_columns;};
 	void setMesh (unsigned int columns, unsigned int rows);
 

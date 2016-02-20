@@ -44,16 +44,16 @@ extern bool dataExists(const std::string &data_name);
 class MANTID_MDALGORITHMS_DLL CreateMD : public API::DataProcessorAlgorithm {
 public:
   CreateMD();
-  virtual ~CreateMD();
+  ~CreateMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Load data from file into a workspace
   Mantid::API::Workspace_sptr loadWs(const std::string &filename,
@@ -91,7 +91,7 @@ private:
              Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
   /// Validate the algorithm's input properties
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace MDAlgorithms

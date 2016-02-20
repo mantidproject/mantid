@@ -17,6 +17,12 @@ The correction factor workspace is a workspace group containing the correction
 factors in the Paalman and Pings format, note that only :math:`{A_{s,s}}` and
 :math:`A_{c,c}` factors are calculated by thsi algorithm.
 
+Workflow
+--------
+
+.. diagram:: IndirectFlatPlateAbsorption-v1_wkflw.dot
+
+
 Usage
 -----
 

@@ -77,7 +77,6 @@ public:
 
   /// Clear memory associated with the PropertyManagers
   void clearPropertyManagers();
-
   /// Creates and instance of an algorithm
   IAlgorithm *createAlgorithm(const std::string &algName,
                               const int &version = -1);
@@ -120,12 +119,12 @@ private:
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
   void AsynchronousStartupTasks();
+  /// Setup Usage Reporting if enabled
+  void setupUsageReporting();
   /// Update instrument definitions from github
   void UpdateInstrumentDefinitions();
   /// check if a newer version of Mantid is available
   void CheckIfNewerVersionIsAvailable();
-  /// Sends startup usage information
-  void SendStartupUsageInfo();
 
 #ifdef MPI_BUILD
   /** Member variable that initialises the MPI environment on construction (in

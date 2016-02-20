@@ -73,6 +73,7 @@ public:
   ~SpectrumView();
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
   QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
+  bool isTrackingOn() const;
 
 signals:
   void spectrumDisplayChanged(SpectrumDisplay*);
@@ -81,6 +82,7 @@ protected slots:
   void closeWindow();
   void changeSpectrumDisplay(int tab);
   void respondToTabCloseReqest(int tab);
+  void changeTracking(bool on);
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);
@@ -93,6 +95,8 @@ protected:
 
 private:
   void updateHandlers();
+  void loadSettings();
+  void saveSettings() const;
 
   QList<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;

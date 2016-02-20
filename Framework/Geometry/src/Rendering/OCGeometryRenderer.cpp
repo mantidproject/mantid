@@ -69,7 +69,7 @@ void OCGeometryRenderer::Render(TopoDS_Shape *ObjSurf) { Initialize(ObjSurf); }
  * @param ObjComp :: input to render
  */
 void OCGeometryRenderer::Render(IObjComponent *ObjComp) {
-  if (ObjComp == NULL)
+  if (ObjComp == nullptr)
     return;
   glPushMatrix();
   V3D pos = ObjComp->getPos();
@@ -117,7 +117,7 @@ void OCGeometryRenderer::Initialize(IObjComponent *ObjComp) {
  * Renders TopoDS Shape by traversing through the TopoDS_Shape
  */
 void OCGeometryRenderer::RenderTopoDS(TopoDS_Shape *ObjSurf) {
-  if ((ObjSurf != NULL) && !ObjSurf->IsNull()) {
+  if ((ObjSurf != nullptr) && !ObjSurf->IsNull()) {
     TopExp_Explorer Ex;
     for (Ex.Init(*ObjSurf, TopAbs_FACE); Ex.More(); Ex.Next()) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());

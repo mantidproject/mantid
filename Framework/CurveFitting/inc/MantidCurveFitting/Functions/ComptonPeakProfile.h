@@ -47,21 +47,22 @@ public:
   ComptonPeakProfile();
 
 private:
-  std::string name() const;
+  std::string name() const override;
 
   /** @name Function evaluation */
   ///@{
   /// Calculate the function
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// Ensure the object is ready to be fitted
-  void setUpForFit();
+  void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
   ///@}
 
-  void declareParameters();
-  void declareAttributes();
-  void setAttribute(const std::string &name, const Attribute &value);
+  void declareParameters() override;
+  void declareAttributes() override;
+  void setAttribute(const std::string &name, const Attribute &value) override;
 
   /// WorkspaceIndex attribute
   size_t m_wsIndex;

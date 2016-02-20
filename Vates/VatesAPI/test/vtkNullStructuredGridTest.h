@@ -9,6 +9,7 @@
 
 #include <vtkStructuredGrid.h>
 #include <vtkPoints.h>
+#include <vtkSmartPointer.h>
 
 using namespace Mantid::VATES;
 
@@ -17,11 +18,11 @@ public:
   void testCorrectVtkDataSetIsReturned() {
     vtkNullStructuredGrid grid;
 
-    vtkStructuredGrid *ugrid = NULL;
+    vtkSmartPointer<vtkStructuredGrid> ugrid;
 
     TSM_ASSERT_THROWS_NOTHING(
         "Should create the unstructured grid without problems.",
-        ugrid = grid.createNullData());
+        ugrid.TakeReference(grid.createNullData()));
     TSM_ASSERT("Should have exactly one point",
                ugrid->GetNumberOfPoints() == 1);
     TSM_ASSERT("Should have exactly one cell", ugrid->GetNumberOfCells() == 1);
@@ -30,7 +31,6 @@ public:
     TSM_ASSERT("X should be in the center", coord[0] == 0.0);
     TSM_ASSERT("X should be in the center", coord[1] == 0.0);
     TSM_ASSERT("X should be in the center", coord[2] == 0.0);
-    ugrid->Delete();
   }
 };
 #endif

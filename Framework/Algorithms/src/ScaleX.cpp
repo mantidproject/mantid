@@ -2,7 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ScaleX.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -20,7 +23,7 @@ DECLARE_ALGORITHM(ScaleX)
  * Default constructor
  */
 ScaleX::ScaleX()
-    : API::Algorithm(), m_progress(NULL), m_algFactor(1.0), m_parname(),
+    : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(),
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
 
 /**
@@ -114,7 +117,7 @@ void ScaleX::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     this->execEvent();
     return;
   }
@@ -170,42 +173,29 @@ void ScaleX::execEvent() {
   g_log.information("Processing event workspace");
   const MatrixWorkspace_const_sptr matrixInputWS =
       this->getProperty("InputWorkspace");
-  const std::string op = getPropertyValue("Operation");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
-  int numHistograms = static_cast<int>(inputWS->getNumberHistograms());
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+
+  const std::string op = getPropertyValue("Operation");
+  int numHistograms = static_cast<int>(outputWS->getNumberHistograms());
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
+      auto factor = getScaleFactor(outputWS, i);
       if (op == "Multiply") {
-        outputWS->getEventList(i).scaleTof(getScaleFactor(inputWS, i));
-        if (m_algFactor < 0) {
+        outputWS->getEventList(i).scaleTof(factor);
+        if (factor < 0) {
           outputWS->getEventList(i).reverse();
         }
       } else if (op == "Add") {
-        outputWS->getEventList(i).addTof(getScaleFactor(inputWS, i));
+        outputWS->getEventList(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");

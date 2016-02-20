@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -140,43 +142,18 @@ void Rebin::exec() {
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if (eventInputWS != NULL) {
+  if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
-    EventWorkspace_sptr eventOutputWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-    if (inPlace && PreserveEvents) {
-      // -------------Rebin in-place, preserving events
-      // ----------------------------------------------
+    if (PreserveEvents) {
+      if (!inPlace) {
+        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+      }
+      auto eventOutputWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
       // This only sets the X axis. Actual rebinning will be done upon data
       // access.
       eventOutputWS->setAllX(XValues_new);
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutputWS));
-    } else if (!inPlace && PreserveEvents) {
-      // -------- NOT in-place, but you want to keep events for some reason.
-      // ----------------------
-      // Must copy the event workspace to a new EventWorkspace (and bin that).
-
-      // Make a brand new EventWorkspace
-      eventOutputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          inputWS, eventOutputWS, false);
-      // You need to copy over the data as well.
-      eventOutputWS->copyDataFrom((*eventInputWS));
-
-      // This only sets the X axis. Actual rebinning will be done upon data
-      // access.
-      eventOutputWS->setAllX(XValues_new);
-
-      // Cast to the matrixOutputWS and save it
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutputWS));
     } else {
       //--------- Different output, OR you're inplace but not preserving Events
       //--- create a Workspace2D -------
@@ -230,10 +207,10 @@ void Rebin::exec() {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       outputWS->setYUnit(eventInputWS->YUnit());
       outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", outputWS);
     }
+
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace", outputWS);
 
   } // END ---- EventWorkspace
 
@@ -356,7 +333,7 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   // Get a reference to the list of masked bins for this spectrum
   const MatrixWorkspace::MaskList &mask = inputWS->maskedBins(hist);
   // Now iterate over the list, building up a vector of the masked bins
-  MatrixWorkspace::MaskList::const_iterator it = mask.begin();
+  auto it = mask.cbegin();
   const MantidVec &XValues = inputWS->readX(hist);
   masked_bins.push_back(XValues[(*it).first]);
   weights.push_back((*it).second);

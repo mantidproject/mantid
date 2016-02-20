@@ -53,6 +53,7 @@ void ResNorm::setup() {}
  */
 bool ResNorm::validate() {
   UserInputValidator uiv;
+  QString errors("");
 
   const bool vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
   const bool resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
@@ -88,7 +89,14 @@ bool ResNorm::validate() {
     }
   }
 
-  QString errors = uiv.generateErrorMessage();
+  // check eMin and eMax values
+  const auto eMin = m_dblManager->value(m_properties["EMin"]);
+  const auto eMax = m_dblManager->value(m_properties["EMax"]);
+  if (eMin >= eMax)
+    errors.append("EMin must be strictly less than EMax.\n");
+
+  // Create and show error messages
+  errors.append(uiv.generateErrorMessage());
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
     return false;

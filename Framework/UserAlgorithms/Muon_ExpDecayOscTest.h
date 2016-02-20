@@ -40,19 +40,19 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Muon_ExpDecayOscTest : public API::IPeakFunction {
 public:
   /// Destructor
-  virtual ~Muon_ExpDecayOscTest(){};
+  ~Muon_ExpDecayOscTest() override{};
 
   /// overwrite IPeakFunction base class methods
 
-  virtual double centre() const { return getParameter("lambda"); }
-  virtual double height() const { return getParameter("A"); }
-  virtual double fwhm() const { return 1 / getParameter("frequency"); }
-  virtual void setCentre(const double c) { setParameter("lambda", c); }
-  virtual void setHeight(const double h) { setParameter("A", h); }
-  virtual void setFwhm(const double w) { setParameter("frequency", 1 / w); }
+  double centre() const override { return getParameter("lambda"); }
+  double height() const override { return getParameter("A"); }
+  double fwhm() const override { return 1 / getParameter("frequency"); }
+  void setCentre(const double c) override { setParameter("lambda", c); }
+  void setHeight(const double h) override { setParameter("A", h); }
+  void setFwhm(const double w) override { setParameter("frequency", 1 / w); }
 
   /// Here specify name of function as it will appear
-  std::string name() const { return "Muon_ExpDecayOscTest"; }
+  std::string name() const override { return "Muon_ExpDecayOscTest"; }
 
   // ** OPTIONALLY MODIFY THIS **
   /// The categories the Fit function belong to.
@@ -60,9 +60,9 @@ public:
   /// For example: "General, Muon\\Custom" which adds
   /// this function to the category "General" and the sub-category
   /// "Muon\\Custom"
-  virtual const std::string category() const { return "C++ User Defined"; }
-  virtual void functionDeriv(const API::FunctionDomain &domain,
-                             API::Jacobian &out);
+  const std::string category() const override { return "C++ User Defined"; }
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &out) override;
 
   // ** OPTIONALLY MODIFY THIS **
   virtual const std::string summary() const {
@@ -71,12 +71,12 @@ public:
   }
 
 protected:
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const;
-  virtual void functionDerivLocal(API::Jacobian *, const double *,
-                                  const size_t) {}
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *, const double *,
+                          const size_t) override {}
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 };
 
 } // namespace CurveFitting

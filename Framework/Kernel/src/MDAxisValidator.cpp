@@ -12,11 +12,7 @@ namespace Kernel {
 MDAxisValidator::MDAxisValidator(const std::vector<int> &axes,
                                  const size_t nDimensions,
                                  const bool checkIfEmpty)
-    : m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {
-  for (auto iter = axes.begin(); iter != axes.end(); iter++) {
-    m_axes.push_back(*iter);
-  }
-}
+    : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -45,8 +41,8 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
 
   // Make sure that there are fewer axes specified than exist on the workspace
   if (m_axes.size() > m_wsDimensions) {
-    invalidProperties.insert(std::make_pair(
-        "Axes", "More axes specified than dimensions available in the input"));
+    invalidProperties.emplace(
+        "Axes", "More axes specified than dimensions available in the input");
   }
 
   // Ensure that the axes selection is within the number of dimensions of the

@@ -50,20 +50,21 @@ class DLLExport PeakHKLErrors : public API::ParamFunction,
                                 public API::IFunction1D {
 public:
   PeakHKLErrors();
-  virtual ~PeakHKLErrors();
+  ~PeakHKLErrors() override;
 
-  std::string name() const { return std::string("PeakHKLErrors"); };
+  std::string name() const override { return std::string("PeakHKLErrors"); };
 
   virtual int version() const { return 1; };
 
-  const std::string category() const { return "Calibration"; };
+  const std::string category() const override { return "Calibration"; };
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
-  void init();
+  void init() override;
 
   static void cLone(boost::shared_ptr<Geometry::ParameterMap> &pmap,
                     boost::shared_ptr<const Geometry::IComponent> component,
@@ -72,7 +73,7 @@ public:
   void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks,
                      const std::string &OptRuns,
                      std::map<int, Mantid::Kernel::Matrix<double>> &Res) const;
-  size_t nAttributes() const { return (size_t)2; }
+  size_t nAttributes() const override { return (size_t)2; }
 
   static Kernel::Matrix<double> DerivRotationMatrixAboutRegAxis(double theta,
                                                                 char axis);
@@ -83,14 +84,11 @@ public:
   boost::shared_ptr<Geometry::Instrument>
   getNewInstrument(DataObjects::PeaksWorkspace_sptr Peaks) const;
 
-  std::vector<std::string> getAttributeNames() const {
-    std::vector<std::string> Res;
-    Res.push_back("OptRuns");
-    Res.push_back("PeakWorkspaceName");
-    return Res;
+  std::vector<std::string> getAttributeNames() const override {
+    return {"OptRuns", "PeakWorkspaceName"};
   }
 
-  IFunction::Attribute getAttribute(const std::string &attName) const {
+  IFunction::Attribute getAttribute(const std::string &attName) const override {
     if (attName == "OptRuns")
       return IFunction::Attribute(OptRuns);
 
@@ -101,7 +99,7 @@ public:
   }
 
   void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value) {
+                    const IFunction::Attribute &value) override {
     if (attName == "OptRuns") {
       OptRuns = value.asString();
 
@@ -131,7 +129,7 @@ public:
     throw std::invalid_argument("Not a valid attribute name");
   }
 
-  bool hasAttribute(const std::string &attName) const {
+  bool hasAttribute(const std::string &attName) const override {
     if (attName == "OptRuns")
       return true;
 

@@ -1,7 +1,11 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -65,7 +69,7 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(NULL), m_Ei(-1.0),
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0),
       m_ki(-1.0), m_shapeCache(), m_samplePos(), m_spectraSkipped() {
   m_shapeCache.clear();
 }
@@ -212,8 +216,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
-  std::set<detid_t>::const_iterator iend = dets.end();
-  for (std::set<detid_t>::const_iterator it = dets.begin(); it != iend; ++it) {
+  for (auto it = dets.cbegin(); it != dets.cend(); ++it) {
     IDetector_const_sptr det_member =
         m_inputWS->getInstrument()->getDetector(*it);
 
@@ -250,12 +253,12 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
     const double det_const =
         g_helium_prefactor * (detRadius - wallThickness) * atms / sinTheta;
 
-    MantidVec::const_iterator yinItr = yValues.begin();
-    MantidVec::const_iterator einItr = eValues.begin();
-    MantidVec::iterator youtItr = yout.begin();
-    MantidVec::iterator eoutItr = eout.begin();
-    MantidVec::const_iterator xItr = m_inputWS->readX(spectraIn).begin();
-    std::vector<double>::iterator wavItr = oneOverWaveVectors.begin();
+    auto yinItr = yValues.cbegin();
+    auto einItr = eValues.cbegin();
+    auto youtItr = yout.begin();
+    auto eoutItr = eout.begin();
+    auto xItr = m_inputWS->readX(spectraIn).cbegin();
+    auto wavItr = oneOverWaveVectors.begin();
 
     for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
       if (it == dets.begin()) {
@@ -318,8 +321,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -331,8 +334,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -341,8 +344,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -384,7 +387,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D &start,
   }
   // the first part of the track will be the part inside the shape, return its
   // length
-  return track.begin()->distInsideObject;
+  return track.cbegin()->distInsideObject;
 }
 
 /** Calculates detector efficiency, copied from the fortran code in

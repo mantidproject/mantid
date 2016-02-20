@@ -241,9 +241,9 @@ public:
 
   /** Split sub-boxes, if this is possible and neede for this box */
   virtual void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL) = 0;
+  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Recalculate signal etc. */
-  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) = 0;
+  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
   virtual void calculateCentroid(coord_t * /*centroid*/) const = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
@@ -263,13 +263,6 @@ public:
   virtual void getCenter(coord_t *const /*boxCenter*/) const = 0;
   virtual uint32_t getDepth() const = 0;
   virtual signal_t getSignalNormalized() const = 0;
-
-  virtual signal_t getSignalWithMask() const = 0;
-  virtual signal_t getSignalNormalizedWithMask() const = 0;
-  virtual signal_t getSignalByNEventsWithMask() const {
-    return this->getSignalWithMask() /
-           static_cast<signal_t>(this->getNPoints());
-  }
 
   virtual void calcVolume() = 0;
   virtual void setInverseVolume(const coord_t) = 0;

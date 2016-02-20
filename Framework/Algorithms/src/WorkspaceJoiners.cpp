@@ -3,6 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -12,7 +17,7 @@ using namespace DataObjects;
 
 /** Constructor
  */
-WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(NULL) {}
+WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
 /** Destructor
  */

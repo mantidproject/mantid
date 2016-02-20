@@ -47,12 +47,12 @@ public:
   SingleValueParameter(ValType value);
   SingleValueParameter();
   SingleValueParameter(const SingleValueParameter<Derived, ValType> &other);
-  std::string toXMLString() const;
+  std::string toXMLString() const override;
   Derived &operator=(const Derived &other);
   bool operator==(const Derived &other) const;
   bool operator!=(const Derived &other) const;
   ValType getValue() const;
-  virtual bool isValid() const;
+  bool isValid() const override;
 
 protected:
   ValType m_value;

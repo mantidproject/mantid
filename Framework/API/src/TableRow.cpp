@@ -75,9 +75,8 @@ std::ostream &operator<<(std::ostream &s, const TableRow &row) {
     row.m_columns[0]->print(row.row(), s);
     return s;
   }
-  std::vector<boost::shared_ptr<Column>>::const_iterator ci =
-      row.m_columns.begin();
-  for (; ci != row.m_columns.end() - 1; ++ci) {
+  auto ci = row.m_columns.cbegin();
+  for (; ci != row.m_columns.cend() - 1; ++ci) {
     (*ci)->print(row.row(), s);
     s << row.m_sep;
   }

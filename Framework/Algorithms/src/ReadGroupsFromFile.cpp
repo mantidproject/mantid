@@ -6,6 +6,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
@@ -58,9 +59,7 @@ void ReadGroupsFromFile::init() {
       "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
-  std::vector<std::string> select;
-  select.push_back("True");
-  select.push_back("False");
+  std::vector<std::string> select{"True", "False"};
   declareProperty("ShowUnselected", "True",
                   boost::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
@@ -222,15 +221,15 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
 
     std::string ids = group->getAttribute("val");
 
-    Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
-      for (Poco::StringTokenizer::Iterator it = data.begin(); it != data.end();
-           ++it) {
+      for (const auto &value : data) {
         // cast the string to an int
         int detID;
         try {
-          detID = boost::lexical_cast<int>(*it);
+          detID = boost::lexical_cast<int>(value);
         } catch (boost::bad_lexical_cast &) {
           throw Mantid::Kernel::Exception::FileError(
               "Could cast string to integer in input XML file", filename);

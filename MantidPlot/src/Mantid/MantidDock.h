@@ -7,10 +7,12 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
 #include "Mantid/MantidWSIndexDialog.h"
+#include "Mantid/MantidSurfacePlotDialog.h"
 
 #include <QActionGroup>
 #include <QAtomicInt>
@@ -51,10 +53,10 @@ class MantidDockWidget: public QDockWidget
   Q_OBJECT
 public:
   MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
-  ~MantidDockWidget();
+  ~MantidDockWidget() override;
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
-  void dropEvent(QDropEvent *de);
+  void dropEvent(QDropEvent *de) override;
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
@@ -89,6 +91,7 @@ private slots:
   void clearUB();
   void filterWorkspaceTree(const QString &text);
   void plotSurface();
+  void plotContour();
 
 private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
@@ -105,12 +108,13 @@ private:
   void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & mdeventWS) const;
   void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr & WS) const;
   void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
-  void addWorkspaceGroupMenuItems(QMenu *menu) const;
+  void addWorkspaceGroupMenuItems(
+      QMenu *menu, const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
   void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  
+
 protected:
   MantidTreeWidget * m_tree;
   friend class MantidUI;
@@ -131,7 +135,7 @@ private:
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
 
-  //Context-menu actions
+  // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
       *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_showSpectrumViewer,
       *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
@@ -139,7 +143,7 @@ private:
       *m_delete, *m_program, *m_ascendingSortAction, *m_descendingSortAction,
       *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
       *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
-      *m_clearUB, *m_plotSurface;
+      *m_clearUB, *m_plotSurface, *m_plotContour;
 
   ApplicationWindow *m_appParent;
 
@@ -159,12 +163,14 @@ class MantidTreeWidget:public QTreeWidget
 
 public:
   MantidTreeWidget(MantidDockWidget *w, MantidUI *mui);
-  void mousePressEvent (QMouseEvent *e);
-  void mouseMoveEvent(QMouseEvent *e);
-  void mouseDoubleClickEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseMoveEvent(QMouseEvent *e) override;
+  void mouseDoubleClickEvent(QMouseEvent *e) override;
 
   QStringList getSelectedWorkspaceNames() const;
-  MantidWSIndexDialog::UserInput chooseSpectrumFromSelected(bool showWaterfallOpt = true) const;
+  MantidWSIndexWidget::UserInput
+  chooseSpectrumFromSelected(bool showWaterfallOpt = true,
+                             bool showPlotAll = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
@@ -172,11 +178,19 @@ public:
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
   void sort();
-  void dropEvent(QDropEvent *de);
+  void dropEvent(QDropEvent *de) override;
+  QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
+  getSelectedMatrixWorkspaces() const;
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseSurfacePlotOptions(int nWorkspaces) const;
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseContourPlotOptions(int nWorkspaces) const;
 
 protected:
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
+  MantidSurfacePlotDialog::UserInputSurface
+  choosePlotOptions(const QString &type, int nWorkspaces) const;
 
 private:
   QPoint m_dragStartPosition;
@@ -201,7 +215,7 @@ public:
 
 
 private:
-  bool operator<(const QTreeWidgetItem &other) const;
+  bool operator<(const QTreeWidgetItem &other) const override;
   MantidTreeWidget* m_parent;
   static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
   int m_sortPos;

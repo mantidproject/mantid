@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -201,8 +203,8 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
         std::min(std::abs(*std::min_element(xIn.begin(), xIn.end())), m_Ei) <
         m_Ei;
 
-    MantidVec::const_iterator xIn_it = xIn.begin(); // DeltaE
-    MantidVec::iterator effOut_it = effOut.begin();
+    auto xIn_it = xIn.cbegin(); // DeltaE
+    auto effOut_it = effOut.begin();
     for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
       if (conditionForEnergy) {
         // cppcheck cannot see that this is used by reference by muparser

@@ -117,6 +117,22 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
+  * selected spec will be passed as a bank for the calibrartion
+  * process to be carried out
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual int currentCropCalibBankName() const = 0;
+
+  /**
+  * customised spec will be passed via specID text field for the
+  * calibrartion process to be carried out
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
   * Selected plot data representation will be applied, which will
   * ran through python script
   *
@@ -288,7 +304,7 @@ public:
    *
    * @return run number(s), as a string
    */
-  virtual std::string currentPreprocRunNo() const = 0;
+  virtual std::vector<std::string> currentPreprocRunNo() const = 0;
 
   /**
    * For when pre-processing from event to histo data using a regular

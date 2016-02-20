@@ -94,6 +94,10 @@ call the created workspace:
    #Bad:
    CutMD(..., Projection=proj.createWorkspace(), ...)
 
+Workflow
+~~~~~~~~
+
+.. diagram:: CutMD-v1_wkflw.dot
 
 Usage
 -----

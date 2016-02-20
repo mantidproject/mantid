@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,8 +39,8 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     // We require the same binning for the input workspace and the q resolution
     // workspace
-    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
-    MantidVec::const_iterator qResX = qResolution->readX(0).begin();
+    auto reqX = dataWS->readX(0).cbegin();
+    auto qResX = qResolution->readX(0).cbegin();
     for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
       if (*reqX != *qResX) {
         throw std::invalid_argument(
@@ -77,9 +78,9 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
       throw std::invalid_argument("The WavelengthAdj workspace's bins must "
                                   "match those of the detector bank workspace");
     }
-    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
-    MantidVec::const_iterator testX = binAdj->readX(0).begin();
-    for (; reqX != dataWS->readX(0).end(); ++reqX, ++testX) {
+    auto reqX = dataWS->readX(0).cbegin();
+    auto testX = binAdj->readX(0).cbegin();
+    for (; reqX != dataWS->readX(0).cend(); ++reqX, ++testX) {
       if (*reqX != *testX) {
         throw std::invalid_argument("The WavelengthAdj workspace must have "
                                     "matching bins with the detector bank "
@@ -116,7 +117,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     size_t num_histograms = dataWS->getNumberHistograms();
     for (size_t i = 0; i < num_histograms; i++) {
-      double adj = (double)detectAdj->readY(i)[0];
+      double adj = static_cast<double>(detectAdj->readY(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
 

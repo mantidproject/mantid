@@ -107,6 +107,7 @@ set ( SRC_FILES
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/ExtractSpectra.cpp
+	src/ExtractUnmaskedSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
@@ -153,6 +154,7 @@ set ( SRC_FILES
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
 	src/Max.cpp
+	src/MaxEnt.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -384,6 +386,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/ExtractSpectra.h
+	inc/MantidAlgorithms/ExtractUnmaskedSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
@@ -431,6 +434,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
+	inc/MantidAlgorithms/MaxEnt.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -669,6 +673,7 @@ set ( TEST_FILES
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
 	ExtractSpectraTest.h
+	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
@@ -710,6 +715,7 @@ set ( TEST_FILES
 	LorentzCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
@@ -830,7 +836,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
+						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

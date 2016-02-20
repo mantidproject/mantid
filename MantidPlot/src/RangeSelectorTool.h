@@ -54,12 +54,12 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
 	Q_OBJECT
 	public:
 		RangeSelectorTool(Graph *graph, const QObject *status_target=NULL, const char *status_slot="");
-		virtual ~RangeSelectorTool();
-		double minXValue() const { return QMIN(d_active_marker.xValue(), d_inactive_marker.xValue()); }
+                ~RangeSelectorTool() override;
+                double minXValue() const { return QMIN(d_active_marker.xValue(), d_inactive_marker.xValue()); }
 		double maxXValue() const { return QMAX(d_active_marker.xValue(), d_inactive_marker.xValue()); }
 		int dataSize() const { return qAbs(d_active_point - d_inactive_point); }
-		virtual bool eventFilter(QObject *obj, QEvent *event);
-		bool keyEventFilter(QKeyEvent *ke);
+                bool eventFilter(QObject *obj, QEvent *event) override;
+                bool keyEventFilter(QKeyEvent *ke);
 
 		QwtPlotCurve *selectedCurve() const { return d_selected_curve; }
 		//! Caller is responsible for replot.
@@ -69,15 +69,17 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
         void cutSelection();
         void clearSelection();
         void pasteSelection();
-        virtual int rtti() const {return PlotToolInterface::Rtti_RangeSelector;};
-		bool isVisible(){return d_visible;};
+        int rtti() const override {
+          return PlotToolInterface::Rtti_RangeSelector;
+        };
+                bool isVisible(){return d_visible;};
 
 	public slots:
 		virtual void pointSelected(const QPoint &point);
         void setCurveRange();
-        void setEnabled(bool on = true);
+        void setEnabled(bool on = true) override;
 
-	signals:
+        signals:
 		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
@@ -86,8 +88,8 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
 		//! Emitted whenever the selected curve and/or range have changed.
 		void changed();
 	protected:
-		virtual void append(const QPoint& point) { pointSelected(point); }
-		void emitStatusText();
+          void append(const QPoint &point) override { pointSelected(point); }
+                void emitStatusText();
 		void switchActiveMarker();
 		//! Caller is responsible for replot.
 		void setActivePoint(int index);

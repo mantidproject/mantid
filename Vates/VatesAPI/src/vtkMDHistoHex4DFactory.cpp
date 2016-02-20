@@ -85,11 +85,10 @@ namespace VATES
   @return fully constructed vtkDataSet.
   */
   template<typename TimeMapper>
-  vtkDataSet* vtkMDHistoHex4DFactory<TimeMapper>::create(ProgressAction& progressUpdating) const
+  vtkSmartPointer<vtkDataSet> vtkMDHistoHex4DFactory<TimeMapper>::create(ProgressAction& progressUpdating) const
   {
-    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace, progressUpdating);
-    if(product != NULL)
-    {
+    auto product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace, progressUpdating);
+    if (product != nullptr) {
       return product;
     }
     else

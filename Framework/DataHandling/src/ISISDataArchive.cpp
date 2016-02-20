@@ -8,7 +8,7 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
 
 #include <sstream>
@@ -42,20 +42,16 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 std::string
 ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                 const std::vector<std::string> &exts) const {
-  std::set<std::string>::const_iterator iter = filenames.begin();
-  for (; iter != filenames.end(); ++iter) {
-    g_log.debug() << *iter << ")\n";
+  for (const auto &filename : filenames) {
+    g_log.debug() << filename << ")\n";
   }
-  std::vector<std::string>::const_iterator iter2 = exts.begin();
-  for (; iter2 != exts.end(); ++iter2) {
-    g_log.debug() << *iter2 << ")\n";
+  for (const auto &ext : exts) {
+    g_log.debug() << ext << ")\n";
   }
 
-  std::vector<std::string>::const_iterator ext = exts.begin();
-  for (; ext != exts.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
-    for (; it != filenames.end(); ++it) {
-      const std::string fullPath = getPath(*it + *ext);
+  for (const auto &ext : exts) {
+    for (const auto &filename : filenames) {
+      const std::string fullPath = getPath(filename + ext);
       if (!fullPath.empty())
         return fullPath;
     } // it

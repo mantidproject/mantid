@@ -17,6 +17,12 @@ an exponential and stretched exponential.
 
 This routine was originally part of the MODES package.
 
+Workflow
+--------
+
+.. diagram:: FuryFitMultiple-v1_wkflw.dot
+
+
 Usage
 -----
 

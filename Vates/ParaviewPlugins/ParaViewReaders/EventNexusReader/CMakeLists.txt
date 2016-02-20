@@ -14,7 +14,7 @@ target_link_libraries( MantidParaViewEventNexusReaderSMPlugin LINK_PRIVATE ${TCM
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${JSONCPP_LIBRARIES}
+${vtkjsoncpp_LIBRARIES}
 ${QWT_LIBRARIES})
 
 if (OSX_VERSION VERSION_GREATER 10.8)

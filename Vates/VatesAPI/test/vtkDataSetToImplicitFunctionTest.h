@@ -7,6 +7,7 @@
 #include "MockObjects.h"
 #include <vtkDataSet.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include <vtkNew.h>
 
 using namespace Mantid::VATES;
 
@@ -25,44 +26,28 @@ public:
     TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg), std::runtime_error);
   }
 
-  //void testExecution()
-  //{
-  //  vtkStructuredGrid* ds = vtkStructuredGrid::New();
-  //  ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
-
-  //  vtkDataSetToImplicitFunction extractor(ds);
-  //  Mantid::Geometry::MDImplicitFunction* func = NULL;
-  //  TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
-  //  TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
-  //  ds->Delete();
-  //  delete func;
-  //}
-
-  void testNoImplcitFunction()
-  {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+  void testNoImplcitFunction() {
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray("<MDInstruction/>"));
 
-    vtkDataSetToImplicitFunction extractor(ds);
-    Mantid::Geometry::MDImplicitFunction* func = NULL;
-    TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
+    vtkDataSetToImplicitFunction extractor(ds.GetPointer());
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func;
+    TS_ASSERT_THROWS_NOTHING(
+        func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
+            extractor.execute()));
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
-    ds->Delete();
-    delete func;
   }
 
-  void testStaticUsage()
-  {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+  void testStaticUsage() {
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray("<MDInstruction/>"));
 
-    Mantid::Geometry::MDImplicitFunction* func = NULL;
-    TS_ASSERT_THROWS_NOTHING(func = vtkDataSetToImplicitFunction::exec(ds));
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func;
+    TS_ASSERT_THROWS_NOTHING(
+        func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
+            vtkDataSetToImplicitFunction::exec(ds.GetPointer())));
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
-    ds->Delete();
-    delete func;
   }
-
 };
 
 #endif

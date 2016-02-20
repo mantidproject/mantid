@@ -440,11 +440,7 @@ public:
 
   void test_Vector() {
     DateAndTime a = DateAndTime("1990-01-02 03:04:05.000");
-    std::vector<double> secs;
-    secs.push_back(1.0);
-    secs.push_back(2.0);
-    secs.push_back(0.5);
-    secs.push_back(-3.0);
+    std::vector<double> secs{1.0, 2.0, 0.5, -3.0};
 
     std::vector<DateAndTime> times;
     DateAndTime::createVector(a, secs, times);

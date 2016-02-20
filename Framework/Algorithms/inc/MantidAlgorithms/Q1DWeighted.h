@@ -50,24 +50,24 @@ public:
   /// (Empty) Constructor
   Q1DWeighted() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~Q1DWeighted() {}
+  ~Q1DWeighted() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Q1DWeighted"; }
+  const std::string name() const override { return "Q1DWeighted"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs azimuthal averaging on a 2D SANS data to produce I(Q).";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

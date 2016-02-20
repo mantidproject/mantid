@@ -5,8 +5,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -64,10 +66,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   //       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
   //       std::cout << monitors_changed << std::endl;
 
-  if (!monitors_changed)
-    return false;
-
-  return true;
+  return monitors_changed;
 }
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
@@ -396,7 +395,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("More then one spectra corresponds to the "
                                "requested monitor ID, which is unheard of");
     }
-    spectra_num = (int)indexList[0];
+    spectra_num = static_cast<int>(indexList[0]);
   } else { // monitor spectrum is specified.
     spec2index_map specs;
     const SpectraAxis *axis =
@@ -410,7 +409,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");
     }
-    spectra_num = (int)specs[monitorSpec];
+    spectra_num = static_cast<int>(specs[monitorSpec]);
   }
   return this->extractMonitorSpectrum(inputWorkspace, spectra_num);
 }
@@ -563,25 +562,16 @@ void NormaliseToMonitor::normaliseBinByBin(
     API::MatrixWorkspace_sptr &outputWorkspace) {
   EventWorkspace_sptr inputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
-  EventWorkspace_sptr outputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
     if (inputEvent) {
-      // Make a brand new EventWorkspace
-      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
-      // Copy geometry and data
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          inputEvent, outputEvent, false);
-      outputEvent->copyDataFrom((*inputEvent));
-      outputWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEvent);
+      outputWorkspace = MatrixWorkspace_sptr(inputWorkspace->clone().release());
     } else
       outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   }
+  auto outputEvent =
+      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Get hold of the monitor spectrum
   const MantidVec &monX = m_monitor->readX(0);

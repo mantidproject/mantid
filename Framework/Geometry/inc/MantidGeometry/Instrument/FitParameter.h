@@ -49,49 +49,59 @@ public:
   /// get paramter value
   double getValue() const;
   /// set parameter value
-  double &setValue() { return m_value; }
+  void setValue(double value) { m_value = value; }
   /// get tie
   std::string getTie() const { return m_tie; }
   /// set tie
-  std::string &setTie() { return m_tie; }
+  void setTie(std::string tie) { m_tie = std::move(tie); }
   /// get constraint
   std::string getConstraint() const;
   /// get penalty factor
-  std::string getConstraintPenaltyFactor() const {
+  const std::string &getConstraintPenaltyFactor() const {
     return m_constraintPenaltyFactor;
   }
   /// set constraint min
-  std::string &setConstraintMin() { return m_constraintMin; }
+  void setConstraintMin(std::string constraintMin) {
+    m_constraintMin = std::move(constraintMin);
+  }
   /// set constraint max
-  std::string &setConstraintMax() { return m_constraintMax; }
+  void setConstraintMax(std::string constraintMax) {
+    m_constraintMax = std::move(constraintMax);
+  }
   /// set the constraint penalty
-  std::string &setConstraintPenaltyFactor() {
-    return m_constraintPenaltyFactor;
+  void setConstraintPenaltyFactor(std::string constraintPenaltyFactor) {
+    m_constraintPenaltyFactor = std::move(constraintPenaltyFactor);
   }
   /// get formula
-  std::string getFormula() const { return m_formula; }
+  const std::string &getFormula() const { return m_formula; }
   /// set formula
-  std::string &setFormula() { return m_formula; }
+  void setFormula(std::string formula) { m_formula = std::move(formula); }
   /// get formula unit, and Empty string is no unit has been specified
-  std::string getFormulaUnit() const { return m_formulaUnit; }
+  const std::string &getFormulaUnit() const { return m_formulaUnit; }
   /// set formula unit
-  std::string &setFormulaUnit() { return m_formulaUnit; }
+  void setFormulaUnit(std::string formulaUnit) {
+    m_formulaUnit = std::move(formulaUnit);
+  }
   /// get result formula unit, and Empty string is no unit has been specified
-  std::string getResultUnit() const { return m_resultUnit; }
+  const std::string &getResultUnit() const { return m_resultUnit; }
   /// set result formula unit
-  std::string &setResultUnit() { return m_resultUnit; }
+  void setResultUnit(std::string resultUnit) {
+    m_resultUnit = std::move(resultUnit);
+  }
   /// get function
-  std::string getFunction() const { return m_function; }
+  const std::string &getFunction() const { return m_function; }
   /// set function
-  std::string &setFunction() { return m_function; }
+  void setFunction(std::string function) { m_function = std::move(function); }
   /// get name
-  std::string getName() const { return m_name; }
+  const std::string &getName() const { return m_name; }
   /// set name
-  std::string &setName() { return m_name; }
+  void setName(std::string name) { m_name = std::move(name); }
   /// get look up table
   const Kernel::Interpolation &getLookUpTable() const { return m_lookUpTable; }
   /// set look up table
-  Kernel::Interpolation &setLookUpTable() { return m_lookUpTable; }
+  void setLookUpTable(Kernel::Interpolation lookupTable) {
+    m_lookUpTable = std::move(lookupTable);
+  }
 
   /// Prints object to stream
   void printSelf(std::ostream &os) const;

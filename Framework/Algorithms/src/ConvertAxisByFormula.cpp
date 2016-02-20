@@ -51,8 +51,8 @@ void ConvertAxisByFormula::init() {
                   "Name of the output workspace");
 
   std::vector<std::string> axisOptions;
-  axisOptions.push_back("X");
-  axisOptions.push_back("Y");
+  axisOptions.emplace_back("X");
+  axisOptions.emplace_back("Y");
   declareProperty("Axis", "X",
                   boost::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
@@ -107,7 +107,7 @@ void ConvertAxisByFormula::exec() {
 
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
-  if (refAxisPtr != NULL) {
+  if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
     if (sameBins.isValid(outputWs) != "") {
       throw std::invalid_argument("Axes must have common bins for this "
@@ -189,8 +189,7 @@ void ConvertAxisByFormula::exec() {
     if (axisUnits == "") {
       axisUnits = axisPtr->unit()->label();
     }
-    axisPtr->unit() =
-        boost::shared_ptr<Unit>(new Units::Label(axisTitle, axisUnits));
+    axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
   }
 }
 

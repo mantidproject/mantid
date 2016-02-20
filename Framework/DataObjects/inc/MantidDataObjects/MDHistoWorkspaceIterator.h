@@ -55,84 +55,81 @@ class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
   MDHistoWorkspaceIterator(
       MDHistoWorkspace_const_sptr workspace, SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       const MDHistoWorkspace *workspace, SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       MDHistoWorkspace_const_sptr workspace,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
       const MDHistoWorkspace *workspace,
-      Mantid::Geometry::MDImplicitFunction *function = NULL,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
-  virtual ~MDHistoWorkspaceIterator();
+  ~MDHistoWorkspaceIterator() override;
 
   void init(const MDHistoWorkspace *workspace,
             Mantid::Geometry::MDImplicitFunction *function, size_t beginPos = 0,
             size_t endPos = size_t(-1));
 
-  virtual size_t getDataSize() const;
+  size_t getDataSize() const override;
 
-  virtual bool valid() const;
+  bool valid() const override;
 
-  virtual bool next();
+  bool next() override;
 
-  virtual bool next(size_t skip);
+  bool next(size_t skip) override;
 
-  virtual void jumpTo(size_t index);
+  void jumpTo(size_t index) override;
 
   virtual coord_t jumpToNearest(const Mantid::Kernel::VMD &fromLocation);
 
-  virtual signal_t getNormalizedSignal() const;
+  signal_t getNormalizedSignal() const override;
 
-  virtual signal_t getNormalizedError() const;
+  signal_t getNormalizedError() const override;
 
-  virtual signal_t getNormalizedSignalWithMask() const;
+  signal_t getSignal() const override;
 
-  virtual signal_t getSignal() const;
+  signal_t getError() const override;
 
-  virtual signal_t getError() const;
+  coord_t *getVertexesArray(size_t &numVertices) const override;
 
-  virtual coord_t *getVertexesArray(size_t &numVertices) const;
+  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                            const bool *maskDim) const override;
 
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const;
+  Mantid::Kernel::VMD getCenter() const override;
 
-  virtual Mantid::Kernel::VMD getCenter() const;
-
-  virtual size_t getNumEvents() const;
+  size_t getNumEvents() const override;
 
   virtual signal_t getNumEventsFraction() const;
 
-  virtual uint16_t getInnerRunIndex(size_t index) const;
+  uint16_t getInnerRunIndex(size_t index) const override;
 
-  virtual int32_t getInnerDetectorID(size_t index) const;
+  int32_t getInnerDetectorID(size_t index) const override;
 
-  virtual coord_t getInnerPosition(size_t index, size_t dimension) const;
+  coord_t getInnerPosition(size_t index, size_t dimension) const override;
 
-  virtual signal_t getInnerSignal(size_t index) const;
+  signal_t getInnerSignal(size_t index) const override;
 
-  virtual signal_t getInnerError(size_t index) const;
+  signal_t getInnerError(size_t index) const override;
 
-  virtual bool getIsMasked() const;
+  bool getIsMasked() const override;
 
-  virtual size_t getLinearIndex() const;
+  size_t getLinearIndex() const override;
 
-  std::vector<size_t> findNeighbourIndexes() const;
+  std::vector<size_t> findNeighbourIndexes() const override;
 
-  std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+  std::vector<size_t> findNeighbourIndexesFaceTouching() const override;
 
   std::vector<size_t> findNeighbourIndexesByWidth(const int &width) const;
 
   std::vector<size_t>
   findNeighbourIndexesByWidth(const std::vector<int> &widths) const;
 
-  virtual bool isWithinBounds(size_t index) const;
+  bool isWithinBounds(size_t index) const override;
 
   size_t permutationCacheSize() const;
 

@@ -37,28 +37,28 @@ namespace MDAlgorithms {
 class DLLExport BooleanBinaryOperationMD : public BinaryOperationMD {
 public:
   BooleanBinaryOperationMD();
-  virtual ~BooleanBinaryOperationMD();
+  ~BooleanBinaryOperationMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
-  virtual int version() const;
+  int version() const override;
 
 protected:
   /// Return true if the algorithm can operate on a scalar.
   virtual bool acceptScalar() const { return true; }
-  virtual bool commutative() const;
-  void checkInputs();
-  void execEvent();
-  virtual void
-  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                  Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+  bool commutative() const override;
+  void checkInputs() override;
+  void execEvent() override;
+  void execHistoScalar(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  virtual void
-  execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                 Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) = 0;
+  void execHistoHisto(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override = 0;
 };
 
 } // namespace MDAlgorithms

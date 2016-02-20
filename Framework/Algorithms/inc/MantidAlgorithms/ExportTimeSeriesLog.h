@@ -39,21 +39,23 @@ namespace Algorithms {
 class DLLExport ExportTimeSeriesLog : public API::Algorithm {
 public:
   ExportTimeSeriesLog();
-  virtual ~ExportTimeSeriesLog();
+  ~ExportTimeSeriesLog() override;
 
-  virtual const std::string name() const { return "ExportTimeSeriesLog"; };
-  virtual int version() const { return 1; };
-  virtual const std::string category() const {
+  const std::string name() const override { return "ExportTimeSeriesLog"; };
+
+  int version() const override { return 1; };
+
+  const std::string category() const override {
     return "Diffraction\\DataHandling;Events\\EventFiltering";
   };
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Read a TimeSeries log and return information";
   }
 
 private:
-  API::MatrixWorkspace_sptr m_dataWS;
+  API::MatrixWorkspace_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outWS;
 
   std::vector<int64_t> mSETimes;
@@ -63,18 +65,29 @@ private:
   Kernel::DateAndTime mFilterT0;
   Kernel::DateAndTime mFilterTf;
 
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
-  void exportLog(std::string logname, int numberexports, bool outputeventws);
+  bool
+  calculateTimeSeriesRangeByTime(std::vector<Kernel::DateAndTime> &vec_times,
+                                 const double &rel_start_time, size_t &i_start,
+                                 const double &rel_stop_time, size_t &i_stop,
+                                 const double &time_factor);
 
-  void setupEventWorkspace(int numentries,
+  void exportLog(const std::string &logname, const std::string timeunit,
+                 const double &starttime, const double &stoptime,
+                 const bool exportepoch, bool outputeventws, int numentries);
+
+  void setupEventWorkspace(const size_t &start_index, const size_t &stop_index,
+                           int numentries,
                            std::vector<Kernel::DateAndTime> &times,
-                           std::vector<double> values);
+                           std::vector<double> values, const bool &epochtime);
 
-  void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times,
-                        std::vector<double> values);
+  void setupWorkspace2D(const size_t &start_index, const size_t &stop_index,
+                        int numentries, std::vector<Kernel::DateAndTime> &times,
+                        std::vector<double> values, const bool &epochtime,
+                        const double &timeunitfactor);
 };
 
 } // namespace Algorithms

@@ -8,22 +8,23 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/ICostFunction.h"
 
 #include "MantidQtMantidWidgets/FilenameDialogEditor.h"
 #include "MantidQtMantidWidgets/FormulaDialogEditor.h"
@@ -1183,6 +1184,12 @@ std::string FitPropertyBrowser::costFunction()const
 bool FitPropertyBrowser::convolveMembers() const
 {
     return m_boolManager->value(m_convolveMembers);
+}
+
+/// Get the max number of iterations
+int FitPropertyBrowser::maxIterations() const
+{
+  return m_intManager->value(m_maxIterations);
 }
 
 /// Get the registered function names

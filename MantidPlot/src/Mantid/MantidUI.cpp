@@ -21,23 +21,24 @@
 #include "../Folder.h"
 #include "../TiledWindow.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LogFilter.h"
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitConversion.h"
-#include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include "InstrumentWidget/InstrumentWindow.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
-
-#include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -85,6 +86,7 @@
 using namespace std;
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
@@ -466,38 +468,51 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 @param makeVisible :: If true show the created MantidMatrix, hide otherwise.
 @return A pointer to the new MantidMatrix.
 */
-MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
-{
+MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
+                                              int upper, bool showDlg,
+                                              bool makeVisible) {
   MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        wsName.toStdString());
   }
 
-  if (!ws.get()) return 0;
+  MantidMatrix *matrix = importMatrixWorkspace(ws, lower, upper, showDlg);
+  if (matrix) {
+    appWindow()->addMdiSubWindow(matrix, makeVisible);
+  }
+  return matrix;
+}
 
-  MantidMatrix* w = 0;
-  if (showDlg)
-  {
-    ImportWorkspaceDlg dlg(appWindow(), ws->getNumberHistograms());
-    if (dlg.exec() == QDialog::Accepted)
-    {
-      int start = dlg.getLowerLimit();
-      int end = dlg.getUpperLimit();
-
-      w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
-      if (dlg.isFiltered())
-        w->setRange(0,dlg.getMaxValue());
+/**  Import a MatrixWorkspace into a MantidMatrix.
+@param workspace :: Workspace
+@param lower :: An optional lower boundary
+@param upper :: An optional upper boundary
+@param showDlg :: If true show a dialog box to set some import parameters
+@return A pointer to the new MantidMatrix.
+*/
+MantidMatrix *
+MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
+                                int upper, bool showDlg) {
+  MantidMatrix *matrix = 0;
+  if (workspace) {
+    const QString wsName(workspace->name().c_str());
+    if (showDlg) {
+      ImportWorkspaceDlg dlg(appWindow(), workspace->getNumberHistograms());
+      if (dlg.exec() == QDialog::Accepted) {
+        int start = dlg.getLowerLimit();
+        int end = dlg.getUpperLimit();
+        matrix = new MantidMatrix(workspace, appWindow(), "Mantid", wsName,
+                                  start, end);
+        if (dlg.isFiltered())
+          matrix->setRange(0, dlg.getMaxValue());
+      }
+    } else {
+      matrix = new MantidMatrix(workspace, appWindow(), "Mantid", wsName, lower,
+                                upper);
     }
   }
-  else
-  {
-    w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
-  }
-  if ( !w ) return 0;
-
-  appWindow()->addMdiSubWindow(w,makeVisible);
-  return w;
+  return matrix;
 }
 
 /**  Import a Workspace into MantidPlot.
@@ -870,6 +885,9 @@ void MantidUI::showSliceViewer()
     {
       w->getSlicer()->setTransparentZeros(false);
     }
+
+    // Global option for color bar autoscaling
+    w->getSlicer()->setColorBarAutoScale(m_appWindow->autoscale2DPlots);
 
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
@@ -2027,39 +2045,34 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
-  InstrumentWindow *insWin = new InstrumentWindow(wsName,QString("Instrument"),appWindow(),windowName);
+  
   try
   {
-    insWin->init();
+    InstrumentWindow *insWin = new InstrumentWindow(
+        wsName, QString("Instrument"), appWindow(), windowName);
+
+    insWin->selectTab(tab);
+
+    appWindow()->addMdiSubWindow(insWin);
+
+    QApplication::restoreOverrideCursor();
+    return insWin;
   }
   catch(const std::exception& e)
   {
     QApplication::restoreOverrideCursor();
     QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
-    if (insWin)
-    {
-      appWindow()->closeWindow(insWin);
-      insWin->close();
-    }
+
     return NULL;
   }
-
-  insWin->selectTab(tab);
-
-  appWindow()->addMdiSubWindow(insWin);
-
-  connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
-    SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
-
-  QApplication::restoreOverrideCursor();
-  return insWin;
 }
 
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
   InstrumentWindow *insWin = getInstrumentView(wsName);
+
   if (!insWin)
   {
     m_lastShownInstrumentWin = NULL;
@@ -2074,14 +2087,14 @@ void MantidUI::showMantidInstrument(const QString& wsName)
       m_lastShownInstrumentWin->close();
       QPoint p = m_lastShownInstrumentWin->pos();
       delete m_lastShownInstrumentWin;
-      insWin->move(p);
+	  insWin->move(p);
     }
   }
   m_lastShownInstrumentWin = insWin;
 
   if (!insWin->isVisible())
   {
-    insWin->show();
+	  insWin->show();
   }
 }
 
@@ -3419,6 +3432,14 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
   appWindow()->setSpectrogramTickStyle(plot);
   plot->setAutoScale();
+  /* The 'setAutoScale' above is needed to make sure that the plot initially
+   * encompasses all the data points. However, this has the side-effect
+   * suggested by its name: all the axes become auto-scaling if the data
+   * changes. If, in the plot preferences, autoscaling has been disabled then
+   * the next line re-fixes the axes
+   */
+  if (!appWindow()->autoscale2DPlots)
+    plot->enableAutoscaling(false);
 
   QApplication::restoreOverrideCursor();
   return window;

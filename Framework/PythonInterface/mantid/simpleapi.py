@@ -640,18 +640,28 @@ def _get_args_from_lhs(lhs, algm_obj):
         :param algm_obj: An initialised algorithm object
         :returns: A dictionary mapping property names to the values extracted from the lhs variables
     """
+
     ret_names = lhs[1]
     extra_args = {}
 
     output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
+
     nprops = len(output_props)
-    i = 0
-    while len(ret_names) > 0 and i < nprops:
-        p = output_props[i]
+    nnames = len(ret_names)
+
+    name = 0
+
+    for p in output_props:
         if _is_workspace_property(p):
-            extra_args[p.name] = ret_names[0]
-            ret_names = ret_names[1:]
-        i += 1
+            if nnames > 0 and nprops > nnames:
+                extra_args[p.name] = ret_names[0] # match argument to property name
+                ret_names = ret_names[1:]
+                nnames -= 1
+            elif nnames > 0:
+                extra_args[p.name] = ret_names[name]
+
+        name += 1
+
     return extra_args
 
 def _merge_keywords_with_lhs(keywords, lhs_args):
@@ -818,6 +828,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
         set_properties(algm, *args, **final_keywords)
+
         try:
             algm.execute()
         except RuntimeError, e:
@@ -826,6 +837,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
                 _check_mandatory_args(algorithm, _algm_object, e, *args, **kwargs)
             else:
                 raise
+
         return _gather_returns(algorithm, lhs, algm)
 
 

@@ -1,15 +1,19 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/bind.hpp>
@@ -204,7 +208,7 @@ void ConvertUnitsUsingDetectorTable::setupMemberVariables(
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
-      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != NULL);
+      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
 
   m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
@@ -223,18 +227,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::setupOutputWorkspace(
   // the output
   if (outputWS != inputWS) {
     if (m_inputEvents) {
-      // Need to create by name as WorkspaceFactory otherwise spits out
-      // Workspace2D when EventWS passed in
-      outputWS = WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1);
-      // Copy geometry etc. over
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        false);
-      // Need to copy over the data as well
-      EventWorkspace_const_sptr inputEventWS =
-          boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS)
-          ->copyDataFrom(*inputEventWS);
+      outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
     } else {
       // Create the output workspace
       outputWS = WorkspaceFactory::Instance().create(inputWS);
@@ -560,12 +553,7 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
 
-  std::vector<double> retval;
-  retval.push_back(XMin);
-  retval.push_back(step);
-  retval.push_back(XMax);
-
-  return retval;
+  return {XMin, step, XMax};
 }
 
 /** Reverses the workspace if X values are in descending order
@@ -647,16 +635,15 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     const MantidVec &X0 = workspace->readX(i);
-    MantidVec::const_iterator start =
-        std::lower_bound(X0.begin(), X0.end(), -1.0e-10 * DBL_MAX);
-    if (start == X0.end()) {
+    auto start = std::lower_bound(X0.cbegin(), X0.cend(), -1.0e-10 * DBL_MAX);
+    if (start == X0.cend()) {
       const std::string e("Check the input EFixed: the one given leads to all "
                           "bins being in the physically inaccessible region.");
       g_log.error(e);
       throw std::invalid_argument(e);
     }
-    MantidVec::difference_type bins = X0.end() - start;
-    MantidVec::difference_type first = start - X0.begin();
+    MantidVec::difference_type bins = X0.cend() - start;
+    MantidVec::difference_type first = start - X0.cbegin();
 
     result =
         WorkspaceFactory::Instance().create(workspace, numSpec, bins, bins - 1);
@@ -680,9 +667,8 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
       const MantidVec &X = workspace->readX(i);
-      MantidVec::const_iterator end =
-          std::lower_bound(X.begin(), X.end(), 1.0e-10 * DBL_MAX);
-      MantidVec::difference_type bins = end - X.begin();
+      auto end = std::lower_bound(X.cbegin(), X.cend(), 1.0e-10 * DBL_MAX);
+      MantidVec::difference_type bins = end - X.cbegin();
       lastBins[i] = bins;
       if (bins > maxBins)
         maxBins = static_cast<int>(bins);

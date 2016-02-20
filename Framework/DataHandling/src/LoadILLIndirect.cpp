@@ -1,6 +1,9 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
@@ -25,7 +28,7 @@ LoadILLIndirect::LoadILLIndirect()
     : API::IFileLoader<Kernel::NexusDescriptor>(), m_numberOfTubes(0),
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
-  m_supportedInstruments.push_back("IN16B");
+  m_supportedInstruments.emplace_back("IN16B");
 }
 
 //----------------------------------------------------------------------------------------------

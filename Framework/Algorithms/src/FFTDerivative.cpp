@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/FFTDerivative.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 #include <functional>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

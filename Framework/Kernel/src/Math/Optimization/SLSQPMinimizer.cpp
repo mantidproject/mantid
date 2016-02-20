@@ -179,7 +179,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
 
   size_t constrCounter(0);
   while (constrCounter < totalNumConstr) {
-    const DblMatrix *constrMatrix(NULL);
+    const DblMatrix *constrMatrix(nullptr);
     if (constrCounter < numEqualityConstraints())
       constrMatrix = &equality;
     else
@@ -2821,7 +2821,7 @@ L75:
 /*     FOR REAL OR D.P. SET HITEST = CUTHI/N */
 /*     FOR COMPLEX      SET HITEST = CUTHI/(2*N) */
 L85:
-  hitest = cuthi / (float)(*n);
+  hitest = cuthi / static_cast<float>(*n);
   /*                   PHASE 3.  SUM IS MID-RANGE.  NO SCALING. */
   i__1 = nn;
   i__2 = *incx;

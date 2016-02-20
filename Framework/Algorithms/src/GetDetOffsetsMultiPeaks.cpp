@@ -38,7 +38,7 @@ const double BAD_OFFSET(1000.); // mark things that didn't work with this
 double gsl_costFunction(const gsl_vector *v, void *params) {
   // FIXME - there is no need to use vectors peakPosToFit, peakPosFitted and
   // chisq
-  double *p = (double *)params;
+  double *p = reinterpret_cast<double *>(params);
   size_t n = static_cast<size_t>(p[0]);
   std::vector<double> peakPosToFit(n);
   std::vector<double> peakPosFitted(n);
@@ -159,18 +159,13 @@ void GetDetOffsetsMultiPeaks::init() {
                   "Name of the input Tableworkspace containing peak fit window "
                   "information for each spectrum. ");
 
-  std::vector<std::string> peaktypes;
-  peaktypes.push_back("BackToBackExponential");
-  peaktypes.push_back("Gaussian");
-  peaktypes.push_back("Lorentzian");
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
+                                     "Lorentzian"};
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
       boost::make_shared<StringListValidator>(bkgdtypes),
@@ -354,8 +349,8 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   // Create output workspaces
   m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  MatrixWorkspace_sptr tempmaskws(
-      new MaskWorkspace(m_inputWS->getInstrument()));
+  MatrixWorkspace_sptr tempmaskws =
+      boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
 
   // Input resolution
@@ -714,7 +709,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = NULL;
+  gsl_multimin_fminimizer *s = nullptr;
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -1153,9 +1148,9 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
 
   // set up columns
   m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
-  for (size_t i = 0; i < m_peakPositions.size(); ++i) {
+  for (double m_peakPosition : m_peakPositions) {
     std::stringstream namess;
-    namess << "@" << std::setprecision(5) << m_peakPositions[i];
+    namess << "@" << std::setprecision(5) << m_peakPosition;
     m_peakOffsetTableWS->addColumn("str", namess.str());
   }
   m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");

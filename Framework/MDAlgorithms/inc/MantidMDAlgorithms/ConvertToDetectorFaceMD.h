@@ -41,21 +41,21 @@ class DLLExport ConvertToDetectorFaceMD
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   ConvertToDetectorFaceMD();
-  virtual ~ConvertToDetectorFaceMD();
+  ~ConvertToDetectorFaceMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Convert a MatrixWorkspace containing to a MD workspace for viewing "
            "the detector face.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   std::map<int, Geometry::RectangularDetector_const_sptr> getBanks();
 

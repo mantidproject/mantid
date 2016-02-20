@@ -28,7 +28,7 @@ The EFix value may be provided for input workspaces. Specifying a single value, 
 Merging Individually Converted Runs
 #####################################
 
-If a sequence of input workspaces are provided, and *InPlace* is False, then these are individually processed as above, and are merged together via :ref:`algm-MergeMD`. Intermediate workspaces are not kept. If *InPlace* is applied conversion and merging are done in the same step. This requires less memory overhead, but may be slower.
+If a sequence of input workspaces are provided, and *InPlace* is False, then these are individually processed as above, and are merged together via :ref:`algm-MergeMD`. Intermediate workspaces are not kept. If *InPlace* is applied conversion and merging are done in the same step. This requires less memory overhead, however input workspaces are altered.
 
 Additional Information
 #######################
@@ -40,9 +40,29 @@ CreateMD steps use :ref:`algm-ConvertToMDMinMaxGlobal` to determine the min and 
 
    `Horace <http://horace.isis.rl.ac.uk/Generating_SQW_files>`__ style orientation used by CreateMD. DSPI and Omega in the image have no meaning in Mantid and are not required by this algorithm.
 
+Workflow
+########
 
-**Single Conversion Example**
-##########################################
+.. diagram:: CreateMD-v1_wkflw.dot
+
+**Conversion Of Multiple Input Files Example**
+##############################################
+
+.. code-block:: python
+
+   import numpy as np
+
+   # Create arrays of run numbers and corresponding values of psi
+   run_numbers = range(15052, 15098)
+   psi_array = np.arange(0.0, 92.0, 2)
+   
+   # Create list of file names from run numbers
+   input_runs = ['/path/to/data/instr_'+str(run_number)+'.nxspe' for run_number in run_numbers]
+   
+   md_ws = CreateMD(input_runs, Emode='Direct', Alatt=[2.87, 2.87, 2.87], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0, 1, 0], Psi=psi_array, EFix=400.0)
+
+**Conversion Of A Single Input Workspace Example**
+##################################################
 
 .. code-block:: python
 
@@ -51,7 +71,7 @@ CreateMD steps use :ref:`algm-ConvertToMDMinMaxGlobal` to determine the min and 
    AddSampleLog(Workspace=current_ws,LogName='Ei',LogText='3.0',LogType='Number')
 
    # Execute CreateMD
-   new_mdew = CreateMD(current_ws, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=6, Gs=0, Gl=[0])
+   new_mdew = CreateMD(current_ws, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=6, Gs=0, Gl=[0])
 
    # Show dimensionality and dimension names
    ndims = new_mdew.getNumDims()
@@ -69,8 +89,8 @@ Output
    [0,0,L]
    DeltaE
 
-**Multi Conversion Example**
-##########################################
+**Conversion Of Multiple Input Workspaces Example**
+###################################################
 
 .. code-block:: python
 
@@ -105,8 +125,8 @@ Output
    [0,0,L]
    DeltaE
 
-**Multi Conversion Example InPlace**
-##########################################
+**Multi Conversion Example Without Altering Original Workspaces (InPlace=False)**
+#################################################################################
 
 .. code-block:: python
 
@@ -123,7 +143,7 @@ Output
        gs.append(0.0)
     
    # Convert and merge. ConversionToMD done in place.
-   new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=psi, Gl=gl, Gs=gs, EFix=3.0, InPlace=True)
+   new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=psi, Gl=gl, Gs=gs, EFix=3.0, InPlace=False)
 
    # Show dimensionality and dimension names
    ndims = new_merged.getNumDims()

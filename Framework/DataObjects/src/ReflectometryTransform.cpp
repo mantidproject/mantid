@@ -10,6 +10,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -17,7 +18,6 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/assign.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -164,7 +164,8 @@ MantidVec createXAxis(MatrixWorkspace *const ws, const double gradX,
   xAxis->title() = caption;
   MantidVec xAxisVec(nBins);
   for (size_t i = 0; i < nBins; ++i) {
-    double qxIncrement = ((1 / gradX) * ((double)i + 1) + cxToUnit);
+    double qxIncrement =
+        ((1 / gradX) * (static_cast<double>(i) + 1) + cxToUnit);
     xAxis->setValue(i, qxIncrement);
     xAxisVec[i] = qxIncrement;
   }
@@ -196,7 +197,8 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
   verticalAxis->title() = caption;
   for (size_t i = 0; i < nBins; ++i) {
     ws->setX(i, xAxisVec);
-    double qzIncrement = ((1 / gradY) * ((double)i + 1) + cyToUnit);
+    double qzIncrement =
+        ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
     verticalAxis->setValue(i, qzIncrement);
   }
 }
@@ -283,12 +285,12 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController,
     Mantid::Geometry::MDFrame_uptr frame) const {
-  MDHistoDimension_sptr dim0 = MDHistoDimension_sptr(new MDHistoDimension(
+  auto dim0 = boost::make_shared<MDHistoDimension>(
       m_d0Label, m_d0ID, *frame, static_cast<Mantid::coord_t>(m_d0Min),
-      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
-  MDHistoDimension_sptr dim1 = MDHistoDimension_sptr(new MDHistoDimension(
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins);
+  auto dim1 = boost::make_shared<MDHistoDimension>(
       m_d1Label, m_d1ID, *frame, static_cast<Mantid::coord_t>(m_d1Min),
-      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins);
 
   auto ws = createMDWorkspace(dim0, dim1, boxController);
 
@@ -313,7 +315,7 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
                                   centers));
     }
   }
-  ws->splitAllIfNeeded(NULL);
+  ws->splitAllIfNeeded(nullptr);
   ws->refreshCache();
   return ws;
 }
@@ -368,8 +370,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
       if (_d0 >= m_d0Min && _d0 <= m_d0Max && _d1 >= m_d1Min &&
           _d1 <= m_d1Max) // Check that the calculated ki and kf are in range
       {
-        const int outIndexX = (int)((gradD0 * _d0) + cxToIndex);
-        const int outIndexZ = (int)((gradD1 * _d1) + cyToIndex);
+        const int outIndexX = static_cast<int>((gradD0 * _d0) + cxToIndex);
+        const int outIndexZ = static_cast<int>((gradD1 * _d1) + cyToIndex);
 
         ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
         ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];
@@ -438,10 +440,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   std::vector<double> xBinsVec;
   std::vector<double> zBinsVec;
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d1Min)(widthD1)(m_d1Max), zBinsVec);
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d0Min)(widthD0)(m_d0Max), xBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d1Min, widthD1, m_d1Max},
+                                          zBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d0Min, widthD0, m_d0Max},
+                                          xBinsVec);
 
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = new BinEdgeAxis(zBinsVec);
