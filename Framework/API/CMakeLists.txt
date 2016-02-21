@@ -43,6 +43,8 @@ set ( SRC_FILES
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
+	src/GeometryInfoFactory.cpp
+	src/GeometryInfo.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -195,6 +197,8 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
+	inc/MantidAPI/GeometryInfoFactory.h
+	inc/MantidAPI/GeometryInfo.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -356,6 +360,8 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	GeometryInfoFactoryTest.h
+	GeometryInfoTest.h
 	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h

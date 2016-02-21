@@ -2,6 +2,7 @@
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h"
+#include "MantidKernel/make_unique.h"
 
 #include <sstream>
 #include <fstream>
@@ -49,8 +50,7 @@ std::string
 ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups,
                                        std::set<int> rows) {
 
-  std::unique_ptr<Mantid::API::NotebookWriter> notebook(
-      new Mantid::API::NotebookWriter());
+  auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName));
 

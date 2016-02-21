@@ -2,7 +2,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidKernel/LibraryManager.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 namespace Mantid {
 namespace API {
