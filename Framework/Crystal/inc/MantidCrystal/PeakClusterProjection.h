@@ -64,7 +64,6 @@ public:
   virtual ~PeakClusterProjection() = default;
 
 private:
-
   /// Image
   boost::shared_ptr<Mantid::API::IMDWorkspace> m_mdWS;
 
