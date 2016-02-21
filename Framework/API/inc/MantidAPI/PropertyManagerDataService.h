@@ -32,16 +32,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL PropertyManagerDataServiceImpl
     : public Mantid::Kernel::DataService<Mantid::Kernel::PropertyManager> {
+public:
+  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
+      delete;
+  PropertyManagerDataServiceImpl &
+  operator=(const PropertyManagerDataServiceImpl &) = delete;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PropertyManagerDataServiceImpl>;
   /// Constructor
   PropertyManagerDataServiceImpl();
-  /// Private, unimplemented copy constructor
-  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
-      delete;
-  /// Private, unimplemented copy assignment operator
-  PropertyManagerDataServiceImpl &
-  operator=(const PropertyManagerDataServiceImpl &) = delete;
   ~PropertyManagerDataServiceImpl() override = default;
 };
 
