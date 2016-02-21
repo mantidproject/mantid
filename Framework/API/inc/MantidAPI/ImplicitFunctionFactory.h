@@ -43,12 +43,12 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionFactoryImpl
     : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction> {
 public:
-  Mantid::Geometry::MDImplicitFunction_sptr
-  create(const std::string &className) const override;
-
   ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
   ImplicitFunctionFactoryImpl &
   operator=(const ImplicitFunctionFactoryImpl &) = delete;
+  Mantid::Geometry::MDImplicitFunction_sptr
+  create(const std::string &className) const override;
+
   virtual Mantid::Geometry::MDImplicitFunction *
   createUnwrapped(Poco::XML::Element *processXML) const;
 
@@ -60,7 +60,6 @@ public:
 private:
   /// Private Constructor for singleton class
   ImplicitFunctionFactoryImpl();
-
   /// Private Destructor
   ~ImplicitFunctionFactoryImpl() override = default;
 };

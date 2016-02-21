@@ -63,7 +63,6 @@ private:
 
   /// Private Constructor for singleton class
   ScriptRepositoryFactoryImpl();
-
   /// Private Destructor
   ~ScriptRepositoryFactoryImpl() override = default;
 };

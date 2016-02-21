@@ -174,9 +174,9 @@ public:
 
   //============================================================================
   Algorithm();
-  ~Algorithm() override;
   Algorithm(const Algorithm &) = delete;
   Algorithm &operator=(const Algorithm &) = delete;
+  ~Algorithm() override;
 
   /** @name Algorithm Information */
   /// function to return a name of the algorithm, must be overridden in all

@@ -42,6 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL ArchiveSearchFactoryImpl
     : public Kernel::DynamicFactory<IArchiveSearch> {
+public:
   ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &) = delete;
   ArchiveSearchFactoryImpl &
   operator=(const ArchiveSearchFactoryImpl &) = delete;
@@ -51,7 +52,6 @@ private:
 
   /// Private Constructor for singleton class
   ArchiveSearchFactoryImpl();
-
   /// Private Destructor
   ~ArchiveSearchFactoryImpl() override = default;
 };

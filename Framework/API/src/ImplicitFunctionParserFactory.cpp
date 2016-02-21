@@ -7,7 +7,6 @@
 
 namespace Mantid {
 namespace API {
-ImplicitFunctionParserFactoryImpl::ImplicitFunctionParserFactoryImpl() {}
 
 boost::shared_ptr<ImplicitFunctionParser>
 ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {

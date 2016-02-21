@@ -5,8 +5,6 @@
 
 namespace Mantid {
 namespace API {
-ImplicitFunctionParameterParserFactoryImpl::
-    ImplicitFunctionParameterParserFactoryImpl() {}
 
 boost::shared_ptr<ImplicitFunctionParameterParser>
 ImplicitFunctionParameterParserFactoryImpl::create(

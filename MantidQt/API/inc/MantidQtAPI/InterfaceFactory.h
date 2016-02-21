@@ -128,13 +128,13 @@ public:
   }
 
 public:
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
+  UserSubWindowFactoryImpl &
+  operator=(const UserSubWindowFactoryImpl &) = delete;
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
   QSet<QString> getInterfaceCategories(const QString & interfaceName) const;
-  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
-  UserSubWindowFactoryImpl &
-  operator=(const UserSubWindowFactoryImpl &) = delete;
 
 protected:
   // Unhide the inherited create method
