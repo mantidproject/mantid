@@ -61,7 +61,7 @@ private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;
 
   /// Private constructor for singleton class
-  LiveListenerFactoryImpl();
+  LiveListenerFactoryImpl() = default;
 
   /// Private destructor
   ~LiveListenerFactoryImpl() override = default;

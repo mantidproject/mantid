@@ -61,14 +61,14 @@ class ICatalog;
 */
 class MANTID_API_DLL CatalogFactoryImpl
     : public Kernel::DynamicFactory<ICatalog> {
+public:
+  CatalogFactoryImpl(const CatalogFactoryImpl &) = delete;
+  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &) = delete;
+
 private:
   friend struct Kernel::CreateUsingNew<CatalogFactoryImpl>;
   /// Private Constructor for singleton class
-  CatalogFactoryImpl();
-  /// Private copy constructor
-  CatalogFactoryImpl(const CatalogFactoryImpl &) = delete;
-  /// Private assignment operator
-  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &) = delete;
+  CatalogFactoryImpl() = default;
   /// Private Destructor
   ~CatalogFactoryImpl() override = default;
   /// Stores pointers to already created Catalog instances, with their name as

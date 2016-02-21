@@ -59,7 +59,7 @@ public:
 
 private:
   /// Private Constructor for singleton class
-  ImplicitFunctionFactoryImpl();
+  ImplicitFunctionFactoryImpl() = default;
   /// Private Destructor
   ~ImplicitFunctionFactoryImpl() override = default;
 };

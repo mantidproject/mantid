@@ -38,13 +38,12 @@ namespace API {
 class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
-  IMDHistoWorkspace();
+  IMDHistoWorkspace() = default;
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
   }
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
-
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
   virtual signal_t *getSignalArray() const = 0;

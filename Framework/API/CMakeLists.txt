@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
-	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
 	src/CatalogSession.cpp
 	src/ChopperModel.cpp

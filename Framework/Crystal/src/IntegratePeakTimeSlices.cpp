@@ -815,6 +815,7 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
+
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
   int chanCenter = find(X, time);

@@ -57,7 +57,7 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<DomainCreatorFactoryImpl>;
 
   /// Private Constructor for singleton class
-  DomainCreatorFactoryImpl();
+  DomainCreatorFactoryImpl() = default;
   /// No copying
   DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
   /// Private Destructor for singleton

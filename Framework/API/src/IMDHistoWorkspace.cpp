@@ -10,10 +10,6 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IMDHistoWorkspace::IMDHistoWorkspace()
-    : IMDWorkspace(), MultipleExperimentInfos() {}
 
 const std::string IMDHistoWorkspace::toString() const {
   std::ostringstream os;

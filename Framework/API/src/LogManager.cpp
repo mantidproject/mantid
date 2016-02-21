@@ -29,23 +29,6 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-LogManager::LogManager() : m_manager(), m_singleValueCache() {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const LogManager &LogManager::operator=(const LogManager &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  return *this;
-}
 
 /**
 * Set the run start and end

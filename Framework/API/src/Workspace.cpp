@@ -7,10 +7,6 @@
 namespace Mantid {
 namespace API {
 
-/// Default constructor
-Workspace::Workspace()
-    : DataItem(), m_title(), m_comment(), m_name(), m_history() {}
-
 /** Set the title of the workspace
  *
  *  @param t :: The title

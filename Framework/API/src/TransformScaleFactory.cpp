@@ -11,9 +11,6 @@ namespace {
 Kernel::Logger g_log("TransformScaleFactory");
 }
 
-TransformScaleFactoryImpl::TransformScaleFactoryImpl()
-    : Kernel::DynamicFactory<ITransformScale>() {}
-
 /** Creates an instance of the appropriate scaling transform
  *  @param type The name of the scaling transform
  *  @returns A shared pointer to the created ITransformScale implementation

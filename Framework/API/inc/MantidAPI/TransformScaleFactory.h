@@ -58,7 +58,7 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<TransformScaleFactoryImpl>;
 
   /// Private Constructor for singleton class
-  TransformScaleFactoryImpl();
+  TransformScaleFactoryImpl() = default;
   ~TransformScaleFactoryImpl() override = default;
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.

@@ -50,15 +50,9 @@ namespace API {
 */
 class MANTID_API_DLL LogManager {
 public:
-  /// Default constructor
-  LogManager();
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
   virtual ~LogManager() = default;
-  /// Copy constructor
-  LogManager(const LogManager &) = default;
-  /// Assignment operator
-  const LogManager &operator=(const LogManager &rhs);
 
   //-------------------------------------------------------------
   /// Set the run start and end

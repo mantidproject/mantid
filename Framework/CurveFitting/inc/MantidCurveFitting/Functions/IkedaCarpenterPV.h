@@ -42,9 +42,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction,
                                    virtual public API::IFunctionMW {
 public:
-  /// contruction used for standard fitting
-  IkedaCarpenterPV(){};
-
   /// overwrite IPeakFunction base class methods
   double centre() const override;
   double height() const override;

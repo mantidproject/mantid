@@ -35,7 +35,7 @@ namespace API {
 */
 class DLLExport MultipleExperimentInfos {
 public:
-  MultipleExperimentInfos();
+  MultipleExperimentInfos() = default;
   MultipleExperimentInfos(const MultipleExperimentInfos &other);
   virtual ~MultipleExperimentInfos() = default;
 

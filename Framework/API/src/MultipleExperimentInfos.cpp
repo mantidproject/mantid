@@ -9,11 +9,6 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultipleExperimentInfos::MultipleExperimentInfos() {}
-
-//----------------------------------------------------------------------------------------------
 /** Copy constructor
  *
  * @param other :: other workspace to copy    */

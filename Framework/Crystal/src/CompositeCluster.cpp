@@ -20,11 +20,6 @@ public:
 namespace Mantid {
 namespace Crystal {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CompositeCluster::CompositeCluster() {}
-
 /**
  * Integrate the composite cluster.
  * @param ws : Workspace to integrate

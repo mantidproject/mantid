@@ -46,12 +46,6 @@ namespace API {
 */
 class MANTID_API_DLL Run : public LogManager {
 public:
-  /// Default constructor
-  Run();
-  /// Copy constructor
-  Run(const Run &copy);
-  /// Assignment operator
-  const Run &operator=(const Run &rhs);
   /// Addition
   Run &operator+=(const Run &rhs);
 

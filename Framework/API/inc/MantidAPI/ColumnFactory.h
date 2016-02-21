@@ -57,7 +57,7 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
 
   /// Private Constructor for singleton class
-  ColumnFactoryImpl();
+  ColumnFactoryImpl() = default;
   /// Private Destructor
   ~ColumnFactoryImpl() override = default;
 };

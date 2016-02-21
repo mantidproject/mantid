@@ -35,7 +35,6 @@ DisjointElement::DisjointElement(const DisjointElement &other)
  */
 DisjointElement &DisjointElement::operator=(const DisjointElement &other) {
   if (this != &other) {
-
     m_parent = other.m_parent;
     m_rank = other.m_rank;
     m_id = other.m_id;
