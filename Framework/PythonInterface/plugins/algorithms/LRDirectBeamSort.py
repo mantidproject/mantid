@@ -31,7 +31,7 @@ class CompareTwoNXSDataForSFcalculator(object):
             self.resultComparison = compare1
             return
 
-        compare2 = self.compareParameter('vATT', 'ascending')
+        compare2 = self.compareParameter('vAtt', 'ascending')
         if compare2 != 0:
             self.resultComparison = compare2
             return
@@ -170,7 +170,6 @@ class LRDirectBeamSort(PythonAlgorithm):
             if len(g) == 0:
                 continue
             runs = [r.getRunNumber() for r in g]
-            logger.notice(str(runs))
 
             direct_beam_runs = []
             peak_ranges = []
@@ -203,7 +202,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                 else:
                     low_res = [0, number_of_pixels_x]
 
-                att = run.getRun().getProperty('vATT').value[0]-1
+                att = run.getRun().getProperty('vAtt').value[0]-1
                 direct_beam_runs.append(run.getRunNumber())
                 peak_ranges.append(int(peak[0]))
                 peak_ranges.append(int(peak[1]))
@@ -232,6 +231,7 @@ class LRDirectBeamSort(PythonAlgorithm):
             summary += "TOF: %s\n\n" % tof_range
 
             # Compute the scaling factors
+            logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
                              TOFRange=tof_range, TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
