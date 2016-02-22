@@ -55,7 +55,6 @@ public:
   void addPeriodLog(const int i, API::Run &exptRun);
 
 private:
-  ISISRunLogs() = delete;
   /// A LogParser object
   std::unique_ptr<Kernel::LogParser> m_logParser;
 };
