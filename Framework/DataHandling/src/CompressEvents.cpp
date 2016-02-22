@@ -27,20 +27,20 @@ CompressEvents::~CompressEvents() {}
 
 void CompressEvents::init() {
   declareProperty(
-      new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                            Direction::Input),
+      make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "",
+                                                     Direction::Input),
       "The name of the EventWorkspace on which to perform the algorithm");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output EventWorkspace.");
 
   // Tolerance must be >= 0.0
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
-      new PropertyWithValue<double>("Tolerance", 1e-5, mustBePositive,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, mustBePositive,
+                                             Direction::Input),
       "The tolerance on each event's X value (normally TOF, but may be a "
       "different unit if you have used ConvertUnits).\n"
       "Any events within Tolerance will be summed into a single event.");

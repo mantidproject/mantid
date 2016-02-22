@@ -24,21 +24,22 @@ GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<CommonBinsValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "Workspace", "", Direction::InOut,
+          boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(
-      new ArrayProperty<specid_t>("SpectraList"),
+      make_unique<ArrayProperty<specid_t>>("SpectraList"),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,

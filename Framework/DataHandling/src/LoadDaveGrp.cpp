@@ -73,11 +73,11 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadDaveGrp::init() {
   std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  this->declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "A DAVE grouped ASCII file");
-  this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                                     Kernel::Direction::Output),
+  this->declareProperty(Kernel::make_unique<API::FileProperty>(
+                            "Filename", "", API::FileProperty::Load, exts),
+                        "A DAVE grouped ASCII file");
+  this->declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Kernel::Direction::Output),
                         "The name of the workspace that will be created.");
 
   // Extract the current contents of the UnitFactory to be the allowed values
@@ -94,12 +94,12 @@ void LoadDaveGrp::init() {
                         "The name of the units for the Y-Axis (must be one of "
                         "those registered in "
                         "the Unit Factory)");
-  this->declareProperty(new Kernel::PropertyWithValue<bool>(
+  this->declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
                             "IsMicroEV", false, Kernel::Direction::Input),
                         "Original file is in units of micro-eV for DeltaE");
   this->declareProperty(
-      new Kernel::PropertyWithValue<bool>("ConvertToHistogram", false,
-                                          Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+          "ConvertToHistogram", false, Kernel::Direction::Input),
       "Convert output workspace to histogram data.");
 }
 

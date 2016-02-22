@@ -31,10 +31,10 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "The name of the NeXus file to load");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
                   "Number of the signal to load from the file. Default is 1 = "
@@ -45,12 +45,13 @@ void LoadTOFRawNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
-      new PropertyWithValue<specid_t>("SpectrumMin", 1, mustBePositive),
+      make_unique<PropertyWithValue<specid_t>>("SpectrumMin", 1,
+                                               mustBePositive),
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
   declareProperty(
-      new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(),
-                                      mustBePositive),
+      make_unique<PropertyWithValue<specid_t>>(
+          "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
 }

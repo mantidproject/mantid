@@ -1058,41 +1058,42 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
 */
 void LoadEventNexus::init() {
+  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
       "sensitive if running on Linux).");
 
   this->declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                Direction::Output),
       "The name of the output EventWorkspace or WorkspaceGroup in which to "
       "load the EventNexus file.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the minimum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTimeStart",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events after the provided start "
                   "time, in seconds (relative to the start of the run).");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
@@ -1103,16 +1104,18 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterByTimeStop", grp1);
 
   declareProperty(
-      new PropertyWithValue<string>("NXentryName", "", Direction::Input),
+      make_unique<PropertyWithValue<string>>("NXentryName", "",
+                                             Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 
-  declareProperty(new ArrayProperty<string>("BankName", Direction::Input),
-                  "Optional: To only include events from one bank. Any bank "
-                  "whose name does not match the given string will have no "
-                  "events.");
+  declareProperty(
+      make_unique<ArrayProperty<string>>("BankName", Direction::Input),
+      "Optional: To only include events from one bank. Any bank "
+      "whose name does not match the given string will have no "
+      "events.");
 
-  declareProperty(new PropertyWithValue<bool>("SingleBankPixelsOnly", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("SingleBankPixelsOnly",
+                                                       true, Direction::Input),
                   "Optional: Only applies if you specified a single bank to "
                   "load with BankName. "
                   "Only pixels in the specified bank will be created if true; "
@@ -1125,14 +1128,14 @@ void LoadEventNexus::init() {
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
-      new PropertyWithValue<bool>("Precount", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Precount", true, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory "
       "(optional, default False). "
       "This can significantly reduce memory use and memory fragmentation; it "
       "may also speed up loading.");
 
-  declareProperty(new PropertyWithValue<double>("CompressTolerance", -1.0,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "CompressTolerance", -1.0, Direction::Input),
                   "Run CompressEvents while loading (optional, leave blank or "
                   "negative to not do). "
                   "This specified the tolerance to use (in microseconds) when "
@@ -1158,35 +1161,36 @@ void LoadEventNexus::init() {
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
-  declareProperty(
-      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-      "Load the monitors from the file (optional, default False).");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadMonitors", false,
+                                                       Direction::Input),
+                  "Load the monitors from the file (optional, default False).");
 
   declareProperty(
-      new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("MonitorsAsEvents", false,
+                                           Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTofMin",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the minimum accepted value in microseconds.");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTofMax",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the maximum accepted value in microseconds.");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTimeStart",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors after the "
                   "provided start time, in seconds (relative to the start of "
                   "the run).");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTimeStop",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors before the "
                   "provided stop time, in seconds (relative to the start of "
                   "the run).");
@@ -1213,15 +1217,16 @@ void LoadEventNexus::init() {
                   "The number of the first spectrum to read.");
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
-  declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
 
   declareProperty(
-      new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("MetaDataOnly", false,
+                                           Direction::Input),
       "If true, only the meta data and sample logs will be loaded.");
 
   declareProperty(
-      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
 }
 
@@ -2332,8 +2337,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
     this->declareProperty(
-        new WorkspaceProperty<IEventWorkspace>("MonitorWorkspace", mon_wsname,
-                                               Direction::Output),
+        Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+            "MonitorWorkspace", mon_wsname, Direction::Output),
         "Monitors from the Event NeXus file");
     this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace",
                                             m_ws->getSingleHeldWorkspace());
@@ -2373,10 +2378,10 @@ void LoadEventNexus::runLoadMonitors() {
                                    this->getProperty("MonitorsAsEvents"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<Workspace>("MonitorWorkspace",
-                                                           mon_wsname,
-                                                           Direction::Output),
-                          "Monitors from the Event NeXus file");
+    this->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            "MonitorWorkspace", mon_wsname, Direction::Output),
+        "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", monsOut);
     // The output will either be a group workspace or a matrix workspace
     MatrixWorkspace_sptr mons =
@@ -2398,7 +2403,7 @@ void LoadEventNexus::runLoadMonitors() {
           ssPropName << "MonitorWorkspace"
                      << "_" << i + 1;
           this->declareProperty(
-              new WorkspaceProperty<MatrixWorkspace>(
+              Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                   ssPropName.str(), ssWsName.str(), Direction::Output),
               "Monitors from the Event NeXus file");
           this->setProperty(ssPropName.str(), monsGrp->getItem(i));

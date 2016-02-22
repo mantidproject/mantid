@@ -48,14 +48,14 @@ LoadPreNexusMonitors::LoadPreNexusMonitors()
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
-  declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load,
-                                   "_runinfo.xml"),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
                   "The filename of the runinfo file for a particular run. "
                   "Allowed Values are: _runinfo.xml");
 
   // The output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(WORKSPACE_OUT, "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      WORKSPACE_OUT, "", Direction::Output),
                   "The workspace to load the monitors into.");
 
   // Make sure things are initialised.

@@ -52,13 +52,14 @@ LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".raw", ".s*", ".add"}),
+  const std::vector<std::string> exts{".raw", ".s*", ".add"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "The name of the RAW file to read, including its full or "
                   "relative path. The file extension must be .raw or .RAW "
                   "(N.B. case sensitive if running on Linux).");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the Analysis Data Service. "
                   "If the input RAW file contains multiple periods higher "
@@ -273,7 +274,7 @@ void LoadRawHelper::createMonitorWorkspace(
     // otherwise  set the workspace as "OutputWorkspace"
     if (nwsSpecs > 0) {
       std::string monitorwsName = wsName + "_monitors";
-      pAlg->declareProperty(new WorkspaceProperty<Workspace>(
+      pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           "MonitorWorkspace", monitorwsName, Direction::Output));
       setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,
                            numberOfPeriods, true, pAlg);
@@ -331,8 +332,8 @@ void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
     outputWorkspace = "OutputWorkspace";
   }
   outws = outputWorkspace + "_" + suffix.str();
-  pAlg->declareProperty(
-      new WorkspaceProperty<Workspace>(outws, wsName, Direction::Output));
+  pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      outws, wsName, Direction::Output));
   pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
 }

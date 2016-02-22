@@ -579,13 +579,14 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii2::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".dat", ".txt", ".csv", ""}),
+  const std::vector<std::string> exts{".dat", ".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, "
                   "filled with the read-in data and stored in the [[Analysis "
                   "Data Service]].");
@@ -614,8 +615,8 @@ void LoadAscii2::init() {
                   " tab, space, semicolon or colon.).");
 
   declareProperty(
-      new PropertyWithValue<std::string>("CustomSeparator", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                  Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
   setPropertySettings(

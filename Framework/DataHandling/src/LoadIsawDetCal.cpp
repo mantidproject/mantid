@@ -44,20 +44,21 @@ LoadIsawDetCal::~LoadIsawDetCal() {}
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".DetCal"),
       "The input filename of the ISAW DetCal file (East banks for SNAP) ");
 
-  declareProperty(new API::FileProperty("Filename2", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".DetCal"),
-                  "The input filename of the second ISAW DetCal file (West "
-                  "banks for SNAP) ");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }

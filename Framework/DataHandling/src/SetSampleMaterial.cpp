@@ -43,9 +43,9 @@ using namespace Kernel;
 */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
-      "The workspace with which to associate the sample ");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::InOut),
+                  "The workspace with which to associate the sample ");
   declareProperty("ChemicalFormula", "",
                   "ChemicalFormula or AtomicNumber must be given.");
   declareProperty("AtomicNumber", 0,

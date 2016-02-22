@@ -246,23 +246,25 @@ void LoadEventPreNexus2::init() {
   // which files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
+      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                        eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(new FileProperty(PULSEID_PARAM, "",
-                                   FileProperty::OptionalLoad, pulseExts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // which pixels to load
-  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -291,11 +293,12 @@ void LoadEventPreNexus2::init() {
 
   // the output workspace name
   declareProperty(
-      new WorkspaceProperty<IEventWorkspace>(OUT_PARAM, "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+          OUT_PARAM, "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "EventNumberWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Workspace with number of events per pulse");

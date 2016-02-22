@@ -300,13 +300,14 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".dat", ".txt", ".csv", ""}),
+  const std::vector<std::string> extensions{".dat", ".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
                   "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .tst, .dat, or "
+                  "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");

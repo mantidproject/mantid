@@ -54,11 +54,11 @@ SaveMask::~SaveMask() {}
 /// Define input parameters
 void SaveMask::init() {
 
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
   declareProperty(
-      new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
+      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 
