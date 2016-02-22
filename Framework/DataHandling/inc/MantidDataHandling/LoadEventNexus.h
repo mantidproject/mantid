@@ -10,6 +10,8 @@
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include <memory>
@@ -90,25 +92,25 @@ class DLLExport LoadEventNexus
 
 public:
   LoadEventNexus();
-  virtual ~LoadEventNexus();
+  ~LoadEventNexus() override;
 
-  virtual const std::string name() const { return "LoadEventNexus"; };
+  const std::string name() const override { return "LoadEventNexus"; };
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads an Event NeXus file and stores as an "
            "EventWorkspace. Optionally, you can filter out events falling "
            "outside a range of times-of-flight and/or a time interval.";
   }
 
   /// Version
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Category
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /** Sets whether the pixel counts will be pre-counted.
    * @param value :: true if you want to precount. */
@@ -247,10 +249,10 @@ public:
 
 private:
   /// Intialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 

@@ -686,25 +686,25 @@ public:
 
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  virtual void startElement(const XMLString &, const XMLString &localName,
-                            const XMLString &, const Attributes &attrList) {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
     if (localName == "instrument") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  virtual void endElement(const XMLString &, const XMLString &,
-                          const XMLString &) {}
-  virtual void startDocument() {}
-  virtual void endDocument() {}
-  virtual void characters(const XMLChar[], int, int) {}
-  virtual void endPrefixMapping(const XMLString &) {}
-  virtual void ignorableWhitespace(const XMLChar[], int, int) {}
-  virtual void processingInstruction(const XMLString &, const XMLString &) {}
-  virtual void setDocumentLocator(const Locator *) {}
-  virtual void skippedEntity(const XMLString &) {}
-  virtual void startPrefixMapping(const XMLString &, const XMLString &) {}
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1130,14 +1130,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
 
-  int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  options += Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer splitter(parameterStr, "|", options);
+  int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+  options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
   auto iend = splitter.end();
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
-    Poco::StringTokenizer tokens(*itr, ";");
+    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];

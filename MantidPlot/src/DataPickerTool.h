@@ -47,15 +47,17 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
 		enum Mode { Display, Move, Remove };
 		enum MoveMode {Free, Vertical, Horizontal};
 		DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, const QObject *status_target=NULL, const char *status_slot="");
-		virtual ~DataPickerTool();
+                ~DataPickerTool() override;
     Mode getMode()const{return d_mode;}
-		virtual bool eventFilter(QObject *obj, QEvent *event);
-		bool keyEventFilter(QKeyEvent *ke);
+    bool eventFilter(QObject *obj, QEvent *event) override;
+                bool keyEventFilter(QKeyEvent *ke);
 		QwtPlotCurve *selectedCurve() const { return d_selected_curve; }
 
-    virtual int rtti() const {return PlotToolInterface::Rtti_DataPicker;};
+                int rtti() const override {
+                  return PlotToolInterface::Rtti_DataPicker;
+                };
 
-	signals:
+        signals:
 		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
@@ -64,8 +66,8 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
 		//! Emitted whenever a new data point has been selected.
 		void selected(QwtPlotCurve*, int);
 	protected:
-		virtual void append(const QPoint &point);
-		void setSelection(QwtPlotCurve *curve, int point_index);
+          void append(const QPoint &point) override;
+                void setSelection(QwtPlotCurve *curve, int point_index);
 	private:
 		ApplicationWindow *d_app;
 		QwtPlotMarker d_selection_marker;

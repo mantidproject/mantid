@@ -3,7 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,24 +31,23 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PerformIndexOperations : public API::DataProcessorAlgorithm,
-                                         public API::DeprecatedAlgorithm {
+class DLLExport PerformIndexOperations : public API::DataProcessorAlgorithm {
 public:
   PerformIndexOperations();
-  virtual ~PerformIndexOperations();
+  ~PerformIndexOperations() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Process the workspace according to the Index operations provided.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

@@ -72,7 +72,7 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  virtual ~IMDWorkspace();
+  ~IMDWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {
@@ -96,7 +96,7 @@ public:
   /// Creates a new iterator pointing to the first cell in the workspace
   virtual std::vector<IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const = 0;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates
   virtual signal_t
@@ -116,8 +116,8 @@ public:
                            std::vector<coord_t> &x, std::vector<signal_t> &y,
                            std::vector<signal_t> &e) const;
 
-  IMDIterator *
-  createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  IMDIterator *createIterator(
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
   void setConvention(std::string m_convention);
@@ -163,11 +163,11 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IMDWorkspace &operator=(const IMDWorkspace &other);
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
   std::string m_convention;
-  virtual IMDWorkspace *doClone() const = 0;
+  IMDWorkspace *doClone() const override = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

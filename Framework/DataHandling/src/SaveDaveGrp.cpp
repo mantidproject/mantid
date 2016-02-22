@@ -1,6 +1,8 @@
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
 

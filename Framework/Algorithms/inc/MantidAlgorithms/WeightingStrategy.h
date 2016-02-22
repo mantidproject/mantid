@@ -73,10 +73,10 @@ Flat (no weighting) strategy. Concrete WeightingStrategy
 class DLLExport FlatWeighting : public WeightingStrategy {
 public:
   FlatWeighting();
-  virtual ~FlatWeighting();
-  virtual double weightAt(const double &, const double &, const double &,
-                          const double &);
-  double weightAt(const Mantid::Kernel::V3D &);
+  ~FlatWeighting() override;
+  double weightAt(const double &, const double &, const double &,
+                  const double &) override;
+  double weightAt(const Mantid::Kernel::V3D &) override;
 };
 
 /*
@@ -85,10 +85,10 @@ Linear weighting strategy.
 class DLLExport LinearWeighting : public WeightingStrategy {
 public:
   LinearWeighting(const double cutOff);
-  virtual ~LinearWeighting();
-  double weightAt(const Mantid::Kernel::V3D &);
-  virtual double weightAt(const double &adjX, const double &ix,
-                          const double &adjY, const double &iy);
+  ~LinearWeighting() override;
+  double weightAt(const Mantid::Kernel::V3D &) override;
+  double weightAt(const double &adjX, const double &ix, const double &adjY,
+                  const double &iy) override;
 };
 
 /*
@@ -97,10 +97,10 @@ Parabolic weighting strategy.
 class DLLExport ParabolicWeighting : public WeightingStrategy {
 public:
   ParabolicWeighting(const double cutOff);
-  virtual ~ParabolicWeighting();
-  double weightAt(const Mantid::Kernel::V3D &);
-  virtual double weightAt(const double &adjX, const double &ix,
-                          const double &adjY, const double &iy);
+  ~ParabolicWeighting() override;
+  double weightAt(const Mantid::Kernel::V3D &) override;
+  double weightAt(const double &adjX, const double &ix, const double &adjY,
+                  const double &iy) override;
 };
 
 /*
@@ -109,10 +109,10 @@ Null weighting strategy.
 class DLLExport NullWeighting : public WeightingStrategy {
 public:
   NullWeighting();
-  virtual ~NullWeighting();
-  double weightAt(const Mantid::Kernel::V3D &);
-  virtual double weightAt(const double &, const double &, const double &,
-                          const double &);
+  ~NullWeighting() override;
+  double weightAt(const Mantid::Kernel::V3D &) override;
+  double weightAt(const double &, const double &, const double &,
+                  const double &) override;
 };
 
 /*
@@ -123,10 +123,10 @@ y = exp(-0.5*((r./p(1)).^2) where p = sqtr(2)*sigma
 class DLLExport GaussianWeightingnD : public WeightingStrategy {
 public:
   GaussianWeightingnD(double cutOff, double sigma);
-  virtual ~GaussianWeightingnD();
-  virtual double weightAt(const Mantid::Kernel::V3D &);
-  virtual double weightAt(const double &, const double &, const double &,
-                          const double &);
+  ~GaussianWeightingnD() override;
+  double weightAt(const Mantid::Kernel::V3D &) override;
+  double weightAt(const double &, const double &, const double &,
+                  const double &) override;
 
 private:
   double calculateGaussian(const double normalisedDistanceSq);

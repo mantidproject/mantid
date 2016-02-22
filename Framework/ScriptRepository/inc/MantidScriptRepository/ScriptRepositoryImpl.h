@@ -88,37 +88,37 @@ public:
   ScriptRepositoryImpl(const std::string &local_repository = std::string(),
                        const std::string &remote_url = std::string());
 
-  virtual ~ScriptRepositoryImpl() throw();
+  ~ScriptRepositoryImpl() throw() override;
 
-  void connect(const std::string &server);
+  void connect(const std::string &server) override;
 
-  void install(const std::string &local_path);
+  void install(const std::string &local_path) override;
 
-  ScriptInfo info(const std::string &path);
-  const std::string &description(const std::string &path);
+  ScriptInfo info(const std::string &path) override;
+  const std::string &description(const std::string &path) override;
 
-  std::vector<std::string> listFiles();
+  std::vector<std::string> listFiles() override;
 
-  void download(const std::string &file_path);
+  void download(const std::string &file_path) override;
 
-  SCRIPTSTATUS fileStatus(const std::string &file_path);
+  SCRIPTSTATUS fileStatus(const std::string &file_path) override;
 
   void upload(const std::string &file_path, const std::string &comment,
-              const std::string &author, const std::string &email);
+              const std::string &author, const std::string &email) override;
   // remove file from the central repository and from local folder
   void remove(const std::string &file_path, const std::string &comment,
-              const std::string &author, const std::string &email);
+              const std::string &author, const std::string &email) override;
 
   /* Return true if there is a local repository installed*/
-  bool isValid(void);
+  bool isValid(void) override;
 
-  std::vector<std::string> check4Update(void);
+  std::vector<std::string> check4Update(void) override;
 
-  void setIgnorePatterns(const std::string &patterns);
+  void setIgnorePatterns(const std::string &patterns) override;
 
-  std::string ignorePatterns(void);
+  std::string ignorePatterns(void) override;
 
-  int setAutoUpdate(const std::string &path, bool option = true);
+  int setAutoUpdate(const std::string &path, bool option = true) override;
 
   /// @deprecated Should avoid this, it is not in the design file.
   std::string localRepository() const { return local_repository; }

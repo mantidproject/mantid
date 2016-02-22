@@ -9,6 +9,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -666,7 +667,7 @@ void LeBailFit::execRefineBackground() {
   }
 
   // 5. Output background to table workspace
-  TableWorkspace_sptr outtablews(new TableWorkspace());
+  auto outtablews = boost::make_shared<TableWorkspace>();
   outtablews->addColumn("str", "Name");
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");
@@ -2364,16 +2365,8 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
     g_log.debug() << "[TestRandom] dice " << dice << "\n";
     double bar =
         exp(-(new_goodness - cur_goodness) / (cur_goodness * m_Temperature));
-    // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-    // g_log.debug() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
-    if (dice < bar) {
-      // random number (dice, 0 and 1) is smaller than bar (between -infty and
-      // 0)
-      accept = true;
-    } else {
-      // Reject
-      accept = false;
-    }
+    // random number (dice, 0 and 1) is smaller than bar (between -infty andn0)
+    accept = dice < bar;
   }
 
   return accept;

@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -161,7 +162,7 @@ void ChopData::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
   for (auto &workspace : workspaces) {
     wsgroup->addWorkspace(workspace);

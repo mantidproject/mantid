@@ -119,7 +119,7 @@ public:
   bool exists(const std::string &algorithmName, const int version = -1);
 
   /// Get the algorithm names and version - mangled use decodeName to separate
-  const std::vector<std::string> getKeys() const;
+  const std::vector<std::string> getKeys() const override;
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
   /// Returns the highest version of the algorithm currently registered
@@ -158,7 +158,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &);
   /// Private Destructor
-  virtual ~AlgorithmFactoryImpl();
+  ~AlgorithmFactoryImpl() override;
   /// creates an algorithm name convolved from an name and version
   std::string createName(const std::string &, const int &) const;
   /// fills a set with the hidden categories

@@ -59,19 +59,19 @@ public:
   LoadMappingTable();
 
   /// Destructor
-  ~LoadMappingTable() {}
+  ~LoadMappingTable() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadMappingTable"; };
+  const std::string name() const override { return "LoadMappingTable"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Builds up the mapping between spectrum number and the detector "
            "objects in the instrument Geometry.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument;DataHandling\\Raw";
   }
 
@@ -80,10 +80,10 @@ private:
   std::string m_filename;
 
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 };
 
 } // namespace DataHandling

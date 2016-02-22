@@ -112,7 +112,7 @@ public:
     TS_ASSERT_EQUALS(svc.size(), 1);
 
     // Does it replace?
-    boost::shared_ptr<int> two(new int(2));
+    boost::shared_ptr<int> two = boost::make_shared<int>(2);
     TS_ASSERT_THROWS_NOTHING(svc.addOrReplace("one", two););
     TS_ASSERT_EQUALS(svc.size(), 1);
     TS_ASSERT(svc.doesExist("one"));
@@ -284,7 +284,7 @@ public:
     int num = 5000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < num; i++) {
-      boost::shared_ptr<int> object(new int(i));
+      boost::shared_ptr<int> object = boost::make_shared<int>(i);
       std::ostringstream mess;
       mess << "item" << i;
 
@@ -297,7 +297,7 @@ public:
 
       // Also add then remove another object
       std::string otherName = "other_" + mess.str();
-      boost::shared_ptr<int> other(new int(i));
+      boost::shared_ptr<int> other = boost::make_shared<int>(i);
       svc.add(otherName, other);
       svc.remove(otherName);
     }

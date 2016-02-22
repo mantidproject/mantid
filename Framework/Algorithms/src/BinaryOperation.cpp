@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/make_shared.hpp>
 
@@ -222,18 +225,9 @@ void BinaryOperation::exec() {
             "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
-
-      // Create a copy of the lhs workspace
-      m_eout = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_elhs->getNumberHistograms(), 2, 1));
-      // Copy geometry, spectra map, etc. over.
-      API::WorkspaceFactory::Instance().initializeFromParent(m_elhs, m_eout,
-                                                             false);
-      // And we copy all the events from the lhs
-      m_eout->copyDataFrom(*m_elhs);
-      // Make sure m_out still points to the same as m_eout;
-      m_out = boost::dynamic_pointer_cast<API::MatrixWorkspace>(m_eout);
+      m_out = MatrixWorkspace_sptr(m_lhs->clone().release());
+      // Make sure m_eout still points to the same as m_out;
+      m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
     }
 
     // Always clear the MRUs.

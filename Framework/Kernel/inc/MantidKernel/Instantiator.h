@@ -75,12 +75,12 @@ public:
   Instantiator() {}
 
   /// Destroys the Instantiator.
-  virtual ~Instantiator() {}
+  ~Instantiator() override {}
 
   /** Creates an instance of a concrete subclass of Base.
    *  @return A pointer to the base type
    */
-  boost::shared_ptr<Base> createInstance() const {
+  boost::shared_ptr<Base> createInstance() const override {
     boost::shared_ptr<Base> ptr(new C);
     return ptr;
   }
@@ -89,7 +89,7 @@ public:
    * a boost shared_ptr.
    *  @return A bare pointer to the base type
    */
-  virtual Base *createUnwrappedInstance() const {
+  Base *createUnwrappedInstance() const override {
     return static_cast<Base *>(new C);
   }
 };

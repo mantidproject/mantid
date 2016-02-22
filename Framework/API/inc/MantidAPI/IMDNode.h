@@ -241,9 +241,9 @@ public:
 
   /** Split sub-boxes, if this is possible and neede for this box */
   virtual void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL) = 0;
+  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Recalculate signal etc. */
-  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) = 0;
+  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
   virtual void calculateCentroid(coord_t * /*centroid*/) const = 0;
   /** Calculate the centroid of this box and all sub-boxes. */

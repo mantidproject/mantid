@@ -244,6 +244,7 @@ namespace MantidQt
 
       // This will contain the list of column names.
       QStringList columnHeaders;
+      columnHeaders.reserve(static_cast<int>(workspace->columnCount()));
 
       // Add the data from the workspace to the search results table.
       for(size_t col = 0 ; col < workspace->columnCount(); col++)

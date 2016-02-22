@@ -21,9 +21,9 @@ public:
   ProgressText(double start = 0.0, double end = 1.0, int nsteps = 100,
                bool newLines = true);
 
-  ~ProgressText();
+  ~ProgressText() override;
 
-  virtual void doReport(const std::string &msg = "");
+  void doReport(const std::string &msg = "") override;
 
   //    virtual void report(int i,const std::string& msg = "");
   //    virtual void reportIncrement(int inc, const std::string& msg = "");

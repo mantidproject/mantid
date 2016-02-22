@@ -37,20 +37,20 @@ namespace WorkflowAlgorithms {
 class DLLExport DgsRemap : public API::Algorithm {
 public:
   DgsRemap();
-  virtual ~DgsRemap();
+  ~DgsRemap() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Mask and/or group the given workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execGrouping(API::MatrixWorkspace_sptr iWS,
                     API::MatrixWorkspace_sptr &oWS);
   void execMasking(API::MatrixWorkspace_sptr iWS);

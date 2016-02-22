@@ -47,18 +47,18 @@ public:
   /// (Empty) Constructor
   CorrectToFile() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~CorrectToFile() {}
+  ~CorrectToFile() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CorrectToFile"; }
+  const std::string name() const override { return "CorrectToFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Correct data using a file in the LOQ RKH format";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;CorrectionFunctions";
   }
 
@@ -67,9 +67,9 @@ private:
   /// that taken up with loading the file
   static const double LOAD_TIME;
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Load in the RKH file for that has the correction information
   API::MatrixWorkspace_sptr loadInFile(const std::string &corrFile);
   /// Multiply or divide the input workspace as specified by the user

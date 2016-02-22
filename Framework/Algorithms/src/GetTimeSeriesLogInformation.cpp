@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -270,7 +271,7 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 /** Generate statistic information table workspace
   */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");

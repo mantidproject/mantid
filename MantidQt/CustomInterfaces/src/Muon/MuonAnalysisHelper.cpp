@@ -7,13 +7,14 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
 
-#include <stdexcept>
 #include <boost/scope_exit.hpp>
+#include <stdexcept>
 
 namespace MantidQt
 {

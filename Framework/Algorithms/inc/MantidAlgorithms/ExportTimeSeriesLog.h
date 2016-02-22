@@ -39,18 +39,18 @@ namespace Algorithms {
 class DLLExport ExportTimeSeriesLog : public API::Algorithm {
 public:
   ExportTimeSeriesLog();
-  virtual ~ExportTimeSeriesLog();
+  ~ExportTimeSeriesLog() override;
 
-  virtual const std::string name() const { return "ExportTimeSeriesLog"; };
+  const std::string name() const override { return "ExportTimeSeriesLog"; };
 
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;Events\\EventFiltering";
   };
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Read a TimeSeries log and return information";
   }
 
@@ -65,9 +65,9 @@ private:
   Kernel::DateAndTime mFilterT0;
   Kernel::DateAndTime mFilterTf;
 
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
   bool
   calculateTimeSeriesRangeByTime(std::vector<Kernel::DateAndTime> &vec_times,

@@ -41,23 +41,23 @@ National Laboratory & European Spallation Source
 class DLLExport GausOsc : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Destructor
-  virtual ~GausOsc() {}
+  ~GausOsc() override {}
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "GausOsc"; }
+  std::string name() const override { return "GausOsc"; }
 
   /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
-  virtual void setActiveParameter(size_t i, double value);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
+  void setActiveParameter(size_t i, double value) override;
 
   /// overwrite IFunction base class method that declares function parameters
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

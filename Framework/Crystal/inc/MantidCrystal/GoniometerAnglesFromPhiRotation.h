@@ -44,26 +44,28 @@ namespace Crystal {
 class DLLExport GoniometerAnglesFromPhiRotation : public API::Algorithm {
 public:
   GoniometerAnglesFromPhiRotation();
-  ~GoniometerAnglesFromPhiRotation();
+  ~GoniometerAnglesFromPhiRotation() override;
 
   /// Algorithm's name for identification
-  const std::string name() const { return "GoniometerAnglesFromPhiRotation"; }
+  const std::string name() const override {
+    return "GoniometerAnglesFromPhiRotation";
+  }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The 2nd PeaksWorkspace is set up with the correct sample "
            "orientations and UB matrices";
   }
 
   /// Algorithm's version for identification
-  int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification
-  const std::string category() const { return "Crystal\\Goniometer"; }
+  const std::string category() const override { return "Crystal\\Goniometer"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   Kernel::Matrix<double>
   getUBRaw(const Kernel::Matrix<double> &UB,
            const Kernel::Matrix<double> &GoniometerMatrix) const;
@@ -77,7 +79,7 @@ private:
                 double tolerance) const;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // Crystal

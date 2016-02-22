@@ -24,67 +24,67 @@ TMDE_CLASS
 class DLLExport MDBoxIterator : public Mantid::API::IMDIterator {
 public:
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-                Mantid::Geometry::MDImplicitFunction *function = NULL);
+                Mantid::Geometry::MDImplicitFunction *function = nullptr);
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
                 SkippingPolicy *skippingPolicy,
-                Mantid::Geometry::MDImplicitFunction *function = NULL);
+                Mantid::Geometry::MDImplicitFunction *function = nullptr);
   MDBoxIterator(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
   void init(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
-  virtual ~MDBoxIterator();
+  ~MDBoxIterator() override;
 
   /// Return a pointer to the current box pointed to by the iterator.
   MDBoxBase<MDE, nd> *getBox() const { return (m_current); }
 
   /// ------------ IMDIterator Methods ------------------------------
-  size_t getDataSize() const;
+  size_t getDataSize() const override;
 
-  bool valid() const;
+  bool valid() const override;
 
-  void jumpTo(size_t index);
+  void jumpTo(size_t index) override;
 
-  bool next();
+  bool next() override;
 
-  bool next(size_t skip);
+  bool next(size_t skip) override;
 
-  signal_t getNormalizedSignal() const;
+  signal_t getNormalizedSignal() const override;
 
-  signal_t getNormalizedError() const;
+  signal_t getNormalizedError() const override;
 
-  signal_t getSignal() const;
+  signal_t getSignal() const override;
 
-  signal_t getError() const;
+  signal_t getError() const override;
 
   coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const;
+                            const bool *maskDim) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const;
+  coord_t *getVertexesArray(size_t &numVertices) const override;
 
-  Mantid::Kernel::VMD getCenter() const;
+  Mantid::Kernel::VMD getCenter() const override;
 
-  size_t getNumEvents() const;
+  size_t getNumEvents() const override;
 
-  uint16_t getInnerRunIndex(size_t index) const;
+  uint16_t getInnerRunIndex(size_t index) const override;
 
-  int32_t getInnerDetectorID(size_t index) const;
+  int32_t getInnerDetectorID(size_t index) const override;
 
-  coord_t getInnerPosition(size_t index, size_t dimension) const;
+  coord_t getInnerPosition(size_t index, size_t dimension) const override;
 
-  signal_t getInnerSignal(size_t index) const;
+  signal_t getInnerSignal(size_t index) const override;
 
-  signal_t getInnerError(size_t index) const;
+  signal_t getInnerError(size_t index) const override;
 
-  bool getIsMasked() const;
+  bool getIsMasked() const override;
 
   /// Getter for the position of the iterator.
   size_t getPosition() const { return m_pos; }
 
-  virtual std::vector<size_t> findNeighbourIndexes() const;
+  std::vector<size_t> findNeighbourIndexes() const override;
 
-  virtual std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+  std::vector<size_t> findNeighbourIndexesFaceTouching() const override;
 
-  virtual size_t getLinearIndex() const;
+  size_t getLinearIndex() const override;
 
-  virtual bool isWithinBounds(size_t index) const;
+  bool isWithinBounds(size_t index) const override;
 
 private:
   /// Common code run my a few of the constructors.

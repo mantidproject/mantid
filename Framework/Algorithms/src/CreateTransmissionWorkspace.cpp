@@ -3,8 +3,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -225,9 +223,8 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     }
     if (stitchingStart.is_initialized() && stitchingEnd.is_initialized() &&
         stitchingDelta.is_initialized()) {
-      const std::vector<double> params =
-          boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-              stitchingEnd.get()).convert_to_container<std::vector<double>>();
+      const std::vector<double> params = {
+          stitchingStart.get(), stitchingDelta.get(), stitchingEnd.get()};
       stitch1DAlg->setProperty("Params", params);
     } else if (stitchingDelta.is_initialized()) {
       const double delta = stitchingDelta.get();

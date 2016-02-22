@@ -53,9 +53,9 @@ class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfacePresenter
 public:
   /// Default constructor - normally used from the concrete view
   TomographyIfacePresenter(ITomographyIfaceView *view);
-  virtual ~TomographyIfacePresenter();
+  ~TomographyIfacePresenter() override;
 
-  virtual void notify(ITomographyIfacePresenter::Notification notif);
+  void notify(ITomographyIfacePresenter::Notification notif) override;
 
 protected:
   void initialize();

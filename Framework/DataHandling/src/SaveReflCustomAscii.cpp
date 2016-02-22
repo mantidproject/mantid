@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+
 #include <fstream>
 
 namespace Mantid {

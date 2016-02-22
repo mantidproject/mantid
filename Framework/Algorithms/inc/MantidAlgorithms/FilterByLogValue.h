@@ -36,29 +36,29 @@ namespace Algorithms {
 class DLLExport FilterByLogValue : public API::Algorithm {
 public:
   FilterByLogValue();
-  virtual ~FilterByLogValue();
+  ~FilterByLogValue() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FilterByLogValue"; };
+  const std::string name() const override { return "FilterByLogValue"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Filter out events from an EventWorkspace based on a sample log "
            "value satisfying filter criteria.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Events\\EventFiltering";
   }
 
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

@@ -37,12 +37,11 @@ namespace CustomInterfaces {
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflNexusMeasurementItemSource : public ReflMeasurementItemSource {
 public:
   ReflNexusMeasurementItemSource();
-  virtual MeasurementItem obtain(const std::string &definedPath,
-                             const std::string &fuzzyName) const;
+  MeasurementItem obtain(const std::string &definedPath,
+                         const std::string &fuzzyName) const override;
   /// Virtual destructor
-  virtual ReflNexusMeasurementItemSource *clone() const;
-  virtual ~ReflNexusMeasurementItemSource();
-
+  ReflNexusMeasurementItemSource *clone() const override;
+  ~ReflNexusMeasurementItemSource() override;
 };
 
 } // namespace CustomInterfaces

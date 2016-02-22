@@ -1,16 +1,17 @@
 #include "MantidCurveFitting/Functions/ProcessBackground.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidCurveFitting/Functions/Chebyshev.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -193,7 +194,7 @@ void ProcessBackground::init() {
   // Output background type.
   std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
   auto outbkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+      boost::make_shared<Kernel::StringListValidator>(outbkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",

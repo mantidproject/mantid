@@ -38,28 +38,28 @@ namespace Crystal {
 class DLLExport PredictFractionalPeaks : public API::Algorithm {
 public:
   PredictFractionalPeaks();
-  virtual ~PredictFractionalPeaks();
+  ~PredictFractionalPeaks() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "PredictFractionalPeaks"; };
+  const std::string name() const override { return "PredictFractionalPeaks"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The offsets can be from hkl values in a range of hkl values or "
            "from peaks in the input PeaksWorkspace";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

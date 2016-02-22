@@ -9,10 +9,10 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
@@ -511,10 +511,11 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 1.1;
     const double max = 7.1; // 7.1 - 1.1 = 6
+    const std::vector<double> minMaxVec = {min, max};
+
     alg.setProperty("P1Bin", std::vector<double>(
                                  0)); // Pass through. Do not change binning.
-    alg.setProperty("P2Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    alg.setProperty("P2Bin", minMaxVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");

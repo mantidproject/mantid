@@ -3,18 +3,20 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -424,11 +426,8 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   std::string durationlogname = getProperty("DurationLogName");      //"time"
   std::string rotanglelogname = getProperty("RotationAngleLogName"); // "2theta"
 
-  std::vector<std::string> lognames;
-  lognames.push_back(ptname);
-  lognames.push_back(monitorlogname);
-  lognames.push_back(durationlogname);
-  lognames.push_back(rotanglelogname);
+  std::vector<std::string> lognames{ptname, monitorlogname, durationlogname,
+                                    rotanglelogname};
 
   std::vector<size_t> ilognames(lognames.size());
 

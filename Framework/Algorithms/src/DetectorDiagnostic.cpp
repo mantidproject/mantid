@@ -2,16 +2,20 @@
 // Includes
 //--------------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
+#include <boost/iterator/counting_iterator.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
+
 #include <cfloat>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 
@@ -519,7 +523,7 @@ DataObjects::MaskWorkspace_sptr
 DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  DataObjects::MaskWorkspace_sptr maskWS(new DataObjects::MaskWorkspace());
+  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>();
   maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
   maskWS->setTitle(inputWS->getTitle());
@@ -529,14 +533,9 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 
 std::vector<std::vector<size_t>>
 DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
-  std::vector<std::vector<size_t>> mymap;
-  std::vector<size_t> single;
-
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
-  }
-  mymap.push_back(single);
-  return mymap;
+  return {
+      {boost::counting_iterator<std::size_t>(0),
+       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *

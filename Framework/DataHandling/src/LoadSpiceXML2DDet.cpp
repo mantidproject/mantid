@@ -1,8 +1,7 @@
-#include <algorithm>
-#include <fstream>
-
 #include "MantidDataHandling/LoadSpiceXML2DDet.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,6 +19,9 @@
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
+
+#include <algorithm>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {

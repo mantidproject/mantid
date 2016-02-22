@@ -6,8 +6,6 @@
 #include "MantidKernel/System.h"
 #include <sstream>
 
-#include "boost/assign/list_of.hpp"
-
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -246,7 +244,7 @@ public:
     const std::string oldEmuIdf = "EMU_Definition_32detectors.xml";
     const std::string newEmuIdf = "EMU_Definition_96detectors.xml";
 
-    const std::vector<int> detIDs = boost::assign::list_of(2)(10);
+    const std::vector<int> detIDs = {2, 10};
     auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
 
     auto byInstName =

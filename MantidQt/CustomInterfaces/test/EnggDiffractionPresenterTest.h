@@ -635,9 +635,7 @@ public:
         .Times(1)
         .WillOnce(Return(m_invalid_run_number));
     // missing bank on/off vector!
-    std::vector<bool> banks;
-    banks.push_back(false);
-    banks.push_back(false);
+    std::vector<bool> banks{false, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     // would needs basic calibration settings, but only if there was at least
@@ -705,9 +703,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo())
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
-    std::vector<bool> banks;
-    banks.push_back(true); // 1 bank used
-    banks.push_back(false);
+    std::vector<bool> banks{true, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     EXPECT_CALL(mockView, currentInstrument())
@@ -750,9 +746,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo())
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
-    std::vector<bool> banks;
-    banks.push_back(false);
-    banks.push_back(false);
+    std::vector<bool> banks{false, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     // will need basic calibration settings from the user

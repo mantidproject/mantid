@@ -53,12 +53,12 @@ public:
   VectorValueParameterType *parseVectorParameter(std::string value);
 
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  createParameter(Poco::XML::Element *parameterElement) override;
 
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 
-  ~Vector3DParameterParser();
+  ~Vector3DParameterParser() override;
 };
 
 ////////////////////////////////////////////////////////////////////

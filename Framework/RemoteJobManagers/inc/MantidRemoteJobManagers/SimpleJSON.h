@@ -97,7 +97,7 @@ public:
 
   // Default constructor, copy constructor & assignment operator are fine
 
-  virtual ~JSONException() throw() {}
+  ~JSONException() throw() override {}
 
 private:
   std::string m_msg;

@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -269,7 +271,7 @@ void ConvertAxesToRealSpace::exec() {
   for (int i = 0; i < nOutputHist; ++i) {
     MantidVec &errorVec = outputWs->dataE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
-                   (double (*)(double))sqrt);
+                   static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");
   }
 

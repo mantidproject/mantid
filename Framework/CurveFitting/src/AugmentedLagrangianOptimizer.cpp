@@ -318,7 +318,7 @@ void AugmentedLagrangianOptimizer::unconstrainedOptimization(
   costFunc.f = costf;
   costFunc.df = costdf;
   costFunc.fdf = costfdf;
-  costFunc.params = (void *)&d;
+  costFunc.params = static_cast<void *>(&d);
 
   // Declare minimizer
   const gsl_multimin_fdfminimizer_type *T =

@@ -7,6 +7,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 
 #include "MantidKernel/Exception.h"

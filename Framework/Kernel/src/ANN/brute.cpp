@@ -101,9 +101,9 @@ int ANNbruteForce::annkFRSearch( // approx fixed-radius kNN search
     }
   }
   for (i = 0; i < k; i++) { // extract the k closest points
-    if (dd != NULL)
+    if (dd != nullptr)
       dd[i] = mk.ith_smallest_key(i);
-    if (nn_idx != NULL)
+    if (nn_idx != nullptr)
       nn_idx[i] = mk.ith_smallest_info(i);
   }
 
