@@ -23,7 +23,7 @@ DECLARE_ALGORITHM(LoadSwans)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSwans::LoadSwans()  {
+LoadSwans::LoadSwans() {
   // m_ws = EventWorkspace_sptr(new EventWorkspace());
   m_ws = boost::make_shared<EventWorkspace>();
 }
