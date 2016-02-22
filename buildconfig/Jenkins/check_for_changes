@@ -1,0 +1,42 @@
+#!/bin/bash -ex
+# return 1 if have matches
+# return 0 if no matches
+FOUND=1
+NOTFOUND=0
+
+TYPE=${1}
+BASE_BRANCH="origin/master"
+if [ $2 ]; then
+    BASE_BRANCH=$2
+fi
+
+case "$TYPE" in
+    py)
+        exit $(git diff --quiet ${BASE_BRANCH} -- \*\.py)
+    ;;
+    cpp)
+        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.h)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.cpp)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.cxx)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.tcc)
+        then
+            exit $FOUND
+        fi
+        exit $NOTFOUND
+    ;;
+    *)
+        echo "do not have case for type \"$TYPE\""
+    ;;
+esac
+
+# fall-through behavior is that it matches
+exit $FOUND
