@@ -20,7 +20,6 @@ using Kernel::TimeSeriesProperty;
  * Construct using a run that has the required ICP event log
  * Throws if no icp event log exists
  * @param icpRun :: A run containing the ICP event log to parse
- * @param totalNumPeriods :: The total number of periods overall
  */
 ISISRunLogs::ISISRunLogs(const API::Run &icpRun) {
   // ICP event either in form icp_event or icpevent
