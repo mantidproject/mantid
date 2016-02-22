@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -75,6 +76,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
 
   DetectorParams detpar;
   const auto &pmap = ws->constInstrumentParameters();
+  detpar.bank = 0;
   detpar.l1 = sample->getDistance(*source);
   detpar.l2 = det->getDistance(*sample);
   detpar.pos = det->getPos();
@@ -82,6 +84,13 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
               1e-6; // Convert to seconds
   detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
+
+  Geometry::IComponent_const_sptr detParent = det->getAncestors()[0];
+  if (detParent->getName() == "forward")
+    detpar.bank = 1;
+  else if (detParent->getName() == "back")
+    detpar.bank = -1;
+
   return detpar;
 }
 

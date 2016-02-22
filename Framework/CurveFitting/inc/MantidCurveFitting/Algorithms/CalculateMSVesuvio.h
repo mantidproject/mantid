@@ -142,7 +142,8 @@ private:
   SampleComptonProperties *m_sampleProps; // description of sample properties
   double m_detHeight, m_detWidth, m_detThick; // (m)
   double m_tmin, m_tmax, m_delt;              // min, max & dt TOF value
-  double m_foilRes;                           // resolution in energy of foil
+  double m_forwardRes; // resolution in energy of forward scattering
+  double m_backRes;    // resolution in energy of backscattering
 
   size_t m_nscatters; // highest order of scattering to generate
   size_t m_nruns;     // number of runs per spectrum
