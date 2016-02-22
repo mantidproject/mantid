@@ -88,7 +88,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(const curveType &atype) {
 /**
  * @brief Gets the X range of the first curve whose data is stored in the query workspace.
  * @param workspace pointer to query workspace
- * @retuns the range of the first curve associated to the workspace
+ * @return the range of the first curve associated to the workspace
  * @exception std::runtime_error no stored curves are associated to the query workspace
  */
 QPair<double, double> DisplayCurveFit::getCurveRange(
@@ -196,7 +196,7 @@ DisplayCurveFit::nameToType(const QString &name) const {
 
 /**
  * @brief Translate a list of curve names to curve types.
- * @param names query curve names.
+ * @param curveNames query curve names.
  * @return a std::vector of the corresponding curve types.
  * @exception std::domain_error one (of more) of the names do not have a
  *correspoinding type.
