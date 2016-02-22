@@ -65,9 +65,9 @@ public:
 
   /** Ranges on the X-axis */
   enum class dcRange {
-    fit = 1, ///< range over which the fitting procedure is carried out */
-    evaluate ///< range over which the fit and residuals curves are evaluated. Usually extends beyond the boundaries of the fit
-                range */
+    fit = 1, ///< range over which the fitting procedure is carried out.
+    evaluate ///< range over which the fit and residuals curves are evaluated.
+             ///Usually extends beyond the boundaries of the fit range.
   };
   DisplayCurveFit(QWidget *parent = nullptr);
   virtual ~DisplayCurveFit();
