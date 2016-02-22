@@ -67,14 +67,14 @@ void SCARFTomoReconstruction::init() {
                   Direction::Input);
 
   // - Action: login
-  declareProperty(
-      new MaskedProperty<std::string>("Password", "", Direction::Input),
-      "The password for the user");
+  declareProperty(make_unique<MaskedProperty<std::string>>("Password", "",
+                                                           Direction::Input),
+                  "The password for the user");
   setPropertySettings("Password",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "LogIn"));
 
   // - Action: submit
-  declareProperty(new PropertyWithValue<std::string>(
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "RunnablePath",
                       "/work/imat/webservice_test/tomopy/imat_recon_FBP.py",
                       Direction::Input),
@@ -84,7 +84,7 @@ void SCARFTomoReconstruction::init() {
                                           "Action", IS_EQUAL_TO, "SubmitJob"));
 
   declareProperty(
-      new PropertyWithValue<std::string>(
+      make_unique<PropertyWithValue<std::string>>(
           "JobOptions", "/work/imat/webservice_test/remote_output/test_",
           Direction::Input),
       "Options for the job command line, application dependent. It "
@@ -103,38 +103,40 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: upload file
   declareProperty(
-      new API::FileProperty("FileToUpload", "", API::FileProperty::OptionalLoad,
-                            "", Direction::Input),
+      make_unique<API::FileProperty>("FileToUpload", "",
+                                     API::FileProperty::OptionalLoad, "",
+                                     Direction::Input),
       "Name of the file (local, full path) to upload to the compute "
       "resource/server ");
   setPropertySettings("FileToUpload",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
 
   declareProperty(
-      new PropertyWithValue<std::string>("DestinationDirectory", "/work/imat",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>(
+          "DestinationDirectory", "/work/imat", Direction::Input),
       "Path where to upload the file on the compute resource/server");
   setPropertySettings("DestinationDirectory",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
 
   // - Action: query status and info (of implicitly all jobs)
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsID", Direction::Output),
-      "ID strings for the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsNames", Direction::Output),
-      "Names of the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsStatus", Direction::Output),
-      "Strings describing the current status of the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsCommands", Direction::Output),
-      "Strings with the command line run for the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsID",
+                                                          Direction::Output),
+                  "ID strings for the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsNames",
+                                                          Direction::Output),
+                  "Names of the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsStatus",
+                                                          Direction::Output),
+                  "Strings describing the current status of the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsCommands",
+                                                          Direction::Output),
+                  "Strings with the command line run for the jobs");
 
   // - Action: query status and info by ID
-  declareProperty(new PropertyWithValue<int>("JobID", 0, Direction::Input),
-                  "The ID of a job currently running or recently run on the "
-                  "compute resource");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("JobID", 0, Direction::Input),
+      "The ID of a job currently running or recently run on the "
+      "compute resource");
   setPropertySettings(
       "JobID", new VisibleWhenProperty("Action", IS_EQUAL_TO, "JobStatusByID"));
 
@@ -149,8 +151,8 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: download file
   declareProperty(
-      new PropertyWithValue<std::string>("RemoteJobFilename", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("RemoteJobFilename", "",
+                                                  Direction::Input),
       "Name of the job file to download - you can give an empty name "
       "to download  all the files of this job.");
   setPropertySettings(
@@ -158,16 +160,16 @@ void SCARFTomoReconstruction::init() {
       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
 
   declareProperty(
-      new API::FileProperty("LocalDirectory", "",
-                            API::FileProperty::OptionalDirectory, "",
-                            Direction::Input),
+      make_unique<API::FileProperty>("LocalDirectory", "",
+                                     API::FileProperty::OptionalDirectory, "",
+                                     Direction::Input),
       "Path to a local directory/folder where to download files from "
       "the compute resource/server");
   setPropertySettings("LocalDirectory", new VisibleWhenProperty(
                                             "Action", IS_EQUAL_TO, "Download"));
 
   declareProperty(
-      new PropertyWithValue<int>("DownloadJobID", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("DownloadJobID", 0, Direction::Input),
       "ID of the job for which to download files. A job with this ID "
       "must be running or have been run on the compute resource.");
   setPropertySettings("DownloadJobID", new VisibleWhenProperty(
@@ -175,7 +177,7 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: cancel job by ID
   declareProperty(
-      new PropertyWithValue<int>("CancelJobID", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("CancelJobID", 0, Direction::Input),
       "The ID for a currently running job on " + m_SCARFComputeResource);
   setPropertySettings("CancelJobID", new VisibleWhenProperty(
                                          "Action", IS_EQUAL_TO, "CancelJob"));
