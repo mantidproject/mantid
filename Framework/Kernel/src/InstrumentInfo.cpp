@@ -134,7 +134,7 @@ const std::string &InstrumentInfo::liveDataAddress() const {
 }
 
 /// Return list of techniques
-const std::unordered_set<std::string> &InstrumentInfo::techniques() const {
+const std::set<std::string> &InstrumentInfo::techniques() const {
   return m_technique;
 }
 
