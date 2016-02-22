@@ -924,7 +924,7 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
  * @param keyword A keyword
  * @returns True if the keyword is contained in at least one technique else false.
  */
-bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::unordered_set<std::string> &techniques, const std::string &keyword) const
+bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string> &techniques, const std::string &keyword) const
 {
   boost::regex pattern( "(.*)" + keyword + "(.*)");
 

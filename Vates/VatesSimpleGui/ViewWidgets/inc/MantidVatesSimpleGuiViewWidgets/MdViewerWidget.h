@@ -15,7 +15,6 @@
 #include "boost/shared_ptr.hpp"
 
 #include <vtkSmartPointer.h>
-#include <unordered_set>
 
 // forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
@@ -115,7 +114,7 @@ protected slots:
   void switchViews(ModeControlWidget::Views v);
   /// Triggered when panel is changed.
   void panelChanged();
-  /// On rebin 
+  /// On rebin
   void onRebin(std::string algorithmType);
   /// On  unbin
   void onUnbin();
@@ -215,16 +214,16 @@ private:
   /// Get the view for a specified instrument
   QString getViewForInstrument(const std::string& instrument) const;
   /// Check if a technique contains a keyword
-  bool checkIfTechniqueContainsKeyword(const std::unordered_set<std::string>& techniques, const std::string& keyword) const;
+  bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace
-  pqPipelineSource* prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
+  pqPipelineSource* prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType);
   /// Handle drag and drop of peaks workspcaes
   void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
-  /// Set the color map 
+  /// Set the color map
   void setColorMap();
   /// Render the original workspace
   pqPipelineSource* renderOriginalWorkspace(const std::string originalWorkspaceName);
