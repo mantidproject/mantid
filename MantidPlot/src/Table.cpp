@@ -81,14 +81,7 @@ void Table::init(int rows, int cols)
 
   d_table = new MyTable(rows, cols, this, "table");
   d_table->setSelectionMode (QAbstractItemView::ExtendedSelection);
-  //d_table->setRowMovingEnabled(true);
-  //d_table->setColumnMovingEnabled(true);
   d_table->setCurrentCell(-1, -1);
-
-  //connect(d_table->verticalHeader(), SIGNAL(indexChange(int, int, int)),
-  //    this, SLOT(notifyChanges()));
-  //connect(d_table->horizontalHeader(), SIGNAL(indexChange(int, int, int)),
-  //    this, SLOT(moveColumn(int, int, int)));
 
   setFocusPolicy(Qt::StrongFocus);
   //setFocus();
@@ -104,7 +97,6 @@ void Table::init(int rows, int cols)
 
   auto head=d_table->horizontalHeader();
   head->setMouseTracking(true);
-  //head->setResizeEnabled(true);
   head->installEventFilter(this);
   connect(head, SIGNAL(sectionResized(int, int, int)), this, SLOT(colWidthModified(int, int, int)));
 
@@ -131,6 +123,7 @@ void Table::init(int rows, int cols)
   connect(accelAll, SIGNAL(activated()), this, SLOT(selectAllTable()));
 
   connect(d_table, SIGNAL(cellChanged(int, int)), this, SLOT(cellEdited(int, int)));
+  connect(d_table, SIGNAL(itemSelectionChanged()), this, SLOT(recordSelection()));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
 }
@@ -234,7 +227,6 @@ void Table::print(const QString& fileName)
   p.setFont(hHeader->font());
   QRect br;
   auto headerLabel = hHeader->model()->headerData(0, Qt::Horizontal).asString();
-//  br=p.boundingRect(br,Qt::AlignCenter,	hHeader->label(0));
   br=p.boundingRect(br,Qt::AlignCenter,	headerLabel);
   p.drawLine(right,height,right,height+br.height());
   QRect tr(br);
@@ -687,20 +679,6 @@ void Table::updateValues(Table* t, const QString& columnName)
   }
 }
 
-//?
-//Q3TableSelection Table::getSelection()
-//{
-//  Q3TableSelection sel;
-//  if (d_table->numSelections() == 0){
-//    sel.init(d_table->currentRow(), d_table->currentColumn());
-//    sel.expandTo(d_table->currentRow(), d_table->currentColumn());
-//  } else if (d_table->currentSelection()>0)
-//    sel = d_table->selection(d_table->currentSelection());
-//  else
-//    sel = d_table->selection(0);
-//  return sel;
-//}
-
 std::string Table::saveToProject(ApplicationWindow* app)
 {
   TSVSerialiser tsv;
@@ -1068,7 +1046,7 @@ void Table::addCol(PlotDesignation pd)
     }
   }
   d_table->insertColumns(cols);
-  //? d_table->ensureCellVisible ( 0, cols );
+  d_table->ensureCellVisible ( 0, cols );
 
   comments << QString();
   commands << "";
@@ -3068,54 +3046,57 @@ void Table::swapColumns(int col1, int col2)
   if (col1 < 0 || col1 >= d_table->columnCount() || col2 < 0 || col2 >= d_table->columnCount())
     return;
 
-  //int width1 = d_table->columnWidth(col1);
-  //int width2 = d_table->columnWidth(col2);
+  int width1 = d_table->columnWidth(col1);
+  int width2 = d_table->columnWidth(col2);
 
-  //d_table->swapColumns(col1, col2);
-  //col_label.swap (col1, col2);
-  //comments.swap (col1, col2);
-  //commands.swap (col1, col2);
-  //colTypes.swap (col1, col2);
-  //col_format.swap (col1, col2);
-  //col_plot_type.swap (col1, col2);
+  d_table->swapColumns(col1, col2);
+  col_label.swap (col1, col2);
+  comments.swap (col1, col2);
+  commands.swap (col1, col2);
+  colTypes.swap (col1, col2);
+  col_format.swap (col1, col2);
+  col_plot_type.swap (col1, col2);
 
-  //d_table->setColumnWidth(col1, width2);
-  //d_table->setColumnWidth(col2, width1);
-  //setHeaderColType();
+  d_table->setColumnWidth(col1, width2);
+  d_table->setColumnWidth(col2, width1);
+  setHeaderColType();
 }
 
 void Table::moveColumnBy(int cols)
 {
-  //int oldPos = selectedCol;
-  //int newPos = oldPos + cols;
-  //if (newPos < 0)
-  //  newPos = 0;
-  //else if	(newPos >= d_table->columnCount())
-  //  newPos = d_table->columnCount() - 1;
+  int oldPos = selectedCol;
+  int newPos = oldPos + cols;
+  if (newPos < 0)
+    newPos = 0;
+  else if	(newPos >= d_table->columnCount())
+    newPos = d_table->columnCount() - 1;
 
-  //if (abs(cols) > 1){
-  //  d_table->insertColumns(newPos);
-  //  if (cols < 0)
-  //    d_table->swapColumns(oldPos + 1, newPos);
-  //  else
-  //    d_table->swapColumns(oldPos, newPos + 1);
+  if (abs(cols) > 1){
+    if (cols < 0) {
+      d_table->insertColumns(newPos);
+      d_table->swapColumns(oldPos + 1, newPos);
+      d_table->removeColumn(oldPos + 1);
+    } else {
+      d_table->insertColumns(newPos + 1);
+      d_table->swapColumns(oldPos, newPos + 1);
+      d_table->removeColumn(oldPos);
+    }
 
-  //  d_table->removeColumn(oldPos);
+    col_label.move(oldPos, newPos);
+    comments.move(oldPos, newPos);
+    commands.move(oldPos, newPos);
+    colTypes.move(oldPos, newPos);
+    col_format.move(oldPos, newPos);
+    col_plot_type.move(oldPos, newPos);
+    setHeaderColType();
+  } else {
+    swapColumns(oldPos, newPos);
+  }
 
-  //  col_label.move(oldPos, newPos);
-  //  comments.move(oldPos, newPos);
-  //  commands.move(oldPos, newPos);
-  //  colTypes.move(oldPos, newPos);
-  //  col_format.move(oldPos, newPos);
-  //  col_plot_type.move(oldPos, newPos);
-  //} else
-  //  swapColumns(oldPos, newPos);
 
-  //setHeaderColType();
-
-  //setSelectedCol(newPos);
-  //d_table->clearSelection();
-  //d_table->selectColumn(newPos);
+  setSelectedCol(newPos);
+  d_table->clearSelection();
+  d_table->selectColumn(newPos);
 }
 
 void Table::hideColumn(int col, bool hide)
@@ -3351,6 +3332,15 @@ std::string Table::saveTableMetadata()
 
 int Table::verticalHeaderWidth(){return d_table->verticalHeader()->width();};
 
+void Table::recordSelection() {
+  auto c = leftSelectedColumn();
+  if (c >= 0 && isColumnSelected(c, true)) {
+    setSelectedCol(c);
+  } else {
+    setSelectedCol(-1);
+  }
+}
+
 /*****************************************************************************
  *
  * Class MyTable
@@ -3409,10 +3399,6 @@ void MyTable::resizeData(int n)
   if ( m_blockResizing )
   {
     emit unwantedResize();
-  }
-  else
-  {
-   //? Q3Table::resizeData(n);
   }
 }
 
@@ -3553,4 +3539,15 @@ void MyTable::selectCell(int row, int col) {
 
 void MyTable::ensureCellVisible(int row, int col) {
   scrollTo(model()->index(row, col));
+}
+
+void MyTable::swapColumns(int col1, int col2) {
+  blockSignals(true);
+  for(int row = 0; row < rowCount(); ++row) {
+    auto item1 = takeItem(row, col1);
+    auto item2 = takeItem(row, col2);
+    setItem(row, col1, item2);
+    setItem(row, col2, item1);
+  }
+  blockSignals(false);
 }

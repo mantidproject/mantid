@@ -69,7 +69,7 @@ public:
     int rightSelectedColumn() const;
     void selectCell(int row, int col);
     void ensureCellVisible(int row, int col);
-
+    void swapColumns(int col1, int col2);
 
 signals:
     void unwantedResize();
@@ -102,7 +102,6 @@ public:
 
 	Table(ScriptingEnv *env, int r,int c, const QString &label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
 
-//?	Q3TableSelection getSelection();
   int topSelectedRow() const {return d_table->topSelectedRow();}
   int bottomSelectedRow() const {return d_table->bottomSelectedRow();}
   int leftSelectedColumn() const {return d_table->leftSelectedColumn();}
@@ -393,6 +392,10 @@ protected:
 	void setColPlotDesignation(int col, int pd);
 
 	MyTable *d_table;
+
+private slots:
+
+  void recordSelection();
 
 private:
 	void clearCol();
