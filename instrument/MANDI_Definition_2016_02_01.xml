@@ -4,8 +4,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MANDI" valid-from   ="2015-08-01 00:00:00"
-              valid-to     ="2016-01-31 23:59:59"
+ name="MANDI" valid-from   ="2016-02-01 00:00:00"
+              valid-to     ="2100-12-31 23:59:59"
                       last-modified="2015-09-24 17:31:16.384625">
   <!--DEFAULTS-->
   <defaults>
@@ -46,7 +46,8 @@
       <location z="1.042" name="monitor3"/>
     </component>
   </type>
-<!-- XML Code automatically generated on 2015-09-24 17:31:16.450029 for the Mantid instrument definition file from MaNDi_2015-09-24.DetCal -->
+  <!-- some XML Code automatically generated on 2015-09-24 17:31:16.450029 for the Mantid instrument definition file from MaNDi_2015-09-24.DetCal - individual panel sizes-->
+  <!-- some XML Code automatically generated on 2016-02-15 11:42:18.107060 for the Mantid instrument definition file - common panel sizes -->
 <component type="panel1" idstart="65536" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.409200" t="66.451303" p="-91.083002" name="bank1" rot="90.570136" axis-x="0" axis-y="1" axis-z="0">
   <rot val="65.797717">
@@ -75,6 +76,13 @@
     ypixels="256" ystart="-0.078769" ystep="0.000618" >
   <properties/>
 </type>
+  <component type="panel" idstart="196608" idfillbyfirst="y" idstepbyrow="256">
+    <location r="0.409194" t="90.000086" p="-66.000154" name="bank3" rot="-179.999790" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="66.000154">
+        <rot val="90.000000" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
 <component type="panel5" idstart="327680" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.409200" t="114.611689" p="-90.961550" name="bank5" rot="-90.419015" axis-x="0" axis-y="1" axis-z="0">
   <rot val="66.019813">
@@ -243,6 +251,20 @@
     ypixels="256" ystart="-0.078061" ystep="0.000612" >
   <properties/>
 </type>
+  <component type="panel" idstart="1507328" idfillbyfirst="y" idstepbyrow="256">
+    <location r="0.425000" t="124.403098" p="-19.516157" name="bank23" rot="-69.410491" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="47.178655">
+        <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="panel" idstart="1703936" idfillbyfirst="y" idstepbyrow="256">
+    <location r="0.425000" t="124.403098" p="-160.483843" name="bank26" rot="38.590066" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="47.178655">
+        <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
 <component type="panel27" idstart="1769472" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.425000" t="90.505423" p="-165.138258" name="bank27" rot="75.213160" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.092431">
@@ -397,6 +419,20 @@
     ypixels="256" ystart="-0.077967" ystep="0.000612" >
   <properties/>
 </type>
+  <component type="panel" idstart="2818048" idfillbyfirst="y" idstepbyrow="256">
+    <location r="0.425000" t="124.403098" p="19.516157" name="bank43" rot="-38.590066" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="47.178655">
+        <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="panel" idstart="3014656" idfillbyfirst="y" idstepbyrow="256">
+    <location r="0.425000" t="124.403098" p="160.483843" name="bank46" rot="69.410491" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="47.178655">
+        <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
 <component type="panel47" idstart="3080192" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.425000" t="90.429116" p="162.871738" name="bank47" rot="106.524237" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.515657">
@@ -537,10 +573,17 @@
     ypixels="256" ystart="-0.078330" ystep="0.000614" >
   <properties/>
 </type>
-<!-- List of all the bank names:
-bank1,bank2,bank5,bank7,bank8,bank11,bank12,bank13,bank17,bank18,bank19,bank20,bank21,bank22,bank27,bank28,bank29,bank31,bank32,bank33,bank37,bank39,bank40,bank41,bank42,bank47,bank48,bank49,bank50,bank51,bank52,bank53,bank57,bank58,bank59
--->
+  <!-- List of all the banks:
+       1,2,3,5,7,8,11,12,13,17,18,19,20,21,22,23,26,27,28,29,31,32,33,37,39,40,41,42,43,46,47,48,49,50,51,52,53,57,58,59
+       -->
 
+<!-- NOTE: This detector is the same as the SNAP detector -->
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel"
+    xpixels="256" xstart="-0.078795" xstep="+0.000618"
+    ypixels="256" ystart="-0.078795" ystep="+0.000618" >
+  <properties/>
+</type>
 
   <!-- Pixel for Detectors-->
   <type is="detector" name="pixel">
