@@ -55,17 +55,17 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiFitPeaks2D : public API::Algorithm {
 public:
   PoldiFitPeaks2D();
-  virtual ~PoldiFitPeaks2D();
+  ~PoldiFitPeaks2D() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
 
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
-  bool checkGroups() { return false; }
+  bool checkGroups() override { return false; }
 
 protected:
   // Workspace handling
@@ -168,8 +168,8 @@ protected:
   double m_deltaT;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Poldi

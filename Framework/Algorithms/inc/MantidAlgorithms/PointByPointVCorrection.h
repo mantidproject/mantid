@@ -38,26 +38,26 @@ namespace Algorithms {
 class DLLExport PointByPointVCorrection : public API::Algorithm {
 public:
   PointByPointVCorrection();
-  virtual ~PointByPointVCorrection();
+  ~PointByPointVCorrection() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PointByPointVCorrection"; }
+  const std::string name() const override { return "PointByPointVCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Spectrum by spectrum division for vanadium normalisation "
            "correction.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\Corrections;CorrectionFunctions\\SpecialCorrections";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void check_validity(API::MatrixWorkspace_const_sptr &w1,
                       API::MatrixWorkspace_const_sptr &w2,
                       API::MatrixWorkspace_sptr &out);

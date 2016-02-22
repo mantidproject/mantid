@@ -2,18 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefReduction.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include <MantidAPI/FileFinder.h>
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include "Poco/File.h"
-#include "Poco/String.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -107,9 +109,7 @@ void RefReduction::init() {
   setPropertySettings("AngleOffset", new VisibleWhenProperty(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
-  std::vector<std::string> instrOptions;
-  instrOptions.push_back("REF_L");
-  instrOptions.push_back("REF_M");
+  std::vector<std::string> instrOptions{"REF_L", "REF_M"};
   declareProperty("Instrument", "REF_M",
                   boost::make_shared<StringListValidator>(instrOptions),
                   "Instrument to reduce for");

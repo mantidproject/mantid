@@ -247,7 +247,7 @@ struct LOG_LINE {
   int len;    ///< real length of data
   char *data; ///< padded to multiple of 4 bytes
   /// constructor
-  LOG_LINE() : len(0), data(0) {}
+  LOG_LINE() : len(0), data(nullptr) {}
 };
 
 /// log line entry
@@ -256,7 +256,7 @@ struct LOG_STRUCT {
   int nlines;      ///< number of lines
   LOG_LINE *lines; ///< size nlines
   /// constructor
-  LOG_STRUCT() : ver(2), nlines(0), lines(0) {}
+  LOG_STRUCT() : ver(2), nlines(0), lines(nullptr) {}
 };
 
 /// isis raw file.

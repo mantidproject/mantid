@@ -102,7 +102,7 @@ public:
   /// DefaultConstructor
   AlgorithmDialog(QWidget* parent = 0);
   /// Destructor
-  virtual ~AlgorithmDialog();
+  ~AlgorithmDialog() override;
 
   /// Set if the keep open option is shown.
   void setShowKeepOpen(const bool showOption);
@@ -225,7 +225,7 @@ signals:
 protected slots:
   
   /// A default slot that can be used for an OK button.
-  virtual void accept();
+  void accept() override;
 
   /// Help button clicked;
   virtual void helpClicked();
@@ -257,10 +257,11 @@ protected:
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
   /// Handle completion of algorithm started while staying open
-  virtual void finishHandle(const Mantid::API::IAlgorithm *alg);
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Handle completion of algorithm started while staying open
-  virtual void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what);
-  virtual void closeEvent(QCloseEvent *evt);
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
+  void closeEvent(QCloseEvent *evt) override;
 
 /// The following methods were made public for testing in GenericDialogDemo.cpp
 public:

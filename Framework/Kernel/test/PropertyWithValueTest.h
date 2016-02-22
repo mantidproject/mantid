@@ -525,8 +525,8 @@ public:
     PropertyWithValue<std::string> empty(
         "test", "", boost::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS(empty.isValid(), "Select a value");
-    vec.push_back("one");
-    vec.push_back("two");
+    vec.emplace_back("one");
+    vec.emplace_back("two");
     PropertyWithValue<std::string> p(
         "test", "", boost::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS(p.isValid(), "Select a value");
@@ -623,13 +623,7 @@ public:
     delete p2;
 
     // --- Vectors are appennded together ----
-    std::vector<int> v1, v2;
-    v1.push_back(1);
-    v1.push_back(2);
-    v1.push_back(3);
-    v1.push_back(4);
-    v1.push_back(5);
-    v1.push_back(6);
+    std::vector<int> v1{1, 2, 3, 4, 5, 6}, v2;
     p1 = new PropertyWithValue<std::vector<int>>("Prop1", v1);
     p2 = new PropertyWithValue<std::vector<int>>("Prop1", v2);
     (*p1) += p2;
@@ -643,12 +637,8 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues;
-    allowedValues.push_back("Hello");
-    allowedValues.push_back("World");
-    std::map<std::string, std::string> alias;
-    alias["1"] = "Hello";
-    alias["0"] = "World";
+    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
     PropertyWithValue<std::string> prop("String", "", validator);

@@ -58,9 +58,9 @@ class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
 public:
   /// Default constructor - normally used from the concrete view
   EnggDiffractionPresenter(IEnggDiffractionView *view);
-  virtual ~EnggDiffractionPresenter();
+  ~EnggDiffractionPresenter() override;
 
-  virtual void notify(IEnggDiffractionPresenter::Notification notif);
+  void notify(IEnggDiffractionPresenter::Notification notif) override;
 
   /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,

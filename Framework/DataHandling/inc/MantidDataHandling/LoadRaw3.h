@@ -49,25 +49,25 @@ public:
   /// Default constructor
   LoadRaw3();
   /// Destructor
-  ~LoadRaw3();
+  ~LoadRaw3() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadRaw"; }
+  const std::string name() const override { return "LoadRaw"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a data file in ISIS  RAW format and stores it in a 2D "
            "workspace (Workspace2D class).";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 3; }
+  int version() const override { return 3; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Raw"; }
+  const std::string category() const override { return "DataHandling\\Raw"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// returns true if the given spectrum is a monitor
   bool isMonitor(const std::vector<specid_t> &monitorIndexes,

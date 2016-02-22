@@ -40,18 +40,18 @@ namespace Algorithms {
 class DLLExport GetTimeSeriesLogInformation : public API::Algorithm {
 public:
   GetTimeSeriesLogInformation();
-  virtual ~GetTimeSeriesLogInformation();
+  ~GetTimeSeriesLogInformation() override;
 
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "GetTimeSeriesLogInformation";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Get information from a TimeSeriesProperty log.";
   }
 
-  virtual int version() const { return 1; }
-  virtual const std::string category() const {
+  int version() const override { return 1; }
+  const std::string category() const override {
     return "Diffraction\\Utility;Events\\EventFiltering";
   }
 
@@ -74,9 +74,9 @@ private:
 
   bool m_ignoreNegativeTime;
 
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
   void examLog(std::string logname, std::string outputdir);
 

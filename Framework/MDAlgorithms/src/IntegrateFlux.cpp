@@ -65,7 +65,7 @@ void IntegrateFlux::init() {
  */
 void IntegrateFlux::exec() {
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  size_t nX = static_cast<size_t>((int)getProperty("NPoints"));
+  size_t nX = static_cast<size_t>(static_cast<int>(getProperty("NPoints")));
 
   auto outputWS = createOutputWorkspace(*inputWS, nX);
 
@@ -170,7 +170,7 @@ template <class EventType>
 void IntegrateFlux::integrateSpectraEvents(
     const DataObjects::EventWorkspace &inputWS,
     API::MatrixWorkspace &integrWS) const {
-  inputWS.sortAll(DataObjects::TOF_SORT, NULL);
+  inputWS.sortAll(DataObjects::TOF_SORT, nullptr);
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 

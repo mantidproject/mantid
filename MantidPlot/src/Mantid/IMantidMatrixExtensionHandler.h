@@ -7,7 +7,7 @@
 
 class IMantidMatrixExtensionHandler : public Mantid::Kernel::Chainable<IMantidMatrixExtensionHandler> {
 public:
-  virtual ~IMantidMatrixExtensionHandler() {}
+  ~IMantidMatrixExtensionHandler() override {}
   virtual void setNumberFormat(MantidMatrixTabExtension& extension,
                                const QChar &format, int precision) = 0;
   virtual void recordFormat(MantidMatrixTabExtension& extension, const QChar &format, int precision) = 0;

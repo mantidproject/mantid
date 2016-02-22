@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -53,17 +54,17 @@ public:
   GetEi();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GetEi"; }
+  const std::string name() const override { return "GetEi"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the kinetic energy of neutrons leaving the source based "
            "on the time it takes for them to travel between two monitors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Inelastic\\Ei"; }
+  const std::string category() const override { return "Inelastic\\Ei"; }
 
 private:
   /// name of the tempory workspace that we create and use
@@ -79,8 +80,8 @@ private:
   };
 
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
                    specid_t mon1Spec, double &monitor0Dist,

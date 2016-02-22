@@ -185,7 +185,7 @@ public:
   */
   void test_exec_TableWorkspace() {
     // 1. Create input table workspace
-    TableWorkspace_sptr inpWS(new TableWorkspace());
+    auto inpWS = boost::make_shared<TableWorkspace>();
 
     inpWS->addColumn("str", "Name");
     inpWS->addColumn("double", "Value");

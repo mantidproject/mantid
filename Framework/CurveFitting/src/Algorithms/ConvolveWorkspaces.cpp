@@ -4,10 +4,13 @@
 #include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
-#include <sstream>
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
+
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -17,7 +20,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ConvolveWorkspaces)
 
 /// Constructor
-ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(NULL) {}
+ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(nullptr) {}
 
 /// Virtual destructor
 ConvolveWorkspaces::~ConvolveWorkspaces() { delete prog; }

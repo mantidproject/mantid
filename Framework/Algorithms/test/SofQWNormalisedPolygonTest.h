@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAPI/Axis.h"
 
 #include "SofQWTest.h"
-#include <boost/assign.hpp>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -60,20 +60,19 @@ public:
 
     // Spectra-detector mapping
     const size_t nspectra(6);
-    using namespace boost::assign;
     typedef std::set<int> IDSet;
     std::vector<IDSet> expectedIDs(nspectra);
-    IDSet s1 = list_of(3);
+    IDSet s1 = {3};
     expectedIDs[0] = s1;
-    IDSet s2 = list_of(13);
+    IDSet s2 = {13};
     expectedIDs[1] = s2;
-    IDSet s3 = list_of(13)(23);
+    IDSet s3 = {13, 23};
     expectedIDs[2] = s3;
-    IDSet s4 = list_of(23)(33);
+    IDSet s4 = {23, 33};
     expectedIDs[3] = s4;
-    IDSet s5 = list_of(33)(43);
+    IDSet s5 = {33, 43};
     expectedIDs[4] = s5;
-    IDSet s6 = list_of(43);
+    IDSet s6 = {43};
     expectedIDs[5] = s6;
 
     for (size_t i = 0; i < nspectra; ++i) {

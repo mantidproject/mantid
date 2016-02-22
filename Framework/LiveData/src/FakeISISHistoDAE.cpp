@@ -81,7 +81,7 @@ public:
     sendOK();
   }
   /// Destructor.
-  ~TestServerConnection() {
+  ~TestServerConnection() override {
     // std::cerr << "Test connection deleted" << std::endl;
   }
   /// Sends an OK message when there is nothing to send or an error occured
@@ -191,7 +191,7 @@ public:
   /**
    * Main method that reads commands from the socket and send out the data.
    */
-  void run() {
+  void run() override {
     for (;;) {
       char buffer[1024];
       isisds_command_header_t comm;
@@ -302,7 +302,7 @@ public:
    * @param socket :: The socket.
    */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
@@ -311,7 +311,7 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE() : m_server(NULL) {}
+FakeISISHistoDAE::FakeISISHistoDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISHistoDAE::~FakeISISHistoDAE() {
@@ -368,7 +368,7 @@ void FakeISISHistoDAE::exec() {
   }
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 }

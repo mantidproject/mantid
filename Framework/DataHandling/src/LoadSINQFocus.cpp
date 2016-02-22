@@ -1,7 +1,11 @@
 #include "MantidDataHandling/LoadSINQFocus.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -26,7 +30,7 @@ LoadSINQFocus::LoadSINQFocus()
     : m_instrumentName(""), m_instrumentPath(), m_localWorkspace(),
       m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfHistograms(0), m_loader() {
-  m_supportedInstruments.push_back("FOCUS");
+  m_supportedInstruments.emplace_back("FOCUS");
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
 }

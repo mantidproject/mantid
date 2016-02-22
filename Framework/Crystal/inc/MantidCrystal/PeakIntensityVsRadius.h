@@ -35,21 +35,21 @@ namespace Crystal {
 class DLLExport PeakIntensityVsRadius : public API::Algorithm {
 public:
   PeakIntensityVsRadius();
-  virtual ~PeakIntensityVsRadius();
+  ~PeakIntensityVsRadius() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the integrated intensity of peaks vs integration radius.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
-  std::map<std::string, std::string> validateInputs();
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Crystal

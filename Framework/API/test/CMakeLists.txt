@@ -7,6 +7,7 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})

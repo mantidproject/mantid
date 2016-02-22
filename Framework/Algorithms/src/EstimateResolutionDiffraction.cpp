@@ -2,9 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"

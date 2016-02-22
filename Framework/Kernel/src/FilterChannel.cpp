@@ -2,12 +2,12 @@
 #include "MantidKernel/FilterChannel.h"
 
 #include <Poco/LoggingRegistry.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Message.h>
 
 namespace Poco {
 
-FilterChannel::FilterChannel() : _channel(0), _priority(8) {}
+FilterChannel::FilterChannel() : _channel(nullptr), _priority(8) {}
 
 FilterChannel::~FilterChannel() { close(); }
 
@@ -23,10 +23,11 @@ void FilterChannel::addChannel(Channel *pChannel) {
 void FilterChannel::setProperty(const std::string &name,
                                 const std::string &value) {
   if (name.compare(0, 7, "channel") == 0) {
-    StringTokenizer tokenizer(value, ",;", StringTokenizer::TOK_IGNORE_EMPTY |
-                                               StringTokenizer::TOK_TRIM);
-    for (auto it = tokenizer.begin(); it != tokenizer.end(); ++it) {
-      addChannel(LoggingRegistry::defaultRegistry().channelForName(*it));
+    Mantid::Kernel::StringTokenizer tokenizer(
+        value, ",;", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                         Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &piece : tokenizer) {
+      addChannel(LoggingRegistry::defaultRegistry().channelForName(piece));
     }
   } else if (name.compare(0, 5, "level") == 0) {
     setPriority(value);
@@ -44,7 +45,7 @@ void FilterChannel::log(const Message &msg) {
 
 void FilterChannel::close() {
   FastMutex::ScopedLock lock(_mutex);
-  if (_channel != NULL) {
+  if (_channel != nullptr) {
     _channel->release();
   }
 }

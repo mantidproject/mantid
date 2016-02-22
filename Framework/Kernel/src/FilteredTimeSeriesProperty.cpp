@@ -17,7 +17,7 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     TimeSeriesProperty<HeldType> *seriesProp,
     const TimeSeriesProperty<bool> &filterProp, const bool transferOwnership)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(NULL) {
+    : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
   if (transferOwnership)
     m_unfiltered = seriesProp;
   else

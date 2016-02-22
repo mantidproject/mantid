@@ -26,7 +26,7 @@ namespace DataObjects {
 TMDE(MDBoxIterator)::MDBoxIterator(
     API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
     Mantid::Geometry::MDImplicitFunction *function)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this)) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
 }
@@ -49,7 +49,7 @@ TMDE(MDBoxIterator)::MDBoxIterator(
     API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
     SkippingPolicy *skippingPolicy,
     Mantid::Geometry::MDImplicitFunction *function)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(skippingPolicy) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
 }
@@ -101,7 +101,7 @@ TMDE(void MDBoxIterator)::commonConstruct(
  */
 TMDE(MDBoxIterator)::MDBoxIterator(std::vector<API::IMDNode *> &boxes,
                                    size_t begin, size_t end)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this))
 
 {
@@ -157,7 +157,7 @@ TMDE(void MDBoxIterator)::jumpTo(size_t index) {
 
 //----------------------------------------------------------------------------------------------
 /// @return true if the iterator is currently valid
-TMDE(bool MDBoxIterator)::valid() const { return (m_current != NULL); }
+TMDE(bool MDBoxIterator)::valid() const { return m_current != nullptr; }
 
 //----------------------------------------------------------------------------------------------
 /// Advance to the next cell. If the current cell is the last one in the
@@ -215,8 +215,8 @@ TMDE(void MDBoxIterator)::getEvents() const {
 TMDE(void MDBoxIterator)::releaseEvents() const {
   if (m_events) {
     m_currentMDBox->releaseEvents();
-    m_events = NULL;
-    m_currentMDBox = NULL;
+    m_events = nullptr;
+    m_currentMDBox = nullptr;
   }
 }
 

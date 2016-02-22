@@ -124,7 +124,7 @@ void SetUB::exec() {
   // Sample copy;
   IMDEventWorkspace_sptr mdws =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
-  if (mdws != NULL) {
+  if (mdws != nullptr) {
     int sampleNumber = getProperty("MDSampleNumber");
     if ((sampleNumber == EMPTY_INT()) ||
         (sampleNumber < 0)) // copy to all samples

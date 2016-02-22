@@ -59,24 +59,24 @@ public:
   OCGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   OCGeometryHandler(Object *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler>
-  clone() const;        ///< Virtual copy constructor
-  ~OCGeometryHandler(); ///< Destructor
-  GeometryHandler *createInstance(IObjComponent *comp);
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj);
-  GeometryHandler *createInstance(Object *);
-  void Triangulate();
-  void Render();
-  void Initialize();
+  clone() const override;        ///< Virtual copy constructor
+  ~OCGeometryHandler() override; ///< Destructor
+  GeometryHandler *createInstance(IObjComponent *comp) override;
+  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
+  GeometryHandler *createInstance(Object *) override;
+  void Triangulate() override;
+  void Render() override;
+  void Initialize() override;
   /// Returns true if the shape can be triangulated
-  bool canTriangulate() { return true; }
+  bool canTriangulate() override { return true; }
   /// get the number of Triangles
-  int NumberOfTriangles();
+  int NumberOfTriangles() override;
   /// get the number of points or vertices
-  int NumberOfPoints();
+  int NumberOfPoints() override;
   /// Extract the vertices of the triangles
-  double *getTriangleVertices();
+  double *getTriangleVertices() override;
   /// Extract the Faces of the triangles
-  int *getTriangleFaces();
+  int *getTriangleFaces() override;
 };
 
 } // NAMESPACE Geometry

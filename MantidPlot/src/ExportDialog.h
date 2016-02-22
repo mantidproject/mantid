@@ -50,7 +50,7 @@ public:
   ExportDialog(const QString& tableName, QWidget* parent = 0, Qt::WFlags fl = 0 );
 
 private:
-  void closeEvent(QCloseEvent*);
+  void closeEvent(QCloseEvent *) override;
 
   QPushButton* buttonOk;
   QPushButton* buttonCancel;
@@ -80,8 +80,8 @@ private slots:
 
 protected slots:
 	//! Accept changes
-	void accept();
-	//! Display help
+  void accept() override;
+        //! Display help
 	void help();
 };
 

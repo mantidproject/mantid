@@ -1,4 +1,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtCustomDialogs/SmoothNeighboursDialog.h"
 
 using namespace Mantid::API;

@@ -280,7 +280,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
         throw std::runtime_error("Unable to cast to MDBox");
       mdbox->setExtents(dim, -10, 10);
       mdbox->calcVolume();
-      mdbox->refreshCache(NULL);
+      mdbox->refreshCache(nullptr);
     }
   }
 
@@ -421,8 +421,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   // Add all the other propertys from original data workspace
   const std::vector<Kernel::Property *> vec_property =
       dataws->run().getProperties();
-  for (size_t i = 0; i < vec_property.size(); ++i) {
-    expinfo->mutableRun().addProperty(vec_property[i]->clone());
+  for (auto property : vec_property) {
+    expinfo->mutableRun().addProperty(property->clone());
   }
 
   m_outputWS->addExperimentInfo(expinfo);
@@ -570,10 +570,7 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     loader->execute();
 
     dataws = loader->getProperty("OutputWorkspace");
-    if (dataws)
-      loaded = true;
-    else
-      loaded = false;
+    loaded = static_cast<bool>(dataws);
   } catch (std::runtime_error &runerror) {
     loaded = false;
     errmsg = runerror.what();

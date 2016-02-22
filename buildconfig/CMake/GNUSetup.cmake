@@ -40,6 +40,13 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
     set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
 
+# Check if we have a new enough version for these flags
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
+    set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override -Wsuggest-final-types -Wsuggest-final-methods")
+  endif()
+endif()
+
 # Add some options for debug build to help the Zoom profiler
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )

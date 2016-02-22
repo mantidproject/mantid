@@ -36,20 +36,20 @@ namespace Crystal {
 class DLLExport HasUB : public ClearUB {
 public:
   HasUB();
-  virtual ~HasUB();
+  ~HasUB() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Determines whether the workspace has one or more UB Matrix";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

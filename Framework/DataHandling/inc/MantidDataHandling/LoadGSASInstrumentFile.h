@@ -41,28 +41,28 @@ namespace DataHandling {
 class DLLExport LoadGSASInstrumentFile : public API::Algorithm {
 public:
   LoadGSASInstrumentFile();
-  virtual ~LoadGSASInstrumentFile();
+  ~LoadGSASInstrumentFile() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadGSASInstrumentFile"; }
+  const std::string name() const override { return "LoadGSASInstrumentFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load parameters from a GSAS Instrument file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling";
   }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Load file to a vector of strings
   void loadFile(std::string filename, std::vector<std::string> &lines);

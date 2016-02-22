@@ -103,8 +103,8 @@ void vtkMDHexFactory::doCreate(
   vtkNew<vtkIdList> hexPointList;
   hexPointList->SetNumberOfIds(8);
 
-  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(
-      m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction =
+      makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError
@@ -130,8 +130,7 @@ void vtkMDHexFactory::doCreate(
           coords = std::unique_ptr<coord_t>(
               box->getVertexesArray(numVertexes, 3, this->sliceMask.get()));
         } else {
-          coords =
-              std::unique_ptr<coord_t>(box->getVertexesArray(numVertexes));
+          coords = std::unique_ptr<coord_t>(box->getVertexesArray(numVertexes));
         }
 
         if (numVertexes == 8) {
@@ -231,14 +230,11 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
-      // TODO: Smarter mapping
       for (size_t d = 0; d < nd; d++)
         this->sliceMask[d] = (d < 3);
 
       // Define where the slice is in 4D
-      // TODO: Where to slice? Right now is just 0
       std::vector<coord_t> point(nd, 0);
-      point[3] = coord_t(m_time); // Specifically for 4th/time dimension.
 
       // Define two opposing planes that point in all higher dimensions
       std::vector<coord_t> normal1(nd, 0);
@@ -247,12 +243,14 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
         normal1[d] = +1.0;
         normal2[d] = -1.0;
       }
-      // This creates a 0-thickness region to slice in.
+      // This creates a slice which is one bin thick in the 4th dimension
+      // m_time assumed to satisfy: dim_min <= m_time < dim_max
+      // but does not have to be a bin centre
+      point[3] = getPreviousBinBoundary(imdws);
       sliceImplicitFunction->addPlane(MDPlane(normal1, point));
+      point[3] = getNextBinBoundary(imdws);
       sliceImplicitFunction->addPlane(MDPlane(normal2, point));
 
-      // coord_t pointA[4] = {0, 0, 0, -1.0};
-      // coord_t pointB[4] = {0, 0, 0, +2.0};
     } else {
       // Direct 3D, so no slicing
       this->slice = false;
@@ -265,6 +263,44 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
   }
+}
+
+/*
+ * Get the next highest bin boundary
+ */
+coord_t
+vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
+  auto t_dim = imdws->getTDimension();
+  coord_t bin_width = t_dim->getBinWidth();
+  coord_t dim_min = t_dim->getMinimum();
+  return roundUp(coord_t(m_time) - dim_min, bin_width) + dim_min;
+}
+
+/*
+ * Get the previous bin boundary, or the current one if m_time is on a boundary
+ */
+coord_t
+vtkMDHexFactory::getPreviousBinBoundary(IMDEventWorkspace_sptr imdws) const {
+  auto t_dim = imdws->getTDimension();
+  coord_t bin_width = t_dim->getBinWidth();
+  coord_t dim_min = t_dim->getMinimum();
+  return roundDown(coord_t(m_time) - dim_min, bin_width) + dim_min;
+}
+
+/*
+ * Round up to next multiple of factor
+ * Where "up" means towards +ve infinity
+ */
+coord_t roundUp(const coord_t num_to_round, const coord_t factor) {
+  return (std::floor(num_to_round / factor) + 1) * factor;
+}
+
+/*
+ * Round down to next multiple of factor
+ * Where "down" means towards -ve infinity
+ */
+coord_t roundDown(const coord_t num_to_round, const coord_t factor) {
+  return std::floor(num_to_round / factor) * factor;
 }
 
 /*

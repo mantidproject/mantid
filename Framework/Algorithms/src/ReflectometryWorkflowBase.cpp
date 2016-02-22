@@ -6,8 +6,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -437,7 +435,7 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
 
   auto rebinWorkspaceAlg = this->createChildAlgorithm("Rebin");
   rebinWorkspaceAlg->initialize();
-  std::vector<double> params = boost::assign::list_of(wavelengthStep);
+  std::vector<double> params = {wavelengthStep};
   rebinWorkspaceAlg->setProperty("Params", params);
   rebinWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
   rebinWorkspaceAlg->execute();

@@ -19,26 +19,26 @@ namespace MDAlgorithms {
 class DLLExport CentroidPeaksMD2 : public API::Algorithm {
 public:
   CentroidPeaksMD2();
-  ~CentroidPeaksMD2();
+  ~CentroidPeaksMD2() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CentroidPeaksMD"; };
+  const std::string name() const override { return "CentroidPeaksMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Find the centroid of single-crystal peaks in a MDEventWorkspace, "
            "in order to refine their positions.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 2; };
+  int version() const override { return 2; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
+  const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   template <typename MDE, size_t nd>
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);

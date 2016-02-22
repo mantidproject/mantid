@@ -64,35 +64,35 @@ namespace Algorithms {
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   MergeRuns();
-  virtual ~MergeRuns();
+  ~MergeRuns() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MergeRuns"; }
+  const std::string name() const override { return "MergeRuns"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Combines the data contained in an arbitrary number of input "
            "workspaces.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Merging"; }
+  const std::string category() const override { return "Transforms\\Merging"; }
   // Overriden MultiPeriodGroupAlgorithm method.
-  bool useCustomInputPropertyName() const;
+  bool useCustomInputPropertyName() const override;
 
 protected:
   /// Overriden fillHistory method to correctly store history from merged
   /// workspaces
-  virtual void fillHistory();
+  void fillHistory() override;
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
-  std::string fetchInputPropertyName() const;
+  std::string fetchInputPropertyName() const override;
   /// test the compatibility of the given workspace with others
   void testCompatibility(API::MatrixWorkspace_const_sptr ws,
                          const std::string &xUnitID, const std::string &YUnit,

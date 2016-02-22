@@ -2,17 +2,21 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadGSS.h"
-#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
+
 #include <fstream>
 #include <sstream>
 
@@ -107,7 +111,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = NULL;
+  Progress *prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -145,7 +149,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == NULL) {
+    if (nSpec != 0 && prog == nullptr) {
       prog = new Progress(this, 0.0, 1.0, nSpec);
     }
 
@@ -232,7 +236,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         vecY.clear();
         vecE.clear();
 
-        if (prog != NULL)
+        if (prog != nullptr)
           prog->report();
       }
 

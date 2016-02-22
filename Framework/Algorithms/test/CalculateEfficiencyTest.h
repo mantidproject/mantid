@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateEfficiency.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"

@@ -97,7 +97,7 @@ Kernel::Property *SequenceTypeHandler<ContainerType>::create(
     valueInC = std::vector<DestElementType>(1, scalar);
   }
 
-  Kernel::Property *valueProp(NULL);
+  Kernel::Property *valueProp(nullptr);
   if (isNone(validator)) {
     valueProp =
         new Kernel::PropertyWithValue<ContainerType>(name, valueInC, direction);

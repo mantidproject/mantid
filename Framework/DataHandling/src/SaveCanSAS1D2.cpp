@@ -1,14 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveCanSAS1D2.h"
-
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-
+#include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidGeometry/IComponent.h"
-
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 

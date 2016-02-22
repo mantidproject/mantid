@@ -59,7 +59,7 @@ namespace MantidQt
       SelectionNotificationServiceImpl();
 
       /// private constructor, since SelectionNotificationService is a singleton
-      virtual ~SelectionNotificationServiceImpl();
+      ~SelectionNotificationServiceImpl() override;
 
       friend struct Mantid::Kernel::CreateUsingNew<SelectionNotificationServiceImpl>;      
    };

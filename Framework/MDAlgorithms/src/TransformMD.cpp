@@ -82,7 +82,7 @@ void TransformMD::doTransform(
     API::IMDNode::sortObjByID(boxes);
 
   PARALLEL_FOR_IF(!ws->isFileBacked())
-  for (int i = 0; i < int(boxes.size()); i++) {
+  for (int i = 0; i < static_cast<int>(boxes.size()); i++) {
     PARALLEL_START_INTERUPT_REGION
     MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
     if (box) {
@@ -175,7 +175,7 @@ void TransformMD::exec() {
   } else if (event) {
     // Call the method for this type of MDEventWorkspace.
     CALL_MDEVENT_FUNCTION(this->doTransform, outWS);
-    Progress *prog2 = NULL;
+    Progress *prog2 = nullptr;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0, prog2);
     event->splitAllIfNeeded(ts);

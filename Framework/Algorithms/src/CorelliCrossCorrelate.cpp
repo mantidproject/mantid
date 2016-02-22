@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -109,15 +111,7 @@ void CorelliCrossCorrelate::exec() {
   outputWS = getProperty("OutputWorkspace");
 
   if (outputWS != inputWS) {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
+    outputWS = EventWorkspace_sptr(inputWS->clone().release());
   }
 
   // Read in chopper sequence from IDF.
@@ -164,8 +158,8 @@ void CorelliCrossCorrelate::exec() {
 
   int offset_int = getProperty("TimingOffset");
   const int64_t offset = static_cast<int64_t>(offset_int);
-  for (unsigned long i = 0; i < tdc.size(); ++i)
-    tdc[i] += offset;
+  for (auto &timing : tdc)
+    timing += offset;
 
   // Determine period from chopper frequency.
   auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(

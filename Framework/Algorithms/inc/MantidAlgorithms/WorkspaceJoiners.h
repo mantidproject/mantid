@@ -40,12 +40,12 @@ namespace Algorithms {
 class DLLExport WorkspaceJoiners : public API::Algorithm {
 public:
   WorkspaceJoiners();
-  virtual ~WorkspaceJoiners();
+  ~WorkspaceJoiners() override;
 
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Join two workspaces together by appending their spectra.";
   }
 

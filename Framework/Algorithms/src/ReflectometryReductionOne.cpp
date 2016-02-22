@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -7,7 +8,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -194,8 +194,8 @@ void ReflectometryReductionOne::init() {
                                               Direction::Input),
                   "Enforces spectrum number checking prior to normalization");
 
-  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
-      "None")("PolynomialCorrection")("ExponentialCorrection");
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "PolynomialCorrection", "ExponentialCorrection"};
   declareProperty("CorrectionAlgorithm", "None",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
@@ -288,9 +288,9 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
   } else {
     auto specNumbers = getSpectrumNumbers(toCorrect);
     correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
-    for (size_t t = 0; t < specNumbers.size(); ++t) {
+    for (auto specNumber : specNumbers) {
       std::stringstream buffer;
-      buffer << "Writing out: " << specNumbers[t];
+      buffer << "Writing out: " << specNumber;
       g_log.notice(buffer.str());
     }
   }
@@ -372,6 +372,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
+
+  // Rotate the source (needed before ConvertUnits)
   double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
   if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
@@ -389,6 +391,22 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   convertUnits->setProperty("Target", "MomentumTransfer");
   convertUnits->execute();
   MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
+
+  // Rotate the source back to its original position
+  if (rotationTheta != 0.0) {
+    // for IvsLam Workspace
+    auto rotateSource = this->createChildAlgorithm("RotateSource");
+    rotateSource->setChild(true);
+    rotateSource->initialize();
+    rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+    // for IvsQ Workspace
+    rotateSource->setProperty("Workspace", inQ);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+  }
+
   return inQ;
 }
 
@@ -408,7 +426,7 @@ ReflectometryReductionOne::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -435,7 +453,7 @@ ReflectometryReductionOne::getDetectorComponent(
   }
   boost::shared_ptr<const IComponent> searchResult =
       inst->getComponentByName(componentToCorrect);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(componentToCorrect +
                                 " does not exist. Check input properties.");
   }
@@ -671,9 +689,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
 
       if (stitchingStart.is_initialized() && stitchingEnd.is_initialized() &&
           stitchingDelta.is_initialized()) {
-        const std::vector<double> params =
-            boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+        const std::vector<double> params = {
+            stitchingStart.get(), stitchingDelta.get(), stitchingEnd.get()};
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",

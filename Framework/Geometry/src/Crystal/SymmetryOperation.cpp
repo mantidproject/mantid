@@ -9,11 +9,10 @@ namespace Geometry {
 
 /// Default constructor, results in identity.
 SymmetryOperation::SymmetryOperation()
-    : m_order(1), m_matrix(Kernel::IntMatrix(3, 3, true)),
-      m_inverseMatrix(Kernel::IntMatrix(3, 3, true)), m_vector(),
-      m_reducedVector(), m_identifier() {
+    : m_order(1), m_inverseMatrix(Kernel::IntMatrix(3, 3, true)),
+      m_reducedVector(), m_identifier(), m_matrixVectorPair() {
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
-      m_matrix, m_vector);
+      m_matrixVectorPair.getMatrix(), m_matrixVectorPair.getVector());
 }
 
 /**
@@ -40,22 +39,26 @@ SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
   init(matrix, vector);
 }
 
+/// Convenience constructor for double-matrices.
+SymmetryOperation::SymmetryOperation(const Mantid::Kernel::DblMatrix &matrix,
+                                     const Mantid::Geometry::V3R &vector) {
+  init(convertMatrix<int>(matrix), vector);
+}
+
 /// Copy-constructor
 SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
-    : m_order(other.m_order), m_matrix(other.m_matrix),
-      m_inverseMatrix(other.m_inverseMatrix), m_vector(other.m_vector),
-      m_reducedVector(other.m_reducedVector), m_identifier(other.m_identifier) {
-}
+    : m_order(other.m_order), m_inverseMatrix(other.m_inverseMatrix),
+      m_reducedVector(other.m_reducedVector), m_identifier(other.m_identifier),
+      m_matrixVectorPair(other.m_matrixVectorPair) {}
 
 /// Assignment operator
 SymmetryOperation &SymmetryOperation::
 operator=(const SymmetryOperation &other) {
   m_order = other.m_order;
-  m_matrix = other.m_matrix;
   m_inverseMatrix = other.m_inverseMatrix;
-  m_vector = other.m_vector;
   m_reducedVector = other.m_reducedVector;
   m_identifier = other.m_identifier;
+  m_matrixVectorPair = other.m_matrixVectorPair;
 
   return *this;
 }
@@ -63,26 +66,31 @@ operator=(const SymmetryOperation &other) {
 /// Initialize from matrix and vector.
 void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
                              const V3R &vector) {
-  m_matrix = matrix;
+  m_matrixVectorPair =
+      MatrixVectorPair<int, V3R>(matrix, getWrappedVector(vector));
 
   // Inverse matrix for HKL operations.
   m_inverseMatrix = Kernel::IntMatrix(matrix);
   m_inverseMatrix.Invert();
   m_inverseMatrix = m_inverseMatrix.Transpose();
 
-  m_vector = getWrappedVector(vector);
-  m_order = getOrderFromMatrix(m_matrix);
+  m_order = getOrderFromMatrix(m_matrixVectorPair.getMatrix());
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
-      m_matrix, m_vector);
+      m_matrixVectorPair.getMatrix(), m_matrixVectorPair.getVector());
 
-  m_reducedVector = getReducedVector(m_matrix, m_vector);
+  m_reducedVector = getReducedVector(m_matrixVectorPair.getMatrix(),
+                                     m_matrixVectorPair.getVector());
 }
 
 /// Returns a const reference to the internally stored matrix
-const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrix; }
+const Kernel::IntMatrix &SymmetryOperation::matrix() const {
+  return m_matrixVectorPair.getMatrix();
+}
 
 /// Returns a const reference to the internall stored vector
-const V3R &SymmetryOperation::vector() const { return m_vector; }
+const V3R &SymmetryOperation::vector() const {
+  return m_matrixVectorPair.getVector();
+}
 
 /**
  * @brief SymmetryOperation::reducedVector
@@ -126,11 +134,14 @@ std::string SymmetryOperation::identifier() const { return m_identifier; }
 
 /// Returns true if this is the identity operation.
 bool SymmetryOperation::isIdentity() const {
-  return !hasTranslation() && m_matrix == Kernel::IntMatrix(3, 3, true);
+  return !hasTranslation() &&
+         m_matrixVectorPair.getMatrix() == Kernel::IntMatrix(3, 3, true);
 }
 
 /// Returns true if the operation has a translational component.
-bool SymmetryOperation::hasTranslation() const { return m_vector != 0; }
+bool SymmetryOperation::hasTranslation() const {
+  return m_matrixVectorPair.getVector() != 0;
+}
 
 /**
  * Transforms an index triplet hkl
@@ -167,17 +178,16 @@ Kernel::V3D SymmetryOperation::transformHKL(const Kernel::V3D &hkl) const {
  */
 SymmetryOperation SymmetryOperation::
 operator*(const SymmetryOperation &operand) const {
-  return SymmetryOperation(
-      m_matrix * operand.m_matrix,
-      getWrappedVector((m_matrix * operand.m_vector) + m_vector));
+  MatrixVectorPair<int, V3R> result =
+      m_matrixVectorPair * operand.m_matrixVectorPair;
+  return SymmetryOperation(result.getMatrix(), result.getVector());
 }
 
 /// Returns the inverse of the symmetry operation.
 SymmetryOperation SymmetryOperation::inverse() const {
-  Kernel::IntMatrix matrix(m_matrix);
-  matrix.Invert();
+  MatrixVectorPair<int, V3R> inverse = m_matrixVectorPair.getInverse();
 
-  return SymmetryOperation(matrix, -(matrix * m_vector));
+  return SymmetryOperation(inverse.getMatrix(), inverse.getVector());
 }
 
 /// Returns the symmetry operation, applied to itself (exponent) times.
@@ -203,7 +213,7 @@ SymmetryOperation SymmetryOperation::operator^(size_t exponent) const {
 
 /// Returns true if matrix and vector are equal
 bool SymmetryOperation::operator==(const SymmetryOperation &other) const {
-  return m_matrix == other.m_matrix && m_vector == other.m_vector;
+  return m_matrixVectorPair == other.m_matrixVectorPair;
 }
 
 /// Returns true if SymmetryOperation is "smaller" than other, determined by

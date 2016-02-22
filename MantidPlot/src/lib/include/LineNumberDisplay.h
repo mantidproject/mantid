@@ -55,7 +55,7 @@ private slots:
   void changeCharFormat (const QTextCharFormat &);
 
 private:
-  void showEvent(QShowEvent *);
+  void showEvent(QShowEvent *) override;
   QTextEdit *d_text_edit;
 };
 #endif

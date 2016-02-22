@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "boost/pointer_cast.hpp"
 #include <cfloat>

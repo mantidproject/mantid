@@ -25,3 +25,10 @@ add_custom_target(CompileUIUI DEPENDS
   CompileUIReflectometer
   CompileUISANS
 )
+
+# Put all ui targets inside the 'CompilePyUI' folder or group in VS and the like, for convenience
+set_property ( TARGET CompileUIUIBase PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIDiffraction PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIInElastic PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIReflectometer PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUISANS PROPERTY FOLDER "CompilePyUI" )

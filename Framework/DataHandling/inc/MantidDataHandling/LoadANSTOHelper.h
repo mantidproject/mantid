@@ -53,25 +53,29 @@ protected:
   // fields
   const std::vector<bool> &m_roi;
   const size_t m_stride;
+  // number of frames
+  size_t m_frames;
   // tof correction
   const double m_period;
   const double m_phase;
   // boundaries
   const double m_tofMinBoundary;
   const double m_tofMaxBoundary;
+  const double m_timeMinBoundary;
+  const double m_timeMaxBoundary;
 
   // methods
-  virtual void endOfFrameImpl() = 0;
   virtual void addEventImpl(size_t id, double tof) = 0;
 
 public:
   // construction
   EventProcessor(const std::vector<bool> &roi, const size_t stride,
                  const double period, const double phase,
-                 const double tofMinBoundary, const double tofMaxBoundary);
+                 const double tofMinBoundary, const double tofMaxBoundary,
+                 const double timeMinBoundary, const double timeMaxBoundary);
 
   // methods
-  void endOfFrame();
+  void newFrame();
   void addEvent(size_t x, size_t y, double tof);
 };
 
@@ -79,21 +83,19 @@ class EventCounter : public EventProcessor {
 protected:
   // fields
   std::vector<size_t> &m_eventCounts;
-  // number of frames
-  size_t m_numFrames;
   // tof
   double m_tofMin;
   double m_tofMax;
 
   // methods
-  virtual void endOfFrameImpl();
-  virtual void addEventImpl(size_t id, double tof);
+  virtual void addEventImpl(size_t id, double tof); // override
 
 public:
   // construction
   EventCounter(const std::vector<bool> &roi, const size_t stride,
                const double period, const double phase,
                const double tofMinBoundary, const double tofMaxBoundary,
+               const double timeMinBoundary, const double timeMaxBoundary,
                std::vector<size_t> &eventCounts);
 
   // properties
@@ -108,14 +110,14 @@ protected:
   std::vector<EventVector_pt> &m_eventVectors;
 
   // methods
-  virtual void endOfFrameImpl();
-  virtual void addEventImpl(size_t id, double tof);
+  virtual void addEventImpl(size_t id, double tof) override;
 
 public:
   // construction
   EventAssigner(const std::vector<bool> &roi, const size_t stride,
                 const double period, const double phase,
                 const double tofMinBoundary, const double tofMaxBoundary,
+                const double timeMinBoundary, const double timeMaxBoundary,
                 std::vector<EventVector_pt> &eventVectors);
 };
 
@@ -135,8 +137,9 @@ public:
   void *handle() const;
 
   // methods
+  void close();
   bool read(void *buffer, uint32_t size);
-  bool seek(int64_t offset, int whence, int64_t *newPosition = NULL);
+  bool seek(int64_t offset, int whence, int64_t *newPosition = nullptr);
 };
 
 namespace Tar {
@@ -172,6 +175,11 @@ struct EntryHeader {
   char DeviceMinorNumber[8];
   // cppcheck-suppress unusedStructMember
   char FilenamePrefix[155];
+
+  // methods
+  void writeChecksum();
+  void writeFileSize(int64_t value);
+  int64_t readFileSize();
 };
 
 class File {
@@ -205,6 +213,7 @@ private:
 public:
   // construction
   File(const std::string &path);
+  void close();
 
   // properties
   bool good() const;
@@ -219,6 +228,10 @@ public:
   bool skip(uint64_t offset);
   size_t read(void *dst, size_t size);
   int read_byte();
+
+  // helpers
+  static bool append(const std::string &path, const std::string &name,
+                     const void *buffer, size_t size);
 };
 
 } // Tar

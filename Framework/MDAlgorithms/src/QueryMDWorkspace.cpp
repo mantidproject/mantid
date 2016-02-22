@@ -148,8 +148,8 @@ void QueryMDWorkspace::getBoxData(
 
   std::vector<API::IMDNode *> boxes;
   ws->getBox()->getBoxes(boxes, depth, true);
-  for (size_t i = 0; i < boxes.size(); i++) {
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
+  for (auto &boxe : boxes) {
+    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxe);
     if (!box)
       throw(std::runtime_error("Can not cast IMDNode to any type of boxes"));
     size_t d = box->getDepth();

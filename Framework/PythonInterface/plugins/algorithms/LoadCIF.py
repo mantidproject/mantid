@@ -232,17 +232,34 @@ class LoadCIF(PythonAlgorithm):
                              doc='Load UB-matrix from CIF file if available.')
 
     def PyExec(self):
-        cifFileName = self.getProperty('InputFile').value
+        try:
+            self._loadFromCif()
+        except ImportError:
+            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW' \
+                               ' (https://pypi.python.org/pypi/PyCifRW/4.1)')
+
+    def _loadFromCif(self):
+        from CifFile import ReadCif
+
+        cifFileUrl = self._getFileUrl()
         workspace = self.getProperty('Workspace').value
 
         # Try to parse cif file using PyCifRW
-        parsedCifFile = ReadCif(cifFileName)
+        parsedCifFile = ReadCif(cifFileUrl)
 
         self._setCrystalStructureFromCifFile(workspace, parsedCifFile)
 
         ubOption = self.getProperty('LoadUBMatrix').value
         if ubOption:
             self._setUBMatrixFromCifFile(workspace, parsedCifFile)
+
+    def _getFileUrl(self):
+        # ReadCif requires a URL, windows path specs seem to confuse urllib,
+        # so the pathname is converted to a URL before passing it to ReadCif.
+        from urllib import pathname2url
+
+        cifFileName = self.getProperty('InputFile').value
+        return pathname2url(cifFileName)
 
     def _setCrystalStructureFromCifFile(self, workspace, cifFile):
         crystalStructure = self._getCrystalStructureFromCifFile(cifFile)
@@ -277,10 +294,4 @@ class LoadCIF(PythonAlgorithm):
         return builder.getUBMatrix()
 
 
-try:
-    from CifFile import ReadCif
-
-    AlgorithmFactory.subscribe(LoadCIF)
-except ImportError:
-    logger.debug('Failed to subscribe algorithm LoadCIF; Python package PyCifRW' \
-                 'may be missing (https://pypi.python.org/pypi/PyCifRW/4.1)')
+AlgorithmFactory.subscribe(LoadCIF)

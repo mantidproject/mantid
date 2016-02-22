@@ -1,6 +1,11 @@
 #include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -20,7 +25,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 /** Constructor
  */
 LoadILLSANS::LoadILLSANS() : m_defaultBinning(2) {
-  m_supportedInstruments.push_back("D33");
+  m_supportedInstruments.emplace_back("D33");
 }
 
 //----------------------------------------------------------------------------------------------

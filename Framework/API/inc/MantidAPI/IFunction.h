@@ -10,7 +10,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN
@@ -315,7 +314,7 @@ public:
 
   /// Constructor
   IFunction()
-      : m_isParallel(false), m_handler(NULL), m_progReporter(NULL),
+      : m_isParallel(false), m_handler(nullptr), m_progReporter(nullptr),
         m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();

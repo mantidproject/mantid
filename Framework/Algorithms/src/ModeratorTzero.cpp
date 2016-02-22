@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -47,10 +49,7 @@ void ModeratorTzero::init() {
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
-  std::vector<std::string> EModeOptions;
-  EModeOptions.push_back("Indirect");
-  EModeOptions.push_back("Direct");
-  EModeOptions.push_back("Elastic");
+  std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
   this->declareProperty("EMode", "Indirect",
                         boost::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
@@ -104,7 +103,7 @@ void ModeratorTzero::exec() {
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventWS != NULL) {
+  if (eventWS != nullptr) {
     execEvent(emode);
     return;
   }
@@ -246,28 +245,14 @@ void ModeratorTzero::execEvent(const std::string &emode) {
 
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
-  Mantid::API::MatrixWorkspace_sptr matrixOutputWS =
-      getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
-    // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Get pointers to sample and source
   IComponent_const_sptr source = m_instrument->getSource();
@@ -277,7 +262,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
+    Kernel::Property *eiprop = outputWS->run().getProperty("Ei");
     double Ei = boost::lexical_cast<double>(eiprop->value());
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
@@ -286,6 +271,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   }
 
   // Loop over the spectra
+  const size_t numHists = static_cast<size_t>(outputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
@@ -299,7 +285,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
       double L2(-1);  // distance from sample to detector
 
       try {
-        det = inputWS->getDetector(i);
+        det = outputWS->getDetector(i);
         if (det->isMonitor()) {
           // redefine the sample as the monitor
           L1 = source->getDistance(*det);
@@ -345,54 +331,44 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           }
           if (t2 >= 0) // t2 < 0 when no detector info is available
           {
-            double tof;
             // fix the histogram bins
             MantidVec &x = evlist.dataX();
-            for (auto iter = x.begin(); iter != x.end(); ++iter) {
-              tof = *iter;
+            for (double &tof : x) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              *iter = tof;
             }
 
             MantidVec tofs = evlist.getTofs();
-            for (unsigned int itof = 0; itof < tofs.size(); itof++) {
-              tof = tofs[itof];
+            for (double &tof : tofs) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
                 tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-              tofs[itof] = tof;
             }
             evlist.setTofs(tofs);
             evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
           } // end of if( t2>= 0)
         }   // end of if(emode=="Indirect")
         else if (emode == "Elastic") {
-          double tof;
           // Apply t0 correction to histogram bins
           MantidVec &x = evlist.dataX();
-          for (auto iter = x.begin(); iter != x.end(); ++iter) {
-            tof = *iter;
+          for (double &tof : x) {
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            *iter = tof;
           }
 
           MantidVec tofs = evlist.getTofs();
-          for (unsigned int itof = 0; itof < tofs.size(); itof++) {
+          for (double &tof : tofs) {
             // add a [-0.1,0.1] microsecond noise to avoid artifacts
             // resulting from original tof data
-            tof = tofs[itof];
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
             else
               tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-            tofs[itof] = tof;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
@@ -403,13 +379,13 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         else if (emode == "Direct") {
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
-          for (auto iter = x.begin(); iter != x.end(); ++iter) {
-            *iter -= t0_direct;
+          for (double &tof : x) {
+            tof -= t0_direct;
           }
 
           MantidVec tofs = evlist.getTofs();
-          for (unsigned int itof = 0; itof < tofs.size(); itof++) {
-            tofs[itof] -= t0_direct;
+          for (double &tof : tofs) {
+            tof -= t0_direct;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
