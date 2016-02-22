@@ -24,7 +24,7 @@ using Kernel::TimeSeriesProperty;
  */
 ISISRunLogs::ISISRunLogs(const API::Run &icpRun) {
   // ICP event either in form icp_event or icpevent
-  for (const auto &icpLogName : {"icp_event", "icpevent"}) {
+  for (const auto icpLogName : {"icp_event", "icpevent"}) {
     try {
       Kernel::Property *icpLog = icpRun.getLogData(icpLogName);
       m_logParser = Kernel::make_unique<LogParser>(icpLog);
