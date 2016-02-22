@@ -66,7 +66,7 @@ const std::string ConvolutionFitSequential::summary() const {
  */
 void ConvolutionFitSequential::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();

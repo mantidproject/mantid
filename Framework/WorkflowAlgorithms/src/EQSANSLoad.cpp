@@ -40,21 +40,21 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void EQSANSLoad::init() {
-  declareProperty(new API::FileProperty("Filename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        "_event.nxs"),
-                  "The name of the input event Nexus file to load");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      "The name of the input event Nexus file to load");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),
                   "Input event workspace. Assumed to be unmodified events "
                   "straight from LoadEventNexus");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Then name of the output EventWorkspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Then name of the output EventWorkspace");
   declareProperty(
       "NoBeamCenter", false,
       "If true, the detector will not be moved according to the beam center");
@@ -448,7 +448,8 @@ void EQSANSLoad::exec() {
   EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
   if (fileName.size() == 0 && !inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided" << std::endl;
+                     "input workspace must be provided"
+                  << std::endl;
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided");
   } else if (fileName.size() > 0 && inputEventWS) {
@@ -483,16 +484,17 @@ void EQSANSLoad::exec() {
   }
 
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    AlgorithmProperty *loadProp = new AlgorithmProperty("LoadAlgorithm");
+    auto loadProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
     setPropertyValue("InputWorkspace", "");
     setProperty("NoBeamCenter", false);
     loadProp->setValue(toString());
-    reductionManager->declareProperty(loadProp);
+    reductionManager->declareProperty(std::move(loadProp));
   }
 
   if (!reductionManager->existsProperty("InstrumentName")) {
     reductionManager->declareProperty(
-        new PropertyWithValue<std::string>("InstrumentName", "EQSANS"));
+        make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                    "EQSANS"));
   }
 
   // Output log
@@ -528,8 +530,8 @@ void EQSANSLoad::exec() {
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
       }
-      declareProperty(new WorkspaceProperty<>("MonitorWorkspace", mon_wsname,
-                                              Direction::Output),
+      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                          "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
       setProperty("MonitorWorkspace", monWS);
     }
@@ -666,13 +668,13 @@ void EQSANSLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", m_center_x));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterX", m_center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", m_center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", m_center_y));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterY", m_center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }
@@ -688,7 +690,8 @@ void EQSANSLoad::exec() {
     dataWS->mutableRun().addProperty("is_frame_skipping", 0, true);
     if (correct_for_flight_path) {
       g_log.error() << "CorrectForFlightPath and SkipTOFCorrection can't be "
-                       "set to true at the same time" << std::endl;
+                       "set to true at the same time"
+                    << std::endl;
       m_output_message += "    Skipped flight path correction: see error log\n";
     }
   } else {

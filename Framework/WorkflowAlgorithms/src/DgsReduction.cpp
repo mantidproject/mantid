@@ -57,21 +57,22 @@ const std::string DgsReduction::category() const {
 void DgsReduction::init() {
   // Sample setup options
   std::string sampleSetup = "Sample Setup";
-  this->declareProperty(new FileProperty("SampleInputFile", "",
-                                         FileProperty::OptionalLoad,
-                                         "_event.nxs"),
+  this->declareProperty(make_unique<FileProperty>("SampleInputFile", "",
+                                                  FileProperty::OptionalLoad,
+                                                  "_event.nxs"),
                         "File containing the sample data to reduce");
-  this->declareProperty(new WorkspaceProperty<>("SampleInputWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "Workspace to be reduced");
   this->declareProperty(
-      new WorkspaceProperty<>("SampleInputMonitorWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(
+          "SampleInputWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Workspace to be reduced");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>("SampleInputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input sample workspace.");
-  this->declareProperty(
-      new FileProperty("DetCalFilename", "", FileProperty::OptionalLoad),
-      "A detector calibration file.");
+  this->declareProperty(make_unique<FileProperty>("DetCalFilename", "",
+                                                  FileProperty::OptionalLoad),
+                        "A detector calibration file.");
   this->declareProperty("RelocateDetectors", false,
                         "Move detectors to position specified in cal file.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -97,20 +98,23 @@ void DgsReduction::init() {
       "Monitor2SpecId", EMPTY_INT(), mustBePositiveInt,
       "Spectrum ID for the second monitor to use in Ei calculation.");
   this->declareProperty(
-      new ArrayProperty<double>("EnergyTransferRange",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "EnergyTransferRange",
+          boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
       "boundary.\n"
       "Negative width value indicates logarithmic binning.");
   this->declareProperty(
       "SofPhiEIsDistribution", true,
       "The final S(Phi, E) data is made to be a distribution.");
-  this->declareProperty(
-      new FileProperty("HardMaskFile", "", FileProperty::OptionalLoad, ".xml"),
-      "A file or workspace containing a hard mask.");
-  this->declareProperty(
-      new FileProperty("GroupingFile", "", FileProperty::OptionalLoad, ".xml"),
-      "A file containing grouping (mapping) information.");
+  this->declareProperty(make_unique<FileProperty>("HardMaskFile", "",
+                                                  FileProperty::OptionalLoad,
+                                                  ".xml"),
+                        "A file or workspace containing a hard mask.");
+  this->declareProperty(make_unique<FileProperty>("GroupingFile", "",
+                                                  FileProperty::OptionalLoad,
+                                                  ".xml"),
+                        "A file containing grouping (mapping) information.");
   this->declareProperty("ShowIntermediateWorkspaces", false,
                         "Flag to show the intermediate workspaces (diagnostic "
                         "mask, integrated detector vanadium, "
@@ -171,16 +175,17 @@ void DgsReduction::init() {
       new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
   this->declareProperty("CorrectKiKf", true, "Apply the ki/kf correction.");
   this->declareProperty(
-      new FileProperty("DetectorVanadiumInputFile", "",
-                       FileProperty::OptionalLoad, "_event.nxs"),
+      make_unique<FileProperty>("DetectorVanadiumInputFile", "",
+                                FileProperty::OptionalLoad, "_event.nxs"),
       "File containing the sample detector vanadium data to reduce");
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "DetectorVanadiumInputWorkspace", "",
+                            Direction::Input, PropertyMode::Optional),
+                        "Sample detector vanadium workspace to be reduced");
   this->declareProperty(
-      new WorkspaceProperty<>("DetectorVanadiumInputWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
-      "Sample detector vanadium workspace to be reduced");
-  this->declareProperty(
-      new WorkspaceProperty<>("DetectorVanadiumInputMonitorWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("DetectorVanadiumInputMonitorWorkspace",
+                                       "", Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input sample detector vanadium "
       "workspace.");
   this->declareProperty("SaveProcessedDetVan", false,
@@ -189,8 +194,8 @@ void DgsReduction::init() {
                             new VisibleWhenProperty("DetectorVanadiumInputFile",
                                                     IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
-      new FileProperty("SaveProcDetVanFilename", "", FileProperty::OptionalSave,
-                       ".nxs"),
+      make_unique<FileProperty>("SaveProcDetVanFilename", "",
+                                FileProperty::OptionalSave, ".nxs"),
       "Provide a filename for saving the processed detector vanadium.");
   this->declareProperty(
       "UseProcessedDetVan", false,
@@ -292,16 +297,17 @@ void DgsReduction::init() {
                             new VisibleWhenProperty("DetectorVanadiumInputFile",
                                                     IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
-      new FileProperty("DetectorVanadium2InputFile", "",
-                       FileProperty::OptionalLoad, "_event.nxs"),
+      make_unique<FileProperty>("DetectorVanadium2InputFile", "",
+                                FileProperty::OptionalLoad, "_event.nxs"),
       "File containing detector vanadium data to compare against");
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "DetectorVanadium2InputWorkspace", "",
+                            Direction::Input, PropertyMode::Optional),
+                        "Detector vanadium workspace to compare against");
   this->declareProperty(
-      new WorkspaceProperty<>("DetectorVanadium2InputWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
-      "Detector vanadium workspace to compare against");
-  this->declareProperty(
-      new WorkspaceProperty<>("DetectorVanadium2InputMonitorWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("DetectorVanadium2InputMonitorWorkspace",
+                                       "", Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input comparison detector "
       "vanadium workspace.");
 
@@ -383,22 +389,24 @@ void DgsReduction::init() {
   this->declareProperty("DoAbsoluteUnits", false,
                         "If true, perform an absolute units normalisation.");
   this->declareProperty(
-      new FileProperty("AbsUnitsSampleInputFile", "",
-                       FileProperty::OptionalLoad),
+      make_unique<FileProperty>("AbsUnitsSampleInputFile", "",
+                                FileProperty::OptionalLoad),
       "The sample (vanadium) file used in the absolute units normalisation.");
   this->setPropertySettings(
       "AbsUnitsSampleInputFile",
       new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new WorkspaceProperty<>("AbsUnitsSampleInputWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("AbsUnitsSampleInputWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "The sample (vanadium) workspace for absolute units normalisation.");
   this->setPropertySettings(
       "AbsUnitsSampleInputWorkspace",
       new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new WorkspaceProperty<>("AbsUnitsSampleInputMonitorWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("AbsUnitsSampleInputMonitorWorkspace",
+                                       "", Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input absolute units sample "
       "workspace.");
   this->setPropertySettings(
@@ -410,22 +418,24 @@ void DgsReduction::init() {
       "AbsUnitsGroupingFile",
       new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new FileProperty("AbsUnitsDetectorVanadiumInputFile", "",
-                       FileProperty::OptionalLoad),
+      make_unique<FileProperty>("AbsUnitsDetectorVanadiumInputFile", "",
+                                FileProperty::OptionalLoad),
       "The detector vanadium file used in the absolute units normalisation.");
   this->setPropertySettings(
       "AbsUnitsDetectorVanadiumInputFile",
       new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new WorkspaceProperty<>("AbsUnitsDetectorVanadiumInputWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("AbsUnitsDetectorVanadiumInputWorkspace",
+                                       "", Direction::Input,
+                                       PropertyMode::Optional),
       "The detector vanadium workspace for absolute units normalisation.");
   this->setPropertySettings(
       "AbsUnitsDetectorVanadiumInputWorkspace",
       new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new WorkspaceProperty<>("AbsUnitsDetectorVanadiumInputMonitorWorkspace",
-                              "", Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(
+          "AbsUnitsDetectorVanadiumInputMonitorWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "A monitor workspace associated with the input absolute units sample "
       "detector vanadium workspace.");
   this->setPropertySettings(
@@ -514,8 +524,9 @@ void DgsReduction::init() {
   this->declareProperty("DoPowderDataConversion", false,
                         "Flag to switch on converting DeltaE to SQW.");
   this->declareProperty(
-      new ArrayProperty<double>("PowderMomTransferRange",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "PowderMomTransferRange",
+          boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
       "boundary.\n"
       "Negative width value indicates logarithmic binning.");
@@ -529,8 +540,8 @@ void DgsReduction::init() {
       "SavePowderNexusFile",
       new VisibleWhenProperty("DoPowderDataConversion", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      new FileProperty("SavePowderNexusFilename", "",
-                       FileProperty::OptionalSave, ".nxs"),
+      make_unique<FileProperty>("SavePowderNexusFilename", "",
+                                FileProperty::OptionalSave, ".nxs"),
       "Provide a filename for saving the processed powder data.");
   this->setPropertySettings(
       "SavePowderNexusFilename",
@@ -543,9 +554,9 @@ void DgsReduction::init() {
 
   // Common to PD and SC
 
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Provide a name for the output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "Provide a name for the output workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Output);
 }
@@ -583,8 +594,8 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       std::string detCalFileProperty = prop + "DetCalFilename";
       if (!detCalFileFromAlg.empty()) {
         this->reductionManager->declareProperty(
-            new PropertyWithValue<std::string>(detCalFileProperty,
-                                               detCalFileFromAlg));
+            Kernel::make_unique<PropertyWithValue<std::string>>(detCalFileProperty,
+                                                        detCalFileFromAlg));
       }
     }
 
@@ -653,8 +664,8 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
       // Set a property to use later.
       g_log.warning() << "Old format grouping file in use." << std::endl;
       this->reductionManager->declareProperty(
-          new PropertyWithValue<std::string>(prop + "OldGroupingFilename",
-                                             groupFile));
+          Kernel::make_unique<PropertyWithValue<std::string>>(
+              prop + "OldGroupingFilename", groupFile));
       return boost::shared_ptr<MatrixWorkspace>();
     }
   }
@@ -690,7 +701,8 @@ void DgsReduction::exec() {
   const std::vector<Property *> props = this->getProperties();
   for (auto prop : props) {
     if (!boost::contains(prop->name(), "Input")) {
-      this->reductionManager->declareProperty(prop->clone());
+      this->reductionManager->declareProperty(
+          std::unique_ptr<Property>(prop->clone()));
     }
   }
 
@@ -705,8 +717,9 @@ void DgsReduction::exec() {
   Workspace_sptr sampleWS = this->loadInputData("Sample");
   MatrixWorkspace_sptr WS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
-  this->reductionManager->declareProperty(new PropertyWithValue<std::string>(
-      "InstrumentName", WS->getInstrument()->getName()));
+  this->reductionManager->declareProperty(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
+          "InstrumentName", WS->getInstrument()->getName()));
 
   // Check the facility for the loaded file and make sure it's the
   // same as the default.
@@ -737,7 +750,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
   if (hardMaskWS && showIntermedWS) {
     std::string hardMaskName = outputWsName + "_hardmask";
-    this->declareProperty(new WorkspaceProperty<>(
+    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "ReductionHardMask", hardMaskName, Direction::Output));
     this->setProperty("ReductionHardMask", hardMaskWS);
   }
@@ -747,7 +760,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr groupingWS = this->loadGroupingFile("");
   if (groupingWS && showIntermedWS) {
     std::string groupName = outputWsName + "_grouping";
-    this->declareProperty(new WorkspaceProperty<>(
+    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "ReductionGrouping", groupName, Direction::Output));
     this->setProperty("ReductionGrouping", groupingWS);
   }
@@ -783,7 +796,7 @@ void DgsReduction::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
 
     if (showIntermedWS) {
-      this->declareProperty(new WorkspaceProperty<>(
+      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
           "SampleDetVanDiagMask", detVanMaskName, Direction::Output));
       this->setProperty("SampleDetVanDiagMask", maskWS);
     }
@@ -800,7 +813,7 @@ void DgsReduction::exec() {
     idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
-      this->declareProperty(new WorkspaceProperty<>(
+      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
           "IntegratedNormWorkspace", idetVanName, Direction::Output));
       this->setProperty("IntegratedNormWorkspace", idetVanWS);
     }
@@ -833,7 +846,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
 
   if (tibWS && showIntermedWS) {
-    this->declareProperty(new WorkspaceProperty<>(
+    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "SampleTibWorkspace", tibWsName, Direction::Output));
     this->setProperty("SampleTibWorkspace", tibWS);
   }
@@ -885,10 +898,10 @@ void DgsReduction::exec() {
     outputWS = divide(outputWS, absUnitsWS);
 
     if (showIntermedWS) {
-      this->declareProperty(new WorkspaceProperty<>(
+      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
           "AbsUnitsWorkspace", absWsName, Direction::Output));
       this->setProperty("AbsUnitsWorkspace", absUnitsWS);
-      this->declareProperty(new WorkspaceProperty<>(
+      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
           "AbsUnitsDiagMask", outputWsName + "_absunits_diagmask",
           Direction::Output));
       this->setProperty("AbsUnitsDiagMask", absMaskWS);
@@ -914,7 +927,7 @@ void DgsReduction::exec() {
     sofqw->setProperty("EFixed", initialEnergy);
     sofqw->executeAsChildAlg();
     MatrixWorkspace_sptr sqwWS = sofqw->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<>(
+    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "PowderSqwWorkspace", sqwWsName, Direction::Output));
     this->setProperty("PowderSqwWorkspace", sqwWS);
 

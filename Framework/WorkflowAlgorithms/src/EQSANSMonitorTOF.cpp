@@ -24,15 +24,15 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSMonitorTOF::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
 
   // Output parameters
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace to store the corrected data in");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace to store the corrected data in");
   declareProperty("FrameSkipping", false,
                   "True if the data was taken in frame-skipping mode",
                   Kernel::Direction::Output);
@@ -56,7 +56,8 @@ void EQSANSMonitorTOF::exec() {
       inputWS->getInstrument()->getMonitors();
   if (monitor_list.size() != 1) {
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
-                     "This should not happen" << std::endl;
+                     "This should not happen"
+                  << std::endl;
   }
   IDetector_const_sptr mon;
   try {
