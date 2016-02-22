@@ -62,7 +62,7 @@ public:
   std::vector<double> getEntropy() const;
   std::vector<double> getEntropyGrad() const;
   std::vector<double> getMetric() const;
-	std::vector<double> getReconstructedData() const;
+  std::vector<double> getReconstructedData() const;
   std::vector<std::vector<double>> getSearchDirections();
   QuadraticCoefficients getQuadraticCoefficients();
   double getAngle();
@@ -70,7 +70,7 @@ public:
 
   // Other
   void calculateSearchDirections();
-	void calculateChisq();
+  void calculateChisq();
   std::vector<double> transformImageToData(const std::vector<double> &input);
   std::vector<double> transformDataToImage(const std::vector<double> &input);
 

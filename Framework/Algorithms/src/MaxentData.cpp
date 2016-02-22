@@ -58,9 +58,9 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
     // X*N data points (real data)
     throw std::runtime_error("Couldn't load invalid data");
   }
-	if (dataRe.size() != 2 * image.size()) {
-		throw std::runtime_error("Couldn't load invalid data");
-	}
+  if (dataRe.size() != 2 * image.size()) {
+    throw std::runtime_error("Couldn't load invalid data");
+  }
   if (m_background == 0) {
     throw std::runtime_error("Background must be positive");
   }
@@ -105,10 +105,10 @@ void MaxentData::setImage(const std::vector<double> &image) {
   }
   m_image = image;
 
-	m_dataCalc = transformImageToData(image);
+  m_dataCalc = transformImageToData(image);
 
-	calculateChisq();
-	m_chisq = getChisq();
+  calculateChisq();
+  m_chisq = getChisq();
 
   // Reset m_angle to default
   m_angle = -1.;
@@ -150,9 +150,7 @@ std::vector<double> MaxentData::getEntropyGrad() const {
   return entropyGrad;
 }
 
-std::vector<double> MaxentData::getReconstructedData() const {
-	return m_data;
-}
+std::vector<double> MaxentData::getReconstructedData() const { return m_data; }
 
 std::vector<double> MaxentData::getMetric() const {
 
@@ -285,17 +283,17 @@ void MaxentData::calculateSearchDirections() {
 
 void MaxentData::calculateChisq() {
 
-	size_t npoints = m_data.size();
+  size_t npoints = m_data.size();
 
-	// Calculate
-	// ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
-	m_chisq = 0;
-	for (size_t i = 0; i < npoints; i++) {
-		if (m_errors[i] != 0.0) {
-			double term = (m_data[i] - m_dataCalc[i]) / m_errors[i];
-			m_chisq += term * term;
-		}
-	}
+  // Calculate
+  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
+  m_chisq = 0;
+  for (size_t i = 0; i < npoints; i++) {
+    if (m_errors[i] != 0.0) {
+      double term = (m_data[i] - m_dataCalc[i]) / m_errors[i];
+      m_chisq += term * term;
+    }
+  }
 }
 std::vector<double>
 MaxentData::transformImageToData(const std::vector<double> &input) {

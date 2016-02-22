@@ -71,9 +71,8 @@ private:
   /// Calculates the distance of the current solution
   double distance(const Kernel::DblMatrix &s2, const std::vector<double> &beta);
   /// Populates the output workspaces
-  void populateOutputWS(const API::MatrixWorkspace_sptr &inWS,
-                        size_t spec, size_t nspec,
-                        const std::vector<double> &result,
+  void populateOutputWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
+                        size_t nspec, const std::vector<double> &result,
                         API::MatrixWorkspace_sptr &outWS, bool isImage);
 };
 

@@ -34,10 +34,9 @@ public:
   MaxentEntropy() = default;
   virtual ~MaxentEntropy() = default;
 
-	virtual double getDerivative(double x) = 0;
-	virtual double getSecondDerivative(double x) = 0;
-	virtual double correctValue(double x) = 0;
-
+  virtual double getDerivative(double x) = 0;
+  virtual double getSecondDerivative(double x) = 0;
+  virtual double correctValue(double x) = 0;
 };
 
 // Helper typedef for scoped pointer of this type.

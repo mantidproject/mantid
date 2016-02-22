@@ -534,9 +534,8 @@ double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
 * @param outImage :: [output] The output workspace containing the reconstructed
 * image
 */
-void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, 
-                              size_t spec, size_t nspec,
-                              const std::vector<double> &result,
+void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+                              size_t nspec, const std::vector<double> &result,
                               MatrixWorkspace_sptr &outWS, bool isImage) {
 
   if (result.size() % 2)
@@ -549,39 +548,37 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS,
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-	if (isImage) {
+  if (isImage) {
 
-		double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
-		double delta = 1. / dx / npoints;
-		int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+    double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
+    double delta = 1. / dx / npoints;
+    int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
 
-		for (int i = 0; i < npoints; i++) {
-			int j = (npoints / 2 + i + isOdd) % npoints;
-			X[i] = delta * (-npoints / 2 + i);
-			YR[i] = result[2 * j] * dx;
-			YI[i] = result[2 * j + 1] * dx;
-		}
-		if (npointsX == npoints + 1)
-			X[npoints] = X[npoints - 1] + delta;
-	}
-	else {
-		for (int i = 0; i < npoints; i++) {
-			X[i] = inWS->readX(spec)[i];
-			YR[i] = result[2 * i];
-			YI[i] = result[2 * i + 1];
-		}
-		if (npointsX == npoints + 1)
-			X[npoints] = inWS->readX(spec)[npoints];
-	}
+    for (int i = 0; i < npoints; i++) {
+      int j = (npoints / 2 + i + isOdd) % npoints;
+      X[i] = delta * (-npoints / 2 + i);
+      YR[i] = result[2 * j] * dx;
+      YI[i] = result[2 * j + 1] * dx;
+    }
+    if (npointsX == npoints + 1)
+      X[npoints] = X[npoints - 1] + delta;
+  } else {
+    for (int i = 0; i < npoints; i++) {
+      X[i] = inWS->readX(spec)[i];
+      YR[i] = result[2 * i];
+      YI[i] = result[2 * i + 1];
+    }
+    if (npointsX == npoints + 1)
+      X[npoints] = inWS->readX(spec)[npoints];
+  }
   // Reconstructed image
 
-	outWS->dataX(spec).assign(X.begin(), X.end());
-	outWS->dataY(spec).assign(YR.begin(), YR.end());
-	outWS->dataE(spec).assign(E.begin(), E.end());
-	outWS->dataX(nspec + spec).assign(X.begin(), X.end());
-	outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
-	outWS->dataE(nspec + spec).assign(E.begin(), E.end());
-
+  outWS->dataX(spec).assign(X.begin(), X.end());
+  outWS->dataY(spec).assign(YR.begin(), YR.end());
+  outWS->dataE(spec).assign(E.begin(), E.end());
+  outWS->dataX(nspec + spec).assign(X.begin(), X.end());
+  outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
+  outWS->dataE(nspec + spec).assign(E.begin(), E.end());
 }
 
 } // namespace Algorithms
