@@ -45,7 +45,9 @@ Example 1: Rotating a bank around the Y Axis
         """ Handles potential issues with +-0 (for 6 digits text output) """
         return 0.0 if abs(value) < 1e-7 else value
 
-     result = '[{0:.6f}, {1:.6f}, {2:.6f}]'.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
+     precision = str(digits)
+     format_str = '[{0:.'+precision+'f}, {1:.'+precision+'f}, {2:.'+precision+'f}]'
+     result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
      return result
 
   print 'Original positions of detectors 1 and 2'
@@ -101,7 +103,9 @@ Example 2: Rotating a bank around the Z Axis
         """ Handles potential issues with +-0 (for 6 digits text output) """
         return 0.0 if abs(value) < 1e-7 else value
 
-     result = '[{0:.6f}, {1:.6f}, {2:.6f}]'.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
+     precision = str(digits)
+     format_str = '[{0:.'+precision+'f}, {1:.'+precision+'f}, {2:.'+precision+'f}]'
+     result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
      return result
 
   print 'Original positions of detectors 1 and 4'
