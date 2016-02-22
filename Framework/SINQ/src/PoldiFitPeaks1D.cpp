@@ -84,7 +84,7 @@ void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction) {
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(
     const DataObjects::TableWorkspace_sptr &peakTable) const {
-  PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
+  auto peakCollection = boost::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
@@ -100,7 +100,7 @@ PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 
   IFunction_sptr clonedBackground = m_backgroundTemplate->clone();
 
-  CompositeFunction_sptr totalProfile(new CompositeFunction);
+  auto totalProfile = boost::make_shared<CompositeFunction>();
   totalProfile->initialize();
   totalProfile->addFunction(clonedProfile);
   totalProfile->addFunction(clonedBackground);
@@ -153,7 +153,7 @@ void PoldiFitPeaks1D::exec() {
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
-  WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
+  auto fitPlotGroup = boost::make_shared<WorkspaceGroup>();
 
   for (size_t i = 0; i < m_peaks->peakCount(); ++i) {
     PoldiPeak_sptr currentPeak = m_peaks->peak(i);

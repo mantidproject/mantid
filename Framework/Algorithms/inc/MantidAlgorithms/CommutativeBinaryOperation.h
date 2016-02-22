@@ -44,14 +44,14 @@ public:
   /// Default constructor
   CommutativeBinaryOperation() : BinaryOperation(){};
   /// Destructor
-  virtual ~CommutativeBinaryOperation(){};
+  ~CommutativeBinaryOperation() override{};
 
 protected:
   // Overridden BinaryOperation method
   /// Checks the overall size compatability of two workspaces
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
 };
 
 } // namespace Algorithm

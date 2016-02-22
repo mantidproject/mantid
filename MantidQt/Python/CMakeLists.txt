@@ -57,6 +57,8 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 # Other folders that need to be included...
 include_directories ( ../SliceViewer/inc )
 include_directories ( ../MantidWidgets/inc )
+include_directories ( ../MantidWidgets/inc/MantidQtMantidWidgets )
+include_directories ( ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView )
 include_directories ( ../Factory/inc )
 include_directories ( ../SpectrumViewer/inc )
 include_directories ( ../RefDetectorViewer/inc )

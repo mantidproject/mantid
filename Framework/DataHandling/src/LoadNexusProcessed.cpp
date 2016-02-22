@@ -8,6 +8,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -29,7 +30,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <nexus/NeXusException.hpp>
 
@@ -193,7 +194,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
-      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(NULL) {}
+      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
 
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed() { delete m_cppFile; }
@@ -435,7 +436,7 @@ void LoadNexusProcessed::exec() {
     m_list = !specListProp->isDefault();
 
     // Load all first level entries
-    WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+    auto wksp_group = boost::make_shared<WorkspaceGroup>();
     // This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
@@ -1095,8 +1096,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (size_t i = 0; i < columnNames.size(); i++) {
-    const std::string str = columnNames[i];
+  for (auto str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();
@@ -1743,10 +1743,7 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   is1 >> execNum1;
   is2 >> execNum2;
 
-  if (execNum1 < execNum2)
-    return true;
-  else
-    return false;
+  return execNum1 < execNum2;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1762,7 +1759,8 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
 void LoadNexusProcessed::getWordsInString(const std::string &words3,
                                           std::string &w1, std::string &w2,
                                           std::string &w3) {
-  Poco::StringTokenizer data(words3, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 3) {
     g_log.warning() << "Algorithm list line " + words3 +
                            " is not of the correct format\n";
@@ -1788,7 +1786,8 @@ void LoadNexusProcessed::getWordsInString(const std::string &words3,
 void LoadNexusProcessed::getWordsInString(const std::string &words4,
                                           std::string &w1, std::string &w2,
                                           std::string &w3, std::string &w4) {
-  Poco::StringTokenizer data(words4, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 4) {
     g_log.warning() << "Algorithm list line " + words4 +
                            " is not of the correct format\n";
@@ -1860,11 +1859,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
   const int64_t nxbins(m_xbins->size());
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -1937,11 +1936,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
   const int64_t nxbins(m_xbins->size());
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -2015,10 +2014,10 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   errors.load(static_cast<int>(blocksize), static_cast<int>(hist));
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  double *farea_start = NULL;
-  double *farea_end = NULL;
-  double *xErrors_start = NULL;
-  double *xErrors_end = NULL;
+  double *farea_start = nullptr;
+  double *farea_end = nullptr;
+  double *xErrors_start = nullptr;
+  double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));

@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -51,9 +53,7 @@ void ExportTimeSeriesLog::init() {
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
-  std::vector<std::string> units;
-  units.push_back("Seconds");
-  units.push_back("Nano Seconds");
+  std::vector<std::string> units{"Seconds", "Nano Seconds"};
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(units),
@@ -335,7 +335,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
                                               values[i + start_index]));
   }
   // Ensure thread-safety
-  outEventWS->sortAll(TOF_SORT, NULL);
+  outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;

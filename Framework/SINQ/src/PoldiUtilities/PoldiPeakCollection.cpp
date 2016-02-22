@@ -60,8 +60,8 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   clone->setPointGroup(m_pointGroup);
   clone->setUnitCell(m_unitCell);
 
-  for (size_t i = 0; i < m_peaks.size(); ++i) {
-    clone->addPeak(m_peaks[i]->clone());
+  for (auto &peak : m_peaks) {
+    clone->addPeak(peak->clone());
   }
 
   return clone;
@@ -199,16 +199,9 @@ bool PoldiPeakCollection::checkColumns(
     return false;
   }
 
-  std::vector<std::string> shouldNames;
-  shouldNames.push_back("HKL");
-  shouldNames.push_back("d");
-  shouldNames.push_back("delta d");
-  shouldNames.push_back("Q");
-  shouldNames.push_back("delta Q");
-  shouldNames.push_back("Intensity");
-  shouldNames.push_back("delta Intensity");
-  shouldNames.push_back("FWHM (rel.)");
-  shouldNames.push_back("delta FWHM (rel.)");
+  std::vector<std::string> shouldNames{"HKL", "d", "delta d", "Q", "delta Q",
+                                       "Intensity", "delta Intensity",
+                                       "FWHM (rel.)", "delta FWHM (rel.)"};
 
   std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 

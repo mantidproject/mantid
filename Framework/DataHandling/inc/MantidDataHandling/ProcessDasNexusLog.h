@@ -37,21 +37,21 @@ class DLLExport ProcessDasNexusLog : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:
   ProcessDasNexusLog();
-  virtual ~ProcessDasNexusLog();
+  ~ProcessDasNexusLog() override;
 
-  virtual const std::string name() const { return "ProcessDasNexusLog"; };
+  const std::string name() const override { return "ProcessDasNexusLog"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Very specialized algorithm to fix certain SNS DAS logs that cannot "
            "be used directly.";
   }
 
-  virtual int version() const { return 1; };
-  virtual const std::string category() const { return "DataHandling\\Logs"; };
+  int version() const override { return 1; };
+  const std::string category() const override { return "DataHandling\\Logs"; };
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void convertToAbsoluteTime(API::MatrixWorkspace_sptr ws, std::string logname,
                              std::vector<Kernel::DateAndTime> &abstimeve,

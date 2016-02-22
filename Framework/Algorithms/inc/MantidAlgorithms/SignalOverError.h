@@ -36,21 +36,22 @@ namespace Algorithms {
 class DLLExport SignalOverError : public UnaryOperation {
 public:
   SignalOverError();
-  virtual ~SignalOverError();
+  ~SignalOverError() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Replace Y by Y/E for a MatrixWorkspace";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
   // Overridden UnaryOperation methods
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 };
 
 } // namespace Algorithms

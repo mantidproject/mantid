@@ -39,25 +39,25 @@ public:
   /// (Empty) Constructor
   SANSBeamFinder() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SANSBeamFinder() {}
+  ~SANSBeamFinder() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SANSBeamFinder"; }
+  const std::string name() const override { return "SANSBeamFinder"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Beam finder workflow algorithm for SANS instruments.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   API::MatrixWorkspace_sptr
   loadBeamFinderFile(const std::string &beamCenterFile);
   void maskEdges(API::MatrixWorkspace_sptr beamCenterWS, int high, int low,

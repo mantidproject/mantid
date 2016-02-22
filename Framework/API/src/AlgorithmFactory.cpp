@@ -7,7 +7,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/StringTokenizer.h"
+#include "MantidKernel/StringTokenizer.h"
 
 namespace Mantid {
 namespace API {
@@ -366,9 +366,8 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 
       // Traverse each parent category, working our way from the top down.
       std::string currentLayer = "";
-      for (auto layerIt = categoryLayers.begin();
-           layerIt != categoryLayers.end(); ++layerIt) {
-        currentLayer.append(*layerIt);
+      for (auto &categoryLayer : categoryLayers) {
+        currentLayer.append(categoryLayer);
 
         if (hiddenCategories.find(currentLayer) != hiddenCategories.end()) {
           // Category is hidden, no need to check any others.
@@ -391,9 +390,10 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
     std::set<std::string> *categorySet) const {
   std::string categoryString = Kernel::ConfigService::Instance().getString(
       "algorithms.categories.hidden");
-  Poco::StringTokenizer tokenizer(categoryString, ";",
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      categoryString, ";",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   std::copy(tokenizer.begin(), tokenizer.end(),
             std::inserter(*categorySet, categorySet->end()));
 }

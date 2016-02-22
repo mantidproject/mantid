@@ -3,8 +3,10 @@
 
 #include "MantidAPI/AnalysisDataService.h" 
 #include "MantidAPI/AlgorithmProxy.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace MantidQt
 {
@@ -34,6 +36,9 @@ namespace MantidWidgets
     // seq. fit dialog 
     auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( m_fitPropBrowser->getWorkspace() );
     m_ui.runs->setText( QString::number( fitWS->getRunNumber() ) + "-" );
+    // Set the file finder to the correct instrument (not Mantid's default instrument)
+    auto instName = fitWS->getInstrument()->getName();
+    m_ui.runs->setInstrumentOverride(QString(instName.c_str()));
 
     // TODO: find a better initial one, e.g. previously used
     m_ui.labelInput->setText("Label");

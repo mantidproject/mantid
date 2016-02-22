@@ -74,36 +74,44 @@ namespace VATES {
 /**
  * This function constructs and executes the helper class.
  * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct
- * modification
+ * @param name : The MDWorkspace containing the information to construct.
+ * @param workspaceProvider: The provider of one or multiple workspaces.
+
  */
-void vtkDataSetToNonOrthogonalDataSet::exec(vtkDataSet *dataset,
-                                            std::string name) {
-  vtkDataSetToNonOrthogonalDataSet temp(dataset, name);
-  temp.execute();
+void vtkDataSetToNonOrthogonalDataSet::exec(
+    vtkDataSet *dataset, std::string name,
+    std::unique_ptr<WorkspaceProvider> workspaceProvider)
+{
+    vtkDataSetToNonOrthogonalDataSet temp(dataset, name,
+                                          std::move(workspaceProvider));
+    temp.execute();
 }
 
 /**
  * This is the private class constructor.
  * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct
- * modification
+ * @param name : The MDWorkspace containing the information to construct.
+ * @param workspaceProvider: The provider of one or multiple workspaces.
  */
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
-    vtkDataSet *dataset, std::string name)
+    vtkDataSet *dataset, std::string name,
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider)
     : m_dataSet(dataset), m_wsName(name), m_numDims(3), m_skewMat(),
       m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
-      m_coordType(Kernel::HKL) {
-  if (NULL == m_dataSet) {
-    throw std::runtime_error("Cannot construct "
-                             "vtkDataSetToNonOrthogonalDataSet with null VTK "
-                             "dataset");
-  }
-  if (name.empty()) {
-    throw std::runtime_error("Cannot construct "
-                             "vtkDataSetToNonOrthogonalDataSet without "
-                             "associated workspace name");
-  }
+      m_coordType(Kernel::HKL),
+      m_workspaceProvider(std::move(workspaceProvider))
+{
+    if (NULL == m_dataSet) {
+        throw std::runtime_error(
+            "Cannot construct "
+            "vtkDataSetToNonOrthogonalDataSet with null VTK "
+            "dataset");
+    }
+    if (name.empty()) {
+        throw std::runtime_error("Cannot construct "
+                                 "vtkDataSetToNonOrthogonalDataSet without "
+                                 "associated workspace name");
+    }
 }
 
 /**
@@ -118,9 +126,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
-  // Get the workspace from the ADS
-  ADSWorkspaceProvider<API::IMDWorkspace> workspaceProvider;
-  API::Workspace_sptr ws = workspaceProvider.fetchWorkspace(m_wsName);
+  // Get the workspace from the workspace provider
+  API::Workspace_sptr ws = m_workspaceProvider->fetchWorkspace(m_wsName);
   std::string wsType = ws->id();
 
   Geometry::OrientedLattice oLatt;

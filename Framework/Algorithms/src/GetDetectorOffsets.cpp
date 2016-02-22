@@ -74,9 +74,7 @@ void GetDetectorOffsets::init() {
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
 
-  std::vector<std::string> modes;
-  modes.push_back("Relative");
-  modes.push_back("Absolute");
+  std::vector<std::string> modes{"Relative", "Absolute"};
 
   declareProperty("OffsetMode", "Relative",
                   boost::make_shared<StringListValidator>(modes),
@@ -112,9 +110,9 @@ void GetDetectorOffsets::exec() {
 
   int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
-  OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+  auto outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
   // Create the output MaskWorkspace
-  MaskWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
+  auto maskWS = boost::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
       maskWS->getDetectorIDToWorkspaceIndexMap(true);

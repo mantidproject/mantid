@@ -6,19 +6,20 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/MantidAlgorithmMetatype.h"
 
 #include <Poco/NObserver.h>
 
@@ -39,6 +40,7 @@ class AlgorithmDockWidget;
 class RemoteClusterDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
+
 namespace MantidQt
 {
   namespace API
@@ -99,10 +101,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
-Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
-  Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
 
 class MantidUI:public QObject
 {
@@ -114,7 +114,7 @@ public:
   explicit MantidUI(ApplicationWindow *aw);
 
   // Destructor
-  ~MantidUI();
+  ~MantidUI() override;
 
   //Clear the framework
   void shutdown();
@@ -418,7 +418,7 @@ signals:
     void manageMantidWorkspaces();
 
     //Python related functions
-    InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
+    InstrumentWindow *getInstrumentView(const QString & wsName, int tab = -1);
 
     void showMantidInstrument();
 

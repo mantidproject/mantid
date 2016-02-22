@@ -234,12 +234,16 @@ public:
     crystalSystemsMap["-1"] = PointGroup::CrystalSystem::Triclinic;
 
     crystalSystemsMap["2"] = PointGroup::CrystalSystem::Monoclinic;
+    crystalSystemsMap["112"] = PointGroup::CrystalSystem::Monoclinic;
     crystalSystemsMap["m"] = PointGroup::CrystalSystem::Monoclinic;
+    crystalSystemsMap["11m"] = PointGroup::CrystalSystem::Monoclinic;
     crystalSystemsMap["2/m"] = PointGroup::CrystalSystem::Monoclinic;
     crystalSystemsMap["112/m"] = PointGroup::CrystalSystem::Monoclinic;
 
     crystalSystemsMap["222"] = PointGroup::CrystalSystem::Orthorhombic;
     crystalSystemsMap["mm2"] = PointGroup::CrystalSystem::Orthorhombic;
+    crystalSystemsMap["m2m"] = PointGroup::CrystalSystem::Orthorhombic;
+    crystalSystemsMap["2mm"] = PointGroup::CrystalSystem::Orthorhombic;
     crystalSystemsMap["mmm"] = PointGroup::CrystalSystem::Orthorhombic;
 
     crystalSystemsMap["4"] = PointGroup::CrystalSystem::Tetragonal;
@@ -301,9 +305,11 @@ public:
 
     TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Triclinic), 2);
 
-    // 2/m with axis b and c, so one more
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Monoclinic), 3 + 1);
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Orthorhombic), 3);
+    // 3 * 2 (for unique b- and c-axis
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Monoclinic), 3 * 2);
+
+    // mmm and 222 + (2mm, m2m, mm2)
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Orthorhombic), 5);
     TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Tetragonal), 8);
 
     // 5 with rhombohedral axes and 8 with hexagonal and 3 for defaults

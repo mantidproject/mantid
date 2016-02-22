@@ -1,4 +1,4 @@
-#pylint: disable=too-many-arguments,unused-variable
+﻿#pylint: disable=too-many-arguments,unused-variable
 
 from mantid.simpleapi import *
 from os.path import join
@@ -106,12 +106,13 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     (outname, uampstotal) = cry_sample.get_data_sum(sampleAdd, "sample", EXPR_FILE)
     if uampstotal < 1e-6:
         return "No usable data, Raw files probably not found: cannot create " + outname + "\n"
-    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile)
+    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile) # where user and GrpFile is appended
     Integration(InputWorkspace="sample", OutputWorkspace="sampleSum")
     MaskDetectorsIf(InputWorkspace="sampleSum", InputCalFile=EXPR_FILE.Path2GrpFile, OutputCalFile=newCalFile,
                     Mode="DeselectIf", Operator="Equal", Value=10)
     mtd.remove("sampleSum")
     EXPR_FILE.Path2DatGrpFile = newCalFile
+    # isfirst always true when called from FocusAll
     if EXPR_FILE.VGrpfocus == "sam" and isfirst:
         cry_vana.create_vana(EXPR_FILE, NoAbs)
     if EXPR_FILE.SEmptyFile[0] != "none":

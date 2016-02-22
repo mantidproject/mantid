@@ -41,10 +41,14 @@ namespace MantidQt
     {
       public:
       PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, Mantid::Geometry::PeakTransform_const_sptr transform, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber=0);
-      virtual ~PeakOverlayMultiCrossFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const;
-      virtual int FOM() const;
-      virtual void swapPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS);
+      ~PeakOverlayMultiCrossFactory() override;
+      boost::shared_ptr<PeakOverlayView> createView(
+          PeaksPresenter *const presenter,
+          Mantid::Geometry::PeakTransform_const_sptr transform) const override;
+      int FOM() const override;
+      void swapPeaksWorkspace(
+          boost::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
+
     private:
       /// Peaks workspace.
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;

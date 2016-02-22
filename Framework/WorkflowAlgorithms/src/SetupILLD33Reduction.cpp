@@ -41,11 +41,8 @@ void SetupILLD33Reduction::init() {
 
   // Beam center
   std::string center_grp = "Beam Center";
-  std::vector<std::string> centerOptions;
-  centerOptions.push_back("None");
-  centerOptions.push_back("Value");
-  centerOptions.push_back("DirectBeam");
-  centerOptions.push_back("Scattering");
+  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
+                                         "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
@@ -92,11 +89,11 @@ void SetupILLD33Reduction::init() {
   // Normalisation
   std::string norm_grp = "Normalisation";
   std::vector<std::string> incidentBeamNormOptions;
-  incidentBeamNormOptions.push_back("None");
+  incidentBeamNormOptions.emplace_back("None");
   // The data will be normalised to the monitor counts
-  incidentBeamNormOptions.push_back("Monitor");
+  incidentBeamNormOptions.emplace_back("Monitor");
   // The data will be normalised to the total charge only (no beam profile)
-  incidentBeamNormOptions.push_back("Timer");
+  incidentBeamNormOptions.emplace_back("Timer");
   this->declareProperty(
       "Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
@@ -182,9 +179,7 @@ void SetupILLD33Reduction::init() {
 
   // Transmission
   std::string trans_grp = "Transmission";
-  std::vector<std::string> transOptions;
-  transOptions.push_back("Value");
-  transOptions.push_back("DirectBeam");
+  std::vector<std::string> transOptions{"Value", "DirectBeam"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
@@ -394,10 +389,7 @@ void SetupILLD33Reduction::init() {
   declareProperty(
       new ArrayProperty<int>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  std::vector<std::string> maskOptions;
-  maskOptions.push_back("None");
-  maskOptions.push_back("Front");
-  maskOptions.push_back("Back");
+  std::vector<std::string> maskOptions{"None", "Front", "Back"};
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
@@ -409,9 +401,9 @@ void SetupILLD33Reduction::init() {
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
   std::vector<std::string> scaleOptions;
-  scaleOptions.push_back("None");
-  scaleOptions.push_back("Value");
-  scaleOptions.push_back("ReferenceData");
+  scaleOptions.emplace_back("None");
+  scaleOptions.emplace_back("Value");
+  scaleOptions.emplace_back("ReferenceData");
   declareProperty("AbsoluteScaleMethod", "None",
                   boost::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");

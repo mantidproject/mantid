@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_AppendSpectraTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

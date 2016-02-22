@@ -9,7 +9,6 @@
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "boost/assign.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
@@ -17,7 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
 
 namespace Mantid {
 namespace Crystal {
@@ -55,10 +53,8 @@ void SaveLauenorm::init() {
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
   declareProperty("MaxWavelength", EMPTY_DBL(),
                   "Maximum wavelength (Angstroms)");
-  std::vector<std::string> histoTypes;
-  histoTypes.push_back("Bank");
-  histoTypes.push_back("RunNumber");
-  histoTypes.push_back("Both Bank and RunNumber");
+  std::vector<std::string> histoTypes{"Bank", "RunNumber",
+                                      "Both Bank and RunNumber"};
   declareProperty("SortFilesBy", histoTypes[0],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");

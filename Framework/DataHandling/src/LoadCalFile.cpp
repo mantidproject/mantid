@@ -69,10 +69,7 @@ bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
     return true;
 
   std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
-  if (!InstrumentFilename.empty())
-    return true;
-
-  return false;
+  return !InstrumentFilename.empty();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -111,7 +108,7 @@ LoadCalFile::getInstrument3Ways(Algorithm *alg) {
   } else {
     Algorithm_sptr childAlg =
         alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
+    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);

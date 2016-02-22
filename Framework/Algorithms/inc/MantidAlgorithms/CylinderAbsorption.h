@@ -91,23 +91,23 @@ public:
   /// (Empty) Constructor
   CylinderAbsorption();
   /// Virtual destructor
-  virtual ~CylinderAbsorption() {}
+  ~CylinderAbsorption() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CylinderAbsorption"; }
+  const std::string name() const override { return "CylinderAbsorption"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates bin-by-bin correction factors for attenuation due to "
            "absorption and single scattering in a 'cylindrical' sample.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
-  void defineProperties();
-  void retrieveProperties();
-  std::string sampleXML();
-  void initialiseCachedDistances();
+  void defineProperties() override;
+  void retrieveProperties() override;
+  std::string sampleXML() override;
+  void initialiseCachedDistances() override;
 
   double m_cylHeight;      ///< The height of the cylindrical sample in m
   double m_cylRadius;      ///< The radius of the cylindrical sample in m

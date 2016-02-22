@@ -1,11 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAlgorithms/AlphaCalc.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+
 #include <cmath>
 #include <vector>
-
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/AlphaCalc.h"
 
 namespace Mantid {
 namespace Algorithms {

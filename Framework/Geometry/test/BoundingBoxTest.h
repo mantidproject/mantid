@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
 using namespace Mantid;

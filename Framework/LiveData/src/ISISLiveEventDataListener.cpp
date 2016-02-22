@@ -1,16 +1,17 @@
 #include "MantidLiveData/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
@@ -127,7 +128,7 @@ bool ISISLiveEventDataListener::connect(
     retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
   }
   if (retVal != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -288,8 +289,7 @@ void ISISLiveEventDataListener::run() {
                   << "Exception message: " << e.what() << std::endl;
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &
                e) { // TimeSeriesProperty (and possibly some other things) can
@@ -300,8 +300,7 @@ void ISISLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
   } catch (...) { // Default exception handler
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
@@ -387,9 +386,11 @@ void ISISLiveEventDataListener::saveEvents(
     period = 0;
   }
 
-  for (auto it = data.begin(); it != data.end(); ++it) {
-    Mantid::DataObjects::TofEvent event(it->time_of_flight, pulseTime);
-    m_eventBuffer[period]->getEventList(it->spectrum).addEventQuickly(event);
+  for (const auto &streamEvent : data) {
+    Mantid::DataObjects::TofEvent event(streamEvent.time_of_flight, pulseTime);
+    m_eventBuffer[period]
+        ->getEventList(streamEvent.spectrum)
+        .addEventQuickly(event);
   }
 }
 

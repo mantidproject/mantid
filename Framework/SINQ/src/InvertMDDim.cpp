@@ -39,12 +39,12 @@ void InvertMDDim::exec() {
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dimi));
   }
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   int rank = static_cast<int>(inWS->getNumDims());
   auto idx = new int[rank];
-  if (idx == NULL || outWS == NULL) {
+  if (idx == nullptr || outWS == nullptr) {
     throw std::runtime_error("Out of memory in InvertMDDim");
   }
   recurseDim(inWS, outWS, 0, idx, rank);

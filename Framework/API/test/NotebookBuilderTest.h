@@ -2,6 +2,7 @@
 #define MANTID_NOTEBOOKBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -139,7 +140,8 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output(new WorkspaceTester());
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -166,7 +168,8 @@ public:
                          "\"TopLevelAlgorithm(InputWorkspace='test_input_"
                          "workspace', "
                          "OutputWorkspace='test_output_workspace')\",";
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -190,8 +193,9 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    // Compare line with expected result
-    TS_ASSERT_EQUALS(notebookLines[64], result)
+    // Check that the expected line does appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
+              notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -203,7 +207,8 @@ public:
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -229,8 +234,11 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[100], result_code)
+    // Check that the expected lines do appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -242,7 +250,8 @@ public:
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -277,8 +286,11 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[74], result_code)
+    // Check that the expected lines do appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -291,7 +303,8 @@ public:
                          "\"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_"
                          "workspace', "
                          "OutputWorkspace='test_output_workspace')\",";
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
                                                  input);
 
@@ -316,7 +329,9 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result)
+    // Check that the expected line does appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
+              notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");

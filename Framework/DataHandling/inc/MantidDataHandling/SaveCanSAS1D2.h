@@ -80,24 +80,24 @@ class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
   /// default constructor
   SaveCanSAS1D2();
-  virtual ~SaveCanSAS1D2();
+  ~SaveCanSAS1D2() override;
 
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
 
 protected:
   /// Extends the SaveCanSAS1D init method
-  virtual void init();
+  void init() override;
   /// Overwrites Algorithm method
-  virtual void exec();
+  void exec() override;
 
   /// Create the SASRoot element
-  virtual void createSASRootElement(std::string &rootElem);
+  void createSASRootElement(std::string &rootElem) override;
 
   /// this method creates SAStransmission_spectrum element
   void createSASTransElement(std::string &sasTrans, const std::string &name);
 
   /// Overwrites writeHeader method
-  virtual void writeHeader(const std::string &fileName);
+  void writeHeader(const std::string &fileName) override;
 
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;

@@ -22,9 +22,8 @@ PyObject *getCategories(IFunction &self) {
   std::vector<std::string> categories = self.categories();
 
   PyObject *registered = PyList_New(0);
-  for (auto category = categories.begin(); category != categories.end();
-       ++category) {
-    PyObject *value = PyString_FromString(category->c_str());
+  for (auto &categorie : categories) {
+    PyObject *value = PyString_FromString(categorie.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

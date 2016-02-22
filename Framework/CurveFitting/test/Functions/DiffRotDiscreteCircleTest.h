@@ -38,7 +38,7 @@ public:
     const double w0 = random_value(-1.0, 1.0);
     const double h = random_value(1.0, 1000.0);
     const double fwhm = random_value(1.0, 100.0);
-    boost::shared_ptr<Gaussian> resolution(new Gaussian());
+    boost::shared_ptr<Gaussian> resolution = boost::make_shared<Gaussian>();
     resolution->initialize(); // declare parameters
     resolution->setCentre(w0);
     resolution->setHeight(h);
@@ -544,9 +544,9 @@ private:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
 
     // Create the instrument
-    boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
-    inst->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+    boost::shared_ptr<Instrument> inst =
+        boost::make_shared<Instrument>("BASIS");
+    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
     ObjComponent *source = new ObjComponent(

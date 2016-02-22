@@ -98,8 +98,7 @@ void FixGSASInstrumentFile::exec() {
     throw runtime_error(errss.str());
   }
 
-  for (size_t i = 0; i < vec_line.size(); ++i) {
-    string &line = vec_line[i];
+  for (auto &line : vec_line) {
     ofile << line;
     for (size_t j = line.size(); j < LINESIZE; ++j)
       ofile << " ";

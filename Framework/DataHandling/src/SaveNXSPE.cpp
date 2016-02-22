@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
 #include "MantidKernel/CompositeValidator.h"

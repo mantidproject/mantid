@@ -47,13 +47,15 @@ public:
 
 private:
     void init();
-    void output();
+    void output() override;
     void output(const QString &text);
 
     QString fftCurve();
     QString fftTable();
 
-    bool setDataFromTable(Table *t, const QString& realColName, const QString& imagColName = QString(), int from = 0, int to = -1);
+    bool setDataFromTable(Table *t, const QString &realColName,
+                          const QString &imagColName = QString(), int from = 0,
+                          int to = -1) override;
 
     double d_sampling;
     //! Flag telling if an inverse FFT must be performed.

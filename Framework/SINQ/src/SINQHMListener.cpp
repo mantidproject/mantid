@@ -106,7 +106,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
 
   readHMData(ws);
@@ -221,7 +221,7 @@ void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws,
 }
 
 void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
-  int *data = NULL, length = 1;
+  int *data = nullptr, length = 1;
   coord_t *idx;
 
   for (int i = 0; i < rank; i++) {
@@ -232,7 +232,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
   std::istream &istr = httpRequest(pathBuffer.str());
 
   data = reinterpret_cast<int *>(malloc(length * sizeof(int)));
-  if (data == NULL) {
+  if (data == nullptr) {
     throw std::runtime_error("Out of memory reading HM data");
   }
   istr.read(reinterpret_cast<char *>(data), length * sizeof(int));

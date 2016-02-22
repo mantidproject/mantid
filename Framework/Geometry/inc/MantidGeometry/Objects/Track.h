@@ -59,7 +59,7 @@ struct MANTID_GEOMETRY_DLL Link {
   */
   inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
               const double totalDistance, const Object &obj,
-              const ComponentID compID = NULL)
+              const ComponentID compID = nullptr)
       : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
         distInsideObject(entryPoint.distance(exitPoint)), object(&obj),
         componentID(compID) {}
@@ -105,7 +105,7 @@ struct IntersectionPoint {
   */
   inline IntersectionPoint(const int flag, const Kernel::V3D &end,
                            const double distFromStartOfTrack, const Object &obj,
-                           const ComponentID compID = NULL)
+                           const ComponentID compID = nullptr)
       : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
         object(&obj), componentID(compID) {}
 
@@ -159,11 +159,11 @@ public:
   ~Track();
   /// Adds a point of intersection to the track
   void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
-                const Object &obj, const ComponentID compID = NULL);
+                const Object &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
               const double distanceAlongTrack, const Object &obj,
-              const ComponentID compID = NULL);
+              const ComponentID compID = nullptr);
   /// Remove touching Links that have identical components
   void removeCojoins();
   /// Construct links between added points
@@ -177,6 +177,10 @@ public:
   const Kernel::V3D &startPoint() const { return m_startPoint; }
   /// Returns the direction as a unit vector
   const Kernel::V3D &direction() const { return m_unitVector; }
+  /// Returns an interator to the start of the set of links
+  LType::iterator begin() { return m_links.begin(); }
+  /// Returns an interator to one-past-the-end of the set of links
+  LType::iterator end() { return m_links.end(); }
   /// Returns an interator to the start of the set of links
   LType::const_iterator cbegin() const { return m_links.cbegin(); }
   /// Returns an interator to one-past-the-end of the set of links

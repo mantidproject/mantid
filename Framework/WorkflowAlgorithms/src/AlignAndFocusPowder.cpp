@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -39,7 +40,7 @@ AlignAndFocusPowder::AlignAndFocusPowder()
     : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
       xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
       tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
-      m_lowResSpecOffset(0), m_progress(NULL) {}
+      m_lowResSpecOffset(0), m_progress(nullptr) {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)
@@ -316,29 +317,14 @@ void AlignAndFocusPowder::exec() {
 
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
-  if (m_outputW == m_inputW) {
-    if (m_inputEW) {
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  if (m_inputEW) {
+    if (m_outputW != m_inputW) {
+      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
     }
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
-    if (m_inputEW) {
-      // Make a brand new EventWorkspace
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      WorkspaceFactory::Instance().initializeFromParent(m_inputEW, m_outputEW,
-                                                        false);
-      // You need to copy over the data as well.
-      m_outputEW->copyDataFrom((*m_inputEW));
-
-      // Cast to the matrixOutputWS and save it
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
-    } else {
-      // Not-an-event workspace
+    if (m_outputW != m_inputW) {
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      // m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
 
@@ -773,8 +759,8 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
     return matrixws;
   } else {
     g_log.information() << "running Rebin( ";
-    for (auto param = m_params.begin(); param != m_params.end(); ++param)
-      g_log.information() << (*param) << " ";
+    for (double param : m_params)
+      g_log.information() << param << " ";
     g_log.information() << ")\n";
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", matrixws);

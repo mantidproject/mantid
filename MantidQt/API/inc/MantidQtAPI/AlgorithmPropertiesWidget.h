@@ -53,8 +53,8 @@ namespace API
 
   public:
     AlgorithmPropertiesWidget(QWidget * parent = NULL);
-    virtual ~AlgorithmPropertiesWidget();
-    
+    ~AlgorithmPropertiesWidget() override;
+
     void setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory * inputHistory);
 
     void initLayout();

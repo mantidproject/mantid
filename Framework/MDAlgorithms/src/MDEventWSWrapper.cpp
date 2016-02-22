@@ -27,7 +27,7 @@ void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
     if (!numBins.empty())
       nBins = numBins[d];
 
-    Geometry::MDHistoDimension *dim = NULL;
+    Geometry::MDHistoDimension *dim = nullptr;
     if (d < 3 && description.isQ3DMode()) {
       // We should have frame and scale information that we can use correctly
       // for our Q dimensions.

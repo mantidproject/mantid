@@ -60,10 +60,10 @@ public:
   /// values
   ForegroundModel(const API::IFunction &fittingFunction);
   /// Destructor
-  ~ForegroundModel();
+  ~ForegroundModel() override;
 
   /// Function category
-  virtual const std::string category() const { return "Quantification"; }
+  const std::string category() const override { return "Quantification"; }
 
   /// Returns the type of model
   virtual ModelType modelType() const = 0;
@@ -77,10 +77,10 @@ public:
   /// default constructor
   void setFunctionUnderMinimization(const API::IFunction &fitFunction);
   /// Declares the parameters
-  void declareParameters();
+  void declareParameters() override;
   /// Called when an attribute value is set
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &attr);
+                    const API::IFunction::Attribute &attr) override;
   /// Return the initial value of the parameter according to the fit by index
   double getInitialParameterValue(size_t index) const;
   /// Return the initial value of the parameter according to the fit by name
@@ -111,7 +111,7 @@ private:
 
   /// Required by the interface
   void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const {}
+                Mantid::API::FunctionValues &) const override {}
   /// Add attributes common to all models
   void addAttributes();
 

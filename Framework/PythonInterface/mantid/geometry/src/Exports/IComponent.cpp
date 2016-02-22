@@ -1,4 +1,5 @@
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/Quat.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>

@@ -188,8 +188,8 @@ void CICatHelper::saveInvestigationIncludesResponse(
         savetoTableWorkspace((*datafile_citr)->location, t);
 
         // File creation Time.
-        std::string *creationtime = NULL;
-        if ((*datafile_citr)->datafileCreateTime != NULL) {
+        std::string *creationtime = nullptr;
+        if ((*datafile_citr)->datafileCreateTime != nullptr) {
           time_t crtime = *(*datafile_citr)->datafileCreateTime;
           char temp[25];
           strftime(temp, 25, "%Y-%b-%d %H:%M:%S", localtime(&crtime));
@@ -313,8 +313,8 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
   int result = icat.listInstruments(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      instruments.push_back(response.return_[i]);
+    for (const auto &instrument : response.return_) {
+      instruments.push_back(instrument);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -339,8 +339,8 @@ void CICatHelper::listInvestigationTypes(
   int result = icat.listInvestigationTypes(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      investTypes.push_back(response.return_[i]);
+    for (const auto &type : response.return_) {
+      investTypes.push_back(type);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -698,12 +698,12 @@ void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy &icat) {
 void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
   if (soap_ssl_client_context(
           &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          NULL, /* keyfile: required only when client must authenticate to
+          nullptr, /* keyfile: required only when client must authenticate to
                 server (see SSL docs on how to obtain this file) */
-          NULL, /* password to read the keyfile */
-          NULL, /* optional cacert file to store trusted certificates */
-          NULL, /* optional capath to directory with trusted certificates */
-          NULL  /* if randfile!=NULL: use a file with random data to seed
+          nullptr, /* password to read the keyfile */
+          nullptr, /* optional cacert file to store trusted certificates */
+          nullptr, /* optional capath to directory with trusted certificates */
+          nullptr  /* if randfile!=NULL: use a file with random data to seed
                    randomness */
           )) {
     CErrorHandling::throwErrorMessages(icat);

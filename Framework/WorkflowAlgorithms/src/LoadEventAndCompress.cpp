@@ -161,8 +161,8 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   // set chunking information
   if (rowCount > 0.) {
     const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
-    for (auto name = COL_NAMES.begin(); name != COL_NAMES.end(); ++name) {
-      alg->setProperty(*name, m_chunkingTable->getRef<int>(*name, rowIndex));
+    for (const auto &name : COL_NAMES) {
+      alg->setProperty(name, m_chunkingTable->getRef<int>(name, rowIndex));
     }
   }
 

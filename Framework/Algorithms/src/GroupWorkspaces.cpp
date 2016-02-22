@@ -51,8 +51,8 @@ void GroupWorkspaces::exec() {
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  for (auto citr = names.cbegin(); citr != names.cend(); ++citr) {
-    auto workspace = ads.retrieve(*citr);
+  for (const auto &name : names) {
+    auto workspace = ads.retrieve(name);
     addToGroup(workspace);
   }
 }

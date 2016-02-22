@@ -73,11 +73,16 @@ private:
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
-  QStringList m_fitStrings;
   QString m_previousFit;
   QString m_baseName;
   int m_runMin;
   int m_runMax;
+
+  // ShortHand Naming for fit functions
+  QStringList m_fitStrings;
+
+  // Used in auto generating defaults for parameters
+  QStringList m_defaultParams;
 
 };
 } // namespace IDA

@@ -42,26 +42,26 @@ public:
   /// Default constructor
   SaveANSTOAscii() {}
   /// Destructor
-  ~SaveANSTOAscii() {}
+  ~SaveANSTOAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveANSTOAscii"; }
+  const std::string name() const override { return "SaveANSTOAscii"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to a ascii file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   /// Return the file extension this algorthm should output.
-  virtual std::string ext() { return ".txt"; }
+  std::string ext() override { return ".txt"; }
   /// return if the line should start with a separator
-  virtual bool leadingSep() { return false; }
+  bool leadingSep() override { return false; }
   /// no extra properties required so override blank
-  virtual void extraProps() {}
+  void extraProps() override {}
   /// no extra information required so override blank
-  virtual void extraHeaders(std::ofstream &file);
+  void extraHeaders(std::ofstream &file) override;
 };
 
 } // namespace DataHandling

@@ -4,9 +4,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -28,8 +30,8 @@ CreateWorkspace::~CreateWorkspace() {}
 void CreateWorkspace::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("SpectraNumber");
-  unitOptions.push_back("Text");
+  unitOptions.emplace_back("SpectraNumber");
+  unitOptions.emplace_back("Text");
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -87,7 +89,7 @@ void CreateWorkspace::exec() {
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
 
-  const ArrayProperty<double> *pCheck = NULL;
+  const ArrayProperty<double> *pCheck = nullptr;
 
   pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
   if (!pCheck)
@@ -210,7 +212,7 @@ void CreateWorkspace::exec() {
       }
     } else {
       const size_t vAxisLength = vAxis.size();
-      NumericAxis *newAxis(NULL);
+      NumericAxis *newAxis(nullptr);
       if (vAxisLength == static_cast<size_t>(nSpec))
         newAxis = new NumericAxis(vAxisLength); // treat as points
       else if (vAxisLength == static_cast<size_t>(nSpec + 1))

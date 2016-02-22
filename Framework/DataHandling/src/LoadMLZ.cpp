@@ -2,18 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMLZ.h"
+#include "MantidDataHandling/LoadHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 
-#include <limits>
 #include <algorithm>
-#include <vector>
 #include <cmath>
+#include <limits>
+#include <vector>
 //-----------------------------------------------------------------------
 
 namespace Mantid {
@@ -44,8 +48,8 @@ LoadMLZ::LoadMLZ() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_chopper_ratio = 0;
   m_l1 = 0;
   m_l2 = 0;
-  m_supportedInstruments.push_back("TOFTOF");
-  m_supportedInstruments.push_back("DNS");
+  m_supportedInstruments.emplace_back("TOFTOF");
+  m_supportedInstruments.emplace_back("DNS");
 }
 
 //---------------------------------------------------------------------------
@@ -138,9 +142,9 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   g_log.debug() << "Number of masked detectors: " << masked_detectors.size()
                 << std::endl;
 
-  for (size_t i = 0; i < masked_detectors.size(); i++) {
+  for (auto masked_detector : masked_detectors) {
     g_log.debug() << "List of masked detectors: ";
-    g_log.debug() << masked_detectors[i];
+    g_log.debug() << masked_detector;
     g_log.debug() << ", ";
   }
   g_log.debug() << std::endl;

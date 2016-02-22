@@ -47,20 +47,20 @@ public:
   /// Default constructorMatrix
   OptimizeLatticeForCellType();
   /// Destructor
-  virtual ~OptimizeLatticeForCellType();
+  ~OptimizeLatticeForCellType() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "OptimizeLatticeForCellType";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Optimize lattice parameters for cell type.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Cell"; }
+  const std::string category() const override { return "Crystal\\Cell"; }
 
   API::ILatticeFunction_sptr
   getLatticeFunction(const std::string &cellType,
@@ -68,8 +68,8 @@ public:
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);

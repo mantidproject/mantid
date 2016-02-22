@@ -1,7 +1,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/StringTokenizer.h"
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
@@ -266,10 +266,10 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
 std::string removeSpace(const std::string &CLine) {
   std::string Out;
   char prev = 'x';
-  for (unsigned int i = 0; i < CLine.length(); i++) {
-    if (!isspace(CLine[i]) || prev == '\\') {
-      Out += CLine[i];
-      prev = CLine[i];
+  for (char character : CLine) {
+    if (!isspace(character) || prev == '\\') {
+      Out += character;
+      prev = character;
     }
   }
   return Out;
@@ -436,11 +436,12 @@ std::map<std::string, std::string>
 splitToKeyValues(const std::string &input, const std::string &keyValSep,
                  const std::string &listSep) {
   std::map<std::string, std::string> keyValues;
-  const int splitOptions =
-      Poco::StringTokenizer::TOK_IGNORE_EMPTY + Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer listSplitter(input, listSep);
-  for (auto iter = listSplitter.begin(); iter != listSplitter.end(); ++iter) {
-    Poco::StringTokenizer keyValSplitter(*iter, keyValSep, splitOptions);
+  const int splitOptions = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY +
+                           Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
+  for (const auto &iter : listSplitter) {
+    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep,
+                                                   splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -1045,39 +1046,33 @@ int isMember(const std::vector<std::string> &group,
  */
 std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                             const std::string &rangeSep) {
-  typedef Poco::StringTokenizer Tokenizer;
+  typedef Mantid::Kernel::StringTokenizer Tokenizer;
 
-  boost::shared_ptr<Tokenizer> elements;
+  Tokenizer elements;
 
   if (elemSep.find(' ') != std::string::npos) {
     // If element separator contains space character it's a special case,
     // because in that case
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
-
-    // Space is added so that last empty element of the "1,2,3-" is not ignored
-    // and we can
-    // spot the error. Behaviour is changed in Poco 1.5 and this will not be
-    // needed.
-    Tokenizer ranges(str + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
     std::string new_str =
         join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
-
-    elements = boost::make_shared<Tokenizer>(
-        new_str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(new_str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
-    elements = boost::make_shared<Tokenizer>(
-        str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   }
 
   std::vector<int> result;
 
   // Estimation of the resulting number of elements
-  result.reserve(elements->count());
+  result.reserve(elements.count());
 
-  for (auto it = elements->begin(); it != elements->end(); it++) {
+  for (const auto &elementString : elements) {
     // See above for the reason space is added
-    Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer rangeElements(elementString, rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 
@@ -1085,7 +1080,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     if (noOfRangeElements == 1) {
       int element;
       if (convert(rangeElements[0], element) != 1)
-        throw std::invalid_argument("Invalid element: " + *it);
+        throw std::invalid_argument("Invalid element: " + elementString);
       result.push_back(element);
     }
     // A pair
@@ -1094,17 +1089,19 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 
       if (convert(rangeElements[0], start) != 1 ||
           convert(rangeElements[1], end) != 1)
-        throw std::invalid_argument("Invalid range: " + *it);
+        throw std::invalid_argument("Invalid range: " + elementString);
 
       if (start >= end)
-        throw std::invalid_argument("Range boundaries are reversed: " + *it);
+        throw std::invalid_argument("Range boundaries are reversed: " +
+                                    elementString);
 
       for (int i = start; i <= end; i++)
         result.push_back(i);
     }
     // Error - e.g. "--""
     else {
-      throw std::invalid_argument("Multiple range separators: " + *it);
+      throw std::invalid_argument("Multiple range separators: " +
+                                  elementString);
     }
   }
 

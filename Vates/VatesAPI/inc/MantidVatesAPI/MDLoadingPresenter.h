@@ -62,7 +62,8 @@ namespace Mantid
         virtual std::string getTimeStepLabel() const = 0;
         virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
         virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet);
-        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
+        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet,
+                                       std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
         virtual bool canReadFile() const = 0;
         virtual const std::string& getGeometryXML() const = 0;
         virtual ~MDLoadingPresenter(){}

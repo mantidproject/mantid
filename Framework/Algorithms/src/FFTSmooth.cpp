@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/BoundedValidator.h"
@@ -30,9 +33,7 @@ void FFTSmooth::init() {
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "Spectrum index for smoothing");
 
-  std::vector<std::string> type;
-  // type.push_back("Truncation");
-  type.push_back("Zeroing");
+  std::vector<std::string> type{"Zeroing"};
   declareProperty("Filter", "Zeroing",
                   boost::make_shared<StringListValidator>(type),
                   "The type of the applied filter");

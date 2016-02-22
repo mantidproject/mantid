@@ -1,9 +1,13 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -43,10 +47,7 @@ void GetSpiceDataRawCountsFromMD::init() {
                                              Direction::Output),
       "Name of the output MatrixWorkspace containing the raw data required.");
 
-  std::vector<std::string> vecmode;
-  vecmode.push_back("Pt.");
-  vecmode.push_back("Detector");
-  vecmode.push_back("Sample Log");
+  std::vector<std::string> vecmode{"Pt.", "Detector", "Sample Log"};
   auto modevalidator = boost::make_shared<ListValidator<std::string>>(vecmode);
   declareProperty(
       "Mode", "Detector", modevalidator,

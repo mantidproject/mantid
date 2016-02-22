@@ -1,13 +1,16 @@
 #include "MantidAlgorithms/PolarizationCorrection.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include <algorithm>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <boost/shared_ptr.hpp>
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -399,18 +402,17 @@ void PolarizationCorrection::exec() {
     loadableProperties[cAlphaLabel()] = "calpha";
   }
 
-  for (auto propName = loadableProperties.begin();
-       propName != loadableProperties.end(); ++propName) {
-    Property *prop = getProperty(propName->first);
+  for (auto &loadableProperty : loadableProperties) {
+    Property *prop = getProperty(loadableProperty.first);
 
     if (!prop)
       continue;
 
     if (prop->isDefault()) {
-      auto vals = instrument->getStringParameter(propName->second);
+      auto vals = instrument->getStringParameter(loadableProperty.second);
       if (vals.empty())
         throw std::runtime_error(
-            "Cannot find value for " + propName->first +
+            "Cannot find value for " + loadableProperty.first +
             " in parameter file. Please specify this property manually.");
       prop->setValue(vals[0]);
     }
