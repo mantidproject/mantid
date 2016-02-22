@@ -155,7 +155,9 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.zero_b2 = -1
         self.zero = -1
         # table workspace with detector positions
-        self.posTable = None
+        self.pos_table = None
+        # table workspace with parameters of fitted peaks
+        self.peaks_info = None
         # expected peaks in d-spacing and fitted peak centers
         self.peaks = []
         self.peaks_b2 = []
@@ -175,13 +177,16 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
 
         # This needs a relatively long list of peaks if you want it to work
         # for every detector in all (both) banks
-        positions, peaks_info = EnggCalibrateFull(Workspace = long_calib_ws,
-                                                  VanadiumWorkspace = van_ws,
-                                                  Bank = '1',
-                                                  ExpectedPeaks = '0.855618487, 0.956610, 1.104599, '
-                                                  '1.352852, 1.562138, 1.631600, '
-                                                  '1.913221, 2.705702376, 3.124277511')
-        self.posTable = positions
+        positions, peaks_params = EnggCalibrateFull(Workspace = long_calib_ws,
+                                                    VanadiumWorkspace = van_ws,
+                                                    Bank = '1',
+                                                    ExpectedPeaks = '0.855618487, 0.956610, 1.104599, '
+                                                    '1.352852, 1.562138, 1.631600, '
+                                                    '1.913221, 2.705702376, 3.124277511')
+
+        # to protect against 'invalidated' variables with algorithm input/output workspaces
+        self.pos_table = positions
+        self.peaks_info = peaks_params
 
         # Bank 1
         self.difc, self.zero, tbl = EnggCalibrate(InputWorkspace = long_calib_ws,
@@ -189,7 +194,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
                                                   Bank = '1',
                                                   ExpectedPeaks =
                                                   '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
-                                                  DetectorPositions = self.posTable)
+                                                  DetectorPositions = self.pos_table)
         self.peaks = tbl.column('dSpacing')
         self.peaks_fitted = tbl.column('X0')
 
@@ -199,17 +204,33 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
                                                            Bank = '2',
                                                            ExpectedPeaks =
                                                            '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
-                                                           DetectorPositions = self.posTable)
+                                                           DetectorPositions = self.pos_table)
         self.peaks_b2 = tbl_b2.column('dSpacing')
         self.peaks_fitted_b2 = tbl_b2.column('X0')
 
     def validate(self):
         # === check detector positions table produced by EnggCalibrateFull
-        self.assertTrue(self.posTable)
-        self.assertEquals(self.posTable.columnCount(), 9)
-        self.assertEquals(self.posTable.rowCount(), 1200)
-        self.assertEquals(self.posTable.cell(88, 0), 100089)   # det ID
-        self.assertEquals(self.posTable.cell(200, 0), 101081)  # det ID
+        self.assertTrue(self.pos_table)
+        self.assertEquals(self.pos_table.columnCount(), 9)
+        self.assertEquals(self.pos_table.rowCount(), 1200)
+        self.assertEquals(self.pos_table.cell(88, 0), 100089)   # det ID
+        self.assertEquals(self.pos_table.cell(200, 0), 101081)  # det ID
+
+        # The output table of peak parameters has the expected structure
+        self.assertEquals(self.peaks_info.rowCount(), 1200)
+        self.assertEquals(self.peaks_info.columnCount(), 2)
+        self.assertEquals(self.peaks_info.keys(), ['Detector ID', 'Parameters'])
+        self.assertEquals(self.peaks_info.cell(10, 0), 100011)
+        self.assertEquals(self.peaks_info.cell(100, 0),100101)
+        self.assertEquals(self.peaks_info.cell(123, 0), 101004)
+        self.assertEquals(self.peaks_info.cell(517, 0), 104038)
+        self.assertEquals(self.peaks_info.cell(987, 0), 108028)
+        self.assertEquals(self.peaks_info.cell(1000, 0), 108041)
+        for idx in [0, 12, 516, 789, 891, 1112]:
+            cell_val = self.peaks_info.cell(idx,1)
+            self.assertTrue(isinstance(cell_val, str))
+            self.assertEquals(cell_val[0:11], '{"1": {"A":')
+            self.assertEquals(cell_val[-2:], '}}')
 
         # this will be used as a comparison delta in relative terms (percentage)
         exdelta = exdelta_special = 1e-5
@@ -226,12 +247,12 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         # Note that the reference values are given with 12 digits more for reference than
         # for assert-comparison purposes (comparisons are not that picky, by far)
 
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(100, 3), 1.53041625023, exdelta))
-        #self.assertDelta(self.posTable.cell(100, 3), 1.49010562897, delta)
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(400, 4), 1.65264105797, exdelta))
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(200, 5), -0.296705961227, exdelta))
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(610, 7), 18603.7597656, exdelta))
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(1199, 8), -5.62454175949, exdelta_special))
+        self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.53041625023, exdelta))
+        #self.assertDelta(self.pos_table.cell(100, 3), 1.49010562897, delta)
+        self.assertTrue(rel_err_less_delta(self.pos_table.cell(400, 4), 1.65264105797, exdelta))
+        self.assertTrue(rel_err_less_delta(self.pos_table.cell(200, 5), -0.296705961227, exdelta))
+        self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 7), 18603.7597656, exdelta))
+        self.assertTrue(rel_err_less_delta(self.pos_table.cell(1199, 8), -5.62454175949, exdelta_special))
 
         # === check difc, zero parameters for GSAS produced by EnggCalibrate
 
@@ -251,7 +272,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
 
         # === peaks used to fit the difc and zero parameters ===
         expected_peaks = [0.9566, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
-        # 0.9566 is not found for bank2
+        # 0.9566 is not found for bank2 (after all, CalibrateFull is only applied on bank 1.
         expected_peaks_b2 = expected_peaks[1:]
         self.assertEquals(len(self.peaks), len(expected_peaks))
         self.assertEquals(len(self.peaks_b2), len(expected_peaks_b2))
