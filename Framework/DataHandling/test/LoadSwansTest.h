@@ -15,8 +15,10 @@ private:
    * @return its path
    */
   std::string getMetadataFile() {
-	//                  runnumber,   wavelength, chopper frequency, time offset, ?, angle
-	std::string content("80814.000000	3.500000	60.000000	11200.715115	0.000000	6.500000");
+    //                  runnumber,   wavelength, chopper frequency, time offset,
+    //                  ?, angle
+    std::string content("80814.000000	3.500000	60.000000	"
+                        "11200.715115	0.000000	6.500000");
     Poco::TemporaryFile tmpFile;
     std::ofstream ofs(tmpFile.path().c_str());
     ofs << content << std::endl;
@@ -42,7 +44,7 @@ public:
 
   void test_exec() {
     // Data file
-    std::string filename = "SWANS_RUN80814.dat";
+    const std::string filename = "SWANS_RUN80814.dat";
     LoadSwans alg;
 
     alg.setChild(true);
@@ -51,7 +53,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameData", filename));
     std::string metadataFilename = getMetadataFile();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameMetaData", metadataFilename));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("FilenameMetaData", metadataFilename));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "Output_ws_name"));
 
@@ -61,6 +64,9 @@ public:
         alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16384);
+    TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 2505292);
+    TS_ASSERT_EQUALS(
+        outputWS->run().getPropertyValueAsType<double>("wavelength"), 3.5);
   }
 };
 

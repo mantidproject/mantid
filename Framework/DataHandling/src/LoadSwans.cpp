@@ -24,13 +24,9 @@ DECLARE_ALGORITHM(LoadSwans)
 /** Constructor
  */
 LoadSwans::LoadSwans() : m_detector_size(0) {
-  m_ws = EventWorkspace_sptr(new EventWorkspace());
+  // m_ws = EventWorkspace_sptr(new EventWorkspace());
+  m_ws = boost::make_shared<EventWorkspace>();
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSwans::~LoadSwans() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -56,6 +52,7 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
  */
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
   // since this is a test loader, the confidence will always be 0!
+  // I don't want the Load algorithm to pick this one!
   if (descriptor.extension().compare(".dat") != 0)
     return 0;
   else
@@ -86,13 +83,13 @@ void LoadSwans::init() {
  */
 void LoadSwans::exec() {
 
-  // Load this here to get the necessary Parameters from the XML file
+  // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
-  m_detector_size = setDetectorSize();
-  std::map<uint32_t, std::vector<uint32_t>> pos_tof_map = loadData();
+  m_detector_size = getDetectorSize();
+  std::map<uint32_t, std::vector<uint32_t>> eventMap = loadData();
   std::vector<double> metadata = loadMetaData();
   setMetaDataAsWorkspaceProperties(metadata);
-  loadDataIntoTheWorkspace(pos_tof_map);
+  loadDataIntoTheWorkspace(eventMap);
   loadInstrument();
   setTimeAxis();
   placeDetectorInSpace();
@@ -132,14 +129,13 @@ void LoadSwans::placeDetectorInSpace() {
   const double distance = static_cast<double>(
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
   // Make the angle negative to accomodate sense of rotation.
-  const double angle = - m_ws->run().getPropertyValueAsType<double>("angle");
+  const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
 
   g_log.information() << "Moving detector " << componentName << " " << distance
                       << " meters and " << angle << " degrees." << std::endl;
 
   LoadHelper helper;
-
-  const double deg2rad = M_PI / 180.0;
+  constexpr double deg2rad = M_PI / 180.0;
   V3D pos = helper.getComponentPosition(m_ws, componentName);
   double angle_rad = angle * deg2rad;
   V3D newpos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
@@ -165,27 +161,29 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
 
   m_ws->initialize(m_detector_size, 1, 1);
 
-  std::map<uint32_t, std::vector<uint32_t>> pos_tof_map;
+  std::map<uint32_t, std::vector<uint32_t>> eventMap;
 
   while (input.is_open()) {
     if (input.eof())
       break;
     uint32_t tof = 0;
-    input.read((char *)&tof, sizeof(tof));
+    // input.read((char *)&tof, sizeof(tof));
+    input.read(reinterpret_cast<char *>(&tof), sizeof(tof));
     tof -= static_cast<uint32_t>(1e9);
     tof = static_cast<uint32_t>(tof * 0.1);
-    uint32_t pos = 0;
 
-    input.read((char *)&pos, sizeof(pos));
+    uint32_t pos = 0;
+    // input.read((char *)&pos, sizeof(pos));
+    input.read(reinterpret_cast<char *>(&pos), sizeof(pos));
     if (pos < 400000) {
       g_log.warning() << "Detector index invalid: " << pos << std::endl;
       continue;
     }
     pos -= 400000;
-    pos_tof_map[pos].push_back(tof);
+    eventMap[pos].push_back(tof);
   }
 
-  return pos_tof_map;
+  return eventMap;
 }
 
 /**
@@ -209,14 +207,14 @@ std::vector<double> LoadSwans::loadMetaData() {
   while (getline(infile, line)) {
     // line with data, need to be parsed by white spaces
     if (!line.empty() && line[0] != '#') {
-    	g_log.debug() << "Metadata parsed line: " << line << std::endl;
-    	std::vector<std::string> dataLine;
-        boost::trim_if(
-            line, boost::is_any_of("\t ")); // could also use plain boost::trim
-        boost::split(dataLine, line, boost::is_any_of("\t "),
-                     boost::token_compress_on);
+      g_log.debug() << "Metadata parsed line: " << line << std::endl;
+      std::vector<std::string> dataLine;
+      boost::trim_if(
+          line, boost::is_any_of("\t ")); // could also use plain boost::trim
+      boost::split(dataLine, line, boost::is_any_of("\t "),
+                   boost::token_compress_on);
       for (auto beg = dataLine.begin(); beg != dataLine.end(); ++beg) {
-    	std::stringstream ss;
+        std::stringstream ss;
         ss << *beg;
         double d;
         ss >> d;
@@ -254,14 +252,13 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
  *
  */
 void LoadSwans::loadDataIntoTheWorkspace(
-    const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map) {
-  for (auto it = pos_tof_map.begin(); it != pos_tof_map.end(); ++it) {
-
-    EventList &el = m_ws->getEventList(it->first);
-    el.setSpectrumNo(it->first);
-    el.setDetectorID(it->first);
-    for (auto itv = it->second.begin(); itv != it->second.end(); ++itv) {
-      el.addEventQuickly(TofEvent(*itv));
+    const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
+  for (const auto &position : eventMap) {
+    EventList &el = m_ws->getEventList(position.first);
+    el.setSpectrumNo(position.first);
+    el.setDetectorID(position.first);
+    for (const auto &event : position.second) {
+      el.addEventQuickly(TofEvent(event));
     }
   }
 }
@@ -273,17 +270,14 @@ void LoadSwans::loadDataIntoTheWorkspace(
  * longest-tof
  */
 void LoadSwans::setTimeAxis() {
-  unsigned int shortest_tof = static_cast<unsigned int>(
+  const unsigned int shortest_tof = static_cast<unsigned int>(
       m_ws->getInstrument()->getNumberParameter("shortest-tof")[0]);
-  unsigned int longest_tof = static_cast<unsigned int>(
+  const unsigned int longest_tof = static_cast<unsigned int>(
       m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-
-  xRef[0] = shortest_tof; // Just to make sure the bins hold it all
-  xRef[1] = longest_tof;
+  xRef = {static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
   // Set the binning axis using this.
   m_ws->setAllX(axis);
 }
@@ -292,7 +286,7 @@ void LoadSwans::setTimeAxis() {
  * From the Parameters XML file gets number-of-x-pixels and number-of-y-pixels
  * and calculates the detector size/shape
  */
-unsigned int LoadSwans::setDetectorSize() {
+unsigned int LoadSwans::getDetectorSize() {
   const unsigned int x_size = static_cast<unsigned int>(
       m_ws->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
   const unsigned int y_size = static_cast<unsigned int>(

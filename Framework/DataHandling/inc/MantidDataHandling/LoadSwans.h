@@ -36,9 +36,8 @@ namespace DataHandling {
 class DLLExport LoadSwans : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
-  virtual ~LoadSwans();
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
@@ -46,17 +45,17 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   std::map<uint32_t, std::vector<uint32_t>> loadData();
   std::vector<double> loadMetaData();
-  void setMetaDataAsWorkspaceProperties(const std::vector<double>& metadata);
+  void setMetaDataAsWorkspaceProperties(const std::vector<double> &metadata);
   void loadDataIntoTheWorkspace(
       const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map);
   void setTimeAxis();
   void loadInstrument();
   void placeDetectorInSpace();
-  unsigned int setDetectorSize();
+  unsigned int getDetectorSize();
 
   // Member variables
   DataObjects::EventWorkspace_sptr m_ws;
