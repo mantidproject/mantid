@@ -64,7 +64,7 @@ Usage
 .. testcode:: ExTwoPeaks
 
    # Two BackB2Back exponential peaks
-   peak1 = "name=BackToBackExponential,I=4000,A=1,B=0.5,X0=12000,S=350"
+   peak1 = "name=BackToBackExponential,I=6000,A=1,B=0.5,X0=15000,S=250"
    peak2 = "name=BackToBackExponential,I=5000,A=1,B=0.7,X0=35000,S=300"
 
    # Create workpsace with the above peaks and a single detector pixel
@@ -80,10 +80,9 @@ Usage
    EditInstrumentGeometry(Workspace = ws, L2 = [1.5], Polar = [90], PrimaryFlightPath = 50)
 
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
-   # difc, zero = EnggXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
 
    out_tbl_name = 'peaks'
-   difc, zero, peaks_tbl = EnggFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
+   difc, zero, peaks_tbl = EnggFitPeaks(ws, 0, [0.8, 1.9], OutParametersTable=out_tbl_name)
 
 
    # Print the results
@@ -95,6 +94,8 @@ Usage
    print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
    print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
    print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
+   print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
+   print "Second fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[1])
 
 Output:
 
@@ -104,13 +105,15 @@ Output:
 
 .. testoutput:: ExTwoPeaks
 
-   Difc: 18400.0
-   Zero: 46.0
+   Difc: 18181.8
+   Zero: 460.5
    The output table has 1 row(s)
-   Parameters from the table, Difc: 18400.0, Zero: 46.0
+   Parameters from the table, Difc: 18181.8, Zero: 460.5
    Number of peaks fitted: 2
-   First peak expected (dSpacing): 0.65
-   First fitted peak center (ToF): 12006.0
+   First peak expected (dSpacing): 0.8
+   First fitted peak center (ToF): 15006.0
+   Second peak expected (dSpacing): 1.9
+   Second fitted peak center (ToF): 35006.0
 
 .. categories::
 
