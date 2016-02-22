@@ -284,7 +284,7 @@ public:
 
     detmid_sample = detmiddle2 - sample2;
     twotheta_middle = detmid_sample.angle(sample_source) * 180. / 3.1415926;
-    TS_ASSERT_DELTA(twotheta_middle, 0.0228, 0.0001);
+    TS_ASSERT_DELTA(twotheta_middle, 0.0239, 0.0001);
 
     det0_sample = det0pos2 - sample2;
     double twotheta0_2 = det0_sample.angle(sample_source) * 180. / 3.14159265;
@@ -424,7 +424,7 @@ public:
     TS_ASSERT_DELTA(dist0, dist255, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
-    TS_ASSERT_DELTA(distmiddle, 0.3518, 0.000001);
+    TS_ASSERT_DELTA(distmiddle, 0.3350, 0.000001);
 
     // 2theta value
     Kernel::V3D sample_source = sample - source;

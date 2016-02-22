@@ -136,7 +136,7 @@ class NTableWidget(QtGui.QTableWidget):
             return_value = str(item_i_j.text())
             if cell_data_type == 'int':
                 return_value = int(return_value)
-            elif cell_data_type == 'float':
+            elif cell_data_type == 'float' or cell_data_type == 'double':
                 return_value = float(return_value)
 
         return return_value
@@ -362,6 +362,7 @@ class NTableWidget(QtGui.QTableWidget):
         self.remove_all_rows()
 
         # add rows back
+        print '[DB-BAT] Sort by column %d. Keys = ' % column_index, key_list, 'sort_order = ', sort_order
         for key_value in key_list:
             self.append_row(row_content_dict[key_value])
         # END-FOR

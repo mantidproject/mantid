@@ -156,6 +156,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_select_all_survey)
         self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
                      self.do_filter_sort_survey_table)
+        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_survey)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -189,6 +191,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.radioButton_ubFromTab1.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
+        self.ui.checkBox_sortDescending.setChecked(False)
+        self.ui.radioButton_sortByCounts.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -694,9 +698,17 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(2)
 
         # find peak and add peak
+        failed_list = list()
         for scan_number in scan_number_list:
-            # merge peak and find peak
-            self._myControl.merge_pts_in_scan(exp_number, scan_number, [], 'q-sample')
+            # merge peak
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_number, scan_number, [], 'q-sample')
+
+            # continue to the next scan if there is something wrong
+            if status is False:
+                failed_list.append((scan_number, err_msg))
+                continue
+
+            # find peak
             self._myControl.find_peak(exp_number, scan_number)
 
             # get PeakInfo
@@ -708,6 +720,19 @@ class MainWindow(QtGui.QMainWindow):
 
             # add to table
             self.set_ub_peak_table(peak_info)
+        # END-FOR
+
+        # pop error if there is any scan that is not reduced right
+        if len(failed_list) > 0:
+            failed_scans_str = 'Unable to merge scans: '
+            sum_error_str = ''
+            for fail_tup in failed_list:
+                failed_scans_str += '%d, ' % fail_tup[0]
+                sum_error_str += '%s\n' % fail_tup[1]
+            # END-FOR
+
+            self.pop_one_button_dialog(failed_scans_str)
+            self.pop_one_button_dialog(sum_error_str)
         # END-FOR
 
         return
@@ -804,6 +829,19 @@ class MainWindow(QtGui.QMainWindow):
         else:
             err_msg = ub_matrix
             self.pop_one_button_dialog(err_msg)
+
+        return
+
+    def do_clear_survey(self):
+        """
+        Clear survey and survey table.
+        As myController does not store any survey information,
+        there is no need to clear any data structure in myController
+        :return:
+        """
+        # Clear table
+        self.ui.tableWidget_surveyTable.remove_all_rows()
+        self.ui.tableWidget_surveyTable.reset()
 
         return
 

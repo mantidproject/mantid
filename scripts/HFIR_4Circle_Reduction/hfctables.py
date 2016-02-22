@@ -572,7 +572,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
     """
     Table_Setup = [('Scan', 'int'),
                    ('Max Counts Pt', 'int'),
-                   ('Max Counts', 'double'),
+                   ('Max Counts', 'float'),
                    ('H', 'float'),
                    ('K', 'float'),
                    ('L', 'float'),
@@ -622,7 +622,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self.filter_rows(start_scan, end_scan, min_counts, max_counts)
 
         # order
-        self.sort_by_column(col_index)
+        self.sort_by_column(col_index, sort_order)
 
         return
 
@@ -637,8 +637,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
         :return:
         """
         # check whether it can be skipped
-        if start_scan == self._currStartScan and end_scan == self._currEndScan\
-            and min_counts == self._currMinCounts and max_counts == self._currMaxCounts:
+        if start_scan == self._currStartScan and end_scan == self._currEndScan \
+                and min_counts == self._currMinCounts and max_counts == self._currMaxCounts:
             # same filter set up, return
             return
 
@@ -654,9 +654,11 @@ class ScanSurveyTable(tableBase.NTableWidget):
             # check with filters: original order is counts, scan, Pt., ...
             scan_number = sum_item[1]
             if scan_number < start_scan or scan_number > end_scan:
+                # print 'Scan %d is out of range.' % scan_number
                 continue
             counts = sum_item[0]
             if counts < min_counts or counts > max_counts:
+                # print 'Scan %d Counts %f is out of range.' % (scan_number, counts)
                 continue
 
             # modify for appending to table
@@ -668,6 +670,12 @@ class ScanSurveyTable(tableBase.NTableWidget):
             # append to table
             self.append_row(row_items)
         # END-FOR (index)
+
+        # Update
+        self._currStartScan = start_scan
+        self._currEndScan = end_scan
+        self._currMinCounts = min_counts
+        self._currMaxCounts = max_counts
 
         return
 
@@ -755,3 +763,9 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self.set_status_column_name('Selected')
 
         return
+
+    def reset(self):
+        """ Reset the inner survey summary table
+        :return:
+        """
+        self._myScanSummaryList = list()

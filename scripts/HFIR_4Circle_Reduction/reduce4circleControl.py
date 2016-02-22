@@ -15,6 +15,8 @@ import math
 
 import numpy
 
+import fourcircle_utility as ftuil
+
 import mantid
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
@@ -1052,8 +1054,19 @@ class CWSCDReductionControl(object):
 
             # body
             for row in reader:
-                row_list.append(row)
-                # print row, type(row)
+                # check
+                assert isinstance(row, list)
+                assert len(row) == 7
+                # convert
+                counts = float(row[0])
+                scan = int(row[1])
+                pt = int(row[2])
+                h = float(row[3])
+                k = float(row[4])
+                l = float(row[5])
+                q_range = float(row[6])
+                # append
+                row_list.append([counts, scan, pt, h, k, l, q_range])
             # END-FOR
         # END-WITH
 
@@ -1224,14 +1237,18 @@ class CWSCDReductionControl(object):
         # Collect HB3A Exp/Scan information
         # construct a configuration with 1 scan and multiple Pts.
         scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
-        api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
-                                      ScanList='%d' % scan_no,
-                                      PtLists=pt_list_str,
-                                      DataDirectory=self._dataDir,
-                                      GenerateVirtualInstrument=False,
-                                      OutputWorkspace=scan_info_ws_name,
-                                      DetectorTableWorkspace='MockDetTable')
-        assert AnalysisDataService.doesExist(scan_info_ws_name)
+        try:
+            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                          ScanList='%d' % scan_no,
+                                          PtLists=pt_list_str,
+                                          DataDirectory=self._dataDir,
+                                          GenerateVirtualInstrument=False,
+                                          OutputWorkspace=scan_info_ws_name,
+                                          DetectorTableWorkspace='MockDetTable')
+        except RuntimeError as rt_error:
+            return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
+        else:
+            assert AnalysisDataService.doesExist(scan_info_ws_name)
 
         # Convert to Q-sample
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
@@ -1557,7 +1574,7 @@ class CWSCDReductionControl(object):
             file_name = '%s.csv' % file_name
 
         # Write file
-        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L']
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q']
         with open(file_name, 'w') as csvfile:
             csv_writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
@@ -1565,7 +1582,7 @@ class CWSCDReductionControl(object):
             for scan_summary in self._scanSummaryList:
                 # check type
                 assert isinstance(scan_summary, list)
-
+                assert len(scan_summary) == len(titles)
                 # write to csv
                 csv_writer.writerow(scan_summary)
             # END-FOR
@@ -1758,13 +1775,14 @@ class CWSCDReductionControl(object):
                 h_col_index = col_name_list.index('h')
                 k_col_index = col_name_list.index('k')
                 l_col_index = col_name_list.index('l')
-                twotheta_col_index = col_name_list.index('2theta')
+                col_2theta_index = col_name_list.index('2theta')
+                m1_col_index = col_name_list.index('m1')
 
                 max_count = 0
                 max_row = 0
                 max_h = max_k = max_l = 0
 
-                twotheta = -1
+                two_theta = m1 = -1
 
                 for i_row in xrange(num_rows):
                     det_count = spice_table_ws.cell(i_row, 5)
@@ -1774,14 +1792,18 @@ class CWSCDReductionControl(object):
                         max_h = spice_table_ws.cell(i_row, h_col_index)
                         max_k = spice_table_ws.cell(i_row, k_col_index)
                         max_l = spice_table_ws.cell(i_row, l_col_index)
-                        twotheta = spice_table_ws.cell(i_row, twotheta_col_index)
+                        two_theta = spice_table_ws.cell(i_row, col_2theta_index)
+                        m1 = spice_table_ws.cell(i_row, m1_col_index)
                 # END-FOR
 
-                wavelength = self.get_hb3a_wavelength(m1)
+                # calculate wavelength
+                wavelength = ftuil.get_hb3a_wavelength(m1)
+                q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
+                print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
 
-                # FIXME/TODO/NOW
-                q_range = 4*math.pi*math.sin(twotheta*0.5)/wavelength
-                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l, q_range])
+                # appending to list
+                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
+                                      q_range])
 
             except RuntimeError as e:
                 print e

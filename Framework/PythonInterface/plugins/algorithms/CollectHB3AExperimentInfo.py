@@ -121,7 +121,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 # get start det id.  all Pt. belonged to same scan will use the same starting detector ID
                 if start_det_id is None:
                     # get 2theta for starting det-ID
-                    assert (scan_number, pt_number) in self._scanPt2ThetaDict
+                    assert (scan_number, pt_number) in self._scanPt2ThetaDict, 'Scan %d Pt %d cannot be ' \
+                                                                               'found in scan-pt-2theta dict, ' \
+                                                                               'whose keys are %s.' \
+                                                                               '' % (scan_number, pt_number,
+                                                                                     str(self._scanPt2ThetaDict.keys()))
                     two_theta = self._scanPt2ThetaDict[(scan_number, pt_number)]
 
                     assert two_theta in self._detStartID

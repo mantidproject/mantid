@@ -366,7 +366,7 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
-    const int scannnumber, const int runnumber, int monitor_counts) {
+    const int scannumber, const int runnumber, int monitor_counts) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);
@@ -445,7 +445,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     expinfo->setInstrument(tmp_inst);
   }
   expinfo->mutableRun().setGoniometer(dataws->run().getGoniometer(), false);
-  int scan_run_number = scannnumber * 1000 + runnumber;
+  int scan_run_number = scannumber * 1000 + runnumber;
   expinfo->mutableRun().addProperty("run_number", scan_run_number);
   expinfo->mutableRun().addProperty("monitor", monitor_counts);
   // Add all the other propertys from original data workspace

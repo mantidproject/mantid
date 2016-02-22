@@ -112,11 +112,14 @@ def parse_float_editors(line_edits, allow_blank=False):
         assert isinstance(line_edit, QtGui.QLineEdit)
         str_value = str(line_edit.text()).strip()
         if len(str_value) == 0 and allow_blank:
+            # allow blank and use None
             float_list.append(None)
+        else:
+            # parse
             try:
                 float_value = float(str_value)
             except ValueError as value_err:
-                error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+                error_message += 'Unable to parse %s to float due to %s\n' % (str_value, value_err)
             else:
                 float_list.append(float_value)
             # END-TRY
@@ -125,11 +128,14 @@ def parse_float_editors(line_edits, allow_blank=False):
 
     if len(error_message) > 0:
         return False, error_message
-    elif return_single_value is True:
-        return True, float_list[0]
-
-    # Final check
-    assert len(line_edits) == len(float_list)
+    else:
+        # Final check
+        assert len(line_edits) == len(float_list), 'Number of input line edits %d is not same as ' \
+                                                   'number of output floats %d.' % (len(line_edits),
+                                                                                    len(float_list))
+        if return_single_value is True:
+            # return single float mode
+            return True, float_list[0]
 
     return True, float_list
 
@@ -170,7 +176,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
             try:
                 int_value = int(str_value)
             except ValueError as value_err:
-                error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+                error_message += 'Unable to parse a line edit with value %s to integer. %s\n' % (str_value, value_err)
             else:
                 if str_value != '%d' % int_value:
                     error_message += 'Value %s is not a proper integer.\n' % str_value
