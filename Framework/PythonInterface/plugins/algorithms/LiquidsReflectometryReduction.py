@@ -75,6 +75,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("AngleOffsetError", 0.0, doc="Angle offset error (degrees)")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty("ScalingFactorFile", "", doc="Scaling factor configuration file")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty("SlitsWidthFlag", True,
                              doc="Looking for perfect match of slits width when using Scaling Factor file")
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
@@ -92,7 +93,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
     def PyExec(self):
         # The old reduction code had a tolerance value for matching the
         # slit parameters to get the scaling factors
-        self.TOLERANCE = 0.020
+        self.TOLERANCE = self.getProperty("SlitTolerance").value
 
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
