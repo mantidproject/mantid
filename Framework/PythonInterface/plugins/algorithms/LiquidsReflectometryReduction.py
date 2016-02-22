@@ -334,9 +334,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         tthd_units = run_object.getProperty('tthd').units
 
         # Make sure we have radians
-        if thi_units == 'degree':
+        if thi_units.lower().startswith('deg'):
             thi_value *= math.pi / 180.0
-        if tthd_units == 'degree':
+        if tthd_units.lower().startswith('deg'):
             tthd_value *= math.pi / 180.0
 
         theta = math.fabs(tthd_value - thi_value) / 2.
