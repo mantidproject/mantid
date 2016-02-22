@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTENTROPY_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Algorithms {

@@ -58,7 +58,7 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
     // X*N data points (real data)
     throw std::runtime_error("Couldn't load invalid data");
   }
-  if (dataRe.size() != 2 * image.size()) {
+  if (2 * dataRe.size() != image.size()) {
     throw std::runtime_error("Couldn't load invalid data");
   }
   if (m_background == 0) {
@@ -141,23 +141,29 @@ std::vector<double> MaxentData::getEntropy() const {
 
 std::vector<double> MaxentData::getEntropyGrad() const {
 
-  std::vector<double> entropyGrad(m_image.size(), 0.);
+  const size_t size = m_image.size();
 
-  for (auto &im : m_image) {
-    entropyGrad.push_back(m_entropy->getDerivative(im / m_background));
+  std::vector<double> entropyGrad(size, 0.);
+
+  for (size_t i = 0; i < size; i++) {
+    entropyGrad[i] = m_entropy->getDerivative(m_image[i] / m_background);
   }
 
   return entropyGrad;
 }
 
-std::vector<double> MaxentData::getReconstructedData() const { return m_data; }
+std::vector<double> MaxentData::getReconstructedData() const {
+  return m_dataCalc;
+}
 
 std::vector<double> MaxentData::getMetric() const {
 
-  std::vector<double> metric(m_image.size(), 0.);
+  const size_t size = m_image.size();
 
-  for (auto &im : m_image) {
-    metric.push_back(m_entropy->getSecondDerivative(im));
+  std::vector<double> metric(size, 0.);
+
+  for (size_t i = 0; i < size; i++) {
+    metric[i] = m_entropy->getSecondDerivative(m_image[i]);
   }
 
   return metric;
@@ -173,7 +179,13 @@ QuadraticCoefficients MaxentData::getQuadraticCoefficients() {
 }
 
 double MaxentData::getAngle() { return m_angle; }
-double MaxentData::getChisq() { return m_chisq; }
+
+double MaxentData::getChisq() {
+  if (m_chisq == -1.)
+    calculateChisq();
+
+  return m_chisq;
+}
 
 void MaxentData::calculateSearchDirections() {
 
@@ -262,8 +274,9 @@ void MaxentData::calculateSearchDirections() {
       m_coeffs.s2[k][l] = 0.;
       m_coeffs.c2[k][l] = 0.;
       for (size_t i = 0; i < npoints; i++) {
-        m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
-                             m_errors[i] / m_errors[i];
+        if (m_errors[i])
+          m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
+                               m_errors[i] / m_errors[i];
         m_coeffs.s2[k][l] -=
             m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
       }

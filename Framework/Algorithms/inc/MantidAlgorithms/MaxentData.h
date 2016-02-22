@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/MaxentEntropy.h"
 #include "MantidKernel/Matrix.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Algorithms {

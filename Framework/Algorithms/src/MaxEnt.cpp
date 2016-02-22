@@ -198,12 +198,13 @@ void MaxEnt::exec() {
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
-  MaxentData_sptr maxentData;
+  MaxentData_sptr maxentData = boost::make_shared<MaxentData>(entropy);
 
+  npoints *= 2;
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
-    std::vector<double> image(2 * npoints, background);
+    std::vector<double> image(npoints, background);
 
     if (complex) {
       auto dataRe = inWS->readY(2 * s);

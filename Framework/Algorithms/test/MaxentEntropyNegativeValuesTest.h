@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaxentEntropyNegativeValues.h"
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 using Mantid::Algorithms::MaxentEntropyNegativeValues;
 
