@@ -667,9 +667,9 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
       msg += " payload_len=";
       msg += boost::lexical_cast<std::string>(m_payload_len);
       delete[] m_sectionOffsets;
-      m_sectionOffsets = (uint32_t *)NULL;
+      m_sectionOffsets = nullptr;
       delete[] m_after_banks_offset;
-      m_after_banks_offset = (uint32_t *)NULL;
+      m_after_banks_offset = nullptr;
       throw invalid_packet(msg);
     } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
                m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) *
@@ -714,9 +714,9 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     msg += " payload_len=";
     msg += boost::lexical_cast<std::string>(m_payload_len);
     delete[] m_sectionOffsets;
-    m_sectionOffsets = (uint32_t *)NULL;
+    m_sectionOffsets = nullptr;
     delete[] m_after_banks_offset;
-    m_after_banks_offset = (uint32_t *)NULL;
+    m_after_banks_offset = nullptr;
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
              m_payload_len < (sectionOffset * sizeof(uint32_t))) {
