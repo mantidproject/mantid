@@ -48,17 +48,17 @@ const std::string SplineSmoothing::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineSmoothing::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The workspace on which to perform the smoothing algorithm.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calculated points");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv",
-                                                        "", Direction::Output,
-                                                        PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaceDeriv", "", Direction::Output,
+                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = boost::make_shared<BoundedValidator<int>>();

@@ -83,42 +83,44 @@ void LeBailFit::init() {
 
   // Input Data Workspace
   this->declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Input workspace containing the data to fit by LeBail algorithm.");
 
   // Output Result Data/Model Workspace
-  this->declareProperty(new WorkspaceProperty<Workspace2D>(
+  this->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                             "OutputWorkspace", "", Direction::Output),
                         "Output workspace containing calculated pattern or "
                         "calculated background. ");
 
   // Instrument profile Parameters
-  this->declareProperty(new WorkspaceProperty<TableWorkspace>(
+  this->declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                             "InputParameterWorkspace", "", Direction::Input),
                         "Input table workspace containing the parameters "
                         "required by LeBail fit. ");
 
   // Output instrument profile parameters
-  auto tablewsprop1 = new WorkspaceProperty<TableWorkspace>(
+  auto tablewsprop1 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
       "OutputParameterWorkspace", "", Direction::Output,
       API::PropertyMode::Optional);
-  this->declareProperty(tablewsprop1, "Input table workspace containing the "
-                                      "parameters required by LeBail fit. ");
+  this->declareProperty(std::move(tablewsprop1),
+                        "Input table workspace containing the "
+                        "parameters required by LeBail fit. ");
 
   // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
   this->declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "",
-                                            Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputHKLWorkspace", "", Direction::Input),
       "Input table workspace containing the list of reflections (HKL). ");
 
   // Bragg peaks profile parameter output table workspace
-  auto tablewsprop2 = new WorkspaceProperty<TableWorkspace>(
+  auto tablewsprop2 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
       "OutputPeaksWorkspace", "", Direction::Output,
       API::PropertyMode::Optional);
-  this->declareProperty(tablewsprop2, "Optional output table workspace "
-                                      "containing all peaks' peak "
-                                      "parameters. ");
+  this->declareProperty(std::move(tablewsprop2),
+                        "Optional output table workspace "
+                        "containing all peaks' peak "
+                        "parameters. ");
 
   // WorkspaceIndex
   this->declareProperty("WorkspaceIndex", 0,
@@ -126,7 +128,7 @@ void LeBailFit::init() {
 
   // Interested region
   this->declareProperty(
-      new Kernel::ArrayProperty<double>("FitRegion"),
+      Kernel::make_unique<Kernel::ArrayProperty<double>>("FitRegion"),
       "Region of data (TOF) for LeBail fit.  Default is whole range. ");
 
   // Functionality: Fit/Calculation/Background
@@ -154,16 +156,17 @@ void LeBailFit::init() {
 
   // Input background parameters (array)
   this->declareProperty(
-      new Kernel::ArrayProperty<double>("BackgroundParameters"),
+      Kernel::make_unique<Kernel::ArrayProperty<double>>(
+          "BackgroundParameters"),
       "Optional: enter a comma-separated list of background order parameters "
       "from order 0. ");
 
   // Input background parameters (tableworkspace)
-  auto tablewsprop3 = new WorkspaceProperty<TableWorkspace>(
+  auto tablewsprop3 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
       "BackgroundParametersWorkspace", "", Direction::InOut,
       API::PropertyMode::Optional);
   this->declareProperty(
-      tablewsprop3,
+      std::move(tablewsprop3),
       "Optional table workspace containing the fit result for background.");
 
   // Peak Radius
@@ -230,10 +233,11 @@ void LeBailFit::init() {
 
   //-----------------  Parameters for Monte Carlo Simulated Annealing
   //--------------------------
-  auto mcwsprop = new WorkspaceProperty<TableWorkspace>(
+  auto mcwsprop = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
       "MCSetupWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(mcwsprop, "Name of table workspace containing parameters' "
-                            "setup for Monte Carlo simualted annearling. ");
+  declareProperty(std::move(mcwsprop),
+                  "Name of table workspace containing parameters' "
+                  "setup for Monte Carlo simualted annearling. ");
   setPropertySettings(
       "MCSetupWorkspace",
       new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));

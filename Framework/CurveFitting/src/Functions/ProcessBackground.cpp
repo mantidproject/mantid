@@ -55,8 +55,8 @@ ProcessBackground::~ProcessBackground() {}
 void ProcessBackground::init() {
   // Input and output Workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputWorkspace", "Anonymous",
-                                         Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "InputWorkspace", "Anonymous", Direction::Input),
       "Name of the output workspace containing the processed background.");
 
   // Workspace index
@@ -64,8 +64,8 @@ void ProcessBackground::init() {
                   "Workspace index for the input workspaces.");
 
   // Output workspace
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "",
-                                                     Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output workspace containing processed background");
 
   // Function Options
@@ -82,10 +82,11 @@ void ProcessBackground::init() {
   declareProperty("UpperBound", Mantid::EMPTY_DBL(),
                   "Upper boundary of the data to have background processed.");
 
-  auto refwsprop = new WorkspaceProperty<Workspace2D>(
+  auto refwsprop = Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
       "ReferenceWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(refwsprop, "Name of the workspace containing the data "
-                             "required by function AddRegion.");
+  declareProperty(std::move(refwsprop),
+                  "Name of the workspace containing the data "
+                  "required by function AddRegion.");
   setPropertySettings(
       "ReferenceWorkspace",
       new VisibleWhenProperty("Options", IS_EQUAL_TO, "AddRegion"));
@@ -122,10 +123,12 @@ void ProcessBackground::init() {
                                               "FitGivenDataPoints"));
 
   // User input background points for "SelectBackground"
-  auto arrayproperty = new Kernel::ArrayProperty<double>("BackgroundPoints");
-  declareProperty(arrayproperty, "Vector of doubles, each of which is the "
-                                 "X-axis value of the background point "
-                                 "selected by user.");
+  auto arrayproperty =
+      Kernel::make_unique<Kernel::ArrayProperty<double>>("BackgroundPoints");
+  declareProperty(std::move(arrayproperty),
+                  "Vector of doubles, each of which is the "
+                  "X-axis value of the background point "
+                  "selected by user.");
   setPropertySettings("BackgroundPoints",
                       new VisibleWhenProperty("Options", IS_EQUAL_TO,
                                               "SelectBackgroundPoints"));
@@ -133,7 +136,7 @@ void ProcessBackground::init() {
                       new VisibleWhenProperty("SelectionMode", IS_EQUAL_TO,
                                               "FitGivenDataPoints"));
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "BackgroundTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the table workspace containing background "
@@ -173,7 +176,7 @@ void ProcessBackground::init() {
                                               "SelectBackgroundPoints"));
 
   // Optional output workspace
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                       "UserBackgroundWorkspace", "_dummy01", Direction::Output),
                   "Output workspace containing fitted background from points "
                   "specified by users.");
@@ -183,7 +186,7 @@ void ProcessBackground::init() {
 
   // Optional output workspace
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputBackgroundParameterWorkspace", "_dummy02", Direction::Output),
       "Output parameter table workspace containing the background fitting "
       "result. ");
@@ -210,7 +213,7 @@ void ProcessBackground::init() {
                                               "SelectBackgroundPoints"));
 
   // Peak table workspac for "RemovePeaks"
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "BraggPeakTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing peaks' parameters. ");

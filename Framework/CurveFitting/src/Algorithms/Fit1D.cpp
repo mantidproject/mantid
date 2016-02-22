@@ -277,8 +277,8 @@ void Fit1D::modifyFinalFittedParameters(std::vector<double> &fittedParameter) {
 /** Initialisation method
  */
 void Fit1D::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -628,7 +628,7 @@ void Fit1D::exec() {
           standardDeviations.push_back(sdExtended[i]);
 
       declareProperty(
-          new WorkspaceProperty<API::ITableWorkspace>(
+          make_unique<WorkspaceProperty<API::ITableWorkspace>>(
               "OutputNormalisedCovarianceMatrix", "", Direction::Output),
           "The name of the TableWorkspace in which to store the final "
           "covariance matrix");
@@ -666,13 +666,13 @@ void Fit1D::exec() {
       setProperty("OutputNormalisedCovarianceMatrix", m_covariance);
     }
 
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                         "OutputParameters", "", Direction::Output),
                     "The name of the TableWorkspace in which to store the "
                     "final fit parameters");
     declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                               Direction::Output),
+        make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                        Direction::Output),
         "Name of the output Workspace holding resulting simlated spectrum");
 
     setPropertyValue("OutputParameters", output + "_Parameters");
