@@ -4,12 +4,32 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadSwans.h"
+#include <Poco/TemporaryFile.h>
 
 using Mantid::DataHandling::LoadSwans;
 
 class LoadSwansTest : public CxxTest::TestSuite {
+private:
+  /**
+   * Creates the metadatafile
+   * @return its path
+   */
+  std::string getMetadataFile() {
+	//                  runnumber,   wavelength, chopper frequency, time offset, ?, angle
+	std::string content("80814.000000	3.500000	60.000000	11200.715115	0.000000	6.500000");
+    Poco::TemporaryFile tmpFile;
+    std::ofstream ofs(tmpFile.path().c_str());
+    ofs << content << std::endl;
+    ofs.close();
+    TSM_ASSERT("File has not been created.", tmpFile.exists());
+    TSM_ASSERT("File is not a file.", tmpFile.isFile());
+    tmpFile.keepUntilExit();
+    return tmpFile.path();
+  }
+
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent the suite being created
+  // statically
   // This means the constructor isn't called when running other tests
   static LoadSwansTest *createSuite() { return new LoadSwansTest(); }
   static void destroySuite(LoadSwansTest *suite) { delete suite; }
@@ -29,7 +49,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameData", filename));
+    std::string metadataFilename = getMetadataFile();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameMetaData", metadataFilename));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "Output_ws_name"));
 

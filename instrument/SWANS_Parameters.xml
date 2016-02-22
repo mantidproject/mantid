@@ -24,9 +24,6 @@
 		</parameter>
 		
 		<!-- Parameter that will come from somewhere else in the future? -->
-		<parameter name="detector-rotation-angle">
-			<value val="-6.5"/>
-		</parameter>
 		<parameter name="detector-sample-distance">
 			<value val="2"/>
 		</parameter>

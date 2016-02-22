@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,9 +55,11 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
  * be used
  */
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
+  // since this is a test loader, the confidence will always be 0!
   if (descriptor.extension().compare(".dat") != 0)
     return 0;
-  return 0;
+  else
+    return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,9 +67,14 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadSwans::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".txt"}),
+      new FileProperty("FilenameData", "", FileProperty::Load, {".dat"}),
       "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .txt or .dat.");
+      "relative path. The file extension must be .dat.");
+
+  declareProperty(new FileProperty("FilenameMetaData", "", FileProperty::Load,
+                                   {"meta.dat"}),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be meta.dat.");
 
   declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -81,7 +89,9 @@ void LoadSwans::exec() {
   // Load this here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = setDetectorSize();
-  std::map<uint32_t, std::vector<uint32_t>> pos_tof_map = LoadSwans::loadData();
+  std::map<uint32_t, std::vector<uint32_t>> pos_tof_map = loadData();
+  std::vector<double> metadata = loadMetaData();
+  setMetaDataAsWorkspaceProperties(metadata);
   loadDataIntoTheWorkspace(pos_tof_map);
   loadInstrument();
   setTimeAxis();
@@ -112,7 +122,8 @@ void LoadSwans::loadInstrument() {
 /**
  * Place the detector in space according to the distance and angle
  * Needs in the IDF Parameters file the entries:
- * detector-name, detector-sample-distance, detector-rotation-angle
+ * detector-name, detector-sample-distance
+ * Also the metadata file has to have the rotation angle value
  */
 void LoadSwans::placeDetectorInSpace() {
 
@@ -120,8 +131,8 @@ void LoadSwans::placeDetectorInSpace() {
       m_ws->getInstrument()->getStringParameter("detector-name")[0];
   const double distance = static_cast<double>(
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
-  const double angle = static_cast<double>(
-      m_ws->getInstrument()->getNumberParameter("detector-rotation-angle")[0]);
+  // Make the angle negative to accomodate sense of rotation.
+  const double angle = - m_ws->run().getPropertyValueAsType<double>("angle");
 
   g_log.information() << "Moving detector " << componentName << " " << distance
                       << " meters and " << angle << " degrees." << std::endl;
@@ -148,7 +159,7 @@ void LoadSwans::placeDetectorInSpace() {
  */
 std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
 
-  std::string filename = getPropertyValue("Filename");
+  std::string filename = getPropertyValue("FilenameData");
   std::ifstream input(filename, std::ifstream::binary | std::ios::ate);
   input.seekg(0);
 
@@ -177,6 +188,67 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
   return pos_tof_map;
 }
 
+/**
+ * Load metadata file witch to date is just a line of of double values
+ * Parses this file and put it into a vector
+ * @return vector with the file contents
+ */
+std::vector<double> LoadSwans::loadMetaData() {
+
+  std::vector<double> metadata;
+  std::string filename = getPropertyValue("FilenameMetaData");
+
+  std::ifstream infile(filename);
+
+  if (infile.fail()) {
+    g_log.error("Error reading file " + filename);
+    throw Exception::FileError("Unable to read data in File:", filename);
+  }
+
+  std::string line;
+  while (getline(infile, line)) {
+    // line with data, need to be parsed by white spaces
+    if (!line.empty() && line[0] != '#') {
+    	g_log.debug() << "Metadata parsed line: " << line << std::endl;
+    	std::vector<std::string> dataLine;
+        boost::trim_if(
+            line, boost::is_any_of("\t ")); // could also use plain boost::trim
+        boost::split(dataLine, line, boost::is_any_of("\t "),
+                     boost::token_compress_on);
+      for (auto beg = dataLine.begin(); beg != dataLine.end(); ++beg) {
+    	std::stringstream ss;
+        ss << *beg;
+        double d;
+        ss >> d;
+        metadata.push_back(d);
+      }
+    }
+  }
+  return metadata;
+}
+
+/*
+ * Metadata positions:
+ * 0 - run number
+ * 1 - wavelength
+ * 2 - chopper frequency
+ * 3 - time offset
+ * 4 - ??
+ * 5 - angle
+ *
+ */
+void LoadSwans::setMetaDataAsWorkspaceProperties(
+    const std::vector<double> &metadata) {
+  if (metadata.size() < 6) {
+    g_log.error("Expecting size 6 for metadata!");
+    throw Exception::NotFoundError(
+        "Number of arguments for metdata must be at least 6", metadata.size());
+  }
+  API::Run &runDetails = m_ws->mutableRun();
+  runDetails.addProperty<double>("wavelength", metadata[1]);
+  runDetails.addProperty<double>("angle", metadata[5]);
+}
+
 /*
  * Puts all events from the map into the WS
  *
@@ -195,8 +267,10 @@ void LoadSwans::loadDataIntoTheWorkspace(
 }
 
 /**
- * Get shortest and longest tof from the Parameters file and sets the time axis
- * Properties must be present in the Parameters file: shortest-tof, longest-tof
+ * Get shortest and longest tof from the Parameters file and sets the time
+ * axis
+ * Properties must be present in the Parameters file: shortest-tof,
+ * longest-tof
  */
 void LoadSwans::setTimeAxis() {
   unsigned int shortest_tof = static_cast<unsigned int>(
