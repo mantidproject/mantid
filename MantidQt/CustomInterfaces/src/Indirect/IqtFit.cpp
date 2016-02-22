@@ -280,12 +280,15 @@ void IqtFit::plotWorkspace() {
  * Save the result of the algorithm
  */
 void IqtFit::saveResult() {
-  const auto workingdirectory =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory");
-  const auto filepath = workingdirectory + m_pythonExportWsName + ".nxs";
-  addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
-                          QString::fromStdString(filepath));
+  if (m_uiForm.ckSave->isChecked()) {
+    const auto workingdirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+    const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
+    addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
+                            QString::fromStdString(filepath));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
 }
 
 /**
