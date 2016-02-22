@@ -8,14 +8,12 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
-#include "boost/assign.hpp"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
 
 namespace Mantid {
 namespace Crystal {

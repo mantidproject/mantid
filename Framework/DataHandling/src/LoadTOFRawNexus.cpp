@@ -445,8 +445,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                errors.begin() + (i + 1) * m_numBins);
     } else {
       // Now take the sqrt(Y) to give E
-      E = Y;
-      std::transform(E.begin(), E.end(), E.begin(), (double (*)(double))sqrt);
+      E = MantidVec();
+      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
+                     static_cast<double (*)(double)>(sqrt));
     }
   }
 
@@ -518,8 +519,8 @@ void LoadTOFRawNexus::exec() {
   g_log.debug() << "Loading DAS logs" << std::endl;
 
   int nPeriods = 1; // Unused
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log")); // Unused
+  auto periodLog =
+      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 

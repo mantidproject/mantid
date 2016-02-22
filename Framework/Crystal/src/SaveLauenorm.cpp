@@ -9,7 +9,6 @@
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "boost/assign.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
@@ -17,7 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
 
 namespace Mantid {
 namespace Crystal {

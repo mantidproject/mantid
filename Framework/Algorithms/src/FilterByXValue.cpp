@@ -79,22 +79,13 @@ void FilterByXValue::exec() {
 
   // Check if we're doing thing in-place.
   if (inputWS != outputWS) {
-    // Create a new output workspace if not doing things in place. Preserve
-    // event-ness.
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numSpec,
-                                            inputWS->blocksize() +
-                                                inputWS->isHistogramData(),
-                                            inputWS->blocksize()));
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // Copy over the data.
     // TODO: Make this more efficient by only copying over the events that pass
     // the
     // filter rather than copying everything and then removing some. This should
     // entail new methods (e.g. iterators) on EventList as this algorithm
     // shouldn't
     // need to know about the type of the events (e.g. weighted).
-    outputWS->copyDataFrom(*inputWS);
+    outputWS = EventWorkspace_sptr(inputWS->clone().release());
     setProperty("OutputWorkspace", outputWS);
   }
 

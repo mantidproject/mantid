@@ -726,7 +726,7 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, Workspace_sptr ws2) {
  */
 API::WorkspaceGroup_sptr
 Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
-  WorkspaceGroup_sptr group = WorkspaceGroup_sptr(new WorkspaceGroup);
+  auto group = boost::make_shared<WorkspaceGroup>();
 
   for (const auto &ws : wsList) {
     WorkspaceGroup_sptr isGroup =

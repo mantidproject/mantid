@@ -4,6 +4,7 @@ if ( CXXTEST_FOUND )
   include_directories( ../../../Framework/TestHelpers/inc ../../../Framework/DataObjects/inc )
 
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                         ../../../Framework/TestHelpers/src/TearDownWorld.cpp
