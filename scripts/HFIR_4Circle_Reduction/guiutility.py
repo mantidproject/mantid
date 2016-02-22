@@ -83,9 +83,15 @@ def parse_integer_list(array_str):
     return integer_list
 
 
-def parse_float_editors(line_edits):
+def parse_float_editors(line_edits, allow_blank=False):
     """
+    Requirements:
+    - line_edits: list of line edits
+    Guarantees:
+    - if 'allow blank' then use None for the value
+    - return a list of float
     :param line_edits:
+    :param allow_blank: flag to allow blanks
     :return: (True, list of floats); (False, error message)
     """
     # Set flag
@@ -104,14 +110,17 @@ def parse_float_editors(line_edits):
 
     for line_edit in line_edit_list:
         assert isinstance(line_edit, QtGui.QLineEdit)
-        try:
-            str_value = str(line_edit.text()).strip()
-            float_value = float(str_value)
-        except ValueError as value_err:
-            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
-        else:
-            float_list.append(float_value)
-        # END-TRY
+        str_value = str(line_edit.text()).strip()
+        if len(str_value) == 0 and allow_blank:
+            float_list.append(None)
+            try:
+                float_value = float(str_value)
+            except ValueError as value_err:
+                error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+            else:
+                float_list.append(float_value)
+            # END-TRY
+        # END-IF-ELSE
     # END-FOR
 
     if len(error_message) > 0:
@@ -119,12 +128,21 @@ def parse_float_editors(line_edits):
     elif return_single_value is True:
         return True, float_list[0]
 
+    # Final check
+    assert len(line_edits) == len(float_list)
+
     return True, float_list
 
 
-def parse_integers_editors(line_edits):
+def parse_integers_editors(line_edits, allow_blank=False):
     """
+    Requirements:
+    - line_edits: list of line edits
+    Guarantees:
+    - if 'allow blank' then use None for the value
+    - return a list of integers
     :param line_edits:
+    :param allow_blank: flag to allow empty string and return as a None
     :return: (True, list of integers); (False, error message)
     """
     # Set flag
@@ -139,21 +157,27 @@ def parse_integers_editors(line_edits):
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
 
     error_message = ''
-    integer_list = []
+    integer_list = list()
 
     for line_edit in line_edit_list:
         assert isinstance(line_edit, QtGui.QLineEdit)
-        try:
-            str_value = str(line_edit.text()).strip()
-            int_value = int(str_value)
-        except ValueError as value_err:
-            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+        str_value = str(line_edit.text()).strip()
+        if len(str_value) == 0 and allow_blank:
+            # allowed empty string
+            integer_list.append(None)
         else:
-            if str_value != '%d' % int_value:
-                error_message += 'Value %s is not a proper integer.\n' % str_value
+            # normal case
+            try:
+                int_value = int(str_value)
+            except ValueError as value_err:
+                error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
             else:
-                integer_list.append(int_value)
-        # END-TRY
+                if str_value != '%d' % int_value:
+                    error_message += 'Value %s is not a proper integer.\n' % str_value
+                else:
+                    integer_list.append(int_value)
+            # END-TRY
+        # END-IF-ELSE
     # END-FOR
 
     if len(error_message) > 0:

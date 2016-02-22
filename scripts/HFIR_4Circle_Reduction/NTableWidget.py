@@ -141,6 +141,17 @@ class NTableWidget(QtGui.QTableWidget):
 
         return return_value
 
+    def get_column_index(self, column_name):
+        """
+        Get column index by column name
+        Guarantees: return column index
+        :param column_name:
+        :return:
+        """
+        assert isinstance(column_name, str)
+
+        return self._myColumnNameList.index(column_name)
+
     def get_row_value(self, row_index):
         """
         :param row_index:
@@ -312,22 +323,63 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
-    def sort_by_column_name(self, column_name, order=0):
+    def sort_by_column(self, column_index, sort_order=0):
         """
-
-        :param column_name:
+        Requirements:
+            1. column index must be an integer within valid column range
+            2. sort order will be either 0 (ascending) or 1 (descending)
+        :param column_index:
+        :param sort_order: 0 for ascending, 1 for descending
         :return:
         """
-        # TODO/NOW/1st
+        # check
+        assert isinstance(column_index, int), \
+            'column_index must be an integer but not %s.' % str(type(column_index))
+        if column_index < 0:
+            column_index += len(self._myColumnNameList)
+        assert 0 <= column_index < len(self._myColumnNameList), 'Column index %d is out of range.' % column_index
+
+        assert isinstance(sort_order, int), 'sort_order must be integer but not %s.' % str(type(sort_order))
+        assert sort_order == 0 or sort_order == 1
+
+        # get rows
+        num_rows = self.rowCount()
+        row_content_dict = dict()
+        for i_row in xrange(num_rows):
+            row_items = self.get_row_value(i_row)
+            key_value = self.get_cell_value(i_row, column_index)
+            row_content_dict[key_value] = row_items
+        # END-FOR
+
+        # sort keys
+        reverse_order = False
+        if sort_order == 1:
+            reverse_order = True
+        key_list = row_content_dict.keys()
+        key_list.sort(reverse=reverse_order)
+
+        # clear all rows
+        self.remove_all_rows()
+
+        # add rows back
+        for key_value in key_list:
+            self.append_row(row_content_dict[key_value])
+        # END-FOR
+
+        return
 
     def update_cell_value(self, row, col, value):
         """
-
+        Update (NOT reset) the value of a cell
         :param row:
         :param col:
         :param value:
         :return:
         """
+        # Check
+        assert isinstance(row, int) and 0 <= row < self.rowCount()
+        assert isinstance(col, int) and 0 <= col < self.columnCount()
+
         cell_item = self.item(row, col)
         cell_widget = self.cellWidget(row, col)
 

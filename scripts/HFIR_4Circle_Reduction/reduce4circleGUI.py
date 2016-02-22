@@ -5,6 +5,7 @@
 #
 ################################################################################
 import os
+import sys
 import math
 import csv
 import time
@@ -154,7 +155,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_select_all_survey)
         self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
-                     self.do_sort_survey_table)
+                     self.do_filter_sort_survey_table)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -177,6 +178,7 @@ class MainWindow(QtGui.QMainWindow):
         self._allowDownload = True
         self._dataAccessMode = 'Download'
         self._surveyTableFlag = True
+        self._ubPeakTableFlag = True
 
         # Sub window
         self._my3DWindow = None
@@ -496,10 +498,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
         self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
         self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
-
-        # TODO/NOW/1st: need to offer users with different types of UB matrix refinement tool!
-        # call mantid.FindUBUsingIndexedPeaks()
-        # refer to Calculate UB matrix to build PeakWorkspace
 
         return
 
@@ -1224,7 +1222,8 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        # TODO/NOW/1st: Implement ASAP
+        self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 
@@ -1362,13 +1361,60 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_sort_survey_table(self):
+    def do_filter_sort_survey_table(self):
         """
-
+        Sort and filter survey table by specified field
+        Requirements:
+        Guarantees: the original table is cleared and a new list is appended
         :return:
         """
-        # TODO/DOC
-        self.ui.tableWidget_surveyTable.sortByColumn(2, 1)
+        # Get column name
+        if self.ui.radioButton_sortByScan.isChecked():
+            column_name = 'Scan'
+        elif self.ui.radioButton_sortByCounts.isChecked():
+            column_name = 'Max Counts'
+        else:
+            self.pop_one_button_dialog('No column is selected to sort.')
+            return
+
+        # Get filters
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_filterScanLower,
+                                                        self.ui.lineEdit_filterScanUpper],
+                                                       allow_blank=True)
+        if status:
+            start_scan_number = ret_obj[0]
+            if start_scan_number is None:
+                start_scan_number = 0
+            end_scan_number = ret_obj[1]
+            if end_scan_number is None:
+                end_scan_number = sys.maxint
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
+                                                     self.ui.lineEdit_filterCountsUpper],
+                                                    allow_blank=True)
+        if status:
+            min_counts = ret_obj[0]
+            if min_counts is None:
+                min_counts = -0.0
+            max_counts = ret_obj[1]
+            if max_counts is None:
+                max_counts = sys.float_info.max
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
+
+        # filter and sort
+        ascending_order = not self.ui.checkBox_sortDescending.isChecked()
+        if ascending_order:
+            sort_order = 0
+        else:
+            sort_order = 1
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan_number, end_scan_number,
+                                                        min_counts, max_counts,
+                                                        column_name, sort_order)
 
         return
 

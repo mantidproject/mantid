@@ -1,5 +1,7 @@
 #pylint: disable=W0403,C0103,R0901,R0904
 import numpy
+import sys
+
 import NTableWidget as tableBase
 
 # UB peak information table
@@ -584,6 +586,88 @@ class ScanSurveyTable(tableBase.NTableWidget):
         tableBase.NTableWidget.__init__(self, parent)
 
         self._myScanSummaryList = list()
+
+        self._currStartScan = 0
+        self._currEndScan = sys.maxint
+        self._currMinCounts = 0.
+        self._currMaxCounts = sys.float_info.max
+
+        return
+
+    def filter_and_sort(self, start_scan, end_scan, min_counts, max_counts,
+                        sort_by_column, sort_order):
+        """
+        Filter the survey table and sort
+        Note: it might not be efficient here because the table will be refreshed twice
+        :param start_scan:
+        :param end_scan:
+        :param min_counts:
+        :param max_counts:
+        :param sort_by_column:
+        :param sort_order: 0 for ascending, 1 for descending
+        :return:
+        """
+        # check
+        assert isinstance(start_scan, int) and isinstance(end_scan, int) and end_scan >= start_scan
+        assert isinstance(min_counts, float) and isinstance(max_counts, float) and min_counts < max_counts
+        assert isinstance(sort_by_column, str), \
+            'sort_by_column requires a string but not %s.' % str(type(sort_by_column))
+        assert isinstance(sort_order, int), \
+            'sort_order requires an integer but not %s.' % str(type(sort_order))
+
+        # get column index to sort
+        col_index = self.get_column_index(column_name=sort_by_column)
+
+        # filter on the back end row contents list first
+        self.filter_rows(start_scan, end_scan, min_counts, max_counts)
+
+        # order
+        self.sort_by_column(col_index)
+
+        return
+
+    def filter_rows(self, start_scan, end_scan, min_counts, max_counts):
+        """
+        Filter by scan number, detector counts on self._myScanSummaryList
+        and reset the table via the latest result
+        :param start_scan:
+        :param end_scan:
+        :param min_counts:
+        :param max_counts:
+        :return:
+        """
+        # check whether it can be skipped
+        if start_scan == self._currStartScan and end_scan == self._currEndScan\
+            and min_counts == self._currMinCounts and max_counts == self._currMaxCounts:
+            # same filter set up, return
+            return
+
+        # clear the table
+        self.remove_all_rows()
+
+        # go through all rows in the original list and then reconstruct
+        for index in xrange(len(self._myScanSummaryList)):
+            sum_item = self._myScanSummaryList[index]
+            # check
+            assert isinstance(sum_item, list)
+            assert len(sum_item) == len(self._myColumnNameList) - 1
+            # check with filters: original order is counts, scan, Pt., ...
+            scan_number = sum_item[1]
+            if scan_number < start_scan or scan_number > end_scan:
+                continue
+            counts = sum_item[0]
+            if counts < min_counts or counts > max_counts:
+                continue
+
+            # modify for appending to table
+            row_items = sum_item[:]
+            counts = row_items.pop(0)
+            row_items.insert(2, counts)
+            row_items.append(False)
+
+            # append to table
+            self.append_row(row_items)
+        # END-FOR (index)
 
         return
 

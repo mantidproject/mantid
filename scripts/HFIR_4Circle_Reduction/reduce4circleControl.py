@@ -1758,23 +1758,26 @@ class CWSCDReductionControl(object):
                 h_col_index = col_name_list.index('h')
                 k_col_index = col_name_list.index('k')
                 l_col_index = col_name_list.index('l')
+                twotheta_col_index = col_name_list.index('2theta')
 
                 max_count = 0
                 max_row = 0
                 max_h = max_k = max_l = 0
 
+                twotheta = -1
+
                 for i_row in xrange(num_rows):
                     det_count = spice_table_ws.cell(i_row, 5)
-                    h = spice_table_ws.cell(i_row, h_col_index)
-                    k = spice_table_ws.cell(i_row, k_col_index)
-                    l = spice_table_ws.cell(i_row, l_col_index)
                     if det_count > max_count:
                         max_count = det_count
                         max_row = i_row
-                        max_h = h
-                        max_k = k
-                        max_l = l
+                        max_h = spice_table_ws.cell(i_row, h_col_index)
+                        max_k = spice_table_ws.cell(i_row, k_col_index)
+                        max_l = spice_table_ws.cell(i_row, l_col_index)
+                        twotheta = spice_table_ws.cell(i_row, twotheta_col_index)
                 # END-FOR
+
+                wavelength = self.get_hb3a_wavelength(m1)
 
                 # FIXME/TODO/NOW
                 q_range = 4*math.pi*math.sin(twotheta*0.5)/wavelength
