@@ -156,6 +156,8 @@ set ( SRC_FILES
 	src/Max.cpp
 	src/MaxEnt.cpp
 	src/MaxMin.cpp
+	src/MaxentData.cpp
+	src/MaxentEntropyNegativeValues.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
 	src/Min.cpp
@@ -436,6 +438,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
 	inc/MantidAlgorithms/MaxMin.h
+	inc/MantidAlgorithms/MaxentData.h
+	inc/MantidAlgorithms/MaxentEntropy.h
+	inc/MantidAlgorithms/MaxentEntropyNegativeValues.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
@@ -717,6 +722,8 @@ set ( TEST_FILES
 	MaskBinsTest.h
 	MaxEntTest.h
 	MaxMinTest.h
+	MaxentDataTest.h
+	MaxentEntropyNegativeValuesTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
