@@ -50,7 +50,8 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -71,7 +72,8 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "BasisVector" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Description of the basis vector of the " + Strings::toString(i) +
             "th output dimension."
             "Format: 'name, units, x,y,z,..'.\n"
@@ -83,22 +85,24 @@ void SlicingAlgorithm::initSlicingProps() {
     setPropertySettings(propName, ps->clone());
     setPropertyGroup(propName, grpName);
   }
-  declareProperty(new ArrayProperty<double>("Translation", Direction::Input),
-                  "Coordinates in the INPUT workspace that corresponds to "
-                  "(0,0,0) in the OUTPUT workspace.\n"
-                  "Enter as a comma-separated string.\n"
-                  "Default: 0 in all dimensions (no translation).");
-
-  declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
-                  "The minimum, maximum edges of space of each dimension of "
-                  "the OUTPUT workspace, as a comma-separated list");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("Translation", Direction::Input),
+      "Coordinates in the INPUT workspace that corresponds to "
+      "(0,0,0) in the OUTPUT workspace.\n"
+      "Enter as a comma-separated string.\n"
+      "Default: 0 in all dimensions (no translation).");
 
   declareProperty(
-      new ArrayProperty<int>("OutputBins", Direction::Input),
+      make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
+      "The minimum, maximum edges of space of each dimension of "
+      "the OUTPUT workspace, as a comma-separated list");
+
+  declareProperty(
+      make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
       "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(new PropertyWithValue<bool>("NormalizeBasisVectors", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors",
+                                                       true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
@@ -106,7 +110,8 @@ void SlicingAlgorithm::initSlicingProps() {
                   "INPUT dimension = 1 in the OUTPUT dimensions.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
+                                           Direction::Input),
       "Force the input basis vectors to form an orthogonal coordinate system. "
       "Only works in 3 dimension!");
 

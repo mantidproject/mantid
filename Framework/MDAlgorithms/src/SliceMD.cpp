@@ -37,25 +37,25 @@ SliceMD::~SliceMD() {}
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
-                       {".nxs"}),
+      make_unique<FileProperty>("OutputFilename", "",
+                                FileProperty::OptionalSave, ".nxs"),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
   declareProperty(
-      new PropertyWithValue<int>("Memory", -1),
+      make_unique<PropertyWithValue<int>>("Memory", -1),
       "If OutputFilename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");

@@ -45,12 +45,13 @@ SaveMD2::~SaveMD2() {}
 /** Initialize the algorithm's properties.
  */
 void SaveMD2::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd

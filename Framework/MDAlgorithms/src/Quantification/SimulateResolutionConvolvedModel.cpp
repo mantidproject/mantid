@@ -53,12 +53,12 @@ int SimulateResolutionConvolvedModel::niterations() const { return 1; }
  * Initialize the algorithm's properties.
  */
 void SimulateResolutionConvolvedModel::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(INPUT_WS_NAME, "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      INPUT_WS_NAME, "", Direction::Input),
                   "The input MDEvent workspace");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(SIMULATED_NAME, "",
-                                                           Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      SIMULATED_NAME, "", Direction::Output),
                   "The simulated output workspace");
 
   std::vector<std::string> models =
