@@ -245,7 +245,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  */
 void WorkspaceGroup::workspaceDeleteHandle(
     Mantid::API::WorkspacePostDeleteNotification_ptr notice) {
-  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  std::unique_lock<std::recursive_mutex> _lock(m_mutex);
   const std::string deletedName = notice->objectName();
   if (!this->contains(deletedName))
     return;
@@ -255,6 +255,10 @@ void WorkspaceGroup::workspaceDeleteHandle(
     if (isEmpty()) {
       // We are about to get deleted so we don't want to recieve any
       // notifications
+      // The unique lock needs to be unlocked at this point as the workspace
+      // is about to destroy itself. We have to make sure that the mutex is
+      // not locked.
+      _lock.unlock();
       observeADSNotifications(false);
       AnalysisDataService::Instance().remove(this->getName());
     }
