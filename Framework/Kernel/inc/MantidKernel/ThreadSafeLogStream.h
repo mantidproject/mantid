@@ -7,7 +7,6 @@
 #include "MantidKernel/DllConfig.h"
 #include <Poco/Logger.h>
 
-
 #ifdef _MSC_VER
 // Disable a flood of warnings about inheriting from std streams
 // See

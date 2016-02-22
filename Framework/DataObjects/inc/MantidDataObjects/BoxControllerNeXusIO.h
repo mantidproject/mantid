@@ -103,7 +103,7 @@ private:
   /// the vector, which describes the event specific data size, namely how many
   /// column an event is composed into and this class reads/writres
   std::vector<int64_t> m_BlockSize;
-  /// lock Nexus file operations as Nexus is not thread safe 
+  /// lock Nexus file operations as Nexus is not thread safe
   mutable std::mutex m_fileMutex;
 
   // Mainly static information which may be split into different IO classes

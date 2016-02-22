@@ -55,7 +55,8 @@ public:
     TaskWithMutex *task4 = new TaskWithMutex(mut2, 7.0);
     TaskWithMutex *task5 = new TaskWithMutex(mut2, 6.0);
     TaskWithMutex *task6 = new TaskWithMutex(mut3, 5.0);
-    TaskWithMutex *task7 = new TaskWithMutex(boost::shared_ptr<std::mutex>(), 4.0);
+    TaskWithMutex *task7 =
+        new TaskWithMutex(boost::shared_ptr<std::mutex>(), 4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);

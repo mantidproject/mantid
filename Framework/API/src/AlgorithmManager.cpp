@@ -7,7 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
 
-
 namespace Mantid {
 namespace API {
 namespace {

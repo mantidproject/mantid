@@ -127,7 +127,7 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
   uint64_t position = blockPosition;
   // uint64_t fileLength = this->getFileLength();
   std::lock_guard<std::mutex> lock(m_fileMutex);
- 
+
   if (m_EventSize * (position + nEvents) > fileContents.size()) {
     fileContents.resize((position + nEvents) * m_EventSize);
     this->setFileLength(position + nEvents);

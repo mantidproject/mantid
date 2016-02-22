@@ -4,10 +4,7 @@
 #include <mutex>
 
 namespace Mantid {
-namespace Kernel {
-
-
-} // namespace
+namespace Kernel {} // namespace
 } // namespace
 
 // The syntax used to define a pragma within a macro is different on windows and

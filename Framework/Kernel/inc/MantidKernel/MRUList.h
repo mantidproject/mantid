@@ -172,7 +172,7 @@ private:
   MRUList &operator=(MRUList &);
 
   /// Mutex for modifying the MRU list
-  mutable std::mutex  m_mutex;
+  mutable std::mutex m_mutex;
 };
 
 } // namespace Kernel

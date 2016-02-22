@@ -11,7 +11,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include <mutex>
 
-
 namespace Mantid {
 namespace LiveData {
 /** An implementation of ILiveListener for testing purposes that fills its event
