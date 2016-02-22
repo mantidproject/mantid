@@ -40,6 +40,9 @@ public:
 	double correctValue(double x) override;
 };
 
+// Helper typedef for scoped pointer of this type.
+typedef boost::shared_ptr<MaxentEntropyNegativeValues> MaxentEntropyNegativeValues_sptr;
+
 } // namespace Algorithms
 } // namespace Mantid
 

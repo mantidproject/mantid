@@ -8,10 +8,9 @@ namespace Algorithms {
 MaxentData::MaxentData(MaxentEntropy_sptr entropy)
     : m_entropy(entropy), m_angle(-1.), m_chisq(-1.) {}
 
-void MaxentData::load(const std::vector<double> &data,
-                      const std::vector<double> &errors,
-                      const std::vector<double> &image, double background,
-                      bool isComplex) {
+void MaxentData::loadReal(const std::vector<double> &data,
+                          const std::vector<double> &errors,
+                          const std::vector<double> &image, double background) {
 
   if ((data.size() != errors.size()) || (image.size() % data.size())) {
     // If data and errors have N datapoints, image should have:
@@ -30,23 +29,61 @@ void MaxentData::load(const std::vector<double> &data,
   m_dataCalc = transformImageToData(image);
   m_background = background;
 
-  if (isComplex) {
-    m_data = data;
-    m_errors = errors;
-  } else {
-    size_t size = data.size();
+  size_t size = data.size();
 
-    m_data = std::vector<double>(2 * size);
-    m_errors = std::vector<double>(2 * size);
+  m_data = std::vector<double>(2 * size);
+  m_errors = std::vector<double>(2 * size);
 
-    for (size_t i = 0; i < size; i++) {
-      m_data[2 * i] = data[i];
-      m_data[2 * i + 1] = 0.;
-      ;
-      m_errors[2 * i] = errors[i];
-      m_errors[2 * i + 1] = 0.;
-      ;
-    }
+  for (size_t i = 0; i < size; i++) {
+    m_data[2 * i] = data[i];
+    m_data[2 * i + 1] = 0.;
+    ;
+    m_errors[2 * i] = errors[i];
+    m_errors[2 * i + 1] = 0.;
+    ;
+  }
+}
+
+void MaxentData::loadComplex(const std::vector<double> &dataRe,
+                             const std::vector<double> &dataIm,
+                             const std::vector<double> &errorsRe,
+                             const std::vector<double> &errorsIm,
+                             const std::vector<double> &image,
+                             double background) {
+
+  if ((dataRe.size() != dataIm.size()) || (errorsRe.size() % errorsIm.size()) ||
+      (dataRe.size() != errorsRe.size())) {
+    // If data and errors have N datapoints, image should have:
+    // 2*X*N data points (complex data)
+    // X*N data points (real data)
+    throw std::runtime_error("Couldn't load invalid data");
+  }
+	if (dataRe.size() != 2 * image.size()) {
+		throw std::runtime_error("Couldn't load invalid data");
+	}
+  if (m_background == 0) {
+    throw std::runtime_error("Background must be positive");
+  }
+
+  m_angle = -1.;
+  m_chisq = -1.;
+
+  m_image = image;
+  m_dataCalc = transformImageToData(image);
+  m_background = background;
+
+  size_t size = dataRe.size();
+
+  m_data = std::vector<double>(2 * size);
+  m_errors = std::vector<double>(2 * size);
+
+  for (size_t i = 0; i < size; i++) {
+    m_data[2 * i] = dataRe[i];
+    m_data[2 * i + 1] = dataIm[i];
+    ;
+    m_errors[2 * i] = errorsRe[i];
+    m_errors[2 * i + 1] = errorsIm[i];
+    ;
   }
 }
 
@@ -68,9 +105,13 @@ void MaxentData::setImage(const std::vector<double> &image) {
   }
   m_image = image;
 
-  // Reset m_angle and m_chisq to default
+	m_dataCalc = transformImageToData(image);
+
+	calculateChisq();
+	m_chisq = getChisq();
+
+  // Reset m_angle to default
   m_angle = -1.;
-  m_chisq = -1.;
 }
 
 std::vector<double> MaxentData::getChiGrad() const {
@@ -107,6 +148,10 @@ std::vector<double> MaxentData::getEntropyGrad() const {
   }
 
   return entropyGrad;
+}
+
+std::vector<double> MaxentData::getReconstructedData() const {
+	return m_data;
 }
 
 std::vector<double> MaxentData::getMetric() const {
@@ -238,6 +283,20 @@ void MaxentData::calculateSearchDirections() {
   }
 }
 
+void MaxentData::calculateChisq() {
+
+	size_t npoints = m_data.size();
+
+	// Calculate
+	// ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
+	m_chisq = 0;
+	for (size_t i = 0; i < npoints; i++) {
+		if (m_errors[i] != 0.0) {
+			double term = (m_data[i] - m_dataCalc[i]) / m_errors[i];
+			m_chisq += term * term;
+		}
+	}
+}
 std::vector<double>
 MaxentData::transformImageToData(const std::vector<double> &input) {
 

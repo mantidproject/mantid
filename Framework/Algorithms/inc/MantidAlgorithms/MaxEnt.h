@@ -1,8 +1,9 @@
 #ifndef MANTID_ALGORITHMS_MAXENT_H_
 #define MANTID_ALGORITHMS_MAXENT_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/MaxentData.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -35,32 +36,6 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/// Auxiliary class to store the search directions (xi), quadratic coefficients
-/// (c1, s1, c2, s2), angle and chi-sq
-class SearchDirections {
-  // SB eq. 21
-  // SB eq. 24
-public:
-  SearchDirections(size_t dim, size_t points) {
-    xIm = Kernel::DblMatrix(dim, points);
-    xDat = Kernel::DblMatrix(dim, points);
-    s1 = Kernel::DblMatrix(dim, 1);
-    c1 = Kernel::DblMatrix(dim, 1);
-    s2 = Kernel::DblMatrix(dim, dim);
-    c2 = Kernel::DblMatrix(dim, dim);
-  };
-  Kernel::DblMatrix xIm;  // Search directions in image space
-  Kernel::DblMatrix xDat; // Search directions in data space
-  Kernel::DblMatrix s1;   // Quadratic coefficient S_mu
-  Kernel::DblMatrix c1;   // Quadratic coefficient C_mu
-  Kernel::DblMatrix s2;   // Quadratic coefficient g_mu_nu
-  Kernel::DblMatrix c2;   // Quadratic coefficient M_mu_nu
-  // Chi-sq
-  double chisq;
-  // Non-parallelism between S and C (angle)
-  double angle;
-};
-
 class DLLExport MaxEnt : public API::Algorithm {
 public:
   /// Constructor
@@ -84,44 +59,22 @@ private:
   void exec() override;
   /// Validate the input properties
   std::map<std::string, std::string> validateInputs() override;
-  /// Transforms from image space to data space
-  std::vector<double> transformImageToData(const std::vector<double> &input);
-  /// Transforms from data space to image space
-  std::vector<double> transformDataToImage(const std::vector<double> &input);
-  /// Calculates chi-square
-  double getChiSq(const std::vector<double> &data,
-                  const std::vector<double> &errors,
-                  const std::vector<double> &dataCalc);
-  /// Calculates the gradient of Chi
-  std::vector<double> getCGrad(const std::vector<double> &data,
-                               const std::vector<double> &errors,
-                               const std::vector<double> &dataCalc);
-  /// Calculates the gradient of S (entropy)
-  std::vector<double> getSGrad(const std::vector<double> &image,
-                               double background);
-  /// Calculates the search directions and the quadratic coefficients
-  SearchDirections calculateSearchDirections(const std::vector<double> &data,
-                                             const std::vector<double> &error,
-                                             const std::vector<double> &image,
-                                             double background);
   // Calculates chi-square by solving the matrix equation A*x = b
-  double calculateChi(const SearchDirections &coeffs, double a,
+  double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);
   // Calculates the SVD of the input matrix A
   std::vector<double> solveSVD(const Kernel::DblMatrix &A,
                                const Kernel::DblMatrix &B);
   /// Moves the system one step closer towards the solution
-  std::vector<double> move(const SearchDirections &dirs, double chiTarget,
-                           double chiEps, size_t alphaIter);
+  std::vector<double> move(const QuadraticCoefficients &coeffs,
+                           double chiTarget, double chiEps, size_t alphaIter);
   /// Calculates the distance of the current solution
   double distance(const Kernel::DblMatrix &s2, const std::vector<double> &beta);
   /// Populates the output workspaces
-  void populateOutputWS(const API::MatrixWorkspace_sptr &inWS, bool complex,
+  void populateOutputWS(const API::MatrixWorkspace_sptr &inWS,
                         size_t spec, size_t nspec,
-                        const std::vector<double> &data,
-                        const std::vector<double> &image,
-                        API::MatrixWorkspace_sptr &outData,
-                        API::MatrixWorkspace_sptr &outImage);
+                        const std::vector<double> &result,
+                        API::MatrixWorkspace_sptr &outWS, bool isImage);
 };
 
 } // namespace Algorithms
