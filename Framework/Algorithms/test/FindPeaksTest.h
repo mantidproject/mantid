@@ -221,267 +221,54 @@ public:
    * d = 1.235
     */
   MatrixWorkspace_sptr getSinglePeakData() {
-    std::vector<double> vecX, vecY, vecE;
-    vecX.push_back(1.21012);
-    vecY.push_back(1619);
-    vecE.push_back(40.2368);
-    vecX.push_back(1.2106);
-    vecY.push_back(1644);
-    vecE.push_back(40.5463);
-    vecX.push_back(1.21108);
-    vecY.push_back(1616);
-    vecE.push_back(40.1995);
-    vecX.push_back(1.21157);
-    vecY.push_back(1589);
-    vecE.push_back(39.8623);
-    vecX.push_back(1.21205);
-    vecY.push_back(1608);
-    vecE.push_back(40.0999);
-    vecX.push_back(1.21254);
-    vecY.push_back(1612);
-    vecE.push_back(40.1497);
-    vecX.push_back(1.21302);
-    vecY.push_back(1630);
-    vecE.push_back(40.3733);
-    vecX.push_back(1.21351);
-    vecY.push_back(1671);
-    vecE.push_back(40.8779);
-    vecX.push_back(1.21399);
-    vecY.push_back(1588);
-    vecE.push_back(39.8497);
-    vecX.push_back(1.21448);
-    vecY.push_back(1577);
-    vecE.push_back(39.7115);
-    vecX.push_back(1.21497);
-    vecY.push_back(1616);
-    vecE.push_back(40.1995);
-    vecX.push_back(1.21545);
-    vecY.push_back(1556);
-    vecE.push_back(39.4462);
-    vecX.push_back(1.21594);
-    vecY.push_back(1625);
-    vecE.push_back(40.3113);
-    vecX.push_back(1.21642);
-    vecY.push_back(1655);
-    vecE.push_back(40.6817);
-    vecX.push_back(1.21691);
-    vecY.push_back(1552);
-    vecE.push_back(39.3954);
-    vecX.push_back(1.2174);
-    vecY.push_back(1539);
-    vecE.push_back(39.2301);
-    vecX.push_back(1.21788);
-    vecY.push_back(1538);
-    vecE.push_back(39.2173);
-    vecX.push_back(1.21837);
-    vecY.push_back(1542);
-    vecE.push_back(39.2683);
-    vecX.push_back(1.21886);
-    vecY.push_back(1558);
-    vecE.push_back(39.4715);
-    vecX.push_back(1.21935);
-    vecY.push_back(1628);
-    vecE.push_back(40.3485);
-    vecX.push_back(1.21983);
-    vecY.push_back(1557);
-    vecE.push_back(39.4588);
-    vecX.push_back(1.22032);
-    vecY.push_back(1606);
-    vecE.push_back(40.0749);
-    vecX.push_back(1.22081);
-    vecY.push_back(1563);
-    vecE.push_back(39.5348);
-    vecX.push_back(1.2213);
-    vecY.push_back(1611);
-    vecE.push_back(40.1373);
-    vecX.push_back(1.22179);
-    vecY.push_back(1584);
-    vecE.push_back(39.7995);
-    vecX.push_back(1.22228);
-    vecY.push_back(1447);
-    vecE.push_back(38.0395);
-    vecX.push_back(1.22276);
-    vecY.push_back(1532);
-    vecE.push_back(39.1408);
-    vecX.push_back(1.22325);
-    vecY.push_back(1580);
-    vecE.push_back(39.7492);
-    vecX.push_back(1.22374);
-    vecY.push_back(1539);
-    vecE.push_back(39.2301);
-    vecX.push_back(1.22423);
-    vecY.push_back(1513);
-    vecE.push_back(38.8973);
-    vecX.push_back(1.22472);
-    vecY.push_back(1601);
-    vecE.push_back(40.0125);
-    vecX.push_back(1.22521);
-    vecY.push_back(1558);
-    vecE.push_back(39.4715);
-    vecX.push_back(1.2257);
-    vecY.push_back(1567);
-    vecE.push_back(39.5854);
-    vecX.push_back(1.22619);
-    vecY.push_back(1573);
-    vecE.push_back(39.6611);
-    vecX.push_back(1.22668);
-    vecY.push_back(1551);
-    vecE.push_back(39.3827);
-    vecX.push_back(1.22717);
-    vecY.push_back(1465);
-    vecE.push_back(38.2753);
-    vecX.push_back(1.22766);
-    vecY.push_back(1602);
-    vecE.push_back(40.025);
-    vecX.push_back(1.22816);
-    vecY.push_back(1543);
-    vecE.push_back(39.281);
-    vecX.push_back(1.22865);
-    vecY.push_back(1538);
-    vecE.push_back(39.2173);
-    vecX.push_back(1.22914);
-    vecY.push_back(1515);
-    vecE.push_back(38.923);
-    vecX.push_back(1.22963);
-    vecY.push_back(1556);
-    vecE.push_back(39.4462);
-    vecX.push_back(1.23012);
-    vecY.push_back(1574);
-    vecE.push_back(39.6737);
-    vecX.push_back(1.23061);
-    vecY.push_back(1519);
-    vecE.push_back(38.9744);
-    vecX.push_back(1.23111);
-    vecY.push_back(1452);
-    vecE.push_back(38.1051);
-    vecX.push_back(1.2316);
-    vecY.push_back(1568);
-    vecE.push_back(39.598);
-    vecX.push_back(1.23209);
-    vecY.push_back(1522);
-    vecE.push_back(39.0128);
-    vecX.push_back(1.23258);
-    vecY.push_back(1518);
-    vecE.push_back(38.9615);
-    vecX.push_back(1.23308);
-    vecY.push_back(1603);
-    vecE.push_back(40.0375);
-    vecX.push_back(1.23357);
-    vecY.push_back(1538);
-    vecE.push_back(39.2173);
-    vecX.push_back(1.23406);
-    vecY.push_back(1659);
-    vecE.push_back(40.7308);
-    vecX.push_back(1.23456);
-    vecY.push_back(1685);
-    vecE.push_back(41.0488);
-    vecX.push_back(1.23505);
-    vecY.push_back(1763);
-    vecE.push_back(41.9881);
-    vecX.push_back(1.23554);
-    vecY.push_back(1846);
-    vecE.push_back(42.9651);
-    vecX.push_back(1.23604);
-    vecY.push_back(1872);
-    vecE.push_back(43.2666);
-    vecX.push_back(1.23653);
-    vecY.push_back(2018);
-    vecE.push_back(44.9222);
-    vecX.push_back(1.23703);
-    vecY.push_back(2035);
-    vecE.push_back(45.111);
-    vecX.push_back(1.23752);
-    vecY.push_back(2113);
-    vecE.push_back(45.9674);
-    vecX.push_back(1.23802);
-    vecY.push_back(2131);
-    vecE.push_back(46.1628);
-    vecX.push_back(1.23851);
-    vecY.push_back(1921);
-    vecE.push_back(43.8292);
-    vecX.push_back(1.23901);
-    vecY.push_back(1947);
-    vecE.push_back(44.1248);
-    vecX.push_back(1.2395);
-    vecY.push_back(1756);
-    vecE.push_back(41.9047);
-    vecX.push_back(1.24);
-    vecY.push_back(1603);
-    vecE.push_back(40.0375);
-    vecX.push_back(1.2405);
-    vecY.push_back(1602);
-    vecE.push_back(40.025);
-    vecX.push_back(1.24099);
-    vecY.push_back(1552);
-    vecE.push_back(39.3954);
-    vecX.push_back(1.24149);
-    vecY.push_back(1558);
-    vecE.push_back(39.4715);
-    vecX.push_back(1.24199);
-    vecY.push_back(1518);
-    vecE.push_back(38.9615);
-    vecX.push_back(1.24248);
-    vecY.push_back(1512);
-    vecE.push_back(38.8844);
-    vecX.push_back(1.24298);
-    vecY.push_back(1511);
-    vecE.push_back(38.8716);
-    vecX.push_back(1.24348);
-    vecY.push_back(1466);
-    vecE.push_back(38.2884);
-    vecX.push_back(1.24397);
-    vecY.push_back(1474);
-    vecE.push_back(38.3927);
-    vecX.push_back(1.24447);
-    vecY.push_back(1368);
-    vecE.push_back(36.9865);
-    vecX.push_back(1.24497);
-    vecY.push_back(1463);
-    vecE.push_back(38.2492);
-    vecX.push_back(1.24547);
-    vecY.push_back(1447);
-    vecE.push_back(38.0395);
-    vecX.push_back(1.24597);
-    vecY.push_back(1409);
-    vecE.push_back(37.5366);
-    vecX.push_back(1.24646);
-    vecY.push_back(1381);
-    vecE.push_back(37.1618);
-    vecX.push_back(1.24696);
-    vecY.push_back(1478);
-    vecE.push_back(38.4448);
-    vecX.push_back(1.24746);
-    vecY.push_back(1445);
-    vecE.push_back(38.0132);
-    vecX.push_back(1.24796);
-    vecY.push_back(1429);
-    vecE.push_back(37.8021);
-    vecX.push_back(1.24846);
-    vecY.push_back(1447);
-    vecE.push_back(38.0395);
-    vecX.push_back(1.24896);
-    vecY.push_back(1354);
-    vecE.push_back(36.7967);
-    vecX.push_back(1.24946);
-    vecY.push_back(1430);
-    vecE.push_back(37.8153);
-    vecX.push_back(1.24996);
-    vecY.push_back(1440);
-    vecE.push_back(37.9473);
-    vecX.push_back(1.25046);
-    vecY.push_back(1423);
-    vecE.push_back(37.7227);
 
-    size_t sizex = vecX.size();
-    size_t sizey = vecY.size();
+    const size_t size = 83;
+
+    std::array<double, size> vecX = {
+        {1.210120, 1.210600, 1.211080, 1.211570, 1.212050, 1.212540, 1.213020,
+         1.213510, 1.213990, 1.214480, 1.214970, 1.215450, 1.215940, 1.216420,
+         1.216910, 1.217400, 1.217880, 1.218370, 1.218860, 1.219350, 1.219830,
+         1.220320, 1.220810, 1.221300, 1.221790, 1.222280, 1.222760, 1.223250,
+         1.223740, 1.224230, 1.224720, 1.225210, 1.225700, 1.226190, 1.226680,
+         1.227170, 1.227660, 1.228160, 1.228650, 1.229140, 1.229630, 1.230120,
+         1.230610, 1.231110, 1.231600, 1.232090, 1.232580, 1.233080, 1.233570,
+         1.234060, 1.234560, 1.235050, 1.235540, 1.236040, 1.236530, 1.237030,
+         1.237520, 1.238020, 1.238510, 1.239010, 1.239500, 1.240000, 1.240500,
+         1.240990, 1.241490, 1.241990, 1.242480, 1.242980, 1.243480, 1.243970,
+         1.244470, 1.244970, 1.245470, 1.245970, 1.246460, 1.246960, 1.247460,
+         1.247960, 1.248460, 1.248960, 1.249460, 1.249960, 1.250460}};
+    std::array<double, size> vecY = {
+        {1619.0, 1644.0, 1616.0, 1589.0, 1608.0, 1612.0, 1630.0, 1671.0, 1588.0,
+         1577.0, 1616.0, 1556.0, 1625.0, 1655.0, 1552.0, 1539.0, 1538.0, 1542.0,
+         1558.0, 1628.0, 1557.0, 1606.0, 1563.0, 1611.0, 1584.0, 1447.0, 1532.0,
+         1580.0, 1539.0, 1513.0, 1601.0, 1558.0, 1567.0, 1573.0, 1551.0, 1465.0,
+         1602.0, 1543.0, 1538.0, 1515.0, 1556.0, 1574.0, 1519.0, 1452.0, 1568.0,
+         1522.0, 1518.0, 1603.0, 1538.0, 1659.0, 1685.0, 1763.0, 1846.0, 1872.0,
+         2018.0, 2035.0, 2113.0, 2131.0, 1921.0, 1947.0, 1756.0, 1603.0, 1602.0,
+         1552.0, 1558.0, 1518.0, 1512.0, 1511.0, 1466.0, 1474.0, 1368.0, 1463.0,
+         1447.0, 1409.0, 1381.0, 1478.0, 1445.0, 1429.0, 1447.0, 1354.0, 1430.0,
+         1440.0, 1423.0}};
+    std::array<double, size> vecE = {{
+        40.236800, 40.546300, 40.199500, 39.862300, 40.099900, 40.149700,
+        40.373300, 40.877900, 39.849700, 39.711500, 40.199500, 39.446200,
+        40.311300, 40.681700, 39.395400, 39.230100, 39.217300, 39.268300,
+        39.471500, 40.348500, 39.458800, 40.074900, 39.534800, 40.137300,
+        39.799500, 38.039500, 39.140800, 39.749200, 39.230100, 38.897300,
+        40.012500, 39.471500, 39.585400, 39.661100, 39.382700, 38.275300,
+        40.025000, 39.281000, 39.217300, 38.923000, 39.446200, 39.673700,
+        38.974400, 38.105100, 39.598000, 39.012800, 38.961500, 40.037500,
+        39.217300, 40.730800, 41.048800, 41.988100, 42.965100, 43.266600,
+        44.922200, 45.111000, 45.967400, 46.162800, 43.829200, 44.124800,
+        41.904700, 40.037500, 40.025000, 39.395400, 39.471500, 38.961500,
+        38.884400, 38.871600, 38.288400, 38.392700, 36.986500, 38.249200,
+        38.039500, 37.536600, 37.161800, 38.444800, 38.013200, 37.802100,
+        38.039500, 36.796700, 37.815300, 37.947300, 37.722700, }};
 
     MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
-    for (size_t i = 0; i < sizex; ++i)
+    for (size_t i = 0; i < size; ++i) {
       dataws->dataX(0)[i] = vecX[i];
-
-    for (size_t i = 0; i < sizex; ++i) {
       dataws->dataY(0)[i] = vecY[i];
       dataws->dataE(0)[i] = vecE[i];
     }

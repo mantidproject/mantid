@@ -109,27 +109,15 @@ public:
     TS_ASSERT(test_output_WS);
 
     // setup expected values
-    std::vector<double> y_expected;
-    y_expected.push_back(2.22389);
-    y_expected.push_back(2.2924);
-    y_expected.push_back(2.36292);
-    y_expected.push_back(2.43552);
-    y_expected.push_back(2.51024);
-    y_expected.push_back(2.58716);
-    y_expected.push_back(2.66632);
-    y_expected.push_back(2.7478);
-    y_expected.push_back(2.83166);
-    y_expected.push_back(2.91796);
-    y_expected.push_back(3.00678);
-    y_expected.push_back(3.0982);
-    y_expected.push_back(3.19228);
-    y_expected.push_back(3.28912);
-    y_expected.push_back(3.38879);
-    y_expected.push_back(3.49139);
+    const size_t size = 16;
+    std::array<double, size> y_expected = {
+        {2.22389, 2.2924, 2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
+         2.83166, 2.91796, 3.00678, 3.0982, 3.19228, 3.28912, 3.38879,
+         3.49139}};
 
     // do the final comparison
     const MantidVec &y_actual = test_output_WS->readY(0);
-    for (size_t i = 0; i < y_expected.size(); i++)
+    for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(y_actual[i], y_expected[i], 0.00001);
 
     // cleanup
