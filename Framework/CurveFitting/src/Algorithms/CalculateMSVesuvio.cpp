@@ -234,7 +234,7 @@ void CalculateMSVesuvio::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp * nmasses << " values, however, only "
+       << nExptdAtomProp *nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
