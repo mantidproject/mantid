@@ -2,7 +2,6 @@
 #define MANTID_MDALGORITHMS_INTEGRATEMDHISTOWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <boost/assign/list_of.hpp>
 
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -54,8 +53,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
     const double step = 0.1;
-    alg.setProperty("P1Bin", boost::assign::list_of(0.0)(step)(1.0)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {(0.0), (step), (1.0)};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("No new steps allowed", alg.execute(),
@@ -78,15 +77,15 @@ public:
 
     // Test equal to
     double max = min;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test less than
     max = min - 0.01;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
   }
@@ -107,22 +106,22 @@ public:
     double step = 0;
     // Test equal to
     double max = min;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, step, max};
+    alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test less than
     max = min - 0.01;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max)
-                                 .convert_to_container<std::vector<double>>());
+    p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test non-zero step. ZERO means copy!
     max = min - 0.01;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(1.0)(max)
-                                 .convert_to_container<std::vector<double>>());
+    p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Step has been specified", alg.execute(),
                       std::runtime_error &);
@@ -181,8 +180,8 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 0;
     const double max = 5;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -229,8 +228,8 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 0.75;
     const double max = 4.25;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -282,8 +281,8 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 0.75;
     const double max = 4.25;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(0.0)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, 0.0, max};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -338,8 +337,8 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 0;
     const double max = 5;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -411,8 +410,8 @@ public:
     const double max = 7.1; // 7.1 - 1.1 = 6
     alg.setProperty("P1Bin", std::vector<double>(
                                  0)); // Pass through. Do not change binning.
-    alg.setProperty("P2Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P2Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -483,8 +482,8 @@ public:
     alg.setProperty("InputWorkspace", ws);
     const double min = 0.75;
     const double max = 4.25;
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -547,8 +546,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {pMin, 0.0, pMax};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -630,8 +629,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {pMin, 0.0, pMax};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -692,8 +691,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {pMin, 0.0, pMax};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -754,8 +753,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {pMin, 0.0, pMax};
+    alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -808,14 +807,11 @@ public:
     const double min = 0;
     const double max = 1;
     alg.setProperty("InputWorkspace", m_ws);
-    alg.setProperty("P1Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
-    alg.setProperty("P2Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
-    alg.setProperty("P3Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
-    alg.setProperty("P4Bin", boost::assign::list_of(min)(max)
-                                 .convert_to_container<std::vector<double>>());
+    std::vector<double> p1BinVec = {min, max};
+    alg.setProperty("P1Bin", p1BinVec);
+    alg.setProperty("P2Bin", p1BinVec);
+    alg.setProperty("P3Bin", p1BinVec);
+    alg.setProperty("P4Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");

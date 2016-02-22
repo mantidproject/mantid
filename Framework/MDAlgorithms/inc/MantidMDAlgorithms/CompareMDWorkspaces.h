@@ -38,20 +38,20 @@ namespace MDAlgorithms {
 class DLLExport CompareMDWorkspaces : public API::Algorithm {
 public:
   CompareMDWorkspaces();
-  virtual ~CompareMDWorkspaces();
+  ~CompareMDWorkspaces() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Compare two MDWorkspaces for equality.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void doComparison();
   void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
                          Mantid::API::IMDWorkspace_sptr ws2);

@@ -24,8 +24,8 @@ namespace MantidQt
 				Q_OBJECT
 			public:
 				explicit MantidGLWidget(QWidget *parent = 0); ///< Constructor
-				virtual ~MantidGLWidget();         ///< Destructor
-				void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+                                ~MantidGLWidget() override; ///< Destructor
+                                void setSurface(boost::shared_ptr<ProjectionSurface> surface);
 				boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
 				void setBackgroundColor(QColor);
@@ -40,21 +40,22 @@ namespace MantidQt
 				void componentSelected(Mantid::Geometry::ComponentID id);
 
 			protected:
-				void initializeGL();
-				void resetWidget();
+                          void initializeGL() override;
+                                void resetWidget();
 				void MakeObject();
-				void paintEvent(QPaintEvent *event);
-				void resizeGL(int, int);
-				void contextMenuEvent(QContextMenuEvent*);
-				void mousePressEvent(QMouseEvent*);
-				void mouseMoveEvent(QMouseEvent*);
-				void mouseReleaseEvent(QMouseEvent*);
-				void wheelEvent(QWheelEvent *);
-				void keyPressEvent(QKeyEvent *);
-				void keyReleaseEvent(QKeyEvent *);
-				void enterEvent(QEvent *);
-				void leaveEvent(QEvent *);
-				void draw();
+                                void paintEvent(QPaintEvent *event) override;
+                                void resizeGL(int, int) override;
+                                void
+                                contextMenuEvent(QContextMenuEvent *) override;
+                                void mousePressEvent(QMouseEvent *) override;
+                                void mouseMoveEvent(QMouseEvent *) override;
+                                void mouseReleaseEvent(QMouseEvent *) override;
+                                void wheelEvent(QWheelEvent *) override;
+                                void keyPressEvent(QKeyEvent *) override;
+                                void keyReleaseEvent(QKeyEvent *) override;
+                                void enterEvent(QEvent *) override;
+                                void leaveEvent(QEvent *) override;
+                                void draw();
 				void checkGLError(const QString& funName);
 			private:
 				void setRenderingOptions();

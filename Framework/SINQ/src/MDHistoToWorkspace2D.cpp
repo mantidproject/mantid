@@ -12,6 +12,8 @@
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
 
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <cmath>
 
 // Register the algorithm into the AlgorithmFactory

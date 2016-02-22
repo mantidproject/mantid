@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/AlignDetectors.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"

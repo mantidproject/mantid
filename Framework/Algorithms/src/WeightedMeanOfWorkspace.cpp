@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 

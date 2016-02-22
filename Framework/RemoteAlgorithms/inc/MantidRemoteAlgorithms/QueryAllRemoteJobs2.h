@@ -36,24 +36,24 @@ public:
   /// (Empty) Constructor
   QueryAllRemoteJobs2() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~QueryAllRemoteJobs2() {}
+  ~QueryAllRemoteJobs2() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "QueryAllRemoteJobs"; }
+  const std::string name() const override { return "QueryAllRemoteJobs"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Query a remote compute resource for all jobs the user has "
            "submitted.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Remote"; }
+  const std::string category() const override { return "Remote"; }
 
 private:
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // end namespace RemoteAlgorithms

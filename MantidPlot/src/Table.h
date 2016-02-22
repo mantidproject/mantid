@@ -157,15 +157,15 @@ public slots:
 	bool isEmptyRow(int row);
 	bool isEmptyColumn(int col);
 
-	void print();
-	void print(const QString& fileName);
-	void exportPDF(const QString& fileName);
+        void print() override;
+        void print(const QString& fileName);
+        void exportPDF(const QString &fileName) override;
 
-	//! \name Event Handlers
+        //! \name Event Handlers
 	//@{
-	bool eventFilter(QObject *object, QEvent *e);
-	void customEvent( QEvent* e);
-	//@}v
+        bool eventFilter(QObject *object, QEvent *e) override;
+        void customEvent(QEvent *e) override;
+        //@}v
 
 	//! \name Column Operations
 	//@{
@@ -339,8 +339,8 @@ public slots:
 
 	//! \name Saving and Restoring
 	//@{
-	std::string saveToProject(ApplicationWindow* app);
-	std::string saveTableMetadata();
+        std::string saveToProject(ApplicationWindow *app) override;
+        std::string saveTableMetadata();
 
 	void restore(QString& spec);
 
@@ -361,10 +361,11 @@ public slots:
 	void showComments(bool on = true);
 	bool commentsEnabled(){return d_show_comments;}
 
-  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-	void restore(const QStringList& lst);
+        void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                             const int fileVersion) override;
+        void restore(const QStringList &lst) override;
 
-	//! This slot notifies the main application that the table has been modified. Triggers the update of 2D plots.
+        //! This slot notifies the main application that the table has been modified. Triggers the update of 2D plots.
 	void notifyChanges();
 
 	//! Notifies the main application that the width of a table column has been modified by the user.

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/AddNote.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"

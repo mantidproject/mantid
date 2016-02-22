@@ -39,15 +39,17 @@ namespace Mantid
     public:
       SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                           const std::string fileName);
-      virtual vtkSmartPointer<vtkDataSet>
+      vtkSmartPointer<vtkDataSet>
       execute(vtkDataSetFactory *factory,
               ProgressAction &rebinningProgressUpdate,
-              ProgressAction &drawingProgressUpdate);
-      virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
-      virtual void executeLoadMetadata();
-      virtual ~SQWLoadingPresenter();
-      virtual bool canReadFile() const;
-      virtual std::string getWorkspaceTypeName();
+              ProgressAction &drawingProgressUpdate) override;
+      void
+      extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs) override;
+      void executeLoadMetadata() override;
+      ~SQWLoadingPresenter() override;
+      bool canReadFile() const override;
+      std::string getWorkspaceTypeName() override;
+
     private:
       const std::string m_filename;
       std::string m_wsTypeName;

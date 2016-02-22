@@ -89,7 +89,7 @@ class EXPORT_OPT_MANTIDQT_API AlgorithmInputHistoryImpl : public AbstractAlgorit
 {
 private:
   AlgorithmInputHistoryImpl() : AbstractAlgorithmInputHistory("Mantid/Algorithms") {}
-  ~AlgorithmInputHistoryImpl() {}
+  ~AlgorithmInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;

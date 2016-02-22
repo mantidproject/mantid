@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 
 #include "MantidAlgorithms/RemoveBackground.h"
 #include "MantidAlgorithms/Rebin.h"
@@ -97,14 +98,10 @@ public:
                       std::invalid_argument);
 
     auto sourceWS = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
-    TSM_ASSERT_THROWS("Should throw if source workspace does not have units",
-                      bgRemoval.initialize(BgWS, sourceWS, 0),
-                      std::invalid_argument);
-
     sourceWS->getAxis(0)->setUnit("TOF");
     TSM_ASSERT_THROWS(
         "Should throw if source workspace does not have proper instrument",
-        bgRemoval.initialize(BgWS, sourceWS, 0), std::invalid_argument);
+        bgRemoval.initialize(BgWS, sourceWS, 0), std::runtime_error);
   }
 
   void testBackgroundHelper() {

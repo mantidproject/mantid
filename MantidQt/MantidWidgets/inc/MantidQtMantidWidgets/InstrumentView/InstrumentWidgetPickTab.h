@@ -57,11 +57,11 @@ namespace MantidQt
 
 			explicit InstrumentWidgetPickTab(InstrumentWidget *instrWidget);
 			bool canUpdateTouchedDetector()const;
-			void initSurface();
-			void saveSettings(QSettings& settings) const;
-			void loadSettings(const QSettings& settings);
-			bool addToDisplayContextMenu(QMenu&) const;
-			void selectTool(const ToolType tool);
+                        void initSurface() override;
+                        void saveSettings(QSettings &settings) const override;
+                        void loadSettings(const QSettings &settings) override;
+                        bool addToDisplayContextMenu(QMenu &) const override;
+                        void selectTool(const ToolType tool);
 			boost::shared_ptr<ProjectionSurface> getSurface() const;
 
 			public slots:
@@ -82,8 +82,8 @@ namespace MantidQt
 			void updatePlotMultipleDetectors();
 			void savePlotToWorkspace();
 		private:
-			void showEvent(QShowEvent *);
-			QColor getShapeBorderColor() const;
+                  void showEvent(QShowEvent *) override;
+                        QColor getShapeBorderColor() const;
 
 			/* Pick tab controls */
 			OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors

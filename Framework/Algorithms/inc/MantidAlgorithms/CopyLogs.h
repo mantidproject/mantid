@@ -5,6 +5,11 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace API {
+class Run;
+}
+
 namespace Algorithms {
 
 /** CopyLogs
@@ -40,20 +45,20 @@ namespace Algorithms {
 class DLLExport CopyLogs : public API::Algorithm {
 public:
   CopyLogs();
-  virtual ~CopyLogs();
+  ~CopyLogs() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Copies the sample logs from one workspace to another.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// appends new logs and overwrites existing logs.
   void mergeReplaceExisting(const std::vector<Kernel::Property *> &inputLogs,

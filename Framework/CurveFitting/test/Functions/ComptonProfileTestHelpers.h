@@ -1,6 +1,7 @@
 #ifndef COMPTONPROFILETESTHELPERS_H_
 #define COMPTONPROFILETESTHELPERS_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MersenneTwister.h"

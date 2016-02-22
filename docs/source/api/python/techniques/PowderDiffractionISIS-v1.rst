@@ -246,7 +246,4 @@ Usage
 
    cry_focus.focus_all(expt, "79514", Write_ExtV=False)
 
-.. toctree::
-   :maxdepth: 1
 
-   api/python/index

@@ -49,7 +49,7 @@ public:
     sendInitialSetup();
   }
   /// Destructor.
-  ~TestServerConnection() {}
+  ~TestServerConnection() override {}
   /// Sends an OK message when there is nothing to send or an error occured
   void sendOK() {
     std::string comm = "OK";
@@ -67,7 +67,7 @@ public:
   /**
   * Main method that sends out the data.
   */
-  void run() {
+  void run() override {
     Kernel::MersenneTwister tof(0, 10000.0, 20000.0);
     Kernel::MersenneTwister spec(1234, 0.0, static_cast<double>(m_nSpectra));
     Kernel::MersenneTwister period(0, 0.0, static_cast<double>(m_nPeriods));
@@ -141,7 +141,7 @@ public:
   * @param socket :: The socket.
   */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
                                     m_nEvents, m_prog);
   }

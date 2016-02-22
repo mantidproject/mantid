@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/make_shared.hpp>
 #include <queue>
@@ -395,7 +396,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 */
 boost::shared_ptr<const IComponent>
 Instrument::getComponentByID(ComponentID id) const {
-  const IComponent *base = (const IComponent *)(id);
+  const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
         boost::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
@@ -860,8 +861,7 @@ Instrument::getPlottable() const {
 
   } else {
     // Base instrument
-    boost::shared_ptr<std::vector<IObjComponent_const_sptr>> res(
-        new std::vector<IObjComponent_const_sptr>);
+    auto res = boost::make_shared<std::vector<IObjComponent_const_sptr>>();
     res->reserve(m_detectorCache.size() + 10);
     appendPlottable(*this, *res);
     return res;

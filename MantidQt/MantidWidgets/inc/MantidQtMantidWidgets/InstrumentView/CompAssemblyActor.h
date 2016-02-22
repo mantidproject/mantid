@@ -61,16 +61,24 @@ namespace MantidQt
 		{
 		public:
 			CompAssemblyActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Constructor
-			virtual ~CompAssemblyActor();
-			virtual std::string type()const { return "CompAssemblyActor"; } ///< Type of the GL object
-			virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-			void setChildVisibility(bool);
-			bool hasChildVisible() const;
-			bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
-			bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
-			virtual void setColors();
+                        ~CompAssemblyActor() override;
+                        std::string type() const override {
+                          return "CompAssemblyActor";
+                        } ///< Type of the GL object
+                        void draw(bool picking = false)
+                            const override; ///< Method that defines
+                                            ///ObjComponent geometry. Calls
+                                            ///ObjComponent draw method
+                        void setChildVisibility(bool) override;
+                        bool hasChildVisible() const override;
+                        bool accept(GLActorVisitor &visitor,
+                                    VisitorAcceptRule rule = VisitAll) override;
+                        bool accept(
+                            GLActorConstVisitor &visitor,
+                            VisitorAcceptRule rule = VisitAll) const override;
+                        void setColors() override;
 
-		protected:
+                protected:
 			mutable std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
 			mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
 		private:

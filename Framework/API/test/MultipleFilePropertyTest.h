@@ -12,7 +12,6 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
-#include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string/join.hpp>
 
 using namespace Mantid;
@@ -105,35 +104,34 @@ public:
     m_tempDirs.insert(m_dummyFilesDir);
     m_tempDirs.insert(m_dirWithWhitespace);
 
-    std::set<std::string> dummyFilenames = boost::assign::list_of
+    std::set<std::string> dummyFilenames = {
         // Standard raw file runs.
-        ("TSC00001.raw")("TSC00002.raw")("TSC00003.raw")("TSC00004.raw")(
-            "TSC00005.raw")
+        "TSC00001.raw", "TSC00002.raw", "TSC00003.raw", "TSC00004.raw",
+        "TSC00005.raw",
         // Duplicates, but in NeXuS format.
-        ("TSC00001.nxs")("TSC00002.nxs")("TSC00003.nxs")("TSC00004.nxs")(
-            "TSC00005.nxs")
+        "TSC00001.nxs", "TSC00002.nxs", "TSC00003.nxs", "TSC00004.nxs",
+        "TSC00005.nxs",
         // Standard NeXuS runs for another instrument.
-        ("IRS00001.raw")("IRS00002.raw")("IRS00003.raw")("IRS00004.raw")(
-            "IRS00005.raw")
+        "IRS00001.raw", "IRS00002.raw", "IRS00003.raw", "IRS00004.raw",
+        "IRS00005.raw",
         // Duplicates, but in NeXuS format.
-        ("IRS00001.nxs")("IRS00002.nxs")("IRS00003.nxs")("IRS00004.nxs")(
-            "IRS00005.nxs")
+        "IRS00001.nxs", "IRS00002.nxs", "IRS00003.nxs", "IRS00004.nxs",
+        "IRS00005.nxs",
         // "Incorrect" zero padding file.
-        ("TSC9999999.raw")
+        "TSC9999999.raw",
         // "Non-run" files.
-        ("IRS10001_graphite002_info.nxs")("IRS10002_graphite002_info.nxs")(
-            "IRS10003_graphite002_info.nxs")("IRS10004_graphite002_info.nxs")(
-            "IRS10005_graphite002_info.nxs")
+        "IRS10001_graphite002_info.nxs", "IRS10002_graphite002_info.nxs",
+        "IRS10003_graphite002_info.nxs", "IRS10004_graphite002_info.nxs",
+        "IRS10005_graphite002_info.nxs",
         // File with no extension.
-        ("bl6_flux_at_sample")
+        "bl6_flux_at_sample",
         // A single "non-run" file, that we should be able to load.
-        ("IRS10001-10005_graphite002_info.nxs")
+        "IRS10001-10005_graphite002_info.nxs",
         // A file with a "+" and "," in the name, to see if it can be loaded
         // when multifileloading is turned off via the preferences file.
-        ("_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
+        "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt"};
 
-    std::set<std::string> whiteSpaceDirFilenames =
-        boost::assign::list_of("file with whitespace.txt");
+    std::set<std::string> whiteSpaceDirFilenames = {"file with whitespace.txt"};
 
     createFilesInDirectory(dummyFilenames, m_dummyFilesDir);
     createFilesInDirectory(whiteSpaceDirFilenames, m_dummyFilesDir);

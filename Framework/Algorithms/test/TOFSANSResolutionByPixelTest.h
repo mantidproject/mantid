@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
@@ -193,11 +194,6 @@ public:
   }
 
   void test_that_correct_resolution_is_calculated_without_gravity() {
-    // Arrange
-    std::vector<double> xValues;
-    xValues.push_back(1);
-    xValues.push_back(2);
-    xValues.push_back(3);
 
     double collimationLengthCorrection = -1;
     double collimationLengthIncrement = -1;

@@ -28,7 +28,7 @@ public:
     this->setMouseTracking(true);
   }
 
-  void mouseMoveEvent(QMouseEvent * event)
+  void mouseMoveEvent(QMouseEvent * event) override
   {
     double val = 1.0 - double(event->y()) / double(this->height());
     emit mouseMoved(event->globalPos(), val);
@@ -81,6 +81,8 @@ public:
   void setAutoScale(bool autoscale);
   bool getAutoScale() const;
 
+  bool getAutoColorScaleforCurrentSlice() const;
+
 public slots:
   void changedMinimum();
   void changedMaximum();
@@ -96,9 +98,9 @@ signals:
 
 private:
   void setSpinBoxesSteps();
-  void mouseDoubleClickEvent(QMouseEvent * event);
+  void mouseDoubleClickEvent(QMouseEvent * event) override;
   void updateMinMaxGUI();
-  void resizeEvent(QResizeEvent * event);
+  void resizeEvent(QResizeEvent * event) override;
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;

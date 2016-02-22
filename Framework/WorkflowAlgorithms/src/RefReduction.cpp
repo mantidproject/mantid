@@ -2,18 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefReduction.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include <MantidAPI/FileFinder.h>
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include "Poco/File.h"
-#include "Poco/String.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

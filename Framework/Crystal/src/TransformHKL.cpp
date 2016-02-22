@@ -123,6 +123,7 @@ void TransformHKL::exec() {
   // Transform looks OK so update UB and
   // transform the hkls
   UB = UB * hkl_tran_inverse;
+  g_log.notice() << "Transformed UB = " << UB << std::endl;
   o_lattice.setUB(UB);
   std::vector<double> sigabc(6);
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);

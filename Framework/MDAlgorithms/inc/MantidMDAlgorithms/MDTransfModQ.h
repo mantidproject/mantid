@@ -48,24 +48,24 @@ class DLLExport MDTransfModQ : public MDTransfInterface {
 public:
   /// the name, this ChildAlgorithm is known to users (will appear in selection
   /// list)
-  const std::string transfID() const; // {return "ModQ"; }
+  const std::string transfID() const override; // {return "ModQ"; }
   /** energy conversion modes supported by this class;
     * The class supports three standard energy conversion modes */
-  std::vector<std::string> getEmodes() const;
+  std::vector<std::string> getEmodes() const override;
 
-  bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
-  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i);
+  bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
+  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
   bool calcMatrixCoord(const double &k0, std::vector<coord_t> &Coord, double &s,
-                       double &err) const;
+                       double &err) const override;
   // constructor;
   MDTransfModQ();
   /* clone method allowing to provide the copy of the particular class */
-  MDTransfInterface *clone() const { return new MDTransfModQ(*this); }
+  MDTransfInterface *clone() const override { return new MDTransfModQ(*this); }
   //
-  void initialize(const MDWSDescription &ConvParams);
+  void initialize(const MDWSDescription &ConvParams) override;
 
-  virtual std::vector<double>
-  getExtremumPoints(const double xMin, const double xMax, size_t det_num) const;
+  std::vector<double> getExtremumPoints(const double xMin, const double xMax,
+                                        size_t det_num) const override;
 
   // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL
@@ -77,26 +77,27 @@ public:
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr Sptr =
-                           API::MatrixWorkspace_const_sptr()) const;
+                           API::MatrixWorkspace_const_sptr()) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,
                API::MatrixWorkspace_const_sptr Sptr =
-                   API::MatrixWorkspace_const_sptr()) const;
+                   API::MatrixWorkspace_const_sptr()) const override;
   /**the default dimID-s in ModQ mode are |Q| and dE if necessary */
   std::vector<std::string>
   getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
                   API::MatrixWorkspace_const_sptr Sptr =
-                      API::MatrixWorkspace_const_sptr()) const;
+                      API::MatrixWorkspace_const_sptr()) const override;
   /**  returns the units, the transformation expects for input workspace to be
    * expressed in. */
-  const std::string inputUnitID(Kernel::DeltaEMode::Type dEmode,
-                                API::MatrixWorkspace_const_sptr Sptr =
-                                    API::MatrixWorkspace_const_sptr()) const;
-  virtual void setDisplayNormalization(
+  const std::string
+  inputUnitID(Kernel::DeltaEMode::Type dEmode,
+              API::MatrixWorkspace_const_sptr Sptr =
+                  API::MatrixWorkspace_const_sptr()) const override;
+  void setDisplayNormalization(
       Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const;
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
 protected:
   //  directions to the detectors

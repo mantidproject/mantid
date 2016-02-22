@@ -1,11 +1,13 @@
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -551,7 +553,8 @@ void ConvolutionFitSequential::calculateEISF(
     // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
     auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
     std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                   sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+                   sqrtESqOverYSq.begin(),
+                   static_cast<double (*)(double)>(sqrt));
     // eisfYSumRoot = eisfY * sqrtESqOverYSq
     auto eisfYSumRoot = cloneVector(eisfY);
     std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),

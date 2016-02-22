@@ -37,12 +37,12 @@ class Cone3D : public Qwt3D::VertexEnrichment
 public:
   Cone3D();
   Cone3D(double rad, unsigned quality);
-  ~Cone3D();
+  ~Cone3D() override;
 
-  Qwt3D::Enrichment* clone() const {return new Cone3D(*this);}
-  
+  Qwt3D::Enrichment *clone() const override { return new Cone3D(*this); }
+
   void configure(double rad, unsigned quality);
-  void draw(Qwt3D::Triple const&);
+  void draw(Qwt3D::Triple const &) override;
 
 private:
   	GLUquadricObj *hat;

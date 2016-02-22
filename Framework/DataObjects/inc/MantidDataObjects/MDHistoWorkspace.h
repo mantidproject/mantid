@@ -52,7 +52,7 @@ public:
                    Mantid::API::MDNormalization displayNormalization =
                        Mantid::API::NoNormalization);
 
-  virtual ~MDHistoWorkspace();
+  ~MDHistoWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MDHistoWorkspace> clone() const {
@@ -64,30 +64,30 @@ public:
 
   void cacheValues();
 
-  virtual const std::string id() const { return "MDHistoWorkspace"; }
+  const std::string id() const override { return "MDHistoWorkspace"; }
 
-  virtual size_t getMemorySize() const;
+  size_t getMemorySize() const override;
 
   /// Get the number of points (bins in this case) associated with the
   /// workspace;
-  uint64_t getNPoints() const { return m_length; }
+  uint64_t getNPoints() const override { return m_length; }
   /// get number of contributed events
-  uint64_t getNEvents() const;
-  virtual std::vector<Mantid::API::IMDIterator *>
-  createIterators(size_t suggestedNumCores = 1,
-                  Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  uint64_t getNEvents() const override;
+  std::vector<Mantid::API::IMDIterator *> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  void getLinePlot(const Mantid::Kernel::VMD &start,
+                   const Mantid::Kernel::VMD &end,
+                   Mantid::API::MDNormalization normalize,
+                   std::vector<coord_t> &x, std::vector<signal_t> &y,
+                   std::vector<signal_t> &e) const override;
 
-  virtual void getLineData(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  void getLineData(const Mantid::Kernel::VMD &start,
+                   const Mantid::Kernel::VMD &end,
+                   Mantid::API::MDNormalization normalize,
+                   std::vector<coord_t> &x, std::vector<signal_t> &y,
+                   std::vector<signal_t> &e) const override;
 
   void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
 
@@ -139,18 +139,18 @@ public:
   const size_t *getIndexMultiplier() const { return indexMultiplier; }
 
   /** @return the direct pointer to the signal array. For speed */
-  signal_t *getSignalArray() const { return m_signals; }
+  signal_t *getSignalArray() const override { return m_signals; }
 
   /** @return the inverse of volume of EACH cell in the workspace. For
    * normalizing. */
-  coord_t getInverseVolume() const { return m_inverseVolume; }
+  coord_t getInverseVolume() const override { return m_inverseVolume; }
 
   /** @return the direct pointer to the error squared array. For speed */
-  signal_t *getErrorSquaredArray() const { return m_errorsSquared; }
+  signal_t *getErrorSquaredArray() const override { return m_errorsSquared; }
 
   /** @return the direct pointer to the array of the number of events. For speed
    */
-  signal_t *getNumEventsArray() const { return m_numEvents; }
+  signal_t *getNumEventsArray() const override { return m_numEvents; }
 
   /** @return the direct pointer to the array of mask bits (bool). For
    * speed/testing */
@@ -161,37 +161,40 @@ public:
   const coord_t *getBinWidths() const { return m_boxLength; }
 
   /// Get the special coordinate system.
-  virtual Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override;
 
   /// Set the special coordinate system.
-  void
-  setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem);
+  void setCoordinateSystem(
+      const Kernel::SpecialCoordinateSystem coordinateSystem) override;
 
-  void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
+  void setTo(signal_t signal, signal_t errorSquared,
+             signal_t numEvents) override;
 
   void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction *function,
                              signal_t signal, signal_t errorSquared);
 
   coord_t *getVertexesArray(size_t linearIndex, size_t &numVertices) const;
 
-  Kernel::VMD getCenter(size_t linearIndex) const;
+  Kernel::VMD getCenter(size_t linearIndex) const override;
 
   /// Returns the (normalized) signal at a given coordinates
-  signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const;
+  signal_t getSignalAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const override;
 
   /// Returns the (normalized) signal at a given coordinates
   // or 0 if masked
-  virtual signal_t getSignalWithMaskAtCoord(
+  signal_t getSignalWithMaskAtCoord(
       const coord_t *coords,
-      const Mantid::API::MDNormalization &normalization) const;
+      const Mantid::API::MDNormalization &normalization) const override;
 
   /// Sets the signal at the specified index.
-  void setSignalAt(size_t index, signal_t value) { m_signals[index] = value; }
+  void setSignalAt(size_t index, signal_t value) override {
+    m_signals[index] = value;
+  }
 
   /// Sets the error (squared) at the specified index.
-  void setErrorSquaredAt(size_t index, signal_t value) {
+  void setErrorSquaredAt(size_t index, signal_t value) override {
     m_errorsSquared[index] = value;
   }
 
@@ -205,19 +208,20 @@ public:
   signal_t getNumEventsAt(size_t index) const { return m_numEvents[index]; }
 
   /// Get the error of the signal at the specified index.
-  signal_t getErrorAt(size_t index) const {
+  signal_t getErrorAt(size_t index) const override {
     return std::sqrt(m_errorsSquared[index]);
   }
 
   /// Get the error at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
-  signal_t getErrorAt(size_t index1, size_t index2) const {
+  signal_t getErrorAt(size_t index1, size_t index2) const override {
     return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0] * index2]);
   }
 
   /// Get the error at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
-  signal_t getErrorAt(size_t index1, size_t index2, size_t index3) const {
+  signal_t getErrorAt(size_t index1, size_t index2,
+                      size_t index3) const override {
     return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0] * index2 +
                                      indexMultiplier[1] * index3]);
   }
@@ -225,7 +229,7 @@ public:
   /// Get the error at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
   signal_t getErrorAt(size_t index1, size_t index2, size_t index3,
-                      size_t index4) const {
+                      size_t index4) const override {
     return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0] * index2 +
                                      indexMultiplier[1] * index3 +
                                      indexMultiplier[2] * index4]);
@@ -237,17 +241,18 @@ public:
   bool getIsMaskedAt(size_t index) const { return m_masks[index]; }
 
   /// Get the signal at the specified index.
-  signal_t getSignalAt(size_t index) const { return m_signals[index]; }
+  signal_t getSignalAt(size_t index) const override { return m_signals[index]; }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
-  signal_t getSignalAt(size_t index1, size_t index2) const {
+  signal_t getSignalAt(size_t index1, size_t index2) const override {
     return m_signals[index1 + indexMultiplier[0] * index2];
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
-  signal_t getSignalAt(size_t index1, size_t index2, size_t index3) const {
+  signal_t getSignalAt(size_t index1, size_t index2,
+                       size_t index3) const override {
     return m_signals[index1 + indexMultiplier[0] * index2 +
                      indexMultiplier[1] * index3];
   }
@@ -255,26 +260,26 @@ public:
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t)
   signal_t getSignalAt(size_t index1, size_t index2, size_t index3,
-                       size_t index4) const {
+                       size_t index4) const override {
     return m_signals[index1 + indexMultiplier[0] * index2 +
                      indexMultiplier[1] * index3 + indexMultiplier[2] * index4];
   }
 
   /// Get the signal at the specified index, normalized by cell volume
-  signal_t getSignalNormalizedAt(size_t index) const {
+  signal_t getSignalNormalizedAt(size_t index) const override {
     return m_signals[index] * m_inverseVolume;
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
-  signal_t getSignalNormalizedAt(size_t index1, size_t index2) const {
+  signal_t getSignalNormalizedAt(size_t index1, size_t index2) const override {
     return m_signals[index1 + indexMultiplier[0] * index2] * m_inverseVolume;
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
   signal_t getSignalNormalizedAt(size_t index1, size_t index2,
-                                 size_t index3) const {
+                                 size_t index3) const override {
     return m_signals[index1 + indexMultiplier[0] * index2 +
                      indexMultiplier[1] * index3] *
            m_inverseVolume;
@@ -283,7 +288,7 @@ public:
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
   signal_t getSignalNormalizedAt(size_t index1, size_t index2, size_t index3,
-                                 size_t index4) const {
+                                 size_t index4) const override {
     return m_signals[index1 + indexMultiplier[0] * index2 +
                      indexMultiplier[1] * index3 +
                      indexMultiplier[2] * index4] *
@@ -292,34 +297,34 @@ public:
 
   /// Get the error of the signal at the specified index, normalized by cell
   /// volume
-  signal_t getErrorNormalizedAt(size_t index) const {
+  signal_t getErrorNormalizedAt(size_t index) const override {
     return std::sqrt(m_errorsSquared[index]) * m_inverseVolume;
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
-  signal_t getErrorNormalizedAt(size_t index1, size_t index2) const {
+  signal_t getErrorNormalizedAt(size_t index1, size_t index2) const override {
     return getErrorAt(index1, index2) * m_inverseVolume;
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
   signal_t getErrorNormalizedAt(size_t index1, size_t index2,
-                                size_t index3) const {
+                                size_t index3) const override {
     return getErrorAt(index1, index2, index3) * m_inverseVolume;
   }
 
   /// Get the signal at the specified index given in 4 dimensions (typically
   /// X,Y,Z,t), normalized by cell volume
   signal_t getErrorNormalizedAt(size_t index1, size_t index2, size_t index3,
-                                size_t index4) const {
+                                size_t index4) const override {
     return getErrorAt(index1, index2, index3, index4) * m_inverseVolume;
   }
 
   //---------------------------------------------------------------------------------------------
   /** @return a reference to the error (squared) at the linear index
    * @param index :: linear index (see getLinearIndex).  */
-  signal_t &errorSquaredAt(size_t index) {
+  signal_t &errorSquaredAt(size_t index) override {
     if (index < m_length)
       return m_errorsSquared[index];
     else
@@ -328,7 +333,7 @@ public:
 
   /** @return a reference to the signal at the linear index
    * @param index :: linear index (see getLinearIndex).  */
-  signal_t &signalAt(size_t index) {
+  signal_t &signalAt(size_t index) override {
     if (index < m_length)
       return m_signals[index];
     else
@@ -336,20 +341,21 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------
-  size_t getLinearIndex(size_t index1, size_t index2) const {
+  size_t getLinearIndex(size_t index1, size_t index2) const override {
     if (this->getNumDims() != 2)
       throw std::runtime_error("Workspace does not have 2 dimensions!");
     return index1 + indexMultiplier[0] * index2;
   }
 
-  size_t getLinearIndex(size_t index1, size_t index2, size_t index3) const {
+  size_t getLinearIndex(size_t index1, size_t index2,
+                        size_t index3) const override {
     if (this->getNumDims() != 3)
       throw std::runtime_error("Workspace does not have 3 dimensions!");
     return index1 + indexMultiplier[0] * index2 + indexMultiplier[1] * index3;
   }
 
   size_t getLinearIndex(size_t index1, size_t index2, size_t index3,
-                        size_t index4) const {
+                        size_t index4) const override {
     if (this->getNumDims() != 4)
       throw std::runtime_error("Workspace does not have 4 dimensions!");
     return index1 + indexMultiplier[0] * index2 + indexMultiplier[1] * index3 +
@@ -374,7 +380,7 @@ public:
    * @param index :: linear index into array
    * @return the signal (not normalized) at that index.
    */
-  signal_t &operator[](const size_t &index) {
+  signal_t &operator[](const size_t &index)override {
     if (index < m_length)
       return m_signals[index];
     else
@@ -387,12 +393,13 @@ public:
   virtual std::vector<signal_t> getErrorDataVector() const;
 
   /// Apply masking.
-  void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
+  void
+  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
   /// Apply masking.
   void setMDMaskAt(const size_t &index, bool mask);
 
   /// Clear masking.
-  void clearMDMasking();
+  void clearMDMasking() override;
   /// sum the array of contributing events m_numEvents array
   uint64_t sumNContribEvents() const;
   void updateSum() { m_nEventsContributed = sumNContribEvents(); }
@@ -401,16 +408,16 @@ public:
   static size_t sizeOfElement();
 
   /// Preferred visual normalization method.
-  virtual Mantid::API::MDNormalization displayNormalization() const;
+  Mantid::API::MDNormalization displayNormalization() const override;
 
   /// Preferred visual normalization method.
-  virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
+  Mantid::API::MDNormalization displayNormalizationHisto() const override;
 
-  virtual void setDisplayNormalization(
-      const Mantid::API::MDNormalization &preferredNormalization);
+  void setDisplayNormalization(
+      const Mantid::API::MDNormalization &preferredNormalization) override;
 
 private:
-  virtual MDHistoWorkspace *doClone() const {
+  MDHistoWorkspace *doClone() const override {
     return new MDHistoWorkspace(*this);
   }
 

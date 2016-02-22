@@ -34,16 +34,16 @@ namespace MDAlgorithms {
 class DLLExport ConvertToMDMinMaxLocal : public ConvertToMDParent {
 public:
   ConvertToMDMinMaxLocal();
-  virtual ~ConvertToMDMinMaxLocal();
+  ~ConvertToMDMinMaxLocal() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate limits of ConvertToMD transformation possible for this "
            "particular workspace and the instrument, attached to it.";
   }
 
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 protected: // for testing
   void findMinMaxValues(MDWSDescription &targWSDescr,
@@ -53,8 +53,8 @@ protected: // for testing
                         std::vector<double> &MaxValues);
 
 private:
-  void exec();
-  void init();
+  void exec() override;
+  void init() override;
   /// pointer to the input workspace;
   Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
 };

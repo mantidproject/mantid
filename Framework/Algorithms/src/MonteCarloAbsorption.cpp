@@ -4,12 +4,15 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SampleEnvironment.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/random/uniform_int.hpp>
@@ -499,18 +502,14 @@ bool MonteCarloAbsorption::boxIntersectsSample(
     const double xmax, const double ymax, const double zmax, const double xmin,
     const double ymin, const double zmin) const {
   // Check all 8 corners for intersection
-  if (ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
-      ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
-      ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
-      ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
-      ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
-      ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
-      ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
-      ptIntersectsSample(V3D(xmin, ymin, zmax)))   // right-back-bottom
-  {
-    return true;
-  } else
-    return false;
+  return (ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
+          ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
+          ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
+          ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
+          ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
+          ptIntersectsSample(V3D(xmin, ymin, zmax)));  // right-back-bottom
 }
 
 /**

@@ -57,23 +57,23 @@ public:
   /// Default constructor
   Max() : API::Algorithm(){};
   /// Destructor
-  virtual ~Max(){};
+  ~Max() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Max"; }
+  const std::string name() const override { return "Max"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a 2D workspace as input and find the maximum in each 1D "
            "spectrum.";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

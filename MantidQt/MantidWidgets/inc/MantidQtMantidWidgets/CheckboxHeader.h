@@ -52,9 +52,10 @@ namespace MantidQt
 
     protected:
       /// Overrides QHeaderView allowing checkbox functionality in the first column of the table.
-      void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
+      void paintSection(QPainter *painter, const QRect &rect,
+                        int logicalIndex) const override;
       /// Set the checkbox to checked when it is clicked.
-      void mousePressEvent(QMouseEvent *event);
+      void mousePressEvent(QMouseEvent *event) override;
 
     private:
       /// The area around the checkbox.

@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -8,7 +9,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
-#include <vector>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;

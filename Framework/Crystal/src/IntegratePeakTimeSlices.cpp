@@ -14,6 +14,7 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 //#include "MantidGeometry/Surfaces/Surface.h"
 
@@ -1729,12 +1730,12 @@ int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
   if (sgn * (X[0] - time) >= 0)
     return 0;
 
-  if (sgn * (time - X[X.size() - 1]) >= 0)
+  if (sgn * (time - X[X.size() - 1u]) >= 0)
     return static_cast<int>(X.size()) - 1;
 
-  for (size_t i = 0; i < (size_t)X.size() - static_cast<size_t>(1); i++) {
-    if (sgn * (time - X[i]) >= 0 &&
-        sgn * (X[i + static_cast<size_t>(1)] - time) >= 0)
+  size_t end = X.size() - 1u;
+  for (size_t i = 0; i < end; i++) {
+    if (sgn * (time - X[i]) >= 0 && sgn * (X[i + 1u] - time) >= 0)
       return static_cast<int>(i);
   }
 
@@ -2101,12 +2102,12 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
-                  << (int)getProperty("PeakIndex") << ":"
+                  << static_cast<int>(getProperty("PeakIndex")) << ":"
                   << std::string(Ex1.what()) << std::endl;
   } catch (...) {
     done = true;
     g_log.error() << "Bivariate Error A for peakNum="
-                  << (int)getProperty("PeakIndex") << std::endl;
+                  << static_cast<int>(getProperty("PeakIndex")) << std::endl;
   }
   if (!done) // Bivariate error happened
   {

@@ -1,11 +1,15 @@
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

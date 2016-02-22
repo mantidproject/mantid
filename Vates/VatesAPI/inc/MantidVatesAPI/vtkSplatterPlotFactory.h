@@ -61,17 +61,17 @@ public:
                          const double percentToUse = 5.0);
 
   /// Destructor
-  virtual ~vtkSplatterPlotFactory();
+  ~vtkSplatterPlotFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const;
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr);
+  void initialize(Mantid::API::Workspace_sptr) override;
 
   /// Get the name of the type.
-  virtual std::string getFactoryTypeName() const {
+  std::string getFactoryTypeName() const override {
     return "vtkSplatterPlotFactory";
   }
 
@@ -112,7 +112,7 @@ private:
                                const int z) const;
 
   /// Template Method pattern to validate the factory before use.
-  virtual void validate() const;
+  void validate() const override;
 
   /// Add metadata
   void addMetadata() const;

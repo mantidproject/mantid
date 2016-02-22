@@ -83,24 +83,26 @@ public:
   /// Default constructor
   SmoothNeighbours();
   /// Destructor
-  virtual ~SmoothNeighbours(){};
+  ~SmoothNeighbours() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SmoothNeighbours"; }
+  const std::string name() const override { return "SmoothNeighbours"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform a moving-average smoothing by summing spectra of nearest "
            "neighbours over the face of detectors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Smoothing"; }
+  const std::string category() const override {
+    return "Transforms\\Smoothing";
+  }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void execWorkspace2D();
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);

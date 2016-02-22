@@ -40,10 +40,10 @@ namespace MantidQt
 			void maxValueChanged(double);
 			void nthPowerChanged(double);
 		protected:
-			void mousePressEvent(QMouseEvent*);
-			void mouseMoveEvent(QMouseEvent*);
-			void mouseReleaseEvent(QMouseEvent*);
-			void updateScale();
+                  void mousePressEvent(QMouseEvent *) override;
+                  void mouseMoveEvent(QMouseEvent *) override;
+                  void mouseReleaseEvent(QMouseEvent *) override;
+                        void updateScale();
 			void setMinValueText(double);
 			void setMaxValueText(double);
 			private slots:

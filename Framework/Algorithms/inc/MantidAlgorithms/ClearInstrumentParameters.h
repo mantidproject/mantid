@@ -37,15 +37,15 @@ namespace Algorithms {
 class DLLExport ClearInstrumentParameters : public API::Algorithm {
 public:
   ClearInstrumentParameters();
-  virtual ~ClearInstrumentParameters();
-  virtual const std::string name() const;
-  virtual const std::string summary() const;
-  virtual const std::string category() const;
-  virtual int version() const;
+  ~ClearInstrumentParameters() override;
+  const std::string name() const override;
+  const std::string summary() const override;
+  const std::string category() const override;
+  int version() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

@@ -13,6 +13,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
@@ -1305,6 +1306,47 @@ private:
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;
+};
+
+class MatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static MatrixWorkspaceTestPerformance *createSuite() {
+    return new MatrixWorkspaceTestPerformance();
+  }
+  static void destroySuite(MatrixWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  MatrixWorkspaceTestPerformance() : m_workspace(nullptr) {
+    size_t numberOfHistograms = 10000;
+    size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
+  void test_typical() {
+    auto instrument = m_workspace.getInstrument();
+    auto source = instrument->getSource();
+    auto sample = instrument->getSample();
+    auto L1 = source->getDistance(*sample);
+    double result = 0.0;
+    for (size_t i = 0; i < 10000; ++i) {
+      auto detector = m_workspace.getDetector(i);
+      result += L1;
+      result += detector->getDistance(*sample);
+      result += m_workspace.detectorTwoTheta(detector);
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+  }
+
+private:
+  WorkspaceTester m_workspace;
 };
 
 #endif /*WORKSPACETEST_H_*/

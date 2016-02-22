@@ -15,9 +15,11 @@ namespace MantidQt
 		{
 		public:
 			explicit OpenGLError(const std::string& msg) :m_msg(msg) {}
-			~OpenGLError() throw() {}
-			const char * what() const throw() { return m_msg.c_str(); }
-			static bool check(const std::string& funName);
+                        ~OpenGLError() throw() override {}
+                        const char *what() const throw() override {
+                          return m_msg.c_str();
+                        }
+                        static bool check(const std::string& funName);
 			static bool hasError(const std::string& funName) { return check(funName); }
 			static std::ostream& log();
 			static std::ostream& logDebug();

@@ -16,8 +16,8 @@ class StringDialogEditorFactory : public QtAbstractEditorFactory<QtStringPropert
 public:
   StringDialogEditorFactory(QObject *parent = 0): QtAbstractEditorFactory<QtStringPropertyManager>(parent){}
 protected:
-  void connectPropertyManager(QtStringPropertyManager *manager);
-  void disconnectPropertyManager(QtStringPropertyManager *manager);
+  void connectPropertyManager(QtStringPropertyManager *manager) override;
+  void disconnectPropertyManager(QtStringPropertyManager *manager) override;
 };
 
 /**
@@ -30,7 +30,7 @@ class StringDialogEditor: public QWidget
   Q_OBJECT
 public:
   StringDialogEditor(QtProperty *property, QWidget *parent);
-  ~StringDialogEditor();
+  ~StringDialogEditor() override;
 protected slots:
   /// Implementations must open a dialog to edit the editor's text. If editing is successful
   /// setText() and updateProperty() methods must be called.

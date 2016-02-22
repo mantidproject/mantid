@@ -35,24 +35,24 @@ namespace DataHandling {
 class DLLExport RenameLog : public API::Algorithm {
 public:
   RenameLog();
-  virtual ~RenameLog();
+  ~RenameLog() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "RenameLog"; };
+  const std::string name() const override { return "RenameLog"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Rename a TimeSeries log in a given Workspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
   API::MatrixWorkspace_sptr matrixWS;
 };

@@ -19,33 +19,33 @@ class DLLExport LoadIsawPeaks
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadIsawPeaks();
-  virtual ~LoadIsawPeaks();
+  ~LoadIsawPeaks() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadIsawPeaks"; }
+  const std::string name() const override { return "LoadIsawPeaks"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load an ISAW-style .peaks file into a PeaksWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Isaw";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Reads calibration/detector section and returns first word of next line
   std::string ApplyCalibInfo(std::ifstream &in, std::string startChar,

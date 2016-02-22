@@ -75,26 +75,26 @@ public:
   enum FunctionMode { CALCULATION, FIT, BACKGROUNDPROCESS, MONTECARLO };
 
   LeBailFit();
-  virtual ~LeBailFit();
+  ~LeBailFit() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LeBailFit"; }
+  const std::string name() const override { return "LeBailFit"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Do LeBail Fit to a spectrum of powder diffraction data. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
+  void init() override;
   // Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process input properties
   void processInputProperties();

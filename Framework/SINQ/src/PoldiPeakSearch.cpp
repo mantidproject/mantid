@@ -1,5 +1,6 @@
 #include "MantidSINQ/PoldiPeakSearch.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"

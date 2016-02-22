@@ -47,7 +47,7 @@ void CreatePeaksWorkspace::init() {
 void CreatePeaksWorkspace::exec() {
   MatrixWorkspace_sptr instWS = getProperty("InstrumentWorkspace");
 
-  PeaksWorkspace_sptr out(new PeaksWorkspace());
+  auto out = boost::make_shared<PeaksWorkspace>();
   setProperty("OutputWorkspace", out);
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 

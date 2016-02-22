@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RealFFT.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>

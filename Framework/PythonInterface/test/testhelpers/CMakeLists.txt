@@ -26,6 +26,7 @@ set ( SRC_FILES
   WorkspaceCreationHelperModule.cpp 
   ${FRAMEWORK_DIR}/TestHelpers/src/ComponentCreationHelper.cpp
   ${FRAMEWORK_DIR}/TestHelpers/src/MDEventsTestHelper.cpp
+  ${FRAMEWORK_DIR}/TestHelpers/src/InstrumentCreationHelper.cpp
   ${FRAMEWORK_DIR}/TestHelpers/src/WorkspaceCreationHelper.cpp
 )
 add_library ( PythonWorkspaceCreationHelper ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )

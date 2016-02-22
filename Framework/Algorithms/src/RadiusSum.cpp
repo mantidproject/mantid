@@ -1,16 +1,21 @@
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <numeric>
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
+
+#include <boost/foreach.hpp>
+
 #include <limits>
 #include <math.h>
+#include <numeric>
 #include <sstream>
-#include <boost/foreach.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -605,14 +610,9 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
 double RadiusSum::getMaxDistance(const V3D &centre,
                                  const std::vector<double> &boundary_limits) {
 
-  std::vector<double> Xs;       //  = {boundary_limits[0], boundary_limits[1]};
-  std::vector<double> Ys;       // = {boundary_limits[2], boundary_limits[3]};
-  std::vector<double> Zs(2, 0); //  = {0, 0};
-
-  Xs.push_back(boundary_limits[0]);
-  Xs.push_back(boundary_limits[1]);
-  Ys.push_back(boundary_limits[2]);
-  Ys.push_back(boundary_limits[3]);
+  std::array<double, 2> Xs = {{boundary_limits[0], boundary_limits[1]}};
+  std::array<double, 2> Ys = {{boundary_limits[2], boundary_limits[3]}};
+  std::array<double, 2> Zs = {{0., 0.}};
 
   if (boundary_limits.size() == 6) {
     Zs[0] = boundary_limits[4];
@@ -620,12 +620,12 @@ double RadiusSum::getMaxDistance(const V3D &centre,
   }
 
   double max_distance = 0;
-  for (size_t x = 0; x < 2; x++)
-    for (size_t y = 0; y < 2; y++)
-      for (size_t z = 0; z < 2;
-           z++) { // define all the possible combinations for the limits
+  for (auto &x : Xs)
+    for (auto &y : Ys)
+      for (auto &z : Zs) {
+        // define all the possible combinations for the limits
 
-        double curr_distance = centre.distance(V3D(Xs[x], Ys[y], Zs[z]));
+        double curr_distance = centre.distance(V3D(x, y, z));
 
         if (curr_distance > max_distance)
           max_distance = curr_distance; // keep the maximum distance.

@@ -46,12 +46,12 @@ namespace MDAlgorithms {
 class DLLExport BinaryOperationMD : public API::Algorithm {
 public:
   BinaryOperationMD();
-  virtual ~BinaryOperationMD();
+  ~BinaryOperationMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const {
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override {
     return "Abstract base class for binary operations on IMDWorkspaces, e.g. A "
            "= B + C or A = B / C.";
   }
@@ -83,9 +83,9 @@ protected:
   /// The name of the output workspace property
   virtual std::string outputPropName() const { return "OutputWorkspace"; }
 
-  void init();
+  void init() override;
   virtual void initExtraProperties();
-  virtual void exec();
+  void exec() override;
 
   /// LHS workspace
   Mantid::API::IMDWorkspace_sptr m_lhs;

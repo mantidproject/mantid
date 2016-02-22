@@ -2,6 +2,7 @@
 #define MANTID_NOTEBOOKBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -192,8 +193,9 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    // Compare line with expected result
-    TS_ASSERT_EQUALS(notebookLines[64], result)
+    // Check that the expected line does appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
+              notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -232,8 +234,11 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[100], result_code)
+    // Check that the expected lines do appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -281,8 +286,11 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[74], result_code)
+    // Check that the expected lines do appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                        result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -321,7 +329,9 @@ public:
     while (std::getline(buffer, line))
       notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[64], result)
+    // Check that the expected line does appear in the output
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
+              notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");

@@ -41,7 +41,7 @@ namespace MantidWidgets
 
   public:
     AlgorithmSelectorWidget(QWidget *parent);
-    virtual ~AlgorithmSelectorWidget();
+    ~AlgorithmSelectorWidget() override;
     void getSelectedAlgorithm(QString& algName, int& version);
     QString getSelectedAlgorithm();
     void setSelectedAlgorithm(QString & algName);
@@ -83,10 +83,10 @@ signals:
     Q_OBJECT
   public:
     AlgorithmTreeWidget(QWidget *w):QTreeWidget(w){}
-    virtual ~AlgorithmTreeWidget() {}
-    void mousePressEvent (QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseDoubleClickEvent(QMouseEvent *e);
+    ~AlgorithmTreeWidget() override {}
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
     void getSelectedAlgorithm(QString& algName, int& version);
 
   public slots:
@@ -109,7 +109,7 @@ signals:
   {
     Q_OBJECT
   public:
-    virtual ~FindAlgComboBox() {}
+    ~FindAlgComboBox() override {}
     void getSelectedAlgorithm(QString& algName, int& version);
 
   signals:
@@ -119,7 +119,8 @@ signals:
     void update();
 
   protected:
-    void keyPressEvent(QKeyEvent *e);
+    void keyPressEvent(QKeyEvent *e) override;
+
   private:
     typedef std::vector<Mantid::API::Algorithm_descriptor> AlgNamesType;
     void addAliases(AlgNamesType& algNamesList);

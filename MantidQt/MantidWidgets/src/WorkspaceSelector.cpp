@@ -9,6 +9,7 @@
 #include <Poco/NObserver.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QDropEvent>
 #include <QMimeData>

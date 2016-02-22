@@ -1,6 +1,8 @@
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 

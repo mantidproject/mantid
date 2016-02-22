@@ -48,29 +48,29 @@ public:
   /// (Empty) Constructor
   CloneWorkspace() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~CloneWorkspace() {}
+  ~CloneWorkspace() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CloneWorkspace"; }
+  const std::string name() const override { return "CloneWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Copies an existing workspace into a new one.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
 private:
-  const std::string workspaceMethodName() const { return "clone"; }
-  const std::string workspaceMethodInputProperty() const {
+  const std::string workspaceMethodName() const override { return "clone"; }
+  const std::string workspaceMethodInputProperty() const override {
     return "InputWorkspace";
   }
 
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

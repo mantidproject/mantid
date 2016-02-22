@@ -1,7 +1,11 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"

@@ -44,7 +44,7 @@ public:
   void insertColumnsList(const QStringList& cols);
 
 private slots:
-  void accept();
+  void accept() override;
   void changeType(int index);
 
 signals:
