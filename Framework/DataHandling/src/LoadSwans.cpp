@@ -54,7 +54,7 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
   // since this is a test loader, the confidence will always be 0!
   // I don't want the Load algorithm to pick this one!
   if (descriptor.extension().compare(".dat") != 0)
-    return 0;
+    return 1;
   else
     return 0;
 }
