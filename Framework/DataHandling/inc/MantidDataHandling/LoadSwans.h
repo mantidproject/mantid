@@ -33,7 +33,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadSwans : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadSwans final : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
 
@@ -59,7 +59,7 @@ private:
 
   // Member variables
   DataObjects::EventWorkspace_sptr m_ws;
-  unsigned int m_detector_size;
+  unsigned int m_detector_size = 0;
 
   // Constants:
   // This has to be here because the data file to date has no metadata
