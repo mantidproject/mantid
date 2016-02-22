@@ -68,8 +68,11 @@ private:
   /// Moves the system one step closer towards the solution
   std::vector<double> move(const QuadraticCoefficients &coeffs,
                            double chiTarget, double chiEps, size_t alphaIter);
-  /// Calculates the distance of the current solution
-  double distance(const Kernel::DblMatrix &s2, const std::vector<double> &beta);
+  /// TODO Description
+  std::vector<double> applyDistancePenalty(const std::vector<double> &beta,
+                                           const QuadraticCoefficients &coeffs,
+                                           const std::vector<double> &image,
+                                           double background, double distEps);
   /// Populates the output workspaces
   void populateOutputWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
                         size_t nspec, const std::vector<double> &result,

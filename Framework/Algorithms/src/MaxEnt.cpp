@@ -148,13 +148,11 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
  */
 void MaxEnt::exec() {
 
-  // Read input workspace
-  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  // MaxEnt parameters
   // Complex data?
   bool complex = getProperty("ComplexData");
   // Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
-
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -169,7 +167,9 @@ void MaxEnt::exec() {
   size_t niter = getProperty("MaxIterations");
   // Maximum number of iterations in alpha chop
   size_t alphaIter = getProperty("AlphaChopIterations");
-
+  // Number of spectra and datapoints
+  // Read input workspace
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
@@ -177,6 +177,8 @@ void MaxEnt::exec() {
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
+  // The type of entropy we are going to use (depends on the type of image,
+  // positive only, or positive and/or negative)
   MaxentEntropy_sptr entropy;
   if (positiveImage) {
     throw std::invalid_argument("Negative image: not implemented");
@@ -232,33 +234,24 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      // Calculate search directions and quadratic model coefficients (SB eq. 21
-      // and 24)
+      // Calculate search directions and quadratic model coefficients
+      // (SB eq. 21 and 24)
       maxentData->calculateSearchDirections();
       double currAngle = maxentData->getAngle();
       double currChisq = maxentData->getChisq();
       auto dirs = maxentData->getSearchDirections();
       auto coeffs = maxentData->getQuadraticCoefficients();
 
-      // Calculate beta to contruct new image (SB eq. 25)
-      auto beta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
+      // Calculate delta to construct new image (SB eq. 25)
+      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-      double sum = 0.;
-      for (double point : image)
-        sum += fabs(point);
-
-      double dist = distance(coeffs.s2, beta);
-      if (dist > distEps * sum / background) {
-        for (double &k : beta) {
-          k *= sqrt(sum / dist / background);
-        }
-      }
+			delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
       // Calculate the new image
       for (size_t i = 0; i < npoints; i++) {
-        for (size_t k = 0; k < beta.size(); k++) {
-          newImage[i] = newImage[i] + beta[k] * dirs[k][i];
+        for (size_t k = 0; k < delta.size(); k++) {
+          newImage[i] = newImage[i] + delta[k] * dirs[k][i];
         }
       }
 
@@ -313,7 +306,7 @@ void MaxEnt::exec() {
 
 //----------------------------------------------------------------------------------------------
 
-/** Bisection method to move beta one step closer towards the solution
+/** Bisection method to move delta one step closer towards the solution
 * @param dirs :: [input] The current quadratic coefficients
 * @param chiTarget :: [input] The requested Chi target
 * @param chiEps :: [input] Precision required for Chi target
@@ -330,22 +323,22 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   // Dimension, number of search directions
   size_t dim = coeffs.c2.size().first;
 
-  std::vector<double> betaMin(dim, 0); // Beta at alpha min
-  std::vector<double> betaMax(dim, 0); // Beta at alpha max
+  std::vector<double> deltaMin(dim, 0); // delta at alpha min
+  std::vector<double> deltaMax(dim, 0); // delta at alpha max
 
-  double chiMin = calculateChi(coeffs, aMin, betaMin); // Chi at alpha min
-  double chiMax = calculateChi(coeffs, aMax, betaMax); // Chi at alpha max
+  double chiMin = calculateChi(coeffs, aMin, deltaMin); // Chi at alpha min
+  double chiMax = calculateChi(coeffs, aMax, deltaMax); // Chi at alpha max
 
-  double dchiMin = chiMin - chiTarget; // Delta = max - target
-  double dchiMax = chiMax - chiTarget; // Delta = min - target
+  double dchiMin = chiMin - chiTarget; // max - target
+  double dchiMax = chiMax - chiTarget; // min - target
 
   if (dchiMin * dchiMax > 0) {
     // ChiTarget could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
-      return betaMin;
+      return deltaMin;
     } else {
-      return betaMax;
+      return deltaMax;
     }
     //    throw std::runtime_error("Error in alpha chop\n");
   }
@@ -356,12 +349,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   // Bisection method
 
-  std::vector<double> beta(dim, 0); // Beta at current alpha
+  std::vector<double> delta(dim, 0); // delta at current alpha
 
   while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
-    double chiMid = calculateChi(coeffs, aMid, beta);
+    double chiMid = calculateChi(coeffs, aMid, delta);
 
     eps = chiMid - chiTarget;
 
@@ -385,7 +378,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                              "image. No convergence in alpha chop.\n");
   }
 
-  return beta;
+  return delta;
 }
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
@@ -489,9 +482,9 @@ std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
   gsl_linalg_SV_solve(a, v, s, b, x);
 
   // From gsl_vector to vector
-  std::vector<double> beta(dim);
+  std::vector<double> delta(dim);
   for (size_t k = 0; k < dim; k++)
-    beta[k] = gsl_vector_get(x, k);
+    delta[k] = gsl_vector_get(x, k);
 
   gsl_matrix_free(a);
   gsl_matrix_free(v);
@@ -500,27 +493,43 @@ std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
   gsl_vector_free(x);
   gsl_vector_free(b);
 
-  return beta;
+  return delta;
 }
 
-/** Calculates the distance of the current solution
-* @param s2 :: [input] The current quadratic coefficient for the entropy S
-* @param beta :: [input] The current beta vector
-* @return :: The distance
+/** Applies a distance penalty
+* @param delta :: [input] The current increment
+* @param coeffs :: [input] The quadratic coefficients
+* @param image :: [input] The current image
+* @param background :: [input] The background
+* @param distEps :: [input] The distance constraint
+* @return :: The new increment
 */
-double MaxEnt::distance(const DblMatrix &s2, const std::vector<double> &beta) {
+std::vector<double> MaxEnt::applyDistancePenalty(
+    const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
+    const std::vector<double> &image, double background, double distEps) {
 
-  size_t dim = s2.size().first;
+  double sum = 0.;
+  for (double point : image)
+    sum += fabs(point);
+
+  size_t dim = coeffs.s2.size().first;
 
   double dist = 0.;
 
   for (size_t k = 0; k < dim; k++) {
     double sum = 0.0;
     for (size_t l = 0; l < dim; l++)
-      sum -= s2[k][l] * beta[l];
-    dist += beta[k] * sum;
+      sum -= coeffs.s2[k][l] * delta[l];
+    dist += delta[k] * sum;
   }
-  return dist;
+
+  auto newDelta = delta;
+  if (dist > distEps * sum / background) {
+    for (size_t k = 0; k < delta.size(); k++) {
+			newDelta[k] *= sqrt(sum / dist / background);
+    }
+  }
+  return newDelta;
 }
 
 /** Populates the output workspaces
