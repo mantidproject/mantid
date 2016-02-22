@@ -73,9 +73,6 @@ public:
   /// Empty constructor
   TofEvent();
 
-  /// Destructor
-  virtual ~TofEvent() = default;
-
   bool operator==(const TofEvent &rhs) const;
   bool operator<(const TofEvent &rhs) const;
   bool operator<(const double rhs_tof) const;

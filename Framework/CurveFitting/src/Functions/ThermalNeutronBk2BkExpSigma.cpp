@@ -22,11 +22,6 @@ using namespace CurveFitting;
 DECLARE_FUNCTION(ThermalNeutronBk2BkExpSigma)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ThermalNeutronBk2BkExpSigma::ThermalNeutronBk2BkExpSigma() {}
-
-//----------------------------------------------------------------------------------------------
 /** Defintion of parameter
   */
 void ThermalNeutronBk2BkExpSigma::init() {

@@ -18,11 +18,6 @@ using namespace CurveFitting;
 //----------------------------------------------------------------------------------------------
 DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ThermalNeutronDtoTOFFunction::ThermalNeutronDtoTOFFunction() {}
-
 /**
 * Define the fittable parameters
 */

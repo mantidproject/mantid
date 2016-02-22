@@ -158,7 +158,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDWorkspace(const IMDWorkspace &other) = default;
+  IMDWorkspace(const IMDWorkspace &) = default;
 
   const std::string toString() const override;
 

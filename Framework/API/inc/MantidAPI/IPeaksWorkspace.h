@@ -161,7 +161,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IPeaksWorkspace(const IPeaksWorkspace &other) = default;
+  IPeaksWorkspace(const IPeaksWorkspace &) = default;
 
   const std::string toString() const override;
 

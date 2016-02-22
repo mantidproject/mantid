@@ -35,8 +35,6 @@ namespace Functions {
 */
 class DLLExport FlatBackground : public BackgroundFunction {
 public:
-  FlatBackground();
-
   std::string name() const override;
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
