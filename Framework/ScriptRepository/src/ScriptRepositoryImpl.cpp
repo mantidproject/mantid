@@ -8,6 +8,8 @@
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 #include <utility>
+#include <unordered_set>
+
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;

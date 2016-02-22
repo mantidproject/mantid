@@ -10,6 +10,7 @@
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {

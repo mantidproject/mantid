@@ -29,6 +29,7 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

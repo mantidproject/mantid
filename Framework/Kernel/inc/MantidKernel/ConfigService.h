@@ -9,7 +9,7 @@
 #include "MantidKernel/ProxyInfo.h"
 #include <vector>
 #include <map>
-#include <unordered_set>
+#include <set>
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -307,7 +307,7 @@ private:
   WrappedObject<Poco::Util::SystemConfiguration> *m_pSysConfig;
 
   /// A set of property keys that have been changed
-  mutable std::unordered_set<std::string> m_changed_keys;
+  mutable std::set<std::string> m_changed_keys;
 
   /// A map storing string/key pairs where the string denotes a path
   /// that could be relative in the user properties file
