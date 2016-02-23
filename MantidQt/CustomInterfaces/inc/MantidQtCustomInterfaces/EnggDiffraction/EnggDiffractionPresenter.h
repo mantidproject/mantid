@@ -254,9 +254,9 @@ private:
 
   std::string DifcZeroWorkspaceFactory(std::vector<double> &difc,
                                        std::vector<double> &tzero,
-                                       std::string &specNo);
+                                       std::string &specNo) const;
 
-  std::string plotDifcZeroWorkspace();
+  std::string plotDifcZeroWorkspace() const;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

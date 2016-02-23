@@ -364,6 +364,7 @@ public:
   * Produces ceria peaks graph with two spectrum for calib
   * output.
   *
+  * @param pyCode string which is passed to Mantid via pyScript
   */
   virtual void plotDifcZeroCalibOutput(std::string &pyCode) = 0;
 

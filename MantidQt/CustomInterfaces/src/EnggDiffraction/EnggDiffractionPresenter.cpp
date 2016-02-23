@@ -2326,7 +2326,7 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 std::string
 EnggDiffractionPresenter::DifcZeroWorkspaceFactory(std::vector<double> &difc,
                                                    std::vector<double> &tzero,
-                                                   std::string &specNo) {
+                                                   std::string &specNo) const {
 
   size_t bank1 = size_t(0);
   size_t bank2 = size_t(1);
@@ -2392,9 +2392,10 @@ EnggDiffractionPresenter::DifcZeroWorkspaceFactory(std::vector<double> &difc,
 * Plot the workspace with difc/zero acordding to selected bank
 *
 * @return string with a python script which will merge with
-* DifcZeroWorkspaceFactory
+*
+
 */
-std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() {
+std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
   std::string pyCode =
       // plotSpecNum is true when SpectrumIDs being used
       " if (plotSpecNum == False):\n"
