@@ -8,11 +8,11 @@ namespace Mantid {
 namespace API {
 
 /**
-General interface for any MD geometry, which should be valied to
+General interface for any MD geometry, which should be valid to
 describe the geometry of any MD workspace.
 
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
+Copyright &copy; 2015,2016 ISIS Rutherford Appleton Laboratory, NScD
+Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -35,12 +35,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL IMDLeanGeometry {
 
 public:
-  virtual ~IMDLeanGeometry() {};
+  virtual ~IMDLeanGeometry(){};
 
   virtual void initGeometry(
       std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) = 0;
 
-  //@name Main methods for dimensions. Can be overriden by e.g. MatrixWorkspace
+  //@name Main methods to access dimensions. Can be overriden by e.g.
+  //MatrixWorkspace
   //@{
   virtual size_t getNumDims() const = 0;
 
@@ -62,9 +63,9 @@ public:
 
   virtual std::string getGeometryXML() const = 0;
 
-  virtual void addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) = 0;
+  virtual void
+  addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) = 0;
   virtual void addDimension(Mantid::Geometry::IMDDimension *dim) = 0;
-
 };
 
 } // namespace API

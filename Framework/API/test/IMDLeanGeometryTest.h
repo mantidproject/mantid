@@ -10,9 +10,12 @@ class IMDLeanGeometryTest : public CxxTest::TestSuite {
 
 public:
   void test_noop() {
-    IMDLeanGeometry *geom1;
+    Mantid::API::IMDLeanGeometry *geom1 = nullptr;
+    TSM_ASSERT_EQUALS("nullptr should be nullptr", nullptr, geom1);
 
-    boost::shared_ptr<IMDLeanGeometry> geom2;
+    boost::shared_ptr<Mantid::API::IMDLeanGeometry> geom2;
+    TSM_ASSERT_EQUALS("Null shared pointer should be nullptr", nullptr,
+                      geom2.get());
   }
 };
 
