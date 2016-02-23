@@ -146,9 +146,7 @@ public:
 
   virtual void plotVanCurvesCalibOutput();
 
-  virtual void plotDifcZeroCalibOutput(std::vector<double> &difc,
-                                       std::vector<double> &tzero,
-                                       std::string &specNo);
+  virtual void plotDifcZeroCalibOutput(std::string &pyCode);
 
   virtual bool saveFocusedOutputFiles() const;
 

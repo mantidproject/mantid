@@ -252,6 +252,12 @@ private:
   // generates appropriate names for table workspaces
   std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
 
+  std::string DifcZeroWorkspaceFactory(std::vector<double> &difc,
+                                       std::vector<double> &tzero,
+                                       std::string &specNo);
+
+  std::string plotDifcZeroWorkspace();
+
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 

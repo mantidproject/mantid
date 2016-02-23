@@ -365,9 +365,7 @@ public:
   * output.
   *
   */
-  virtual void plotDifcZeroCalibOutput(std::vector<double> &difc,
-                                       std::vector<double> &tzero,
-                                       std::string &specNo) = 0;
+  virtual void plotDifcZeroCalibOutput(std::string &) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.
@@ -392,7 +390,7 @@ public:
   */
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
-	  const std::string &type) = 0;
+                                   const std::string &type) = 0;
 };
 
 } // namespace CustomInterfaces
