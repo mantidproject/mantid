@@ -1468,6 +1468,9 @@ void ReflMainViewPresenter::search() {
         CatalogManager::Instance().getActiveSessions().front()->getSessionId();
   } else {
     // there are no active sessions, we return here to avoid an exception
+    m_view->giveUserInfo(
+        "Error Logging in: Please press 'Search' to try again.",
+        "Login Failed");
     return;
   }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
