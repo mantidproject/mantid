@@ -195,7 +195,7 @@ public:
     TS_ASSERT_DELTA(dist0, dist255, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
-    TS_ASSERT_DELTA(distmiddle, 0.3518, 0.000001);
+    TS_ASSERT_DELTA(distmiddle, 0.3350, 0.000001);
 
     // 2theta value
     Kernel::V3D sample_source = sample - source;
@@ -204,7 +204,7 @@ public:
 
     Kernel::V3D det0_sample = det0pos - sample;
     double twotheta0 = det0_sample.angle(sample_source) * 180. / 3.14159265;
-    TS_ASSERT_DELTA(twotheta0, 11.6252, 0.0001);
+    TS_ASSERT_DELTA(twotheta0, 11.5072, 0.0001);
 
     Kernel::V3D detTL_sample = detlast0 - sample;
     double twotheta_tl = detTL_sample.angle(sample_source) * 180. / 3.14159265;
@@ -212,7 +212,7 @@ public:
 
     Kernel::V3D det255_sample = det255pos - sample;
     double twotheta255 = det255_sample.angle(sample_source) * 180. / 3.14159265;
-    TS_ASSERT_DELTA(twotheta255, 19.5328, 0.0001);
+    TS_ASSERT_DELTA(twotheta255, 19.7753, 0.0001);
 
     Kernel::V3D detlast_sample = detlast - sample;
     double twothetalast =
@@ -228,7 +228,7 @@ public:
     Kernel::V3D detedgemid_sample = detedgemiddle - sample;
     double twotheta_edgemiddle =
         detedgemid_sample.angle(sample_source) * 180. / 3.14159265;
-    TS_ASSERT_DELTA(twotheta_edgemiddle, 10.8864, 0.0001);
+    TS_ASSERT_DELTA(twotheta_edgemiddle, 10.6809, 0.0001);
 
     TS_ASSERT_LESS_THAN(twotheta0, twotheta_middle);
     TS_ASSERT_LESS_THAN(twotheta_middle, twothetalast);
