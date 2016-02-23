@@ -2136,6 +2136,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
       m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
                                   "2");
     }
+
     m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
     // g_plottingCounter++;
   }
@@ -2315,6 +2316,75 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
   }
   return fullFilename;
 }
+
+std::string
+EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
+	std::vector<double> &difc, std::vector<double> &tzero,
+	std::string &specNo) {
+
+	size_t bank1 = size_t(0);
+	size_t bank2 = size_t(1);
+	std::string pyRange;
+	std::string plotSpecNum = "False";
+
+	// sets the range to plot appropriate graph for the particular bank
+	if (specNo == "North") {
+		// only enable script to plot bank 1
+		pyRange = "1, 2";
+	}
+	else if (specNo == "South") {
+		// only enables python script to plot bank 2
+		// as bank 2 data will be located in difc[0] & tzero[0] - refactor
+		pyRange = "2, 3";
+		bank2 = size_t(0);
+	}
+	else if (specNo != "") {
+		pyRange = "1, 2";
+		plotSpecNum = "True";
+	}
+	else {
+		// enables python script to plot bank 1 & 2
+		pyRange = "1, 3";
+	}
+
+	std::string pyCode =
+		"plotSpecNum = " + plotSpecNum + "\n"
+		"for i in range(" +
+		pyRange +
+		"):\n"
+
+		" if (plotSpecNum == False):\n"
+		"  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+		" else:\n"
+		"  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
+
+		" xVal = []\n"
+		" yVal = []\n"
+		" y2Val = []\n"
+
+		" if (i == 1):\n"
+		"  difc=" +
+		boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+		boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
+
+		"  difc=" +
+		boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+		boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+
+		" for irow in range(0, bank_ws.rowCount()):\n"
+		"  xVal.append(bank_ws.cell(irow, 0))\n"
+		"  yVal.append(bank_ws.cell(irow, 5))\n"
+
+		"  y2Val.append(xVal[irow] * difc + tzero)\n"
+
+		" ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
+		"Peaks "
+		" Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
+		"us)\")\n"
+		" ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n";
+	return pyCode;
+}
+
 
 /**
 * Generates appropriate names for table workspaces
