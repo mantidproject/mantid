@@ -79,6 +79,7 @@ local.properties
 # Build results
 [Dd]ebug/
 [Rr]elease/
+build/
 *_i.c
 *_p.c
 *.ilk
