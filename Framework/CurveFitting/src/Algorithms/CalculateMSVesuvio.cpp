@@ -298,35 +298,29 @@ void CalculateMSVesuvio::cacheInputs() {
 
   // Forward resolution
   auto forward = instrument->getComponentByName("forward");
-  if (!forward) {
-    throw std::runtime_error("Workspace has no forward component defined.");
-  }
   auto forwardResParam =
-      m_inputWS->instrumentParameters().get(forward.get(), "hwhm_lorentz");
-  if (!forwardResParam) {
-    forwardResParam =
         m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
-    if (!forwardResParam) {
-      throw std::runtime_error(
-          "Front scattering bank has no hwhm_lorentz parameter defined.");
-    }
+  if (forward) {
+    forwardResParam =
+        m_inputWS->instrumentParameters().get(forward.get(), "hwhm_lorentz");
+  }
+  if (!forwardResParam) {
+    throw std::runtime_error(
+        "Front scattering bank has no hwhm_lorentz parameter defined.");
   }
   m_forwardRes = forwardResParam->value<double>();
 
   // Back resolution
   auto back = instrument->getComponentByName("back");
-  if (!back) {
-    throw std::runtime_error("Workspace has no back component defined.");
-  }
   auto backResParam =
-      m_inputWS->instrumentParameters().get(back.get(), "hwhm_lorentz");
-  if (!backResParam) {
+      m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
+  if (back) {
     backResParam =
-        m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
-    if (!backResParam) {
-      throw std::runtime_error(
-          "Backscattering bank has no hwhm_lorentz parameter defined.");
-    }
+        m_inputWS->instrumentParameters().get(back.get(), "hwhm_lorentz");
+  }
+  if (!backResParam) {
+    throw std::runtime_error(
+        "Backscattering bank has no hwhm_lorentz parameter defined.");
   }
   m_backRes = backResParam->value<double>();
 }
