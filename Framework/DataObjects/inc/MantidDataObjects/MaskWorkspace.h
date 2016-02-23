@@ -13,7 +13,7 @@ namespace DataObjects {
 class DLLExport MaskWorkspace : public SpecialWorkspace2D,
                                 public API::IMaskWorkspace {
 public:
-  MaskWorkspace();
+  MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);
   MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
                 const bool includeMonitors = false);

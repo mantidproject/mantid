@@ -13,8 +13,6 @@ Kernel::Logger g_log("RebinnedOutput");
 
 DECLARE_WORKSPACE(RebinnedOutput)
 
-RebinnedOutput::RebinnedOutput() : Workspace2D() {}
-
 /**
  * Gets the name of the workspace type.
  * @return Standard string name

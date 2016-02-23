@@ -9,11 +9,6 @@ namespace DataObjects {
 
 using namespace Mantid::Kernel;
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakShapeSphericalFactory::PeakShapeSphericalFactory() {}
-
 /**
  * @brief PeakShapeSphericalFactory::create : Creational method
  * @param source : Source JSON

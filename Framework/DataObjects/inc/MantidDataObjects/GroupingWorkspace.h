@@ -21,7 +21,7 @@ namespace DataObjects {
 class DLLExport GroupingWorkspace : public SpecialWorkspace2D {
 public:
   GroupingWorkspace(Geometry::Instrument_const_sptr inst);
-  GroupingWorkspace();
+  GroupingWorkspace() = default;
   GroupingWorkspace(size_t numvectors);
   GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 

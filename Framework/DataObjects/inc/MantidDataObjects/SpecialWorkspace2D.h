@@ -25,7 +25,7 @@ public:
 
 class DLLExport SpecialWorkspace2D : public Workspace2D {
 public:
-  SpecialWorkspace2D();
+  SpecialWorkspace2D() = default;
   SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                      const bool includeMonitors = false);
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);

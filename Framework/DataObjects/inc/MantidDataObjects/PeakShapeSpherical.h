@@ -46,10 +46,6 @@ public:
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
-  /// Copy constructor
-  PeakShapeSpherical(const PeakShapeSpherical &other);
-  /// Assignment operator
-  PeakShapeSpherical &operator=(const PeakShapeSpherical &other);
   /// Serialization method
   std::string toJSON() const override;
   /// Clone the peak shape

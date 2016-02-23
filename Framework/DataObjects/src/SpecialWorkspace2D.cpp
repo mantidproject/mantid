@@ -20,11 +20,6 @@ Kernel::Logger g_log("SpecialWorkspace2D");
 DECLARE_WORKSPACE(SpecialWorkspace2D)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecialWorkspace2D::SpecialWorkspace2D() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace

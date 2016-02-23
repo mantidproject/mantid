@@ -71,8 +71,6 @@ typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
 /// Helper class to keep this out of the interface of CenteringGroup.
 class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl {
 public:
-  ~CenteringGroupCreatorImpl() = default;
-
   CenteringGroup::CenteringType
   getCenteringType(const std::string &centeringSymbol) const;
 

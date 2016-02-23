@@ -32,8 +32,6 @@ namespace DataObjects {
 */
 class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory {
 public:
-  PeakShapeEllipsoidFactory();
-
   // PeakShapeFactory interface
 
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;

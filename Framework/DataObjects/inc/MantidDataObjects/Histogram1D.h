@@ -37,8 +37,6 @@ protected:
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
-  Histogram1D();
-
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };
   /// Sets the data and errors

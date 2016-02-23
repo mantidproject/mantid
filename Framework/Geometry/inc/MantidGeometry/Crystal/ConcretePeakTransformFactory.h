@@ -15,11 +15,6 @@ template <typename PeakTransformProduct>
 class DLLExport ConcretePeakTransformFactory : public PeakTransformFactory {
 public:
   /**
-  Constructor
-  */
-  ConcretePeakTransformFactory() = default;
-
-  /**
   Overriden Factory Method.
   @param xPlotLabel : X-axis plot label
   @param yPlotLabel : Y-axis plot label

@@ -4,11 +4,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakNoShapeFactory::PeakNoShapeFactory() {}
-
 void PeakNoShapeFactory::setSuccessor(
     boost::shared_ptr<const PeakShapeFactory>) {}
 

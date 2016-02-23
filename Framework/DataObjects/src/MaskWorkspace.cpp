@@ -27,12 +27,6 @@ const double ERROR_VALUE = 0.;
 //--------------------------------------------------------------------------
 
 /**
- * Constructor - Default.
- * @return MaskWorkspace
- */
-MaskWorkspace::MaskWorkspace() {}
-
-/**
  * Constructor - with a given dimension.
  * @param[in] numvectors Number of vectors/histograms for this workspace.
  * @return MaskWorkspace

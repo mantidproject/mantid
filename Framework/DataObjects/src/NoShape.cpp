@@ -6,11 +6,6 @@ namespace Mantid {
 namespace DataObjects {
 
 /**
- * @brief Constructor
- */
-NoShape::NoShape() {}
-
-/**
  * @brief Serialize to JSON object
  * @return JSON object as std::string
  */

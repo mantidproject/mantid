@@ -40,9 +40,7 @@ namespace DataObjects {
 */
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
-  /// Class constructor.
-  RebinnedOutput();
-
+  RebinnedOutput() = default;
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());

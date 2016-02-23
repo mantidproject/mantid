@@ -11,11 +11,6 @@ namespace DataObjects {
 DECLARE_WORKSPACE(OffsetsWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-OffsetsWorkspace::OffsetsWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace

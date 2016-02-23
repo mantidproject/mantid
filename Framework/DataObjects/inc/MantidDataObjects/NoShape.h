@@ -33,8 +33,6 @@ namespace DataObjects {
 class DLLExport NoShape : public Mantid::Geometry::PeakShape {
 
 public:
-  /// Constructor
-  NoShape();
   /// Serialize
   std::string toJSON() const override;
   /// Clone

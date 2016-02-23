@@ -13,11 +13,6 @@ namespace DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GroupingWorkspace::GroupingWorkspace() {}
-
 /** Constructor, buiding with give dimensions
  * @param numvectors: input size of the vector/histogram number for this
  * workspace

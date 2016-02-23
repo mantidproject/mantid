@@ -18,7 +18,7 @@ namespace DataObjects {
  */
 class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
 public:
-  OffsetsWorkspace();
+  OffsetsWorkspace() = default;
   OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
 
   /// Returns a clone of the workspace
