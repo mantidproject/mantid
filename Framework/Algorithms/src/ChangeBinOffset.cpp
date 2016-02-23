@@ -110,8 +110,8 @@ void ChangeBinOffset::exec() {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
     if ((i >= wi_min) && (i <= wi_max)) {
-      for (size_t j = 0; j < outputW->readX(i).size(); ++j)
-        outputW->dataX(i)[j] += offset;
+      for(auto &x : outputW->dataX(i))
+        x += offset;
     }
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
