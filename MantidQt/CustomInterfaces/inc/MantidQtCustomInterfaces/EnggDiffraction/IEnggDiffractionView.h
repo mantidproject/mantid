@@ -365,7 +365,7 @@ public:
   * output.
   *
   */
-  virtual void plotDifcZeroCalibOutput(std::string &) = 0;
+  virtual void plotDifcZeroCalibOutput(std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.

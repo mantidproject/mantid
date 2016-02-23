@@ -2435,7 +2435,7 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() {
       " DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
 
   return pyCode;
-};
+}
 
 /**
 * Generates appropriate names for table workspaces
