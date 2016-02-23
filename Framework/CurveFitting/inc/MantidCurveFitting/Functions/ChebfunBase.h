@@ -5,8 +5,8 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <functional>
+#include <vector>
 
 namespace Mantid {
 
@@ -206,10 +206,14 @@ boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
     std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
-  for (double tol = tolerance; tol < 0.1; tol *= 100) {
+
+  double tol = tolerance;
+  while (tol < 0.1) {
     auto base = bestFit(start, end, f, p, a, maxA, tol, maxSize);
-    if (base)
+    if (base) {
       return base;
+    }
+    tol *= 100.0;
   }
   return ChebfunBase_sptr();
 }

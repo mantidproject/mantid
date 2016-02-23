@@ -240,12 +240,7 @@ public:
     integ.execute();
     TS_ASSERT(integ.isExecuted());
 
-    // No longer output an EventWorkspace, Rebin should be used instead
-    // EventWorkspace_sptr output;
-    // TS_ASSERT_THROWS_NOTHING(output =
-    // boost::dynamic_pointer_cast<EventWorkspace>(
-    // AnalysisDataService::Instance().retrieve(outName) ) );
-
+    // No longer output an EventWorkspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));

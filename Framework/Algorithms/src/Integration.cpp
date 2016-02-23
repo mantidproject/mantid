@@ -84,7 +84,7 @@ void Integration::exec() {
   bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = this->getInputWorkspace();
+  MatrixWorkspace_sptr localworkspace = this->getInputWorkspace();
 
   const int numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
@@ -106,12 +106,36 @@ void Integration::exec() {
     maxRange = 0.0;
   }
 
+  double progressStart = 0.0;
+  //---------------------------------------------------------------------------------
+  // Now, determine if the input workspace is actually an EventWorkspace
+  EventWorkspace_sptr eventInputWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+
+  if (eventInputWS != nullptr) {
+    //------- EventWorkspace as input -------------------------------------
+    // Get the eventworkspace rebinned to apply the upper and lowerrange
+    double evntMinRange =
+        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
+    double evntMaxRange =
+        isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
+    localworkspace =
+        rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
+
+    progressStart = 0.5;
+    if ((isEmpty(maxSpec)) && (isEmpty(maxSpec))) {
+      // Assign it to the output workspace property
+      setProperty("OutputWorkspace", localworkspace);
+      return;
+    }
+  }
+
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace =
       this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, 0, 1, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
@@ -254,12 +278,29 @@ void Integration::exec() {
 }
 
 /**
+* Uses rebin to reduce event workspaces to a single bin histogram
+*/
+API::MatrixWorkspace_sptr
+Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
+                                       double minRange, double maxRange) {
+  bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
+  auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
+  childAlg->setProperty("InputWorkspace", workspace);
+  std::ostringstream binParams;
+  binParams << minRange << "," << maxRange - minRange << "," << maxRange;
+  childAlg->setPropertyValue("Params", binParams.str());
+  childAlg->setProperty("PreserveEvents", false);
+  childAlg->executeAsChildAlg();
+  return childAlg->getProperty("OutputWorkspace");
+}
+
+/**
  * This function gets the input workspace. In the case for a RebinnedOutput
  * workspace, it must be cleaned before proceeding. Other workspaces are
  * untouched.
  * @return the input workspace, cleaned if necessary
  */
-MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
+MatrixWorkspace_sptr Integration::getInputWorkspace() {
   MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
 
   if (temp->id() == "RebinnedOutput") {
@@ -302,9 +343,9 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
  *
  * @return the output workspace
  */
-MatrixWorkspace_sptr
-Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS,
-                                const int minSpec, const int maxSpec) {
+MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
+                                                     const int minSpec,
+                                                     const int maxSpec) {
   if (inWS->id() == "RebinnedOutput") {
     MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
         "Workspace2D", maxSpec - minSpec + 1, 2, 1);

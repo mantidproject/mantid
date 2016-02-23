@@ -1,3 +1,4 @@
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabel.h"
@@ -50,13 +51,12 @@ bool ReciprocalLatticeUnitFactory::canInterpret(
 }
 
 MDUnitFactory_uptr makeMDUnitFactoryChain() {
-  typedef MDUnitFactory_uptr FactoryType;
-  auto first = FactoryType(new ReciprocalLatticeUnitFactory);
-  first->setSuccessor(FactoryType(new InverseAngstromsUnitFactory))
+  MDUnitFactory_uptr first = make_unique<ReciprocalLatticeUnitFactory>();
+  first->setSuccessor(make_unique<InverseAngstromsUnitFactory>())
       // Add more factories here!
       // Make sure that LabelUnitFactory is the last in the chain to give a fall
       // through
-      .setSuccessor(FactoryType(new LabelUnitFactory));
+      .setSuccessor(make_unique<LabelUnitFactory>());
   return first;
 }
 

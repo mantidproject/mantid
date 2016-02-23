@@ -65,6 +65,7 @@ class LRScalingFactors(PythonAlgorithm):
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
         self.declareProperty("TOFSteps", 500.0, doc="TOF step size")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty(FileProperty("ScalingFactorFile","",
                                           action=FileAction.Save,
                                           extensions=['cfg']))
@@ -102,7 +103,7 @@ class LRScalingFactors(PythonAlgorithm):
         self.wavelength_tolerance = 0.2
 
         # Slit settings tolerance
-        self.tolerance = 0.02
+        self.tolerance = self.getProperty("SlitTolerance").value
 
         # Scaling factor output
         self.scaling_factors = []
@@ -236,7 +237,7 @@ class LRScalingFactors(PythonAlgorithm):
         if self.have_attenuator_info:
             return self.attenuators[run_index]
         else:
-            return int(workspace.getRun().getProperty('vATT').value[0]-1)
+            return int(workspace.getRun().getProperty('vAtt').value[0]-1)
 
     def get_valid_pixel_range(self, property_name, number_of_runs):
         """

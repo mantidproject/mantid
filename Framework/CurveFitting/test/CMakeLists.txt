@@ -5,6 +5,7 @@ if ( CXXTEST_FOUND )
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp

@@ -1,5 +1,5 @@
-digraph FuryFitMultiple {
-  label="FuryFitMultiple Flowchart"
+digraph IqtFitMultiple {
+  label="IqtFitMultiple Flowchart"
   $global_style
   
   subgraph params {

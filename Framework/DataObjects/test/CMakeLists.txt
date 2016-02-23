@@ -6,6 +6,7 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp 
@@ -26,7 +27,6 @@ if ( CXXTEST_FOUND )
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES})
   # Specify implicit dependency, but don't link to it
-  add_dependencies ( DataObjectsTest UserAlgorithms )
   add_dependencies ( FrameworkTests DataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataObjectsTest PROPERTY FOLDER "UnitTests" )
