@@ -57,6 +57,7 @@ public:
   inline Kernel::IValidator_sptr clone() const override {
     return boost::make_shared<AlgorithmHasProperty>(*this);
   }
+
 protected:
   /**
    * Checks the value based on the validator's rules

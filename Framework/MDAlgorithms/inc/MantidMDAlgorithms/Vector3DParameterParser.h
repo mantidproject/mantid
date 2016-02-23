@@ -59,7 +59,6 @@ public:
 
 ////////////////////////////////////////////////////////////////////
 
-
 template <typename VectorValueParameterType>
 VectorValueParameterType *
 Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
@@ -101,7 +100,6 @@ void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-
 }
 }
 
