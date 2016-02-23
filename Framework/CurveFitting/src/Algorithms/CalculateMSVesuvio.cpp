@@ -299,7 +299,7 @@ void CalculateMSVesuvio::cacheInputs() {
   // Forward resolution
   auto forward = instrument->getComponentByName("forward");
   auto forwardResParam =
-        m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
+      m_inputWS->instrumentParameters().get(instrument.get(), "hwhm_lorentz");
   if (forward) {
     forwardResParam =
         m_inputWS->instrumentParameters().get(forward.get(), "hwhm_lorentz");

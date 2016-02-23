@@ -49,13 +49,13 @@ public:
 
   void test_exec_with_flat_plate_sample_with_grouped_detectors() {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS(true, true));
-    /* TS_ASSERT_THROWS_NOTHING(alg->execute()); */
-    /* TS_ASSERT(alg->isExecuted()); */
+/* TS_ASSERT_THROWS_NOTHING(alg->execute()); */
+/* TS_ASSERT(alg->isExecuted()); */
 // seed has different effect in boost version 1.56 and newer
 #if (BOOST_VERSION / 100000) == 1 && (BOOST_VERSION / 100 % 1000) >= 56
-    /* checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356); */
+/* checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356); */
 #else
-    /* checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473); */
+/* checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473); */
 #endif
   }
 
