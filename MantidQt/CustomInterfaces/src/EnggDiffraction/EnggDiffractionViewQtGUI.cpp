@@ -674,18 +674,18 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
       " yVal = []\n"
       " y2Val = []\n"
 
+      " if (i == 1):\n"
+      "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
+
+                                                              "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+
       " for irow in range(0, bank_ws.rowCount()):\n"
       "  xVal.append(bank_ws.cell(irow, 0))\n"
       "  yVal.append(bank_ws.cell(irow, 5))\n"
-
-      "  if (i == 1):\n"
-      "   difc=" +
-      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "   tzero=" +
-      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + "  else:\n"
-
-                                                              "   difc=" +
-      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "   tzero=" +
-      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
 
       "  y2Val.append(xVal[irow] * difc + tzero)\n"
 
@@ -700,30 +700,33 @@ void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
       " else:\n"
       "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
 
+      " if(mtd.doesExist(output_ws)):\n"
+      "  DeleteWorkspace(output_ws)\n"
+
       " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
       " DeleteWorkspace(ws1)\n"
       " DeleteWorkspace(ws2)\n"
 
       " if (plotSpecNum == False):\n"
-      "  DifcZeroWs = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
       " else:\n"
-      "  DifcZeroWs = \"engggui_difc_zero_peaks_cropped\"\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_cropped\"\n"
 
-      " DifcZeroWs = workspace(DifcZeroWs)\n"
-      " DifcZeroWs = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
+      " DifcZeroWs = workspace(DifcZero)\n"
+      " DifcZeroPlot = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
 
       " if (plotSpecNum == False):\n"
-      "  DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
       "str(i))\n"
       " else:\n"
-      "  DifcZeroWs.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
 
-      " DifcZeroWs.setCurveTitle(0, \"Peaks Fitted\")\n"
-      " DifcZeroWs.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
-      " DifcZeroWs.setAxisTitle(Layer.Bottom, \"Expected Peaks "
+      " DifcZeroPlot.setCurveTitle(0, \"Peaks Fitted\")\n"
+      " DifcZeroPlot.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
+      " DifcZeroPlot.setAxisTitle(Layer.Bottom, \"Expected Peaks "
       "Centre(dSpacing, "
       " A)\")\n"
-      " DifcZeroWs.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+      " DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
