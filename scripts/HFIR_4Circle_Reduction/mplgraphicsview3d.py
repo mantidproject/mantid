@@ -1,13 +1,10 @@
 #pylint: disable=R0902,R0904
-import sys
 import numpy as np
 import os
 
-from PyQt4 import QtGui
 from PyQt4.QtGui import QSizePolicy
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -203,9 +200,9 @@ class MplPlot3dCanvas(FigureCanvas):
         return
 
     def report_pixel(self, x_d, y_d):
-        s = self.format_coord_org(x_d, y_d)
-        s = s.replace(",", " ")
-        return s
+        report = self.format_coord_org(x_d, y_d)
+        report = report.replace(",", " ")
+        return report
 
     def set_axes_labels(self, x_label, y_label, z_label):
         """

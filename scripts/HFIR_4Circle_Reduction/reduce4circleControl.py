@@ -1,4 +1,4 @@
-#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914
+#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914,W0403
 ################################################################################
 #
 # Controlling class
@@ -220,12 +220,12 @@ class PeakInfo(object):
 
     def set_indexed_hkl(self, hkl):
         """
-
+        Set HKL to PeakInfo.  HKL is calculated via peak indexing
+        Requirements: input HKL is a list of 3 elements
         :param hkl:
         :return:
         """
-        # TODO/NOW - Doc and check
-        assert isinstance(hkl, list)
+        assert isinstance(hkl, list) and len(hkl) == 3
 
         for i in xrange(3):
             self._calculatedHKL[i] = hkl[i]
@@ -367,31 +367,10 @@ class CWSCDReductionControl(object):
             assert isinstance(peak_info, PeakInfo)
 
         # Construct a new peak workspace by combining all single peak
-        # TODO/FIXME/NOW - replace by _build_peaks_workspace
         ub_peak_ws_name = 'Temp_UB_Peak'
-        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=ub_peak_ws_name)
-        assert AnalysisDataService.doesExist(ub_peak_ws_name)
-        ub_peak_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
-
-        for i_peak_info in xrange(num_peak_info):
-            # Set HKL as optional
-            peak_info_i = peak_info_list[i_peak_info]
-            peak_ws = peak_info_i.get_peak_workspace()
-            assert peak_ws.getNumberPeaks() > 0
-            # get any peak to add
-            peak_temp = peak_ws.getPeak(0)
-            ub_peak_ws.addPeak(peak_temp)
-
-            # set the peak in ub peak workspace right
-            peak_i = ub_peak_ws.getPeak(i_peak_info)
-            # user HKL
-            h, k, l = peak_info_i.get_user_hkl()
-            peak_i.setHKL(h, k, l)
-            # q-sample
-            q_x, q_y, q_z = peak_info_i.get_peak_centre()
-            q_sample = V3D(q_x, q_y, q_z)
-            peak_i.setQSampleFrame(q_sample)
-        # END-FOR(i_peak_info)
+        zero_hkl = False
+        hkl_to_int = True
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, zero_hkl, hkl_to_int)
 
         # Calculate UB matrix
         try:
@@ -400,6 +379,7 @@ class CWSCDReductionControl(object):
         except ValueError as val_err:
             return False, str(val_err)
 
+        ub_peak_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
         ub_matrix = ub_peak_ws.sample().getOrientedLattice().getUB()
 
         self._myLastPeakUB = ub_peak_ws

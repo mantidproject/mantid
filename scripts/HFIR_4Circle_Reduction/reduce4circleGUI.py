@@ -281,62 +281,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def try_plot_3d(self):
-        """ Mock test
-        :return:
-        """
-        import numpy as np
-        from mpl_toolkits.mplot3d import Axes3D
-        import matplotlib.pyplot as plt
-
-        # Dataset generation
-        a, b, c = 10., 28., 8. / 3.
-        def lorenz_map(X, dt = 1e-2):
-            X_dt = np.array([a * (X[1] - X[0]), X[0] * (b - X[2]) - X[1], X[0] * X[1] - c * X[2]])
-            return X + dt * X_dt
-
-        def parse3DFile(filename):
-            """
-            """
-            ifile = open(filename, 'r')
-            lines = ifile.readlines()
-            ifile.close()
-
-            points = np.zeros((len(lines), 3))
-            for i in xrange(len(lines)):
-                line = lines[i].strip()
-                terms = line.split(',')
-                for j in xrange(3):
-                    points[i][j] = float(terms[j])
-            return points
-
-        points = np.zeros((2000, 3))
-        X = np.array([.1, .0, .0])
-        for i in range(points.shape[0]):
-            points[i], X = X, lorenz_map(X)
-
-        #points0 = parse3DFile('exp355_scan38_pt11_qsample.dat')
-        #points1 = parse3DFile('hkl.dat')
-
-        # Plotting
-        fig = plt.figure()
-        ax = fig.gca(projection = '3d')
-
-        ax.set_xlim(1.0, 2.1)
-        ax.set_ylim(-3.2, 2.6)
-        ax.set_zlim(-5.2, 2.5)
-
-        ax.set_xlabel('X axis')
-        ax.set_ylabel('Y axis')
-        ax.set_zlabel('Z axis')
-        ax.set_title('Lorenz Attractor a=%0.2f b=%0.2f c=%0.2f' % (a, b, c))
-
-        ax.scatter(points[:, 0], points[:, 1],  points[:, 2], zdir = 'y', c = 'r')
-        #ax.scatter(points0[:, 0], points0[:, 1],  points0[:, 2], zdir = 'y', c = 'r')  # c = 'k', 'r'
-        #ax.scatter(points1[:, 0], points1[:, 1],  points1[:, 2], zdir = 'y', c = (0.6, 0.1, 0.9))
-
-        plt.show()
-
     def do_integrate_peaks(self):
         """ Integrate peaks
         Integrate peaks
@@ -351,15 +295,18 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog('Scan number is not given!')
                 return
             pt_list = gutil.parse_integer_list(str(self.ui.lineEdit_ptNumListIntPeak.text()))
-            self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list, target_ws_name=None,
-                                              target_frame=None)
+            # self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list,
+            #                                   target_ws_name=None,
+            #                                   target_frame=None)
         else:
             if self._myControl.does_workspace_exist(merged_ws_name) is False:
                 self.pop_one_button_dialog('Merged MDEventWorkspace %s does not exist!' % merged_ws_name)
                 return
         # END-IF-ELSE
 
-        """
+        raise NotImplementedError('ASAP')
+
+    def _how_to_deal_with_this(self):
         # Get peak integration parameters
         line_editors = [self.ui.lineEdit_peakRadius,
                         self.ui.lineEdit_bkgdInnerR,
@@ -392,9 +339,6 @@ class MainWindow(QtGui.QMainWindow):
                                             peak_radius, bkgd_inner_radius, bkgd_outer_radius,
                                             is_cylinder)
         # END-FOR
-        """
-
-        return
 
     def do_refine_ub(self):
         """
@@ -411,30 +355,8 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(str(error))
             return
 
-        # FIXME/NOW/1st: replace the following by method _show_refined_ub_result()
-        # Deal with result
-        ub_matrix, lattice, lattice_error = self._myControl.get_refined_ub_matrix()
-        # ub matrix
-        self.ui.tableWidget_ubMatrix.set_from_matrix(ub_matrix)
-
-        # lattice parameter
-        assert isinstance(lattice, list)
-        assert len(lattice) == 6
-        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
-        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
-        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
-        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
-        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
-        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
-
-        assert isinstance(lattice_error, list)
-        assert len(lattice_error) == 6
-        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
-        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
-        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
-        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
-        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
-        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
+        # show result
+        self._show_refined_ub_result()
 
         return
 
@@ -977,7 +899,7 @@ class MainWindow(QtGui.QMainWindow):
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
         err_msg = ''
         for i_peak in xrange(num_peaks):
-            scan_no, pt_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)
+            scan_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)[0]
             status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no)
             if status is True:
                 hkl_value = ret_obj[0]
@@ -1168,7 +1090,6 @@ class MainWindow(QtGui.QMainWindow):
         self.pop_one_button_dialog('Data processing is long. Be patient!')
 
         # Process
-        base_name = str(self.ui.lineEdit_baseMergeMDName.text())
         scan_row_list = self.ui.tableWidget_mergeScans.get_scan_list()
         print '[DB] %d scans have been selected to merge.' % len(scan_row_list)
         frame = str(self.ui.comboBox_mergeScanFrame.currentText())
@@ -1419,30 +1340,35 @@ class MainWindow(QtGui.QMainWindow):
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_filterScanLower,
                                                         self.ui.lineEdit_filterScanUpper],
                                                        allow_blank=True)
-        if status:
-            start_scan_number = ret_obj[0]
-            if start_scan_number is None:
-                start_scan_number = 0
-            end_scan_number = ret_obj[1]
-            if end_scan_number is None:
-                end_scan_number = sys.maxint
-        else:
+
+        # return with error
+        if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
+
+        # set up default with return as None
+        start_scan_number = ret_obj[0]
+        if start_scan_number is None:
+            start_scan_number = 0
+        end_scan_number = ret_obj[1]
+        if end_scan_number is None:
+            end_scan_number = sys.maxint
 
         status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
                                                      self.ui.lineEdit_filterCountsUpper],
                                                     allow_blank=True)
-        if status:
-            min_counts = ret_obj[0]
-            if min_counts is None:
-                min_counts = -0.0
-            max_counts = ret_obj[1]
-            if max_counts is None:
-                max_counts = sys.float_info.max
-        else:
+        if status is False:
+            # return with error message
             self.pop_one_button_dialog(ret_obj)
             return
+
+        # set up default with return as None
+        min_counts = ret_obj[0]
+        if min_counts is None:
+            min_counts = -0.0
+        max_counts = ret_obj[1]
+        if max_counts is None:
+            max_counts = sys.float_info.max
 
         # filter and sort
         ascending_order = not self.ui.checkBox_sortDescending.isChecked()
@@ -1499,14 +1425,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_view_data_set_3d(self):
         """
-
+        Launch the sub window to view merged data in 3D.
         :return:
         """
-        # TODO/NOW/ Think of share codes with do_view_data_3d()
-        self._my3DWindow = plot3dwindow.Plot3DWindow(self)
-        self._my3DWindow.show()
+        # self._my3DWindow = plot3dwindow.Plot3DWindow(self)
+        # self._my3DWindow.show()
 
-        return
+        raise RuntimeError('Think of share codes with do_view_data_3d()')
+
 
     def do_view_data_3d(self):
         """
@@ -1692,18 +1618,20 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def set_ub_peak_table(self, peakinfo):
+    def set_ub_peak_table(self, peak_info):
         """
-        TODO/NOW/DOC
+        Set up the table of peaks to calculate UB matrix
+        Requirements: peak_info is a valid PeakInfo instance
         :param peak_info:
         :return:
         """
-        assert isinstance(peakinfo, r4c.PeakInfo)
+        # Check requirements
+        assert isinstance(peak_info, r4c.PeakInfo)
 
         # Get data
-        exp_number, scan_number = peakinfo.getExpInfo()
-        h, k, l = peakinfo.get_user_hkl()
-        q_x, q_y, q_z = peakinfo.get_peak_centre()
+        exp_number, scan_number = peak_info.getExpInfo()
+        h, k, l = peak_info.get_user_hkl()
+        q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
 
         # Set to table
