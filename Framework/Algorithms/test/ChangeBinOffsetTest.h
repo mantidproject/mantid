@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
@@ -162,6 +164,45 @@ public:
 
 private:
   std::string inputSpace;
+};
+
+class ChangeBinOffsetTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ChangeBinOffsetTestPerformance *createSuite() {
+    return new ChangeBinOffsetTestPerformance();
+  }
+  static void destroySuite(ChangeBinOffsetTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  ChangeBinOffsetTestPerformance() {
+    auto input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    AnalysisDataService::Instance().add("input", input);
+    auto inputEvent =
+        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+    AnalysisDataService::Instance().add("inputEvent", inputEvent);
+  }
+
+  void testExec2D() {
+    ChangeBinOffset alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("Offset", "100.0");
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
+
+  void testExecEvent() {
+    ChangeBinOffset alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputEvent");
+    alg.setPropertyValue("Offset", "100.0");
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
 };
 
 #endif /*CHANGEBINOFFSETTEST_H_*/
