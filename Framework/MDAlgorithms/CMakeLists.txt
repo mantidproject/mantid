@@ -121,7 +121,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
-	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
 )

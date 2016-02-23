@@ -38,7 +38,6 @@ namespace Poldi {
 */
 class MANTID_SINQ_DLL PoldiChopperFactory {
 public:
-  PoldiChopperFactory() = default;
   virtual ~PoldiChopperFactory() = default;
 
   virtual PoldiAbstractChopper *createChopper(std::string chopperType);

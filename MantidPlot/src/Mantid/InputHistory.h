@@ -78,7 +78,7 @@ private:
 	///Private Constructor
 	InputHistoryImpl();
 	///Private Destructor
-	virtual ~InputHistoryImpl();
+        virtual ~InputHistoryImpl() = default;
 
   /// For debugging
   // cppcheck-suppress unusedPrivateFunction

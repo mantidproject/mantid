@@ -48,7 +48,6 @@ class MANTID_API_DLL AlgorithmHasProperty
 public:
   /// Constructor
   AlgorithmHasProperty(const std::string &propName);
-  AlgorithmHasProperty & operator=(AlgorithmHasProperty&) = delete;
   /**
    * Get a string representation of the type
    * @returns A string containing the validator type
@@ -68,7 +67,6 @@ protected:
   std::string
   checkValidity(const boost::shared_ptr<IAlgorithm> &value) const override;
 
-  AlgorithmHasProperty(const AlgorithmHasProperty&) = default;
 private:
   /// Store the property name
   std::string m_propName;

@@ -44,11 +44,6 @@ InputHistoryImpl::InputHistoryImpl()
     settings.endGroup();
 }
 
-/// Destructor
-InputHistoryImpl::~InputHistoryImpl()
-{
-}
-
 void InputHistoryImpl::save()
 {
     QSettings settings;

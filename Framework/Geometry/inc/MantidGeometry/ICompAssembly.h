@@ -85,8 +85,11 @@ public:
   virtual void testIntersectionWithChildren(
       Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const = 0;
 
+protected:
+  /// Protected copy constructor
+  ICompAssembly(const ICompAssembly &) = default;
+
 private:
-  /// Private copy assignment operator
   ICompAssembly &operator=(const ICompAssembly &) = delete;
 };
 

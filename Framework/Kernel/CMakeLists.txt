@@ -100,7 +100,6 @@ set ( SRC_FILES
 	src/Timer.cpp
 	src/Unit.cpp
 	src/UnitConversion.cpp
-	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
 	src/UsageService.cpp

@@ -77,7 +77,7 @@ private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
 
   /// Private Constructor for singleton class
-  UnitFactoryImpl();
+  UnitFactoryImpl() = default;
 
   /// Private Destructor
   ~UnitFactoryImpl() override = default;

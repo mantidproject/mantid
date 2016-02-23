@@ -142,7 +142,7 @@ protected:
   Intersection &operator=(const Intersection &);
 
 public:
-  Intersection();
+  Intersection() = default;
   explicit Intersection(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Intersection(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   std::unique_ptr<Intersection>
@@ -199,7 +199,7 @@ protected:
   Union &operator=(const Union &);
 
 public:
-  Union();
+  Union() = default;
   explicit Union(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Union(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
 
@@ -362,7 +362,7 @@ protected:
   CompGrp &operator=(const CompGrp &);
 
 public:
-  CompGrp();
+  CompGrp() = default;
   explicit CompGrp(Rule *, std::unique_ptr<Rule>);
   std::unique_ptr<CompGrp> clone() const;
   std::string className() const override {

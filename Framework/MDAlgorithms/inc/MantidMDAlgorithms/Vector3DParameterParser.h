@@ -48,8 +48,6 @@ template <class VectorValueParameterType>
 class DLLExport Vector3DParameterParser
     : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  Vector3DParameterParser();
-
   VectorValueParameterType *parseVectorParameter(std::string value);
 
   Mantid::API::ImplicitFunctionParameter *
@@ -57,15 +55,10 @@ public:
 
   void setSuccessorParser(
       Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
-
-  ~Vector3DParameterParser() override;
 };
 
 ////////////////////////////////////////////////////////////////////
 
-template <typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser() =
-    default;
 
 template <typename VectorValueParameterType>
 VectorValueParameterType *
@@ -109,24 +102,6 @@ void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
   m_successor.swap(temp);
 }
 
-template <typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser() =
-    default;
-
-// Declare types based on this template.
-
-/// Parses Origin Parameters
-// typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
-
-/// Parses Normal Parameters
-// typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
-
-/// Parses Up Parameters
-// typedef Vector3DParameterParser<UpParameter> UpParameterParser;
-
-/// Parses Perpendicular Parameters
-// typedef Vector3DParameterParser<PerpendicularParameter>
-// PerpendicularParameterParser;
 }
 }
 

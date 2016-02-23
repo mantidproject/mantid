@@ -22,7 +22,6 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL ReflectionCondition {
 public:
-  ReflectionCondition() = default;
   virtual ~ReflectionCondition() = default;
   /// Name of the reflection condition
   virtual std::string getName() = 0;

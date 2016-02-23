@@ -591,8 +591,6 @@ public:
       int n,            // number of points
       int dd);          // dimension
 
-  ~ANNbruteForce() override; // destructor
-
   void annkSearch(                // approx k near neighbor search
       ANNpoint q,                 // query point
       int k,                      // number of near neighbors to return

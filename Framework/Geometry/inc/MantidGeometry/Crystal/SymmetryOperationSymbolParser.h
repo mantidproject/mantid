@@ -65,8 +65,6 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SymmetryOperationSymbolParser {
 public:
-  ~SymmetryOperationSymbolParser() = default;
-
   static std::pair<Kernel::IntMatrix, V3R>
   parseIdentifier(const std::string &identifier);
   static std::string

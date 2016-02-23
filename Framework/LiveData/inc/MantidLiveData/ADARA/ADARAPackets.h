@@ -187,7 +187,6 @@ private:
 
 class DLLExport SourceListPkt : public Packet {
 public:
-  SourceListPkt(const SourceListPkt &pkt);
   const uint32_t *ids(void) const {
     return reinterpret_cast<const uint32_t *>(payload());
   }

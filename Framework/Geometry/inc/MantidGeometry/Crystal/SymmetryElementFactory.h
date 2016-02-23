@@ -51,8 +51,6 @@ typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
 class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementIdentityGenerator() {}
-
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const override;
   bool canProcess(const SymmetryOperation &operation) const override;
@@ -66,8 +64,6 @@ public:
 class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementTranslationGenerator() {}
-
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const override;
   bool canProcess(const SymmetryOperation &operation) const override;
@@ -81,8 +77,6 @@ public:
 class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementInversionGenerator() {}
-
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const override;
   bool canProcess(const SymmetryOperation &operation) const override;
@@ -126,8 +120,6 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
-  SymmetryElementRotationGenerator() {}
-
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const override;
   bool canProcess(const SymmetryOperation &operation) const override;
@@ -153,8 +145,6 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
-  SymmetryElementMirrorGenerator() {}
-
   SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const override;
   bool canProcess(const SymmetryOperation &operation) const override;
@@ -249,9 +239,6 @@ public:
   }
 
 protected:
-  SymmetryElementFactoryImpl()
-      : m_generators(), m_generatorNames(), m_prototypes() {}
-
   bool isSubscribed(const std::string &generatorClassName) const;
   void subscribe(const AbstractSymmetryElementGenerator_sptr &generator,
                  const std::string &generatorClassName);

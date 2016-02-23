@@ -39,8 +39,6 @@ namespace Poldi {
 
 class AbstractDoubleValueExtractor {
 public:
-  AbstractDoubleValueExtractor() = default;
-
   virtual ~AbstractDoubleValueExtractor() = default;
 
   virtual double operator()(const API::Run &runInformation,

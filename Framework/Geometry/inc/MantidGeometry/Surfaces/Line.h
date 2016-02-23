@@ -68,8 +68,6 @@ public:
   Line(const Kernel::V3D &, const Kernel::V3D &);
   Line *clone() const;
 
-  ~Line() = default;
-
   Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
   Kernel::V3D getOrigin() const { return Origin; } ///< returns the origin
   Kernel::V3D getDirect() const { return Direct; } ///< returns the direction

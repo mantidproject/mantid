@@ -99,10 +99,9 @@ public:
   MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &) = delete;
 
 private:
-  friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
-
   /// Private Constructor for singleton class
-  MDTransfFactoryImpl();
+  MDTransfFactoryImpl() = default;
+  friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
   /// Stores pointers to already created unit instances, with their name as the
   /// key
   mutable std::map<std::string, boost::shared_ptr<MDTransfInterface>>

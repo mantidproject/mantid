@@ -111,7 +111,6 @@ public:
   ReflectionGenerator(const CrystalStructure &crystalStructure,
                       ReflectionConditionFilter defaultFilter =
                           ReflectionConditionFilter::SpaceGroup);
-  ~ReflectionGenerator() = default;
 
   const CrystalStructure &getCrystalStructure() const;
 

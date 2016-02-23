@@ -50,16 +50,14 @@ private:
   std::map<char, std::string> ID; ///< Short letter identifiers
 
   SurfaceFactory(); ///< singleton constructor
-  SurfaceFactory(const SurfaceFactory &);
-
-  /// Dummy assignment operator
-  SurfaceFactory &operator=(const SurfaceFactory &) { return *this; }
-
   void registerSurface();
 
 public:
   static SurfaceFactory *Instance();
   ~SurfaceFactory() = default;
+
+  SurfaceFactory(const SurfaceFactory &) = delete;
+  SurfaceFactory &operator=(const SurfaceFactory &) = delete;
 
   std::unique_ptr<Surface> createSurface(const std::string &) const;
   std::unique_ptr<Surface> createSurfaceID(const std::string &) const;

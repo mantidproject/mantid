@@ -53,13 +53,6 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
 
-Intersection::Intersection()
-    : Rule(), A(), B()
-/**
-  Standard Constructor with null leaves
-*/
-{}
-
 Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
     : Rule(), A(std::move(Iy)), B(std::move(Ix))
 /**
@@ -370,13 +363,6 @@ TopoDS_Shape Intersection::analyze() {
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
-
-Union::Union()
-    : Rule(), A(), B()
-/**
-  Standard Constructor with null leaves
-*/
-{}
 
 Union::Union(Rule *Parent, std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
     : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
@@ -1397,13 +1383,6 @@ void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //----------------------------------------
 //       COMPGRP
 //----------------------------------------
-
-CompGrp::CompGrp()
-    : Rule(), A()
-/**
-  Constructor
-*/
-{}
 
 CompGrp::CompGrp(Rule *Parent, std::unique_ptr<Rule> Cx)
     : Rule(Parent), A(std::move(Cx))
