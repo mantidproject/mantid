@@ -250,7 +250,7 @@ Solid angle correction
 
     If ``detector_tubes`` is selected, the correction is calculated according to a tube geometry. The cosine term above then becomes:
     
-        :math:`\cos^3(2\theta) \rightarrow \cos(\sqrt{\tan^2(\alpha)+1}) \ \cos^2(2\theta)`
+        :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) / \cos^2(\alpha)`
 
     where :math:`\alpha`: is the angle between the projection of the sample-to-pixel vector on the plane defined by the beam (Z) axis and the Y-axis.
     
