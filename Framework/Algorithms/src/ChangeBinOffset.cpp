@@ -132,13 +132,10 @@ void ChangeBinOffset::execEvent() {
   MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
-  int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   PARALLEL_FOR1(outputWS)
-  for (int64_t i = 0; i < numHistograms; ++i) {
+  for (int64_t i = wi_min; i <= wi_max; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // Do the offsetting
-    if ((i >= wi_min) && (i <= wi_max))
-      outputWS->getEventList(i).addTof(offset);
+    outputWS->getEventList(i).addTof(offset);
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
