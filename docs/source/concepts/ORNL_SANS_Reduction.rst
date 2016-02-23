@@ -252,8 +252,13 @@ Solid angle correction
     
         :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) / \cos^2(\alpha)`
 
-    where :math:`\alpha`: is the angle between the projection of the sample-to-pixel vector on the plane defined by the beam (Z) axis and the Y-axis.
+    where :math:`\alpha`: is the angle between the projection of the sample-to-pixel vector on the plane defined by the beam (Z) axis and the Y-axis (Y-Z plane), and the Y-axis.
     
+.. figure:: /images/sans_solid_angle_correction.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Definition of angles for tube solid angle correction.
+
 ``NoSolidAngle()``
     Tells the reducer not to apply the solid angle correction.
 
