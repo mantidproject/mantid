@@ -2541,8 +2541,6 @@ void Table::moveCurrentCell()
 
 bool Table::eventFilter(QObject *object, QEvent *e)
 {
-  auto hheader = d_table->horizontalHeader();
-
   if (e->type() == QEvent::ContextMenu && object == (QObject*)d_table){
     const QContextMenuEvent *ce = (const QContextMenuEvent *)e;
     auto indx = d_table->horizontalHeader()->logicalIndexAt(ce->pos());
@@ -3327,7 +3325,7 @@ std::string Table::saveTableMetadata()
   return tsv.outputLines();
 }
 
-int Table::verticalHeaderWidth(){return d_table->verticalHeader()->width();};
+int Table::verticalHeaderWidth(){return d_table->verticalHeader()->width();}
 
 void Table::recordSelection() {
   auto c = leftSelectedColumn();
@@ -3391,7 +3389,7 @@ void MyTable::blockResizing(bool yes)
   m_blockResizing = yes;
 }
 
-void MyTable::resizeData(int n)
+void MyTable::resizeData(int)
 {
   if ( m_blockResizing )
   {
