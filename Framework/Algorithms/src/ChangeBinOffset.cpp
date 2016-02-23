@@ -109,9 +109,8 @@ void ChangeBinOffset::exec() {
   for (int64_t i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
-    for (size_t j = 0; j < outputW->readX(i).size(); ++j) {
-      // Change bin value by offset
-      if ((i >= wi_min) && (i <= wi_max))
+    if ((i >= wi_min) && (i <= wi_max)) {
+      for (size_t j = 0; j < outputW->readX(i).size(); ++j)
         outputW->dataX(i)[j] += offset;
     }
     m_progress->report();
