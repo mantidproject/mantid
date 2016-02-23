@@ -106,13 +106,10 @@ void ChangeBinOffset::exec() {
 
   // do the shift in X
   PARALLEL_FOR1(outputW)
-  for (int64_t i = 0; i < histnumber; ++i) {
+  for (int64_t i = wi_min; i <= wi_max; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // Do the offsetting
-    if ((i >= wi_min) && (i <= wi_max)) {
-      for(auto &x : outputW->dataX(i))
-        x += offset;
-    }
+    for (auto &x : outputW->dataX(i))
+      x += offset;
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
