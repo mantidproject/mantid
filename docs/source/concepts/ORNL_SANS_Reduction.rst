@@ -252,7 +252,7 @@ Solid angle correction
     
         :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
-    where :math:`\alpha`: is the angle between the projection of the sample-to-pixel vector on the plane defined by the beam (Z) axis and the Y-axis (Y-Z plane), and the Y-axis.
+    where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
     
 .. figure:: /images/sans_solid_angle_correction.png
    :figwidth: 10 cm
