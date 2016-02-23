@@ -29,8 +29,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._spiceTableDict = {}
         self._detStartID = {}
         self._2thetaScanPtDict = {}
-        self._scanPt2ThetaDict = {} 
-        self._monitorCountsDict = dict()    # key = 2-tuple (int, int) as scan number and pt number. 
+        self._scanPt2ThetaDict = {}
+        self._monitorCountsDict = dict()    # key = 2-tuple (int, int) as scan number and pt number.
 
         self._currStartDetID = -999999999
 

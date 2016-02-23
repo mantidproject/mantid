@@ -1,12 +1,11 @@
-__author__ = 'wzz'
-
-import os
+#pylint: disable=C0103
 import sys
 import numpy as np
-
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 import ui_View3DWidget
+
+__author__ = 'wzz'
 
 
 class Plot3DWindow(QtGui.QMainWindow):
@@ -66,17 +65,23 @@ class Plot3DWindow(QtGui.QMainWindow):
 
     def plot(self, data_key_list, base_color_list):
         """
-
+        Plot scatter data with specified base color
         :param data_key_list:
         :param base_color_list:
         :return:
         """
-        # TODO/DOC/CHECK
+        # Check
+        assert isinstance(data_key_list, list)
+        assert isinstance(base_color_list, list)
+        assert len(data_key_list) == len(base_color_list)
 
         for i_plot in xrange(len(data_key_list)):
             data_key = data_key_list[i_plot]
             base_color = base_color_list[i_plot]
             self.ui.graphicsView.plot_scatter(data_key, base_color)
+        # END-FOR
+
+        return
 
 
 if __name__ == "__main__":
@@ -116,7 +121,7 @@ if __name__ == "__main__":
     for i in xrange(num_pt):
         for j in xrange(3):
             centers[i][j] = raw_list[i][j]
-        intensities2[j] = raw_list[i][3]
+        intensities2[i] = raw_list[i][3]
 
     data_key2 = myapp.add_plot_by_array(centers, intensities2)
 

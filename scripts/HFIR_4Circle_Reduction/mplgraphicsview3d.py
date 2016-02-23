@@ -1,3 +1,4 @@
+#pylint: disable=R0902,R0904
 import sys
 import numpy as np
 import os
@@ -121,10 +122,13 @@ class MplPlot3dCanvas(FigureCanvas):
     def plot_scatter(self, data_key, base_color=None):
         """
         Plot data in scatter plot
-        :param data_key:
+        :param data_key: key to locate the data stored to this class
+        :param base_color: None or a list of 3 elements from 0 to 1 for RGB
         :return:
         """
-        # TODO/Now - Doc and check input
+        # Check
+        assert isinstance(data_key, int) and data_key >= 0
+        assert base_color is None or len(base_color) == 3
 
         # get data and check
         points = self._dataDict[data_key][0]
@@ -138,21 +142,21 @@ class MplPlot3dCanvas(FigureCanvas):
             # set x, y and z limit
             x_min = min(points[:, 0])
             x_max = max(points[:, 0])
-            dx = x_max - x_min
-            print x_min, x_max
+            d_x = x_max - x_min
+            # print x_min, x_max
             y_min = min(points[:, 1])
             y_max = max(points[:, 1])
-            dy = y_max - y_min
-            print y_min, y_max
+            d_y = y_max - y_min
+            # print y_min, y_max
             z_min = min(points[:, 2])
             z_max = max(points[:, 2])
-            dz = z_max - z_min
+            d_z = z_max - z_min
             print z_min, z_max
 
             # use default setup
-            self._myAxes.set_xlim(x_min-dx, x_max+dx)
-            self._myAxes.set_ylim(y_min-dy, y_max+dy)
-            self._myAxes.set_zlim(z_min-dz, z_max+dz)
+            self._myAxes.set_xlim(x_min-d_x, x_max+d_x)
+            self._myAxes.set_ylim(y_min-d_y, y_max+d_y)
+            self._myAxes.set_zlim(z_min-d_z, z_max+d_z)
         # END-IF
 
         # color map for intensity
@@ -198,8 +202,8 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return
 
-    def report_pixel(self, xd, yd):
-        s = self.format_coord_org(xd, yd)
+    def report_pixel(self, x_d, y_d):
+        s = self.format_coord_org(x_d, y_d)
         s = s.replace(",", " ")
         return s
 
@@ -227,8 +231,10 @@ class MplPlot3dCanvas(FigureCanvas):
         :param color_b:
         :return:
         """
-        # TODO/NOW/ Doc and check
+        # Set color map
         assert isinstance(color_r, float), 0 <= color_r < 1.
+        assert isinstance(color_g, float), 0 <= color_g < 1.
+        assert isinstance(color_b, float), 0 <= color_b < 1.
 
         self._colorMap = [color_r, color_g, color_b]
 
@@ -242,163 +248,4 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return
 
-    def update_view(self, d_key):
-        """
-
-        :param points:
-        :return:
-        """
-
-
-        # Draw points
-        # TODO/NOW: refactor to  method plot_scatter_points()
-
-        """
-        # prepare data
-        points = np.zeros((2000, 3))
-        X = np.array([.1, .0, .0])
-        for i in range(points.shape[0]):
-            points[i], X = X, lorenz_map(X)
-
-        """
-        points = self._dataDict[d_key][0]
-        intensities = self._dataDict[d_key][1]
-        assert isinstance(points, np.ndarray)
-        assert isinstance(points.shape, tuple)
-        assert points.shape[1] == 3, '3D data %s.' % str(points.shape)
-
-        # Plotting
-        self._myAxes.set_xlim(0.88, 0.89)
-        self._myAxes.set_ylim(-0.37, 0.35)
-        self._myAxes.set_zlim(4.08, 4.09)
-
-        x_min = min(points[:, 0])
-        x_max = max(points[:, 0])
-        print x_min, x_max
-        y_min = min(points[:, 1])
-        y_max = max(points[:, 1])
-        print y_min, y_max
-        z_min = min(points[:, 2])
-        z_max = max(points[:, 2])
-        print z_min, z_max
-
-        """
-        self._myAxes.set_xlim(x_min-1, x_max+1)
-        self._myAxes.set_ylim(y_min-1, y_max+1)
-        self._myAxes.set_zlim(z_min-1, z_max+1)
-        """
-
-        self._myAxes.set_xlabel('X axis')
-        self._myAxes.set_ylabel('Y axis')
-        self._myAxes.set_zlabel('Z axis')
-        # ax.set_title('Lorenz Attractor a=%0.2f b=%0.2f c=%0.2f' % (a, b, c))
-        # 
-
-        # color map
-        print '[DB] List size = ', len(points[:, 2])  # result = 579
-        num_points = len(points[:, 2])
-        color_list = list()
-        for index in xrange(len(points[:, 2])):
-            color_tup = (0.6, 0.3, float(index)/num_points)
-            color_list.append(color_tup)
-
-        # plot scatters
-        self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2], zdir='z', c=color_list)
-
-        self.draw()
-
-
-# Data set generation
-def generate_test_data():
-    """
-    """
-    a, b, c = 10., 28., 8. / 3.
-
-    def lorenz_map(X, dt = 1e-2):
-        X_dt = np.array([a * (X[1] - X[0]), X[0] * (b - X[2]) - X[1], X[0] * X[1] - c * X[2]])
-        return X + dt * X_dt
-
-    data_points = np.zeros((2000, 3))
-    linear_x_set = np.array([.1, .0, .0])
-    for i in range(data_points.shape[0]):
-        data_points[i], linear_x_set = linear_x_set, lorenz_map(linear_x_set)
-
-    return data_points
-
-
-class MplPlot3DCanvasTester(QtGui.QWidget):
-    def __init__(self, parent = None):
-       super(MplPlot3DCanvasTester, self).__init__(parent)
-       self.canvas = MplPlot3dCanvas()
-       self.toolbar = NavigationToolbar(self.canvas, self.canvas)
-       self.vbox = QtGui.QVBoxLayout()
-       self.vbox.addWidget(self.canvas)
-       self.vbox.addWidget(self.toolbar)
-       self.setLayout(self.vbox)
-       self.to_update = False
-
-    def update_view(self, d_key):
-        self.canvas.update_view(d_key)
-
-
-if __name__ == "__main__":
-    """ main to launch """
-    mainApp = QtGui.QApplication(sys.argv)
-
-    myapp = MplPlot3DCanvasTester()
-    myapp.show()
-
-    # prepare data
-    # points = generate_test_data()
-
-    # data_key1 = myapp.canvas.import_data_from_file('exp355_scan38_pt11_qsample.dat')
-    # myapp.update_view(data_key1)
-
-    raw_list = [
-        [0.887649, -0.360632, 4.081141, 14.000000], 
-        [0.887110, -0.360738, 4.082823, 11.000000],
-        [0.887256, -0.360679, 4.082371, 17.000000],
-        [0.887390, -0.360624, 4.081962, 9.0000000],
-        [0.887546, -0.360565, 4.081490, 7.0000000],
-        [0.887678, -0.360511, 4.081094, 21.000000],
-        [0.887103, -0.360621, 4.082837, 238.00000],
-        [0.887244, -0.360565, 4.082411, 755.00000],
-        [0.887386, -0.360510, 4.081990, 3135.0000],
-        [0.887538, -0.360452, 4.081541, 5426.0000],
-        [0.887680, -0.360398, 4.081130, 7724.0000],
-        [0.887070, -0.360512, 4.082922, 8167.0000],
-        [0.887210, -0.360458, 4.082512, 6717.0000],
-        [0.887351, -0.360404, 4.082106, 3835.0000],
-        [0.887491, -0.360350, 4.081704, 856.00000],
-        [0.887621, -0.360299, 4.081337, 108.00000],
-        [0.887774, -0.360244, 4.080907, 17.000000],
-        [0.887168, -0.360353, 4.082634, 11.000000],
-        [0.887309, -0.360300, 4.082234, 11.000000],
-        [0.887452, -0.360247, 4.081836, 5.0000000],
-        [0.887607, -0.360192, 4.081407, 16.000000]
-        ]
-
-    num_pt = len(raw_list)
-    centers = np.ndarray((num_pt, 3), 'double')
-    intensities2 = np.ndarray((num_pt, ), 'double')
-    for i in xrange(num_pt):
-        for j in xrange(3):
-            centers[i][j] = raw_list[i][j]
-        intensities2[j] = raw_list[i][3]
-
-    data_key2 = myapp.canvas.import_3d_data(centers, intensities2)
-    # myapp.update_view(data_key2)
-    myapp.canvas.plot_scatter(data_key2)
-
-    avg_center = np.ndarray((1, 3), 'double')
-    avg_center[0][0] = 0.88735938499471179
-    avg_center[0][1] = -0.36045625545762
-    avg_center[0][2] = 4.0820727566625354
-    intensities3 = np.ndarray((1,), 'double')
-    intensities3[0] = 10000.
-    data_key3 = myapp.canvas.import_3d_data(avg_center, intensities3)
-    myapp.canvas.set_color_map(0.99, 0.1, 0.1)
-    myapp.canvas.plot_scatter(data_key3)
-
-    sys.exit(mainApp.exec_())
 

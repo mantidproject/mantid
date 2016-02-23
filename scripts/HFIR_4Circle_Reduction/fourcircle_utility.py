@@ -44,12 +44,12 @@ def check_url(url, read_lines=False):
     return url_good, error_message
 
 
-def get_hb3a_wavelength(m1):
+def get_hb3a_wavelength(m1_motor_pos):
     """ Get HB3A's wavelength according to motor 'm1''s position.
-    :param m1:
+    :param m1_motor_pos:
     :return: wavelength.  None for no mapping
     """
-    assert isinstance(m1, float), 'Motor m1\'s position must be float.'
+    assert isinstance(m1_motor_pos, float), 'Motor m1\'s position must be float.'
 
     # hard-coded HB3A m1 position and wavelength mapping
     m1_pos_list = [(-25.870, 1.003),
@@ -59,7 +59,7 @@ def get_hb3a_wavelength(m1):
 
     for m1_tup in m1_pos_list:
         this_pos = m1_tup[0]
-        if abs(m1-this_pos) < motor_pos_tolerance:
+        if abs(m1_motor_pos-this_pos) < motor_pos_tolerance:
             return m1_tup[1]
     # END-FOR
 
