@@ -387,8 +387,12 @@ public:
   * Produces a replaceable spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
+  * @param spectrum number of the workspace to plot
+  * @param type of the workspace plot
   */
-  virtual void plotReplacingWindow(const std::string &wsName) = 0;
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+	  const std::string &type) = 0;
 };
 
 } // namespace CustomInterfaces

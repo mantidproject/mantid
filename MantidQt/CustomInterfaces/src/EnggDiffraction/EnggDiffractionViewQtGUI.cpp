@@ -607,10 +607,12 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
-  std::string pyCode =
-      "plotSpectrum('" + wsName +
-      "', 0, error_bars=False, type=0, window=win, clearWindow=True)";
+void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName,
+                                                   const std::string &spectrum,
+                                                   const std::string &type) {
+  std::string pyCode = "win=plotSpectrum('" + wsName + "', " + spectrum +
+                       ", error_bars=False, type=" + type +
+                       ", window=win, clearWindow=True)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
@@ -622,7 +624,7 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
 void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
   std::string pyCode =
       "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
-      "plot(van_curves_ws, [0, 1, 2])";
+      "win = plotSpectrum(van_curves_ws, [0, 1, 2])";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();

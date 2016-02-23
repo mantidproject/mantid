@@ -140,7 +140,9 @@ public:
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
 
-  virtual void plotReplacingWindow(const std::string &wsName);
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+	  const std::string &type);
 
   virtual void plotVanCurvesCalibOutput();
 

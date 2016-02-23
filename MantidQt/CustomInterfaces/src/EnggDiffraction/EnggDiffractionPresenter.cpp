@@ -995,6 +995,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                  << std::endl;
 
   // plots the calibrated workspaces.
+  g_plottingCounter++;
+  g_log.error() << "the g_plottingCounter is: " +
+                       std::to_string(g_plottingCounter)
+                << std::endl;
   plotCalibWorkspace(difc, tzero, specNos);
 }
 
@@ -2098,7 +2102,7 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
       if (g_plottingCounter == 1)
         m_view->plotFocusedSpectrum(outWSName);
       else
-        m_view->plotReplacingWindow(outWSName);
+        m_view->plotReplacingWindow(outWSName, "0", "0");
 
     } else if (plotType == PlotMode::WATERFALL) {
       if (g_plottingCounter == 1)
@@ -2126,8 +2130,14 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
                                                   std::string specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
-    m_view->plotVanCurvesCalibOutput();
+    if (g_plottingCounter == 1) {
+      m_view->plotVanCurvesCalibOutput();
+    } else {
+      m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
+                                  "2");
+    }
     m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
+    // g_plottingCounter++;
   }
 }
 

@@ -150,7 +150,9 @@ public:
   MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
 
   // virtual void plotReplacingWindow
-  MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
+  MOCK_METHOD2(plotReplacingWindow,
+               void(const std::string &wsName, const std::string &spectrum,
+				   const std::string &type));
 
   // virtual void plotVanCurvesCalibOutput();
   MOCK_METHOD0(plotVanCurvesCalibOutput, void());
