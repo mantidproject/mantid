@@ -159,9 +159,6 @@ void Table::setTextColor(const QColor& col)
 void Table::setTextFont(const QFont& fnt)
 {
   d_table->setFont (fnt);
-  QFontMetrics fm(fnt);
-  int lm = fm.width( QString::number(10*d_table->rowCount()));
-//?  d_table->setLeftMargin( lm );
 }
 
 const QFont & Table::getTextFont()
