@@ -295,6 +295,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog('Scan number is not given!')
                 return
             pt_list = gutil.parse_integer_list(str(self.ui.lineEdit_ptNumListIntPeak.text()))
+            assert len(pt_list) > 0
             # self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_list,
             #                                   target_ws_name=None,
             #                                   target_frame=None)
@@ -325,6 +326,9 @@ class MainWindow(QtGui.QMainWindow):
         # Get peak integration options
         adapt_q_bkgd = self.ui.checkBox_adaptQBkgd.isChecked()
         integrate_on_edge = self.ui.checkBox_integrateOnEdge.isChecked()
+        print '[DB-NEXT] Unused widgets: AdaptQBackground (%s) and IntegrateOnEdge (%s).' % (
+            str(adapt_q_bkgd), str(integrate_on_edge)
+        )
         is_cylinder = self.ui.checkBox_cylinder.isChecked()
 
         # Choose the peaks to be integrated
@@ -350,7 +354,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Refine UB matrix
         try:
-            self._myControl.refine_ub_matrix(peak_info_list, set_hkl_int)
+            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list, set_hkl_int)
         except AssertionError as error:
             self.pop_one_button_dialog(str(error))
             return

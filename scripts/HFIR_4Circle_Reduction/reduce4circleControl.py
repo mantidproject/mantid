@@ -620,7 +620,7 @@ class CWSCDReductionControl(object):
         """ Get Pt numbers (as a list) for a scan in an experiment
         :param exp_no:
         :param scan_no:
-        :param load_spice_scan:
+        :param load_spice_scan: flag to load spice scan file if it is not loaded yet.
         :return: (Boolean, Object) as (status, pt number list/error message)
         """
         # Check
@@ -630,21 +630,14 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_no, int)
 
         # Get workspace
-        # TODO/FIXME: better to refactor the part to load SPICE out
-        table_ws = self._get_spice_workspace(exp_no, scan_no)
-        if table_ws is None:
-            if load_spice_scan is False:
-                return False, 'Spice file for Exp %d Scan %d is not loaded.' % (exp_no, scan_no)
-            else:
-                status, error_message = self.load_spice_scan_file(exp_no, scan_no)
-                if status is True:
-                    table_ws = self._get_spice_workspace(exp_no, scan_no)
-                    if table_ws is None:
-                        raise NotImplementedError('Logic error! Cannot happen!')
-                else:
-                    return False, 'Unable to load Spice file for Exp %d Scan %d due to %s.' % (
-                        exp_no, scan_no, error_message)
+        status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
+        if status is False:
+            return False, ret_obj
+        else:
+            table_ws_name = ret_obj
+            table_ws = AnalysisDataService.retrieve(table_ws_name)
 
+        # Get column for Pt.
         col_name_list = table_ws.getColumnNames()
         i_pt = col_name_list.index('Pt.')
         if i_pt < 0 or i_pt >= len(col_name_list):
@@ -730,7 +723,15 @@ class CWSCDReductionControl(object):
         md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         assert AnalysisDataService.doesExist(md_ws_name)
 
-        # TODO/NOW/1st - everything
+        # Pseudo!
+        # call ConvertCWMDtoHKL to write out the temp file
+        blabla
+
+        # load the merged data back from the ASCII data file
+        blabla
+
+        # form ndarray for Q-space and 1 1d-array for counts
+
         return
 
     def get_merged_scan_info(self, ws_name):
@@ -944,7 +945,7 @@ class CWSCDReductionControl(object):
         assert bkgd_inner_radius >= peak_radius
         assert bkgd_outer_radius >= bkgd_inner_radius
 
-        # TODO/FIXME/NOW/1st: Need to re-write this method according to documentation of IntegratePeaksCWSD()
+        # NEXT - Need to re-write this method according to documentation of IntegratePeaksCWSD()
 
         # Get MD WS
         if md_ws_name is None:
@@ -982,7 +983,7 @@ class CWSCDReductionControl(object):
                              AdaptiveQBackground=True,
                              Cylinder=False)
 
-        return
+        raise RuntimeError('Implement ASAP!')
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):
@@ -1356,13 +1357,14 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub_matrix(self, peak_info_list, set_hkl_int):
-        """ Refine UB matrix
+    def refine_ub_matrix_indexed_peaks(self, peak_info_list, set_hkl_int):
+        """ Refine UB matrix by indexed peaks
         Requirements: input is a list of PeakInfo objects and there are at least 3
                         non-degenerate peaks
         Guarantees: UB matrix is refined.  Refined UB matrix and lattice parameters
                     with errors are returned
         :param peak_info_list: list of PeakInfo
+        :param set_hkl_int: set HKL to nearest integer
         :return: 2-tuple: (True, (ub matrix, lattice parameters, lattice parameters errors))
                           (False, error message)
         """
@@ -1371,7 +1373,7 @@ class CWSCDReductionControl(object):
         assert len(peak_info_list) >= 3
 
         # Construct a new peak workspace by combining all single peak
-        ub_peak_ws_name = 'Temp_Refine_UB_Peak'
+        ub_peak_ws_name = 'TempUBIndexedPeaks'
         self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
 
         # Calculate UB matrix
@@ -1381,26 +1383,9 @@ class CWSCDReductionControl(object):
             return False, 'Unable to refine UB matrix due to %s.' % str(e)
 
         # Get peak workspace
-        # TODO/NOW/1st - replace this part by method _get_refined_ub_data
+        self._refinedUBTup = self._get_refined_ub_data()
 
-        refined_ub_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
-        assert refined_ub_ws is not None
-
-        oriented_lattice = refined_ub_ws.sample().getOrientedLattice()
-
-        refined_ub_matrix = oriented_lattice.getUB()
-        lattice = [oriented_lattice.a(), oriented_lattice.b(),
-                   oriented_lattice.c(), oriented_lattice.alpha(),
-                   oriented_lattice.beta(), oriented_lattice.gamma()]
-        lattice_error = [oriented_lattice.errora(), oriented_lattice.errorb(),
-                         oriented_lattice.errorc(), oriented_lattice.erroralpha(),
-                         oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
-
-        print '[DB-BAT] Refined UB = ', refined_ub_matrix, 'of type', type(refined_ub_matrix)
-
-        self._refinedUBTup = (refined_ub_ws, refined_ub_matrix, lattice, lattice_error)
-
-        return True, (refined_ub_matrix, lattice, lattice_error)
+        return
 
     def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max):
         """
