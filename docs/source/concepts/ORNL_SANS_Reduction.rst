@@ -411,8 +411,14 @@ Wedge calculation is done as part of the azimuthal averaging algorithm. The imag
 Data Stitching
 ^^^^^^^^^^^^^^
 
-Data stitching can be done using the SANS reduction UI, or by calling the underlying command directly.
+Data stitching can be done using the SANS reduction UI, or by calling the underlying command directly. The stitching process lets you pick an overlap region that will be used to scale data sets to each other. For any number of input data sets, the data sets are scaled to the first set in the input series. The second set is scaled to the first set, then the third set is scaled to the modified second set. The process continues in pairs until all the data sets are rescaled.
 
+In the process of scaling two data sets, all the points of the lower Q set with a Q value lower than the higher bound of the overlap region are kept. All the points of the higher Q set with a Q value higher than the lower bound of the overlap region are kept (see image). All data points in the overlap region are kept.
+
+.. figure:: /images/stitching_description.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Description of stitching process.
 
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets
