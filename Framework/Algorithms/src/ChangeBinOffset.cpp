@@ -105,20 +105,15 @@ void ChangeBinOffset::exec() {
   }
 
   // do the shift in X
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR1(outputW)
   for (int64_t i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
-    for (size_t j = 0; j < inputW->readX(i).size(); ++j) {
+    for (size_t j = 0; j < outputW->readX(i).size(); ++j) {
       // Change bin value by offset
       if ((i >= wi_min) && (i <= wi_max))
-        outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;
-      else
-        outputW->dataX(i)[j] = inputW->readX(i)[j];
+        outputW->dataX(i)[j] += offset;
     }
-    // Copy y and e data
-    outputW->dataY(i) = inputW->dataY(i);
-    outputW->dataE(i) = inputW->dataE(i);
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
