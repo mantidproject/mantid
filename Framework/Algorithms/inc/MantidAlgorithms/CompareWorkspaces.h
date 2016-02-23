@@ -72,30 +72,30 @@ namespace Algorithms {
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces();
-  virtual ~CompareWorkspaces();
+  ~CompareWorkspaces() override;
 
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
 
   /// Categories this algorithm belongs to
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithm's purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
 private:
   /// Initialise algorithm
-  virtual void init();
+  void init() override;
 
   /// Execute algorithm
-  virtual void exec();
+  void exec() override;
 
   /// Process two groups and ensure the Result string is set properly on the
   /// final algorithm
-  virtual bool processGroups();
+  bool processGroups() override;
 
   /// Process the two groups
   void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne,

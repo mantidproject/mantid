@@ -36,20 +36,21 @@ namespace MDAlgorithms {
 class DLLExport LessThanMD : public BooleanBinaryOperationMD {
 public:
   LessThanMD();
-  virtual ~LessThanMD();
+  ~LessThanMD() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
+  const std::string name() const override;
+  int version() const override;
 
 private:
-  bool acceptScalar() const { return true; }
-  bool commutative() const { return false; }
+  bool acceptScalar() const override { return true; }
+  bool commutative() const override { return false; }
 
-  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
-  void
-  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                  Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+  void execHistoHisto(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoScalar(
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

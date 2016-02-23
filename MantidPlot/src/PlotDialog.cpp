@@ -43,7 +43,7 @@
 #include "QwtPieCurve.h"
 #include "ColorMapEditor.h"
 #include "pixmaps.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "Folder.h"
 #include "ContourLinesEditor.h"
 #include "PenStyleBox.h"

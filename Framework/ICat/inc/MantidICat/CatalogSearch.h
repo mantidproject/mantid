@@ -59,23 +59,25 @@ public:
   /// constructor
   CatalogSearch() : API::Algorithm() {}
   /// destructor
-  ~CatalogSearch() {}
+  ~CatalogSearch() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CatalogSearch"; }
+  const std::string name() const override { return "CatalogSearch"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Searches all active catalogs using the provided input parameters.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
 private:
   /// Overwrites Algorithm init method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm exec method
-  void exec();
+  void exec() override;
   /// Get all inputs for the algorithm
   void getInputProperties(CatalogSearchParam &params);
   /// Parse the run-range input field, split it into start and end run, and set

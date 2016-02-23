@@ -1,7 +1,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/StringTokenizer.h"
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
@@ -436,11 +436,12 @@ std::map<std::string, std::string>
 splitToKeyValues(const std::string &input, const std::string &keyValSep,
                  const std::string &listSep) {
   std::map<std::string, std::string> keyValues;
-  const int splitOptions =
-      Poco::StringTokenizer::TOK_IGNORE_EMPTY + Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer listSplitter(input, listSep);
+  const int splitOptions = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY +
+                           Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
   for (const auto &iter : listSplitter) {
-    Poco::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
+    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep,
+                                                   splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -1045,39 +1046,33 @@ int isMember(const std::vector<std::string> &group,
  */
 std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                             const std::string &rangeSep) {
-  typedef Poco::StringTokenizer Tokenizer;
+  typedef Mantid::Kernel::StringTokenizer Tokenizer;
 
-  boost::shared_ptr<Tokenizer> elements;
+  Tokenizer elements;
 
   if (elemSep.find(' ') != std::string::npos) {
     // If element separator contains space character it's a special case,
     // because in that case
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
-
-    // Space is added so that last empty element of the "1,2,3-" is not ignored
-    // and we can
-    // spot the error. Behaviour is changed in Poco 1.5 and this will not be
-    // needed.
-    Tokenizer ranges(str + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
     std::string new_str =
         join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
-
-    elements = boost::make_shared<Tokenizer>(
-        new_str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(new_str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
-    elements = boost::make_shared<Tokenizer>(
-        str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(str, elemSep,
+                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   }
 
   std::vector<int> result;
 
   // Estimation of the resulting number of elements
-  result.reserve(elements->count());
+  result.reserve(elements.count());
 
-  for (const auto &elementString : *elements) {
+  for (const auto &elementString : elements) {
     // See above for the reason space is added
-    Tokenizer rangeElements(elementString + " ", rangeSep, Tokenizer::TOK_TRIM);
+    Tokenizer rangeElements(elementString, rangeSep, Tokenizer::TOK_TRIM);
 
     size_t noOfRangeElements = rangeElements.count();
 

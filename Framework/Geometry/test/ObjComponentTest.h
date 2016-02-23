@@ -463,7 +463,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    auto retVal = boost::make_shared<Object>();
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -492,7 +492,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    boost::shared_ptr<Object> retVal = boost::make_shared<Object>();
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -533,7 +533,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    boost::shared_ptr<Object> retVal = boost::make_shared<Object>();
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 

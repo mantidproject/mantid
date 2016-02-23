@@ -2,14 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/MemoryManager.h"
-#include "boost/assign.hpp"
+#include "MantidGeometry/Instrument.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
@@ -64,11 +66,19 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
-std::map<int, double> detScale = map_list_of(17, 1.092114823)(18, 0.869105443)(
-    22, 1.081377685)(26, 1.055199489)(27, 1.070308725)(28, 0.886157884)(
-    36, 1.112773972)(37, 1.012894506)(38, 1.049384146)(39, 0.890313805)(
-    47, 1.068553893)(48, 0.900566426)(58, 0.911249203);
+std::map<int, double> detScale = {{17, 1.092114823},
+                                  {18, 0.869105443},
+                                  {22, 1.081377685},
+                                  {26, 1.055199489},
+                                  {27, 1.070308725},
+                                  {28, 0.886157884},
+                                  {36, 1.112773972},
+                                  {37, 1.012894506},
+                                  {38, 1.049384146},
+                                  {39, 0.890313805},
+                                  {47, 1.068553893},
+                                  {48, 0.900566426},
+                                  {58, 0.911249203}};
 
 AnvredCorrection::AnvredCorrection()
     : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),

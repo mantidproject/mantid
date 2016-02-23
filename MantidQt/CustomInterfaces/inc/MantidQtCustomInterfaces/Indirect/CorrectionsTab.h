@@ -74,11 +74,11 @@ namespace CustomInterfaces
 
   private:
     /// Overidden by child class.
-    virtual void setup() = 0;
+    void setup() override = 0;
     /// Overidden by child class.
-    virtual void run() = 0;
+    void run() override = 0;
     /// Overidden by child class.
-    virtual bool validate() = 0;
+    bool validate() override = 0;
 
     /// Overidden by child class.
     virtual void loadSettings(const QSettings & settings) = 0;

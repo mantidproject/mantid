@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
-#include <Poco/Path.h>
-#include <Poco/File.h>
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -238,13 +241,20 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
       pRootElem->getElementsByTagName("correction");
   for (unsigned long i = 0; i < correctionNodeList->length(); ++i) {
     // For each correction element
-    Element *corr = (Element *)correctionNodeList->item(i);
-    DateAndTime start(corr->getAttribute("valid-from"));
-    DateAndTime end(corr->getAttribute("valid-to"));
-    if (start <= externalDate && externalDate <= end) {
-      parameter_file = corr->getAttribute("file");
-      append = (corr->getAttribute("append") == "true");
-      break;
+    Element *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
+    if (corr) {
+      DateAndTime start(corr->getAttribute("valid-from"));
+      DateAndTime end(corr->getAttribute("valid-to"));
+      if (start <= externalDate && externalDate <= end) {
+        parameter_file = corr->getAttribute("file");
+        append = (corr->getAttribute("append") == "true");
+        break;
+      }
+    } else {
+      g_log.error("Parameter correction file: " + correction_file +
+                  "contains an invalid correction element.");
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Invalid element in XML parameter correction file", correction_file);
     }
   }
 }

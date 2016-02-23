@@ -5,8 +5,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -560,25 +562,16 @@ void NormaliseToMonitor::normaliseBinByBin(
     API::MatrixWorkspace_sptr &outputWorkspace) {
   EventWorkspace_sptr inputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
-  EventWorkspace_sptr outputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
     if (inputEvent) {
-      // Make a brand new EventWorkspace
-      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
-      // Copy geometry and data
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          inputEvent, outputEvent, false);
-      outputEvent->copyDataFrom((*inputEvent));
-      outputWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEvent);
+      outputWorkspace = MatrixWorkspace_sptr(inputWorkspace->clone().release());
     } else
       outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   }
+  auto outputEvent =
+      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Get hold of the monitor spectrum
   const MantidVec &monX = m_monitor->readX(0);

@@ -49,9 +49,9 @@ namespace Mantid
 
       explicit vtkDataSetToGeometry(vtkDataSet* dataSet);
 
-      ~vtkDataSetToGeometry();
+      ~vtkDataSetToGeometry() override;
 
-      virtual void execute();
+      void execute() override;
 
       vtkDataSetToGeometry(const vtkDataSetToGeometry& other);
 

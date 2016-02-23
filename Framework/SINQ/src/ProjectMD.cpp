@@ -70,7 +70,7 @@ void ProjectMD::exec() {
     }
   }
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   memset(targetDim, 0, MAXDIM * sizeof(int));

@@ -34,7 +34,7 @@ Description          : Preferences dialog
 #include "ColorButton.h"
 #include "ColorBox.h"
 #include "pixmaps.h"
-#include "DoubleSpinBox.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "SendToProgramDialog.h"
 #include "Mantid/MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"

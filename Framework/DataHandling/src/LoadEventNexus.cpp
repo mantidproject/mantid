@@ -4,26 +4,29 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/function.hpp>
-#include <functional>
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidKernel/Timer.h"
+#include <functional>
 
 using std::endl;
 using std::map;
@@ -186,7 +189,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
   */
-  void run() {
+  void run() override {
     // Local tof limits
     double my_shortest_tof =
         static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -792,7 +795,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
-  void run() {
+  void run() override {
     // The vectors we will be filling
     auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;
@@ -1206,9 +1209,9 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  declareProperty("SpectrumMin", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMin", EMPTY_INT(), mustBePositive,
                   "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
@@ -1631,8 +1634,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log"));
+  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");

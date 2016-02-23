@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/DeleteLog.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {

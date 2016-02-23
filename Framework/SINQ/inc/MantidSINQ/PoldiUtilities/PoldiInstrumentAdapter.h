@@ -53,10 +53,10 @@ typedef boost::shared_ptr<AbstractDoubleValueExtractor>
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   NumberDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~NumberDoubleValueExtractor() {}
+  ~NumberDoubleValueExtractor() override {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return runInformation.getPropertyValueAsType<double>(propertyName);
   }
 };
@@ -64,10 +64,10 @@ public:
 class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~VectorDoubleValueExtractor() {}
+  ~VectorDoubleValueExtractor() override {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return runInformation.getPropertyValueAsType<std::vector<double>>(
                               propertyName).front();
   }
@@ -76,10 +76,10 @@ public:
 class VectorIntValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorIntValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~VectorIntValueExtractor() {}
+  ~VectorIntValueExtractor() override {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return static_cast<double>(
         runInformation.getPropertyValueAsType<std::vector<int>>(propertyName)
             .front());

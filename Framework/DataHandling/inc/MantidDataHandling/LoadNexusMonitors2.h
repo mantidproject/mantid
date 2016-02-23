@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
@@ -49,37 +50,34 @@ public:
   LoadNexusMonitors2();
 
   /// Destructor
-  virtual ~LoadNexusMonitors2();
+  ~LoadNexusMonitors2() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const override {
-    return "LoadNexusMonitors";
-  }
+  const std::string name() const override { return "LoadNexusMonitors"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const override {
+  const std::string summary() const override {
     return "Load all monitors from a NeXus file into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const override { return 2; }
+  int version() const override { return 2; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const override {
-    return "DataHandling\\Nexus";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 protected:
   /// Initialise algorithm
-  virtual void init() override;
+  void init() override;
 
   /// Execute algorithm
-  virtual void exec() override;
+  void exec() override;
 
 private:
   /// Fix the detector numbers if the defaults are not correct
-  void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
-                const boost::scoped_array<specid_t> &spec_ids,
+  void fixUDets(boost::scoped_array<Mantid::detid_t> &det_ids,
+                ::NeXus::File &file,
+                const boost::scoped_array<Mantid::specid_t> &spec_ids,
                 const size_t nmonitors) const;
 
   /// Load the logs

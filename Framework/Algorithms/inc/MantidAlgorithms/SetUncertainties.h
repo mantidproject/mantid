@@ -45,28 +45,28 @@ public:
   SetUncertainties();
 
   /// Virtual destructor
-  virtual ~SetUncertainties();
+  ~SetUncertainties() override;
 
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm creates a workspace which is the duplicate of the "
            "input, but where the error value for every bin has been set to "
            "zero.";
   }
 
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\Errors"; }
+  const std::string category() const override { return "Arithmetic\\Errors"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

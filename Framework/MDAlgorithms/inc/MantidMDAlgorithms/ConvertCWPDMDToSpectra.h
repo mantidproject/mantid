@@ -1,11 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTCWPDMDTOSPECTRA_H_
 #define MANTID_MDALGORITHMS_CONVERTCWPDMDTOSPECTRA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
+
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
@@ -101,13 +103,13 @@ class DLLExport ConvertCWPDMDToSpectra : public API::Algorithm {
 public:
   ConvertCWPDMDToSpectra();
 
-  virtual ~ConvertCWPDMDToSpectra();
+  ~ConvertCWPDMDToSpectra() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertCWPDMDToSpectra"; }
+  const std::string name() const override { return "ConvertCWPDMDToSpectra"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Convert constant wavelength (CW) powder diffraction (PD) data in "
            "MDEventWorksapces "
            " to a single-spectrum MatrixWorkspace, i.e., binning the "
@@ -117,19 +119,19 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength;Diffraction\\Focussing";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Main algorithm to reduce powder diffraction data
   API::MatrixWorkspace_sptr reducePowderData(

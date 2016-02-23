@@ -1,8 +1,11 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <gsl/gsl_statistics.h>
+
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <gsl/gsl_statistics.h>
+
 namespace Mantid {
 namespace Algorithms {
 

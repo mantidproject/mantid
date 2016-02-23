@@ -9,7 +9,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/assign.hpp>
 
 #include <json/json.h>
 
@@ -177,9 +176,8 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
 
   std::vector<std::string> cleanScattererTokens =
       getCleanScattererTokens(tokens);
-  std::vector<std::string> properties =
-      boost::assign::list_of("Element")("Position")("Occupancy")("U")
-          .convert_to_container<std::vector<std::string>>();
+  std::vector<std::string> properties = {"Element", "Position", "Occupancy",
+                                         "U"};
 
   ::Json::Value root;
   for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {

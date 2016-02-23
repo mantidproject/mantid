@@ -43,9 +43,9 @@ namespace API {
 class MANTID_API_DLL LogarithmScale : public ITransformScale {
 public:
   LogarithmScale() : m_base(M_E){};
-  ~LogarithmScale(){};
-  const std::string name() const { return "LogarithmScale"; }
-  void transform(std::vector<double> &gd);
+  ~LogarithmScale() override{};
+  const std::string name() const override { return "LogarithmScale"; }
+  void transform(std::vector<double> &gd) override;
   void setBase(double &base);
   /// The scaling transformation. First and last elements of the grid remain
   /// unchanged

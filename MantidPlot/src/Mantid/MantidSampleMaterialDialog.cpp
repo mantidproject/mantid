@@ -6,6 +6,7 @@
 #include "MantidUI.h"
 
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>

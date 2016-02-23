@@ -29,7 +29,7 @@ protected slots:
   void setText(const QString& txt);
   QString getText()const;
 private:
-  bool eventFilter(QObject*, QEvent*);
+  bool eventFilter(QObject *, QEvent *) override;
   DoubleEditor* m_editor;
   QPushButton* m_button;
   QtProperty* m_property;
@@ -46,8 +46,9 @@ class DoubleDialogEditorFactory : public QtAbstractEditorFactory<ParameterProper
   Q_OBJECT
 public:
   DoubleDialogEditorFactory(QObject *parent = 0) : QtAbstractEditorFactory<ParameterPropertyManager>(parent) {}
-  QWidget *createEditorForManager(ParameterPropertyManager *, QtProperty *property, QWidget *parent)
-  {
+  QWidget *createEditorForManager(ParameterPropertyManager *,
+                                  QtProperty *property,
+                                  QWidget *parent) override {
     auto editor = new DoubleDialogEditor(property, parent);
     connect(editor, SIGNAL(buttonClicked(QtProperty*)), this, SIGNAL(buttonClicked(QtProperty*)));
     connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()), Qt::QueuedConnection);
@@ -57,8 +58,8 @@ signals:
   void buttonClicked(QtProperty*);
   void closeEditor();
 protected:
-  void connectPropertyManager(ParameterPropertyManager*) {}
-  void disconnectPropertyManager(ParameterPropertyManager*) {}
+  void connectPropertyManager(ParameterPropertyManager *) override {}
+  void disconnectPropertyManager(ParameterPropertyManager *) override {}
 };
 
 #endif // DOUBLEDIALOGEDITORFACTORY_H

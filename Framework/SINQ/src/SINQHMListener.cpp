@@ -106,7 +106,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
 
   readHMData(ws);

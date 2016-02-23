@@ -93,14 +93,13 @@ signals:
   void forgetMe();
 
 protected:
-  virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap,
-                         const QwtScaleMap &yMap, int from, int to) const;
+  void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap,
+                 const QwtScaleMap &yMap, int from, int to) const override;
   void drawSideLines(QPainter *p, const QwtScaleMap &xMap,
                      const QwtScaleMap &yMap, int from, int to) const;
 
-  virtual void drawSymbols(QPainter *p, const QwtSymbol &,
-                           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-                           int from, int to) const;
+  void drawSymbols(QPainter *p, const QwtSymbol &, const QwtScaleMap &xMap,
+                   const QwtScaleMap &yMap, int from, int to) const override;
 
   void computeWaterfallOffsets();
 
@@ -121,7 +120,7 @@ public:
   DataCurve(const DataCurve &c);
   void clone(DataCurve *c);
 
-  PlotCurve *clone(const Graph *) const;
+  PlotCurve *clone(const Graph *) const override;
 
   QString saveToString();
 
@@ -193,7 +192,7 @@ public:
   QList<DataCurve *> errorBarsList() const { return d_error_bars; };
   /// Returns a list of error bar settings for each set of error bars associated
   /// to this curve
-  virtual QList<ErrorBarSettings *> errorBarSettingsList() const;
+  QList<ErrorBarSettings *> errorBarSettingsList() const override;
   //! Adds a single error bars curve to the list of attached error bars.
   void addErrorBars(DataCurve *c) {
     if (c)
@@ -206,7 +205,7 @@ public:
   //! Clears the list of attached text labels.
   void clearLabels();
 
-  void setVisible(bool on);
+  void setVisible(bool on) override;
 
   bool selectedLabels(const QPoint &pos);
   bool hasSelectedLabels() const;
@@ -270,7 +269,7 @@ public:
 protected:
   //! Does the actual drawing; see QwtPlotItem::draw.
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &r) const;
+            const QRect &r) const override;
 
   int d_index;
   double d_angle;

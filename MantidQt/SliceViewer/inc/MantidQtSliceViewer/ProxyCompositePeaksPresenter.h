@@ -22,7 +22,7 @@ public:
   ProxyCompositePeaksPresenter(
       boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
   ProxyCompositePeaksPresenter();
-  ~ProxyCompositePeaksPresenter();
+  ~ProxyCompositePeaksPresenter() override;
   size_t size() const;
   void update();
 
@@ -68,11 +68,12 @@ public:
   bool getIsHidden(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
   /// Perform a requested update.
-  void performUpdate();
+  void performUpdate() override;
   /// Perform a peaks workspace replacement
-  void updatePeaksWorkspace(
-      const std::string &toName,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
+  void
+  updatePeaksWorkspace(const std::string &toName,
+                       boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
+                           toWorkspace) override;
   /// Register an updateable view
   void registerView(UpdateableOnDemand *view);
   /// Get optional zoomed peak presenter.

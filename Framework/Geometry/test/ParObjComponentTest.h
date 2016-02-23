@@ -358,7 +358,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    boost::shared_ptr<Object> retVal = boost::make_shared<Object>();
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 

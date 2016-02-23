@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

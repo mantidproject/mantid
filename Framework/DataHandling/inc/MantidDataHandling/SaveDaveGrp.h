@@ -45,30 +45,30 @@ namespace DataHandling {
 class DLLExport SaveDaveGrp : public API::Algorithm {
 public:
   SaveDaveGrp();
-  ~SaveDaveGrp();
+  ~SaveDaveGrp() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveDaveGrp"; };
+  const std::string name() const override { return "SaveDaveGrp"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a 2D workspace to DAVE grouped data format file.See "
            "http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Text;Inelastic\\DataHandling";
   }
   /// Algorithm's aliases
-  virtual const std::string alias() const { return "SaveDASC"; }
+  const std::string alias() const override { return "SaveDASC"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace DataHandling

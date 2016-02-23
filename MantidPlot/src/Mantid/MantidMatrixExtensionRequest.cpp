@@ -4,6 +4,7 @@
 #include "MantidMatrixNullExtensionHandler.h"
 #include "MantidMatrixDxExtensionHandler.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 
 MantidMatrixExtensionRequest::MantidMatrixExtensionRequest()
@@ -26,7 +27,8 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
       extension.label = "X Errors";
       extension.type = type;
       // Extend the chain of responsibility
-      std::unique_ptr<MantidMatrixDxExtensionHandler> dxHandler(new MantidMatrixDxExtensionHandler());
+      auto dxHandler =
+          Mantid::Kernel::make_unique<MantidMatrixDxExtensionHandler>();
       dxHandler->setSuccessor(m_extensionHandler);
       m_extensionHandler = std::move(dxHandler);
       return extension;

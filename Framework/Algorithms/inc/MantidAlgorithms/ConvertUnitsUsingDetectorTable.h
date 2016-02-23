@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -34,16 +35,16 @@ namespace Algorithms {
 class DLLExport ConvertUnitsUsingDetectorTable : public API::Algorithm {
 public:
   ConvertUnitsUsingDetectorTable();
-  virtual ~ConvertUnitsUsingDetectorTable();
+  ~ConvertUnitsUsingDetectorTable() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr

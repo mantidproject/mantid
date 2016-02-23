@@ -4,12 +4,13 @@
 #include "MantidDataHandling/LoadReflTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
 

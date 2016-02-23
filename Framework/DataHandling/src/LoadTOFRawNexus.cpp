@@ -1,12 +1,15 @@
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -442,8 +445,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                errors.begin() + (i + 1) * m_numBins);
     } else {
       // Now take the sqrt(Y) to give E
-      E = Y;
-      std::transform(E.begin(), E.end(), E.begin(), (double (*)(double))sqrt);
+      E = MantidVec();
+      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
+                     static_cast<double (*)(double)>(sqrt));
     }
   }
 
@@ -515,8 +519,8 @@ void LoadTOFRawNexus::exec() {
   g_log.debug() << "Loading DAS logs" << std::endl;
 
   int nPeriods = 1; // Unused
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log")); // Unused
+  auto periodLog =
+      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 

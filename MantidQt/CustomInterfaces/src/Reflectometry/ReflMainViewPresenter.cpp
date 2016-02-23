@@ -5,7 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -25,10 +28,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
-
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -327,13 +326,13 @@ void ReflMainViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
     return;
   }
 
-  std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+  auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(),
       ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
       ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
       ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
       ReflTableSchema::COL_DQQ, ReflTableSchema::COL_SCALE,
-      ReflTableSchema::COL_GROUP));
+      ReflTableSchema::COL_GROUP);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -1453,13 +1452,27 @@ void ReflMainViewPresenter::search() {
   // This is breaking the abstraction provided by IReflSearcher, but provides a
   // nice usability win
   // If we're not logged into a catalog, prompt the user to do so
-  if (CatalogManager::Instance().getActiveSessions().empty())
-    m_view->showAlgorithmDialog("CatalogLogin");
-
-  auto sessionId =
-      CatalogManager::Instance().getActiveSessions().front()->getSessionId();
-
-  // try {
+  if (CatalogManager::Instance().getActiveSessions().empty()) {
+    try {
+      m_view->showAlgorithmDialog("CatalogLogin");
+    } catch (std::runtime_error &e) {
+      m_view->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
+                               "login failed");
+    }
+  }
+  std::string sessionId;
+  // check to see if we have any active sessions for ICAT
+  if (!CatalogManager::Instance().getActiveSessions().empty()) {
+    // we have an active session, so grab the ID
+    sessionId =
+        CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+  } else {
+    // there are no active sessions, we return here to avoid an exception
+    m_view->giveUserInfo(
+        "Error Logging in: Please press 'Search' to try again.",
+        "Login Failed");
+    return;
+  }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
   algSearch->initialize();
   algSearch->setChild(true);
@@ -1469,34 +1482,6 @@ void ReflMainViewPresenter::search() {
   algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
-  /*
-  while (!currentAlg->isExecuted())
-  {
-
-  THIS WORKS FUNCTIONALLY BUT YOU NEED TO
-  FIND A BETTER WAY TO SEE IF ALGORITHM
-  HAS BEEN EXECUTED AS THIS STILL INTRODUCES
-  A SERIAL-TYPE LAG
-
-
-
-  }
-  if (currentAlg->isExecuted())
-  {
-  ITableWorkspace_sptr results = currentAlg->getProperty("OutputWorkspace");
-  m_searchModel = ReflSearchModel_sptr(
-  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-  m_view->showSearch(m_searchModel);
-  }
-  //ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
-  //auto results = m_searcher->search(searchString);
-  m_searchModel = ReflSearchModel_sptr(
-  new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
-  m_view->showSearch(m_searchModel);
-  } catch (std::runtime_error &e) {
-  m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-  "Search Failed");
-  }*/
 }
 
 void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
@@ -1757,6 +1742,7 @@ void ReflMainViewPresenter::initOptions() {
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
+  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
@@ -1764,22 +1750,22 @@ ReflMainViewPresenter::getTransferStrategy() {
         makeCatalogConfigServiceAdapter(ConfigService::Instance()));
 
     // We make a user-based Catalog Info object for the transfer
-    auto catInfo = std::unique_ptr<ICatalogInfo>(new UserCatalogInfo(
+    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
         ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService));
+        *catConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source = std::unique_ptr<ReflMeasurementItemSource>(
-        new ReflNexusMeasurementItemSource);
+    std::unique_ptr<ReflMeasurementItemSource> source =
+        make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflMeasureTransferStrategy(std::move(catInfo), std::move(source)));
+    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+        std::move(catInfo), std::move(source));
+    return rtnStrategy;
   } else if (currentMethod == LegacyTransferMethod) {
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflLegacyTransferStrategy);
-
+    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
+    return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);

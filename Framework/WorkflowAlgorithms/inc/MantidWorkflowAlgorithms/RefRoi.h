@@ -40,26 +40,26 @@ public:
   /// Constructor
   RefRoi();
   /// Virtual destructor
-  virtual ~RefRoi() {}
+  ~RefRoi() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "RefRoi"; }
+  const std::string name() const override { return "RefRoi"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Workflow algorithm for reflectometry to sum up a region of "
            "interest on a 2D detector.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\Reflectometry";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void extractReflectivity();
   void reverse(API::MatrixWorkspace_sptr WS);

@@ -9,10 +9,13 @@ GUI
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
-#include <fstream>
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {

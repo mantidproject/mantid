@@ -1,8 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
@@ -10,21 +9,23 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <limits>
 #include <sstream>
@@ -252,10 +253,11 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -275,15 +277,17 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string &) const { return "std::string"; }
+  std::string apply(const std::string &) const override {
+    return "std::string";
+  }
   /// Apply if int
-  std::string apply(const int &) const { return "int"; }
+  std::string apply(const int &) const override { return "int"; }
   /// Apply if double
-  std::string apply(const double &) const { return "double"; }
+  std::string apply(const double &) const override { return "double"; }
   /// Apply if bool
-  std::string apply(const bool &) const { return "bool"; }
+  std::string apply(const bool &) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> &) const {
+  std::string apply(const std::vector<double> &) const override {
     return "std::vector<double>";
   }
 };
@@ -306,21 +310,23 @@ public:
 
 protected:
   /// Apply if string
-  std::string apply(const std::string &str) const {
+  std::string apply(const std::string &str) const override {
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const {
+  std::string apply(const int &i) const override {
     return boost::lexical_cast<std::string>(i);
   }
   /// Apply if double
-  std::string apply(const double &d) const {
+  std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);
   }
   /// Apply if bool
-  std::string apply(const bool &b) const { return b ? "true" : "false"; }
+  std::string apply(const bool &b) const override {
+    return b ? "true" : "false";
+  }
   /// Apply if vector
-  std::string apply(const std::vector<double> &v) const {
+  std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
     if (v.size() > 0) {
       for (size_t i = 0; i < v.size() - 1; ++i) {
@@ -535,9 +541,9 @@ public:
 
 protected:
   /// Apply if string
-  void apply(std::string &str) const { str = m_value; }
+  void apply(std::string &str) const override { str = m_value; }
   /// Apply if int
-  void apply(int &i) const {
+  void apply(int &i) const override {
     std::istringstream istr(m_value + " ");
     istr >> i;
     if (!istr.good())
@@ -546,7 +552,7 @@ protected:
                                   m_value);
   }
   /// Apply if double
-  void apply(double &d) const {
+  void apply(double &d) const override {
     std::istringstream istr(m_value + " ");
     istr >> d;
     if (!istr.good())
@@ -555,11 +561,11 @@ protected:
                                   m_value);
   }
   /// Apply if bool
-  void apply(bool &b) const {
+  void apply(bool &b) const override {
     b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
   }
   /// Apply if vector
-  void apply(std::vector<double> &v) const {
+  void apply(std::vector<double> &v) const override {
     if (m_value.empty()) {
       v.clear();
       return;
@@ -571,8 +577,8 @@ protected:
         m_value.erase(m_value.size() - 1);
       }
     }
-    Poco::StringTokenizer tokenizer(m_value, ",",
-                                    Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     v.resize(tokenizer.count());
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);

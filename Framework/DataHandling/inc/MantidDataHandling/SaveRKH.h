@@ -48,18 +48,18 @@ public:
   /// Constructor
   SaveRKH();
   /// Virtual destructor
-  virtual ~SaveRKH();
+  ~SaveRKH() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveRKH"; }
+  const std::string name() const override { return "SaveRKH"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a file in the LOQ RKH/'FISH' format";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
   /// Constants used in RKH files
   enum FileConstants {
@@ -70,9 +70,9 @@ public:
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void writeHeader();
   void write1D();

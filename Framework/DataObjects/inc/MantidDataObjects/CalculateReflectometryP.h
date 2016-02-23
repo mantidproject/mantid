@@ -22,14 +22,14 @@ public:
   /**
    * Destructor
    */
-  ~CalculateReflectometryP(){};
+  ~CalculateReflectometryP() override{};
 
   /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) {
+  void setThetaIncident(double thetaIncident) override {
     m_sin_theta_i = sin(to_radians_factor * thetaIncident);
   }
 
@@ -38,7 +38,7 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaFinal: final theta value in degrees
    */
-  void setThetaFinal(double thetaFinal) {
+  void setThetaFinal(double thetaFinal) override {
     m_sin_theta_f = sin(to_radians_factor * thetaFinal);
   }
 
@@ -46,7 +46,7 @@ public:
    Executes the calculation to determine PSum
    @param wavelength : wavelength in Angstroms
    */
-  double calculateDim0(double wavelength) const {
+  double calculateDim0(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
@@ -57,7 +57,7 @@ public:
    Executes the calculation to determine PDiff
    @param wavelength : wavelength in Angstroms
    */
-  double calculateDim1(double wavelength) const {
+  double calculateDim1(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
@@ -65,7 +65,7 @@ public:
   }
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
                                              double thetaUpper,
-                                             double thetaLower) {
+                                             double thetaLower) override {
     setThetaFinal(thetaLower);
     auto dim1UpperRightVertex = calculateDim1(lamLower);
     auto dim0LowerLeftVertex = calculateDim0(lamUpper);

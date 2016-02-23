@@ -16,26 +16,26 @@ namespace Crystal {
 class DLLExport SetGoniometer : public API::Algorithm {
 public:
   SetGoniometer();
-  ~SetGoniometer();
+  ~SetGoniometer() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SetGoniometer"; };
+  const std::string name() const override { return "SetGoniometer"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Define the goniometer motors used in an experiment by giving the "
            "axes and directions of rotations.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Goniometer"; }
+  const std::string category() const override { return "Crystal\\Goniometer"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

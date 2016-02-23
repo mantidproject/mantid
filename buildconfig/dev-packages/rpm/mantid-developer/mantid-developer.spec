@@ -11,8 +11,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %{?fc20:Requires: rpmfusion-nonfree-release}
 Requires: clang
 Requires: cmake-gui >= 2.8.12
-Requires: boost-devel
 %{?el6:Requires: epel-release}
+%if 0%{?el6}
+Requires: boost148-devel
+%else
+Requires: boost-devel
+%endif
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs

@@ -7,6 +7,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -218,7 +220,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {

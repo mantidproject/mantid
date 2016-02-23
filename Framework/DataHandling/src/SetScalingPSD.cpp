@@ -4,11 +4,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
+#include "LoadRaw/isisraw.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "LoadRaw/isisraw.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <fstream>

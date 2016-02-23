@@ -4,6 +4,7 @@
 #include <numeric>
 #include <algorithm>
 #include "boost/bind.hpp"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 

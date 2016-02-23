@@ -1959,12 +1959,7 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
   double det = UB.determinant();
 
   double abs_det = fabs(det);
-  if (abs_det > 10 || abs_det < 1e-12) // UB not found correctly
-  {
-    return false;
-  }
-
-  return true;
+  return !(abs_det > 10 || abs_det < 1e-12); // UB not found correctly
 }
 
 /**

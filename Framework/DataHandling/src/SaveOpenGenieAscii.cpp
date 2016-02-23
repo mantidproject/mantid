@@ -1,19 +1,22 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/Property.h"
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
 #include <exception>
 #include <fstream>
 #include <list>
 #include <vector>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DatHandling {

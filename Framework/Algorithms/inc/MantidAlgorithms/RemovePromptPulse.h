@@ -37,19 +37,19 @@ namespace Algorithms {
 class DLLExport RemovePromptPulse : public API::Algorithm {
 public:
   RemovePromptPulse();
-  ~RemovePromptPulse();
+  ~RemovePromptPulse() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Remove the prompt pulse for a time of flight measurement.";
   }
 
@@ -57,9 +57,9 @@ private:
   /// Sets documentation strings for this algorithm
 
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Try to get the frequency from a given name.
   double getFrequency(const API::Run &run);
   std::vector<double> calculatePulseTimes(const double tmin, const double tmax,

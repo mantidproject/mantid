@@ -60,10 +60,10 @@ private slots:
 private:
 	Matrix *matrix;
 
-	QSize sizeHint() const ;
-	void customEvent( QEvent *e);
+        QSize sizeHint() const override;
+        void customEvent(QEvent *e) override;
 
-	ScriptEditor* commands;
+        ScriptEditor* commands;
     QPushButton* btnCancel;
 	QSpinBox *startRow, *endRow, *startCol, *endCol;
 	QPushButton *btnApply;

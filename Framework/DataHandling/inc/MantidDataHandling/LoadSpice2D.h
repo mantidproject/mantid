@@ -56,33 +56,33 @@ public:
   /// default constructor
   LoadSpice2D();
   /// destructor
-  ~LoadSpice2D();
+  ~LoadSpice2D() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadSpice2D"; }
+  const std::string name() const override { return "LoadSpice2D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a SANS data file produce by the HFIR instruments at ORNL. "
            "The instrument geometry is also loaded. The center of the detector "
            "is placed at (0,0,D), where D is the sample-to-detector distance.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
   }
   /// Number of monitors
   static const int nMonitors = 2;
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// This method throws not found error if a element is not found in the xml
   /// file

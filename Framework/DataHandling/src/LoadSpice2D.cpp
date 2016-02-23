@@ -3,19 +3,22 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/XmlHandler.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidAPI/AlgorithmFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <Poco/Path.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -24,11 +27,11 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <vector>
 #include <string>
-#include <algorithm>
+#include <vector>
 
 //-----------------------------------------------------------------------
 

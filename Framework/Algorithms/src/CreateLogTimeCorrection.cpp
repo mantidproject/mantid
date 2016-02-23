@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <fstream>
 
@@ -142,7 +144,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
 /** Write L2 map and correction map to a TableWorkspace
   */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");

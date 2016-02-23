@@ -36,19 +36,19 @@ namespace Algorithms {
 class DLLExport StripVanadiumPeaks2 : public API::Algorithm {
 public:
   StripVanadiumPeaks2();
-  ~StripVanadiumPeaks2();
+  ~StripVanadiumPeaks2() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "StripVanadiumPeaks"; }
+  const std::string name() const override { return "StripVanadiumPeaks"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding;"
            "Diffraction\\Corrections";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm removes peaks (at vanadium d-spacing positions by "
            "default)"
            " out of a background by linearly/quadratically interpolating over "
@@ -56,8 +56,8 @@ public:
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

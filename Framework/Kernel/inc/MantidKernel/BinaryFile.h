@@ -38,7 +38,7 @@ template <typename T> class DLLExport BinaryFile {
 public:
   //------------------------------------------------------------------------------------
   /// Empty constructor
-  BinaryFile() : handle(NULL), num_elements(0), offset(0) {}
+  BinaryFile() : handle(nullptr), num_elements(0), offset(0) {}
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
@@ -55,7 +55,7 @@ public:
    * @throw invalid_argument if the file does not exist
    * */
   void open(const std::string &filename) {
-    this->handle = NULL;
+    this->handle = nullptr;
     if (!Poco::File(filename).exists()) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
@@ -74,7 +74,7 @@ public:
    * */
   void close() {
     delete handle;
-    handle = NULL;
+    handle = nullptr;
   }
 
   //-----------------------------------------------------------------------------

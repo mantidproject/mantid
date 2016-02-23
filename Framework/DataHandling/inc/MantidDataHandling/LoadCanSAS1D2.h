@@ -73,18 +73,18 @@ public:
   /// default constructor
   LoadCanSAS1D2();
   /// destructor
-  virtual ~LoadCanSAS1D2();
+  ~LoadCanSAS1D2() override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
 
 protected:
   /// Overwrites Algorithm method. Extend to create the LoadTransmission flag.
-  virtual void init();
+  void init() override;
 
-  virtual void exec();
+  void exec() override;
   /// Extends the LoadEntry to deal with the possibility of Transmission data.
-  virtual API::MatrixWorkspace_sptr
-  loadEntry(Poco::XML::Node *const workspaceData, std::string &runName);
+  API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node *const workspaceData,
+                                      std::string &runName) override;
   /// Add new method to deal with loading the transmission related data.
   API::MatrixWorkspace_sptr loadTransEntry(Poco::XML::Node *const workspaceData,
                                            std::string &runName,

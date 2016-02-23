@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"

@@ -56,7 +56,8 @@ public:
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
     ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
-    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
+    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr =
+        boost::make_shared<MockPeaksWorkspaceConcrete>();
     // Act
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
 
@@ -86,8 +87,8 @@ public:
     EXPECT_CALL(peak, getHKL()).Times(0);
     EXPECT_CALL(peak, getQSampleFrame()).WillOnce(Return(coordinate));
 
-
-    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
+    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr =
+        boost::make_shared<MockPeaksWorkspaceConcrete>();
     MockPeaksWorkspaceConcrete & pw = *pw_ptr;
 
     EXPECT_CALL(pw, getSpecialCoordinateSystem()).WillOnce(Return(coordinateSystem));

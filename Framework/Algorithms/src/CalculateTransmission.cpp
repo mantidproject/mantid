@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -20,7 +21,6 @@
 #include <cmath>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -46,7 +46,7 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  * @returns workspace index corresponding to the given detector ID
  */
 size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
-  const std::vector<detid_t> input = boost::assign::list_of(detid);
+  const std::vector<detid_t> input = {detid};
   std::vector<size_t> result;
 
   ws->getIndicesFromDetectorIDs(input, result);
@@ -274,8 +274,9 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
   // lexical_cast function
   typedef std::string (*from_size_t)(const size_t &);
 
-  std::transform(indices.begin(), indices.end(), indexStrings.begin(),
-                 (from_size_t)boost::lexical_cast<std::string, size_t>);
+  std::transform(
+      indices.begin(), indices.end(), indexStrings.begin(),
+      static_cast<from_size_t>(boost::lexical_cast<std::string, size_t>));
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;

@@ -28,10 +28,10 @@ class DLLExport ThreadSchedulerMutexes : public ThreadScheduler {
 public:
   ThreadSchedulerMutexes() : ThreadScheduler() {}
 
-  virtual ~ThreadSchedulerMutexes() { clear(); }
+  ~ThreadSchedulerMutexes() override { clear(); }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) {
+  void push(Task *newTask) override {
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
@@ -42,10 +42,10 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  virtual Task *pop(size_t threadnum) {
+  Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
 
-    Task *temp = NULL;
+    Task *temp = nullptr;
 
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
@@ -75,7 +75,7 @@ public:
           }
         }
       }
-      if (temp == NULL) {
+      if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
         SuperMap::iterator it = m_supermap.begin();
@@ -111,7 +111,7 @@ public:
    * @param task :: the Task that was completed.
    * @param threadnum :: unused argument
    */
-  virtual void finished(Task *task, size_t threadnum) {
+  void finished(Task *task, size_t threadnum) override {
     UNUSED_ARG(threadnum);
     boost::shared_ptr<Mutex> mut = task->getMutex();
     if (mut) {
@@ -123,7 +123,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  size_t size() {
+  size_t size() override {
     m_queueLock.lock();
     // Add up the sizes of all contained maps.
     size_t total = 0;
@@ -137,7 +137,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
-  bool empty() {
+  bool empty() override {
     Mutex::ScopedLock _lock(m_queueLock);
     SuperMap::iterator it = m_supermap.begin();
     SuperMap::iterator it_end = m_supermap.end();
@@ -148,7 +148,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() {
+  void clear() override {
     m_queueLock.lock();
 
     // Empty out the queue and delete the pointers!
