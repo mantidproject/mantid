@@ -99,9 +99,9 @@ Output:
 .. testoutput:: ExConvertHB3AToHKL
 
   Output MDEventWorkspace has 1631 events.
-  H: range from -0.24012 to 0.29856.
-  K: range from -0.41417 to 0.42250.
-  L: range from 4.83863 to 7.23861.
+  H: range from -0.25092 to 0.31464.
+  K: range from -0.43524 to 0.44311.
+  L: range from 4.77711 to 7.29681.
 
 .. categories::
 
