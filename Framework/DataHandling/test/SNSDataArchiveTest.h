@@ -15,7 +15,7 @@ public:
     SNSDataArchive arch;
 
     // PG3 Test case
-    std::unordered_set<std::string> filename;
+    std::set<std::string> filename;
     filename.insert("PG3_7390");
     std::vector<std::string> extension =
         std::vector<std::string>(1, "_event.nxs");

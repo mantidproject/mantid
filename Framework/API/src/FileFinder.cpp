@@ -366,9 +366,8 @@ FileFinderImpl::makeFileName(const std::string &hint,
  *  this argument is ignored.
  * @return The full path to the file or empty string if not found
  */
-std::string
-FileFinderImpl::findRun(const std::string &hintstr,
-                        const std::unordered_set<std::string> &exts) const {
+std::string FileFinderImpl::findRun(const std::string &hintstr,
+                                    const std::set<std::string> &exts) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts.size()
                 << "])\n";
@@ -508,7 +507,7 @@ FileFinderImpl::findRun(const std::string &hintstr,
   // tasked with a redesign of
   // the whole file finding concept.
 
-  std::unordered_set<std::string> filenames;
+  std::set<std::string> filenames;
   filenames.insert(filename);
   if (!getCaseSensitive()) {
     std::string transformed(filename);
@@ -679,7 +678,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
  */
 std::string
 FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                               const std::unordered_set<std::string> &filenames,
+                               const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
   std::string path = "";
   for (const auto &arch : archs) {
@@ -707,7 +706,7 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
  */
 std::string
 FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                        const std::unordered_set<std::string> &filenames,
+                        const std::set<std::string> &filenames,
                         const std::vector<std::string> &exts) const {
   std::string path;
 

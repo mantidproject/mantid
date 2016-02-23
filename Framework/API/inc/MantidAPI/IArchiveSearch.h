@@ -11,7 +11,7 @@
 #endif
 #include <string>
 #include <vector>
-#include <unordered_set>
+#include <set>
 
 #define DECLARE_ARCHIVESEARCH(classname, facility)                             \
   namespace {                                                                  \
@@ -63,7 +63,7 @@ public:
     * @param exts :: A list of extensions to check for in turn against each file
     */
   virtual std::string
-  getArchivePath(const std::unordered_set<std::string> &filenames,
+  getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const = 0;
 };
 

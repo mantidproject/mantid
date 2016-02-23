@@ -43,7 +43,7 @@ class DLLExport ISISDataArchive : public API::IArchiveSearch {
 public:
   /// Returns the path to a filename given the list of extensions to try
   std::string
-  getArchivePath(const std::unordered_set<std::string> &filenames,
+  getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const override;
 
 private:

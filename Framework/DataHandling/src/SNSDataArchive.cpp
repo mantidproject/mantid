@@ -37,7 +37,7 @@ DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
  * @return list of archive locations
  */
 std::string
-SNSDataArchive::getArchivePath(const std::unordered_set<std::string> &filenames,
+SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
   auto iter = filenames.cbegin();
   std::string filename = *iter;
