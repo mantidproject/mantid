@@ -72,9 +72,6 @@ private:
   /// Execute algorithm for EventWorkspaces
   void execEvent();
 
-  /// Create output workspace
-  API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
-
   /// The progress reporting object
   API::Progress *m_progress;
 

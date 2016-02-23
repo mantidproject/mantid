@@ -68,8 +68,6 @@ void ChangeBinOffset::exec() {
 
   offset = getProperty("Offset");
 
-  API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
-
   // Get number of histograms
   int64_t histnumber = static_cast<int64_t>(inputW->getNumberHistograms());
 
@@ -90,6 +88,12 @@ void ChangeBinOffset::exec() {
       g_log.error("Invalid Workspace Index min/max properties");
       throw std::invalid_argument("Inconsistent properties defined");
     }
+  }
+
+  MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
+  if (outputW != inputW) {
+    outputW = MatrixWorkspace_sptr(inputW->clone().release());
+    setProperty("OutputWorkspace", outputW);
   }
 
   // Check if its an event workspace
@@ -129,34 +133,12 @@ void ChangeBinOffset::exec() {
   } catch (Exception::IndexError &) {
     // OK, so this isn't a Workspace2D
   }
-
-  // Assign it to the output workspace property
-  setProperty("OutputWorkspace", outputW);
-}
-
-API::MatrixWorkspace_sptr
-ChangeBinOffset::createOutputWS(API::MatrixWorkspace_sptr input) {
-  MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
-  // Check whether input = output to see whether a new workspace is required.
-  if (input != output) {
-    // Create new workspace for output from old
-    output = API::WorkspaceFactory::Instance().create(input);
-  }
-  return output;
 }
 
 void ChangeBinOffset::execEvent() {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      getProperty("InputWorkspace");
-
-  // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
-  if (matrixOutputWS != matrixInputWS) {
-    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
-    this->setProperty("OutputWorkspace", matrixOutputWS);
-  }
+  MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
