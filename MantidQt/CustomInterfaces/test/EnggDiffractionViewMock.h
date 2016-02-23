@@ -152,15 +152,13 @@ public:
   // virtual void plotReplacingWindow
   MOCK_METHOD3(plotReplacingWindow,
                void(const std::string &wsName, const std::string &spectrum,
-				   const std::string &type));
+                    const std::string &type));
 
   // virtual void plotVanCurvesCalibOutput();
   MOCK_METHOD0(plotVanCurvesCalibOutput, void());
 
   // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD3(plotDifcZeroCalibOutput,
-               void(std::vector<double> &difc, std::vector<double> &tzero,
-                    std::string &specNo));
+  MOCK_METHOD1(plotDifcZeroCalibOutput, void(std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
