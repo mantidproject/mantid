@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <map>
 #include <iostream>
@@ -128,7 +129,7 @@ void LoadSwans::placeDetectorInSpace() {
       m_ws->getInstrument()->getStringParameter("detector-name")[0];
   const double distance = static_cast<double>(
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
-  // Make the angle negative to accomodate sense of rotation.
+  // Make the angle negative to accommodate the sense of rotation.
   const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
 
   g_log.information() << "Moving detector " << componentName << " " << distance
@@ -167,13 +168,11 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
     if (input.eof())
       break;
     uint32_t tof = 0;
-    // input.read((char *)&tof, sizeof(tof));
     input.read(reinterpret_cast<char *>(&tof), sizeof(tof));
     tof -= static_cast<uint32_t>(1e9);
     tof = static_cast<uint32_t>(tof * 0.1);
 
     uint32_t pos = 0;
-    // input.read((char *)&pos, sizeof(pos));
     input.read(reinterpret_cast<char *>(&pos), sizeof(pos));
     if (pos < 400000) {
       g_log.warning() << "Detector index invalid: " << pos << std::endl;
@@ -182,7 +181,6 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
     pos -= 400000;
     eventMap[pos].push_back(tof);
   }
-
   return eventMap;
 }
 
@@ -192,56 +190,46 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
  * @return vector with the file contents
  */
 std::vector<double> LoadSwans::loadMetaData() {
-
   std::vector<double> metadata;
   std::string filename = getPropertyValue("FilenameMetaData");
-
   std::ifstream infile(filename);
-
   if (infile.fail()) {
     g_log.error("Error reading file " + filename);
     throw Exception::FileError("Unable to read data in File:", filename);
   }
-
   std::string line;
   while (getline(infile, line)) {
     // line with data, need to be parsed by white spaces
     if (!line.empty() && line[0] != '#') {
       g_log.debug() << "Metadata parsed line: " << line << std::endl;
-      std::vector<std::string> dataLine;
-      boost::trim_if(
-          line, boost::is_any_of("\t ")); // could also use plain boost::trim
-      boost::split(dataLine, line, boost::is_any_of("\t "),
-                   boost::token_compress_on);
-      for (auto beg = dataLine.begin(); beg != dataLine.end(); ++beg) {
-        std::stringstream ss;
-        ss << *beg;
-        double d;
-        ss >> d;
-        metadata.push_back(d);
+      auto tokenizer = Mantid::Kernel::StringTokenizer(
+          line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      for (const auto &v : tokenizer.asVector()) {
+        metadata.push_back(boost::lexical_cast<double>(v));
       }
     }
+  }
+  if (metadata.size() < 6) {
+    g_log.error("Expecting length >=6 for metadata arguments!");
+    throw Exception::NotFoundError(
+        "Number of arguments for metadata must be at least 6. Found: ",
+        metadata.size());
   }
   return metadata;
 }
 
 /*
- * Metadata positions:
+ * Known metadata positions to date:
  * 0 - run number
  * 1 - wavelength
  * 2 - chopper frequency
  * 3 - time offset
  * 4 - ??
  * 5 - angle
- *
  */
 void LoadSwans::setMetaDataAsWorkspaceProperties(
     const std::vector<double> &metadata) {
-  if (metadata.size() < 6) {
-    g_log.error("Expecting size 6 for metadata!");
-    throw Exception::NotFoundError(
-        "Number of arguments for metdata must be at least 6", metadata.size());
-  }
   API::Run &runDetails = m_ws->mutableRun();
   runDetails.addProperty<double>("wavelength", metadata[1]);
   runDetails.addProperty<double>("angle", metadata[5]);

@@ -39,9 +39,9 @@ public:
   LoadSwans();
 
   const std::string name() const override;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
