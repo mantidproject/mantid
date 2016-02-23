@@ -996,9 +996,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // plots the calibrated workspaces.
   g_plottingCounter++;
-  g_log.error() << "the g_plottingCounter is: " +
-                       std::to_string(g_plottingCounter)
-                << std::endl;
   plotCalibWorkspace(difc, tzero, specNos);
 }
 
@@ -2136,9 +2133,9 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
       m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
                                   "2");
     }
-
-    m_view->plotDifcZeroCalibOutput(difc, tzero, specNos);
-    // g_plottingCounter++;
+    m_view->plotDifcZeroCalibOutput(
+        DifcZeroWorkspaceFactory(difc, tzero, specNos) +
+        plotDifcZeroWorkspace());
   }
 }
 
@@ -2317,74 +2314,128 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
   return fullFilename;
 }
 
+/**
+* Generates the workspace with difc/zero according to the selected bank
+*
+* @param difc vector containing constants difc value of each bank
+* @param tzero vector containing constants tzero value of each bank
+* @param specNo used to set range for Calibration Cropped
+*
+* @return string with a python script
+*/
 std::string
-EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
-	std::vector<double> &difc, std::vector<double> &tzero,
-	std::string &specNo) {
+EnggDiffractionPresenter::DifcZeroWorkspaceFactory(std::vector<double> &difc,
+                                                   std::vector<double> &tzero,
+                                                   std::string &specNo) {
 
-	size_t bank1 = size_t(0);
-	size_t bank2 = size_t(1);
-	std::string pyRange;
-	std::string plotSpecNum = "False";
+  size_t bank1 = size_t(0);
+  size_t bank2 = size_t(1);
+  std::string pyRange;
+  std::string plotSpecNum = "False";
 
-	// sets the range to plot appropriate graph for the particular bank
-	if (specNo == "North") {
-		// only enable script to plot bank 1
-		pyRange = "1, 2";
-	}
-	else if (specNo == "South") {
-		// only enables python script to plot bank 2
-		// as bank 2 data will be located in difc[0] & tzero[0] - refactor
-		pyRange = "2, 3";
-		bank2 = size_t(0);
-	}
-	else if (specNo != "") {
-		pyRange = "1, 2";
-		plotSpecNum = "True";
-	}
-	else {
-		// enables python script to plot bank 1 & 2
-		pyRange = "1, 3";
-	}
+  // sets the range to plot appropriate graph for the particular bank
+  if (specNo == "North") {
+    // only enable script to plot bank 1
+    pyRange = "1, 2";
+  } else if (specNo == "South") {
+    // only enables python script to plot bank 2
+    // as bank 2 data will be located in difc[0] & tzero[0] - refactor
+    pyRange = "2, 3";
+    bank2 = size_t(0);
+  } else if (specNo != "") {
+    pyRange = "1, 2";
+    plotSpecNum = "True";
+  } else {
+    // enables python script to plot bank 1 & 2
+    pyRange = "1, 3";
+  }
 
-	std::string pyCode =
-		"plotSpecNum = " + plotSpecNum + "\n"
-		"for i in range(" +
-		pyRange +
-		"):\n"
+  std::string pyCode =
+      "plotSpecNum = " + plotSpecNum + "\n"
+                                       "for i in range(" +
+      pyRange +
+      "):\n"
 
-		" if (plotSpecNum == False):\n"
-		"  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
-		" else:\n"
-		"  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
+      " if (plotSpecNum == False):\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+      " else:\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
 
-		" xVal = []\n"
-		" yVal = []\n"
-		" y2Val = []\n"
+      " xVal = []\n"
+      " yVal = []\n"
+      " y2Val = []\n"
 
-		" if (i == 1):\n"
-		"  difc=" +
-		boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
-		boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
+      " if (i == 1):\n"
+      "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
 
-		"  difc=" +
-		boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
-		boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+                                                              "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
 
-		" for irow in range(0, bank_ws.rowCount()):\n"
-		"  xVal.append(bank_ws.cell(irow, 0))\n"
-		"  yVal.append(bank_ws.cell(irow, 5))\n"
+      " for irow in range(0, bank_ws.rowCount()):\n"
+      "  xVal.append(bank_ws.cell(irow, 0))\n"
+      "  yVal.append(bank_ws.cell(irow, 5))\n"
 
-		"  y2Val.append(xVal[irow] * difc + tzero)\n"
+      "  y2Val.append(xVal[irow] * difc + tzero)\n"
 
-		" ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
-		"Peaks "
-		" Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
-		"us)\")\n"
-		" ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n";
-	return pyCode;
+      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
+      "Peaks "
+      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
+      "us)\")\n"
+      " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n";
+  return pyCode;
 }
 
+/**
+* Plot the workspace with difc/zero acordding to selected bank
+*
+* @return string with a python script which will merge with
+* DifcZeroWorkspaceFactory
+*/
+std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() {
+  std::string pyCode =
+      // plotSpecNum is true when SpectrumIDs being used
+      " if (plotSpecNum == False):\n"
+      "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      // delete workspace if exists within ADS already
+      " if(mtd.doesExist(output_ws)):\n"
+      "  DeleteWorkspace(output_ws)\n"
+
+      // append workspace with peaks data for Peaks Fitted
+      // and Difc/TZero Straight line
+      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
+      " DeleteWorkspace(ws1)\n"
+      " DeleteWorkspace(ws2)\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      " DifcZeroWs = workspace(DifcZero)\n"
+      " DifcZeroPlot = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      "str(i))\n"
+      " else:\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+
+      // set the legend title
+      " DifcZeroPlot.setCurveTitle(0, \"Peaks Fitted\")\n"
+      " DifcZeroPlot.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
+      " DifcZeroPlot.setAxisTitle(Layer.Bottom, \"Expected Peaks "
+      "Centre(dSpacing, "
+      " A)\")\n"
+      " DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+
+  return pyCode;
+};
 
 /**
 * Generates appropriate names for table workspaces
