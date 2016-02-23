@@ -12,7 +12,6 @@ fi
 
 case "$TYPE" in
     py)
-        git diff ${BASE_BRANCH} --name-only -- \*\.py
         exit $(git diff --quiet ${BASE_BRANCH} -- \*\.py)
     ;;
     cpp)
