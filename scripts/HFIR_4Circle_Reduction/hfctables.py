@@ -333,19 +333,19 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         return
 
 
-# Processing status table
-Process_Table_Setup = [('Scan', 'int'),
-                       ('Number Pt', 'int'),
-                       ('Status', 'str'),
-                       ('Merged Workspace', 'str'),
-                       ('Group Name', 'str'),
-                       ('Select', 'checkbox')]
-
-
 class ProcessTableWidget(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+    TableSetup = [('Scan', 'int'),
+                  ('Number Pt', 'int'),
+                  ('Status', 'str'),
+                  ('Total Counts', 'float'),
+                  ('Intensity', 'float'),
+                  ('Select', 'checkbox'),
+                  ('Merged Workspace', 'str'),
+                  ('Group Name', 'str')]
+
     def __init__(self, parent):
         """
 
@@ -403,7 +403,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param i_row:
         :return:
         """
-        j_col_merged = Process_Table_Setup.index(('Merged Workspace', 'str'))
+        j_col_merged = self.TableSetup.index(('Merged Workspace', 'str'))
 
         return self.get_cell_value(i_row, j_col_merged)
 
@@ -413,8 +413,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         scan_list = list()
         num_rows = self.rowCount()
-        j_select = Process_Table_Setup.index(('Select', 'checkbox'))
-        j_scan = Process_Table_Setup.index(('Scan', 'int'))
+        j_select = self.TableSetup.index(('Select', 'checkbox'))
+        j_scan = self.TableSetup.index(('Scan', 'int'))
 
         for i_row in xrange(num_rows):
             if self.get_cell_value(i_row, j_select) is True:
@@ -428,7 +428,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        self.init_setup(Process_Table_Setup)
+        self.init_setup(self.TableSetup)
 
         return
 
@@ -507,7 +507,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(status, str)
 
         # Set
-        i_status = Process_Table_Setup.index(('Status', 'str'))
+        i_status = self.TableSetup.index(('Status', 'str'))
         self.update_cell_value(row_number, i_status, status)
 
         return

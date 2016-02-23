@@ -124,8 +124,12 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_merge_scans)
         self.connect(self.ui.pushButton_readyToIntegratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_advance_to_integrate_peaks)
+        self.connect(self.ui.pushButton_refreshMerged, QtCore.SIGNAL('clicked()'),
+                     self.do_refresh_merged_scans_table)
+        self.connect(self.ui.pushButton_plotMergedScans, QtCore.SIGNAL('clicked()'),
+                     self.do_view_merged_scans_3d)
 
-        # Tab 'Advanced'
+        # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
                      self.do_setup_dir_default)
         self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
@@ -136,6 +140,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.change_instrument_name)
 
         # Tab 'Integrate Peaks'
+        self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_per_pt)
+        self.connect(self.ui.pushButton_plotScanPt, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_integrated_pts)
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
         self.connect(self.ui.pushButton_findPeaks, QtCore.SIGNAL('clicked()'),
@@ -280,6 +288,30 @@ class MainWindow(QtGui.QMainWindow):
         # END-FOR
 
         return
+
+    def do_integrate_per_pt(self):
+        """
+        Use the peak center of the merged scan. Then on each Pt. with specified radius,
+        calculate the integrated peak intensity and number of counts
+        :return:
+        """
+        # get experiment and scan number
+        blabla()
+
+        # call myController to get peak center
+        blabla()
+
+        # get peak radius
+        blabla()
+
+        # call myController to integrate on each individual Pt.
+        blabla()
+
+        # find peak center of each individual Pt. and calculate its distance to weighted peak center
+        blabla()
+
+        # plot all the result to the table
+        blabla()
 
     def do_integrate_peaks(self):
         """ Integrate peaks
@@ -1034,6 +1066,23 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_plot_integrated_pts(self):
+        """
+        Plot all integrated values of Pt. in a scan in order to study the background
+        behavior.
+        :return:
+        """
+        # get scan number and experiment number
+        blabla()
+
+        # get integrated values of each Pt. and form it as a numpy array
+        blabla()
+
+        # plot to
+        blabla(self.ui.graphicsView_integratedPeakView)
+
+        return
+
     def do_plot_next_pt_raw(self):
         """ Plot the Pt.
         """
@@ -1139,6 +1188,20 @@ class MainWindow(QtGui.QMainWindow):
             # Sleep for a while
             time.sleep(0.1)
         # END-FOR
+
+        return
+
+    def do_refresh_merged_scans_table(self):
+        """ Find the merged
+        :return:
+        """
+        # find out the merged runs
+        self._myControl.get_merged_scans()
+
+        # append the row to the merged scan table
+        self.ui.tableWidget_mergeScans.append_row()
+
+        blabla()
 
         return
 
@@ -1472,8 +1535,20 @@ class MainWindow(QtGui.QMainWindow):
         print avg_peak_centre
 
         # Plot
+        blabla()
 
         raise
+
+    def do_view_merged_scans_3d(self):
+        """ Get selected merged scan and plot them individually in 3D
+        :return:
+        """
+        # collect the selected rows and thus workspace names
+        blabla()
+
+        # validate the space names with controller
+
+        # initialize 3D plot
 
     def do_view_survey_peak(self):
         """ View selected peaks from survey table

@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -218,14 +218,16 @@
                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.Lucida Grande UI'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-weight:600;&quot;&gt;1. Configure the data reduction&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-style:italic;&quot;&gt;(a) Do not modify ServerURL unless necessary;&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-style:italic;&quot;&gt;(b) Click 'Apply' to check internet connection and directories;&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-style:italic;&quot;&gt;(c) If 'Time out' is popped out, try to click 'Apply' again. Server may not be able to respond promptly.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:10pt; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-weight:600;&quot;&gt;2. Start to reduce data&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt; font-style:italic;&quot;&gt;(a) Set&lt;/span&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:10pt;&quot;&gt; Experiment&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;DON'T PANIC! IT IS &lt;/span&gt;&lt;span style=&quot; font-size:7pt; font-style:italic; vertical-align:sub;&quot;&gt;(supposed to be)&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt; EASY TO USE!&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;1. Configure the data reduction&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;(a) Do not modify ServerURL unless necessary;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;(b) Click 'Apply' to check internet connection and directories;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;(c) If 'Time out' is popped out, try to click 'Apply' again. Server may not be able to respond promptly.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;2. Start to reduce data&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;(a) Set&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; Experiment&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -2130,9 +2132,16 @@ p, li { white-space: pre-wrap; }
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_18">
                    <item>
-                    <widget class="QPushButton" name="pushButton">
+                    <widget class="QPushButton" name="pushButton_refreshMerged">
                      <property name="text">
                       <string>Refresh</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QCheckBox" name="checkBox_3">
+                     <property name="text">
+                      <string>Select</string>
                      </property>
                     </widget>
                    </item>
@@ -2153,9 +2162,9 @@ p, li { white-space: pre-wrap; }
                     </spacer>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="checkBox_3">
-                     <property name="text">
-                      <string>Select</string>
+                    <widget class="Line" name="line_8">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -2169,6 +2178,36 @@ p, li { white-space: pre-wrap; }
                      </property>
                      <property name="text">
                       <string>Merge</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer_20">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Preferred</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_7">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_plotMergedScans">
+                     <property name="text">
+                      <string>Plot</string>
                      </property>
                     </widget>
                    </item>
@@ -2202,14 +2241,7 @@ p, li { white-space: pre-wrap; }
                     </spacer>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_4">
-                     <property name="text">
-                      <string>PushButton</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_5">
+                    <widget class="QPushButton" name="pushButton_saveMergedResult">
                      <property name="maximumSize">
                       <size>
                        <width>130</width>
@@ -2217,7 +2249,7 @@ p, li { white-space: pre-wrap; }
                       </size>
                      </property>
                      <property name="text">
-                      <string>Delete</string>
+                      <string>Save</string>
                      </property>
                     </widget>
                    </item>
@@ -2250,44 +2282,33 @@ p, li { white-space: pre-wrap; }
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
              <layout class="QGridLayout" name="gridLayout_13">
-              <item row="2" column="0">
-               <widget class="QCheckBox" name="checkBox_cylinder">
+              <item row="2" column="10">
+               <widget class="QPushButton" name="pushButton_loadMask">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Cylinder</string>
+                 <string>Load Mask</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="3">
+              <item row="1" column="4">
                <widget class="QLineEdit" name="lineEdit_bkgdInnerR"/>
               </item>
-              <item row="1" column="5">
-               <widget class="QLineEdit" name="lineEdit_bkgdOuterR"/>
-              </item>
-              <item row="2" column="4">
+              <item row="2" column="6">
                <widget class="QLabel" name="label_36">
                 <property name="text">
                  <string>Percent Background</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_34">
-                <property name="text">
-                 <string>Peak Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="5">
+              <item row="2" column="7">
                <widget class="QLineEdit" name="lineEdit_cylinderBkgdPercent"/>
               </item>
-              <item row="1" column="4">
-               <widget class="QLabel" name="label_35">
-                <property name="text">
-                 <string>Background Outer Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="6">
+              <item row="2" column="8">
                <widget class="QComboBox" name="comboBox_cylinderProfile">
                 <item>
                  <property name="text">
@@ -2296,27 +2317,14 @@ p, li { white-space: pre-wrap; }
                 </item>
                </widget>
               </item>
-              <item row="2" column="2">
-               <widget class="QLabel" name="label_39">
-                <property name="text">
-                 <string>Cylinder Length</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
+              <item row="1" column="3">
                <widget class="QLabel" name="label_37">
                 <property name="text">
                  <string>Background Inner Radius</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="3">
-               <widget class="QLineEdit" name="lineEdit_cylinderLength"/>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEdit_peakRadius"/>
-              </item>
-              <item row="0" column="6">
+              <item row="0" column="8">
                <widget class="QComboBox" name="comboBox_ubSource">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the name of the tab, in which the UB matrix is used to convert signals to HKL frame.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2338,46 +2346,10 @@ p, li { white-space: pre-wrap; }
                 </item>
                </widget>
               </item>
-              <item row="0" column="3">
-               <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="readOnly">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>Scan Number</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_38">
-                <property name="text">
-                 <string>Merged Scan</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox_mergedScanWSName">
-                <item>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="7">
+              <item row="2" column="9">
                <widget class="QComboBox" name="comboBox_cylinderIntOption"/>
               </item>
-              <item row="0" column="8">
+              <item row="0" column="10">
                <widget class="QPushButton" name="pushButton_integratePeak">
                 <property name="font">
                  <font>
@@ -2390,7 +2362,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="1" column="8">
+              <item row="1" column="10">
                <widget class="QPushButton" name="pushButton_findPeaks">
                 <property name="font">
                  <font>
@@ -2403,20 +2375,38 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="2" column="8">
-               <widget class="QPushButton" name="pushButton_loadMask">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
+              <item row="1" column="8">
+               <widget class="QComboBox" name="comboBox_maskWSList"/>
+              </item>
+              <item row="0" column="9">
+               <widget class="QPushButton" name="pushButton_plot3DMerged">
                 <property name="text">
-                 <string>Load Mask</string>
+                 <string>Plot 3D</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="0" column="6">
+               <widget class="QCheckBox" name="checkBox_integrateOnEdge">
+                <property name="text">
+                 <string>Integrate on Edge</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="6">
+               <widget class="QLabel" name="label_39">
+                <property name="text">
+                 <string>Cylinder Length</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QLabel" name="label_35">
+                <property name="text">
+                 <string>Background Outer Radius</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="7">
                <widget class="QCheckBox" name="checkBox_adaptQBkgd">
                 <property name="font">
                  <font>
@@ -2428,34 +2418,96 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="1" column="6">
-               <widget class="QComboBox" name="comboBox_maskWSList"/>
-              </item>
-              <item row="0" column="7">
-               <widget class="QPushButton" name="pushButton_plot3DMerged">
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_34">
                 <property name="text">
-                 <string>Plot 3D</string>
+                 <string>Peak Radius</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="4">
+               <widget class="QLineEdit" name="lineEdit_peakRadius"/>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
               <item row="1" column="7">
+               <widget class="QLineEdit" name="lineEdit_cylinderLength"/>
+              </item>
+              <item row="2" column="4">
+               <widget class="QLineEdit" name="lineEdit_bkgdOuterR"/>
+              </item>
+              <item row="1" column="9">
+               <widget class="QCheckBox" name="checkBox_cylinder">
+                <property name="text">
+                 <string>Cylinder</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Scan Number</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QPushButton" name="pushButton_integratePt">
+                <property name="text">
+                 <string>Integrate Pt</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="5">
                <widget class="QPushButton" name="pushButton_plotScanPt">
                 <property name="text">
                  <string>Plot</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="4">
-               <widget class="QCheckBox" name="checkBox_integrateOnEdge">
-                <property name="text">
-                 <string>Integrate on Edge</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
             <item>
-             <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIntegration"/>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIntegration"/>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_12">
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_15">
+                  <item row="0" column="0">
+                   <widget class="QPushButton" name="pushButton_showAbsoluteCounts">
+                    <property name="text">
+                     <string>Show Absolute Counts</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QPushButton" name="pushButton_3">
+                    <property name="text">
+                     <string>PushButton</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="MplGraphicsView" name="graphicsView_integratedPeakView"/>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -2893,7 +2945,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1290</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
