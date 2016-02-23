@@ -516,38 +516,6 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
-    def estimate_detector_background(self, bkgd_scan_list):
-        """ Integrate peak with background and etc...
-        Purpose:
-
-        Requirements:
-
-        Guarantees:
-
-        :param bkgd_scan_list:
-        :return:
-        """
-        raise RuntimeError('Incorrect note and documentation: Add me into workflow!')
-        # Check
-        assert isinstance(bkgd_scan_list, list)
-        assert len(bkgd_scan_list) > 2
-
-        # Load and sum
-        bkgd_ws = None
-        for pt_num in bkgd_scan_list:
-            self.load_spice_xml_file(exp_no=exp_number, scan_no=scan_number, pt_no=pt_num)
-            this_matrix_ws = AnalysisDataService.retrieve(get_raw_data_workspace_name(exp_number, scan_number, pt_num))
-            if bkgd_ws is None:
-                bkgd_ws = api.CloneWorkspace(InputWorkspace=this_matrix_ws, OutputWorkspace=special_name)
-            else:
-                bkgd_ws = bkgd_ws + this_matrix_ws
-        # END-FOR
-
-        # Average
-        bkgd_ws *= 1./len(bkgd_scan_list)
-
-        return bkgd_ws.name()
-
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
@@ -879,7 +847,8 @@ class CWSCDReductionControl(object):
 
         peak_info.set_indexed_hkl(hkl)
 
-        # TODO/After Test - Delete temporary peak workspace
+        # delete temporary workspace
+        api.DeleteWorkspace(Workspace=temp_index_ws_name)
 
         return True, (hkl, error)
 
@@ -1413,6 +1382,7 @@ class CWSCDReductionControl(object):
 
         # Get peak workspace
         # TODO/NOW/1st - replace this part by method _get_refined_ub_data
+
         refined_ub_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
         assert refined_ub_ws is not None
 
