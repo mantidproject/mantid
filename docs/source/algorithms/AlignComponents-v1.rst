@@ -60,7 +60,7 @@ Usage
 
 **Example - Align the X and Z position of bank26 in POWGEN:**
 
-.. testcode:: position
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
             CalFilename="PG3_golden.cal",
@@ -81,14 +81,14 @@ Usage
 
 Output:
 
-.. testoutput:: position
+.. code-block:: none
 
     Start position is [1.54436,0.863271,-1.9297]
     Final position is [1.50591,0.863271,-1.92734]
 
 **Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
 
-.. testcode:: rotation
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -114,7 +114,9 @@ Output:
       print "Final bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
       print "Final bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
 
-.. testoutput:: rotation
+Output:
+
+.. code-block:: none
 
       Start bank26 rotation is [-24.061.0.120,18.016]
       Start bank46 rotation is [-41.092.0.061,17.795]
@@ -123,7 +125,7 @@ Output:
 
 **Example - Align sample position in POWGEN:**
 
-.. testcode:: sample
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -142,7 +144,9 @@ Output:
             FitSamplePosition=True)
       print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
-.. testoutput:: sample
+Output:
+
+.. code-block:: none
 
       Start sample position is 0.0
       Final sample position is 0.02826
