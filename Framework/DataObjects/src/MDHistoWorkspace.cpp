@@ -497,7 +497,7 @@ bool pointInWorkspace(const MDHistoWorkspace *ws, const VMD &point) {
 //----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
- *line.
+ *line at bin centres of unmasked bins.
  *
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
@@ -513,45 +513,145 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
                                    std::vector<coord_t> &x,
                                    std::vector<signal_t> &y,
                                    std::vector<signal_t> &e) const {
-  // TODO: Don't use a fixed number of points later
-  const size_t numPoints = 500;
 
-  const VMD step = (end - start) / double(numPoints - 1);
-  const auto stepLength = step.norm();
+  this->getLinePoints(start, end, normalize, x, y, e, true);
+}
 
-  // These will be the curve as plotted
+void MDHistoWorkspace::makeSingleBinWithNaN(std::vector<coord_t> &x,
+                                            std::vector<signal_t> &y,
+                                            std::vector<signal_t> &e) const {
+  x.push_back(0);
+  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+}
+
+//----------------------------------------------------------------------------------------------
+/** Obtain coordinates for a line plot through a MDWorkspace.
+ * Cross the workspace from start to end points, recording the signal along the
+ *lin at either bin centres or bin boundaries. If recording values at bin
+ *centres then omit points for masked bins.
+ *
+ * @param start :: coordinates of the start point of the line
+ * @param end :: coordinates of the end point of the line
+ * @param normalize :: how to normalize the signal
+ * @param x :: linearly spaced points along the line between start and end.
+ * @param y :: is set to the normalized signal for each bin. Length = length(x)
+ *- 1
+ * @param e :: error vector for each bin.
+ */
+void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
+                                     const Mantid::Kernel::VMD &end,
+                                     Mantid::API::MDNormalization normalize,
+                                     std::vector<coord_t> &x,
+                                     std::vector<signal_t> &y,
+                                     std::vector<signal_t> &e,
+                                     const bool bin_centres) const {
+  size_t nd = this->getNumDims();
+  if (start.getNumDims() != nd)
+    throw std::runtime_error("Start point must have the same number of "
+                             "dimensions as the workspace.");
+  if (end.getNumDims() != nd)
+    throw std::runtime_error(
+        "End point must have the same number of dimensions as the workspace.");
+
+  // Unit-vector of the direction
+  VMD dir = end - start;
+  const auto length = dir.normalize();
+
+// Vector with +1 where direction is positive, -1 where negative
+#define sgn(x) ((x < 0) ? -1.0f : ((x > 0.) ? 1.0f : 0.0f))
+  VMD dirSign(nd);
+  for (size_t d = 0; d < nd; d++) {
+    dirSign[d] = sgn(dir[d]);
+  }
+  const size_t BADINDEX = size_t(-1);
+
+  // Dimensions of the workspace
+  boost::scoped_array<size_t> index(new size_t[nd]);
+  boost::scoped_array<size_t> numBins(new size_t[nd]);
+  for (size_t d = 0; d < nd; d++) {
+    IMDDimension_const_sptr dim = this->getDimension(d);
+    index[d] = BADINDEX;
+    numBins[d] = dim->getNBins();
+  }
+
+  const std::set<coord_t> boundaries =
+      getBinBoundariesOnLine(start, end, nd, dir, length);
+
   x.clear();
   y.clear();
   e.clear();
-  for (size_t i = 0; i < numPoints; i++) {
-    // Coordinate along the line
-    VMD coord = start + step * double(i);
 
-    // Get index of bin at this coordinate
-    const auto linearIndex = this->getLinearIndexAtCoord(coord.getBareArray());
-    if (linearIndex < m_length) {
+  if (boundaries.empty()) {
+    this->makeSingleBinWithNaN(x, y, e);
 
-      if (!this->getIsMaskedAt(linearIndex)) {
-        // Record the position along the line
-        x.push_back(static_cast<coord_t>(stepLength * double(i)));
+    // Require x.size() = y.size()+1 if recording bin boundaries
+    if (!bin_centres)
+      x.push_back(length);
 
-        signal_t normalizer = getNormalizationFactor(normalize, linearIndex);
+    return;
+  } else {
+    // Get the first point
+    std::set<coord_t>::iterator it;
+    it = boundaries.cbegin();
+
+    coord_t lastLinePos = *it;
+    VMD lastPos = start + (dir * lastLinePos);
+    if (!bin_centres) {
+      x.push_back(lastLinePos);
+    }
+
+    ++it;
+    coord_t linePos = 0;
+    for (; it != boundaries.cend(); ++it) {
+      // This is our current position along the line
+      linePos = *it;
+
+      // This is the full position at this boundary
+      VMD pos = start + (dir * linePos);
+
+      // Position in the middle of the bin
+      VMD middle = (pos + lastPos) * 0.5;
+
+      // Find the signal in this bin
+      const auto linearIndex =
+          this->getLinearIndexAtCoord(middle.getBareArray());
+
+      if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
+        coord_t bin_centrePos =
+            static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+        x.push_back(bin_centrePos);
+      } else if (!bin_centres)
+        x.push_back(linePos);
+
+      if (linearIndex < m_length) {
+
+        auto normalizer = getNormalizationFactor(normalize, linearIndex);
         // And add the normalized signal/error to the list too
         auto signal = this->getSignalAt(linearIndex) * normalizer;
         if (boost::math::isinf(signal)) {
           // The plotting library (qwt) doesn't like infs.
           signal = std::numeric_limits<signal_t>::quiet_NaN();
         }
-        y.push_back(signal);
-        e.push_back(this->getErrorAt(linearIndex) * normalizer);
+        if (!bin_centres || !this->getIsMaskedAt(linearIndex)) {
+          y.push_back(signal);
+          e.push_back(this->getErrorAt(linearIndex) * normalizer);
+        }
+        // Save the position for next bin
+        lastPos = pos;
+      } else {
+        // Invalid index. This shouldn't happen
+        y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       }
 
-    } else {
-      // Record the position along the line
-      x.push_back(static_cast<coord_t>(stepLength * double(i)));
-      // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-      e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+      lastLinePos = linePos;
+
+    } // for each unique boundary
+
+    // If all bins were masked
+    if (x.size() == 0) {
+      this->makeSingleBinWithNaN(x, y, e);
     }
   }
 }
@@ -578,100 +678,7 @@ void MDHistoWorkspace::getLineData(const Mantid::Kernel::VMD &start,
                                    std::vector<signal_t> &y,
                                    std::vector<signal_t> &e) const {
 
-  size_t nd = this->getNumDims();
-  if (start.getNumDims() != nd)
-    throw std::runtime_error("Start point must have the same number of "
-                             "dimensions as the workspace.");
-  if (end.getNumDims() != nd)
-    throw std::runtime_error(
-        "End point must have the same number of dimensions as the workspace.");
-  x.clear();
-  y.clear();
-  e.clear();
-
-  // Unit-vector of the direction
-  VMD dir = end - start;
-  const auto length = dir.normalize();
-
-// Vector with +1 where direction is positive, -1 where negative
-#define sgn(x) ((x < 0) ? -1.0f : ((x > 0.) ? 1.0f : 0.0f))
-  VMD dirSign(nd);
-  for (size_t d = 0; d < nd; d++) {
-    dirSign[d] = sgn(dir[d]);
-  }
-  const size_t BADINDEX = size_t(-1);
-
-  // Dimensions of the workspace
-  boost::scoped_array<size_t> index(new size_t[nd]);
-  boost::scoped_array<size_t> numBins(new size_t[nd]);
-  for (size_t d = 0; d < nd; d++) {
-    IMDDimension_const_sptr dim = this->getDimension(d);
-    index[d] = BADINDEX;
-    numBins[d] = dim->getNBins();
-  }
-
-  const std::set<coord_t> boundaries =
-      getBinBoundariesOnLine(start, end, nd, dir, length);
-
-  if (boundaries.empty()) {
-    // Nothing at all!
-    // Make a single bin with NAN
-    x.push_back(0);
-    x.push_back(length);
-    y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-    e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-    return;
-  } else {
-    // Get the first point
-    std::set<coord_t>::iterator it;
-    it = boundaries.cbegin();
-
-    coord_t lastLinePos = *it;
-    VMD lastPos = start + (dir * lastLinePos);
-    x.push_back(lastLinePos);
-
-    ++it;
-
-    for (; it != boundaries.cend(); ++it) {
-      // This is our current position along the line
-      coord_t linePos = *it;
-      x.push_back(linePos);
-
-      // This is the full position at this boundary
-      VMD pos = start + (dir * linePos);
-
-      // Position in the middle of the bin
-      VMD middle = (pos + lastPos) * 0.5;
-
-      // Find the signal in this bin
-      const auto linearIndex =
-          this->getLinearIndexAtCoord(middle.getBareArray());
-      if (linearIndex < m_length) {
-
-        // Is the signal here masked?
-        if (this->getIsMaskedAt(linearIndex)) {
-          y.push_back(MDMaskValue);
-          e.push_back(MDMaskValue);
-        } else {
-          auto normalizer = getNormalizationFactor(normalize, linearIndex);
-          // And add the normalized signal/error to the list too
-          auto signal = this->getSignalAt(linearIndex) * normalizer;
-          if (boost::math::isinf(signal)) {
-            // The plotting library (qwt) doesn't like infs.
-            signal = std::numeric_limits<signal_t>::quiet_NaN();
-          }
-          y.push_back(signal);
-          e.push_back(this->getErrorAt(linearIndex) * normalizer);
-        }
-        // Save the position for next bin
-        lastPos = pos;
-      } else {
-        // Invalid index. This shouldn't happen
-        y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-        e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-      }
-    } // for each unique boundary
-  }   // if there is at least one point
+  this->getLinePoints(start, end, normalize, x, y, e, false);
 }
 
 //----------------------------------------------------------------------------------------------

@@ -45,6 +45,30 @@ private:
     delete it;
     return numberMasked;
   }
+
+  void getLinePlotData(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                       std::vector<signal_t> &e, const bool mask) {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+
+    if (mask) {
+      // Mask part of the workspace
+      std::vector<coord_t> min_mask{0, 0};
+      std::vector<coord_t> max_mask{5, 5};
+      MDImplicitFunction *function =
+          new MDBoxImplicitFunction(min_mask, max_mask);
+      ws->setMDMasking(function);
+    }
+
+    auto first_dim = ws->getDimension(0);
+    VMD start(first_dim->getMinimum(), 0.0);
+    VMD end(first_dim->getMaximum(), 0.0);
+
+    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+  }
+
   /// Helper method returns the size of an element in the MDHistoWorkspace
   size_t sizeOfElement() { return (sizeof(double) * 3 + sizeof(bool)); }
 
@@ -549,53 +573,83 @@ public:
         iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
+  void test_getLinePlot_same_number_of_x_and_y_values() {
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    this->getLinePlotData(x, y, e, false);
+    TSM_ASSERT_EQUALS("There should be the same number of x and y values",
+                      x.size(), y.size());
+    TSM_ASSERT_EQUALS("There should be the same number of y and e values",
+                      y.size(), e.size());
+  }
+
   void test_getLinePlot() {
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    this->getLinePlotData(x, y, e, false);
+    TS_ASSERT_EQUALS(x.size(), 10);
+    TSM_ASSERT_DELTA("x[0] should be the centre coordinate of the first bin",
+                     x[0], 0.5, 1e-5);
+    TS_ASSERT_DELTA(x[5], 5.5, 1e-5);
+    TSM_ASSERT_DELTA("x[9] should be the centre coordinate of the last bin",
+                     x[9], 9.5, 1e-5);
+
+    TS_ASSERT_EQUALS(y.size(), 10);
+    TSM_ASSERT_DELTA("y[0] should be the signal value of the first bin", y[0],
+                     0.0, 1e-5);
+    TS_ASSERT_DELTA(y[4], 4.0, 1e-5);
+    TSM_ASSERT_DELTA("y[9] should be the signal value of the last bin", y[9],
+                     9.0, 1e-5);
+  }
+
+  void test_getLinePlot_masked_same_number_of_x_and_y_values() {
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    this->getLinePlotData(x, y, e, true);
+    TSM_ASSERT_EQUALS("There should be the same number of x and y values",
+                      x.size(), y.size());
+    TSM_ASSERT_EQUALS("There should be the same number of y and e values",
+                      y.size(), e.size());
+  }
+
+  void test_getLinePlot_all_masked() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    VMD start(0.5, 0.5);
-    VMD end(9.5, 0.5);
+
+    // Mask the entire workspace
+    std::vector<coord_t> min_mask{0, 0};
+    std::vector<coord_t> max_mask{10, 10};
+    MDImplicitFunction *function =
+        new MDBoxImplicitFunction(min_mask, max_mask);
+    ws->setMDMasking(function);
+
+    auto first_dim = ws->getDimension(0);
+    VMD start(first_dim->getMinimum(), 0.0);
+    VMD end(first_dim->getMaximum(), 0.0);
+
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
     ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 500);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[50], 0.9018, 1e-5);
-    TS_ASSERT_DELTA(x[100], 1.8036, 1e-5);
-    TS_ASSERT_DELTA(x[499], 9.0, 1e-5);
-
-    TS_ASSERT_EQUALS(y.size(), 500);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[50], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[100], 2.0, 1e-5);
+    TSM_ASSERT_EQUALS("We should get a single bin", x.size(), 1);
+    TSM_ASSERT_EQUALS("We should get a single bin", y.size(), 1);
   }
 
   void test_getLinePlotWithMaskedData() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
-    for (size_t i = 0; i < 100; i++)
-      ws->setSignalAt(i, double(i));
-
-    std::vector<coord_t> min{0, 0};
-    std::vector<coord_t> max{5, 5};
-
-    // Mask part of the workspace
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ws->setMDMasking(function);
-
-    VMD start(0.5, 0.5);
-    VMD end(9.5, 0.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
+    this->getLinePlotData(x, y, e, true);
 
     // Masked points omitted
-    TS_ASSERT_EQUALS(y.size(), 250);
+    TS_ASSERT_EQUALS(y.size(), 5);
     // Unmasked value
-    TS_ASSERT_DELTA(y[200], 8.0, 1e-5);
+    TS_ASSERT_DELTA(y[3], 8.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------

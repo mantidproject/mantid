@@ -89,6 +89,13 @@ public:
                    std::vector<coord_t> &x, std::vector<signal_t> &y,
                    std::vector<signal_t> &e) const override;
 
+  void getLinePoints(const Mantid::Kernel::VMD &start,
+                     const Mantid::Kernel::VMD &end,
+                     Mantid::API::MDNormalization normalize,
+                     std::vector<coord_t> &x, std::vector<signal_t> &y,
+                     std::vector<signal_t> &e,
+                     const bool bin_centres) const override;
+
   void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
 
   // --------------------------------------------------------------------------------------------
@@ -420,6 +427,9 @@ private:
   MDHistoWorkspace *doClone() const override {
     return new MDHistoWorkspace(*this);
   }
+
+  void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                            std::vector<signal_t> &e) const;
 
   void initVertexesArray();
 

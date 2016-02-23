@@ -97,6 +97,13 @@ public:
                            std::vector<coord_t> &x, std::vector<signal_t> &y,
                            std::vector<signal_t> &e) const = 0;
 
+  virtual void getLinePoints(const Mantid::Kernel::VMD &start,
+                             const Mantid::Kernel::VMD &end,
+                             Mantid::API::MDNormalization normalize,
+                             std::vector<coord_t> &x, std::vector<signal_t> &y,
+                             std::vector<signal_t> &e,
+                             const bool bin_centres) const = 0;
+
   virtual double &operator[](const size_t &index) = 0;
 
   virtual void setCoordinateSystem(
