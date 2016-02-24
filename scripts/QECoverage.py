@@ -1,33 +1,41 @@
-#pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements, too-many-branches, no-self-use
+﻿# pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements, too-many-branches, no-self-use
 import sys
 import numpy as np
 import mantid
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from scipy import constants
+
 
 def calcQE(efix, tthlims, **kwargs):
     fc = np.sign(efix[0])
     efix = np.abs(efix)
     qe_array = []
+    # Conversion factors
+    E2q = 2. * constants.m_n / (constants.hbar ** 2)  # Energy to (neutron momentum)^2 (==2m_n/hbar^2)
+    meV2J = constants.e / 1000.  # meV to Joules
+    m2A = 1.e10  # metres to Angstrom
     for myE in efix:
-        if fc > 0:
-            Et0 = np.linspace(-myE/5, myE, 200)
-        else:
-            emax = -myE*5
-            if 'emax' in kwargs:
-                emax = -kwargs['emax']
-            Et0 = np.linspace(emax, myE, 200)
-        q1 = np.sqrt((2*1.67e-27/(6.63e-34/(2*np.pi))**2)*(2*myE*1.6e-22-Et0*1.6e-22-2*1.6e-22*np.sqrt(myE*(myE-Et0))*np.cos(np.deg2rad(tthlims[0]))))/1e10
+        emax = -myE * 5
+        if 'emax' in kwargs:
+            emax = -kwargs['emax']
+        elif 'emin' in kwargs:
+            emax = kwargs['emin']
+        Et0 = np.linspace(emax, myE, 200)
+        q1 = np.sqrt(
+            E2q * (2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[0]))) * meV2J) / m2A
         q1 = np.concatenate((np.flipud(q1), q1))
-        Et = np.concatenate((np.flipud(fc*Et0), fc*Et0))
+        Et = np.concatenate((np.flipud(fc * Et0), fc * Et0))
         for lines in range(1, len(tthlims)):
-            q2 = np.sqrt((2*1.67e-27/(6.63e-34/(2*np.pi))**2)*(2*myE*1.6e-22-Et0*1.6e-22-2*1.6e-22*np.sqrt(myE*(myE-Et0))*np.cos(np.deg2rad(tthlims[lines]))))/1e10
+            q2 = np.sqrt(E2q * (
+                2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[lines]))) * meV2J) / m2A
             q2 = np.concatenate((np.flipud(q2), q2))
             q1 = np.append(q1, q2)
-            Et = np.append(Et, np.concatenate((np.flipud(fc*Et0), fc*Et0)))
+            Et = np.append(Et, np.concatenate((np.flipud(fc * Et0), fc * Et0)))
         qe_array.append([q1, Et])
     return qe_array
+
 
 class QECoverageGUI(QtGui.QWidget):
     """
@@ -75,6 +83,15 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_createws.setToolTip("Create a Mantid workspace?")
         self.direct_grid.addWidget(self.direct_createws)
         self.direct_createws.stateChanged.connect(self.onDirectCreateWSChanged)
+        self.direct_emin = QtGui.QFrame(self.tab_direct)
+        self.direct_emin_grid = QtGui.QHBoxLayout()
+        self.direct_emin.setLayout(self.direct_emin_grid)
+        self.direct_emin_label = QtGui.QLabel("Emin", self.direct_emin)
+        self.direct_emin_grid.addWidget(self.direct_emin_label)
+        self.direct_emin_input = QtGui.QLineEdit("-10", self.direct_emin)
+        self.direct_emin_input.setToolTip("Mininum energy transfer to plot down to.")
+        self.direct_emin_grid.addWidget(self.direct_emin_input)
+        self.direct_grid.addWidget(self.direct_emin)
         self.direct_plotbtn = QtGui.QPushButton("Plot Q-E", self.tab_direct)
         self.direct_grid.addWidget(self.direct_plotbtn)
         self.direct_plotbtn.clicked.connect(self.onClickDirectPlot)
@@ -184,16 +201,19 @@ class QECoverageGUI(QtGui.QWidget):
         elif Inst == 'MAPS':
             self.tthlims = [3.0, 19.8, 21.1, 29.8, 31.1, 39.8, 41.1, 49.8, 51.1, 59.8]
         elif Inst == 'MARI':
-            self.tthlims = [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86, 119.14, 120.86, 134.14]
+            self.tthlims = [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86,
+                            119.14, 120.86, 134.14]
         elif Inst == 'MERLIN':
             self.tthlims = [2.838, 135.69]
         elif Inst == 'ARCS':
             self.tthlims = [2.373, 135.955]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
-        # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
+# HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
         elif Inst == 'HYSPEC':
             self.tthlims = [0, 60]
+            # reset s2
+            self.direct_s2_input.setText("30")
             self.direct_s2.show()
         elif Inst == 'SEQUOIA':
             self.tthlims = [1.997, 61.926]
@@ -207,7 +227,7 @@ class QECoverageGUI(QtGui.QWidget):
             self.tthlims = [9.64, 129.4]
         elif Inst == 'MIBEMOL':
             self.tthlims = [23.5, 147.157]
-        # DNS information from webpage because only polarised IDF available in Mantid.
+        # DNS information from web page because only polarised IDF available in Mantid.
         elif Inst == 'DNS':
             self.tthlims = [0, 135]
         elif Inst == 'TOFTOF':
@@ -251,9 +271,9 @@ class QECoverageGUI(QtGui.QWidget):
         except ValueError:
             s2 = 0
         if abs(s2) <= 30:
-            self.tthlims = [0, abs(s2)+30]
+            self.tthlims = [0, abs(s2) + 30]
         else:
-            self.tthlims = [abs(s2)-30, abs(s2)+30]
+            self.tthlims = [abs(s2) - 30, abs(s2) + 30]
 
     def onClickDirectPlot(self):
         overplot = self.direct_plotover.isChecked()
@@ -272,18 +292,19 @@ class QECoverageGUI(QtGui.QWidget):
                 ei_vec = [float(val) for val in ei_str.split(',')]
             except ValueError:
                 raise ValueError(eierr)
-        qe = calcQE(ei_vec, self.tthlims)
+        qe = calcQE(ei_vec, self.tthlims, emin=float(self.direct_emin_input.text()))
         if not overplot:
             self.axes.clear()
             self.axes.axhline(color='k')
         self.axes.hold(True)
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
-            name = Inst+'_Ei='+str(ei_vec[n])
+            name = Inst + '_Ei=' + str(ei_vec[n])
             line, = self.axes.plot(qe[n][0], qe[n][1])
             line.set_label(name)
             if createws:
-                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1, OutputWorkspace=str('QECoverage_'+name))
+                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1,
+                                                 OutputWorkspace=str('QECoverage_' + name))
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.axes.legend()
@@ -302,13 +323,15 @@ class QECoverageGUI(QtGui.QWidget):
         else:
             self.axes.hold(True)
         line, = self.axes.plot(qe[0][0], qe[0][1])
-        line.set_label(inst+'_'+ana)
+        line.set_label(inst + '_' + ana)
         if createws:
-            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1, OutputWorkspace=str('QECoverage_'+inst+'_'+ana))
+            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1,
+                                             OutputWorkspace=str('QECoverage_' + inst + '_' + ana))
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.axes.legend()
         self.canvas.draw()
+
 
 def qapp():
     if QtGui.QApplication.instance():
@@ -316,6 +339,7 @@ def qapp():
     else:
         _app = QtGui.QApplication(sys.argv)
     return _app
+
 
 app = qapp()
 mainForm = QECoverageGUI()
