@@ -137,7 +137,7 @@ void PredictFractionalPeaks::exec() {
   int N = NPeaks;
   if (includePeaksInRange) {
     N = static_cast<int>(
-        (Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
+        std::lround((Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1)));
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
@@ -188,9 +188,9 @@ void PredictFractionalPeaks::exec() {
               ErrPos = 2;
               vector<int> SavPk;
               SavPk.push_back(RunNumber);
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[0] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[1] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[2] + .5)));
+              SavPk.push_back(static_cast<int>(lround(1000.0 * hkl1[0])));
+              SavPk.push_back(static_cast<int>(lround(1000.0 * hkl1[1])));
+              SavPk.push_back(static_cast<int>(lround(1000.0 * hkl1[2])));
 
               // TODO keep list sorted so searching is faster?
               auto it =

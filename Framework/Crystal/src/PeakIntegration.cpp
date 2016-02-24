@@ -144,8 +144,8 @@ void PeakIntegration::exec() {
     double row = peak.getRow();
 
     // Average integer postion
-    int XPeak = int(col + 0.5);
-    int YPeak = int(row + 0.5);
+    int XPeak = static_cast<int>(std::lround(col));
+    int YPeak = static_cast<int>(std::lround(row));
 
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();

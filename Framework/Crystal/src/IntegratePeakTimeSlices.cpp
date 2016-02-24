@@ -934,8 +934,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
 
   panel1->getBoundingBox(B);
 
-  NROWS = static_cast<int>((B.yMax() - B.yMin()) / pixHeighty + .5);
-  NCOLS = static_cast<int>((B.xMax() - B.xMin()) / pixWidthx + .5);
+  NROWS = static_cast<int>(std::lround((B.yMax() - B.yMin()) / pixHeighty));
+  NCOLS = static_cast<int>(std::lround((B.xMax() - B.xMin()) / pixWidthx));
 }
 
 /**
@@ -1004,7 +1004,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x = 1;
   if (sigy * NstdY < 7 && sigy * NstdY >= 0) // is close to row edge
   {
-    x = probs[static_cast<int>(sigy * NstdY + .5)];
+    x = probs[std::lround(sigy * NstdY)];
     if (sigy < 0)
       x = 1 - x;
     double My2 = StatBase[IStartRow];
@@ -1015,7 +1015,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   double x1 = 1;
   if (sigx * NstdX < 7 && sigx * NstdX > 0) // is close to x edge
   {
-    x1 = probs[static_cast<int>(sigx * NstdX + .5)];
+    x1 = probs[std::lround(sigx * NstdX)];
     if (sigx < 0)
       x1 = 1 - x1;
     double Mx2 = StatBase[IStartCol];

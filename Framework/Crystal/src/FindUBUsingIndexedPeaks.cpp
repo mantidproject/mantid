@@ -15,8 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-#define round(x) ((x) >= 0 ? (int)((x) + 0.5) : (int)((x)-0.5))
-
 //--------------------------------------------------------------------------
 /** Constructor
  */
@@ -66,7 +64,8 @@ void FindUBUsingIndexedPeaks::exec() {
                                              // just check for (0,0,0)
     {
       q_vectors.push_back(peaks[i].getQSampleFrame());
-      hkl_vectors.emplace_back(round(hkl[0]), round(hkl[1]), round(hkl[2]));
+      hkl_vectors.emplace_back(std::round(hkl[0]), std::round(hkl[1]),
+                               std::round(hkl[2]));
       indexed_count++;
     }
   }

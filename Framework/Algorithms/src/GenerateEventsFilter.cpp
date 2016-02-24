@@ -601,13 +601,13 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       minvaluei = m_intLog->minValue();
       minvalue = static_cast<double>(minvaluei);
     } else
-      minvaluei = static_cast<int>(minvalue + 0.5);
+      minvaluei = static_cast<int>(std::lround(minvalue));
 
     if (maxvalue == EMPTY_DBL()) {
       maxvaluei = m_intLog->maxValue();
       maxvalue = static_cast<double>(maxvaluei);
     } else
-      maxvaluei = static_cast<int>(maxvalue + 0.5);
+      maxvaluei = static_cast<int>(std::lround(maxvalue));
 
     if (minvalue > maxvalue) {
       stringstream errmsg;
@@ -1449,7 +1449,7 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     if (isEmpty(deltadbl))
       delta = maxvalue - minvalue + 1;
     else
-      delta = static_cast<int>(deltadbl + 0.5);
+      delta = static_cast<int>(std::lround(deltadbl));
 
     if (delta <= 0) {
       stringstream errss;

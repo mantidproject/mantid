@@ -730,14 +730,13 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
   *  As crystallographical coordinate sytem is based on 3 integers, eps is used
   *as accuracy to convert into integers
 */
-#define DINT(x) std::fabs((x) - double(size_t((x) + 0.5)))
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {
       mult /= val;
     } else {
-      if (DINT(val) > eps) {
-        mult *= (double(size_t(val / eps) + 1) * eps / val);
+      if (std::abs(val - std::round(val)) > eps) {
+        mult *= std::ceil(val / eps) * eps / val;
       }
     }
   }
@@ -779,12 +778,12 @@ double V3D::toMillerIndexes(double eps) {
   mult = nearInt(ay, eps, mult);
   mult = nearInt(az, eps, mult);
 
-  size_t iax = size_t(ax * mult / eps + 0.5);
-  size_t iay = size_t(ay * mult / eps + 0.5);
-  size_t iaz = size_t(az * mult / eps + 0.5);
+  size_t iax = std::lround(ax * mult / eps);
+  size_t iay = std::lround(ay * mult / eps);
+  size_t iaz = std::lround(az * mult / eps);
 
   size_t div = boost::math::gcd(iax, boost::math::gcd(iay, iaz));
-  mult /= (double(div) * eps);
+  mult /= (static_cast<double>(div) * eps);
   x *= mult;
   y *= mult;
   z *= mult;

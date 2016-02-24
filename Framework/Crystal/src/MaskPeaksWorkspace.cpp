@@ -100,8 +100,8 @@ void MaskPeaksWorkspace::exec() {
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();
-    int xPeak = int(col + 0.5) - 1;
-    int yPeak = int(row + 0.5) - 1;
+    int xPeak = static_cast<int>(std::lround(col)) - 1;
+    int yPeak = static_cast<int>(std::lround(row)) - 1;
     g_log.debug() << "Generating information for peak at x=" << xPeak
                   << " y=" << yPeak << "\n";
 
