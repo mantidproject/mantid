@@ -37,7 +37,6 @@ class DLLExport LoadSwans final
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -59,7 +58,8 @@ private:
   unsigned int getDetectorSize();
 
   // Member variables
-  DataObjects::EventWorkspace_sptr m_ws;
+  DataObjects::EventWorkspace_sptr m_ws =
+      boost::make_shared<Mantid::DataObjects::EventWorkspace>();
   unsigned int m_detector_size = 0;
 
   // Constants:
