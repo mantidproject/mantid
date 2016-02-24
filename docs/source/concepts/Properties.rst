@@ -38,7 +38,10 @@ these options.
 
 An ArrayProperty can be declared in a algorithm as follows:
 
-``declareProperty(new ArrayProperty``\ \ ``(...));``
+``declareProperty(Mantid::Kernel::make_unique<ArrayProperty>``\ \ ``(...));``
+
+(note the use of ``make_unique`` rather than ``new``, as the algorithm takes
+ownership of the property)
 
 or, if creating using an already existing vector:
 
