@@ -28,7 +28,8 @@ public:
   void test_Calculation() {
     // 1. Input data for test
     std::vector<double> vec_d = {2.72452, 2.84566, 3.33684, 4.719, 5.44903};
-    std::array<double, 5> vec_tof = {62070.4, 64834.9, 76039.6, 107542, 124187};
+    std::array<double, 5> vec_tof = {
+        {62070.4, 64834.9, 76039.6, 107542, 124187}};
 
     // 2. Initialize the method
     ThermalNeutronDtoTOFFunction function;
