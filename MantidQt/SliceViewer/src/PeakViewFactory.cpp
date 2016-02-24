@@ -76,7 +76,10 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  const size_t colorNumber)
     : PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex,
                                  colorNumber),
-      m_mdWS(mdWS), m_peaksWS(peaksWS)
+      m_mdWS(mdWS), m_peaksWS(peaksWS),
+      m_calculator(
+          std::
+              make_shared<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>())
 {
     setForegroundAndBackgroundColors(colorNumber);
 }
@@ -185,7 +188,7 @@ PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationEllipsoid(
 
     return std::make_shared<PeakRepresentationEllipsoid>(
         position, abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter,
-        directions);
+        directions, m_calculator);
 }
 
 void PeakViewFactory::swapPeaksWorkspace(

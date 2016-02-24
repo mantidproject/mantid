@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/PeakRepresentationEllipsoid.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
 
 #include <QPainter>
@@ -8,113 +9,96 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
-  PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(const Mantid::Kernel::V3D &origin,
-                                                           const std::vector<double> peakRadii,
-                                                           const std::vector<double> backgroundInnerRadii,
-                                                           const std::vector<double> backgroundOuterRadii,
-                                                           const std::vector<Mantid::Kernel::V3D> directions)
-    : m_originalOrigin(origin),
-      m_originalDirections(directions),
-      m_origin(origin),
-      m_directions(directions),
-      m_peakRadii(peakRadii),
+PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
+    const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
+    const std::vector<double> backgroundInnerRadii,
+    const std::vector<double> backgroundOuterRadii,
+    const std::vector<Mantid::Kernel::V3D> directions,
+    std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
+        calculator)
+    : m_originalOrigin(origin), m_originalDirections(directions),
+      m_origin(origin), m_directions(directions), m_peakRadii(peakRadii),
       m_backgroundInnerRadii(backgroundInnerRadii),
-      m_backgroundOuterRadii(backgroundOuterRadii),
-      m_opacityMax(0.8),
-      m_opacityMin(0.0),
-      m_cachedOpacityAtDistance(0.0),
-      m_showBackgroundRadii(false)
+      m_backgroundOuterRadii(backgroundOuterRadii), m_opacityMax(0.8),
+      m_opacityMin(0.0), m_cachedOpacityAtDistance(0.0),
+      m_showBackgroundRadii(false), m_calculator(calculator)
 {
-
-
-
-#if 0
-    // This possibility can arise from IntegratePeaksMD.
-    if (m_backgroundOuterRadiusSQ <= m_backgroundInnerRadiusSQ) {
-        m_backgroundOuterRadius = m_backgroundInnerRadius;
-        m_backgroundOuterRadiusSQ = m_backgroundInnerRadiusSQ;
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------------------------
 /** Set the distance between the plane and the center of the peak in md
-coordinates
-
-ASCII diagram below to demonstrate how dz (distance in z) is used to determine
-the radius of the sphere-plane intersection at that point,
-resloves both rx and ry. Also uses the distance to calculate the opacity to
-apply.
-
+coordinates.
 @param z : position of the plane slice in the z dimension.
-
-     /---------\
-    /           \
----/---------rx--\---------------- plane
-   |    dz|     /| peak
-   |      |   /  |
-   |      . /    |
-   |             |
-   \             /
-    \           /
-     \---------/
 */
 void PeakRepresentationEllipsoid::setSlicePoint(const double &z)
 {
-  const double distance = z - m_origin.Z();
-  const double distanceSQ = distance*distance;
 
-  // Need to find a good criterion when the
+    // We check first the outer background. If there is no cut, then,
+    // there should be nothing to left to do. Otherewise we do the inner background
+    // and teh peaks separately.
+    if (Mantid::SliceViewer::checkIfCutExists(
+            m_directions, m_backgroundOuterRadii, m_origin, z)) {
 
-
-
-
-
-
-
-
-
-
-
+        // Handle the case of the outer background
+        auto ellipsoidInfoBackgroundOuter = m_calculator->getSlicePlaneInfo(
+            m_directions, m_backgroundOuterRadii, m_origin, z);
+        m_angleEllipse = ellipsoidInfoBackgroundOuter.angle; // This should be the same for all
+        m_radiiEllipseBackgroundOuter = std::vector<double>(ellipsoidInfoBackgroundOuter.radiusMajorAxis, ellipsoidInfoBackgroundOuter.radiusMinorAxis);
+        //m_originEllipseBackgroundOuter = ellipsoidInfoBackgroundOuter.origin;
 
 
 
+        if (Mantid::SliceViewer::checkIfCutExists(m_directions, m_peakRadii,
+                                                  m_origin, z)) {
 
+            auto ellipsoidInfoPeaks = m_calculator->getSlicePlaneInfo(
+                m_directions, m_peakRadii, m_origin, z);
+        }
+
+        if (Mantid::SliceViewer::checkIfCutExists(
+                m_directions, m_backgroundInnerRadii, m_origin, z)) {
+
+            auto ellipsoidInfoBackgroundOuter = m_calculator->getSlicePlaneInfo(
+                m_directions, m_backgroundInnerRadii, m_origin, z);
+        }
 
 #if 0
-    const double distance = z - m_origin.Z();
-    const double distanceSQ = distance * distance;
 
-    if (distanceSQ <= m_backgroundOuterRadiusSQ) {
-        const double distanceAbs = std::sqrt(distanceSQ);
-        m_peakRadiusAtDistance = std::sqrt(m_peakRadiusSQ - distanceSQ);
-        m_backgroundInnerRadiusAtDistance
-            = std::sqrt(m_backgroundInnerRadiusSQ - distanceSQ);
-        m_backgroundOuterRadiusAtDistance
-            = std::sqrt(m_backgroundOuterRadiusSQ - distanceSQ);
-        // Apply a linear transform to convert from a distance to an opacity
-        // between opacityMin and opacityMax.
-        m_cachedOpacityAtDistance = m_cachedOpacityGradient * distanceAbs
-                                    + m_opacityMax;
+
+
+        // Get the ellipsoid information for the peak
+        auto ellipsoidInfo = m_calculator->getSlicePlaneInfo(
+            m_originalDirections, m_peakRadii, m_origin, z);
+
+        // Get the ellipsoid information for the
+
+
+        m_radiiEllipse = std::vector<double>(ellipsoidInfo.radiusMajorAxis,
+                                             ellipsoidInfo.radiusMinorAxis);
+        m_angleEllipse = ellipsoidInfo.angle;
+       // m_originEllipse = ellipsoidInfo.origin;
+
+        // TODO apply opacity gradient
+        // TODO check backgorund radii
+#endif
     } else {
         m_cachedOpacityAtDistance = m_opacityMin;
-        m_backgroundOuterRadiusAtDistance.reset();
+        // m_backgroundOuterRadiusAtDistance.reset();
     }
-#endif
 }
 
 /**
- *Move the peak origin according to the transform.
+ *Move the peak origin according to the transform. This affects
+ * the origin but also the ellipsoid directions
  *@param peakTransform : transform to use.
  */
 void PeakRepresentationEllipsoid::movePosition(
     Mantid::Geometry::PeakTransform_sptr peakTransform)
 {
-  // TODO need to roate the directions as well
-#if 0
     m_origin = peakTransform->transform(m_originalOrigin);
-#endif
+    m_directions[0] = peakTransform->transform(m_originalDirections[0]);
+    m_directions[1] = peakTransform->transform(m_originalDirections[1]);
+    m_directions[2] = peakTransform->transform(m_originalDirections[2]);
 }
 
 /**
@@ -123,7 +107,7 @@ void PeakRepresentationEllipsoid::movePosition(
 */
 void PeakRepresentationEllipsoid::showBackgroundRadius(const bool show)
 {
-    m_showBackgroundRadii= show;
+    m_showBackgroundRadii = show;
 }
 
 /**
@@ -146,9 +130,8 @@ PeakBoundingBox PeakRepresentationEllipsoid::getBoundingBox() const
 
 double PeakRepresentationEllipsoid::getEffectiveRadius() const
 {
-#if 0
-    return m_showBackgroundRadius ? m_backgroundOuterRadius : m_peakRadius;
-#endif
+    // return m_showBackgroundRadius ? m_backgroundOuterRadius[0] :
+    // m_peakRadius[0];
 }
 
 void PeakRepresentationEllipsoid::setOccupancyInView(const double)
@@ -176,7 +159,8 @@ const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const
     return m_origin;
 }
 
-std::shared_ptr<PeakPrimitives> PeakRepresentationEllipsoid::getDrawingInformation(
+std::shared_ptr<PeakPrimitives>
+PeakRepresentationEllipsoid::getDrawingInformation(
     PeakRepresentationViewInformation viewInformation)
 {
 #if 0

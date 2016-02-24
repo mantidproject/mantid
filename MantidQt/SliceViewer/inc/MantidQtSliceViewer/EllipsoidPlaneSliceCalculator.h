@@ -15,16 +15,20 @@ Mantid::Kernel::Matrix<double> EXPORT_OPT_MANTIDQT_SLICEVIEWER
 createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
                                 std::vector<double> radii);
 
-struct SliceEllipseInfo {
-    SliceEllipseInfo(Mantid::Kernel::V3D origin, double radius1, double radius2,
-                     double angle)
-        : origin(origin), radius1(radius1), radius2(radius2), angle(angle)
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
+                      const std::vector<double> &radii,
+                      const Mantid::Kernel::V3D &originEllipsoid, double zPlane);
+
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceEllipseInfo {
+    SliceEllipseInfo(Mantid::Kernel::V3D origin = Mantid::Kernel::V3D(0, 0, 0),
+                     double radius1 = 0.0, double radius2 = 0.0,
+                     double angle = 0.0)
+        : origin(origin), radiusMajorAxis(radiusMajorAxis), radiusMinorAxis(radiusMinorAxis), angle(angle)
     {
     }
-
     Mantid::Kernel::V3D origin;
-    double radius1;
-    double radius2;
+    double radiusMajorAxis;
+    double radiusMinorAxis;
     double angle;
 };
 
@@ -34,7 +38,7 @@ public:
     SliceEllipseInfo
     getSlicePlaneInfo(std::vector<Mantid::Kernel::V3D> directions,
                       std::vector<double> radii,
-                      Mantid::Kernel::V3D originEllipsoid, double zPlane);
+                      Mantid::Kernel::V3D originEllipsoid, double zPlane) const;
 
 private:
     SliceEllipseInfo

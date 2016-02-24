@@ -4,6 +4,7 @@
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidQtSliceViewer/PeakRepresentation.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 
@@ -87,6 +88,9 @@ private:
 
     /// Color background
     PeakViewColor m_backgroundColor;
+
+    /// Ellipsoid calculator -- as we don't paint in parallel this is safe to share between the peaks
+    std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> m_calculator;
 };
 }
 }

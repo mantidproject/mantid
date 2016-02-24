@@ -2,7 +2,8 @@
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 
 #include "MantidQtSliceViewer/PeakRepresentation.h"
-
+#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidKernel/V2D.h"
 namespace MantidQt
 {
 namespace SliceViewer
@@ -39,7 +40,8 @@ public:
                            const std::vector<double> peakRadii,
                            const std::vector<double> backgroundInnerRadii,
                            const std::vector<double> backgroundOuterRadii,
-                           const std::vector<Mantid::Kernel::V3D> directions);
+                           const std::vector<Mantid::Kernel::V3D> directions,
+                           std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> calculator);
 
   /// Setter for the slice point
   void setSlicePoint(const double &) override;
@@ -72,17 +74,17 @@ protected:
               PeakRepresentationViewInformation viewInformation) override;
 
 private:
+  //---------- Original collections
   /// Original origin x=h, y=k, z=l
   Mantid::Kernel::V3D m_originalOrigin;
   /// Original directions
   std::vector<Mantid::Kernel::V3D> m_originalDirections;
 
-
+  // -----------Working copies of collections
   /// Origin md-x, md-y, and md-z
   Mantid::Kernel::V3D  m_origin;
   /// Direction in md-x, md-y and md-z
   std::vector<Mantid::Kernel::V3D> m_directions;
-
   /// Actual peak radii
   const std::vector<double> m_peakRadii;
   /// Peak background inner radii
@@ -99,13 +101,25 @@ private:
   double m_cachedOpacityAtDistance;
 
 
-  // TODO: check how to incorporate in an elliptical scenario
+  // ---- Drawing information of the 2D ellipses
+  /// Angle between the x axis and the major ellipse axis
+  double m_angleEllipse;
 
+  /// Radii of the ellipse. First entry is the Major axis, second the minor axis
+  std::vector<double> m_radiiEllipse;
+  std::vector<double> m_radiiEllipseBackgroundInner;
+  std::vector<double> m_radiiEllipseBackgroundOuter;
+
+  // Origin of the ellipse
+  Mantid::Kernel::V2D m_originEllipse;
+  Mantid::Kernel::V2D m_originEllipseBackgroundInner;
+  Mantid::Kernel::V2D m_originEllipseBackgroundOuter;
 
   /// Flag to indicate that the background radius should be drawn.
   bool m_showBackgroundRadii;
 
-
+  /// A calculator to extract the ellipse parameters
+  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> m_calculator;
 };
 }
 }

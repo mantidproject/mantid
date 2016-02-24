@@ -152,9 +152,10 @@ getEigenDirections(double evMinorAxis, double evMajorAxis,
  * @return radii and directions
  */
 std::pair<double, double> getAxesInformation(Mantid::Kernel::DblMatrix A,
-                                   Mantid::Kernel::DblMatrix AInverse,
-                                   Mantid::Kernel::DblMatrix B,
-                                   Mantid::Kernel::DblMatrix BT, double c)
+                                             Mantid::Kernel::DblMatrix AInverse,
+                                             Mantid::Kernel::DblMatrix B,
+                                             Mantid::Kernel::DblMatrix BT,
+                                             double c)
 {
     // Calculate the denominator: (Transpose[B]*A^(-1)*B/4 - (c-1))
     const auto temp1 = AInverse * B;
@@ -183,7 +184,7 @@ std::pair<double, double> getAxesInformation(Mantid::Kernel::DblMatrix A,
     // Note that we don't have to perform any transformations on the radius, as
     // they will
     // not be affected by a translation
-    return std::make_pair(radiusMinorAxis, radiusMajorAxis);
+    return std::make_pair(radiusMajorAxis, radiusMinorAxis);
 }
 
 /**
@@ -199,6 +200,14 @@ double getAngle(Mantid::Kernel::DblMatrix A)
     const auto factor = 2 * A[0][1] / (A[1][1] - A[0][0]);
     return -0.5 * std::atan(factor);
 }
+
+bool isBetweenEndpoints(double endpoint1, double endpoint2, double z)
+{
+    const auto isBetween1And2 = (endpoint1 < z) && (z < endpoint2);
+    const auto isBetween2And1 = (endpoint2 < z) && (z < endpoint1);
+
+    return isBetween1And2 || isBetween2And1;
+}
 }
 
 namespace Mantid
@@ -208,7 +217,7 @@ namespace SliceViewer
 
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
-    Mantid::Kernel::V3D originEllipsoid, double zPlane)
+    Mantid::Kernel::V3D originEllipsoid, double zPlane) const
 {
     // Setup the Ellipsoid Matrix
     auto m = createEllipsoidMatrixInXYZFrame(directions, radii);
@@ -242,13 +251,13 @@ bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
  * @param m: the ellipsoid matrix
  * @return true if we are dealing with circle
  */
-bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(const Mantid::Kernel::Matrix<double> &m) const
+bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(
+    const Mantid::Kernel::Matrix<double> &m) const
 {
     auto isM00EqualM11 = almost_equal(m[0][0], m[1][1]);
     auto isM01Zero = almost_equal(m[0][1], 0.0);
     return isM00EqualM11 && isM01Zero;
 }
-
 
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
     const Kernel::Matrix<double> &m, double zPlane,
@@ -302,7 +311,6 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
     const auto isCircle = checkIfIsCircle(m);
     const double angle = isCircle ? 0.0 : getAngle(A);
 
-    // Calculat the roation angle
     return SliceEllipseInfo(origin, radii.first, radii.second, angle);
 }
 
@@ -369,6 +377,38 @@ createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
     e.setRow(2, e2);
     // Now mulitply s*e*Transpose[s]
     return s * e * sTransposed;
+}
+
+/**
+ * Check if a cut with the ellipsoid is possible at all
+ * @param m: the ellipsoid matrix
+ * @param originEllipsoid: the origin of the ellipsoid
+ * @param zVal: the cut z position
+ * @return
+ */
+bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
+                      const std::vector<double> &radii,
+                      const Mantid::Kernel::V3D &originEllipsoid, double zPlane)
+{
+    // Translate into ellipsoid
+    const double z = zPlane - originEllipsoid.Z();
+
+    bool hasCut = false;
+    // For each axis check if the z point is between the z values of the
+    // axis endpoints
+    int counter = 0;
+    for (const auto &direction : directions) {
+        const auto endpoint1 = direction[2] * radii[counter];
+        const auto endpoint2 = -1 * direction[2] * radii[counter];
+
+        if (isBetweenEndpoints(endpoint1, endpoint2, z)) {
+            hasCut = true;
+            break;
+        }
+        ++counter;
+    }
+
+    return hasCut;
 }
 }
 }
