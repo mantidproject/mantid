@@ -16473,12 +16473,12 @@ void ApplicationWindow::showInterfaceCategoriesDialog() {
 }
 
 void ApplicationWindow::showUserDirectoryDialog() {
-  // cppcheck-suppress memleak
   MantidQt::API::ManageUserDirectories *ad =
       new MantidQt::API::ManageUserDirectories(this);
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
+  // cppcheck-suppress memleak
 }
 
 void ApplicationWindow::addCustomAction(QAction *action,

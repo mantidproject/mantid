@@ -4345,9 +4345,11 @@ void Graph::copy(Graph *g) {
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
       else
-        (void)insertText(t);
+        // cppcheck-suppress leakReturnValNotUsed
+        insertText(t);
     } else
-      (void)insertText(t);
+      // cppcheck-suppress leakReturnValNotUsed
+      insertText(t);
   }
 
   QVector<int> l = g->lineMarkerKeys();
