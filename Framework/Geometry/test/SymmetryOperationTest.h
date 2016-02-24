@@ -70,6 +70,14 @@ public:
     TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+1/2");
   }
 
+  void testStringConstructorArbitraryFractions() {
+    SymmetryOperation symOp("-x,-y+10/20,-z+34/45");
+
+    V3R vector = symOp.vector();
+    TS_ASSERT_EQUALS(vector.y(), RationalNumber(1, 2));
+    TS_ASSERT_EQUALS(vector.z(), RationalNumber(34, 45));
+  }
+
   void testCopyConstructor() {
     SymmetryOperation inversion("-x,-y,-z");
     SymmetryOperation anotherInversion(inversion);
