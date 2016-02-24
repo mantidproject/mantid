@@ -9,7 +9,7 @@ namespace Geometry {
 
 /// Default constructor, results in identity.
 SymmetryOperation::SymmetryOperation()
-    : m_order(1), m_inverseMatrix(Kernel::IntMatrix(3, 3, true)),
+    : m_order(1), m_transposedInverseMatrix(Kernel::IntMatrix(3, 3, true)),
       m_reducedVector(), m_identifier(), m_matrixVectorPair() {
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
       m_matrixVectorPair.getMatrix(), m_matrixVectorPair.getVector());
@@ -52,9 +52,9 @@ void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
       MatrixVectorPair<int, V3R>(matrix, getWrappedVector(vector));
 
   // Inverse matrix for HKL operations.
-  m_inverseMatrix = Kernel::IntMatrix(matrix);
-  m_inverseMatrix.Invert();
-  m_inverseMatrix = m_inverseMatrix.Transpose();
+  m_transposedInverseMatrix = Kernel::IntMatrix(matrix);
+  m_transposedInverseMatrix.Invert();
+  m_transposedInverseMatrix = m_transposedInverseMatrix.Transpose();
 
   m_order = getOrderFromMatrix(m_matrixVectorPair.getMatrix());
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
@@ -136,7 +136,7 @@ bool SymmetryOperation::hasTranslation() const {
  * @return :: Transformed index triplet.
  */
 Kernel::V3D SymmetryOperation::transformHKL(const Kernel::V3D &hkl) const {
-  return m_inverseMatrix * hkl;
+  return m_transposedInverseMatrix * hkl;
 }
 
 /**

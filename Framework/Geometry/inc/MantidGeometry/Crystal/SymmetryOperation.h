@@ -161,7 +161,7 @@ protected:
                        const V3R &vector) const;
 
   size_t m_order;
-  Kernel::IntMatrix m_inverseMatrix;
+  Kernel::IntMatrix m_transposedInverseMatrix;
   V3R m_reducedVector;
   std::string m_identifier;
 
