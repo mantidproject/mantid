@@ -16169,8 +16169,8 @@ void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
 }
 
 void ApplicationWindow::makeToolbarsMenu()
-// cppcheck-suppress publicAllocationError
 {
+  // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
   toolbarsMenu->addAction(actionFileTools);
@@ -16473,6 +16473,7 @@ void ApplicationWindow::showInterfaceCategoriesDialog() {
 }
 
 void ApplicationWindow::showUserDirectoryDialog() {
+  // cppcheck-suppress memleak
   MantidQt::API::ManageUserDirectories *ad =
       new MantidQt::API::ManageUserDirectories(this);
   ad->setAttribute(Qt::WA_DeleteOnClose);

@@ -357,7 +357,7 @@ void MDNormSCD::cacheDimensionXValues() {
     }
   }
 }
-
+MDNormSCD
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
@@ -401,7 +401,7 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
-  auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+  std::unique_ptr<API::Progress> prog(new API::Progress(this, 0.3, 1.0, ndets));
   PARALLEL_FOR1(integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -493,8 +493,6 @@ void MDNormSCD::calculateNormalization(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 }
 
 /**

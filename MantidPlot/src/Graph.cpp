@@ -4345,9 +4345,9 @@ void Graph::copy(Graph *g) {
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
       else
-        insertText(t);
+        (void)insertText(t);
     } else
-      insertText(t);
+      (void)insertText(t);
   }
 
   QVector<int> l = g->lineMarkerKeys();
