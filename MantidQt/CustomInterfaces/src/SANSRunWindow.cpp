@@ -144,7 +144,8 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        new Kernel::PropertyWithValue<std::string>(name, ""), value);
+        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        value);
   else
     settings->setProperty(name, value);
 }
