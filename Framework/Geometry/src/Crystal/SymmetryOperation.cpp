@@ -46,9 +46,7 @@ SymmetryOperation::SymmetryOperation(const Mantid::Kernel::DblMatrix &matrix,
 /// Initialize from matrix and vector.
 void SymmetryOperation::init(
     const MatrixVectorPair<int, V3R> &matrixVectorPair) {
-  m_matrixVectorPair = MatrixVectorPair<int, V3R>(
-      matrixVectorPair.getMatrix(),
-      getWrappedVector(matrixVectorPair.getVector()));
+  m_matrixVectorPair = matrixVectorPair;
 
   // Inverse matrix for HKL operations.
   m_transposedInverseMatrix = m_matrixVectorPair.getMatrix();

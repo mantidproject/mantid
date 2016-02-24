@@ -64,10 +64,6 @@ public:
 
     V3D hkl(1, 1, 1);
     TS_ASSERT_EQUALS(inversion * hkl, hkl * -1.0);
-
-    // translational components are wrapped to the unit cell
-    SymmetryOperation screw21z("-x,-y,z+3/2");
-    TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+1/2");
   }
 
   void testStringConstructorArbitraryFractions() {
@@ -76,6 +72,11 @@ public:
     V3R vector = symOp.vector();
     TS_ASSERT_EQUALS(vector.y(), RationalNumber(1, 2));
     TS_ASSERT_EQUALS(vector.z(), RationalNumber(34, 45));
+  }
+
+  void testStringConstructorNoWrapping() {
+    SymmetryOperation screw21z("-x,-y,z+3/2");
+    TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+3/2");
   }
 
   void testCopyConstructor() {
@@ -136,10 +137,9 @@ public:
 
   void testMultiplicationOperatorSymmetryOperation() {
     SymmetryOperation screw21z("-x,-y,z+1/2");
-    SymmetryOperation identity;
 
-    // should be identity, since 1/2 + 1/2 = 1 => 0
-    TS_ASSERT_EQUALS(screw21z * screw21z, identity);
+    // should be identity, since 1/2 + 1/2 = 1
+    TS_ASSERT_EQUALS(screw21z * screw21z, SymmetryOperation("x,y,z+1"));
   }
 
   void testInverse() {
@@ -153,7 +153,7 @@ public:
 
     SymmetryOperation fourOneScrewZPlus("-y,x,z+1/4");
     SymmetryOperation fourOneScrewZMinus = fourOneScrewZPlus.inverse();
-    TS_ASSERT_EQUALS(fourOneScrewZMinus.identifier(), "y,-x,z+3/4");
+    TS_ASSERT_EQUALS(fourOneScrewZMinus.identifier(), "y,-x,z-1/4");
 
     // (Op^-1)^-1 = Op
     TS_ASSERT_EQUALS(fourOneScrewZMinus.inverse(), fourOneScrewZPlus);
