@@ -14,7 +14,7 @@ namespace ADARA {
 class DLLExport PacketHeader {
 public:
   PacketHeader(const uint8_t *data) {
-    const uint32_t *field = (const uint32_t *)data;
+    const uint32_t *field = reinterpret_cast<const uint32_t *>(data);
 
     m_payload_len = field[0];
     m_type = field[1];
@@ -191,7 +191,9 @@ class DLLExport SourceListPkt : public Packet {
 public:
   SourceListPkt(const SourceListPkt &pkt);
 
-  const uint32_t *ids(void) const { return (const uint32_t *)payload(); }
+  const uint32_t *ids(void) const {
+    return reinterpret_cast<const uint32_t *>(payload());
+  }
   uint32_t num_ids(void) const {
     return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t);
   }
@@ -510,7 +512,7 @@ public:
 
   double distance(uint32_t index) const {
     if (index < beamMonCount())
-      return *(const double *)&m_fields[(index * 6) + 5];
+      return *reinterpret_cast<const double *>(&m_fields[(index * 6) + 5]);
     else
       return (0.0);
   }
@@ -608,7 +610,8 @@ public:
 
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return *(const double *)&m_fields[m_after_banks_offset[index] + 3];
+      return *reinterpret_cast<const double *>(
+                 &m_fields[m_after_banks_offset[index] + 3]);
     } else
       return (0.0);
   }
@@ -664,7 +667,8 @@ public:
   const std::string &description(void) const { return m_desc; }
 
   void remapDevice(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
     m_devId = dev;
   };
@@ -693,7 +697,8 @@ public:
   uint32_t value(void) const { return m_fields[3]; }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -717,10 +722,13 @@ public:
   VariableSeverity::Enum severity(void) const {
     return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
-  double value(void) const { return *(const double *)&m_fields[3]; }
+  double value(void) const {
+    return *reinterpret_cast<const double *>(&m_fields[3]);
+  }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -747,7 +755,8 @@ public:
   const std::string &value(void) const { return m_val; }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
