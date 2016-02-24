@@ -48,9 +48,7 @@ void ChangeBinOffset::exec() {
   }
 
   // Check if its an event workspace
-  EventWorkspace_const_sptr eventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-  if (eventWS != nullptr) {
+  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputW)) {
     this->execEvent();
     return;
   }
@@ -73,8 +71,6 @@ void ChangeBinOffset::exec() {
 }
 
 void ChangeBinOffset::execEvent() {
-  g_log.information("Processing event workspace");
-
   MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
