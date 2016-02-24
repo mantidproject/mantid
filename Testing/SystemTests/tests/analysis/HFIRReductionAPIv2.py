@@ -67,6 +67,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         Reduce()
 
     def validate(self):
+        self.tolerance = 0.2
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
@@ -95,6 +96,7 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         Reduce()
 
     def validate(self):
+        self.tolerance = 0.2
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
