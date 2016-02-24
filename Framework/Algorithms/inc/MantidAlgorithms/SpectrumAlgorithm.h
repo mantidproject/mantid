@@ -15,6 +15,10 @@ namespace Kernel {
 class SpectrumIndexSet;
 }
 
+namespace DataObjects {
+class EventWorkspace;
+}
+
 namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL SpectrumAlgorithm : public API::Algorithm {
@@ -41,6 +45,12 @@ private:
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+
+    ifEventWorkspaceClearMRU(workspace);
+  }
+
+  template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) {
+    UNUSED_ARG(workspace);
   }
 
 protected:
@@ -55,6 +65,12 @@ protected:
   Kernel::SpectrumIndexSet
   getSpectrumIndexSet(const API::MatrixWorkspace &workspace) const;
 };
+
+template <>
+inline void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
+    const DataObjects::EventWorkspace &workspace) {
+  workspace.clearMRU();
+}
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
 typedef boost::shared_ptr<SpectrumAlgorithm> SpectrumAlgorithm_sptr;
