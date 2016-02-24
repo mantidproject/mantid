@@ -331,12 +331,12 @@ void FakeMD::addFakeRegularData(const std::vector<double> &params,
     gridSize *= indexMax[d];
   }
   // Create all the requested events
-  std::vector<size_t> indexes;
   size_t cellCount(0);
   for (size_t i = 0; i < num; ++i) {
     coord_t centers[nd];
 
-    Kernel::Utils::getIndicesFromLinearIndex(cellCount, indexMax, indexes);
+    auto indexes =
+        Kernel::Utils::getIndicesFromLinearIndex(cellCount, indexMax);
     ++cellCount;
     if (cellCount >= gridSize)
       cellCount = 0;

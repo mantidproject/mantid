@@ -307,7 +307,7 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
 {
   QStringList workspaces;
 
-  std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
+  auto allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
   for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
   {

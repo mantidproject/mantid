@@ -24,7 +24,7 @@ Expression::Expression() {
   add_operators(ops);
 
   // Define unary operators
-  std::set<std::string> unary;
+  std::unordered_set<std::string> unary;
   unary.insert("+");
   unary.insert("-");
 
@@ -39,7 +39,7 @@ Expression::Expression(const std::vector<std::string> &ops) {
 
 /// contructor
 Expression::Expression(const std::vector<std::string> &binary,
-                       const std::set<std::string> &unary) {
+                       const std::unordered_set<std::string> &unary) {
   m_operators.reset(new Operators());
   add_operators(binary);
   add_unary(unary);
@@ -86,7 +86,7 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
   }
 }
 
-void Expression::add_unary(const std::set<std::string> &ops) {
+void Expression::add_unary(const std::unordered_set<std::string> &ops) {
   m_operators->unary = ops;
   for (const auto &op : ops) {
     m_operators->symbols.insert(op.cbegin(), op.cend());
@@ -479,8 +479,8 @@ const Expression &Expression::bracketsRemoved() const {
 /**
  * Return a list of all variable names in this expression
  */
-std::set<std::string> Expression::getVariables() const {
-  std::set<std::string> out;
+std::unordered_set<std::string> Expression::getVariables() const {
+  std::unordered_set<std::string> out;
   if (!isFunct()) {
     std::string s = name();
     if (!s.empty() && !isdigit(s[0])) {
@@ -489,7 +489,7 @@ std::set<std::string> Expression::getVariables() const {
   } else {
     for (const auto &e : *this) {
       if (e.isFunct()) {
-        std::set<std::string> tout = e.getVariables();
+        std::unordered_set<std::string> tout = e.getVariables();
         out.insert(tout.begin(), tout.end());
       } else {
         std::string s = e.name();

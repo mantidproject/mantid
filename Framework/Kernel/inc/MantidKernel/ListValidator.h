@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -50,6 +51,12 @@ public:
   /** Constructor
    *  @param values :: A set of values consisting of the valid values     */
   explicit ListValidator(const std::set<TYPE> &values)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
+
+  /** Constructor
+   *  @param values :: An unordered set of values consisting of the valid values
+   */
+  explicit ListValidator(const std::unordered_set<TYPE> &values)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
 
   /** Constructor

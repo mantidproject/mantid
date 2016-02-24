@@ -722,8 +722,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
   }
 
   auto &run = localWorkspace->mutableRun();
-  int n = static_cast<int>(m_numberOfPeriods);
-  ISISRunLogs runLogs(run, n);
+  ISISRunLogs runLogs(run);
   runLogs.addStatusLog(run);
 }
 
@@ -735,8 +734,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
 void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace,
                                   int64_t period) {
   auto &run = localWorkspace->mutableRun();
-  int n = static_cast<int>(m_numberOfPeriods);
-  ISISRunLogs runLogs(run, n);
+  ISISRunLogs runLogs(run);
   if (period == 0) {
     runLogs.addPeriodLogs(1, run);
   } else {

@@ -54,12 +54,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
   m_totalYMin(0.0), m_totalYMax(0.0),
   m_imagePicker(NULL)
 {
-  ColorMaps::GetColorMap( ColorMaps::HEAT,
-                          256,
-                          m_positiveColorTable );
-  ColorMaps::GetColorMap( ColorMaps::GRAY,
-                          256,
-                          m_negativeColorTable );
+  m_positiveColorTable = ColorMaps::GetColorMap(ColorMaps::HEAT, 256);
+  m_negativeColorTable = ColorMaps::GetColorMap(ColorMaps::GRAY, 256);
 
   m_spectrumPlotItem = new SpectrumPlotItem;
   setupSpectrumPlotItem();
@@ -380,7 +376,7 @@ void SpectrumDisplay::setColorScales( std::vector<QRgb> & positiveColorTable,
 void SpectrumDisplay::setIntensity( double controlParameter )
 {
   size_t DEFAULT_SIZE = 100000;
-  ColorMaps::GetIntensityMap( controlParameter, DEFAULT_SIZE, m_intensityTable);
+  m_intensityTable = ColorMaps::GetIntensityMap(controlParameter, DEFAULT_SIZE);
   m_spectrumPlotItem->setIntensityTable( &m_intensityTable );
   updateImage();
 }
@@ -546,8 +542,7 @@ void SpectrumDisplay::setVGraph( double x, bool isFront )
  */
 std::vector<std::string> SpectrumDisplay::showInfoList( double x, double y )
 {
-  std::vector<std::string> info_list;
-  m_dataSource->getInfoList( x, y, info_list );
+  std::vector<std::string> info_list = m_dataSource->getInfoList(x, y);
   int n_infos = (int)info_list.size() / 2;
 
   m_imageTable->setRowCount(n_infos + 1);

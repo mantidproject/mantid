@@ -60,25 +60,17 @@ public:
   /// Fit peak first considering high background
   void highBkgdFit();
 
-  /// Get fitting error
-  void getFitError(std::map<std::string, double> &peakerrormap,
-                   std::map<std::string, double> &bkgderrormap);
+  /// Get fitting error for peak function
+  std::map<std::string, double> getPeakError();
+
+  /// Get fitting error for background function
+  std::map<std::string, double> getBackgroundError();
 
   /// Get cost function value from fitting
   double getFitCostFunctionValue();
 
-  /// Get peak
-  // API::IPeakFunction_sptr getPeakFunction();
-
-  /// Get background
-  // API::IBackgroundFunction_sptr getBackgroundFunction();
-
   /// Generate a partial workspace at fit window
   API::MatrixWorkspace_sptr genFitWindowWS();
-
-  // void setPeakParameterValues();
-
-  // void setBackgroundParameterValues();
 
 private:
   /// Name
@@ -136,15 +128,15 @@ private:
   /// Process and store fit result
   void processNStoreFitResult(double rwp, bool storebkgd);
 
-  void push(API::IFunction_const_sptr func,
-            std::map<std::string, double> &funcparammap);
+  /// Back up fit result
+  std::map<std::string, double> backup(API::IFunction_const_sptr func);
 
   void pop(const std::map<std::string, double> &funcparammap,
            API::IFunction_sptr func);
 
   /// Store function fitting error
-  void storeFunctionError(const API::IFunction_const_sptr &func,
-                          std::map<std::string, double> &paramerrormap);
+  std::map<std::string, double>
+  storeFunctionError(const API::IFunction_const_sptr &func);
 
   API::IBackgroundFunction_sptr
   fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
@@ -321,11 +313,6 @@ private:
 
   /// Set up a vector of guessed FWHM
   void setupGuessedFWHM(std::vector<double> &vec_FWHM);
-
-  /// Push/store a fit result
-  void push(API::IFunction_const_sptr func,
-            std::map<std::string, double> &funcparammap,
-            std::map<std::string, double> &paramerrormap);
 
   /// Pop
   void pop(const std::map<std::string, double> &funcparammap,

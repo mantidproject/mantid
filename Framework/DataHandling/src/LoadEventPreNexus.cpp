@@ -841,7 +841,6 @@ void LoadEventPreNexus::setProtonCharge(
  */
 void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
   this->using_mapping_file = false;
-  this->pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -856,7 +855,7 @@ void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->pixelmap);
+  this->pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(pixelmap.begin(), pixelmap.end(),
