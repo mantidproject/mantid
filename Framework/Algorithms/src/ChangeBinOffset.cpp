@@ -2,6 +2,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAlgorithms/MatrixWorkspaceGetters.h"
+#include "MantidAlgorithms/EventWorkspaceGetters.h"
 
 namespace Mantid {
 namespace Algorithms {
