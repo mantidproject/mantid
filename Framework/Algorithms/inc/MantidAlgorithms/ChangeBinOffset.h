@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 #define MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SpectrumAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
@@ -45,8 +42,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
 public:
-  /// Default constructor
-  ChangeBinOffset();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ChangeBinOffset"; }
   /// Summary of algorithms purpose
@@ -71,7 +66,7 @@ private:
   void execEvent();
 
   /// Offset to shift by
-  double offset;
+  double offset = 0.0;
 };
 
 } // namespace Algorithm
