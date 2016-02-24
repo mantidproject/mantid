@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -17,12 +14,6 @@ using namespace DataObjects;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ChangeBinOffset)
-
-/**
- * Default constructor
- */
-ChangeBinOffset::ChangeBinOffset()
-    : SpectrumAlgorithm(), offset(0.) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
