@@ -1149,9 +1149,9 @@ public:
         1000.000000, 1000.000000, 1000.000000, 1000.000000, 1000.000000,
         1000.000000, 1000.000000, 1000.000000};
 
-		const size_t size = vecX.size();
+    const size_t size = vecX.size();
 
-		// b) Get workspace
+    // b) Get workspace
     auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
