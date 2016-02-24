@@ -7,7 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/Getters.h"
 
 namespace Mantid {
 
@@ -67,10 +66,8 @@ protected:
 };
 
 template <>
-inline void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
-    const DataObjects::EventWorkspace &workspace) {
-  workspace.clearMRU();
-}
+void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
+    const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
 typedef boost::shared_ptr<SpectrumAlgorithm> SpectrumAlgorithm_sptr;

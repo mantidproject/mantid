@@ -3,6 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid;
 using namespace Algorithms;
@@ -49,4 +50,10 @@ Kernel::SpectrumIndexSet SpectrumAlgorithm::getSpectrumIndexSet(
       indices_list.push_back(i);
   }
   return {indices_list, numberOfSpectra};
+}
+
+template <>
+void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
+    const DataObjects::EventWorkspace &workspace) {
+  workspace.clearMRU();
 }
