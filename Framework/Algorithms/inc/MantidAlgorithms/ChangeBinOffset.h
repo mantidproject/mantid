@@ -58,15 +58,10 @@ public:
   const std::string alias() const override { return "OffsetX"; }
 
 private:
-  // Overridden Algorithm methods
+  /// Initialisation method. Declares properties to be used in algorithm.
   void init() override;
+  /// Executes the algorithm
   void exec() override;
-
-  /// Execute algorithm for EventWorkspaces
-  void execEvent();
-
-  /// Offset to shift by
-  double offset = 0.0;
 };
 
 } // namespace Algorithm
