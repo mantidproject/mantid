@@ -51,7 +51,7 @@ void SymmetryOperation::init(
       getWrappedVector(matrixVectorPair.getVector()));
 
   // Inverse matrix for HKL operations.
-  m_transposedInverseMatrix = Kernel::IntMatrix(matrixVectorPair.getMatrix());
+  m_transposedInverseMatrix = m_matrixVectorPair.getMatrix();
   m_transposedInverseMatrix.Invert();
   m_transposedInverseMatrix = m_transposedInverseMatrix.Transpose();
 
