@@ -57,6 +57,8 @@ double NormaliseByCurrent::extractCharge(
                            "wrong current.\n";
   }
   // Handle multiperiod data.
+  // The number of periods is set above by reference
+  // cppcheck-suppress leakReturnValNotUsed
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");

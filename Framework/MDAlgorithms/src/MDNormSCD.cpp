@@ -357,7 +357,7 @@ void MDNormSCD::cacheDimensionXValues() {
     }
   }
 }
-MDNormSCD
+
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
