@@ -70,10 +70,9 @@ bool Stretch::validate() {
   QString errors = uiv.generateErrorMessage();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
-    return false;
   }
 
-  return true;
+  return errors.isEmpty();
 }
 
 /**

@@ -225,13 +225,13 @@ int ISISLiveEventDataListener::runNumber() const { return m_runNumber; }
 void ISISLiveEventDataListener::run() {
 
   try {
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string("No connection to the DAE."));
     }
 
     TCPStreamEventDataNeutron events;
-    while (m_stopThread == false) {
+    while (!m_stopThread) {
       // get the header with the type of the packet
       Receive(events.head, "Events header",
               "Corrupt stream - you should reconnect.");

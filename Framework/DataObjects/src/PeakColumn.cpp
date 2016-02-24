@@ -207,7 +207,7 @@ void PeakColumn::read(size_t index, const std::string &text) {
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {
   return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
-          (m_name == "RunNumber"));
+           (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------

@@ -1806,15 +1806,8 @@ void FitPropertyBrowser::postDeleteHandle(const std::string& wsName)
   */
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
-  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0 ||
-    dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) != 0)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != 0 ||
+          dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != 0);
 }
 
 bool FitPropertyBrowser::isWorkspaceAGroup()const

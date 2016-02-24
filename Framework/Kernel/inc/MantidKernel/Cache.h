@@ -146,11 +146,13 @@ private:
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
     MutexLocker lock(m_mutex);
     CacheMapConstIterator it_found = m_cacheMap.find(key);
-    if (it_found == m_cacheMap.end()) {
-      return false; // did not find the component
+	bool isValid = it_found != m_cacheMap.end();
+   
+	if (isValid) {
+		value = it_found->second;
     }
-    value = it_found->second;
-    return true;
+    
+    return isValid;
   }
 
   /// total number of times the cache has contained the requested information

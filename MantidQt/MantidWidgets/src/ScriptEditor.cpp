@@ -92,8 +92,7 @@ void CommandHistory::add(QString cmd)
  */
 bool CommandHistory::hasPrevious() const
 {
-  if( !m_commands.isEmpty() &&  m_current > 0 ) return true;
-  else return false;
+  return !m_commands.isEmpty() && m_current > 0;
 }
 
 /**
@@ -109,8 +108,7 @@ QString CommandHistory::getPrevious() const
  */
 bool CommandHistory::hasNext() const
 {
-  if( !m_commands.isEmpty() &&  m_current < m_commands.count() - 1 ) return true;
-  else return false;
+  return !m_commands.isEmpty() && m_current < m_commands.count() - 1;
 }
 
 /** 

@@ -324,7 +324,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 
   // hidden categories
   std::set<std::string> hiddenCategories;
-  if (includeHidden == false) {
+  if (!includeHidden) {
     fillHiddenCategories(&hiddenCategories);
   }
 

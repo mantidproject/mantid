@@ -246,7 +246,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   runLoadInstrument(instname, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
-  if (isCommon == true)
+  if (isCommon)
     dataWS->setYUnitLabel(yUnit);
   return dataWS;
 }
