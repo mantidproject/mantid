@@ -22,7 +22,7 @@ DECLARE_ALGORITHM(ChangeBinOffset)
  * Default constructor
  */
 ChangeBinOffset::ChangeBinOffset()
-    : API::Algorithm(), m_progress(nullptr), offset(0.), wi_min(0), wi_max(0) {}
+    : SpectrumAlgorithm(), m_progress(nullptr), offset(0.) {}
 
 /**
  * Destructor
@@ -47,16 +47,7 @@ void ChangeBinOffset::init() {
   declareProperty("Offset", 0.0, isDouble,
                   "The amount to change each time bin by");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
-  mustBePositive->setLower(0);
-  declareProperty(
-      "IndexMin", 0, mustBePositive,
-      "The workspace index of the first spectrum to shift. Only used if\n"
-      "IndexMax is set.");
-  declareProperty(
-      "IndexMax", Mantid::EMPTY_INT(), mustBePositive,
-      "The workspace index of the last spectrum to shift. Only used if\n"
-      "explicitly set.");
+  declareSpectrumIndexSetProperties();
 }
 
 /** Executes the algorithm
@@ -73,23 +64,6 @@ void ChangeBinOffset::exec() {
 
   m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 
-  wi_min = 0;
-  wi_max = histnumber - 1;
-  // check if workspace indexes have been set
-  int tempwi_min = getProperty("IndexMin");
-  int tempwi_max = getProperty("IndexMax");
-  if (tempwi_max != Mantid::EMPTY_INT()) {
-    // check wimin<=tempwi_min<=tempwi_max<=wi_max
-    if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) &&
-        (tempwi_max <= wi_max)) {
-      wi_min = size_t(tempwi_min);
-      wi_max = size_t(tempwi_max);
-    } else {
-      g_log.error("Invalid Workspace Index min/max properties");
-      throw std::invalid_argument("Inconsistent properties defined");
-    }
-  }
-
   MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
   if (outputW != inputW) {
     outputW = MatrixWorkspace_sptr(inputW->clone().release());
@@ -104,16 +78,11 @@ void ChangeBinOffset::exec() {
     return;
   }
 
-  // do the shift in X
-  PARALLEL_FOR1(outputW)
-  for (int64_t i = wi_min; i <= wi_max; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    for (auto &x : outputW->dataX(i))
-      x += offset;
-    m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
+  this->for_each(*outputW, std::make_tuple(Getters::x),
+                 [=](std::vector<double> &dataX) {
+                   for (auto &x : dataX)
+                     x += offset;
+                 });
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())
@@ -132,14 +101,8 @@ void ChangeBinOffset::execEvent() {
   MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
-  PARALLEL_FOR1(outputWS)
-  for (int64_t i = wi_min; i <= wi_max; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    outputWS->getEventList(i).addTof(offset);
-    m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
+  this->for_each(*outputWS, std::make_tuple(Getters::eventList),
+                 [=](EventList &eventList) { eventList.addTof(offset); });
 
   outputWS->clearMRU();
 }
