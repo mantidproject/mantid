@@ -58,7 +58,8 @@ void ConvertToDiffractionMDWorkspace2::init() {
                   "conversion (to save memory) is not supported by algorithm "
                   "v2");
   // disable property on interface
-  this->setPropertySettings("ClearInputWorkspace", new DisabledProperty());
+  this->setPropertySettings("ClearInputWorkspace",
+                            make_unique<DisabledProperty>());
 
   declareProperty(
       make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,

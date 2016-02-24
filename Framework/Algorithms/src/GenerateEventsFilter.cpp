@@ -90,8 +90,8 @@ void GenerateEventsFilter::init() {
                   "same time intervals. "
                   "If the size of the array is larger than one, then the "
                   "splitters can have various time interval values.");
-  setPropertySettings("TimeInterval",
-                      new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
+  setPropertySettings("TimeInterval", Kernel::make_unique<VisibleWhenProperty>(
+                                          "LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty(
@@ -109,20 +109,23 @@ void GenerateEventsFilter::init() {
 
   declareProperty("MinimumLogValue", EMPTY_DBL(),
                   "Minimum log value for which to keep events.");
-  setPropertySettings("MinimumLogValue",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "MinimumLogValue",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("MaximumLogValue", EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
-  setPropertySettings("MaximumLogValue",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "MaximumLogValue",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueInterval", EMPTY_DBL(),
                   "Delta of log value to be sliced into from min log value and "
                   "max log value.\n"
                   "If not given, then only value ");
-  setPropertySettings("LogValueInterval",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "LogValueInterval",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
@@ -133,14 +136,15 @@ void GenerateEventsFilter::init() {
       "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
       "d(log value)/dt can be any value, positive only and negative only "
       "respectively.");
-  setPropertySettings("FilterLogValueByChangingDirection",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "FilterLogValueByChangingDirection",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
                   "Tolerance in time for the event times to keep. "
                   "It is used in the case to filter by single value.");
-  setPropertySettings("TimeTolerance",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("TimeTolerance", Kernel::make_unique<VisibleWhenProperty>(
+                                           "LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
@@ -148,14 +152,15 @@ void GenerateEventsFilter::init() {
       "LogBoundary", "Centre", logvalidator,
       "How to treat log values as being measured in the centre of time. "
       "There are three options, 'Centre', 'Left' and 'Other'. ");
-  setPropertySettings("LogBoundary",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("LogBoundary", Kernel::make_unique<VisibleWhenProperty>(
+                                         "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
                   "Tolerance of the log value to be included in filter.  It is "
                   "used in the case to filter by multiple values.");
-  setPropertySettings("LogValueTolerance",
-                      new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings(
+      "LogValueTolerance",
+      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
   declareProperty(

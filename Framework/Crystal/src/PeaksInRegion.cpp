@@ -58,8 +58,8 @@ void PeaksInRegion::init() {
       "specifying the extents of each dimension. Optional, default +-50 in "
       "each dimension.");
 
-  setPropertySettings("PeakRadius", new EnabledWhenProperty("CheckPeakExtents",
-                                                            IS_NOT_DEFAULT));
+  setPropertySettings("PeakRadius", make_unique<EnabledWhenProperty>(
+                                        "CheckPeakExtents", IS_NOT_DEFAULT));
 }
 
 void PeaksInRegion::validateExtentsInput() const {

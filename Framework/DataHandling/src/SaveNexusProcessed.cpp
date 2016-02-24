@@ -75,17 +75,17 @@ void SaveNexusProcessed::init() {
       "For EventWorkspaces, preserve the events when saving (default).\n"
       "If false, will save the 2D histogram version of the workspace with the "
       "current binning parameters.");
-  setPropertySettings(
-      "PreserveEvents",
-      new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
+  setPropertySettings("PreserveEvents",
+                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                          "InputWorkspace", true));
 
   declareProperty(
       "CompressNexus", false,
       "For EventWorkspaces, compress the Nexus data field (default False).\n"
       "This will make smaller files but takes much longer.");
-  setPropertySettings(
-      "CompressNexus",
-      new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
+  setPropertySettings("CompressNexus",
+                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                          "InputWorkspace", true));
 }
 
 /** Get the list of workspace indices to use

@@ -88,8 +88,8 @@ void RadiusSum::init() {
   declareProperty(normOrder, 1.0, "If 2, the normalization will be divided by "
                                   "the quadratic value of the ring for each "
                                   "radius.");
-  setPropertySettings(normOrder,
-                      new VisibleWhenProperty(normBy, IS_EQUAL_TO, "1"));
+  setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
+                                     normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";
   setPropertyGroup(normBy, groupNorm);

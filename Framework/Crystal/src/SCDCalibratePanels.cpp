@@ -1447,30 +1447,30 @@ void SCDCalibratePanels::init() {
                   Kernel::Direction::Output);
   declareProperty("DOF", -1, "Degrees of Freedom", Kernel::Direction::Output);
   setPropertySettings("PanelNamePrefix",
-                      new EnabledWhenProperty(
+                      Kernel::make_unique<EnabledWhenProperty>(
                           "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
-  setPropertySettings("Grouping", new EnabledWhenProperty("PanelGroups",
-                                                          Kernel::IS_EQUAL_TO,
-                                                          "SpecifyGroups"));
+  setPropertySettings("Grouping",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
   setPropertySettings("PreProcFilename",
-                      new EnabledWhenProperty("PreProcessInstrument",
-                                              Kernel::IS_NOT_EQUAL_TO,
-                                              "A)No PreProcessing"));
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO,
+                          "A)No PreProcessing"));
 
-  setPropertySettings(
-      "InitialTimeOffset",
-      new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_EQUAL_TO,
-                              "C)Apply a LoadParameter.xml type file"));
+  setPropertySettings("InitialTimeOffset",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_EQUAL_TO,
+                          "C)Apply a LoadParameter.xml type file"));
 
-  setPropertySettings(
-      "MaxSamplePositionChangeMeters",
-      new EnabledWhenProperty("AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxSamplePositionChangeMeters",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "MaxRotationChangeDegrees",
-      new EnabledWhenProperty("usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxRotationChangeDegrees",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /**

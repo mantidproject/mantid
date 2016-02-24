@@ -59,8 +59,6 @@ void SliceMD::init() {
       "If OutputFilename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  // setPropertySettings("Memory", new EnabledWhenProperty("OutputFilename",
-  // IS_NOT_DEFAULT));
 
   declareProperty("TakeMaxRecursionDepthFromInput", true,
                   "Copy the maximum recursion depth from the input workspace.");
@@ -72,8 +70,8 @@ void SliceMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
   setPropertySettings("MaxRecursionDepth",
-                      new EnabledWhenProperty("TakeMaxRecursionDepthFromInput",
-                                              IS_EQUAL_TO, "0"));
+                      make_unique<EnabledWhenProperty>(
+                          "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
 
   setPropertyGroup("OutputFilename", "File Back-End");
   setPropertyGroup("Memory", "File Back-End");

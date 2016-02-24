@@ -185,10 +185,10 @@ public:
    * @param name :: property name
    * @param settings :: IPropertySettings     */
   void setPropertySettings(const std::string &name,
-                           IPropertySettings *settings) {
+                           std::unique_ptr<IPropertySettings> settings) {
     Property *prop = getPointerToProperty(name);
     if (prop)
-      prop->setSettings(settings);
+      prop->setSettings(std::move(settings));
   }
   /** Set the group for a given property
    * @param name :: property name

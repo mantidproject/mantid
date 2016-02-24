@@ -109,9 +109,9 @@ void AlignAndFocusPowder::init() {
       "Negative width values indicate logarithmic binning.");
   declareProperty("ResampleX", 0, "Number of bins in x-axis. Non-zero value "
                                   "overrides \"Params\" property. Negative "
-                                  "value means logorithmic binning.");
-  setPropertySettings("Params",
-                      new EnabledWhenProperty("ResampleX", IS_DEFAULT));
+                                  "value means logarithmic binning.");
+  setPropertySettings(
+      "Params", make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,
                   "Bin in Dspace. (True is Dspace; False is TOF)");
   declareProperty(make_unique<ArrayProperty<double>>("DMin"),

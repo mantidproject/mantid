@@ -72,26 +72,26 @@ void PredictFractionalPeaks::init() {
       "Maximum L value to use");
 
   setPropertySettings(
-      "Hmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Hmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Kmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Kmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Lmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Lmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Run the algorithm

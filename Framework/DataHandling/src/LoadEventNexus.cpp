@@ -1120,8 +1120,8 @@ void LoadEventNexus::init() {
                   "load with BankName. "
                   "Only pixels in the specified bank will be created if true; "
                   "all of the instrument's pixels will be created otherwise.");
-  setPropertySettings("SingleBankPixelsOnly",
-                      new VisibleWhenProperty("BankName", IS_NOT_DEFAULT));
+  setPropertySettings("SingleBankPixelsOnly", make_unique<VisibleWhenProperty>(
+                                                  "BankName", IS_NOT_DEFAULT));
 
   std::string grp2 = "Loading a Single Bank";
   setPropertyGroup("BankName", grp2);
@@ -1152,8 +1152,8 @@ void LoadEventNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
@@ -1197,13 +1197,16 @@ void LoadEventNexus::init() {
 
   setPropertySettings(
       "MonitorsAsEvents",
-      new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1"));
-  IPropertySettings *asEventsIsOn =
-      new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
-  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
-  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  auto asEventsIsOn = [] {
+    std::unique_ptr<IPropertySettings> prop =
+        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+    return prop;
+  };
+  setPropertySettings("FilterMonByTofMin", asEventsIsOn());
+  setPropertySettings("FilterMonByTofMax", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStart", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStop", asEventsIsOn());
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);

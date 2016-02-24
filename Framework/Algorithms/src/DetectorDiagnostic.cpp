@@ -143,7 +143,7 @@ void DetectorDiagnostic::init() {
   this->setPropertyGroup("DetVanRatioVariation", detEffVarGrp);
   this->setPropertySettings(
       "DetVanRatioVariation",
-      new EnabledWhenProperty("DetVanCompare", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("DetVanCompare", IS_NOT_DEFAULT));
 
   string countsCheck("Check Sample Counts");
   this->declareProperty(
@@ -195,7 +195,7 @@ void DetectorDiagnostic::init() {
   this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
   this->setPropertySettings(
       "NIgnoredCentralPixels",
-      new EnabledWhenProperty("MaxTubeFramerate", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("MaxTubeFramerate", IS_NOT_DEFAULT));
 
   this->declareProperty("NumberOfFailures", 0, Direction::Output);
 }

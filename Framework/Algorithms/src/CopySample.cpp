@@ -54,9 +54,9 @@ void CopySample::init() {
                                                        false, Direction::Input),
                   "Copy the U matrix only, if both origin and destination have "
                   "oriented lattices");
-  setPropertySettings(
-      "CopyOrientationOnly",
-      new Kernel::EnabledWhenProperty("CopyLattice", IS_EQUAL_TO, "1"));
+  setPropertySettings("CopyOrientationOnly",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "CopyLattice", IS_EQUAL_TO, "1"));
   declareProperty(
       make_unique<PropertyWithValue<int>>("MDInputSampleNumber", 0,
                                           Direction::Input),

@@ -78,8 +78,8 @@ void SmoothNeighbours::init() {
   declareProperty(
       "Sigma", 0.5, mustBePositiveDouble,
       "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings(
-      "Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
+  setPropertySettings("Sigma", make_unique<EnabledWhenProperty>(
+                                   "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty(
       "IgnoreMaskedDetectors", true,

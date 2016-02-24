@@ -260,7 +260,7 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
       continue;
     try {
       auto propClone = std::unique_ptr<Property>(loadProp->clone());
-      propClone->deleteSettings(); // Get rid of special settings because it
+      propClone->clearSettings(); // Get rid of special settings because it
                                    // does not work in custom GUI.
       declareProperty(std::move(propClone), loadProp->documentation());
     } catch (Exception::ExistsError &) {

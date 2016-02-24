@@ -61,8 +61,8 @@ void SaveOpenGenieAscii::init() {
       "Spec number is a required field for ENGIN-X format of OpenGenie,"
       "an example of spec number would be: 1201 - 1400");
   setPropertySettings("SpecNumberField",
-                      new VisibleWhenProperty("OpenGenieFormat", IS_EQUAL_TO,
-                                              "ENGIN-X Format"));
+                      make_unique<VisibleWhenProperty>(
+                          "OpenGenieFormat", IS_EQUAL_TO, "ENGIN-X Format"));
 }
 
 void SaveOpenGenieAscii::exec() {

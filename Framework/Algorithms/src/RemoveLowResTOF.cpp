@@ -86,12 +86,12 @@ void RemoveLowResTOF::init() {
                   "other parameters if specified.");
 
   // hide things when people cjoose the minimum wavelength
-  setPropertySettings("ReferenceDIFC",
-                      new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
-  setPropertySettings("K",
-                      new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
-  setPropertySettings("Tmin",
-                      new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
+  setPropertySettings("ReferenceDIFC", make_unique<EnabledWhenProperty>(
+                                           "MinWavelength", IS_DEFAULT));
+  setPropertySettings(
+      "K", make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
+  setPropertySettings(
+      "Tmin", make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
 }
 
 void RemoveLowResTOF::exec() {

@@ -217,15 +217,16 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -234,26 +235,30 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("EndOverlap", "Transmission");
 
   // Only do transmission corrections when point detector.
-  setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                  "AnalysisMode", IS_EQUAL_TO,
-                                                  "PointDetectorAnalysis"));
-  setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                   "AnalysisMode", IS_EQUAL_TO,
-                                                   "PointDetectorAnalysis"));
   setPropertySettings(
-      "Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                "PointDetectorAnalysis"));
-  setPropertySettings("StartOverlap", new Kernel::EnabledWhenProperty(
-                                          "AnalysisMode", IS_EQUAL_TO,
-                                          "PointDetectorAnalysis"));
+      "FirstTransmissionRun",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
   setPropertySettings(
-      "EndOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                    "PointDetectorAnalysis"));
+      "SecondTransmissionRun",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "Params", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                    "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "StartOverlap",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "EndOverlap", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                        "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
 
   // Only use region of direct beam when in multi-detector analysis mode.
-  setPropertySettings("RegionOfDirectBeam", new Kernel::EnabledWhenProperty(
-                                                "AnalysisMode", IS_EQUAL_TO,
-                                                "MultiDetectorAnalysis"));
+  setPropertySettings(
+      "RegionOfDirectBeam",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
 }
 
 /**

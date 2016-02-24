@@ -56,8 +56,8 @@ void SlicingAlgorithm::initSlicingProps() {
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
             "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-    setPropertySettings(
-        propName, new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "1"));
+    setPropertySettings(propName, make_unique<VisibleWhenProperty>(
+                                      "AxisAligned", IS_EQUAL_TO, "1"));
     setPropertyGroup(propName, "Axis-Aligned Binning");
   }
 
@@ -65,8 +65,11 @@ void SlicingAlgorithm::initSlicingProps() {
   // ---------------------------------------
   std::string grpName = "Non-Aligned Binning";
 
-  IPropertySettings *ps =
-      new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "0");
+  auto ps = [] {
+    std::unique_ptr<IPropertySettings> settings =
+        make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "0");
+    return settings;
+  };
   for (size_t i = 0; i < dimChars.size(); i++) {
     std::string dim(" ");
     dim[0] = dimChars[i];
@@ -82,7 +85,7 @@ void SlicingAlgorithm::initSlicingProps() {
             "  x,y,z,...: vector definining the basis in the input dimensions "
             "space.\n"
             "Leave blank for NONE.");
-    setPropertySettings(propName, ps->clone());
+    setPropertySettings(propName, ps());
     setPropertyGroup(propName, grpName);
   }
   declareProperty(
@@ -121,11 +124,11 @@ void SlicingAlgorithm::initSlicingProps() {
   setPropertyGroup("OutputBins", grpName);
   setPropertyGroup("NormalizeBasisVectors", grpName);
   setPropertyGroup("ForceOrthogonal", grpName);
-  setPropertySettings("Translation", ps->clone());
-  setPropertySettings("OutputExtents", ps->clone());
-  setPropertySettings("OutputBins", ps->clone());
-  setPropertySettings("NormalizeBasisVectors", ps->clone());
-  setPropertySettings("ForceOrthogonal", ps);
+  setPropertySettings("Translation", ps());
+  setPropertySettings("OutputExtents", ps());
+  setPropertySettings("OutputBins", ps());
+  setPropertySettings("NormalizeBasisVectors", ps());
+  setPropertySettings("ForceOrthogonal", ps());
 }
 
 //----------------------------------------------------------------------------------------------

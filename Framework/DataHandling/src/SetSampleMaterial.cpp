@@ -94,18 +94,18 @@ void SetSampleMaterial::init() {
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
 
   // Extra property settings
-  setPropertySettings(
-      "AtomicNumber",
-      new Kernel::EnabledWhenProperty("ChemicalFormula", Kernel::IS_DEFAULT));
-  setPropertySettings("MassNumber", new Kernel::EnabledWhenProperty(
+  setPropertySettings("AtomicNumber",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "ChemicalFormula", Kernel::IS_DEFAULT));
+  setPropertySettings("MassNumber", make_unique<Kernel::EnabledWhenProperty>(
                                         "ChemicalFormula", Kernel::IS_DEFAULT));
 
   setPropertySettings("UnitCellVolume",
-                      new Kernel::EnabledWhenProperty("SampleNumberDensity",
-                                                      Kernel::IS_DEFAULT));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_DEFAULT));
   setPropertySettings("ZParameter",
-                      new Kernel::EnabledWhenProperty("SampleNumberDensity",
-                                                      Kernel::IS_DEFAULT));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_DEFAULT));
 
   // output properties
   declareProperty(

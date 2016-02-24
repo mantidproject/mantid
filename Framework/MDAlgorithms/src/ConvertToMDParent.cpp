@@ -91,11 +91,11 @@ void ConvertToMDParent::init() {
       "depending on the target coordinate "
       "system, defined by the property **OutputDimensions**. ");
 
-  setPropertySettings("Q3DFrames", new Kernel::VisibleWhenProperty(
+  setPropertySettings("Q3DFrames", make_unique<Kernel::VisibleWhenProperty>(
                                        "QDimensions", IS_EQUAL_TO, "Q3D"));
-  setPropertySettings(
-      "QconversionScales",
-      new Kernel::VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("QconversionScales",
+                      make_unique<Kernel::VisibleWhenProperty>(
+                          "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
       make_unique<ArrayProperty<std::string>>("OtherDimensions",

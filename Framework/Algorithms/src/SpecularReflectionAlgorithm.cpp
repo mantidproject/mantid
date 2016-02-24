@@ -112,11 +112,11 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
   setPropertySettings("SampleComponentName",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "SpectrumNumbersOfDetectors",
-      new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
+  setPropertySettings("SpectrumNumbersOfDetectors",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleComponentName", IS_NOT_DEFAULT));
 }
 
 /**

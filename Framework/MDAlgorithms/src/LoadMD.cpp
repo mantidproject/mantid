@@ -95,16 +95,16 @@ void LoadMD::init() {
 
   declareProperty(make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
                   "Set to true to load the data only on demand.");
-  setPropertySettings(
-      "FileBackEnd", new EnabledWhenProperty("MetadataOnly", IS_EQUAL_TO, "0"));
+  setPropertySettings("FileBackEnd", make_unique<EnabledWhenProperty>(
+                                         "MetadataOnly", IS_EQUAL_TO, "0"));
 
   declareProperty(
       make_unique<PropertyWithValue<double>>("Memory", -1),
       "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
       "in-memory cache.\n"
       "If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory",
-                      new EnabledWhenProperty("FileBackEnd", IS_EQUAL_TO, "1"));
+  setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
+                                    "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

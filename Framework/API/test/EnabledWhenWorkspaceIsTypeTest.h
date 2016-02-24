@@ -50,13 +50,15 @@ public:
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings(
         "MyValidatorProp",
-        new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>(
+        Kernel::make_unique<
+            EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
             "InputWorkspace", true));
 
     alg.declareProperty("MyValidatorProp2", 456);
     alg.setPropertySettings(
         "MyValidatorProp2",
-        new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>(
+        Kernel::make_unique<
+            EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
             "InputWorkspace", false));
 
     Property *prop = alg.getPointerToProperty("MyValidatorProp");

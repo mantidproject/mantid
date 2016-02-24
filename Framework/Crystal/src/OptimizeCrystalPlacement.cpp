@@ -126,12 +126,12 @@ void OptimizeCrystalPlacement::init() {
   setPropertyGroup("MaxHKLPeaks2Use", "Tolerance settings");
   setPropertyGroup("MaxIndexingError", "Tolerance settings");
 
-  setPropertySettings(
-      "MaxSamplePositionChangeMeters",
-      new EnabledWhenProperty("AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxSamplePositionChangeMeters",
+                      make_unique<EnabledWhenProperty>(
+                          "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings("KeepGoniometerFixedfor",
-                      new OrEnabledWhenProperties(
+                      make_unique<OrEnabledWhenProperties>(
                           "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "0",
                           "OptimizeGoniometerTilt", Kernel::IS_EQUAL_TO, "0"));
 }

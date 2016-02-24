@@ -48,8 +48,8 @@ void ResetNegatives::init() {
       "Add the minumum value of the spectrum to bring it up to zero.");
   declareProperty("ResetValue", 0.,
                   "Reset negative values to this number (default=0)");
-  setPropertySettings("ResetValue",
-                      new EnabledWhenProperty("AddMinimum", IS_NOT_DEFAULT));
+  setPropertySettings("ResetValue", make_unique<EnabledWhenProperty>(
+                                        "AddMinimum", IS_NOT_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------

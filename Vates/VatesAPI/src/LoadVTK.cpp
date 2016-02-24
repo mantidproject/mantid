@@ -132,8 +132,8 @@ namespace Mantid
       auto rangeValidator = boost::make_shared<BoundedValidator<double> >(0, 100);
       this->declareProperty("KeepTopPercent", 25.0, rangeValidator, "Only keep the top percentage of SignalArray values in the range min to max. Allow sparse regions to be ignored. Defaults to 25%.");
 
-      setPropertySettings("KeepTopPercent",
-                new EnabledWhenProperty("AdaptiveBinned", IS_DEFAULT));
+      setPropertySettings("KeepTopPercent", make_unique<EnabledWhenProperty>(
+                                                "AdaptiveBinned", IS_DEFAULT));
 
       declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
                           "OutputWorkspace", "", Direction::Output),

@@ -77,9 +77,9 @@ void SaveAscii::init() {
                                                   Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
-  setPropertySettings(
-      "CustomSeparator",
-      new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined"));
+  setPropertySettings("CustomSeparator",
+                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
+                                                       "UserDefined"));
 
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");

@@ -88,8 +88,8 @@ void QueryMDWorkspace::init() {
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings("MaximumRows",
-                      new EnabledWhenProperty("LimitRows", IS_DEFAULT));
+  setPropertySettings(
+      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back(noNormalisationOption());

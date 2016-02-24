@@ -95,9 +95,9 @@ void ConvertToMDMinMaxGlobal::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  setPropertySettings(
-      "dEAnalysisMode",
-      new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
+  setPropertySettings("dEAnalysisMode",
+                      make_unique<VisibleWhenProperty>(
+                          "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
@@ -109,8 +109,8 @@ void ConvertToMDMinMaxGlobal::init() {
       "laboratory or sample frame."
       "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings(
-      "Q3DFrames", new VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("Q3DFrames", make_unique<VisibleWhenProperty>(
+                                       "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
       make_unique<ArrayProperty<std::string>>("OtherDimensions",

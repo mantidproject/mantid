@@ -95,18 +95,18 @@ void RefReduction::init() {
                                          "polarization states in the data set");
   setPropertySettings(
       "ReflectivityPixel",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DetectorAngle", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DetectorAngle", make_unique<VisibleWhenProperty>(
                                            "Instrument", IS_EQUAL_TO, "REF_M"));
   setPropertySettings(
       "DetectorAngle0",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DirectPixel", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DirectPixel", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_M"));
 
   declareProperty("AngleOffset", EMPTY_DBL(),
                   "Scattering angle offset in degrees");
-  setPropertySettings("AngleOffset", new VisibleWhenProperty(
+  setPropertySettings("AngleOffset", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
   std::vector<std::string> instrOptions{"REF_L", "REF_M"};

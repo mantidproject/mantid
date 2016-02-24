@@ -225,8 +225,8 @@ void ConvertToReflectometryQ::init() {
       "+-50 in each dimension.");
 
   setPropertySettings("IncidentTheta",
-                      new Kernel::EnabledWhenProperty("OverrideIncidentTheta",
-                                                      IS_EQUAL_TO, "1"));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "OverrideIncidentTheta", IS_EQUAL_TO, "1"));
 
   declareProperty(
       make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace", true),
@@ -259,22 +259,22 @@ void ConvertToReflectometryQ::init() {
 
   setPropertySettings(
       "NumberBinsQx",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
   setPropertySettings(
       "NumberBinsQz",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
 
   // Create box controller properties.
   this->initBoxControllerProps("2,2", 50, 10);
 
   // Only show box controller properties when a md workspace is returned.
-  setPropertySettings(
-      "SplitInto", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
-  setPropertySettings("SplitThreshold", new EnabledWhenProperty(
+  setPropertySettings("SplitInto", make_unique<EnabledWhenProperty>(
+                                       "OutputAsMDWorkspace", IS_DEFAULT));
+  setPropertySettings("SplitThreshold", make_unique<EnabledWhenProperty>(
                                             "OutputAsMDWorkspace", IS_DEFAULT));
   setPropertySettings(
       "MaxRecursionDepth",
-      new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
+      make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------

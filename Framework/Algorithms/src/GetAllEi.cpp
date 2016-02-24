@@ -81,11 +81,11 @@ void GetAllEi::init() {
       "values where the derivative of the log turns zero.\n"
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
-  setPropertySettings(
-      "FilterWithDerivative",
-      new Kernel::EnabledWhenProperty("FilterBaseLog",
-                                      Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                                      "Defined in IDF"));
+  setPropertySettings("FilterWithDerivative",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FilterBaseLog",
+                          Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                          "Defined in IDF"));
 
   auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);

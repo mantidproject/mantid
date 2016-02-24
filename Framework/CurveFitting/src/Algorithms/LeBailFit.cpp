@@ -178,26 +178,26 @@ void LeBailFit::init() {
   // Output option to plot each individual peak
   declareProperty("PlotIndividualPeaks", false,
                   "Option to output each individual peak in mode Calculation.");
-  setPropertySettings(
-      "PlotIndividualPeaks",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "Calculation"));
+  setPropertySettings("PlotIndividualPeaks",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "Calculation"));
 
   // Make each reflection visible
   declareProperty("IndicationPeakHeight", 0.0,
                   "Heigh of peaks (reflections) if its calculated height is "
                   "smaller than user-defined minimum.");
-  setPropertySettings(
-      "IndicationPeakHeight",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "Calculation"));
+  setPropertySettings("IndicationPeakHeight",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "Calculation"));
 
   // UseInputPeakHeights
   declareProperty("UseInputPeakHeights", true,
                   "For 'Calculation' mode only, use peak heights specified in "
                   "ReflectionWorkspace. "
                   "Otherwise, calcualte peaks' heights. ");
-  setPropertySettings(
-      "UseInputPeakHeights",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "Calculation"));
+  setPropertySettings("UseInputPeakHeights",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "Calculation"));
 
   /*---------------------------  Properties for Fitting Mode
    * ---------------------------------*/
@@ -210,26 +210,26 @@ void LeBailFit::init() {
                   "The minimizer method applied to do the fit, default is "
                   "Levenberg-Marquardt",
                   Kernel::Direction::InOut);
-  setPropertySettings("Minimizer", new VisibleWhenProperty(
+  setPropertySettings("Minimizer", Kernel::make_unique<VisibleWhenProperty>(
                                        "Function", IS_EQUAL_TO, "LeBailFit"));
 
   declareProperty("Damping", 1.0, "Damping factor if minizer is 'Damping'");
-  setPropertySettings(
-      "Damping", new VisibleWhenProperty("Function", IS_EQUAL_TO, "LeBailFit"));
-  setPropertySettings("Damping", new VisibleWhenProperty(
+  setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
+                                     "Function", IS_EQUAL_TO, "LeBailFit"));
+  setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
                                      "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("NumberMinimizeSteps", 100,
                   "Number of Monte Carlo random walk steps.");
-  setPropertySettings(
-      "NumberMinimizeSteps",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "LeBailFit"));
-  setPropertySettings(
-      "NumberMinimizeSteps",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));
-  setPropertySettings(
-      "NumberMinimizeSteps",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "RefineBackground"));
+  setPropertySettings("NumberMinimizeSteps",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "LeBailFit"));
+  setPropertySettings("NumberMinimizeSteps",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "MonteCarlo"));
+  setPropertySettings("NumberMinimizeSteps",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "RefineBackground"));
 
   //-----------------  Parameters for Monte Carlo Simulated Annealing
   //--------------------------
@@ -238,33 +238,33 @@ void LeBailFit::init() {
   declareProperty(std::move(mcwsprop),
                   "Name of table workspace containing parameters' "
                   "setup for Monte Carlo simualted annearling. ");
-  setPropertySettings(
-      "MCSetupWorkspace",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));
+  setPropertySettings("MCSetupWorkspace",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "MonteCarlo"));
 
-  declareProperty("RandomSeed", 1, "Randum number seed.");
-  setPropertySettings("RandomSeed", new VisibleWhenProperty(
+  declareProperty("RandomSeed", 1, "Random number seed.");
+  setPropertySettings("RandomSeed", Kernel::make_unique<VisibleWhenProperty>(
                                         "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("AnnealingTemperature", 1.0,
                   "Temperature used Monte Carlo.  "
                   "Negative temperature is for simulated annealing. ");
-  setPropertySettings(
-      "AnnealingTemperature",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));
+  setPropertySettings("AnnealingTemperature",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("UseAnnealing", true,
                   "Allow annealing temperature adjusted automatically.");
-  setPropertySettings(
-      "UseAnnealing",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));
+  setPropertySettings("UseAnnealing",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("DrunkenWalk", false,
                   "Flag to use drunken walk algorithm. "
                   "Otherwise, random walk algorithm is used. ");
-  setPropertySettings(
-      "DrunkenWalk",
-      new VisibleWhenProperty("Function", IS_EQUAL_TO, "MonteCarlo"));
+  setPropertySettings("DrunkenWalk",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty(
       "MinimumPeakHeight", 0.01,

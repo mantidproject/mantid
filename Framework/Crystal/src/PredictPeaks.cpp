@@ -94,17 +94,20 @@ void PredictPeaks::init() {
                   "values in the HKLPeaksWorkspace to the nearest integers if "
                   "checked.\n"
                   "Keep unchecked to use the original values");
-  setPropertySettings(
-      "RoundHKL", new EnabledWhenProperty("HKLPeaksWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
+                                      "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
   // Disable some props when using HKLPeaksWorkspace
-  IPropertySettings *set =
-      new EnabledWhenProperty("HKLPeaksWorkspace", IS_DEFAULT);
-  setPropertySettings("WavelengthMin", set);
-  setPropertySettings("WavelengthMax", set->clone());
-  setPropertySettings("MinDSpacing", set->clone());
-  setPropertySettings("MaxDSpacing", set->clone());
-  setPropertySettings("ReflectionCondition", set->clone());
+  auto makeSet = [] {
+    std::unique_ptr<IPropertySettings> set =
+        make_unique<EnabledWhenProperty>("HKLPeaksWorkspace", IS_DEFAULT);
+    return set;
+  };
+  setPropertySettings("WavelengthMin", makeSet());
+  setPropertySettings("WavelengthMax", makeSet());
+  setPropertySettings("MinDSpacing", makeSet());
+  setPropertySettings("MaxDSpacing", makeSet());
+  setPropertySettings("ReflectionCondition", makeSet());
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

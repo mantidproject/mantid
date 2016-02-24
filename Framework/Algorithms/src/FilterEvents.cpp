@@ -103,17 +103,17 @@ void FilterEvents::init() {
                       PropertyMode::Optional),
                   "Name of table workspace containing the log "
                   "time correction factor for each detector. ");
-  setPropertySettings(
-      "DetectorTOFCorrectionWorkspace",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Customized"));
+  setPropertySettings("DetectorTOFCorrectionWorkspace",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
-  setPropertySettings(
-      "IncidentEnergy",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
+  setPropertySettings("IncidentEnergy",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
   vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};

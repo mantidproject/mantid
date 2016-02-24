@@ -293,8 +293,8 @@ void FindClusterFaces::init() {
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings("MaximumRows",
-                      new EnabledWhenProperty("LimitRows", IS_DEFAULT));
+  setPropertySettings(
+      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
 
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",

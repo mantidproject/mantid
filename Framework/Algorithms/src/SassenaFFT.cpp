@@ -51,9 +51,9 @@ void SassenaFFT::init() {
       "Do we apply detailed balance condition? (optional, default is False)");
   this->declareProperty("Temp", 300.0,
                         "Multiply structure factor by exp(E/(2*kT)");
-  this->setPropertySettings(
-      "Temp", new Kernel::EnabledWhenProperty("DetailedBalance",
-                                              Kernel::IS_EQUAL_TO, "1"));
+  this->setPropertySettings("Temp",
+                            Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                                "DetailedBalance", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Execute the algorithm

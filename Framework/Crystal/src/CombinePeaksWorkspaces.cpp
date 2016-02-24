@@ -56,9 +56,9 @@ void CombinePeaksWorkspaces::init() {
   declareProperty("Tolerance", EMPTY_DBL(), mustBePositive,
                   "Maximum difference in each component of Q for which peaks "
                   "are considered identical");
-  setPropertySettings(
-      "Tolerance",
-      new EnabledWhenProperty("CombineMatchingPeaks", IS_EQUAL_TO, "1"));
+  setPropertySettings("Tolerance",
+                      make_unique<EnabledWhenProperty>("CombineMatchingPeaks",
+                                                       IS_EQUAL_TO, "1"));
 }
 
 /** Executes the algorithm.

@@ -175,15 +175,16 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   // Polarization correction inputs --------------
   std::vector<std::string> propOptions;
@@ -222,19 +223,22 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup(cApLabel(), "Polarization Corrections");
   setPropertyGroup(crhoLabel(), "Polarization Corrections");
   setPropertyGroup(cAlphaLabel(), "Polarization Corrections");
-  setPropertySettings(cppLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(cApLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(crhoLabel(), new Kernel::EnabledWhenProperty(
-                                       "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                       noPolarizationCorrectionMode()));
-  setPropertySettings(
-      cAlphaLabel(),
-      new Kernel::EnabledWhenProperty("PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
+  setPropertySettings(cppLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cApLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(crhoLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cAlphaLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
 }
 
 //----------------------------------------------------------------------------------------------
