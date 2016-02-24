@@ -385,11 +385,10 @@ class CWSCDReductionControl(object):
         """
         return self._expNumber
 
-    def get_pt_numbers(self, exp_no, scan_no, load_spice_scan=False):
+    def get_pt_numbers(self, exp_no, scan_no):
         """ Get Pt numbers (as a list) for a scan in an experiment
         :param exp_no:
         :param scan_no:
-        :param load_spice_scan: flag to load spice scan file if it is not loaded yet.
         :return: (Boolean, Object) as (status, pt number list/error message)
         """
         # Check
@@ -499,7 +498,7 @@ class CWSCDReductionControl(object):
         # load the merged data back from the ASCII data file
         q_space_array, counts_array = load_hb3a_md_data(out_file_name)
 
-        return
+        return q_space_array, counts_array
 
     def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
@@ -643,7 +642,7 @@ class CWSCDReductionControl(object):
         assert isinstance(exp_num, int) and isinstance(scan_num, int) and isinstance(pt_num, int)
 
         # Merge
-        merged_ws_name = get_merged_md_name(exp_num, scan_num, [pt_num])
+        merged_ws_name = get_merged_md_name(self._instrumentName, exp_num, scan_num, [pt_num])
         if AnalysisDataService.doesExist(merged_ws_name) is False:
             self.merge_pts_in_scan(exp_num, scan_num, [pt_num], 'q-sample')
         assert AnalysisDataService.doesExist(merged_ws_name)
@@ -860,7 +859,8 @@ class CWSCDReductionControl(object):
 
         # Form standard name for a SPICE file if name is not given
         if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir, get_spice_file_name(self._instrumentName, exp_no, scan_no))
+            spice_file_name = os.path.join(self._dataDir,
+                                           get_spice_file_name(self._instrumentName, exp_no, scan_no))
 
         # Download SPICE file if necessary
         if os.path.exists(spice_file_name) is False:
@@ -980,7 +980,7 @@ class CWSCDReductionControl(object):
             pt_num_list = pt_num_list
         else:
             # default: all Pt. of scan
-            status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
+            status, pt_num_list = self.get_pt_numbers(exp_no, scan_no)
             if status is False:
                 err_msg = pt_num_list
                 return False, err_msg
@@ -1550,7 +1550,7 @@ class CWSCDReductionControl(object):
                 # END-FOR
 
                 # calculate wavelength
-                wavelength = ftuil.get_hb3a_wavelength(m1)
+                wavelength = get_hb3a_wavelength(m1)
                 q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
                 print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
 

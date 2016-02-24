@@ -256,7 +256,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Add table
         for row_index in ret_list:
-            merged_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_index)
+            # merged_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_index)
             # status, merged_info = self._myControl.get_merged_scan_info()
             status = False
             merged_info = None
@@ -308,7 +308,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # call myController to get peak center
         if self._myControl.has_peak_info(exp_number, scan_number) is False:
-            self._myControl.merge_pts_in_scan(exp_number, scan_number)
+            # merge scan and find peak
+            if not self._myControl.has_merged_data(exp_number, scan_number):
+                # merge all Pts. in scan if necessary
+                pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+                self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
+                                                  'q-sample')
+            # find peak
             self._myControl.find_peak(exp_number, scan_number)
         scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
         weighted_peak_center = scan_peak_info.getPeakCentre()
