@@ -154,7 +154,7 @@ public:
   bool operator<(const SymmetryOperation &other) const;
 
 protected:
-  void init(const Kernel::IntMatrix &matrix, const V3R &vector);
+  void init(const MatrixVectorPair<int, V3R> &matrixVectorPair);
 
   size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
   V3R getReducedVector(const Kernel::IntMatrix &matrix,

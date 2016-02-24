@@ -46,20 +46,20 @@ void SymmetryOperationSymbolParser::verifyMatrix(
  * @param identifier :: Symbol representing a symmetry operation
  * @return Kernel::IntMatrix and V3R, representing the symmetry operation.
  */
-std::pair<Kernel::IntMatrix, V3R>
+MatrixVectorPair<int, V3R>
 SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {
   MatrixVectorPair<int, V3R> pair = parseMatrixVectorPair<int>(identifier);
 
   verifyMatrix(pair.getMatrix());
 
-  return std::make_pair(pair.getMatrix(), pair.getVector());
+  return pair;
 }
 
 /// Returns a Jones faithful representation of the symmetry operation
 /// characterized by the supplied matrix/column pair.
 std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
-    const std::pair<Kernel::IntMatrix, V3R> &data) {
-  return getNormalizedIdentifier(data.first, data.second);
+    const MatrixVectorPair<int, V3R> &data) {
+  return getNormalizedIdentifier(data.getMatrix(), data.getVector());
 }
 
 /**

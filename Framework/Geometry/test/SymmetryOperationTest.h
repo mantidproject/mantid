@@ -192,24 +192,24 @@ public:
     TestableSymmetryOperation symOp;
 
     // identity - 0
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param1 =
+    MatrixVectorPair<int, V3R> param1 =
         SymmetryOperationSymbolParser::parseIdentifier("x, y, z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param1.first), 1);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param1.getMatrix()), 1);
 
     // inversion - 1
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param2 =
+    MatrixVectorPair<int, V3R> param2 =
         SymmetryOperationSymbolParser::parseIdentifier("-x, -y, -z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param2.first), 2);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param2.getMatrix()), 2);
 
     // mirror perpendicular to z
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param3 =
+    MatrixVectorPair<int, V3R> param3 =
         SymmetryOperationSymbolParser::parseIdentifier("x, y, -z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param3.first), 2);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param3.getMatrix()), 2);
 
     // 4_1 screw axis along z
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param4 =
+    MatrixVectorPair<int, V3R> param4 =
         SymmetryOperationSymbolParser::parseIdentifier("-y, x, z+1/4");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.first), 4);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.getMatrix()), 4);
 
     // check that random matrices don't work
     Mantid::Kernel::IntMatrix randMatrix(3, 3, false);

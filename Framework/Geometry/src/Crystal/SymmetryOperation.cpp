@@ -12,7 +12,7 @@ SymmetryOperation::SymmetryOperation()
     : m_order(1), m_transposedInverseMatrix(Kernel::IntMatrix(3, 3, true)),
       m_reducedVector(), m_identifier(), m_matrixVectorPair() {
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
-      m_matrixVectorPair.getMatrix(), m_matrixVectorPair.getVector());
+      m_matrixVectorPair);
 }
 
 /**
@@ -27,38 +27,37 @@ SymmetryOperation::SymmetryOperation()
  * @param identifier :: Jones faithful representation of a symmetry operation
  */
 SymmetryOperation::SymmetryOperation(const std::string &identifier) {
-  const std::pair<Kernel::IntMatrix, V3R> parsedSymbol =
-      SymmetryOperationSymbolParser::parseIdentifier(identifier);
-  init(parsedSymbol.first, parsedSymbol.second);
+  init(SymmetryOperationSymbolParser::parseIdentifier(identifier));
 }
 
 /// Constructs a symmetry operation from a matrix component and a vector,
 /// derives order and identifier from matrix and vector.
 SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
                                      const V3R &vector) {
-  init(matrix, vector);
+  init(MatrixVectorPair<int, V3R>(matrix, vector));
 }
 
 /// Convenience constructor for double-matrices.
 SymmetryOperation::SymmetryOperation(const Mantid::Kernel::DblMatrix &matrix,
                                      const Mantid::Geometry::V3R &vector) {
-  init(convertMatrix<int>(matrix), vector);
+  init(MatrixVectorPair<int, V3R>(convertMatrix<int>(matrix), vector));
 }
 
 /// Initialize from matrix and vector.
-void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
-                             const V3R &vector) {
-  m_matrixVectorPair =
-      MatrixVectorPair<int, V3R>(matrix, getWrappedVector(vector));
+void SymmetryOperation::init(
+    const MatrixVectorPair<int, V3R> &matrixVectorPair) {
+  m_matrixVectorPair = MatrixVectorPair<int, V3R>(
+      matrixVectorPair.getMatrix(),
+      getWrappedVector(matrixVectorPair.getVector()));
 
   // Inverse matrix for HKL operations.
-  m_transposedInverseMatrix = Kernel::IntMatrix(matrix);
+  m_transposedInverseMatrix = Kernel::IntMatrix(matrixVectorPair.getMatrix());
   m_transposedInverseMatrix.Invert();
   m_transposedInverseMatrix = m_transposedInverseMatrix.Transpose();
 
   m_order = getOrderFromMatrix(m_matrixVectorPair.getMatrix());
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
-      m_matrixVectorPair.getMatrix(), m_matrixVectorPair.getVector());
+      m_matrixVectorPair);
 
   m_reducedVector = getReducedVector(m_matrixVectorPair.getMatrix(),
                                      m_matrixVectorPair.getVector());
