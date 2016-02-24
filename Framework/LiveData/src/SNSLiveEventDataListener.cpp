@@ -505,8 +505,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
       // Update the property value (overwriting the old value if there was one)
       m_eventBuffer->mutableRun().addProperty<int>(monName, events, true);
 
-      // cppcheck-suppress signConversion
       auto it = m_monitorIndexMap.find(
+          // cppcheck-suppress signConversion
           -1 * monitorID); // Monitor IDs are negated in Mantid IDFs
       if (it != m_monitorIndexMap.end()) {
         bool risingEdge;

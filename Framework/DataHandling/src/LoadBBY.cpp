@@ -804,7 +804,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
     return;
 
   int state = 0;
-  unsigned int c;
+  uint64_t c;
   while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
          static_cast<unsigned int>(-1)) {
 
