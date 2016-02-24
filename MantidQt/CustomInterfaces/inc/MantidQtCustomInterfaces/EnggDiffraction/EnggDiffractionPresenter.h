@@ -252,9 +252,9 @@ private:
   // generates appropriate names for table workspaces
   std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
 
-  std::string DifcZeroWorkspaceFactory(std::vector<double> &difc,
-                                       std::vector<double> &tzero,
-                                       std::string &specNo) const;
+  std::string DifcZeroWorkspaceFactory(const std::vector<double> &difc,
+                                       const std::vector<double> &tzero,
+                                       const std::string &specNo) const;
 
   std::string plotDifcZeroWorkspace() const;
 

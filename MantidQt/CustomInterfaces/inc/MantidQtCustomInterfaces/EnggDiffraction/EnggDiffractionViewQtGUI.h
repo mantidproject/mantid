@@ -142,11 +142,11 @@ public:
 
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
-	  const std::string &type);
+                                   const std::string &type);
 
   virtual void plotVanCurvesCalibOutput();
 
-  virtual void plotDifcZeroCalibOutput(std::string &pyCode);
+  virtual void plotDifcZeroCalibOutput(const std::string &pyCode);
 
   virtual bool saveFocusedOutputFiles() const;
 

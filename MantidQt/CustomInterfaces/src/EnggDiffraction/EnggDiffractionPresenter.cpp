@@ -2133,9 +2133,10 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
       m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
                                   "2");
     }
-    m_view->plotDifcZeroCalibOutput(
+    const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos) +
-        plotDifcZeroWorkspace());
+        plotDifcZeroWorkspace();
+    m_view->plotDifcZeroCalibOutput(pythonCode);
   }
 }
 
@@ -2323,10 +2324,9 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 *
 * @return string with a python script
 */
-std::string
-EnggDiffractionPresenter::DifcZeroWorkspaceFactory(std::vector<double> &difc,
-                                                   std::vector<double> &tzero,
-                                                   std::string &specNo) const {
+std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
+    const std::vector<double> &difc, const std::vector<double> &tzero,
+    const std::string &specNo) const {
 
   size_t bank1 = size_t(0);
   size_t bank2 = size_t(1);

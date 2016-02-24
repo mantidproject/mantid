@@ -366,7 +366,7 @@ public:
   *
   * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotDifcZeroCalibOutput(std::string &pyCode) = 0;
+  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.

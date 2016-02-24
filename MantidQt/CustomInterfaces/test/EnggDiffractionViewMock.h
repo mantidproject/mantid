@@ -158,7 +158,7 @@ public:
   MOCK_METHOD0(plotVanCurvesCalibOutput, void());
 
   // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD1(plotDifcZeroCalibOutput, void(std::string &pyCode));
+  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

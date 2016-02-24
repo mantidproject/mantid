@@ -636,7 +636,7 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
 }
 
 void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
-    std::string &pyCode) {
+    const std::string &pyCode) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
