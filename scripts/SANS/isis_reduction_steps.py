@@ -8,8 +8,10 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
+import os
 import re
 import math
+from collections import namedtuple
 from mantid.kernel import Logger
 
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
@@ -26,8 +28,6 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
 import DarkRunCorrection as DarkCorr
 
 import SANSUserFileParser as UserFileParser
-from collections import namedtuple
-
 from reducer_singleton import ReductionStep
 
 sanslog = Logger("SANS")
@@ -106,12 +106,13 @@ class LoadRun(object):
     wksp_name = property(get_wksp_name, None, None, None)
 
     def _load_transmission(self, inst=None, is_can=False, extra_options=None):
-        extra_options = dict()
+        if extra_options is None:
+            extra_options = dict()
         if '.raw' in self._data_file or '.RAW' in self._data_file:
             self._load(inst, is_can, extra_options)
             return
 
-        # the intension of the code below is a good idea. Hence the reason why
+        # the intention of the code below is a good idea. Hence the reason why
         # I have left in the code but commented it out. As of this writing
         # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
         # i.e. this algorithm only works for event files at present. The error
@@ -151,7 +152,8 @@ class LoadRun(object):
             @param extra_options: arguments to pass on to the Load Algorithm.
             @return: number of periods in the workspace
         """
-        extra_options = dict()
+        if extra_options is None:
+            extra_options = dict()
         _inst = inst
         _is_can = is_can
         if self._period != self.UNSET_PERIOD:
@@ -427,7 +429,7 @@ class LoadRun(object):
                 'There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
 
-class LoadTransmissions:
+class LoadTransmissions(object):
     """
         Loads the file used to apply the transmission correction to the
         sample or can
@@ -2127,6 +2129,7 @@ class TransmissionCalc(ReductionStep):
         # Second we perform the correction on all indices which are not
         # monitors
         if tmp.getNumberHistograms() > 0:
+            ws_index = 0
             for ws_index in range(tmp.getNumberHistograms()):
                 if tmp.getDetector(ws_index).isMonitor():
                     spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
@@ -2455,8 +2458,9 @@ class CalculateNormISIS(object):
     PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
 
     def __init__(self, wavelength_deps=None):
+        if wavelength_deps is None:
+            wavelength_deps = []
         super(CalculateNormISIS, self).__init__()
-        wavelength_deps = []
         self._wave_steps = wavelength_deps
         self._high_angle_pixel_file = ""
         self._low_angle_pixel_file = ""
@@ -2529,8 +2533,7 @@ class CalculateNormISIS(object):
             @return True for point data, false for histogram
         """
         handle = mtd[wksp]
-        is_x_len_equal_to_y_len = len(handle.readX(0)) == len(handle.readY(0))
-        if is_x_len_equal_to_y_len:
+        if len(handle.readX(0)) == len(handle.readY(0)):
             return True
         else:
             return False
@@ -2542,7 +2545,8 @@ class CalculateNormISIS(object):
             @param reducer: settings used for this reduction
             @param wave_wks: additional wavelength dependent correction workspaces to include
         """
-        wave_wks = []
+        if wave_wks is None:
+            wave_wks = []
         # use the instrument's correction file
         corr_file = reducer.instrument.cur_detector().correction_file
         if corr_file:
@@ -2551,7 +2555,7 @@ class CalculateNormISIS(object):
 
             if self._is_point_data(self.TMP_ISIS_NAME):
                 ConvertToHistogram(InputWorkspace=self.TMP_ISIS_NAME, OutputWorkspace=self.TMP_ISIS_NAME)
-        # try to redefine self._pixel_file to pass to CalculateNORM method calculate.
+        ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
         if detect_pixel_file != "":
             self._pixel_file = detect_pixel_file
@@ -2775,13 +2779,13 @@ class ConvertToQISIS(ReductionStep):
         reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
 
     def _get_q_resolution_workspace(self, det_bank_workspace):
-        '''
+        """
         Calculates the QResolution workspace if this is required
-        @param det_bank_workspace: the main worspace which is being reduced
+        @param det_bank_workspace: the main workspace which is being reduced
         @returns the QResolution workspace or None
-        '''
+        """
         # Check if the a calculation is asked for by the user
-        if not self.use_q_resolution:
+        if self.use_q_resolution is False:
             return None
 
         # Make sure that all parameters that are needed are available
@@ -2808,10 +2812,10 @@ class ConvertToQISIS(ReductionStep):
             return self._create_q_resolution(det_bank_workspace=det_bank_workspace)
 
     def _create_q_resolution(self, det_bank_workspace):
-        '''
+        """
         Creates the Q Resolution workspace
         @returns the q resolution workspace
-        '''
+        """
         sigma_moderator = self._get_sigma_moderator_workspace()
 
         # We need the radius, not the diameter in the TOFSANSResolutionByPixel algorithm
@@ -2864,7 +2868,7 @@ class ConvertToQISIS(ReductionStep):
         '''
         # Here we need to check if the binning has changed, ie if the
         # existing
-        dummy_ws = det_bank_workspace
+        _dummy_ws = det_bank_workspace
         raise RuntimeError("The QResolution optimization has not been implemented yet")
 
     def set_q_resolution_moderator(self, file_name):
@@ -2937,10 +2941,10 @@ class ConvertToQISIS(ReductionStep):
         return self.use_q_resolution
 
     def run_consistency_check(self):
-        '''
+        """
         Provides the consistency check for the ConvertTOQISIS
-        '''
-        # Make sure that everythign for the QResolution calculation is setup correctly
+        """
+        # Make sure that everything for the QResolution calculation is setup correctly
         if self.use_q_resolution:
             self._check_q_settings_complete()
 
@@ -2950,7 +2954,7 @@ class ConvertToQISIS(ReductionStep):
         We need a moderator file path. And the other settings have to be self consistent
         '''
         try:
-            dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
+            _dummy_file_path, _dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
         except:
             raise RuntimeError(
                 "The specified moderator file is not valid. Please make sure that that it exists in your search directory.")
@@ -3016,7 +3020,6 @@ class UnitsConvert(ReductionStep):
 
     # TODO: consider how to remove the extra argument after workspace
     def execute(self, reducer, workspace, bin_alg=None):
-        _reducer = reducer
         """
             Runs the ConvertUnits() and a rebin algorithm on the specified
             workspace
@@ -3024,6 +3027,7 @@ class UnitsConvert(ReductionStep):
             @param workspace: the name of the workspace to convert
             @param workspace: the name of the workspace to convert
         """
+        _reducer = reducer
         ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=self._units)
 
         low_wav = self.wav_low
@@ -3159,11 +3163,11 @@ class BaseBeamFinder(ReductionStep):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
-        '''
+        """
         Update the beam center position of the BeamBaseFinder
         @param beam_center_x: The first position
         @param beam_center_y: The second position
-        '''
+        """
         self._beam_center_x = beam_center_x
         self._beam_center_y = beam_center_y
 
@@ -3235,7 +3239,7 @@ class UserFile(ReductionStep):
         for line in file_handle:
             try:
                 self.read_line(line, reducer)
-            except:
+            except IOError:
                 # Close the handle
                 file_handle.close()
                 raise RuntimeError("%s was specified in the MASK file (%s) but the file cannot be found." % (
@@ -3370,11 +3374,11 @@ class UserFile(ReductionStep):
                 elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
                 else:
-                    raise ValueError
+                    raise IOError
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
                                                               fit_method=fit_type, override=True,
                                                               selector=selector)
-            except ValueError:
+            except IOError:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
         elif upper_line.startswith('FIT/MONITOR'):
@@ -3429,7 +3433,7 @@ class UserFile(ReductionStep):
             _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
             return
         limits = limits[1]
-        _limit_type = ''
+        limit_type = ''
 
         if limits.startswith('SP '):
             # We don't use the L/SP line
@@ -3713,7 +3717,7 @@ class UserFile(ReductionStep):
             dark_run_setting = back_parser.parse_and_set(arguments)
             reducer.add_dark_run_setting(dark_run_setting)
         else:
-        # a list of the key words this function can read and the functions it calls in response
+            # a list of the key words this function can read and the functions it calls in response
             keys = ['MON/TIMES', 'M', 'TRANS']
             funcs = [self._read_default_back_region, self._read_back_region, self._read_back_trans_roi]
             self._process(keys, funcs, arguments, reducer)
@@ -3785,7 +3789,7 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs_for_ROI(int(times[0]), int(times[1]))
                 return ''
             raise ValueError('Expected two times for BACK/TRANS')
-        except Exception, reason:
+        except ValueError, reason:
             # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
 
@@ -3881,10 +3885,9 @@ class UserFile(ReductionStep):
             # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])
-            except StandardError, reason:
+            except:
                 sanslog.error(
                     "The specified moderator file could not be found. Please specify a file which exists in the search directories.")
-                sanslog.error(reason)
             return
 
         # All arguments need to be convertible to a float
