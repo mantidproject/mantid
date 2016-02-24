@@ -215,8 +215,8 @@ void UserFunctionDialog::checkParameters(QString& expr)
   {
     return;
   }
-  std::set<std::string> vars1 = e1.getVariables();
-  std::set<std::string> vars2 = e2.getVariables();
+  auto vars1 = e1.getVariables();
+  auto vars2 = e2.getVariables();
   vars1.erase("x");
   vars2.erase("x");
 
@@ -277,10 +277,10 @@ void UserFunctionDialog::updateFunction()
     m_uiForm.leParams->setText("");
     return;
   }
-  std::set<std::string> vars = e.getVariables();
+  auto vars = e.getVariables();
   vars.erase("x");
   QString params;
-  for(std::set<std::string>::iterator it=vars.begin();it!=vars.end();++it)
+  for(auto it=vars.begin();it!=vars.end();++it)
   {
     if (it != vars.begin())
     {

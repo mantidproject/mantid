@@ -985,7 +985,7 @@ namespace MantidQt
 		std::string InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const
 		{
 			if (temp) return "__MaskTab_MaskWorkspace";
-			std::set<std::string> wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+			auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
 			int maxIndex = 0;
 			const std::string baseName = "MaskWorkspace";
 			for (auto name = wsNames.begin(); name != wsNames.end(); ++name)

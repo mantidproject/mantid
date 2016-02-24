@@ -203,7 +203,7 @@ public:
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
       // This is the list of the detectors (grouped)
-      std::set<detid_t> mylist = output->getSpectrum(wi)->getDetectorIDs();
+      auto mylist = output->getSpectrum(wi)->getDetectorIDs();
       // 1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }

@@ -285,7 +285,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     SVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
-  std::set<detid_t> ids = spec->getDetectorIDs();
+  auto ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
     list.emplace_back("Det ID");

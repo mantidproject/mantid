@@ -217,7 +217,7 @@ void PropertyManager::declareProperty(Property *p, const std::string &doc) {
  */
 void PropertyManager::setProperties(
     const std::string &propertiesJson,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   setProperties(propertiesJson, this, ignoreProperties);
 }
 //-----------------------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value jsonValue;
 
@@ -254,7 +254,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   setProperties(jsonValue, this, ignoreProperties);
 }
 
@@ -269,7 +269,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   if (jsonValue.type() == ::Json::ValueType::objectValue) {
 
     // Some algorithms require Filename to be set first do that here
@@ -302,7 +302,7 @@ void PropertyManager::setProperties(
 */
 void PropertyManager::setPropertiesWithSimpleString(
     const std::string &propertiesString,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;

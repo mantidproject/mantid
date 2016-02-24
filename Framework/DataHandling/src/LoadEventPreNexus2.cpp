@@ -529,9 +529,9 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 /** Process imbed logs (marked by bad pixel IDs)
  */
 void LoadEventPreNexus2::processImbedLogs() {
-  std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
-  for (pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
+       ++pit) {
     // a. pixel ID -> index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);

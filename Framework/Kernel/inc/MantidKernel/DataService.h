@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -400,13 +401,13 @@ public:
   }
 
   /// Get the names of the data objects stored by the service
-  std::set<std::string> getObjectNames() const {
+  std::unordered_set<std::string> getObjectNames() const {
     if (showingHiddenObjects())
       return getObjectNamesInclHidden();
 
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
-    std::set<std::string> names;
+    std::unordered_set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
       if (!isHiddenDataServiceObject(it->first)) {
         names.insert(it->first);
@@ -416,10 +417,10 @@ public:
   }
 
   /// Get the names of the data objects stored by the service
-  std::set<std::string> getObjectNamesInclHidden() const {
+  std::unordered_set<std::string> getObjectNamesInclHidden() const {
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
-    std::set<std::string> names;
+    std::unordered_set<std::string> names;
     for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
       names.insert(it->first);
     }

@@ -72,7 +72,7 @@ void MaskDetectorsIf::exec() {
 
   for (size_t i = 0; i < nspec; ++i) {
     // Get the list of udets contributing to this spectra
-    const std::set<detid_t> &dets = inputW->getSpectrum(i)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(i)->getDetectorIDs();
 
     if (dets.empty())
       continue;

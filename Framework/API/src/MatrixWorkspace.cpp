@@ -760,7 +760,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
                                            "workspace index.",
                                            "");
 
-  const std::set<detid_t> &dets = spec->getDetectorIDs();
+  const auto &dets = spec->getDetectorIDs();
   Instrument_const_sptr localInstrument = getInstrument();
   if (!localInstrument) {
     g_log.debug() << "No instrument defined.\n";
@@ -1011,7 +1011,7 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
   // Virtual method clears the spectrum as appropriate
   spec->clearData();
 
-  const std::set<detid_t> dets = spec->getDetectorIDs();
+  const auto dets = spec->getDetectorIDs();
   for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
@@ -1656,7 +1656,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
     spectra[i] = int32_t(spectrum->getSpectrumNo());
 
     // The detectors in this spectrum
-    const std::set<detid_t> &detectorgroup = spectrum->getDetectorIDs();
+    const auto &detectorgroup = spectrum->getDetectorIDs();
     const int ndet1 = static_cast<int>(detectorgroup.size());
 
     detector_index[i + 1] = int32_t(

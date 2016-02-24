@@ -253,7 +253,7 @@ public:
 
     // Are the pixel IDs ok?
     TS_ASSERT_EQUALS(ew->getSpectrum(0)->getSpectrumNo(), 46);
-    std::set<detid_t> dets = ew->getSpectrum(0)->getDetectorIDs();
+    auto dets = ew->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 45);
 

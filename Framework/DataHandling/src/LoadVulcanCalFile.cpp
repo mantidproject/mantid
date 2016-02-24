@@ -435,11 +435,10 @@ void LoadVulcanCalFile::processOffsets(
   }
 
   // Get the global correction
-  std::set<int>::iterator biter;
   g_log.information() << "Number of bankds to process = " << set_bankID.size()
                       << "\n";
   map<int, double> map_bankLogCorr;
-  for (biter = set_bankID.begin(); biter != set_bankID.end(); ++biter) {
+  for (auto biter = set_bankID.begin(); biter != set_bankID.end(); ++biter) {
     // Locate inter bank and inter pack correction (log)
     int bankid = *biter;
     double globalfactor = 0.;
