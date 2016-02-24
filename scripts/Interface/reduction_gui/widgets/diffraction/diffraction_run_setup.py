@@ -2,10 +2,8 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 from mantid.kernel import Logger
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
@@ -107,13 +105,14 @@ class RunSetupWidget(BaseWidget):
         self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
-        iv0 = generateRegExpValidator(self._content.emptyrun_edit, "[\d,-]*")
+        expression = r'[\d,-]*'
+        iv0 = generateRegExpValidator(self._content.emptyrun_edit, expression)
         self._content.emptyrun_edit.setValidator(iv0)
 
-        iv1 = generateRegExpValidator(self._content.vanrun_edit, "[\d,-]*")
+        iv1 = generateRegExpValidator(self._content.vanrun_edit, expression)
         self._content.vanrun_edit.setValidator(iv1)
 
-        iv3 = generateRegExpValidator(self._content.vanbkgdrun_edit, "[\d,-]*")
+        iv3 = generateRegExpValidator(self._content.vanbkgdrun_edit, expression)
         self._content.vanbkgdrun_edit.setValidator(iv3)
 
         siv = QtGui.QIntValidator(self._content.resamplex_edit)
@@ -172,7 +171,7 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
-        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, "[\d,-]*"))
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
 
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
@@ -265,7 +264,7 @@ class RunSetupWidget(BaseWidget):
             s.doresamplex = True
             try:
                 s.resamplex = int(self._content.resamplex_edit.text())
-            except ValueError as e:
+            except ValueError:
                 raise RuntimeError('ResampleX parameter is not given!')
 
             if s.resamplex < 0 and bintypestr.startswith('Linear'):
