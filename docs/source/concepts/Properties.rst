@@ -99,11 +99,14 @@ pointer <Shared Pointer>` to the workspace.
 The syntax to declare a WorkspaceProperty
 in an algorithm is:
 
-``declareProperty(new WorkspaceProperty("PropertyName","WorkspaceName",direction));``
+``declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<>>("PropertyName","WorkspaceName",direction));``
 
 In this case, the direction (see below) must be explicitly declared. An
 optional :ref:`validator <Properties Validators>` may also be appended to
 the above declaration.
+
+Note that the algorithm takes ownership of the property, and that it is
+passed in as a ``unique_ptr`` rather than creating it with ``new``.
 
 Other 'Property Properties'
 ---------------------------
