@@ -47,8 +47,6 @@ class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
 public:
   /// Default constructor
   ChangeBinOffset();
-  /// Destructor
-  ~ChangeBinOffset() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ChangeBinOffset"; }
   /// Summary of algorithms purpose
@@ -71,9 +69,6 @@ private:
 
   /// Execute algorithm for EventWorkspaces
   void execEvent();
-
-  /// The progress reporting object
-  API::Progress *m_progress;
 
   /// Offset to shift by
   double offset;

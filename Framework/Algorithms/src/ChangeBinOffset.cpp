@@ -22,16 +22,7 @@ DECLARE_ALGORITHM(ChangeBinOffset)
  * Default constructor
  */
 ChangeBinOffset::ChangeBinOffset()
-    : SpectrumAlgorithm(), m_progress(nullptr), offset(0.) {}
-
-/**
- * Destructor
- */
-ChangeBinOffset::~ChangeBinOffset() {
-  if (m_progress) {
-    delete m_progress;
-  }
-}
+    : SpectrumAlgorithm(), offset(0.) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -58,11 +49,6 @@ void ChangeBinOffset::exec() {
   const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
   offset = getProperty("Offset");
-
-  // Get number of histograms
-  int64_t histnumber = static_cast<int64_t>(inputW->getNumberHistograms());
-
-  m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 
   MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
   if (outputW != inputW) {
