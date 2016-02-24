@@ -129,8 +129,9 @@ public:
     PropertyManagerHelper mgr;
     std::unique_ptr<Property> p =
         Mantid::Kernel::make_unique<PropertyWithValue<double>>("myProp", 9.99);
+    auto copy = std::unique_ptr<Property>(p->clone());
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(std::move(p)));
-    TS_ASSERT(mgr.existsProperty(p->name()));
+    TS_ASSERT(mgr.existsProperty(copy->name()));
     // Confirm that the first 4 characters of the string are the same
 
     // Note that some versions of boost::lexical_cast > 1.34 give a string such
@@ -142,7 +143,8 @@ public:
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp").substr(0, 4),
                      std::string("9.99"));
 
-    TS_ASSERT_THROWS(mgr.declareProperty(std::move(p)), Exception::ExistsError);
+    TS_ASSERT_THROWS(mgr.declareProperty(std::move(copy)),
+                     Exception::ExistsError);
     TS_ASSERT_THROWS(
         mgr.declareProperty(
             Mantid::Kernel::make_unique<PropertyWithValue<int>>("", 0)),

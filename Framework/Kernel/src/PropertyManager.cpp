@@ -155,8 +155,8 @@ void PropertyManager::splitByTime(
  */
 void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter) {
-  const bool transferOwnership(
-      true); // Make the new FilteredProperty own the original time series
+  constexpr bool transferOwnership(
+      false); // New FilteredProperty should not own the original time series
   for (auto &orderedProperty : m_orderedProperties) {
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
@@ -559,9 +559,7 @@ void PropertyManager::removeProperty(const std::string &name,
     std::vector<Property *>::iterator itr;
     itr = find(m_orderedProperties.begin(), m_orderedProperties.end(), prop);
     m_orderedProperties.erase(itr);
-    if (delproperty) {
-      delete prop;
-    }
+    (void)delproperty; // not used
   }
 }
 
