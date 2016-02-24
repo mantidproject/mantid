@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/RemoteJobManager.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
+	src/SpectrumIndexSet.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
@@ -240,6 +241,7 @@ set ( INC_FILES
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/SpecialCoordinateSystem.h
+	inc/MantidKernel/SpectrumIndexSet.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
