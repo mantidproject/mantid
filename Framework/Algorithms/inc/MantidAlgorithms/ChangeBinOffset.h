@@ -2,7 +2,6 @@
 #define MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 
 #include "MantidAlgorithms/SpectrumAlgorithm.h"
-#include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
