@@ -26,8 +26,11 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         # Set up
 
-        #
+        # list of data keys for management
         self._dataKeyList = list()
+
+        # dictionary for 3D data
+        self._mergedDataDict = dict()
 
         return
 
@@ -79,6 +82,29 @@ class Plot3DWindow(QtGui.QMainWindow):
             data_key = data_key_list[i_plot]
             base_color = base_color_list[i_plot]
             self.ui.graphicsView.plot_scatter(data_key, base_color)
+        # END-FOR
+
+        return
+
+    def set_merged_data_set(self, merged_data_set):
+        """
+        Set up a set of merged data including scan number and data in 3D
+        Requirements: each merged data is a 2-tuple as scan number and 3D data
+        :param merged_data_set:
+        :return:
+        """
+        # check
+        assert isinstance(merged_data_set, list)
+
+        # set up
+        for merged_data in merged_data_set:
+            scan_number = merged_data[0]
+            assert isinstance(scan_number, int)
+            # add data to storage
+            md_data = merged_data[1]
+            self._mergedDataDict[scan_number] = md_data
+            # set up the scan list
+            self.ui.comboBox_scans.addItem(str(scan_number))
         # END-FOR
 
         return

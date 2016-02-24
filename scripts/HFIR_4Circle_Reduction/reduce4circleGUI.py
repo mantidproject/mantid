@@ -10,12 +10,14 @@ import math
 import csv
 import time
 import random
+import numpy
 
 from PyQt4 import QtCore, QtGui
 from mantidqtpython import MantidQt
 
 import reduce4circleControl as r4c
 import guiutility as gutil
+from peakinfo import PeakInfo
 import fourcircle_utility as fcutil
 import plot3dwindow
 
@@ -142,8 +144,6 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_per_pt)
-        self.connect(self.ui.pushButton_plotScanPt, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_integrated_pts)
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
         self.connect(self.ui.pushButton_findPeaks, QtCore.SIGNAL('clicked()'),
@@ -257,7 +257,9 @@ class MainWindow(QtGui.QMainWindow):
         # Add table
         for row_index in ret_list:
             merged_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_index)
-            status, merged_info = self._myControl.get_merged_scan_info(merged_ws_name)
+            # status, merged_info = self._myControl.get_merged_scan_info()
+            status = False
+            merged_info = None
             if status is False:
                 err_msg = merged_info
                 self.pop_one_button_dialog(err_msg)
@@ -296,22 +298,59 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get experiment and scan number
-        blabla()
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_scanIntegratePeak])
+        if not status:
+            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
+            return
+        else:
+            exp_number, scan_number = ret_obj
 
         # call myController to get peak center
-        blabla()
+        if self._myControl.has_peak_info(exp_number, scan_number) is False:
+            self._myControl.merge_pts_in_scan(exp_number, scan_number)
+            self._myControl.find_peak(exp_number, scan_number)
+        scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+        weighted_peak_center = scan_peak_info.getPeakCentre()
 
         # get peak radius
-        blabla()
+        status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
+        if not status:
+            self.pop_one_button_dialog('Unable to get valid peak radius from GUI.')
+            return
+        else:
+            assert peak_radius > 0, 'Peak radius cannot be zero or negative!'
 
         # call myController to integrate on each individual Pt.
-        blabla()
+        pt_integral_outcome = dict()
+        pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+        for pt_number in pt_number_list:
+            peak_ws_name, intensity, counts = self._myControl.integrate_peak(
+                    exp_number, scan_number, pt_number, weighted_peak_center,
+                    peak_radius)
+            pt_integral_outcome[(exp_number, scan_number, pt_number)] = (peak_ws_name,
+                                                                         intensity,
+                                                                         counts)
+        # END-FOR
 
-        # find peak center of each individual Pt. and calculate its distance to weighted peak center
-        blabla()
+        # find peak center of each individual Pt. and calculate its distance to
+        # weighted peak center
 
         # plot all the result to the table
-        blabla()
+        array_size = len(pt_number_list)
+        vec_x = numpy.ndarray(shape=(array_size,))
+        vec_y = numpy.ndarray(shape=(array_size,))
+        pt_number_list.sort()
+        for index in xrange(array_size):
+            pt_number = pt_number_list[index]
+            intensity = pt_integral_outcome[(exp_number, scan_number, pt_number)][1]
+            vec_x[index] = pt_number
+            vec_y[index] = intensity
+
+        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, vec_y)
+
+        return
 
     def do_integrate_peaks(self):
         """ Integrate peaks
@@ -1066,23 +1105,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_plot_integrated_pts(self):
-        """
-        Plot all integrated values of Pt. in a scan in order to study the background
-        behavior.
-        :return:
-        """
-        # get scan number and experiment number
-        blabla()
-
-        # get integrated values of each Pt. and form it as a numpy array
-        blabla()
-
-        # plot to
-        blabla(self.ui.graphicsView_integratedPeakView)
-
-        return
-
     def do_plot_next_pt_raw(self):
         """ Plot the Pt.
         """
@@ -1196,12 +1218,15 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # find out the merged runs
-        self._myControl.get_merged_scans()
+        scan_info_tup_list = self._myControl.get_merged_scans()
 
         # append the row to the merged scan table
-        self.ui.tableWidget_mergeScans.append_row()
-
-        blabla()
+        for scan_info_tup in scan_info_tup_list:
+            exp_number = scan_info_tup[0]
+            scan_number = scan_info_tup[1]
+            ws_name = scan_number[2]
+            ws_group = scan_number[3]
+            self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name, ws_group)
 
         return
 
@@ -1500,14 +1525,14 @@ class MainWindow(QtGui.QMainWindow):
 
         raise RuntimeError('Think of share codes with do_view_data_3d()')
 
-
     def do_view_data_3d(self):
         """
         View merged scan data in 3D after FindPeaks
         :return:
         """
         # get experiment and scan number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_scanNumber])
         if status:
             exp_number = ret_obj[0]
             scan_number = ret_obj[1]
@@ -1521,11 +1546,8 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Generate data by writing out temp file
-        base_file_name = 'md_%d.dat' % random.randint(1, 1001)
-        md_file_name = self._myControl.export_md_data(exp_number, scan_number, base_file_name)
-        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        weight_peak_centers = peak_info.get_weighted_peak_centres()
-        avg_peak_centre = peak_info.get_peak_centre()
+        md_file_name, weight_peak_centers, avg_peak_centre = \
+            self._prepare_view_merged(exp_number, scan_number)
 
         print 'Write file to %s' % md_file_name
         for i_peak in xrange(len(weight_peak_centers)):
@@ -1535,20 +1557,54 @@ class MainWindow(QtGui.QMainWindow):
         print avg_peak_centre
 
         # Plot
-        blabla()
+        if self._my3DWindow is None:
+            self._my3DWindow = plot3dwindow.Plot3DWindow(self)
+            self._my3DWindow.add_plot_by_file(md_file_name)
+            self._my3DWindow.add_plot_by_array(weight_peak_centers, intensities)
+            self._my3DWindow.add_plot_by_array(avg_peak_centre, intensity)
+            self._my3DWindow.show()
 
         raise
+
+    def _prepare_view_merged(self, exp_number, scan_number):
+        """
+        Prepare the data to view 3D for merged scan
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int) and isinstance(scan_number, int)
+
+        # get file name for 3D data
+        base_file_name = 'md_%d.dat' % random.randint(1, 1001)
+        md_file_name = self._myControl.export_md_data(exp_number, scan_number, base_file_name)
+        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+
+        # peak center
+        weight_peak_centers = peak_info.get_weighted_peak_centres()
+        avg_peak_centre = peak_info.get_peak_centre()
+
+        return md_file_name, weight_peak_centers, avg_peak_centre
 
     def do_view_merged_scans_3d(self):
         """ Get selected merged scan and plot them individually in 3D
         :return:
         """
         # collect the selected rows and thus workspace names
-        blabla()
-
-        # validate the space names with controller
+        row_index_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        exp_scan_list = list()
+        for row_index in row_index_list:
+            exp_number, scan_number = self.ui.tableWidget_mergeScans.get_exp_scan(row_index)
+            pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+            md_data = self._myControl.get_merged_data(exp_number, scan_number, pt_number_list)
+            exp_scan_list.append((scan_number, md_data))
 
         # initialize 3D plot
+        if self._my3DWindow is None:
+            self._my3DWindow = plot3dwindow.Plot3DWindow(self)
+        self._my3DWindow.set_merged_data_set(exp_scan_list)
+        self._my3DWindow.show()
+
+        return
 
     def do_view_survey_peak(self):
         """ View selected peaks from survey table

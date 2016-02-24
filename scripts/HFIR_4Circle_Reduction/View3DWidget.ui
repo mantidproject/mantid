@@ -22,14 +22,14 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="5" column="2">
-         <widget class="QPushButton" name="pushButton">
+        <item row="4" column="3">
+         <widget class="QPushButton" name="pushButton_3">
           <property name="text">
            <string>PushButton</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item row="1" column="2">
          <widget class="QLineEdit" name="lineEdit_">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -39,21 +39,24 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QPushButton" name="pushButton_5">
-          <property name="text">
-           <string>Zoom Out (X)</string>
+        <item row="3" column="3">
+         <widget class="QLineEdit" name="lineEdit_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
+        <item row="6" column="3">
          <widget class="QPushButton" name="pushButton_2">
           <property name="text">
            <string>PushButton</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="2">
+        <item row="5" column="2">
          <widget class="QLineEdit" name="lineEdit_5">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -63,7 +66,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
+        <item row="1" column="3">
          <widget class="QLineEdit" name="lineEdit_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -73,24 +76,14 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QLineEdit" name="lineEdit_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="QPushButton" name="pushButton_3">
+        <item row="8" column="3">
+         <widget class="QPushButton" name="pushButton_quit">
           <property name="text">
-           <string>PushButton</string>
+           <string>Close</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="3">
+        <item row="7" column="3">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -103,8 +96,8 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="3">
-         <widget class="QLineEdit" name="lineEdit_4">
+        <item row="3" column="2">
+         <widget class="QLineEdit" name="lineEdit_3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -113,7 +106,21 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
+        <item row="2" column="3">
+         <widget class="QPushButton" name="pushButton_5">
+          <property name="text">
+           <string>Zoom Out (X)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="pushButton_6">
+          <property name="text">
+           <string>Zoom In (X)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3">
          <widget class="QLineEdit" name="lineEdit_6">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -123,19 +130,15 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="3">
-         <widget class="QPushButton" name="pushButton_quit">
+        <item row="6" column="2">
+         <widget class="QPushButton" name="pushButton">
           <property name="text">
-           <string>Close</string>
+           <string>PushButton</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton_6">
-          <property name="text">
-           <string>Zoom In (X)</string>
-          </property>
-         </widget>
+        <item row="0" column="2">
+         <widget class="QComboBox" name="comboBox_scans"/>
         </item>
        </layout>
       </item>
@@ -149,7 +152,7 @@
      <x>0</x>
      <y>0</y>
      <width>1191</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

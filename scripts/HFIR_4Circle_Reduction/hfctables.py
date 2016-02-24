@@ -98,6 +98,8 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
     def set_q(self, row_index, vec_q):
         """
         Set up Q value
+        :param row_index:
+        :param vec_q: a list or array with size 3
         """
         assert len(vec_q) == 3
 
@@ -278,8 +280,8 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         return scan_number, pt_number
 
     def is_selected(self, row_index):
-        """
-
+        """ Check whether a row is selected.
+        :param row_index:
         :return:
         """
         if row_index < 0 or row_index >= self.rowCount():
@@ -304,6 +306,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         Set HKL to table
         :param i_row:
         :param hkl:
+        :param error: error of HKL
         """
         # Check
         assert isinstance(i_row, int)
@@ -325,7 +328,13 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
     def update_hkl(self, i_row, h, k, l):
         """ Update HKL value
+        :param i_row: index of the row to have HKL updated
+        :param h:
+        :param k:
+        :param l:
         """
+        assert isinstance(i_row, int)
+
         self.update_cell_value(i_row, 2, h)
         self.update_cell_value(i_row, 3, k)
         self.update_cell_value(i_row, 4, l)
@@ -353,6 +362,26 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         tableBase.NTableWidget.__init__(self, parent)
+
+        return
+
+    def add_new_merged_data(self, exp_number, scan_number, ws_name, ws_group):
+        """
+        Append a new row with merged data
+        :param exp_number:
+        :param scan_number:
+        :param ws_name:
+        :param ws_group:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(ws_name, str)
+
+        # construct a row
+        new_row = [scan_number, -1, 'done', -1, -1, False, ws_name, ws_group]
+        self.append_row(new_row)
 
         return
 
@@ -466,7 +495,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(row_number, int)
         assert isinstance(pt_list, list)
 
-        j_pt = Process_Table_Setup.index(('Number Pt', 'int'))
+        j_pt = self.get_column_index('Number Pt')
         self.update_cell_value(row_number, j_pt, len(pt_list))
 
         return ''
@@ -474,6 +503,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     def set_status(self, scan_no, status):
         """
         Set the status for merging scan to QTable
+        :param scan_no: scan number
         :param status:
         :return:
         """
@@ -515,6 +545,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
         """
         Set the output workspace and workspace group's names to QTable
+        :param scan_num:
         :param merged_md_name:
         :param ws_group_name:
         :return:
@@ -555,8 +586,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(merged_md_name, str) or merged_md_name is None
         assert isinstance(ws_group_name, str) or ws_group_name is None
 
-        j_ws_name = Process_Table_Setup.index(('Merged Workspace', 'str'))
-        j_group_name = Process_Table_Setup.index(('Group Name', 'str'))
+        j_ws_name = self.get_column_index('Merged Workspace')
+        j_group_name = self.get_column_index('Group Name')
 
         if merged_md_name is not None:
             self.update_cell_value(row_number, j_ws_name, merged_md_name)

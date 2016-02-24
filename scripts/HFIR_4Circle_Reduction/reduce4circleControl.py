@@ -8,14 +8,13 @@
 # - Download from internet to cache (download-mode)
 #
 ################################################################################
-import os
-import urllib2
 import csv
 import math
-
+import random
 import numpy
 
-import fourcircle_utility as ftuil
+from fourcircle_utility import *
+from peakinfo import PeakInfo
 
 import mantid
 import mantid.simpleapi as api
@@ -65,8 +64,6 @@ class CWSCDReductionControl(object):
         # self._myUBPeakWSDict = dict()
         # Container for UB  matrix
         self._myUBMatrixDict = dict()
-        # Container for Merged:(merged_md_ws, target_frame, exp_no, scan_no, None)
-        self._mergedWSManager = dict()
 
         # Peak Info
         self._myPeakInfoDict = dict()
@@ -81,8 +78,32 @@ class CWSCDReductionControl(object):
         # Tuple to hold the result of refining UB
         self._refinedUBTup = None
 
+        # Record for merged scans
+        self._mergedWSManager = list()
+
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
+
+        return
+
+    def _add_merged_ws(self, exp_number, scan_number, pt_number_list):
+        """ Record a merged workspace to
+        Requirements: experiment number, scan number and pt numbers are valid
+        :param exp_number:
+        :param scan_number:
+        :param pt_number_list:
+        :return:
+        """
+        assert isinstance(exp_number, int) and isinstance(scan_number, int)
+        assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+
+        if (exp_number, scan_number, pt_number_list) in self._mergedWSManager:
+            return 'Exp %d Scan %d Pt %s has already been merged and recorded.' % (exp_number,
+                                                                                   scan_number,
+                                                                                   str(pt_number_list))
+
+        self._mergedWSManager.append((exp_number, scan_number, pt_number_list))
+        self._mergedWSManager.sort()
 
         return
 
@@ -297,7 +318,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :param scan_number:
         :param base_file_name:
-        :return:
+        :return: output file name
         """
         # get output file name and source workspace name
         out_file_name = os.path.join(self._workDir, base_file_name)
@@ -317,6 +338,7 @@ class CWSCDReductionControl(object):
 
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
+        :param exp_number:
         :param scan_number:
         :param pt_number_list:
         :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
@@ -352,7 +374,7 @@ class CWSCDReductionControl(object):
         self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
 
         # add the merged workspace to list to manage
-        blabla()
+        self._add_merged_ws(exp_number, scan_number, pt_number_list)
 
         return True, ''
 
@@ -470,27 +492,14 @@ class CWSCDReductionControl(object):
         md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         assert AnalysisDataService.doesExist(md_ws_name)
 
-        # Pseudo!
         # call ConvertCWMDtoHKL to write out the temp file
-        blabla
+        base_name = 'temp_%d_%d_rand%d' % (exp_number, scan_number, random.randint(1, 10000))
+        out_file_name = self.export_md_data(exp_number, scan_number, base_name)
 
         # load the merged data back from the ASCII data file
-        blabla
-
-        # form ndarray for Q-space and 1 1d-array for counts
+        q_space_array, counts_array = load_hb3a_md_data(out_file_name)
 
         return
-
-    def get_merged_scan_info(self, ws_name):
-        """
-        Get some information of merged scan
-        :param ws_name:
-        :return:
-        """
-        if ws_name in self._mergedWSManager is False:
-            return False, 'Unable to locate merged scan MDWorkspace %s' % ws_name
-
-        return True, self._mergedWSManager[ws_name]
 
     def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
@@ -537,6 +546,26 @@ class CWSCDReductionControl(object):
         md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
 
         return AnalysisDataService.doesExist(md_ws_name)
+
+    def has_peak_info(self, exp_number, scan_number, pt_number=None):
+        """ Check whether there is a peak found...
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        # Check for type
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int) or pt_number is None
+
+        # construct key
+        if pt_number is None:
+            p_key = (exp_number, scan_number)
+        else:
+            p_key = (exp_number, scan_number, pt_number)
+
+        return p_key in self._myPeakInfoDict
 
     def index_peak(self, ub_matrix, scan_number):
         """ Index peaks in a Pt.
@@ -600,20 +629,47 @@ class CWSCDReductionControl(object):
 
         return True, (hkl, error)
 
-    def integrate_peak(self, exp_num, scan_num, pt_num, peak_center):
+    def integrate_peak(self, exp_num, scan_num, pt_num, peak_center, peak_radius):
         """
-
+        Integrate a peak from an individual pt number and with a given peak centre in Q
         :param exp_num:
         :param scan_num:
         :param pt_num:
-        :return:
+        :param peak_center:
+        :param peak_radius:
+        :return: 3-tuple as peak workspace name, intensity and counts
         """
-        api.IntegratePeaksCWSD(InputWorkspace='blabla',
-                               PeaksWorkspace='blabla',
-                               OutputWorkspace='blabla',
+        # Check
+        assert isinstance(exp_num, int) and isinstance(scan_num, int) and isinstance(pt_num, int)
+
+        # Merge
+        merged_ws_name = get_merged_md_name(exp_num, scan_num, [pt_num])
+        if AnalysisDataService.doesExist(merged_ws_name) is False:
+            self.merge_pts_in_scan(exp_num, scan_num, [pt_num], 'q-sample')
+        assert AnalysisDataService.doesExist(merged_ws_name)
+
+        # Build peak workspace
+        peak_info = PeakInfo()
+        peak_ws_name = get_peak_ws_name(exp_num, scan_num, [pt_num])
+        zero_hkl = True
+        hkl_to_int = False
+        self._build_peaks_workspace([peak_info], peak_ws_name, zero_hkl, hkl_to_int)
+        assert AnalysisDataService.doesExist(peak_ws_name)
+
+        # Integrate by rewriting the temporary input peak workspace
+        api.IntegratePeaksCWSD(InputWorkspace=merged_ws_name,
+                               PeaksWorkspace=peak_ws_name,
+                               OutputWorkspace=peak_ws_name,
                                PeakCentre=peak_center,
-                               PeakRadius=blabla,
+                               PeakRadius=peak_radius,
                                MergePeaks=False)
+
+        # Get integrated value
+        peak_ws = AnalysisDataService.retrieve(peak_ws_name)
+        intensity = peak_ws.getPeak(0).getIntensity()
+        counts = peak_ws.getPeak(0).getBinCounts()
+
+        return peak_ws_name, intensity, counts
 
     def integrate_peaks_q(self, exp_no, scan_no):
         """
@@ -1530,195 +1586,6 @@ def build_pt_spice_table_row_map(spice_table_ws):
         pt_spice_row_dict[pt_number] = i_row
 
     return pt_spice_row_dict
-
-
-def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
-    """
-    Get detector XML file name (from SPICE)
-    :param instrument_name:
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
-    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
-                                                    scan_number, pt_number)
-
-    return xml_file_name
-
-
-def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, pt_number):
-    """ Get the URL to download the detector counts file in XML format
-    :param server_url:
-    :param instrument_name:
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    assert isinstance(server_url, str) and isinstance(instrument_name, str)
-    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
-
-    base_file_name = get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number)
-    file_url = '%s/exp%d/Datafiles/%s' % (server_url, exp_number, base_file_name)
-
-    return file_url
-
-
-def get_spice_file_name(instrument_name, exp_number, scan_number):
-    """
-    Get standard HB3A SPICE file name from experiment number and scan number
-    :param instrument_name
-    :param exp_number:
-    :param scan_number:
-    :return:
-    """
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_number, int) and isinstance(scan_number, int)
-    file_name = '%s_exp%04d_scan%04d.dat' % (instrument_name, exp_number, scan_number)
-
-    return file_name
-
-
-def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
-    """ Get the SPICE file's URL from server
-    :param server_url:
-    :param instrument_name:
-    :param exp_number:
-    :param scan_number:
-    :return:
-    """
-    assert isinstance(server_url, str) and isinstance(instrument_name, str)
-    assert isinstance(exp_number, int) and isinstance(scan_number, int)
-
-    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number,
-                                                              instrument_name, exp_number, scan_number)
-
-    return file_url
-
-
-def get_spice_table_name(exp_number, scan_number):
-    """ Form the name of the table workspace for SPICE
-    :param exp_number:
-    :param scan_number:
-    :return:
-    """
-    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
-
-    return table_name
-
-
-def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
-    """ Form the name of the matrix workspace to which raw pt. XML file is loaded
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
-
-    return ws_name
-
-
-def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
-    """
-    Build the merged scan's MDEventworkspace's name under convention
-    Requirements: experiment number and scan number are integer. Pt list is a list of integer
-    :param instrument_name:
-    :param exp_no:
-    :param scan_no:
-    :param pt_list:
-    :return:
-    """
-    # check
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
-
-    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
-                                                     pt_list[0], pt_list[-1])
-
-    return merged_ws_name
-
-
-def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
-    """
-    Build the merged scan's MDEventworkspace's name under convention
-    Requirements: experiment number and scan number are integer. Pt list is a list of integer
-    :param instrument_name:
-    :param exp_no:
-    :param scan_no:
-    :param pt_list:
-    :return:
-    """
-    # check
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
-
-    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
-                                                         pt_list[0], pt_list[-1])
-
-    return merged_ws_name
-
-
-def get_merge_pt_info_ws_name(exp_no, scan_no):
-    """ Create the standard table workspace's name to contain the information to merge Pts. in a scan
-    :param exp_no:
-    :param scan_no:
-    :return:
-    """
-    ws_name = 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
-
-    return ws_name
-
-
-def get_peak_ws_name(exp_number, scan_number, pt_number_list):
-    """
-    Form the name of the peak workspace
-    :param exp_number:
-    :param scan_number:
-    :param pt_number_list:
-    :return:
-    """
-    # check
-    assert isinstance(exp_number, int) and isinstance(scan_number, int)
-    assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
-
-    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number,
-                                             pt_number_list[0],
-                                             pt_number_list[-1])
-
-    return ws_name
-
-
-def get_single_pt_md_name(exp_number, scan_number, pt_number):
-    """ Form the name of the MDEvnetWorkspace for a single Pt. measurement
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    ws_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_number, scan_number, pt_number)
-
-    return ws_name
-
-
-def get_virtual_instrument_table_name(exp_number, scan_number, pt_number):
-    """
-    Generate the name of the table workspace containing the virtual instrument information
-    :param exp_number:
-    :param scan_number:
-    :param pt_number:
-    :return:
-    """
-    ws_name = 'VirtualInstrument_Exp%d_Scan%d_Pt%d_Table' % (exp_number, scan_number, pt_number)
-
-    return ws_name
 
 
 def convert_spice_ub_to_mantid(spice_ub):

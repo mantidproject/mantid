@@ -1,14 +1,16 @@
 #pylint: disable=W0633,too-many-branches
-__author__ = 'wzz'
-
 import os
 import urllib2
 import socket
+import numpy
+
+__author__ = 'wzz'
 
 
 def check_url(url, read_lines=False):
     """ Check whether a URL is valid
     :param url:
+    :param read_lines
     :return: boolean, error message
     """
     lines = None
@@ -65,10 +67,12 @@ def get_hb3a_wavelength(m1_motor_pos):
 
     return None
 
+
 def get_scans_list(server_url, exp_no, return_list=False):
     """ Get list of scans under one experiment
     :param server_url:
     :param exp_no:
+    :param return_list: a flag to control the return value. If true, return a list; otherwise, message string
     :return: message
     """
     if server_url.endswith('/') is False:
@@ -161,10 +165,10 @@ def parse_int_array(int_array_str):
                 int_value = int(value_str)
                 if str(int_value) != value_str:
                     ret_status = False
-                    err_msg =  "Contains non-integer string %s." % value_str
+                    err_msg = "Contains non-integer string %s." % value_str
             except ValueError:
                 ret_status = False
-                err_msg = "String %s is not an integer." % (value_str)
+                err_msg = "String %s is not an integer." % value_str
             else:
                 integer_list.append(int_value)
 
@@ -178,10 +182,10 @@ def parse_int_array(int_array_str):
                     int_value = int(value_str)
                     if str(int_value) != value_str:
                         ret_status = False
-                        err_msg = "Contains non-integer string %s." % (value_str)
+                        err_msg = "Contains non-integer string %s." % value_str
                 except ValueError:
                     ret_status = False
-                    err_msg = "String %s is not an integer." % (value_str)
+                    err_msg = "String %s is not an integer." % value_str
                 else:
                     temp_list.append(int_value)
 
@@ -207,3 +211,229 @@ def parse_int_array(int_array_str):
         return False, err_msg
 
     return True, integer_list
+
+
+def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
+    """
+    Get detector XML file name (from SPICE)
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
+    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
+                                                    scan_number, pt_number)
+
+    return xml_file_name
+
+
+def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, pt_number):
+    """ Get the URL to download the detector counts file in XML format
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
+
+    base_file_name = get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number)
+    file_url = '%s/exp%d/Datafiles/%s' % (server_url, exp_number, base_file_name)
+
+    return file_url
+
+
+def get_spice_file_name(instrument_name, exp_number, scan_number):
+    """
+    Get standard HB3A SPICE file name from experiment number and scan number
+    :param instrument_name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    file_name = '%s_exp%04d_scan%04d.dat' % (instrument_name, exp_number, scan_number)
+
+    return file_name
+
+
+def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
+    """ Get the SPICE file's URL from server
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+
+    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number,
+                                                              instrument_name, exp_number, scan_number)
+
+    return file_url
+
+
+def get_spice_table_name(exp_number, scan_number):
+    """ Form the name of the table workspace for SPICE
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+
+    return table_name
+
+
+def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
+    """ Form the name of the matrix workspace to which raw pt. XML file is loaded
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
+                                                     pt_list[0], pt_list[-1])
+
+    return merged_ws_name
+
+
+def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
+                                                         pt_list[0], pt_list[-1])
+
+    return merged_ws_name
+
+
+def get_merge_pt_info_ws_name(exp_no, scan_no):
+    """ Create the standard table workspace's name to contain the information to merge Pts. in a scan
+    :param exp_no:
+    :param scan_no:
+    :return:
+    """
+    ws_name = 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
+
+    return ws_name
+
+
+def get_peak_ws_name(exp_number, scan_number, pt_number_list):
+    """
+    Form the name of the peak workspace
+    :param exp_number:
+    :param scan_number:
+    :param pt_number_list:
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+
+    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number,
+                                             pt_number_list[0],
+                                             pt_number_list[-1])
+
+    return ws_name
+
+
+def get_single_pt_md_name(exp_number, scan_number, pt_number):
+    """ Form the name of the MDEvnetWorkspace for a single Pt. measurement
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_virtual_instrument_table_name(exp_number, scan_number, pt_number):
+    """
+    Generate the name of the table workspace containing the virtual instrument information
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'VirtualInstrument_Exp%d_Scan%d_Pt%d_Table' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def load_hb3a_md_data(file_name):
+    """ Load an ASCii file containing MDEvents and generated by mantid algorithm ConvertCWSDMDtoHKL()
+    :param file_name:
+    :return:
+    """
+    # check
+    assert isinstance(file_name, str) and os.path.exists(file_name)
+
+    # parse
+    data_file = open(file_name, 'r')
+    raw_lines = data_file.readlines()
+    data_file.close()
+
+    # construct ND data array
+    xyz_points = numpy.zeros((len(raw_lines), 3))
+    intensities = numpy.zeros((len(raw_lines), ))
+
+    # parse
+    for i in xrange(len(raw_lines)):
+        line = raw_lines[i].strip()
+
+        # skip empty line
+        if len(line) == 0:
+            continue
+
+        # set value
+        terms = line.split(',')
+        for j in xrange(3):
+            xyz_points[i][j] = float(terms[j])
+        intensities[i] = float(terms[3])
+    # END-FOR
+
+    return xyz_points, intensities
+
+
