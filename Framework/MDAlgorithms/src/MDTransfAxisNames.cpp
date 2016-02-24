@@ -93,7 +93,7 @@ std::string makeAxisName(const Kernel::V3D &Dir,
 }
 std::string DLLExport sprintfd(const double data, const double eps) {
   // truncate to eps decimal points
-  float dist = static_cast<float>(std::round(data / eps) * eps);
+  double dist = std::round(data / eps) * eps;
   return boost::str(boost::format("%d") % dist);
 }
 

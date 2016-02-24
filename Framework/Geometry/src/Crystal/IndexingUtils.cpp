@@ -1083,7 +1083,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   // in some direction, keeping the shortest vector
   // for each direction where the max peaks are indexed
   double delta_d = 0.1f;
-  long n_steps = std::lround(1 + (max_d - min_d) / delta_d);
+  long n_steps = std::lround(1.0 + (max_d - min_d) / delta_d);
 
   std::vector<V3D> selected_dirs;
   V3D dir_temp;
