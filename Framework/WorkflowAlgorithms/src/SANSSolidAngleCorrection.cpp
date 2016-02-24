@@ -26,7 +26,7 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
-/// Returns the angle between the sample-to-pixel vector and its 
+/// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
 static double getYTubeAngle(IDetector_const_sptr det,
                             MatrixWorkspace_const_sptr workspace) {
