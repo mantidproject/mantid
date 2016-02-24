@@ -797,7 +797,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
-  unsigned int dt = 0;
+  uint64_t dt = 0;
   double tof = 0.0;
 
   if ((fileSize == 0) || !tarFile.skip(128))
