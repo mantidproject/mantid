@@ -12,22 +12,22 @@ fi
 
 case "$TYPE" in
     py)
-        exit $(git diff --quiet ${BASE_BRANCH} ${sha1} -- \*\.py)
+        exit $(git diff --quiet ${BASE_BRANCH} ${GIT_SHA1} -- \*\.py)
     ;;
     cpp)
-        if $(! git diff --quiet ${BASE_BRANCH} ${sha1} -- \*\.h)
+        if $(! git diff --quiet ${BASE_BRANCH} ${GIT_SHA1} -- \*\.h)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${sha1} -- \*\.cpp)
+        if $(! git diff --quiet ${BASE_BRANCH} ${GIT_SHA1} -- \*\.cpp)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${sha1} -- \*\.cxx)
+        if $(! git diff --quiet ${BASE_BRANCH} ${GIT_SHA1} -- \*\.cxx)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${sha1} -- \*\.tcc)
+        if $(! git diff --quiet ${BASE_BRANCH} ${GIT_SHA1} -- \*\.tcc)
         then
             exit $FOUND
         fi
