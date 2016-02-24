@@ -75,8 +75,8 @@ namespace Geometry {
         SymmetryOperation inversion("-x,-y,-z");
         SymmetryOperation identity = inversion * inversion;
 
-    Please note that the components of the vector are wrapped to
-    the interval (0, 1] when two symmetry operations are combined.
+    In context of Group, the vector of SymmetryOperation is wrapped onto the
+    interval (0, 1] using the getUnitCellIntervalOperation-function.
 
     Constructing a SymmetryOperation object from a string is heavy, because the
     string has to be parsed every time. It's preferable to use

@@ -333,6 +333,7 @@ std::istream &operator>>(std::istream &stream, SymmetryOperation &operation) {
   return stream;
 }
 
+/// Returns a SymmetryOperation with the vector wrapped to the interval (0, 1].
 SymmetryOperation getUnitCellIntervalOperation(const SymmetryOperation &symOp) {
   return SymmetryOperation(symOp.matrix(), getWrappedVector(symOp.vector()));
 }
