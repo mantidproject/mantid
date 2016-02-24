@@ -7,8 +7,7 @@ using namespace Mantid;
 using namespace Kernel;
 
 SpectrumIndexSet::SpectrumIndexSet(int64_t min, int64_t max,
-                                   size_t numberOfHistograms)
-    : m_isRange(true) {
+                                   size_t numberOfHistograms) {
   if (min < 0 || min > max)
     throw Exception::IndexError(min, max, "SpectrumIndexSet - min");
   if (max >= static_cast<int64_t>(numberOfHistograms))
@@ -35,4 +34,4 @@ SpectrumIndexSet::SpectrumIndexSet(const std::vector<size_t> indices,
 }
 
 SpectrumIndexSet::SpectrumIndexSet(size_t numberOfHistograms)
-    : SpectrumIndexSet(0, numberOfHistograms - 1, numberOfHistograms) {}
+    : m_size(numberOfHistograms) {}
