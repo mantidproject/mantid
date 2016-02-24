@@ -85,7 +85,7 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("TopLevelSplitting", 0,
+      make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
                                            Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
