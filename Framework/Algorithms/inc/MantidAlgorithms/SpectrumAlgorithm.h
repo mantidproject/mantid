@@ -30,12 +30,10 @@ private:
 
   template <class WS, class T, int... S, class OP>
   void for_each(WS &workspace, T getters, seq<S...>, const OP &operation) {
-    //auto count = static_cast<int64_t>(workspace.getNumberHistograms());
-
     auto indexSet = getSpectrumIndexSet(workspace);
-
     auto size = static_cast<int64_t>(indexSet.size());
     API::Progress progress(this, 0.0, 1.0, size);
+
     PARALLEL_FOR1((&workspace))
     for (int64_t i = 0; i < size; ++i) {
       PARALLEL_START_INTERUPT_REGION
