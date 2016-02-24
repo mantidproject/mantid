@@ -762,7 +762,7 @@ void EQSANSLoad::exec() {
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");
   const double wl_step = getProperty("WavelengthStep");
-  
+
   const double wl_min_rounded = round(wl_min * 100.0) / 100.0;
   const double wl_max_rounded = round(wl_combined_max * 100.0) / 100.0;
   std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," +
