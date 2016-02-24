@@ -91,7 +91,7 @@ void ExtractMaskToTable::exec() {
   vector<detid_t> prevmaskeddetids;
   if (m_inputTableWS) {
     g_log.notice("Parse input masking table workspace.");
-    parseMaskTable(m_inputTableWS, prevmaskeddetids);
+    prevmaskeddetids = parseMaskTable(m_inputTableWS);
   } else {
     g_log.notice("No input workspace to parse.");
   }
@@ -126,19 +126,18 @@ void ExtractMaskToTable::exec() {
 /** Parse input TableWorkspace to get a list of detectors IDs of which detector
  * are already masked
   * @param masktablews :: TableWorkspace containing masking information
-  * @param maskeddetectorids :: (output) vector of detector IDs that are masked
+  * @returns :: vector of detector IDs that are masked
   */
-void ExtractMaskToTable::parseMaskTable(
-    DataObjects::TableWorkspace_sptr masktablews,
-    std::vector<detid_t> &maskeddetectorids) {
-  // Clear input
-  maskeddetectorids.clear();
+std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
+    DataObjects::TableWorkspace_sptr masktablews) {
+  // Output vector
+  std::vector<detid_t> maskeddetectorids;
 
   // Check format of mask table workspace
   if (masktablews->columnCount() != 3) {
     g_log.error("Mask table workspace must have more than 3 columns.  First 3 "
                 "must be Xmin, Xmax and Spectrum List.");
-    return;
+    return maskeddetectorids;
   } else {
     vector<string> colnames = masktablews->getColumnNames();
     vector<string> chkcolumans(3);
@@ -152,7 +151,7 @@ void ExtractMaskToTable::parseMaskTable(
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
-        return;
+        return maskeddetectorids;
       }
     }
   }
@@ -165,24 +164,23 @@ void ExtractMaskToTable::parseMaskTable(
     TableRow tmprow = masktablews->getRow(i);
     tmprow >> xmin >> xmax >> specliststr;
 
-    vector<detid_t> tmpdetidvec;
-    parseStringToVector(specliststr, tmpdetidvec);
+    vector<detid_t> tmpdetidvec = parseStringToVector(specliststr);
     maskeddetectorids.insert(maskeddetectorids.end(), tmpdetidvec.begin(),
                              tmpdetidvec.end());
   }
 
-  return;
+  return maskeddetectorids;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
  * of detid_t
   * @param liststr :: string containing list to parse
-  * @param detidvec :: vector genrated from input string containing the list
+  * @returns :: vector genrated from input string containing the list
   */
-void ExtractMaskToTable::parseStringToVector(std::string liststr,
-                                             vector<detid_t> &detidvec) {
-  detidvec.clear();
+std::vector<detid_t>
+ExtractMaskToTable::parseStringToVector(std::string liststr) {
+  std::vector<detid_t> detidvec;
 
   // Use ArrayProperty to parse the list
   ArrayProperty<int> detlist("i", liststr);
@@ -204,7 +202,7 @@ void ExtractMaskToTable::parseStringToVector(std::string liststr,
     g_log.debug() << "[DB] Add detector ID: " << tmpid << ".\n";
   }
 
-  return;
+  return detidvec;
 }
 
 //----------------------------------------------------------------------------------------------

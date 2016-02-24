@@ -244,8 +244,7 @@ void UserFunctionDialog::checkParameters(QString& expr)
     RenameParDialog dlg(all,common);
     if (dlg.exec() == QDialog::Accepted)
     {
-      std::vector<std::string> vars_new;
-      dlg.setOutput(vars_new);
+      auto vars_new = dlg.setOutput();
       std::vector<std::string>::const_iterator v_old = common.begin();
       std::vector<std::string>::const_iterator v_new = vars_new.begin();
       for(; v_old != common.end(); ++v_old,++v_new)

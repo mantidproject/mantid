@@ -2342,7 +2342,6 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
  */
 void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   this->m_usingMappingFile = false;
-  this->m_pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -2358,7 +2357,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->m_pixelmap);
+  this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),

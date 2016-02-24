@@ -114,7 +114,7 @@ void ConvertSpiceDataToRealSpace::exec() {
       getProperty("DetectorEfficiencyTableWorkspace");
   std::map<detid_t, double> detEffMap; // map for detector efficiency
   if (detEffTableWS) {
-    parseDetectorEfficiencyTable(detEffTableWS, detEffMap);
+    detEffMap = parseDetectorEfficiencyTable(detEffTableWS);
   }
 
   // Check whether parent workspace has run start: order (1) parent ws, (2) user
@@ -744,14 +744,13 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
 //------------------------------------------------------------------------------------------------
 /** Parse detector efficiency from table workspace to map
  * @brief ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable
- * @param detefftablews
- * @param deteffmap
+ * @param detefftablews :: [input] detector efficiency table workspace
+ * @returns detector efficiency map
  */
-void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
-    DataObjects::TableWorkspace_sptr detefftablews,
-    std::map<detid_t, double> &deteffmap) {
-  // clear map
-  deteffmap.clear();
+std::map<detid_t, double>
+ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
+    DataObjects::TableWorkspace_sptr detefftablews) {
+  std::map<detid_t, double> deteffmap;
 
   // check table workspace
   size_t numcols = detefftablews->columnCount();
@@ -767,7 +766,7 @@ void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
     deteffmap.emplace(detid, deteff);
   }
 
-  return;
+  return deteffmap;
 }
 
 //------------------------------------------------------------------------------------------------

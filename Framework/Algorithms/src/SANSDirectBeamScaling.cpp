@@ -72,10 +72,9 @@ void SANSDirectBeamScaling::exec() {
 
   // Extract the required spectra into separate workspaces
   std::vector<detid_t> udet;
-  std::vector<size_t> index;
   udet.push_back(getProperty("BeamMonitor"));
   // Convert UDETs to workspace indices
-  inputWS->getIndicesFromDetectorIDs(udet, index);
+  auto index = inputWS->getIndicesFromDetectorIDs(udet);
   if (index.empty()) {
     g_log.debug() << "inputWS->getIndicesFromDetectorIDs() returned empty\n";
     throw std::invalid_argument(

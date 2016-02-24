@@ -69,12 +69,12 @@ private:
 
   /// Parse input TableWorkspace to get a list of detectors IDs of which
   /// detector are already masked
-  void parseMaskTable(DataObjects::TableWorkspace_sptr masktablews,
-                      std::vector<detid_t> &maskeddetectorids);
+  std::vector<detid_t>
+  parseMaskTable(DataObjects::TableWorkspace_sptr masktablews);
 
   /// Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
   /// of detid_t
-  void parseStringToVector(std::string liststr, std::vector<detid_t> &detidvec);
+  std::vector<detid_t> parseStringToVector(std::string liststr);
 
   /// Extract mask from a workspace to a list of detectors
   std::vector<detid_t> extractMaskFromMatrixWorkspace();
