@@ -42,8 +42,8 @@ public:
     PropertyManagerOwner alg;
 
     // Start with a regular property
-    alg.declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
+    alg.declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                         Direction::Input));
 
     // Make a property with its validator. Will be enabled when that other one
     // is NOT the default
