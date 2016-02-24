@@ -24,7 +24,7 @@ public:
   }
 
 private:
-  bool m_isRange;
+  bool m_isRange = true;
   // Default here to avoid uninitialized warning for m_isRange = true.
   size_t m_min = 0;
   size_t m_size;
