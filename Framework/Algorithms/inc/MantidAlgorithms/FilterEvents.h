@@ -139,9 +139,9 @@ private:
 
   double m_progress;
 
-  void getTimeSeriesLogNames(std::vector<std::string> &lognames);
+  std::vector<std::string> getTimeSeriesLogNames();
 
-  void generateSplitters(int wsindex, Kernel::TimeSplitterType &splitters);
+  Kernel::TimeSplitterType generateSplitters(int wsindex);
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);

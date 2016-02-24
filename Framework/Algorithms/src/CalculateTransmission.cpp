@@ -47,9 +47,7 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  */
 size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
   const std::vector<detid_t> input = {detid};
-  std::vector<size_t> result;
-
-  ws->getIndicesFromDetectorIDs(input, result);
+  std::vector<size_t> result = ws->getIndicesFromDetectorIDs(input);
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
@@ -171,7 +169,7 @@ void CalculateTransmission::exec() {
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
-    sampleWS->getIndicesFromDetectorIDs(transDetList, transmissionIndices);
+    transmissionIndices = sampleWS->getIndicesFromDetectorIDs(transDetList);
   } else
     assert(false);
 

@@ -65,8 +65,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
                                       bool isLogX) override;
 
     /// Get a list containing pairs of strings with information about x,y
-    void getInfoList(double x, double y,
-                     std::vector<std::string> &list) override;
+    std::vector<std::string> getInfoList(double x, double y) override;
 
   private:
     std::vector<float> m_data;

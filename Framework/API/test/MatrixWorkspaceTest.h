@@ -110,8 +110,7 @@ public:
     dets.push_back(60);
     dets.push_back(20);
     dets.push_back(90);
-    std::vector<size_t> indices;
-    ws.getIndicesFromDetectorIDs(dets, indices);
+    std::vector<size_t> indices = ws.getIndicesFromDetectorIDs(dets);
     TS_ASSERT_EQUALS(indices.size(), 3);
     TS_ASSERT_EQUALS(indices[0], 6);
     TS_ASSERT_EQUALS(indices[1], 2);
@@ -605,7 +604,7 @@ public:
     std::vector<size_t> out;
     detid_t offset = -1234;
     TS_ASSERT_THROWS_NOTHING(
-        ws->getDetectorIDToWorkspaceIndexVector(out, offset));
+        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 0);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
@@ -635,7 +634,7 @@ public:
     ws->getSpectrum(66)->clearDetectorIDs();
 
     TS_ASSERT_THROWS_NOTHING(
-        ws->getDetectorIDToWorkspaceIndexVector(out, offset));
+        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 1);
     TS_ASSERT_EQUALS(out.size(), 112);
     TS_ASSERT_EQUALS(out[66 + offset], std::numeric_limits<size_t>::max());
@@ -648,8 +647,8 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING(
-        ws->getSpectrumToWorkspaceIndexVector(out, offset));
+    TS_ASSERT_THROWS_NOTHING(out =
+                                 ws->getSpectrumToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, -1);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
