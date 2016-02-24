@@ -332,10 +332,8 @@ void EQSANSLoad::moveToBeamCenter() {
   // default beam center
   if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.information() << "Setting beam center to ["
-                        << m_center_x << ", "
-                        << m_center_y << "]"
-                        << std::endl;
+    g_log.information() << "Setting beam center to [" << m_center_x << ", "
+                        << m_center_y << "]" << std::endl;
     return;
   }
 
@@ -765,8 +763,8 @@ void EQSANSLoad::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   const double wl_step = getProperty("WavelengthStep");
   
-  const double wl_min_rounded = round(wl_min*100.0)/100.0;
-  const double wl_max_rounded = round(wl_combined_max*100.0)/100.0;
+  const double wl_min_rounded = round(wl_min * 100.0) / 100.0;
+  const double wl_max_rounded = round(wl_combined_max * 100.0) / 100.0;
   std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," +
                        Poco::NumberFormatter::format(wl_step) + "," +
                        Poco::NumberFormatter::format(wl_max_rounded, 2);
