@@ -58,16 +58,6 @@ void ChangeBinOffset::exec() {
                    for (auto &x : dataX)
                      x += offset;
                  });
-
-  // Copy units
-  if (outputW->getAxis(0)->unit().get())
-    outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
-  try {
-    if (inputW->getAxis(1)->unit().get())
-      outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
-  } catch (Exception::IndexError &) {
-    // OK, so this isn't a Workspace2D
-  }
 }
 
 void ChangeBinOffset::execEvent() {
