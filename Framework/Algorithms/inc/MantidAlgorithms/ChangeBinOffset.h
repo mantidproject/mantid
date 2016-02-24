@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/SpectrumAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ChangeBinOffset : public API::Algorithm {
+class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
 public:
   /// Default constructor
   ChangeBinOffset();
@@ -77,10 +77,6 @@ private:
 
   /// Offset to shift by
   double offset;
-  /// Start workspace index
-  int64_t wi_min;
-  /// Stop workspace index
-  int64_t wi_max;
 };
 
 } // namespace Algorithm
