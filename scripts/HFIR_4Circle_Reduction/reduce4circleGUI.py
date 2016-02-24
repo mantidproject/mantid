@@ -1182,7 +1182,7 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.download_spice_file(None, scan_no, over_write=False)
 
             # Get some information
-            status, pt_list = self._myControl.get_pt_numbers(None, scan_no, load_spice_scan=True)
+            status, pt_list = self._myControl.get_pt_numbers(None, scan_no)
             if status is False:
                 err_msg = pt_list
                 self.pop_one_button_dialog('Failed to get Pt. number: %s' % err_msg)
@@ -1225,13 +1225,15 @@ class MainWindow(QtGui.QMainWindow):
         """
         # find out the merged runs
         scan_info_tup_list = self._myControl.get_merged_scans()
+        print '[DB-BAT] Scan Info List: ', scan_info_tup_list
 
         # append the row to the merged scan table
         for scan_info_tup in scan_info_tup_list:
             exp_number = scan_info_tup[0]
             scan_number = scan_info_tup[1]
-            ws_name = scan_number[2]
-            ws_group = scan_number[3]
+            # pt_number_list = scan_info_tup[2]
+            ws_name = 'whatever'
+            ws_group = -1
             self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name, ws_group)
 
         return
@@ -1552,13 +1554,14 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Generate data by writing out temp file
-        md_file_name, weight_peak_centers, avg_peak_centre = \
-            self._prepare_view_merged(exp_number, scan_number)
+        ret_obj = self._prepare_view_merged(exp_number, scan_number)
+        assert len(ret_obj) == 5
+        md_file_name, weight_peak_centers, weight_peak_intensities, avg_peak_centre, avg_peak_intensity = ret_obj
 
         print 'Write file to %s' % md_file_name
         for i_peak in xrange(len(weight_peak_centers)):
             peak_i = weight_peak_centers[i_peak]
-            print '%f, %f, %f, %f' % (peak_i[0], peak_i[1], peak_i[2], peak_i[3])
+            print '%f, %f, %f' % (peak_i[0], peak_i[1], peak_i[2])
         print
         print avg_peak_centre
 
@@ -1566,11 +1569,13 @@ class MainWindow(QtGui.QMainWindow):
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
             self._my3DWindow.add_plot_by_file(md_file_name)
-            self._my3DWindow.add_plot_by_array(weight_peak_centers, intensities)
-            self._my3DWindow.add_plot_by_array(avg_peak_centre, intensity)
-            self._my3DWindow.show()
+            self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
+            self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
 
-        raise
+        # Show
+        self._my3DWindow.show()
+
+        return
 
     def _prepare_view_merged(self, exp_number, scan_number):
         """
@@ -1586,10 +1591,30 @@ class MainWindow(QtGui.QMainWindow):
         peak_info = self._myControl.get_peak_info(exp_number, scan_number)
 
         # peak center
-        weight_peak_centers = peak_info.get_weighted_peak_centres()
-        avg_peak_centre = peak_info.get_peak_centre()
+        weight_peak_centers, weight_peak_intensities = peak_info.get_weighted_peak_centres()
+        qx, qy, qz = peak_info.get_peak_centre()
+        # [NEXT/FUTURE] Use a real peak intensity other than 100000
+        intensity = 100000
 
-        return md_file_name, weight_peak_centers, avg_peak_centre
+        # convert from list to ndarray
+        num_pt_peaks = len(weight_peak_centers)
+        assert num_pt_peaks == len(weight_peak_intensities)
+
+        pt_peak_centre_array = numpy.ndarray(shape=(num_pt_peaks, 3), dtype='float')
+        pt_peak_intensity_array = numpy.ndarray(shape=(num_pt_peaks,), dtype='float')
+        for i_pt in xrange(num_pt_peaks):
+            for j in xrange(3):
+                pt_peak_centre_array[i_pt][j] = weight_peak_centers[i_pt][j]
+            pt_peak_intensity_array[i_pt] = weight_peak_intensities[i_pt]
+
+        avg_peak_centre = numpy.ndarray(shape=(1, 3), dtype='float')
+        avg_peak_intensity = numpy.ndarray(shape=(1,), dtype='float')
+        avg_peak_centre[0][0] = qx
+        avg_peak_centre[0][1] = qy
+        avg_peak_centre[0][2] = qz
+        avg_peak_intensity[0] = intensity
+
+        return md_file_name, pt_peak_centre_array, pt_peak_intensity_array, avg_peak_centre, avg_peak_intensity
 
     def do_view_merged_scans_3d(self):
         """ Get selected merged scan and plot them individually in 3D

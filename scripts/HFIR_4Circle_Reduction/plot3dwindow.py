@@ -1,9 +1,10 @@
 #pylint: disable=C0103
 import sys
 import numpy as np
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 import ui_View3DWidget
+import guiutility
 
 __author__ = 'wzz'
 
@@ -24,6 +25,10 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui = ui_View3DWidget.Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Event handling
+        self.connect(self.ui.pushButton_plot3D, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_3d)
+
         # Set up
 
         # list of data keys for management
@@ -42,17 +47,25 @@ class Plot3DWindow(QtGui.QMainWindow):
         data_key = self.ui.graphicsView.import_data_from_file(file_name)
         self._dataKeyList.append(data_key)
 
+        self.ui.comboBox_dataKey.addItem(str(data_key))
+
         return data_key
 
-    def add_plot_by_array(self, points, intensity):
+    def add_plot_by_array(self, points, intensities):
         """
         Add a 3D plot via ndarrays
         :param points:
-        :param intensity:
+        :param intensities:
         :return:
         """
-        data_key = self.ui.graphicsView.import_3d_data(points, intensity)
+        # check
+        assert isinstance(points, np.ndarray) and points.shape[1] == 3, 'Shape is %s.' % str(points.shape)
+        assert isinstance(intensities, np.ndarray) and len(points) == len(intensities)
+
+        data_key = self.ui.graphicsView.import_3d_data(points, intensities)
         self._dataKeyList.append(data_key)
+
+        self.ui.comboBox_dataKey.addItem(str(data_key))
 
         return data_key
 
@@ -66,23 +79,59 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         return
 
-    def plot(self, data_key_list, base_color_list):
+    def do_plot_3d(self):
+        """
+
+        :return:
+        """
+        # color: get R, G, B
+        color_list_str = str(self.ui.lineEdit_baseColorList.text())
+        status, base_color_list = guiutility.parse_float_array(color_list_str)
+        assert len(base_color_list) == 3
+
+        # set the color to get change
+        blabla()
+
+        # get threshold
+        blabla()
+
+        # data key
+        data_key = int(self.ui.comboBox_dataKey.currentText())
+
+        # plot
+        self.plot_3d([data_key], [base_color_list], threshold, [True, True, True])
+
+        return
+
+    def plot_3d(self, data_key, base_color, threshold, change_color):
         """
         Plot scatter data with specified base color
-        :param data_key_list:
-        :param base_color_list:
+        :param data_key:
+        :param base_color:
+        :param change_color: [change_R, change_G, change_B]
         :return:
         """
         # Check
-        assert isinstance(data_key_list, list)
-        assert isinstance(base_color_list, list)
-        assert len(data_key_list) == len(base_color_list)
+        assert isinstance(data_key, int)
+        assert isinstance(base_color, list)
+        assert isinstance(threshold, int)
+        assert isinstance(change_color, list)
 
-        for i_plot in xrange(len(data_key_list)):
-            data_key = data_key_list[i_plot]
-            base_color = base_color_list[i_plot]
-            self.ui.graphicsView.plot_scatter(data_key, base_color)
-        # END-FOR
+        # Reset data
+        if threshold > 0:
+            points, intensities = blabla()
+        else:
+            points, intensities = blabla()
+
+        # Set limit
+        blabla()
+
+        # Format intensity to color map
+        color_list = map_to_color(intensities, base_color, change_color)
+
+        # self.ui.graphicsView.plot_scatter(data_key, base_color)
+        self.ui.graphicsView.set_xyz_limits()
+        self.ui.graphicsView.plot_scatter(points, color_list)
 
         return
 

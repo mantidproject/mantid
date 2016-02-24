@@ -30,7 +30,7 @@ class MplPlot3dCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Axes
-        self._myAxes = Axes3D(self._myFigure) # Canvas figure must be created for mouse rotation
+        self._myAxes = Axes3D(self._myFigure)  # Canvas figure must be created for mouse rotation
         self.format_coord_org = self._myAxes.format_coord
         self._myAxes.format_coord = self.report_pixel
 
@@ -116,9 +116,9 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return return_value
 
-    def plot_scatter(self, data_key, base_color=None):
+    def plot_scatter_auto(self, data_key, base_color=None):
         """
-        Plot data in scatter plot
+        Plot data in scatter plot in an automatic mode
         :param data_key: key to locate the data stored to this class
         :param base_color: None or a list of 3 elements from 0 to 1 for RGB
         :return:

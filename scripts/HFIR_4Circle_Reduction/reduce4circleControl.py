@@ -500,6 +500,13 @@ class CWSCDReductionControl(object):
 
         return q_space_array, counts_array
 
+    def get_merged_scans(self):
+        """
+        Get merged scans and Pts.
+        :return:
+        """
+        return self._mergedWSManager[:]
+
     def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
         get PeakInfo instance
@@ -1569,23 +1576,6 @@ class CWSCDReductionControl(object):
         self._scanSummaryList = scan_sum_list
 
         return True, scan_sum_list
-
-
-def build_pt_spice_table_row_map(spice_table_ws):
-    """
-    Build a lookup dictionary for Pt number and row number
-    :param spice_table_ws:
-    :return:
-    """
-    pt_spice_row_dict = dict()
-    num_rows = spice_table_ws.rowCount()
-    pt_col_index = spice_table_ws.getColumnNames().index('Pt.')
-
-    for i_row in xrange(num_rows):
-        pt_number = int(spice_table_ws.cell(i_row, pt_col_index))
-        pt_spice_row_dict[pt_number] = i_row
-
-    return pt_spice_row_dict
 
 
 def convert_spice_ub_to_mantid(spice_ub):
