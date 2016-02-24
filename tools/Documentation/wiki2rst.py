@@ -17,7 +17,7 @@ The bulk of the work is done by pandoc, which is expected to be in the PATH. The
 from __future__ import print_function
 
 import argparse
-import httplib
+import json
 import os
 import re
 import subprocess
@@ -77,6 +77,18 @@ class WikiURL(object):
 
     def ugly(self):
         return self.indexurl + "index.php?title=" + self.pagename
+
+    def fileurl(self, name):
+        apicall_url = self.indexurl + \
+                  "api.php?titles=File:{0}&action=query&prop=imageinfo&iiprop=url&format=json".format(name.replace(" ", "_"))
+        try:
+            json_str = urllib2.urlopen(apicall_url).read()
+        except urllib2.URLError, err:
+            raise RuntimeError("Failed to fetch JSON describing image page: {}".format(str(err)))
+        apicall = json.loads(json_str)
+        pages = apicall['query']['pages']
+        for _, page in pages.iteritems():
+            return page['imageinfo'][0]['url']
 
 # ------------------------------------------------------------------------------
 
@@ -140,13 +152,14 @@ def execute_process(cmd, args):
 # ------------------------------------------------------------------------------
 
 def post_process(pandoc_rst, wiki_url, wiki_markup,
-                              post_process_args):
+                 post_process_args):
     """Takes raw reST text produced by pandoc and applies several post-processing steps
     as described in the module documentation
     """
     post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
     post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
                                                       post_process_args["rel_img_dir"])
+    download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
     return post_processed_rst
 
 # ------------------------------------------------------------------------------
@@ -237,8 +250,30 @@ def clean_inline_img_def(rst_link):
 
 # ------------------------------------------------------------------------------
 
+def download_images_from_wiki(wiki_url, image_names, img_dir):
+    for name in image_names:
+        download_image_from_wiki(wiki_url, name, img_dir)
+
+# ------------------------------------------------------------------------------
+
+def download_image_from_wiki(wiki_url, name, img_dir):
+    image_url = wiki_url.fileurl(name)
+    try:
+        response = urllib2.urlopen(image_url)
+    except urllib2.URLError, err:
+        raise RuntimeError("Failed to fetch image data: {}".format(str(err)))
+    filename = os.path.join(img_dir, name)
+    display_info("Downloading {0} to {1}".format(name, filename))
+    with open(filename, 'w+b') as f:
+        f.write(response.read())
+
+    return None
+
+# ------------------------------------------------------------------------------
+
 if __name__ == '__main__':
     args = parse_arguments(sys.argv[1:])
+
     wiki_url = WikiURL(args.index_url, args.pagename)
     display_info("Converting {} to reStructeredText..".format(wiki_url.pretty()))
 
