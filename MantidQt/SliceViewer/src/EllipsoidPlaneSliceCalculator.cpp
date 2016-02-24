@@ -5,7 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <type_traits>
-
+#include <algorithm>
 /**
  *
  * The functions in this file intend to calculate the paramters of an ellipse
@@ -409,6 +409,36 @@ bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
     }
 
     return hasCut;
+}
+
+/**
+ * Gets the projections of the ellipsoid direcitons onto the xyz axes
+ * @param directions: the ellipsoid direcitons
+ * @param radii: the radii
+ * @return the projections of the ellipsoid onto the xyz axes
+ */
+std::vector<double>
+getProjections(const std::vector<Mantid::Kernel::V3D> &directions,
+               std::vector<double> radii)
+{
+    std::vector<Mantid::Kernel::V3D> directionsScaled;
+
+    for (int index = 0; index < 3; ++index) {
+        directionsScaled.emplace_back(directions[index] * radii[index]);
+    }
+
+    std::array<double, 3> x = {directionsScaled[0].X(), directionsScaled[1].X(),
+                               directionsScaled[2].X()};
+    std::array<double, 3> y = {directionsScaled[0].Y(), directionsScaled[1].Y(),
+                               directionsScaled[2].Y()};
+    std::array<double, 3> z = {directionsScaled[0].Z(), directionsScaled[1].Z(),
+                               directionsScaled[2].Z()};
+
+    auto xMax = std::max_element(std::begin(x), std::end(x));
+    auto yMax = std::max_element(std::begin(y), std::end(y));
+    auto zMax = std::max_element(std::begin(z), std::end(z));
+
+    return std::vector<double>{*xMax, *yMax, *zMax};
 }
 }
 }

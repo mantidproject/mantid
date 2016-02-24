@@ -79,6 +79,8 @@ private:
   Mantid::Kernel::V3D m_originalOrigin;
   /// Original directions
   std::vector<Mantid::Kernel::V3D> m_originalDirections;
+  /// Original cached opacity gradient
+  Mantid::Kernel::V3D m_originalCachedOpacityGradient;
 
   // -----------Working copies of collections
   /// Origin md-x, md-y, and md-z
@@ -99,7 +101,8 @@ private:
   const double m_opacityMin;
   /// Cached opacity at the distance z from origin
   double m_cachedOpacityAtDistance;
-
+  /// Cached opacity gradient
+  Mantid::Kernel::V3D m_cachedOpacityGradient;
 
   // ---- Drawing information of the 2D ellipses
   /// Angle between the x axis and the major ellipse axis
@@ -111,9 +114,9 @@ private:
   std::vector<double> m_radiiEllipseBackgroundOuter;
 
   // Origin of the ellipse
-  Mantid::Kernel::V2D m_originEllipse;
-  Mantid::Kernel::V2D m_originEllipseBackgroundInner;
-  Mantid::Kernel::V2D m_originEllipseBackgroundOuter;
+  Mantid::Kernel::V3D m_originEllipse;
+  Mantid::Kernel::V3D m_originEllipseBackgroundInner;
+  Mantid::Kernel::V3D m_originEllipseBackgroundOuter;
 
   /// Flag to indicate that the background radius should be drawn.
   bool m_showBackgroundRadii;

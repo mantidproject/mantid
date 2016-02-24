@@ -23,6 +23,21 @@ PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
       m_opacityMin(0.0), m_cachedOpacityAtDistance(0.0),
       m_showBackgroundRadii(false), m_calculator(calculator)
 {
+  // Get projection lengths onto the xyz axes of the ellipsoid axes
+  auto projections = Mantid::SliceViewer::getProjections(directions,
+                                                         backgroundOuterRadii);
+
+  const auto opacityRange = m_opacityMin - m_opacityMax;
+
+  // Get the opacity gradient in all directions
+  int index = 0;
+  for (const auto& projection : projections) {
+    const auto gradient = opacityRange/projection;
+    m_originalCachedOpacityGradient[index] = gradient;
+    m_cachedOpacityGradient[index] = gradient;
+    ++index;
+  }
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -34,52 +49,57 @@ void PeakRepresentationEllipsoid::setSlicePoint(const double &z)
 {
 
     // We check first the outer background. If there is no cut, then,
-    // there should be nothing to left to do. Otherewise we do the inner background
-    // and teh peaks separately.
+    // there should be nothing to left to do. Otherewise we do the inner
+    // background and the peaks separately.
     if (Mantid::SliceViewer::checkIfCutExists(
             m_directions, m_backgroundOuterRadii, m_origin, z)) {
 
         // Handle the case of the outer background
         auto ellipsoidInfoBackgroundOuter = m_calculator->getSlicePlaneInfo(
             m_directions, m_backgroundOuterRadii, m_origin, z);
-        m_angleEllipse = ellipsoidInfoBackgroundOuter.angle; // This should be the same for all
-        m_radiiEllipseBackgroundOuter = std::vector<double>(ellipsoidInfoBackgroundOuter.radiusMajorAxis, ellipsoidInfoBackgroundOuter.radiusMinorAxis);
-        //m_originEllipseBackgroundOuter = ellipsoidInfoBackgroundOuter.origin;
 
+        // The angle should be the same for all
+        m_angleEllipse = ellipsoidInfoBackgroundOuter.angle;
+        m_radiiEllipseBackgroundOuter
+            = std::vector<double>(ellipsoidInfoBackgroundOuter.radiusMajorAxis,
+                                  ellipsoidInfoBackgroundOuter.radiusMinorAxis);
+        m_originEllipseBackgroundOuter = ellipsoidInfoBackgroundOuter.origin;
 
-
+        // Handle the peak radius
         if (Mantid::SliceViewer::checkIfCutExists(m_directions, m_peakRadii,
                                                   m_origin, z)) {
 
             auto ellipsoidInfoPeaks = m_calculator->getSlicePlaneInfo(
                 m_directions, m_peakRadii, m_origin, z);
+            m_radiiEllipse
+                = std::vector<double>(ellipsoidInfoPeaks.radiusMajorAxis,
+                                      ellipsoidInfoPeaks.radiusMinorAxis);
+            m_originEllipse = ellipsoidInfoPeaks.origin;
         }
 
+        // Handle the inner background radius
         if (Mantid::SliceViewer::checkIfCutExists(
                 m_directions, m_backgroundInnerRadii, m_origin, z)) {
 
-            auto ellipsoidInfoBackgroundOuter = m_calculator->getSlicePlaneInfo(
+            auto ellipsoidInfoBackgroundInner = m_calculator->getSlicePlaneInfo(
                 m_directions, m_backgroundInnerRadii, m_origin, z);
+            m_radiiEllipseBackgroundInner = std::vector<double>(
+                ellipsoidInfoBackgroundInner.radiusMajorAxis,
+                ellipsoidInfoBackgroundInner.radiusMinorAxis);
+            m_originEllipseBackgroundInner
+                = ellipsoidInfoBackgroundInner.origin;
         }
+
+
+         // TODO apply opacity gradient
+        const auto distanceAbs = std::abs(z - m_originEllipseBackgroundOuter[3]);
+        //m_cachedOpacityAtDistance = m_cachedOpacityGradient*distanceAbs + m_opacityMax;
 
 #if 0
 
 
-
-        // Get the ellipsoid information for the peak
-        auto ellipsoidInfo = m_calculator->getSlicePlaneInfo(
-            m_originalDirections, m_peakRadii, m_origin, z);
-
-        // Get the ellipsoid information for the
-
-
-        m_radiiEllipse = std::vector<double>(ellipsoidInfo.radiusMajorAxis,
-                                             ellipsoidInfo.radiusMinorAxis);
-        m_angleEllipse = ellipsoidInfo.angle;
-       // m_originEllipse = ellipsoidInfo.origin;
-
         // TODO apply opacity gradient
-        // TODO check backgorund radii
+
 #endif
     } else {
         m_cachedOpacityAtDistance = m_opacityMin;
@@ -156,7 +176,7 @@ double PeakRepresentationEllipsoid::getOccupancyIntoView() const
 
 const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const
 {
-    return m_origin;
+    return m_originEllipseBackgroundOuter;
 }
 
 std::shared_ptr<PeakPrimitives>
