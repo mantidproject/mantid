@@ -232,6 +232,7 @@ set ( INC_FILES
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDEventWorkspace_fwd.h
+	inc/MantidAPI/IMDLeanGeometry.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace_fwd.h
 	inc/MantidAPI/IMDIterator.h
@@ -375,6 +376,7 @@ set ( TEST_FILES
 	ILatticeFunctionTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
+	IMDLeanGeometryTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
