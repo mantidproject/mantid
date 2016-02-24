@@ -380,9 +380,7 @@ public:
 
     std::string foundName;
     svc_it it = findNameWithCaseSearch(name, foundName);
-    if (it != datamap.end())
-      return true;
-    return false;
+    return it != datamap.end();
   }
 
   /// Return the number of objects stored by the data service
