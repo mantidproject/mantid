@@ -55,10 +55,10 @@ public:
 
 protected:
   /// Copy constructor
-  PeakShapeBase(const PeakShapeBase &other) = default;
+  PeakShapeBase(const PeakShapeBase &) = default;
 
   /// Assignment operator
-  PeakShapeBase &operator=(const PeakShapeBase &other) = default;
+  PeakShapeBase &operator=(const PeakShapeBase &) = default;
 
   /// Special coordinate system
   Mantid::Kernel::SpecialCoordinateSystem m_frame;

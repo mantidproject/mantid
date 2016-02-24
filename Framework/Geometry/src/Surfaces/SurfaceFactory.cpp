@@ -52,18 +52,6 @@ SurfaceFactory::SurfaceFactory()
   registerSurface();
 }
 
-// SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
-//    : ID(A.ID)
-/**
-  Copy constructor
-  @param A :: Object to copy
-*/
-//{
-//  MapType::const_iterator vc;
-//  for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-//    SGrid.push_back(MapType::value_type(vc->first, vc->second->clone()));
-//}
-
 void SurfaceFactory::registerSurface()
 /**
   Register tallies to be used

@@ -54,10 +54,6 @@ private:
 
 public:
   static SurfaceFactory *Instance();
-  ~SurfaceFactory() = default;
-
-  SurfaceFactory(const SurfaceFactory &) = delete;
-  SurfaceFactory &operator=(const SurfaceFactory &) = delete;
 
   std::unique_ptr<Surface> createSurface(const std::string &) const;
   std::unique_ptr<Surface> createSurfaceID(const std::string &) const;
