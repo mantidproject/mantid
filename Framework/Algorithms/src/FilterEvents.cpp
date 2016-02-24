@@ -904,8 +904,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     return;
   }
 
-  std::vector<std::string> lognames;
-  this->getTimeSeriesLogNames(lognames);
+  auto lognames = this->getTimeSeriesLogNames();
   g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = "
                 << lognames.size() << " to " << m_outputWS.size()
                 << " outptu workspaces. \n";
@@ -917,8 +916,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     DataObjects::EventWorkspace_sptr opws = wsiter->second;
 
     // Generate a list of splitters for current output workspace
-    Kernel::TimeSplitterType splitters;
-    generateSplitters(wsindex, splitters);
+    Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
 
     g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
                   << ": Name = " << opws->name()
@@ -1022,17 +1020,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 /** Generate splitters for specified workspace index as a subset of
  * m_splitters
  */
-void FilterEvents::generateSplitters(int wsindex,
-                                     Kernel::TimeSplitterType &splitters) {
-  splitters.clear();
+Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
+  Kernel::TimeSplitterType splitters;
   for (auto splitter : m_splitters) {
     int index = splitter.index();
     if (index == wsindex) {
       splitters.push_back(splitter);
     }
   }
-
-  return;
+  return splitters;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1065,9 +1061,10 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
 
 //----------------------------------------------------------------------------------------------
 /** Get all filterable logs' names
+ * @returns Vector of names of logs
  */
-void FilterEvents::getTimeSeriesLogNames(std::vector<std::string> &lognames) {
-  lognames.clear();
+std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
+  std::vector<std::string> lognames;
 
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
@@ -1078,9 +1075,9 @@ void FilterEvents::getTimeSeriesLogNames(std::vector<std::string> &lognames) {
       std::string pname = timeprop->name();
       lognames.push_back(pname);
     }
-  } // FOR
+  }
 
-  return;
+  return lognames;
 }
 
 } // namespace Mantid

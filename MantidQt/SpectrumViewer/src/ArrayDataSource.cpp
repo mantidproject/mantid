@@ -151,16 +151,14 @@ DataArray_const_sptr ArrayDataSource::getDataArray( bool isLogX )
  *
  * @param x    The x-coordinate of the point of interest in the data.
  * @param y    The y-coordinate of the point of interest in the data.
- * @param list Vector that will be filled out with the information strings.
+ * @returns Vector filled with the information strings.
  */
-void ArrayDataSource::getInfoList( double x,
-                                   double y,
-                                   std::vector<std::string> &list )
-{
-  list.clear();
+std::vector<std::string> ArrayDataSource::getInfoList(double x, double y) {
+  std::vector<std::string> list;
 
   SVUtils::PushNameValue( "X", 8, 3, x, list );
   SVUtils::PushNameValue( "Y", 8, 3, y, list );
+  return list;
 }
 
 } // namespace SpectrumView
