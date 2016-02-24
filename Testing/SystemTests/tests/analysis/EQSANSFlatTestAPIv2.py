@@ -59,7 +59,7 @@ class EQSANSFlatTest(stresstesting.MantidStressTest):
         mtd['EQSANS_5729_event_frame1_Iq'].dataY(0)[1] = 856.30028119108
 
     def validate(self):
-        self.tolerance = 4.0
+        self.tolerance = 5.0
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
