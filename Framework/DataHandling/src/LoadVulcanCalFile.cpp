@@ -86,8 +86,9 @@ void LoadVulcanCalFile::init() {
                   "DIFCs for effective detectors. ");
 
   // Effective geometry: 2theta
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Effective2Thetas"),
-                  "2 thetas for effective detectors. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Effective2Thetas"),
+      "2 thetas for effective detectors. ");
 
   // This is the property for testing purpose only!
   declareProperty(

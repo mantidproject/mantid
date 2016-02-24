@@ -600,8 +600,8 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       std::string detCalFileProperty = prop + "DetCalFilename";
       if (!detCalFileFromAlg.empty()) {
         this->reductionManager->declareProperty(
-            Kernel::make_unique<PropertyWithValue<std::string>>(detCalFileProperty,
-                                                        detCalFileFromAlg));
+            Kernel::make_unique<PropertyWithValue<std::string>>(
+                detCalFileProperty, detCalFileFromAlg));
       }
     }
 

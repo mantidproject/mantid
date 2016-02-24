@@ -156,8 +156,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResDataAxisPixelRange parameter should be a vector "
-                       "of two values"
-                    << std::endl;
+                       "of two values" << std::endl;
       throw std::invalid_argument("LowResDataAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -216,8 +215,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     const std::vector<int> bckRange = getProperty("SignalBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "SignalBackgroundPixelRange parameter should be a "
-                       "vector of two values"
-                    << std::endl;
+                       "vector of two values" << std::endl;
       throw std::invalid_argument("SignalBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -386,8 +384,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResNormAxisPixelRange parameter should be a vector "
-                       "of two values"
-                    << std::endl;
+                       "of two values" << std::endl;
       throw std::invalid_argument("LowResNormAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -421,8 +418,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
     const std::vector<int> bckRange = getProperty("NormBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "NormBackgroundPixelRange parameter should be a vector "
-                       "of two values"
-                    << std::endl;
+                       "of two values" << std::endl;
       throw std::invalid_argument("NormBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }

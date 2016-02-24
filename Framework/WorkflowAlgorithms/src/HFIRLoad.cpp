@@ -154,8 +154,7 @@ void HFIRLoad::exec() {
     // reduced data set
     // as a sensitivity data set.
     g_log.warning() << "Unable to load file as a SPICE file. Trying to load as "
-                       "a Nexus file."
-                    << std::endl;
+                       "a Nexus file." << std::endl;
     loadAlg = createChildAlgorithm("Load", 0, 0.2);
     loadAlg->setProperty("Filename", fileName);
     loadAlg->executeAsChildAlg();

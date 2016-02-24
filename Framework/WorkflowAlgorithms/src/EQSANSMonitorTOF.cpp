@@ -56,8 +56,7 @@ void EQSANSMonitorTOF::exec() {
       inputWS->getInstrument()->getMonitors();
   if (monitor_list.size() != 1) {
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
-                     "This should not happen"
-                  << std::endl;
+                     "This should not happen" << std::endl;
   }
   IDetector_const_sptr mon;
   try {

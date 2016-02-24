@@ -622,8 +622,7 @@ void SetupEQSANSReduction::exec() {
     loadMonitors = true;
     if (monitorRefFile.size() == 0) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
-                       "reference data was selected"
-                    << std::endl;
+                       "reference data was selected" << std::endl;
     }
     normAlg->setProperty("NormaliseToMonitor", true);
     normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
@@ -689,7 +688,8 @@ void SetupEQSANSReduction::exec() {
       createChildAlgorithm("EQSANSDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  auto ddcAlgProp = make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
+  auto ddcAlgProp =
+      make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
   ddcAlgProp->setValue(darkDefaultAlg->toString());
   reductionManager->declareProperty(std::move(ddcAlgProp));
 
@@ -699,7 +699,8 @@ void SetupEQSANSReduction::exec() {
     const bool detectorTubes = getProperty("DetectorTubes");
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", detectorTubes);
-    auto ssaAlgProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
+    auto ssaAlgProp =
+        make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     ssaAlgProp->setValue(solidAlg->toString());
     reductionManager->declareProperty(std::move(ssaAlgProp));
   }
@@ -732,13 +733,13 @@ void SetupEQSANSReduction::exec() {
         ctrAlg->setProperty("BeamRadius", beamRadius);
       ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-      auto ctrAlgProp = make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
+      auto ctrAlgProp =
+          make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
       ctrAlgProp->setValue(ctrAlg->toString());
       reductionManager->declareProperty(std::move(ctrAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided"
-                    << std::endl;
+                       " but no file was provided" << std::endl;
     }
   }
 
@@ -903,8 +904,7 @@ void SetupEQSANSReduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
 
@@ -990,8 +990,7 @@ void SetupEQSANSReduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -1081,8 +1080,7 @@ void SetupEQSANSReduction::setupBackground(
         reductionManager->declareProperty(std::move(algProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided"
-                      << std::endl;
+                         " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);

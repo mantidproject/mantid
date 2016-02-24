@@ -349,7 +349,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  const std::vector<std::string> exts{ ".h5", ".hd5" };
+  const std::vector<std::string> exts{".h5", ".hd5"};
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");

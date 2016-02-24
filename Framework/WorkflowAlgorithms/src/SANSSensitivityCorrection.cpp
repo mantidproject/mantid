@@ -151,8 +151,7 @@ void SANSSensitivityCorrection::exec() {
         // Reset pointer
         floodWS.reset();
         g_log.error() << "A processed Mantid workspace was loaded but it "
-                         "wasn't a sensitivity file!"
-                      << std::endl;
+                         "wasn't a sensitivity file!" << std::endl;
       }
     }
 

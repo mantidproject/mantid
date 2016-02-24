@@ -98,8 +98,8 @@ void LoadSpiceAscii::init() {
                   "Name of SPICE data file.");
 
   // Logs to be float type sample log
-  auto floatspckeyprop =
-      make_unique<ArrayProperty<std::string>>("FloatSampleLogNames", Direction::Input);
+  auto floatspckeyprop = make_unique<ArrayProperty<std::string>>(
+      "FloatSampleLogNames", Direction::Input);
   declareProperty(std::move(floatspckeyprop),
                   "List of log names that will be imported as float property.");
 

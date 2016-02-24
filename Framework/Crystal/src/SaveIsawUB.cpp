@@ -33,11 +33,11 @@ SaveIsawUB::~SaveIsawUB() {}
 /** Initialize the algorithm's properties.
  */
 void SaveIsawUB::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-      "An input workspace containing the orientation matrix.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace containing the orientation matrix.");
 
-  const std::vector<std::string> exts{ ".mat", ".ub", ".txt" };
+  const std::vector<std::string> exts{".mat", ".ub", ".txt"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Save, exts),
                   "Path to an ISAW-style UB matrix text file.");

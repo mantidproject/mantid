@@ -112,7 +112,8 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   for (auto property : properties) {
     if ((*property).direction() == Kernel::Direction::Output &&
         (*property).isValid() == "") {
-      auto clonedProperty = std::unique_ptr<Kernel::Property>((*property).clone());
+      auto clonedProperty =
+          std::unique_ptr<Kernel::Property>((*property).clone());
       declareProperty(std::move(clonedProperty));
     }
   }

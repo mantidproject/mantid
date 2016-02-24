@@ -25,7 +25,7 @@ LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
  */
 void LoadSavuTomoConfig::init() {
   // Required input properties
-  const std::vector<std::string> exts{ ".nxs", ".nx5", ".xml" };
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
       Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
                                         exts),

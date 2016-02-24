@@ -599,8 +599,7 @@ void SetupILLD33Reduction::exec() {
       reductionManager->declareProperty(std::move(algProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided"
-                    << std::endl;
+                       " but no file was provided" << std::endl;
     }
   }
 
@@ -755,8 +754,7 @@ void SetupILLD33Reduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
 
@@ -841,8 +839,7 @@ void SetupILLD33Reduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -932,8 +929,7 @@ void SetupILLD33Reduction::setupBackground(
         reductionManager->declareProperty(std::move(btbcAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided"
-                      << std::endl;
+                         " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);

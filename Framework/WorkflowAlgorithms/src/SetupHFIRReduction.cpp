@@ -698,8 +698,7 @@ void SetupHFIRReduction::exec() {
       reductionManager->declareProperty(std::move(beamFinderAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided"
-                    << std::endl;
+                       " but no file was provided" << std::endl;
     }
   }
 
@@ -925,8 +924,7 @@ void SetupHFIRReduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
 
@@ -1015,8 +1013,7 @@ void SetupHFIRReduction::setupBackground(
         reductionManager->declareProperty(std::move(backBeamCentreAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided"
-                      << std::endl;
+                         " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
@@ -1130,8 +1127,7 @@ void SetupHFIRReduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided"
-            << std::endl;
+               " but no file was provided" << std::endl;
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
