@@ -112,6 +112,7 @@ set ( UI_FILES
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
+    test/EllipsoidPlaneSliceCalculatorTest.h
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
     test/PeakRepresentationCrossTest.h
@@ -177,7 +178,7 @@ endif ()
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc)
 
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
   ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
