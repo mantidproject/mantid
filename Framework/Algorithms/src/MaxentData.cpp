@@ -26,6 +26,7 @@ void MaxentData::loadReal(const std::vector<double> &data,
   m_chisq = -1.;
 
   m_image = image;
+  correctImage();
   m_dataCalc = transformImageToData(image);
   m_background = background;
 
@@ -69,6 +70,7 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
   m_chisq = -1.;
 
   m_image = image;
+  correctImage();
   m_dataCalc = transformImageToData(image);
   m_background = background;
 
@@ -90,7 +92,7 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
 void MaxentData::correctImage() {
 
   for (auto &im : m_image) {
-    im = m_entropy->correctValue(im);
+    im = m_entropy->correctValue(im, m_background);
   }
 
   // Reset m_angle and m_chisq to default
@@ -104,6 +106,7 @@ void MaxentData::setImage(const std::vector<double> &image) {
     throw std::invalid_argument("New image must be the same size");
   }
   m_image = image;
+  correctImage();
 
   m_dataCalc = transformImageToData(image);
 
@@ -225,6 +228,13 @@ void MaxentData::calculateSearchDirections() {
   cnorm = sqrt(cnorm);
   snorm = sqrt(snorm);
 
+  if (cnorm == 0) {
+    cnorm = 1.;
+  }
+  if (snorm == 0) {
+    snorm = 1.;
+  }
+
   m_angle = sqrt(0.5 * (1. - csnorm / snorm / cnorm));
   // csnorm could be greater than snorm * cnorm due to rounding issues
   // so check for nan
@@ -240,7 +250,7 @@ void MaxentData::calculateSearchDirections() {
   for (size_t i = 0; i < npoints; i++) {
     m_directionsIm[0][i] = metric[i] * cgrad[i] / cnorm;
     m_directionsIm[1][i] = metric[i] * sgrad[i] / snorm;
-    // xi1[i] = image[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
+    //m_directionsIm[1][i] = metric[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
   }
 
   // Search directions (data space)

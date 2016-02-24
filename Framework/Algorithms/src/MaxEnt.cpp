@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxentEntropyNegativeValues.h"
+#include "MantidAlgorithms/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
@@ -181,7 +181,7 @@ void MaxEnt::exec() {
   // positive only, or positive and/or negative)
   MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    throw std::invalid_argument("Negative image: not implemented");
+    entropy = boost::make_shared<MaxentEntropyPositiveValues>();
   } else {
     entropy = boost::make_shared<MaxentEntropyNegativeValues>();
   }
@@ -246,7 +246,7 @@ void MaxEnt::exec() {
       auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-			delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
+      delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
       // Calculate the new image
       for (size_t i = 0; i < npoints; i++) {
@@ -526,7 +526,7 @@ std::vector<double> MaxEnt::applyDistancePenalty(
   auto newDelta = delta;
   if (dist > distEps * sum / background) {
     for (size_t k = 0; k < delta.size(); k++) {
-			newDelta[k] *= sqrt(sum / dist / background);
+      newDelta[k] *= sqrt(sum / dist / background);
     }
   }
   return newDelta;

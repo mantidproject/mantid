@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
+#ifndef MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_
+#define MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/MaxentEntropy.h"
@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropyNegativeValues : TODO: DESCRIPTION
+/** MaxentEntropyPositiveValues : TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,21 +30,20 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxentEntropyNegativeValues : public MaxentEntropy {
+class MANTID_ALGORITHMS_DLL MaxentEntropyPositiveValues : public MaxentEntropy {
 public:
-  MaxentEntropyNegativeValues() = default;
-  virtual ~MaxentEntropyNegativeValues() = default;
+  MaxentEntropyPositiveValues() = default;
+  virtual ~MaxentEntropyPositiveValues() = default;
 
   double getDerivative(double x) override;
   double getSecondDerivative(double x) override;
   double correctValue(double x, double y) override;
 };
-
 // Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentEntropyNegativeValues>
-    MaxentEntropyNegativeValues_sptr;
+typedef boost::shared_ptr<MaxentEntropyPositiveValues>
+    MaxentEntropyPositiveValues_sptr;
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_ */

@@ -14,7 +14,10 @@ double MaxentEntropyNegativeValues::getSecondDerivative(double value) {
   return fabs(value);
 }
 
-double MaxentEntropyNegativeValues::correctValue(double value) {
+double MaxentEntropyNegativeValues::correctValue(double value,
+                                                 double newValue) {
+
+  UNUSED_ARG(newValue)
 
   // Nothing to correct
   return value;
