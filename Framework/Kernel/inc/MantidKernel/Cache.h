@@ -146,12 +146,12 @@ private:
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
     MutexLocker lock(m_mutex);
     CacheMapConstIterator it_found = m_cacheMap.find(key);
-	bool isValid = it_found != m_cacheMap.end();
-   
-	if (isValid) {
-		value = it_found->second;
+    bool isValid = it_found != m_cacheMap.end();
+
+    if (isValid) {
+      value = it_found->second;
     }
-    
+
     return isValid;
   }
 
