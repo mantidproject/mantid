@@ -175,8 +175,10 @@ if ( CXXTEST_FOUND )
 
   include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
 
-  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
-  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+  set ( TESTHELPER_SRCS
+    ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )

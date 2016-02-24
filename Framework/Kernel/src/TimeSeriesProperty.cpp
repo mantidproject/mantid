@@ -3,6 +3,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
 
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
 #else
@@ -80,8 +81,8 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = std::unique_ptr<TimeSeriesProperty<double>>(
-      new TimeSeriesProperty<double>(this->name() + "_derivative"));
+  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+      this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {
     TYPE v1 = it->value();

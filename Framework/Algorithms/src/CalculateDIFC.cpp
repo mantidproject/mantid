@@ -71,11 +71,14 @@ void CalculateDIFC::exec() {
   DataObjects::OffsetsWorkspace_sptr offsetsWs =
       getProperty("OffsetsWorkspace");
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  API::MatrixWorkspace_sptr outputWs =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
-          new SpecialWorkspace2D(inputWs->getInstrument())));
+  API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 
-  outputWs->setTitle("DIFC workspace");
+  if ((!bool(inputWs == outputWs)) ||
+      (!bool(boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs)))) {
+    outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        boost::make_shared<SpecialWorkspace2D>(inputWs->getInstrument()));
+    outputWs->setTitle("DIFC workspace");
+  }
 
   Instrument_const_sptr instrument = inputWs->getInstrument();
 

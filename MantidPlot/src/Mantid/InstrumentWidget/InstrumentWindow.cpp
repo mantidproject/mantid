@@ -19,6 +19,11 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   this->setWidget(m_instrumentWidget);
   confirmClose(parent->confirmCloseInstrWindow);
   resize(m_instrumentWidget->size());
+
+  connect(m_instrumentWidget, SIGNAL(preDeletingHandle()), this,
+          SLOT(closeSafely()));
+  connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
+          SLOT(closeSafely()));
 }
 
 InstrumentWindow::~InstrumentWindow() {}
@@ -48,46 +53,6 @@ std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
 
 void InstrumentWindow::selectTab(int tab) {
   return m_instrumentWidget->selectTab(tab);
-}
-
-/**
-* Closes the window if the associated workspace is deleted.
-* @param ws_name :: Name of the deleted workspace.
-* @param workspace_ptr :: Pointer to the workspace to be deleted
-*/
-void InstrumentWindow::preDeleteHandle(
-    const std::string &ws_name,
-    const boost::shared_ptr<Workspace> workspace_ptr) {
-  if (m_instrumentWidget->hasWorkspace(ws_name)) {
-    confirmClose(false);
-    close();
-    return;
-  }
-  Mantid::API::IPeaksWorkspace_sptr pws =
-      boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
-  if (pws) {
-    m_instrumentWidget->deletePeaksWorkspace(pws);
-    return;
-  }
-}
-
-void InstrumentWindow::afterReplaceHandle(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
-  m_instrumentWidget->handleWorkspaceReplacement(wsName, workspace);
-}
-
-void InstrumentWindow::renameHandle(const std::string &oldName,
-                                    const std::string &newName) {
-  if (m_instrumentWidget->hasWorkspace(oldName)) {
-    m_instrumentWidget->renameWorkspace(newName);
-    setWindowTitle(QString("Instrument - ") +
-                   m_instrumentWidget->getWorkspaceName());
-  }
-}
-
-void InstrumentWindow::clearADSHandle() {
-  confirmClose(false);
-  close();
 }
 
 InstrumentWidgetTab *InstrumentWindow::getTab(const QString &title) const {
@@ -136,4 +101,9 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
 
 void InstrumentWindow::setViewType(const QString &type) {
   return m_instrumentWidget->setViewType(type);
+}
+
+void InstrumentWindow::closeSafely() {
+	confirmClose(false);
+	close();
 }

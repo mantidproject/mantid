@@ -150,6 +150,8 @@ namespace MantidQt
 			void integrationRangeChanged(double, double);
 			void glOptionChanged(bool);
 			void requestSelectComponent(const QString &);
+			void preDeletingHandle();
+			void clearingHandle();
 
 		protected:
 			/// Implements AlgorithmObserver's finish handler
@@ -274,9 +276,22 @@ namespace MantidQt
 			bool m_blocked;
 			QList<int> m_selectedDetectors;
 			bool m_instrumentDisplayContextMenuOn;
-		};
+		private:
+			/// ADS notification handlers
+                  void preDeleteHandle(
+                      const std::string &ws_name,
+                      const boost::shared_ptr<Mantid::API::Workspace>
+                          workspace_ptr) override;
+                  void afterReplaceHandle(
+                      const std::string &wsName,
+                      const boost::shared_ptr<Mantid::API::Workspace>
+                          workspace_ptr) override;
+                  void renameHandle(const std::string &oldName,
+                                    const std::string &newName) override;
+                  void clearADSHandle() override;
+                };
 
-	}//MantidWidgets
+        }//MantidWidgets
 }//MantidQt
 
 #endif /*INSTRUMENTWIDGET_H_*/

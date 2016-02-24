@@ -519,8 +519,8 @@ void LoadTOFRawNexus::exec() {
   g_log.debug() << "Loading DAS logs" << std::endl;
 
   int nPeriods = 1; // Unused
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log")); // Unused
+  auto periodLog =
+      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 

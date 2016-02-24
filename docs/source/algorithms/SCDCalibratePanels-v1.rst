@@ -104,7 +104,7 @@ Usage
     LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
     #TimeOffset is not stored in xml file, so use DetCal output if you need TimeOffset
     SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60,usetimeOffset=False)
-    LoadEmptyInstrument(Filename='MANDI_Definition_2013_08_01.xml', OutputWorkspace='MANDI_801_event_DetCal')
+    LoadEmptyInstrument(Filename=config.getInstrumentDirectory() + 'MANDI_Definition_2013_08_01.xml', OutputWorkspace='MANDI_801_event_DetCal')
     CloneWorkspace(InputWorkspace='MANDI_801_event_DetCal', OutputWorkspace='MANDI_801_event_xml')
     LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
     LoadIsawDetCal(InputWorkspace='MANDI_801_event_DetCal', Filename='mandi_801.DetCal')
