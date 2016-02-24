@@ -370,6 +370,7 @@ set ( TEST_FILES
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
+	SpectrumIndexSetTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
