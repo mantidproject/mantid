@@ -196,6 +196,18 @@ public:
     TS_ASSERT_EQUALS(one, getWrappedVector(five));
   }
 
+  void testGetUnitCellIntervalSymmetryOperation() {
+    SymmetryOperation symOpNegative =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-1/4"));
+
+    TS_ASSERT_EQUALS(symOpNegative.vector(), V3R(0, 0, 3) / 4);
+
+    SymmetryOperation symOpGreaterOne =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z+12/4"));
+
+    TS_ASSERT_EQUALS(symOpGreaterOne.vector(), V3R(0, 0, 0));
+  }
+
   void testGetOrderFromComponents() {
     TestableSymmetryOperation symOp;
 

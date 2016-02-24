@@ -176,6 +176,9 @@ MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
 
+MANTID_GEOMETRY_DLL SymmetryOperation
+getUnitCellIntervalOperation(const SymmetryOperation &symOp);
+
 template <typename T, typename U>
 Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {
   Kernel::Matrix<T> converted(matrix.numRows(), matrix.numCols());

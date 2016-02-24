@@ -333,5 +333,9 @@ std::istream &operator>>(std::istream &stream, SymmetryOperation &operation) {
   return stream;
 }
 
+SymmetryOperation getUnitCellIntervalOperation(const SymmetryOperation &symOp) {
+  return SymmetryOperation(symOp.matrix(), getWrappedVector(symOp.vector()));
+}
+
 } // namespace Geometry
 } // namespace Mantid
