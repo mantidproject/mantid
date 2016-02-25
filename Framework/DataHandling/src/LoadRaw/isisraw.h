@@ -232,8 +232,8 @@ struct DHDR_STRUCT {
   int d_exp_filesize; ///< equivalent version 1 filesize
   int unused[26];     ///< to bring size to 32*4 bytes
   /// constructor
-  // cppcheck-suppress memsetClassFloat
   DHDR_STRUCT() {
+  // cppcheck-suppress memsetClassFloat
     memset(this, 0, sizeof(DHDR_STRUCT));
     d_comp = 1;
     d_offset = 1 + 32;
