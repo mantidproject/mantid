@@ -1845,10 +1845,13 @@ void Table::setColNumericFormat(int f, int prec, int col, bool updateCells)
       else if (f == 2)
         format = 'e';
 
-      if (d_saved_cells)
+      d_table->blockSignals(true);
+      if (d_saved_cells) {
         setText(i, col, locale().toString(d_saved_cells[col][i], format, prec));
-      else
+      } else {
         setText(i, col, locale().toString(locale().toDouble(t), format, prec));
+      }
+      d_table->blockSignals(false);
     }
   }
 }
@@ -3410,6 +3413,7 @@ void MyTable::setColumnReadOnly(int col, bool on) {
   } else if (!on && !bool(flags & Qt::ItemIsEditable)) {
     flags |= Qt::ItemIsEditable;
   }
+  blockSignals(true);
   for(int row = 0; row < rowCount(); ++row) {
     auto it = item(row, col);
     if (it == nullptr) {
@@ -3417,6 +3421,7 @@ void MyTable::setColumnReadOnly(int col, bool on) {
     }
     it->setFlags(flags);
   }
+  blockSignals(false);
 }
 
 void MyTable::insertColumns(int col, int count) {
