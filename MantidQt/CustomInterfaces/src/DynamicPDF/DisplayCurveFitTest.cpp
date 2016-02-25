@@ -17,9 +17,9 @@ namespace DynamicPDF {
 
 // Add this class to the list of specialised dialogs in this namespace only if
 // compiling in Debug mode
-#ifndef NDEBUG
+//#ifndef NDEBUG
 DECLARE_SUBWINDOW(DisplayCurveFitTest)
-#endif
+//#endif
 
 using curveType = MantidQt::MantidWidgets::DisplayCurveFit::curveType;
 using dcRange = MantidQt::MantidWidgets::DisplayCurveFit::dcRange;
