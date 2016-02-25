@@ -583,20 +583,7 @@ void Spectrogram::setLabelsFont(const QFont& font)
 
 bool Spectrogram::hasSelectedLabels()
 {
-  /*if (d_labels_list.isEmpty())
-        return false;
-
-    foreach(PlotMarker *m, d_labels_list){
-        if (m->label().backgroundPen() == QPen(Qt::blue))
-            return true;
-        else
-            return false;
-    }
-    return false;*/
-
-  if (d_selected_label)
-    return true;
-  return false;
+  return d_selected_label != NULL;
 }
 void Spectrogram::selectLabel(bool on)
 {

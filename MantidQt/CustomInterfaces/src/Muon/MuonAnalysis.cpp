@@ -2100,10 +2100,7 @@ bool MuonAnalysis::isGroupingSet() const
   std::vector<int> dummy;
   whichGroupToWhichRow(m_uiForm, dummy);
 
-  if (dummy.empty())
-    return false;
-  else
-    return true;
+  return !dummy.empty();
 }
 
 /**

@@ -524,7 +524,7 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep, int igno
 	QLocale l = d_locale;
 	if (d_matrix)
 		l = d_matrix->locale();
-	bool updateDecimalSeparators = (l != locale) ? true : false;
+	bool updateDecimalSeparators = (l != locale);
 
 	QString s = t.readLine();
 	if (simplifySpaces)

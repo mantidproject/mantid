@@ -251,7 +251,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
       if (ws->getAxis(i)->isSpectra())
         hasSpectra = true;
     }
-    if (hasSpectra == false) {
+    if (!hasSpectra) {
       m_spectra = false;
       break;
     }
@@ -494,10 +494,7 @@ bool Interval::merge(const Interval& other)
 
 bool Interval::canMerge(const Interval& other) const
 {
-  if(other.start() > m_end + 1 || other.end() + 1 < m_start)
-    return false;
-  else
-    return true;
+  return !(other.start() > m_end + 1 || other.end() + 1 < m_start);
 }
 
 int Interval::start() const
@@ -531,10 +528,7 @@ std::set<int> Interval::getIntSet() const
 
 bool Interval::contains(const Interval& other) const
 {
-  if(other.m_start >= m_start && other.m_end <= m_end)
-    return true;
-
-  return false;
+  return (other.m_start >= m_start && other.m_end <= m_end);
 }
 
 std::string Interval::toStdString() const

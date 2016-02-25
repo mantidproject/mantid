@@ -676,11 +676,8 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
   // Now check if the version has changed since last time
   const QString version =
       QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
-  if (version != lastVersion) {
-    return true;
-  }
-
-  return false;
+ 
+  return (version != lastVersion);
 }
 
 void ApplicationWindow::initWindow() {
@@ -1620,9 +1617,7 @@ bool ApplicationWindow::getMenuSettingsFlag(const QString &menu_item) {
   }
 
   // If we didn't find it, check whether is was manually removed
-  if (removed_interfaces.contains(menu_item))
-    return false;
-  return true;
+  return !removed_interfaces.contains(menu_item);
 }
 
 void ApplicationWindow::disableActions() {
@@ -5182,7 +5177,7 @@ void ApplicationWindow::readSettings() {
     // if the setting was false then the user changed it
     // sync this to the new location and remove the key for the future
     bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
-    if (qsettingsFlag == false) {
+    if (!qsettingsFlag) {
       cfgSvc.setString("graph1d.autodistribution", "Off");
       try {
         cfgSvc.saveConfig(cfgSvc.getUserFilename());
@@ -8877,10 +8872,7 @@ void ApplicationWindow::redo() {
 }
 
 bool ApplicationWindow::hidden(QWidget *window) {
-  if (hiddenWindows->contains(window))
-    return true;
-
-  return false;
+  return hiddenWindows->contains(window);
 }
 
 void ApplicationWindow::updateWindowStatus(MdiSubWindow *w) {
@@ -9759,7 +9751,7 @@ void ApplicationWindow::savedProject() {
 }
 
 void ApplicationWindow::modifiedProject() {
-  if (saved == false)
+  if (!saved)
     return;
   // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and
   // doesn't

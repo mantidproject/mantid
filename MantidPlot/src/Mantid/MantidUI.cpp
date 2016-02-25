@@ -1388,11 +1388,8 @@ void MantidUI::deletePressEvent()
 bool MantidUI::canAcceptDrop(QDragEnterEvent *e)
 {
   QString name = e->mimeData()->objectName();
-  if ( name == "MantidWorkspace" || e->mimeData()->hasUrls() || name == "TiledWindow" )
-  {
-    return true;
-  }
-  return false;
+ 
+  return (name == "MantidWorkspace" || e->mimeData()->hasUrls() || name == "TiledWindow");
 }
 
 bool MantidUI::drop(QDropEvent* e)
@@ -3138,7 +3135,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     if (ask.clickedButton() != confirmButton) return NULL;
   }
   // Force waterfall option to false if only 1 curve
-  if ((NULL == plotWindow || clearWindow == true) && toPlot.size() == 1)
+  if ((NULL == plotWindow || clearWindow) && toPlot.size() == 1)
     waterfallPlot = false;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

@@ -240,7 +240,7 @@ void SNSLiveEventDataListener::run() {
     while (!m_stopThread) // loop until the foreground thread tells us to stop
     {
 
-      while (m_pauseNetRead && m_stopThread == false) {
+      while (m_pauseNetRead && !m_stopThread) {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
         // &pkt)
@@ -388,7 +388,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && !static_cast<bool>(m_keepPausedEvents)) {
+  if (m_runPaused && m_keepPausedEvents == 0) {
     return false;
   }
 

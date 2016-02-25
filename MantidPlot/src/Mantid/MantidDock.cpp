@@ -1316,9 +1316,9 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
         {
           compatible = false;
         }
-        if (compatible != false)
+        if (compatible)
         {
-          if (firstPass == true)
+          if (firstPass)
           {
             m_saveToProgram = new QMenu(tr("Send to"),this);
             menu->addMenu(m_saveToProgram);
@@ -1341,7 +1341,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     }
 
     //Tell the button what to listen for and what to do once clicked (if there is anything to connect it will be set to false)
-    if (firstPass == false)    
+    if (!firstPass)    
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
 
     //Rename is valid for all workspace types
@@ -1964,25 +1964,17 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
   }
   else if(thisShouldBeSorted && !otherShouldBeSorted)
   {
-    if(m_parent->getSortOrder() == Qt::Ascending)
-      return false;
-    else
-      return true;
+    return !(m_parent->getSortOrder() == Qt::Ascending);
   }
   else if(!thisShouldBeSorted && otherShouldBeSorted)
   {
-    if(m_parent->getSortOrder() == Qt::Ascending)
-      return true;
-    else
-      return false;
+    return (m_parent->getSortOrder() == Qt::Ascending);
   }
 
   // If both should be sorted, and the scheme is set to ByName ...
   if(m_parent->getSortScheme() == ByName)
   {
-    if(QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0)
-      return true;
-    return false;
+    return (QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0);
   }
   // ... else both should be sorted and the scheme is set to ByLastModified.
   else

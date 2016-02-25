@@ -846,7 +846,7 @@ bool MantidMatrix::setSelectedRows()
     m_selectedRows.append(it->row()+m_startRow);
   }
 
-  return (m_selectedRows.empty() ? false : true);
+  return (!m_selectedRows.empty());
 }
 
 /// Returns a list of the selected columns
@@ -873,7 +873,7 @@ bool MantidMatrix::setSelectedColumns()
     m_selectedCols.append(it->column());
   }
 
-  return (m_selectedCols.empty() ? false : true);
+  return (!m_selectedCols.empty());
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow* w)
@@ -941,7 +941,7 @@ void MantidMatrix::repaintAll()
       colName.remove(0,2); //This now contains the number in the MantidMatrix
       int matrixNumber = colName.toInt();
       if( matrixNumber < 0 ) break;
-      bool errs = (ident[0] == QChar('E')) ? true : false;
+      bool errs = (ident[0] == QChar('E'));
       if( ident[1] == QChar('S') )
       {
         if( matrixNumber >= numRows() ) break;

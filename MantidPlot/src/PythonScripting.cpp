@@ -458,14 +458,7 @@ bool PythonScripting::loadInitFile(const QString & filename)
   if(file.open(QIODevice::ReadOnly | QIODevice::Text) )
   {
     QByteArray data = file.readAll();
-    if( PyRun_SimpleString(data.data() ) == 0 )
-    {
-      success = true;
-    }
-    else
-    {
-      success = false;
-    }
+	success = (PyRun_SimpleString(data.data()) == 0);
     file.close();
   }
   else
