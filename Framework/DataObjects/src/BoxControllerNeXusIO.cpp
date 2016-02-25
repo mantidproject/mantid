@@ -467,9 +467,9 @@ void BoxControllerNeXusIO::closeFile() {
     this->flushCache();
     // lock file
     std::lock_guard<std::mutex> _lock(m_fileMutex);
-   
+
     m_File->closeData(); // close events data
-    if (!m_ReadOnly) // write free space groups from the disk buffer
+    if (!m_ReadOnly)     // write free space groups from the disk buffer
     {
       std::vector<uint64_t> freeSpaceBlocks;
       this->getFreeSpaceVector(freeSpaceBlocks);
