@@ -874,14 +874,6 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
   }
 }
 
-TMDE(void MDEventWorkspace)::makeSinglePointWithNaN(
-    std::vector<coord_t> &x, std::vector<signal_t> &y,
-    std::vector<signal_t> &e) const {
-  x.push_back(0);
-  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-}
-
 /**
 Setter for the masking region.
 @param maskingRegion : Implicit function defining mask region.

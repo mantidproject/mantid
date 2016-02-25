@@ -518,22 +518,6 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- * Make a single point with NaN as the signal and error
- * This can be returned when there would otherwise be nothing to plot
- * @param x :: position on the line
- * @param y :: signal value
- * @param e :: error value
- */
-void MDHistoWorkspace::makeSingleBinWithNaN(std::vector<coord_t> &x,
-                                            std::vector<signal_t> &y,
-                                            std::vector<signal_t> &e) const {
-  x.push_back(0);
-  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-}
-
-//----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
  *lin at either bin boundaries, or halfway between bin boundaries (which is bin
@@ -594,7 +578,7 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
   e.clear();
 
   if (boundaries.empty()) {
-    this->makeSingleBinWithNaN(x, y, e);
+    this->makeSinglePointWithNaN(x, y, e);
 
     // Require x.size() = y.size()+1 if recording bin boundaries
     if (!bin_centres)
@@ -662,7 +646,7 @@ void MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD &start,
 
     // If all bins were masked
     if (x.size() == 0) {
-      this->makeSingleBinWithNaN(x, y, e);
+      this->makeSinglePointWithNaN(x, y, e);
     }
   }
 }

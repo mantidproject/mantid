@@ -163,6 +163,9 @@ protected:
   /// Protected copy assignment operator. Assignment not implemented.
   IMDWorkspace &operator=(const IMDWorkspace &other);
 
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                              std::vector<signal_t> &e) const;
+
   const std::string toString() const override;
 
 private:

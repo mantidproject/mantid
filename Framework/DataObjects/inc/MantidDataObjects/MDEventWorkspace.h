@@ -230,8 +230,6 @@ protected:
   Mantid::API::MDNormalization m_displayNormalizationHisto;
 
 private:
-  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
-                              std::vector<signal_t> &e) const;
 
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
