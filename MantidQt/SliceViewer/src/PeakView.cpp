@@ -45,6 +45,11 @@ void PeakView::doPaintPeaks(QPaintEvent *)
             const auto yOriginWindow
                 = m_plot->transform(QwtPlot::yLeft, origin.Y());
 
+            const auto x = origin.X();
+            const auto y = origin.Y();
+            const auto z = origin.Z();
+
+
             PeakRepresentationViewInformation peakRepresentationViewInformation;
             peakRepresentationViewInformation.windowHeight = windowHeight;
             peakRepresentationViewInformation.windowWidth = windowWidth;

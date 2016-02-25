@@ -27,7 +27,7 @@ QPainterPath getTransformedPainterPath(double angle, double transX,
     // Then translate it to originWindow values
     // Then scale it by the scale factors
     QTransform transform;
-    transform.rotateRadians(angle);
+    //transform.rotateRadians(angle);
     transform.translate(transX,
                         transY);
     transform.scale(scaleX, scaleY);
@@ -56,7 +56,7 @@ PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
 {
     // Get projection lengths onto the xyz axes of the ellipsoid axes
     auto projections
-        = Mantid::SliceViewer::getProjections(directions, backgroundOuterRadii);
+        = Mantid::SliceViewer::getProjectionLengths(directions, backgroundOuterRadii);
 
     const auto opacityRange = m_opacityMin - m_opacityMax;
 
@@ -164,9 +164,9 @@ void PeakRepresentationEllipsoid::showBackgroundRadius(const bool show)
 PeakBoundingBox PeakRepresentationEllipsoid::getBoundingBox() const
 {
     using namespace Mantid::SliceViewer;
-    return getPeakBoundingBoxForEllipse(m_originEllipseBackgroundOuter,
-                                        m_radiiEllipseBackgroundOuter,
-                                        m_angleEllipse);
+    return getPeakBoundingBoxForEllipse(m_directions,
+                                        m_backgroundOuterRadii,
+                                        m_origin);
 }
 
 double PeakRepresentationEllipsoid::getEffectiveRadius() const
@@ -259,7 +259,7 @@ void PeakRepresentationEllipsoid::doDraw(
     painter.setOpacity(drawingInformationEllipse->peakOpacityAtDistance);
 
     // Add a pen with color, style and stroke, and a painter path
-    auto foregroundColorSphere = foregroundColor.colorSphere;
+    auto foregroundColorEllipsoid = foregroundColor.colorEllipsoid;
 
     const QPointF zeroPoint(0.0, 0.0);
 
@@ -275,7 +275,7 @@ void PeakRepresentationEllipsoid::doDraw(
         viewInformation.yOriginWindow, scaleX, scaleY, peakRadiusInnerPath);
 
     // Add the pen which draws the ellipse
-    QPen pen(foregroundColorSphere);
+    QPen pen(foregroundColorEllipsoid);
     pen.setWidth(drawingInformationEllipse->peakLineWidth);
     pen.setStyle(Qt::DashLine);
     painter.strokePath(transformedPeakRadiusInnerPath, pen);
@@ -304,7 +304,7 @@ void PeakRepresentationEllipsoid::doDraw(
         QPainterPath backgroundRadiusFill
             = transformedBackgroundOuterPath.subtracted(transformedBackgroundInnerPath);
 
-        painter.fillPath(backgroundRadiusFill, backgroundColor.colorSphere);
+        painter.fillPath(backgroundRadiusFill, backgroundColor.colorEllipsoid);
     }
     painter.end();
 }
