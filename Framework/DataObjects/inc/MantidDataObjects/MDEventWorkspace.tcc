@@ -726,18 +726,18 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 //  }
 
 //----------------------------------------------------------------------------------------------
-/** Get ordered list of boundaries in position-along-the-line coordinates
+/** Get ordered list of positions-along-the-line that lie halfway between points
+ *where the line crosses box boundaries
  *
  * @param start :: start of the line
- * @param end :: end of the line
- * @param nd :: number of dimensions
+ * @param num_d :: number of dimensions
  * @param dir :: vector of the direction
- * @param length :: unit-vector of the direction
- * @returns :: ordered list of boundaries
+ * @param length :: vector of the direction of the line
+ * @returns :: ordered list of halfway points between box crossings
  */
-TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
+TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     const VMD &start, size_t num_d, const VMD &dir, coord_t length) const {
-  std::set<coord_t> boundaries;
+  std::set<coord_t> mid_points;
 
   // Get the smallest box size along each dimension
   // We'll assume all boxes are this size and filter out any boundaries
@@ -767,6 +767,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
 
     if (dir[d] != 0.0) {
       VMD lastPos = start;
+      coord_t lastLinePos = 0;
       for (size_t i = 0; i <= num_boundaries; i++) {
         // Position in this coordinate
         coord_t thisX = line_start + (i * box_size);
@@ -783,7 +784,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
         box = this->data->getBoxAtCoord(middle.getBareArray());
         size_t current_id = box->getID();
         lastPos = pos;
-        // If we haven't already recorded the boundary of this box...
+        // If we haven't already a point for this box...
         // This filters out the extra boundaries that don't really exist that
         // we gained by assuming all boxes are the size of the smallest box
         if (current_id != last_id) {
@@ -795,13 +796,19 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
           linePos = (lower_bound - line_start) / dir[d];
 
           if (linePos >= 0 && linePos <= length) {
-            boundaries.insert(linePos);
+            // Avoid picking up a 0 due to line hitting a box corner
+            if ((linePos - lastLinePos) > 1e-5) {
+              coord_t line_pos_of_box_centre =
+                  static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+              mid_points.insert(line_pos_of_box_centre);
+            }
+            lastLinePos = linePos;
           }
         }
       }
     }
   }
-  return boundaries;
+  return mid_points;
 }
 
 //-----------------------------------------------------------------------------------------------
