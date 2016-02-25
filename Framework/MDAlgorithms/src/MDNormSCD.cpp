@@ -401,7 +401,7 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
-  std::unique_ptr<API::Progress> prog(new API::Progress(this, 0.3, 1.0, ndets));
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
   PARALLEL_FOR1(integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION

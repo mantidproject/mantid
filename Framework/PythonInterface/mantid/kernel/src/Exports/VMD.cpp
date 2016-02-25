@@ -5,6 +5,7 @@
 #include <boost/python/operators.hpp>
 #include <boost/python/return_internal_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/return_arg.hpp>
 
 using Mantid::Kernel::VMD;
 using Mantid::Kernel::VMD_t;
@@ -101,11 +102,11 @@ void export_VMD() {
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
                          // object address
-      .def(self + self)
-      .def(self += self)
-      .def(self - self)
-      // cppcheck-suppress duplicateExpression
-      .def(self -= self)
+      .def("__add__", &VMD::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &VMD::operator+=, return_self<>(),
+        (arg("self"), arg("other")))
+      .def("__sub__", &VMD::operator-, (arg("left"), arg("right")))
+      .def("__isub__", &VMD::operator-=, (arg("left"), arg("right")))
       .def(self * self)
       .def(self *= self)
       // cppcheck-suppress duplicateExpression
