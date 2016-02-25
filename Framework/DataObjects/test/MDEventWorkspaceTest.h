@@ -294,6 +294,49 @@ public:
                    coords4, Mantid::API::NoNormalization)));
   }
 
+  void test_getBoxBoundariesOnLine() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+
+    // Create a diagonal line through the workspace
+    Mantid::Kernel::VMD start(0.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 4.0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_boundaries = ew->getBoxBoundariesOnLine(start, 3, dir, length);
+
+    // Copy set to vector for test
+    std::vector<double> boundaries_vector(box_boundaries.begin(),
+                                          box_boundaries.end());
+    TSM_ASSERT_EQUALS("7 boundaries should be found", box_boundaries.size(), 7);
+
+    // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
+    for (size_t i = 0; i < boundaries_vector.size(); ++i) {
+      TS_ASSERT_DELTA(boundaries_vector[i],
+                      static_cast<double>(i) * 0.5 * sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_getBoxBoundariesOnLine_with_variable_box_size() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+
+    // TODO Put >1000 events in a box and then refresh the box splitting
+
+    Mantid::Kernel::VMD start(0.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 4.0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
+
+    auto box_boundaries = ew->getBoxBoundariesOnLine(start, 3, dir, length);
+    TSM_ASSERT_EQUALS("8 boundaries should be found", box_boundaries.size(), 8);
+    std::cout << "Boundaries are:" << std::endl;
+    for (const auto &boundary : box_boundaries) {
+      std::cout << boundary << std::endl;
+    }
+  }
+
   //-------------------------------------------------------------------------------------
   /** Get the signal at a given coord or 0 if masked */
   void test_getSignalWithMaskAtCoord() {

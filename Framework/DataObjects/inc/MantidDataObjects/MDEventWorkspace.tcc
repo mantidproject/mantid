@@ -725,6 +725,81 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 //    this->refreshCache();
 //  }
 
+//----------------------------------------------------------------------------------------------
+/** Get ordered list of boundaries in position-along-the-line coordinates
+ *
+ * @param start :: start of the line
+ * @param end :: end of the line
+ * @param nd :: number of dimensions
+ * @param dir :: vector of the direction
+ * @param length :: unit-vector of the direction
+ * @returns :: ordered list of boundaries
+ */
+TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
+    const VMD &start, size_t num_d, const VMD &dir, coord_t length) const {
+  std::set<coord_t> boundaries;
+
+  // Get the smallest box size along each dimension
+  // We'll assume all boxes are this size and filter out any boundaries
+  // which are not real later
+  std::vector<coord_t> smallest_box_sizes = this->estimateResolution();
+
+  // Next, we go through each dimension and see where the bin boundaries
+  // intersect the line.
+  const IMDNode *box = nullptr;
+  size_t numVertexes = 0;
+  coord_t *vertices_arr;
+  size_t last_id = size_t(-1);
+  for (size_t d = 0; d < num_d; d++) {
+    IMDDimension_const_sptr dim = getDimension(d);
+    coord_t max_extent = dim->getMaximum();
+
+    coord_t line_start = start[d];
+    coord_t box_size = smallest_box_sizes[d];
+
+    std::vector<bool> dim_mask(num_d, false);
+    dim_mask[d] = true;
+    bool dim_mask_arr[16];
+    std::copy(dim_mask.begin(), dim_mask.end(), dim_mask_arr);
+
+    size_t num_boundaries = static_cast<size_t>(
+        floor((max_extent - line_start) / smallest_box_sizes[d]) + 1);
+
+    if (dir[d] != 0.0) {
+      //VMD lastPos = start;
+      for (size_t i = 0; i <= num_boundaries; i++) {
+        // Position in this coordinate
+        coord_t thisX = line_start + (i * box_size);
+        // Position along the line
+        coord_t linePos = (thisX - line_start) / dir[d];
+
+        // Full position
+        VMD pos = start + (dir * linePos);
+
+        box = this->data->getBoxAtCoord(pos.getBareArray());
+        size_t current_id = box->getID();
+        // If we haven't already recorded the boundary of this box...
+        // This filters out the extra boundaries that don't really exist that
+        // we gained by assuming all boxes are the size of the smallest box
+        if (current_id != last_id) {
+          last_id = current_id;
+          // Get the line position at the lower boundary of the box
+          vertices_arr =
+              box->getVertexesArray(numVertexes, num_d, dim_mask_arr);
+          coord_t lower_bound = vertices_arr[0];
+          linePos = (lower_bound - line_start) / dir[d];
+          //lastPos = linePos;
+
+          if (linePos >= 0 && linePos <= length) {
+            boundaries.insert(linePos);
+          }
+        }
+      }
+    }
+  }
+  return boundaries;
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the

@@ -94,6 +94,11 @@ public:
                    std::vector<signal_t> &y,
                    std::vector<signal_t> &e) const override;
 
+  // Get ordered list of boundaries in position-along-the-line coordinates
+  std::set<coord_t> getBoxBoundariesOnLine(const Kernel::VMD &start,
+                                           size_t num_d, const Kernel::VMD &dir,
+                                           coord_t length) const;
+
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
 
