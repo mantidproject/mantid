@@ -106,41 +106,7 @@ Mantid::Kernel::V3D getOrigin(Mantid::Kernel::DblMatrix AInverse,
   return Mantid::Kernel::V3D(x, y, z);
 }
 
-#if 0
 
-/**
- * Calcualtion ofthe eigenvectors
- * @param evMinorAxis: the minor axis eigen value
- * @param evMajorAxis: the major axis eigen value
- * @param MM: the MM Matrix
- * @return the eigen vectors
- */
-std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D>
-getEigenDirections(double evMinorAxis, double evMajorAxis,
-                   Mantid::Kernel::DblMatrix MM)
-{
-  // Calcualte the eigen vector of the minor axis
-  auto isM00SmallerM11 = MM[0][0] - M[1][1];
-
-  Mantid::Kernel::V2D eigenVectorMinorAxis;
-  if (isM00SmallerM11) {
-      eigenVectorMinorAxis[0] = MM[0][1];
-      eigenVectorMinorAxis[1]= evMinorAxis - M[0][0];
-  } else {
-      eigenVectorMinorAxis[0] = evMinorAxis - M[1][1];
-      eigenVectorMinorAxis[1] = M[0][1];
-  }
-  auto normMinorAxis = eigenVectorMinorAxis.norm();
-  eigenVectorMinorAxis /= normMinorAxis;
-
-  // Calculate the eigen vector of the major axis
-  Mantid::Kernel::V2D eigenVectorMajorAxis;
-  eigenVectorMajorAxis[0] = -eigenVectorMinorAxis[1];
-  eigenVectorMajorAxis[1] = eigenVectorMinorAxis[0];
-
-  return std::make_pair(eigenVectorMinorAxis, eigenVectorMajorAxis);
-}
-#endif
 /**
  * Calculates the Radii and the directions of th
  * @param A: the A matrix
