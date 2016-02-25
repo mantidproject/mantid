@@ -389,7 +389,7 @@ void TOPAZLiveEventDataListener::run() {
         // Timestamp for the events
         Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
         // TODO:  We're not sure what the units are on the charge value
         // They *might* be picoCoulombs, or the might be units of 10pC
@@ -603,7 +603,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 

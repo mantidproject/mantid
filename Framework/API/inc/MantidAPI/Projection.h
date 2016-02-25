@@ -8,8 +8,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-using namespace Mantid::Kernel;
-
 namespace Mantid {
 namespace API {
 
@@ -51,9 +49,9 @@ public:
   /// Default constructor builds identity projection
   Projection();
   /// Three dimensional value constructor, w is the cross product of u and v.
-  Projection(const V3D &u, const V3D &v);
+  Projection(const Kernel::V3D &u, const Kernel::V3D &v);
   /// Three dimensional value constructor
-  Projection(const V3D &u, const V3D &v, const V3D &w);
+  Projection(const Kernel::V3D &u, const Kernel::V3D &v, const Kernel::V3D &w);
   /// Construct from an ITableWorkspace
   Projection(const ITableWorkspace &ws);
   /// Copy constructor
@@ -65,23 +63,23 @@ public:
   /// Retrieves the offset for the given dimension
   double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
-  V3D getAxis(size_t nd);
+  Kernel::V3D getAxis(size_t nd);
   /// Retrives the unit of the given dimension
   ProjectionUnit getUnit(size_t nd);
   /// Set the offset for a given dimension
   void setOffset(size_t nd, double offset);
   /// Set the axis vector for a given dimension
-  void setAxis(size_t nd, V3D axis);
+  void setAxis(size_t nd, Kernel::V3D axis);
   /// Set the unit for a given dimension
   void setUnit(size_t nd, ProjectionUnit unit);
 
-  V3D &U() { return m_dimensions[0]; }
-  V3D &V() { return m_dimensions[1]; }
-  V3D &W() { return m_dimensions[2]; }
+  Kernel::V3D &U() { return m_dimensions[0]; }
+  Kernel::V3D &V() { return m_dimensions[1]; }
+  Kernel::V3D &W() { return m_dimensions[2]; }
 
 protected:
   /// The dimensions
-  V3D m_dimensions[3];
+  Kernel::V3D m_dimensions[3];
   /// The offsets for each dimension
   double m_offsets[3];
   /// The units for each dimension

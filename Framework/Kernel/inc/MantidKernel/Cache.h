@@ -8,6 +8,8 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <mutex>
+
 namespace Mantid {
 namespace Kernel {
 /** @class Cache Cache.h Kernel/Cache.h
@@ -68,7 +70,7 @@ public:
 
   /// Clears the cache
   void clear() {
-    MutexLocker lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheHit = 0;
     m_cacheMiss = 0;
     m_cacheMap.clear();
@@ -97,7 +99,7 @@ public:
    * @param value The new value for the key
    */
   void setCache(const KEYTYPE &key, const VALUETYPE &value) {
-    MutexLocker lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheMap[key] = value;
   }
 
@@ -131,7 +133,7 @@ public:
    * @param key The key whose value should be removed
    */
   void removeCache(const KEYTYPE &key) {
-    MutexLocker lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheMap.erase(key);
   }
 
@@ -144,7 +146,7 @@ private:
    * @returns True if the value was found, false otherwise
    */
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
-    MutexLocker lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     CacheMapConstIterator it_found = m_cacheMap.find(key);
     if (it_found == m_cacheMap.end()) {
       return false; // did not find the component
@@ -161,9 +163,7 @@ private:
   /// internal cache map
   std::map<const KEYTYPE, VALUETYPE> m_cacheMap;
   /// internal mutex
-  mutable Poco::FastMutex m_mutex;
-  /// typedef for Scoped Lock
-  typedef Poco::FastMutex::ScopedLock MutexLocker;
+  mutable std::mutex m_mutex;
   /// iterator typedef
   typedef
       typename std::map<const KEYTYPE, VALUETYPE>::iterator CacheMapIterator;

@@ -380,7 +380,7 @@ private:
   mutable EventWorkspaceMRU *mru;
 
   /// Mutex that is locked while sorting an event list
-  mutable Mantid::Kernel::Mutex m_sortMutex;
+  mutable std::mutex m_sortMutex;
 
   /// Lock out deletion of items in the MRU
   mutable bool m_lockedMRU;

@@ -169,7 +169,7 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
     throw std::runtime_error("Background thread stopped.");
   }
 
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   std::vector<DataObjects::EventWorkspace_sptr> outWorkspaces(
       m_numberOfPeriods);
@@ -375,7 +375,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 void ISISLiveEventDataListener::saveEvents(
     const std::vector<TCPStreamEventNeutron> &data,
     const Kernel::DateAndTime &pulseTime, size_t period) {
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (period >= static_cast<size_t>(m_numberOfPeriods)) {
     auto warn = m_warnings.find("period");

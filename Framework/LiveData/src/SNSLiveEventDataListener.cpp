@@ -397,7 +397,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
   // Scope braces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
 
     // Timestamp for the events
     Mantid::Kernel::DateAndTime eventTime = timeFromPacket(pkt);
@@ -468,7 +468,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // We'll likely be modifying m_eventBuffer (specifically,
   // m_eventBuffer->m_monitorWorkspace),
   // so lock the mutex
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   auto monitorBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       m_eventBuffer->monitorWorkspace());
@@ -642,7 +642,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     return false;
   }
 
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
 
@@ -869,7 +869,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<int>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -920,7 +920,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<double>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -974,7 +974,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
           << std::endl;
     } else {
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         m_eventBuffer->mutableRun()
             .getTimeSeriesProperty<std::string>((*it).second)
             ->addValue(timeFromPacket(pkt), pkt.value());
@@ -1125,7 +1125,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               // of a run (after the call to initWorkspacePart2), so we really
               // do need to
               // the lock the mutex here.
-              Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+              std::lock_guard<std::mutex> scopedLock(m_mutex);
               m_eventBuffer->mutableRun().addLogData(prop);
             }
 
@@ -1162,7 +1162,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   }
 
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     // We have to lock the mutex prior to calling mutableRun()
     switch (pkt.marker_type()) {
     case ADARA::MarkerType::GENERIC:
@@ -1414,7 +1414,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 
@@ -1436,7 +1436,7 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
   // Need to protect against m_status and m_deferredRunDetailsPkt
   // getting out of sync in the (currently only one) case where the
   // background thread has not been paused...
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   // The MonitorLiveData algorithm calls this function *after* the call to
   // extract data, which means the value we return should reflect the

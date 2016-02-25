@@ -12,7 +12,7 @@
 #include "Poco/Net/StreamSocket.h"
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
-
+#include <mutex>
 #include <map>
 
 // Time we'll wait on a receive call (in seconds)
@@ -198,7 +198,7 @@ protected:
   /// Used to buffer events between calls to extractData()
   std::vector<DataObjects::EventWorkspace_sptr> m_eventBuffer;
   /// Protects m_eventBuffer
-  Poco::FastMutex m_mutex;
+  std::mutex m_mutex;
   /// Run start time
   Kernel::DateAndTime m_startTime;
   /// Run number

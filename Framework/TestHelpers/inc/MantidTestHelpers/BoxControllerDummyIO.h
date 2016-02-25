@@ -14,6 +14,7 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
+#include <mutex>
 
 namespace MantidTestHelpers {
 
@@ -97,7 +98,7 @@ private:
   /// shared pointer to the box controller, which is repsoponsible for this IO
   const Mantid::API::BoxController *m_bc;
 
-  mutable Mantid::Kernel::Mutex m_fileMutex;
+  mutable std::mutex m_fileMutex;
   /// number of bytes in the event coorinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;
