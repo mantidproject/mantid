@@ -70,7 +70,7 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
  */
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {
-  return std::vector<size_t>(0, this->parameterIndex(AMP_PARAM));
+  return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
 }
 
 /**
