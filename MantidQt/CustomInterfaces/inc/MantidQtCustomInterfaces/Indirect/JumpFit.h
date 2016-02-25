@@ -38,6 +38,8 @@ private slots:
   void plotFitResult(bool error);
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
+  /// Handles the plot guess
+  void plotGuess();
 
 
 private:

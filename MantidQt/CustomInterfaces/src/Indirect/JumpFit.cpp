@@ -66,6 +66,10 @@ void JumpFit::setup() {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 
+  // Update plot Guess
+  connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+	  SLOT(plotGuess()));
+
   fitFunctionSelected(m_uiForm.cbFunction->currentText());
 }
 
@@ -454,6 +458,17 @@ void JumpFit::clearPlot() {
                                    m_spectraList[currentWidth]);
     }
   }
+}
+
+void JumpFit::plotGuess() {
+	// Do nothing if there is not a sample and resolution
+	if (!(m_uiForm.dsSample->isValid() && m_uiForm.ckPlotGuess->isChecked()))
+		return;
+	if (!m_uiForm.ckPlotGuess->isChecked()) {
+		m_uiForm.ppPlot->removeSpectrum("PlotGuess");
+		return;
+	}
+
 }
 
 /**
