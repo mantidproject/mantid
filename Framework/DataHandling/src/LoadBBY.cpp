@@ -792,8 +792,8 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,
                                      Progress_LoadBinFile);
 
-  unsigned int x = 0; // 9 bits [0-239] tube number
-  unsigned int y = 0; // 8 bits [0-255] position along tube
+  uint64_t x = 0; // 9 bits [0-239] tube number
+  uint64_t y = 0; // 8 bits [0-255] position along tube
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
