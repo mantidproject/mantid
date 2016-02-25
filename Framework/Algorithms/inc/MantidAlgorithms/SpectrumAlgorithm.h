@@ -3,16 +3,12 @@
 
 #include <tuple>
 
-#include "MantidKernel/SpectrumIndexSet.h"
+#include "MantidKernel/IndexSet.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
-
-namespace Kernel {
-class SpectrumIndexSet;
-}
 
 namespace DataObjects {
 class EventWorkspace;
@@ -57,9 +53,10 @@ protected:
     for_each(workspace, getters, typename gens<sizeof...(Args)>::type(),
              operation);
   }
+
 protected:
   void declareSpectrumIndexSetProperties();
-  Kernel::SpectrumIndexSet
+  Kernel::IndexSet
   getSpectrumIndexSet(const API::MatrixWorkspace &workspace) const;
 };
 

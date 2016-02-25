@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_SPECTRUMINDEXSET_H_
-#define MANTID_KERNEL_SPECTRUMINDEXSET_H_
+#ifndef MANTID_KERNEL_INDEXSET_H_
+#define MANTID_KERNEL_INDEXSET_H_
 
 #include <vector>
 
@@ -8,12 +8,11 @@
 namespace Mantid {
 namespace Kernel {
 
-class MANTID_KERNEL_DLL SpectrumIndexSet {
+class MANTID_KERNEL_DLL IndexSet {
 public:
-  SpectrumIndexSet(size_t numberOfHistograms);
-  SpectrumIndexSet(int64_t min, int64_t max, size_t numberOfHistograms);
-  SpectrumIndexSet(const std::vector<size_t> indices,
-                   size_t numberOfHistograms);
+  IndexSet(size_t numberOfHistograms);
+  IndexSet(int64_t min, int64_t max, size_t numberOfHistograms);
+  IndexSet(const std::vector<size_t> indices, size_t numberOfHistograms);
 
   size_t size() const { return m_size; }
 
@@ -34,4 +33,4 @@ private:
 } // Namespace Kernel
 } // Namespace Mantid
 
-#endif /* MANTID_KERNEL_SPECTRUMINDEXSET_H_ */
+#endif /* MANTID_KERNEL_INDEXSET_H_ */

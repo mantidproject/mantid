@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
+	src/IndexSet.cpp
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
@@ -85,7 +86,6 @@ set ( SRC_FILES
 	src/RemoteJobManager.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
-	src/SpectrumIndexSet.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
@@ -179,6 +179,7 @@ set ( INC_FILES
 	inc/MantidKernel/ISaveable.h
 	inc/MantidKernel/ITimeSeriesProperty.h
 	inc/MantidKernel/IValidator.h
+	inc/MantidKernel/IndexSet.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
@@ -241,7 +242,6 @@ set ( INC_FILES
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/SpecialCoordinateSystem.h
-	inc/MantidKernel/SpectrumIndexSet.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
@@ -325,6 +325,7 @@ set ( TEST_FILES
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
+	IndexSetTest.h
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
@@ -370,7 +371,6 @@ set ( TEST_FILES
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
-	SpectrumIndexSetTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
