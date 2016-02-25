@@ -32,7 +32,7 @@ MDLeanGeometry::~MDLeanGeometry() { m_dimensions.clear(); }
  * of X, Y, Z, t, etc.
  */
 void MDLeanGeometry::initGeometry(
-    std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
+    const std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough
@@ -178,7 +178,7 @@ Mantid::Kernel::VMD &MDLeanGeometry::getBasisVector(size_t index) {
   return m_basisVectors[index];
 }
 
-/** 
+/**
  * Get the basis vector (in the original workspace) for a dimension of this
  * workspace.
  *
@@ -198,7 +198,8 @@ const Mantid::Kernel::VMD &MDLeanGeometry::getBasisVector(size_t index) const {
  * @param index :: which dimension
  * @param vec :: a vector, in the dimensions of the original workspace
  */
-void MDLeanGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
+void MDLeanGeometry::setBasisVector(size_t index,
+                                    const Mantid::Kernel::VMD &vec) {
   if (index >= m_basisVectors.size())
     throw std::invalid_argument("getBasisVector(): invalid index");
   m_basisVectors[index] = vec;

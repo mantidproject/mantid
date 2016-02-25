@@ -28,28 +28,42 @@ public:
   static void destroySuite(MDLeanGeometryTest *suite) { delete suite; }
 
   void test_initGeometry() {
-    Mantid::API::MDLeanGeometry g;
+    Mantid::API::MDLeanGeometry lg;
+
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    const std::vector<IMDDimension_sptr> dims{dim, dim, dim, dim};
+
+    lg.initGeometry(dims);
+  }
+
+  void test_initGeometryAndBasisVectors() {
+    Mantid::API::MDLeanGeometry lg;
     std::vector<IMDDimension_sptr> dims;
     const Mantid::Geometry::QSample frame;
     IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
     IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
     dims.push_back(dim1);
     dims.push_back(dim2);
-    g.initGeometry(dims);
+    lg.initGeometry(dims);
 
-    TS_ASSERT_EQUALS(g.getNumDims(), 2);
-    TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
-    TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
+    TS_ASSERT_EQUALS(lg.getNumDims(), 2);
+    TS_ASSERT_EQUALS(lg.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS(lg.getDimension(1)->getName(), "Qy");
     // Now set the basis vectors
-    g.setBasisVector(0, VMD(1.2, 3.4));
-    g.setBasisVector(1, VMD(1.2, 3.4));
+    lg.setBasisVector(0, VMD(1.2, 3.4));
+    lg.setBasisVector(1, VMD(1.2, 3.4));
     // Out of bounds
-    TS_ASSERT_THROWS_ANYTHING(g.setBasisVector(2, VMD(1.2, 3.4)));
-    TS_ASSERT_EQUALS(g.getBasisVector(0), VMD(1.2, 3.4));
-    TS_ASSERT_EQUALS(g.getBasisVector(1), VMD(1.2, 3.4));
+    TS_ASSERT_THROWS_ANYTHING(lg.setBasisVector(2, VMD(1.2, 3.4)));
+    TS_ASSERT_EQUALS(lg.getBasisVector(0), VMD(1.2, 3.4));
+    TS_ASSERT_EQUALS(lg.getBasisVector(1), VMD(1.2, 3.4));
+
+    Mantid::Kernel::VMD d0 = lg.getBasisVector(0);
+    const Mantid::Kernel::VMD constD0 = lg.getBasisVector(0);
+    TS_ASSERT_EQUALS(constD0, d0);
 
     // Get the resolution
-    std::vector<coord_t> binSizes = g.estimateResolution();
+    std::vector<coord_t> binSizes = lg.estimateResolution();
     TS_ASSERT_EQUALS(binSizes.size(), 2);
     TS_ASSERT_DELTA(binSizes[0], 0.2, 1e-6);
     TS_ASSERT_DELTA(binSizes[1], 0.1, 1e-6);
@@ -86,20 +100,64 @@ public:
 
   /** Adding dimension info and searching for it back */
   void test_addDimension_getDimension() {
-    MDLeanGeometry g;
+    MDLeanGeometry lg;
     const Mantid::Geometry::QSample frame;
     MDHistoDimension_sptr dim(
         new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
-    TS_ASSERT_THROWS_NOTHING(g.addDimension(dim);)
+    TS_ASSERT_THROWS_NOTHING(lg.addDimension(dim);)
     MDHistoDimension_sptr dim2(
         new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
-    TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
-    TS_ASSERT_EQUALS(g.getNumDims(), 2);
-    TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
-    TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
-    TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qx"), 0);
-    TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qy"), 1);
-    TS_ASSERT_THROWS_ANYTHING(g.getDimensionIndexByName("IDontExist"));
+    TS_ASSERT_THROWS_NOTHING(lg.addDimension(dim2);)
+    TS_ASSERT_EQUALS(lg.getNumDims(), 2);
+    TS_ASSERT_EQUALS(lg.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS(lg.getDimension(1)->getName(), "Qy");
+  }
+
+  void test_nonIntegratedDimensions() {
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
+    const std::vector<IMDDimension_sptr> dims{dim1, dim2};
+
+    MDLeanGeometry lg;
+
+    TS_ASSERT_EQUALS(lg.getNonIntegratedDimensions().size(), 0);
+
+    lg.initGeometry(dims);
+    TS_ASSERT_EQUALS(lg.getNonIntegratedDimensions().size(), 2);
+
+    IMDDimension_sptr dim3(new MDHistoDimension("Qz", "Qz", frame, -1, -1, 30));
+    TS_ASSERT_THROWS_NOTHING(lg.addDimension(dim3));
+
+    TS_ASSERT_EQUALS(lg.getNonIntegratedDimensions().size(), 3);
+  }
+
+  void test_getDimensionIndexes() {
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
+    IMDDimension_sptr dim3(new MDHistoDimension("Qz", "Qz", frame, -1, -1, 30));
+
+    const std::vector<IMDDimension_sptr> dims = {dim1, dim2, dim3};
+
+    Mantid::API::MDLeanGeometry lg;
+    TS_ASSERT_THROWS(lg.getDimensionIndexByName("fail"), std::runtime_error);
+    TS_ASSERT_THROWS(lg.getDimensionIndexById("fail"), std::runtime_error);
+
+    lg.initGeometry(dims);
+
+    TS_ASSERT_EQUALS(lg.getDimensionIndexByName("Qx"), 0);
+    TS_ASSERT_EQUALS(lg.getDimensionIndexByName("Qy"), 1);
+    TS_ASSERT_EQUALS(lg.getDimensionIndexByName("Qz"), 2);
+    TS_ASSERT_THROWS_ANYTHING(lg.getDimensionIndexByName(""));
+    TS_ASSERT_THROWS_ANYTHING(lg.getDimensionIndexByName("IDontExist"));
+
+    TS_ASSERT_EQUALS(0, lg.getDimensionIndexById(dim1->getDimensionId()));
+    TS_ASSERT_EQUALS(1, lg.getDimensionIndexById(dim2->getDimensionId()));
+    TS_ASSERT_EQUALS(2, lg.getDimensionIndexById(dim3->getDimensionId()));
+    TS_ASSERT_THROWS(lg.getDimensionIndexById(""), std::runtime_error);
+    TS_ASSERT_THROWS(lg.getDimensionIndexById("wrong_id_fail"),
+                     std::runtime_error);
   }
 
   void test_all_normalized() {

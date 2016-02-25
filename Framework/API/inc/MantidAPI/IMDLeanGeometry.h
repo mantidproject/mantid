@@ -39,7 +39,7 @@ public:
   virtual ~IMDLeanGeometry(){};
 
   virtual void initGeometry(
-      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) = 0;
+      const std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) = 0;
 
   //@name Main methods to access dimensions. Can be overriden by e.g.
   // MatrixWorkspace

@@ -42,7 +42,7 @@ public:
   virtual ~MDLeanGeometry();
 
   void initGeometry(
-      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) final;
+      const std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) final;
 
   virtual size_t getNumDims() const override;
 
