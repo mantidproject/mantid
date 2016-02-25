@@ -6,23 +6,23 @@
 using namespace Mantid;
 using namespace Kernel;
 
-IndexSet::IndexSet(int64_t min, int64_t max, size_t numberOfHistograms) {
+IndexSet::IndexSet(int64_t min, int64_t max, size_t fullRange) {
   if (min < 0 || min > max)
     throw Exception::IndexError(min, max, "IndexSet - min");
-  if (max >= static_cast<int64_t>(numberOfHistograms))
-    throw Exception::IndexError(max, numberOfHistograms - 1, "IndexSet - max");
+  if (max >= static_cast<int64_t>(fullRange))
+    throw Exception::IndexError(max, fullRange - 1, "IndexSet - max");
 
   m_min = static_cast<size_t>(min);
   m_size = static_cast<size_t>(max - min + 1);
 }
 
-IndexSet::IndexSet(const std::vector<size_t> indices, size_t numberOfHistograms)
+IndexSet::IndexSet(const std::vector<size_t> indices, size_t fullRange)
     : m_isRange(false) {
   // We use a set to create unique and ordered indices.
   std::set<size_t> index_set;
   for (const auto &index : indices) {
-    if (index >= numberOfHistograms)
-      throw Exception::IndexError(index, numberOfHistograms - 1,
+    if (index >= fullRange)
+      throw Exception::IndexError(index, fullRange - 1,
                                   "IndexSet - index vector entry");
     index_set.insert(static_cast<size_t>(index));
   }
@@ -30,4 +30,4 @@ IndexSet::IndexSet(const std::vector<size_t> indices, size_t numberOfHistograms)
   m_size = m_indices.size();
 }
 
-IndexSet::IndexSet(size_t numberOfHistograms) : m_size(numberOfHistograms) {}
+IndexSet::IndexSet(size_t fullRange) : m_size(fullRange) {}
