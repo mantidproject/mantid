@@ -134,7 +134,7 @@ bool PeakView::positionOnly() const
     // now on
     return false;
 }
-
+// TODO how to find the largest effective radius
 double PeakView::getRadius() const { return m_peaks[0]->getEffectiveRadius(); }
 
 bool PeakView::isBackgroundShown() const { return m_showBackground; }

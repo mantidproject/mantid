@@ -129,11 +129,13 @@ void PeakRepresentationSphere::setOccupancyIntoView(const double)
 double PeakRepresentationSphere::getOccupancyInView() const
 {
     // DO NOTHING
+  return 0.0;
 }
 
 double PeakRepresentationSphere::getOccupancyIntoView() const
 {
     // DO NOTHING
+  return 0.0;
 }
 
 const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const
@@ -144,7 +146,7 @@ const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const
 std::shared_ptr<PeakPrimitives> PeakRepresentationSphere::getDrawingInformation(
     PeakRepresentationViewInformation viewInformation)
 {
-    auto drawingInformation = std::make_shared<PeakPrimitivesSphere>(
+    auto drawingInformation = std::make_shared<PeakPrimitiveCircle>(
         Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
         0 /* PeakLineWidth */, 0.0 /*peakInnerRadiusX*/,
         0.0 /*peakInnerRadiusY*/, 0.0 /*backgroundOuterRadiusX*/,
@@ -189,7 +191,7 @@ void PeakRepresentationSphere::doDraw(
     PeakRepresentationViewInformation viewInformation)
 {
     auto drawingInformationSphere
-        = std::static_pointer_cast<PeakPrimitivesSphere>(drawingInformation);
+        = std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
 
     // Setup the QPainter
     painter.setRenderHint(QPainter::Antialiasing);

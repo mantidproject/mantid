@@ -126,9 +126,9 @@ public:
         TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
 
         TSM_ASSERT("The first radius should be 1",
-                   radiusIsInListOfRadii(info.radius1, radii));
+                   radiusIsInListOfRadii(info.radiusMajorAxis, radii));
         TSM_ASSERT("The second radius should be 1",
-                   radiusIsInListOfRadii(info.radius2, radii));
+                   radiusIsInListOfRadii(info.radiusMajorAxis, radii));
 
         TSM_ASSERT_DELTA("The x part of the origin should be at 0",
                          info.origin.X(), 0.0, delta);
@@ -162,9 +162,9 @@ public:
         const double delta = 1e-5;
         TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
         TSM_ASSERT("The first radius should be 1",
-                   radiusIsInListOfRadii(info.radius1, radii));
+                   radiusIsInListOfRadii(info.radiusMajorAxis, radii));
         TSM_ASSERT("The second radius should be 1",
-                   radiusIsInListOfRadii(info.radius2, radii));
+                   radiusIsInListOfRadii(info.radiusMinorAxis, radii));
 
         TSM_ASSERT_DELTA("The x part of the origin should be at 3",
                          info.origin.X(), 3.0, delta);
@@ -203,9 +203,9 @@ public:
         // ie x^2 + y^2 + 0.5^2 == r^2 ==> reffective^2 = 1^2 -0.5^2 = 0.75
         std::vector<double> expcetedRadii = {std::sqrt(0.75)};
         TSM_ASSERT("The first radius should be Sqrt[0.75]",
-                   radiusIsInListOfRadii(info.radius1, expcetedRadii));
+                   radiusIsInListOfRadii(info.radiusMajorAxis, expcetedRadii));
         TSM_ASSERT("The second radius should be Sqrt[0.75]",
-                   radiusIsInListOfRadii(info.radius2, expcetedRadii));
+                   radiusIsInListOfRadii(info.radiusMinorAxis, expcetedRadii));
 
         TSM_ASSERT_DELTA("The x part of the origin should be at 3",
                          info.origin.X(), 3.0, delta);
@@ -241,8 +241,8 @@ public:
       // Radius is 1 and we are looking at 0.5 from the origin
       // ie x^2 + y^2 + 0.5^2 == r^2 ==> reffective^2 = 1^2 -0.5^2 = 0.75
       std::vector<double> expcetedRadii = {std::sqrt(0.75)};
-      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radius1, expcetedRadii));
-      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radius2, expcetedRadii));
+      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radiusMajorAxis, expcetedRadii));
+      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radiusMinorAxis, expcetedRadii));
 
       TSM_ASSERT_DELTA("The x part of the origin should be at 3", info.origin.X(), 3.0, delta);
       TSM_ASSERT_DELTA("The y part of the origin should be at 2", info.origin.Y(), 2.0, delta);
@@ -274,8 +274,8 @@ public:
 
       TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
 
-      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radius1, radii));
-      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radius2, radii));
+      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radiusMajorAxis, radii));
+      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radiusMinorAxis, radii));
 
       TSM_ASSERT_DELTA("The x part of the origin should be at 0", info.origin.X(), 0.0, delta);
       TSM_ASSERT_DELTA("The y part of the origin should be at 0", info.origin.Y(), 0.0, delta);
@@ -310,8 +310,8 @@ public:
       // r2 = 3* Sqrt[1-(0.5/2)^2]
       std::vector<double> expectedRadii = {4.0*std::sqrt(1-std::pow(0.25, 2)), 3.0*std::sqrt(1-std::pow(0.25, 2))};
 
-      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radius1, expectedRadii));
-      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radius2, expectedRadii));
+      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radiusMajorAxis, expectedRadii));
+      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radiusMinorAxis, expectedRadii));
 
       TSM_ASSERT_DELTA("The x part of the origin should be at 3", info.origin.X(), 3.0, delta);
       TSM_ASSERT_DELTA("The y part of the origin should be at 2", info.origin.Y(), 2.0, delta);
@@ -347,8 +347,8 @@ public:
       // r2 = 3* Sqrt[1-(0.5/2)^2]
       std::vector<double> expectedRadii = {4.0*std::sqrt(1-std::pow(0.25, 2)), 3.0*std::sqrt(1-std::pow(0.25, 2))};
 
-      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radius1, expectedRadii));
-      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radius2, expectedRadii));
+      TSM_ASSERT("The first radius should be 1", radiusIsInListOfRadii(info.radiusMajorAxis, expectedRadii));
+      TSM_ASSERT("The second radius should be 1", radiusIsInListOfRadii(info.radiusMinorAxis, expectedRadii));
 
       TSM_ASSERT_DELTA("The x part of the origin should be at 3", info.origin.X(), 3.0, delta);
       TSM_ASSERT_DELTA("The y part of the origin should be at 2", info.origin.Y(), 2.0, delta);

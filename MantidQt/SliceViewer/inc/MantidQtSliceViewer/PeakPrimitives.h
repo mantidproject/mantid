@@ -34,8 +34,8 @@ struct PeakPrimitivesCross : public PeakPrimitives {
     int peakHalfCrossHeight;
 };
 
-struct PeakPrimitivesSphere : public PeakPrimitives {
-    PeakPrimitivesSphere(Mantid::Kernel::V3D peakOrigin,
+struct PeakPrimitiveCircle : public PeakPrimitives {
+        PeakPrimitiveCircle(Mantid::Kernel::V3D peakOrigin,
                          double peakOpacityAtDistance, int peakLineWidth,
                          double peakInnerRadiusX, double peakInnerRadiusY,
                          double backgroundOuterRadiusX,
@@ -57,6 +57,34 @@ struct PeakPrimitivesSphere : public PeakPrimitives {
     double backgroundOuterRadiusY;
     double backgroundInnerRadiusX;
     double backgroundInnerRadiusY;
+};
+
+struct PeakPrimitivesEllipse : public PeakPrimitives {
+  PeakPrimitivesEllipse(Mantid::Kernel::V3D peakOrigin,
+    double peakOpacityAtDistance, int peakLineWidth,
+    double peakInnerRadiusMajorAxis, double peakInnerRadiusMinorAxis,
+    double backgroundOuterRadiusMajorAxis,
+    double backgroundOuterRadiusMinorAxis,
+    double backgroundInnerRadiusMajorAxis,
+    double backgroundInnerRadiusMinorAxis,
+    double angle)
+    : PeakPrimitives(peakOrigin, peakOpacityAtDistance, peakLineWidth),
+    peakInnerRadiusMajorAxis(peakInnerRadiusMajorAxis),
+    peakInnerRadiusMinorAxis(peakInnerRadiusMinorAxis),
+    backgroundOuterRadiusMajorAxis(backgroundOuterRadiusMajorAxis),
+    backgroundOuterRadiusMinorAxis(backgroundOuterRadiusMinorAxis),
+    backgroundInnerRadiusMajorAxis(backgroundInnerRadiusMajorAxis),
+    backgroundInnerRadiusMinorAxis(backgroundInnerRadiusMinorAxis),
+    angle(angle)
+  {
+  }
+  double peakInnerRadiusMajorAxis;
+  double peakInnerRadiusMinorAxis;
+  double backgroundOuterRadiusMajorAxis;
+  double backgroundOuterRadiusMinorAxis;
+  double backgroundInnerRadiusMajorAxis;
+  double backgroundInnerRadiusMinorAxis;
+  double angle;
 };
 
 

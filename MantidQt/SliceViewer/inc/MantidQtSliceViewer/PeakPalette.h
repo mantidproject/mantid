@@ -65,7 +65,7 @@ template <typename C> PeakPalette<C>::~PeakPalette() {}
 
 template <typename C>
 typename PeakPalette<C>::ColourMapType::iterator
-PeakPalette<C>::safeFetchPair(PeakPalette::ColourMapType &map, const int index)
+PeakPalette<C>::safeFetchPair(typename PeakPalette::ColourMapType &map, const int index)
 {
     typename ColourMapType::iterator it = map.find(index);
     if (it == map.end()) {
@@ -78,7 +78,7 @@ PeakPalette<C>::safeFetchPair(PeakPalette::ColourMapType &map, const int index)
 
 template <typename C>
 typename PeakPalette<C>::ColourMapType::const_iterator
-PeakPalette<C>::safeFetchPair(const PeakPalette<C>::ColourMapType &map,
+PeakPalette<C>::safeFetchPair(const typename PeakPalette<C>::ColourMapType &map,
                               const int index) const
 {
     auto it = map.find(index);

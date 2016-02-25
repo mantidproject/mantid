@@ -92,7 +92,7 @@ public:
 
         // Assert
         auto drawingInformationSphere
-            = std::static_pointer_cast<PeakPrimitivesSphere>(
+            = std::static_pointer_cast<PeakPrimitiveCircle>(
                 drawingInformation);
         // The Return object should be initialized to zero in every field.
         TS_ASSERT_EQUALS(drawingInformationSphere->backgroundOuterRadiusX,
@@ -131,7 +131,7 @@ public:
 
         // Assert
         auto drawingInformationSphere
-            = std::static_pointer_cast<PeakPrimitivesSphere>(
+            = std::static_pointer_cast<PeakPrimitiveCircle>(
                 drawingInformation);
 
         // Quick white-box calculations of the outputs to expect.
