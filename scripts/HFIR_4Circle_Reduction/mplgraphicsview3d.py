@@ -57,6 +57,16 @@ class MplPlot3dCanvas(FigureCanvas):
             self._myAxes.collections.remove(plt)
         self._currPlotList = []
 
+    def get_data(self, data_key):
+        """ Get data by data key
+        :param data_key:
+        :return:
+        """
+        assert data_key in self._dataDict, 'Data key %s does not exist in %s.' % (str(data_key),
+                                                                                  str(self._dataDict.keys()))
+
+        return self._dataDict[data_key]
+
     def import_3d_data(self, points, intensities):
         """
 
@@ -245,4 +255,57 @@ class MplPlot3dCanvas(FigureCanvas):
 
         return
 
+    def set_xyz_limits(self, points, limits=None):
+        """ Set XYZ axes limits
+        :param points:
+        :param limits: if None, then use default; otherwise, 3-tuple of 2-tuple
+        :return:
+        """
+        # check
+        assert isinstance(points, np.ndarray)
 
+        # get limit
+        if limits is None:
+            limits = get_auto_xyz_limit(points)
+
+        # set limit to axes
+        self._myAxes.set_xlim(limits[0][0], limits[0][1])
+        self._myAxes.set_ylim(limits[1][0], limits[1][1])
+        self._myAxes.set_zlim(limits[2][0], limits[2][1])
+
+        return
+
+
+def get_auto_xyz_limit(points):
+    """ Get default limit on X, Y, Z
+    Requirements: number of data points must be larger than 0.
+    :param points:
+    :return: 3-tuple of 2-tuple as (min, max) for X, Y and Z respectively
+    """
+    # check
+    assert isinstance(points, np.ndarray)
+    dim = points.shape[1]
+    assert dim == 3
+
+    # set x, y and z limit
+    x_min = min(points[:, 0])
+    x_max = max(points[:, 0])
+    d_x = x_max - x_min
+
+    # print x_min, x_max
+    y_min = min(points[:, 1])
+    y_max = max(points[:, 1])
+    d_y = y_max - y_min
+
+    # print y_min, y_max
+    z_min = min(points[:, 2])
+    z_max = max(points[:, 2])
+    d_z = z_max - z_min
+    print z_min, z_max
+
+    # use default setup
+    x_lim = (x_min-d_x, x_max+d_x)
+    y_lim = (y_min-d_y, y_max+d_y)
+    z_lim = (z_min-d_z, z_max+d_z)
+
+    return x_lim, y_lim, z_lim

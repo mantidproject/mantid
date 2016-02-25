@@ -25,7 +25,7 @@
         <item row="6" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QCheckBox" name="checkBox_4">
+           <widget class="QCheckBox" name="checkBox_changeBlue">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
@@ -134,7 +134,7 @@
          </widget>
         </item>
         <item row="4" column="3">
-         <widget class="QLineEdit" name="lineEdit_baseColorList">
+         <widget class="QLineEdit" name="lineEdit_baseColorRed">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -174,14 +174,14 @@
          </widget>
         </item>
         <item row="18" column="2">
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="pushButton_clearPlots">
           <property name="text">
            <string>Clear</string>
           </property>
          </widget>
         </item>
         <item row="6" column="3">
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="lineEdit_baseColorBlue">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -191,7 +191,7 @@
          </widget>
         </item>
         <item row="5" column="3">
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="lineEdit_baseColorGreen">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -203,7 +203,7 @@
         <item row="5" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QCheckBox" name="checkBox_2">
+           <widget class="QCheckBox" name="checkBox_changeGreen">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
@@ -230,7 +230,7 @@
         <item row="4" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="checkBox_changeRed">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
@@ -293,7 +293,7 @@
         <item row="7" column="3">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QLineEdit" name="lineEdit_7">
+           <widget class="QLineEdit" name="lineEdit_countsThreshold">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -312,15 +312,15 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="pushButton_checkCounts">
             <property name="maximumSize">
              <size>
-              <width>60</width>
+              <width>70</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="text">
-             <string>Set</string>
+             <string>Check</string>
             </property>
            </widget>
           </item>
@@ -338,7 +338,7 @@
      <x>0</x>
      <y>0</y>
      <width>1191</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

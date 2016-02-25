@@ -63,7 +63,11 @@ Calculation of integrated background
 There are two approaches that are proposed to estimate integrated background.
  1. Simple background removal (3D to 2D)
 
-    Assuming that :math:`r_p` and :math:`r_b` are defined for the radius of peak and background respectively,
+    * Assuming that :math:`r_p` and :math:`r_b` are defined for the radius of peak and background respectively.
+    * Calculate :math:`I_p` by integrating the signals within :math:`r_p`;
+    * Calculate :math:`I_pb` by integrating the signals within :math:`r_b';
+    * Then integrated background :math:`I_b = I_pb - I_p`;
+
 
 
  2. Rock scan
