@@ -106,7 +106,8 @@ void export_VMD() {
       .def("__iadd__", &VMD::operator+=, return_self<>(),
         (arg("self"), arg("other")))
       .def("__sub__", &VMD::operator-, (arg("left"), arg("right")))
-      .def("__isub__", &VMD::operator-=, (arg("left"), arg("right")))
+      .def("__isub__", &VMD::operator-=, return_self<>(),
+        (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
       // cppcheck-suppress duplicateExpression
