@@ -237,7 +237,7 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveXErrors)
       localWorkspace->dataDx(i) = spectra[i].dataDx();
     // Just have spectrum number start at 1 and count up
-    localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i) + 1);
+    localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
   return localWorkspace;
 }

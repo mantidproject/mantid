@@ -127,7 +127,7 @@ void MuonGroupDetectors::exec() {
     outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
     outWS->getSpectrum(groupIndex)
-        ->setSpectrumNo(static_cast<specid_t>(groupIndex + 1));
+        ->setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
   }
 
   setProperty("OutputWorkspace", outWS);

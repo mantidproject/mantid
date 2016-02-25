@@ -171,7 +171,7 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
 }
 
 void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
-    const size_t spectrumNumber, const specid_t specid) {
+    const size_t spectrumNumber, const specnum_t specid) {
   for (auto &ws : m_WsVec) {
     auto spec = ws->getSpectrum(spectrumNumber);
     spec->setSpectrumNo(specid);
@@ -217,11 +217,11 @@ EventWorkspaceCollection::getEventList(const std::size_t workspace_index) {
 }
 
 void EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(
-    std::vector<size_t> &out, Mantid::specid_t &offset) const {
+    std::vector<size_t> &out, Mantid::specnum_t &offset) const {
   return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(out, offset);
 }
 void EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
-    std::vector<size_t> &out, Mantid::specid_t &offset, bool dothrow) const {
+    std::vector<size_t> &out, Mantid::specnum_t &offset, bool dothrow) const {
   return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);
 }
 

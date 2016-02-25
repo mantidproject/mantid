@@ -249,7 +249,7 @@ MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws,
     *(outWs->getSpectrum(gi)) = *(grouped->getSpectrum(0));
 
     // Update spectrum number
-    outWs->getSpectrum(gi)->setSpectrumNo(static_cast<specid_t>(gi));
+    outWs->getSpectrum(gi)->setSpectrumNo(static_cast<specnum_t>(gi));
 
     // Copy to the output workspace
     outWs->dataY(gi) = grouped->readY(0);

@@ -100,7 +100,7 @@ private:
   /// Call edit instrument geometry
   API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws,
                                            std::vector<double> polars,
-                                           std::vector<specid_t> specids,
+                                           std::vector<specnum_t> specids,
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
   void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);

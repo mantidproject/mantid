@@ -1236,7 +1236,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     try
     {
       ISpectrum *spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specid_t specNo = spectrum->getSpectrumNo();
+      Mantid::specnum_t specNo = spectrum->getSpectrumNo();
       QString detIds("");
       const auto & ids  = spectrum->getDetectorIDs();
       size_t ndets = ids.size();

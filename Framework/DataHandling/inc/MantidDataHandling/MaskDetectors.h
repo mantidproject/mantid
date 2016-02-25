@@ -84,7 +84,7 @@ private:
   void exec() override;
   void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
   void fillIndexListFromSpectra(std::vector<size_t> &indexList,
-                                const std::vector<specid_t> &spectraList,
+                                const std::vector<specnum_t> &spectraList,
                                 const API::MatrixWorkspace_sptr WS);
   void appendToIndexListFromWS(std::vector<size_t> &indexList,
                                const API::MatrixWorkspace_sptr maskedWorkspace);

@@ -42,9 +42,9 @@ double DEG2RAD = M_PI / 180.0;
 /// Wavelength of absorption (30603e-24 * 6e19). Constant came from VMS
 double ABSORB_WAVELENGTH = 1.83618;
 /// Start of forward scattering spectrum numbers (inclusive)
-specid_t FORWARD_SCATTER_SPECMIN = 135;
+specnum_t FORWARD_SCATTER_SPECMIN = 135;
 /// End of forward scattering spectrum numbers (inclusive)
-specid_t FORWARD_SCATTER_SPECMAX = 198;
+specnum_t FORWARD_SCATTER_SPECMAX = 198;
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ bool CalculateGammaBackground::calculateBackground(const size_t inputIndex,
 
   try {
     const auto *inSpec = m_inputWS->getSpectrum(inputIndex);
-    const specid_t spectrumNo(inSpec->getSpectrumNo());
+    const specnum_t spectrumNo(inSpec->getSpectrumNo());
     m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
     m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
 
@@ -449,7 +449,7 @@ void CalculateGammaBackground::retrieveInputs() {
 
   // Spectrum numbers whose calculation of background from foils is reversed
   m_reversed.clear();
-  for (specid_t i = 143; i < 199; ++i) {
+  for (specnum_t i = 143; i < 199; ++i) {
     if ((i >= 143 && i <= 150) || (i >= 159 && i <= 166) ||
         (i >= 175 && i <= 182) || (i >= 191 && i <= 198))
       m_reversed.insert(i);

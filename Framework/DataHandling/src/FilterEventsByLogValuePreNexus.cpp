@@ -847,7 +847,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       EventList &spec = workspace->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }
@@ -2223,7 +2223,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
       // EventList & spec = workspace->getOrAddEventList(workspaceIndex);
       // spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      // spec.setSpectrumNo(specid_t(workspaceIndex+1));
+      // spec.setSpectrumNo(specnum_t(workspaceIndex+1));
       workspaceIndex += 1;
     }
   }
@@ -2251,7 +2251,7 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(det.first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
     }
   }
 

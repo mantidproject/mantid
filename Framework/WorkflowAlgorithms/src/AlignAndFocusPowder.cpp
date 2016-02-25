@@ -662,7 +662,7 @@ void AlignAndFocusPowder::exec() {
   */
 API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
     API::MatrixWorkspace_sptr ws, std::vector<double> polars,
-    std::vector<specid_t> specids, std::vector<double> l2s,
+    std::vector<specnum_t> specids, std::vector<double> l2s,
     std::vector<double> phis) {
   g_log.information() << "running EditInstrumentGeometry\n";
 
@@ -782,10 +782,10 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   // Get information from ws1: maximum spectrum number, and store original
   // spectrum IDs
   size_t nspec1 = ws1->getNumberHistograms();
-  specid_t maxspecid1 = 0;
-  std::vector<specid_t> origspecids;
+  specnum_t maxspecid1 = 0;
+  std::vector<specnum_t> origspecids;
   for (size_t i = 0; i < nspec1; ++i) {
-    specid_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
     origspecids.push_back(tmpspecid);
     if (tmpspecid > maxspecid1)
       maxspecid1 = tmpspecid;
@@ -812,7 +812,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
 
   // FIXED : Restore the original spectrum IDs to spectra from ws1
   for (size_t i = 0; i < nspec1; ++i) {
-    specid_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
     outws->getSpectrum(i)->setSpectrumNo(origspecids[i]);
 
     g_log.information() << "[DBx540] Conjoined spectrum " << i
@@ -824,7 +824,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   // Rename spectrum number
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
-      specid_t newspecid = maxspecid1 + static_cast<specid_t>((i) + offset);
+      specnum_t newspecid = maxspecid1 + static_cast<specnum_t>((i) + offset);
       outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)

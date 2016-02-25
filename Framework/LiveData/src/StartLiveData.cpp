@@ -68,7 +68,7 @@ void StartLiveData::init() {
       "one chunk.");
 
   // Properties used with ISISHistoDataListener
-  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+  declareProperty(new ArrayProperty<specnum_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
                   "available spectra will be loaded. Applied to ISIS histogram"
                   " data only.");

@@ -224,7 +224,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       // The detector ID
       const detid_t detId = *it;
       // By default: Spectrum number = index +  1
-      const specid_t specNo = specid_t(index + 1);
+      const specnum_t specNo = specnum_t(index + 1);
 
       if (index < this->getNumberHistograms()) {
         ISpectrum *spec = getSpectrum(index);
@@ -288,7 +288,7 @@ void MatrixWorkspace::rebuildNearestNeighbours() {
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
+std::map<specnum_t, V3D>
 MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
                                const double radius,
                                const bool ignoreMaskedDetectors) const {
@@ -296,7 +296,7 @@ MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
     buildNearestNeighbours(ignoreMaskedDetectors);
   }
   // Find the spectrum number
-  std::vector<specid_t> spectra;
+  std::vector<specnum_t> spectra;
   this->getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()),
                                   spectra);
   if (spectra.empty()) {
@@ -305,7 +305,7 @@ MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
                                            "detector",
                                            comp->getID());
   }
-  std::map<specid_t, V3D> neighbours =
+  std::map<specnum_t, V3D> neighbours =
       m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
   return neighbours;
 }
@@ -319,13 +319,13 @@ MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
-MatrixWorkspace::getNeighbours(specid_t spec, const double radius,
+std::map<specnum_t, V3D>
+MatrixWorkspace::getNeighbours(specnum_t spec, const double radius,
                                bool ignoreMaskedDetectors) const {
   if (!m_nearestNeighbours) {
     buildNearestNeighbours(ignoreMaskedDetectors);
   }
-  std::map<specid_t, V3D> neighbours =
+  std::map<specnum_t, V3D> neighbours =
       m_nearestNeighbours->neighboursInRadius(spec, radius);
   return neighbours;
 }
@@ -339,8 +339,8 @@ MatrixWorkspace::getNeighbours(specid_t spec, const double radius,
 *be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
-std::map<specid_t, V3D>
-MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours,
+std::map<specnum_t, V3D>
+MatrixWorkspace::getNeighboursExact(specnum_t spec, const int nNeighbours,
                                     bool ignoreMaskedDetectors) const {
   if (!m_nearestNeighbours) {
     SpectrumDetectorMapping spectraMap(this);
@@ -348,7 +348,7 @@ MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours,
         nNeighbours, this->getInstrument(), spectraMap.getMapping(),
         ignoreMaskedDetectors));
   }
-  std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
+  std::map<specnum_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
   return neighbours;
 }
 
@@ -383,7 +383,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
 *vector.
 */
 void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
-    std::vector<size_t> &out, specid_t &offset) const {
+    std::vector<size_t> &out, specnum_t &offset) const {
   SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
@@ -391,14 +391,14 @@ void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
                              "generate a map.");
 
   // Find the min/max spectra IDs
-  specid_t min = std::numeric_limits<specid_t>::max(); // So that any number
+  specnum_t min = std::numeric_limits<specnum_t>::max(); // So that any number
                                                        // will be less than this
-  specid_t max = -std::numeric_limits<specid_t>::max(); // So that any number
+  specnum_t max = -std::numeric_limits<specnum_t>::max(); // So that any number
                                                         // will be greater than
                                                         // this
   size_t length = ax->length();
   for (size_t i = 0; i < length; i++) {
-    specid_t spec = ax->spectraNo(i);
+    specnum_t spec = ax->spectraNo(i);
     if (spec < min)
       min = spec;
     if (spec > max)
@@ -413,7 +413,7 @@ void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
 
   // Make the vector
   for (size_t i = 0; i < length; i++) {
-    specid_t spec = ax->spectraNo(i);
+    specnum_t spec = ax->spectraNo(i);
     out[spec + offset] = i;
   }
 }
@@ -545,7 +545,7 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 *not a Workspace2D)
 */
 void MatrixWorkspace::getIndicesFromSpectra(
-    const std::vector<specid_t> &spectraList,
+    const std::vector<specnum_t> &spectraList,
     std::vector<size_t> &indexList) const {
   // Clear the output index list
   indexList.clear();
@@ -571,7 +571,7 @@ void MatrixWorkspace::getIndicesFromSpectra(
 * @throw runtime_error if not found.
 */
 size_t
-MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
+MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
   for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
     if (this->getSpectrum(i)->getSpectrumNo() == specNo)
       return i;
@@ -624,14 +624,14 @@ void MatrixWorkspace::getIndicesFromDetectorIDs(
 */
 void MatrixWorkspace::getSpectraFromDetectorIDs(
     const std::vector<detid_t> &detIdList,
-    std::vector<specid_t> &spectraList) const {
+    std::vector<specnum_t> &spectraList) const {
 
   spectraList.clear();
 
   // Try every detector in the list
   for (auto detId : detIdList) {
     bool foundDet = false;
-    specid_t foundSpecNum = 0;
+    specnum_t foundSpecNum = 0;
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {

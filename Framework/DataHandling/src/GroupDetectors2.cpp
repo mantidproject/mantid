@@ -63,7 +63,7 @@ void GroupDetectors2::init() {
                   "Describes how this algorithm should group the detectors. "
                   "See full instruction list.");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectraList"),
+      new ArrayProperty<specnum_t>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
   declareProperty(new ArrayProperty<detid_t>("DetectorList"),
@@ -327,7 +327,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
   }
 
   // manually specified grouping
-  const std::vector<specid_t> spectraList = getProperty("SpectraList");
+  const std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
 
@@ -636,7 +636,7 @@ void GroupDetectors2::processGroupingWorkspace(
     std::vector<size_t> tempv;
     tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
     m_GroupSpecInds.insert(
-        std::make_pair(static_cast<specid_t>(groupid), tempv));
+        std::make_pair(static_cast<specnum_t>(groupid), tempv));
   }
 
   return;
@@ -704,7 +704,7 @@ void GroupDetectors2::processMatrixWorkspace(
       std::vector<size_t> tempv;
       tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
       m_GroupSpecInds.insert(
-          std::make_pair(static_cast<specid_t>(groupid), tempv));
+          std::make_pair(static_cast<specnum_t>(groupid), tempv));
     }
   }
 
@@ -854,7 +854,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
 
     std::vector<size_t>::const_iterator specN = specNums.begin();
     for (; specN != specNums.end(); ++specN) {
-      specid_t spectrumNum = static_cast<specid_t>(*specN);
+      specnum_t spectrumNum = static_cast<specnum_t>(*specN);
       spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
       if (ind == specs2index.end()) {
         g_log.debug() << name() << ": spectrum number " << spectrumNum

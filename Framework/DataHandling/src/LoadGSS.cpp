@@ -414,7 +414,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
-      specid_t specno = static_cast<specid_t>(detectorIDs[i]);
+      specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
       outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
     }
   }

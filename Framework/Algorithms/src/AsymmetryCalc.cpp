@@ -114,7 +114,7 @@ void AsymmetryCalc::exec() {
     tmpWS = inputWS;
 
     // get workspace indices from spectra ids for forward and backward
-    std::vector<specid_t> specIDs(2);
+    std::vector<specnum_t> specIDs(2);
     specIDs[0] = forward;
     specIDs[1] = backward;
     std::vector<size_t> indices;

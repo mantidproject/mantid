@@ -86,7 +86,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   data.resize(m_noVectors, nullptr);
   // Make sure SOMETHING exists for all initialized spots.
   for (size_t i = 0; i < m_noVectors; i++)
-    data[i] = new EventList(mru, specid_t(i));
+    data[i] = new EventList(mru, specnum_t(i));
 
   // Set each X vector to have one bin of 0 & extremely close to zero
   MantidVecPtr xVals;
@@ -522,7 +522,7 @@ EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
     // Increase the size of the eventlist lists.
     for (size_t wi = old_size; wi <= workspace_index; wi++) {
       // Need to make a new one!
-      auto newel = new EventList(mru, specid_t(wi));
+      auto newel = new EventList(mru, specnum_t(wi));
       // Add to list
       this->data.push_back(newel);
     }
@@ -549,7 +549,7 @@ void EventWorkspace::resizeTo(const std::size_t numSpectra) {
   data.resize(numSpectra);
   m_noVectors = numSpectra;
   for (size_t i = 0; i < numSpectra; ++i) {
-    data[i] = new EventList(mru, static_cast<specid_t>(i + 1));
+    data[i] = new EventList(mru, static_cast<specnum_t>(i + 1));
   }
 
   // Put on a default set of X vectors, with one bin of 0 & extremely close to

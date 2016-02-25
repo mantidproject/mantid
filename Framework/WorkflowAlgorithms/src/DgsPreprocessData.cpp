@@ -124,7 +124,7 @@ void DgsPreprocessData::exec() {
           "MonitorIntRangeHigh", reductionManager, "norm-mon1-max", inputWS);
       rangeMax += rangeOffset;
 
-      specid_t monSpec = static_cast<specid_t>(
+      specnum_t monSpec = static_cast<specnum_t>(
           inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
       if ("ISIS" == facility) {
         norm->setProperty("MonitorSpectrum", monSpec);

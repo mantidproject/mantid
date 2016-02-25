@@ -87,8 +87,8 @@ public:
   /// Find the index of the given double value
   virtual size_t indexOfValue(const double value) const = 0;
 
-  /// Get the spectrum index
-  virtual specid_t spectraNo(const std::size_t &index) const;
+  /// Get the spectrum number
+  virtual specnum_t spectraNo(const std::size_t &index) const;
 
   /// Get the length of the axis
   virtual std::size_t length() const = 0;

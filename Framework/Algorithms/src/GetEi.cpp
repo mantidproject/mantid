@@ -81,8 +81,8 @@ void GetEi::init() {
 */
 void GetEi::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const specid_t mon1Spec = getProperty("Monitor1Spec");
-  const specid_t mon2Spec = getProperty("Monitor2Spec");
+  const specnum_t mon1Spec = getProperty("Monitor1Spec");
+  const specnum_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
   getGeometry(inWS, mon1Spec, mon2Spec, dist2moni0, dist2moni1);
 
@@ -149,8 +149,8 @@ void GetEi::exec() {
 * passed to this function second
 *  @throw NotFoundError if no detector is found for the detector ID given
 */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
-                        specid_t mon1Spec, double &monitor0Dist,
+void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
+                        specnum_t mon1Spec, double &monitor0Dist,
                         double &monitor1Dist) const {
   const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
@@ -208,15 +208,15 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
 * in the workspace
 */
 std::vector<size_t> GetEi::getMonitorSpecIndexs(
-    API::MatrixWorkspace_const_sptr WS, specid_t specNum1,
-    specid_t specNum2) const { // getting spectra numbers from detector IDs is
+    API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
+    specnum_t specNum2) const { // getting spectra numbers from detector IDs is
                                // hard because the map works the other way,
                                // getting index numbers from spectra numbers has
                                // the same problem and we are about to do both
   std::vector<size_t> specInds;
 
   // get the index number of the histogram for the first monitor
-  std::vector<specid_t> specNumTemp(&specNum1, &specNum1 + 1);
+  std::vector<specnum_t> specNumTemp(&specNum1, &specNum1 + 1);
   WS->getIndicesFromSpectra(specNumTemp, specInds);
   if (specInds.size() != 1) { // the monitor spectrum isn't present in the
                               // workspace, we can't continue from here

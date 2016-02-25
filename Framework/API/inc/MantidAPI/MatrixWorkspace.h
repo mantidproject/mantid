@@ -103,18 +103,18 @@ public:
   /// Causes the nearest neighbours map to be rebuilt
   void rebuildNearestNeighbours();
   /// Query the NearestNeighbours object for a detector
-  std::map<specid_t, Mantid::Kernel::V3D>
+  std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using a
   /// search radius
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighbours(specid_t spec, const double radius,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighbours(specnum_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using the
   /// direct number of nearest neighbours
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specid_t spec, const int nNeighbours,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighboursExact(specnum_t spec, const int nNeighbours,
                      const bool ignoreMaskedDetectors = false) const;
   //@}
 
@@ -131,14 +131,14 @@ public:
   getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out, detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
   virtual void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                                 specid_t &offset) const;
-  void getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
+                                                 specnum_t &offset) const;
+  void getIndicesFromSpectra(const std::vector<specnum_t> &spectraList,
                              std::vector<size_t> &indexList) const;
-  size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
+  size_t getIndexFromSpectrumNumber(const specnum_t specNo) const;
   void getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList,
                                  std::vector<size_t> &indexList) const;
   void getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList,
-                                 std::vector<specid_t> &spectraList) const;
+                                 std::vector<specnum_t> &spectraList) const;
 
   bool hasGroupedDetectors() const;
 

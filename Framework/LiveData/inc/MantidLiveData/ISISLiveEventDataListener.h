@@ -134,7 +134,7 @@ public:
    * spectra.
    * @param specList :: A vector with spectra indices.
    */
-  void setSpectra(const std::vector<specid_t> &specList) override {
+  void setSpectra(const std::vector<specnum_t> &specList) override {
     (void)specList;
   }
 

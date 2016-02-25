@@ -70,7 +70,7 @@ class DLLExport EventList : public Mantid::API::IEventList {
 public:
   EventList();
 
-  EventList(EventWorkspaceMRU *mru, specid_t specNo);
+  EventList(EventWorkspaceMRU *mru, specnum_t specNo);
 
   EventList(const EventList &rhs);
 

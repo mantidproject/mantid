@@ -117,7 +117,7 @@ private:
   /// The number of peaks in spectrum
   size_t m_npeaks;
   /// List of spectra numbers whose background sum is to be reversed
-  std::set<specid_t> m_reversed;
+  std::set<specnum_t> m_reversed;
 
   /// Sample position
   Kernel::V3D m_samplePos;

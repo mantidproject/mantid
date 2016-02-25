@@ -106,7 +106,7 @@ private:
     return extractor->getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specid_t specID,
+  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
                          const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     const Mantid::API::ISpectrum *spectrum(NULL);

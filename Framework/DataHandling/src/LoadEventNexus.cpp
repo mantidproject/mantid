@@ -1383,11 +1383,11 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   if (this->event_id_is_spec) {
     // Find max spectrum no
     Axis *ax1 = m_ws->getAxis(1);
-    specid_t maxSpecNo =
-        -std::numeric_limits<specid_t>::max(); // So that any number will be
+    specnum_t maxSpecNo =
+        -std::numeric_limits<specnum_t>::max(); // So that any number will be
                                                // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
-      specid_t spec = ax1->spectraNo(i);
+      specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)
         maxSpecNo = spec;
     }
@@ -2488,7 +2488,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        const specid_t &specNo = spec[it - udet.begin()];
+        const specnum_t &specNo = spec[it - udet.begin()];
         m_ws->setSpectrumNumberForAllPeriods(i, specNo);
         m_ws->setDetectorIdsForAllPeriods(i, id);
       }
