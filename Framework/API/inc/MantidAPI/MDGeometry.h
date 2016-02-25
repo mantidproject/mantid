@@ -62,7 +62,7 @@ public:
   size_t getDimensionIndexByName(const std::string &name) const final;
   size_t getDimensionIndexById(const std::string &id) const final;
   Mantid::Geometry::VecIMDDimension_const_sptr
-  getNonIntegratedDimensions() const final;
+  getNonIntegratedDimensions() const override;
   virtual std::vector<coord_t> estimateResolution() const override;
 
   // --------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ public:
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
 
-  std::string getGeometryXML() const final;
+  std::string getGeometryXML() const override;
 
   void
   addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) final;
