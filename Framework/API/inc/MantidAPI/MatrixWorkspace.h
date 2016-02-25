@@ -361,7 +361,7 @@ public:
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
-  void flagMasked(const size_t &spectrumIndex, const size_t &binIndex,
+  void flagMasked(const size_t &spectrumNum, const size_t &binIndex,
                   const double &weight = 1.0);
   bool hasMaskedBins(const size_t &spectrumIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
