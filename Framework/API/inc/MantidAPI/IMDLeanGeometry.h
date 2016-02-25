@@ -41,7 +41,7 @@ public:
       std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) = 0;
 
   //@name Main methods to access dimensions. Can be overriden by e.g.
-  //MatrixWorkspace
+  // MatrixWorkspace
   //@{
   virtual size_t getNumDims() const = 0;
 
