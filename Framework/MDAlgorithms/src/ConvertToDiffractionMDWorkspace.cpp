@@ -190,7 +190,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
   DataObjects::MDBoxBase<DataObjects::MDLeanEvent<3>, 3> *box = ws->getBox();
 
   // Get the position of the detector there.
-  const std::set<detid_t> &detectors = el.getDetectorIDs();
+  const auto &detectors = el.getDetectorIDs();
   if (!detectors.empty()) {
     // Get the detector (might be a detectorGroup for multiple detectors)
     // or might return an exception if the detector is not in the instrument

@@ -130,7 +130,7 @@ public:
 
 /// Records the filename, the description of failure and the line on which it
 /// happened
-class MANTID_KERNEL_DLL ParseError : public FileError {
+class MANTID_KERNEL_DLL ParseError final : public FileError {
 private:
   /// Number of the line where the error occured
   const int m_lineNumber;
@@ -157,7 +157,7 @@ public:
 };
 
 /// Marks code as not implemented yet.
-class MANTID_KERNEL_DLL NotImplementedError : public std::logic_error {
+class MANTID_KERNEL_DLL NotImplementedError final : public std::logic_error {
 public:
   NotImplementedError(const std::string &);
   NotImplementedError(const NotImplementedError &A);
@@ -170,7 +170,7 @@ public:
 };
 
 /// Exception for when an item is not found in a collection.
-class MANTID_KERNEL_DLL NotFoundError : public std::runtime_error {
+class MANTID_KERNEL_DLL NotFoundError final : public std::runtime_error {
 private:
   /// The name of the search object
   const std::string objectName;
@@ -192,7 +192,7 @@ public:
 };
 
 /// Exception for when an item is already in a collection.
-class MANTID_KERNEL_DLL ExistsError : public std::runtime_error {
+class MANTID_KERNEL_DLL ExistsError final : public std::runtime_error {
 private:
   /// The name of the search object
   const std::string objectName;
@@ -364,7 +364,7 @@ public:
  *  @author Nick Draper, Tessella
  *  @date 13/11/2013
  */
-class MANTID_KERNEL_DLL InternetError : public std::runtime_error {
+class MANTID_KERNEL_DLL InternetError final : public std::runtime_error {
 private:
   /// The message returned by what()
   std::string outMessage;

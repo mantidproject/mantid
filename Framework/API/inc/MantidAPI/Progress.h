@@ -38,7 +38,7 @@ class Algorithm;
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL Progress : public Mantid::Kernel::ProgressBase {
+class MANTID_API_DLL Progress final : public Mantid::Kernel::ProgressBase {
 public:
   Progress();
   Progress(Algorithm *alg, double start, double end, int numSteps);

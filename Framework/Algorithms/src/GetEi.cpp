@@ -165,7 +165,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
     g_log.error() << "Error retrieving data for the first monitor" << std::endl;
     throw std::bad_cast();
   }
-  const std::set<detid_t> &dets = WS->getSpectrum(monWI)->getDetectorIDs();
+  const auto &dets = WS->getSpectrum(monWI)->getDetectorIDs();
 
   if (dets.size() != 1) {
     g_log.error() << "The detector for spectrum number " << mon0Spec
@@ -187,7 +187,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  const std::set<detid_t> &dets2 = WS->getSpectrum(monWI)->getDetectorIDs();
+  const auto &dets2 = WS->getSpectrum(monWI)->getDetectorIDs();
   if (dets2.size() != 1) {
     g_log.error() << "The detector for spectrum number " << mon1Spec
                   << " was either not found or is a group, grouped monitors "
@@ -213,11 +213,10 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
                                // hard because the map works the other way,
                                // getting index numbers from spectra numbers has
                                // the same problem and we are about to do both
-  std::vector<size_t> specInds;
 
   // get the index number of the histogram for the first monitor
   std::vector<specid_t> specNumTemp(&specNum1, &specNum1 + 1);
-  WS->getIndicesFromSpectra(specNumTemp, specInds);
+  auto specInds = WS->getIndicesFromSpectra(specNumTemp);
   if (specInds.size() != 1) { // the monitor spectrum isn't present in the
                               // workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor spectrum, number "
@@ -226,9 +225,8 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
   }
 
   // nowe the second monitor
-  std::vector<size_t> specIndexTemp;
   specNumTemp[0] = specNum2;
-  WS->getIndicesFromSpectra(specNumTemp, specIndexTemp);
+  auto specIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (specIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
                                    // workspace, we can't continue from here
     g_log.error() << "Couldn't find the second monitor spectrum, number "

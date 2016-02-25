@@ -647,9 +647,8 @@ void GeneratePeaks::getSpectraSet(
     g_log.debug(outss.str());
   }
 
-  std::set<specid_t>::iterator pit;
   specid_t icount = 0;
-  for (pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
+  for (auto pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
     m_SpectrumMap.emplace(*pit, icount);
     ++icount;
   }
@@ -720,10 +719,10 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
         inputWS, inputWS->getNumberHistograms(), inputWS->dataX(0).size(),
         inputWS->dataY(0).size());
 
-    std::set<specid_t>::iterator siter;
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
-    for (siter = m_spectraSet.begin(); siter != m_spectraSet.end(); ++siter) {
+    for (auto siter = m_spectraSet.begin(); siter != m_spectraSet.end();
+         ++siter) {
       specid_t iws = *siter;
       std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
                 outputWS->dataX(iws).begin());

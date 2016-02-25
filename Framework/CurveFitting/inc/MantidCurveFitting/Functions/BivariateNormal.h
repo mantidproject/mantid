@@ -140,10 +140,7 @@ public:
   }
 
   bool hasAttribute(const std::string &attName) const override {
-    if (attName == std::string("CalcVariances"))
-      return true;
-
-    return false;
+    return attName.compare("CalcVariances") == 0;
   }
 
   bool CalcVxx, CalcVyy, CalcVxy;

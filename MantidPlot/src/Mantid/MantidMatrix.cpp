@@ -54,7 +54,6 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
-//using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;

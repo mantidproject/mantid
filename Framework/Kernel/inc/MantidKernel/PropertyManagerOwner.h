@@ -61,19 +61,19 @@ public:
 
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesJson,
-                     const std::set<std::string> &ignoreProperties =
-                         std::set<std::string>()) override;
+                     const std::unordered_set<std::string> &ignoreProperties =
+                         std::unordered_set<std::string>()) override;
 
   // Sets all the declared properties from a json object
   void setProperties(const ::Json::Value &jsonValue,
-                     const std::set<std::string> &ignoreProperties =
-                         std::set<std::string>()) override;
+                     const std::unordered_set<std::string> &ignoreProperties =
+                         std::unordered_set<std::string>()) override;
 
   // sets all the declared properties using a simple string format
-  void
-  setPropertiesWithSimpleString(const std::string &propertiesString,
-                                const std::set<std::string> &ignoreProperties =
-                                    std::set<std::string>()) override;
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties =
+          std::unordered_set<std::string>()) override;
 
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;

@@ -105,7 +105,7 @@ private:
   groupWsList(const std::vector<API::Workspace_sptr> &wsList);
 
   /// The base properties
-  std::set<std::string> m_baseProps;
+  std::unordered_set<std::string> m_baseProps;
   /// The actual loader
   API::IAlgorithm_sptr m_loader;
   /// The name of the property that will be passed the property from our

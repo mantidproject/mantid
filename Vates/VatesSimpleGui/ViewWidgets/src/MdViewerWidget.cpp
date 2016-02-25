@@ -893,7 +893,7 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
   QString associatedView;
   try
   {
-    const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
+    const auto techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
 
     if (techniques.count("Single Crystal Diffraction") > 0 )
     {
@@ -924,13 +924,13 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
  * @param keyword A keyword
  * @returns True if the keyword is contained in at least one technique else false.
  */
-bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const
+bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string> &techniques, const std::string &keyword) const
 {
   boost::regex pattern( "(.*)" + keyword + "(.*)");
 
-  for (std::set<std::string>::iterator it = techniques.begin(); it != techniques.end(); ++it)
+  for (auto const &technique : techniques)
   {
-    if (boost::regex_match(*it, pattern))
+    if (boost::regex_match(technique, pattern))
     {
       return true;
     }

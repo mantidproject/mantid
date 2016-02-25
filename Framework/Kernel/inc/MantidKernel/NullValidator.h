@@ -36,7 +36,7 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NullValidator : public IValidator {
+class DLLExport NullValidator final : public IValidator {
 public:
   IValidator_sptr clone() const override {
     return boost::make_shared<NullValidator>(*this);

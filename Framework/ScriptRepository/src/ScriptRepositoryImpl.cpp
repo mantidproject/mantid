@@ -8,6 +8,8 @@
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 #include <utility>
+#include <unordered_set>
+
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
@@ -1482,7 +1484,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
   std::string filename = std::string(local_repository).append(".local.json");
   std::vector<std::string> entries_to_delete;
   Repository::iterator entry_it;
-  std::set<std::string> folders_of_deleted;
+  std::unordered_set<std::string> folders_of_deleted;
 
   try {
     Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
@@ -1530,7 +1532,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     if (entries_to_delete.size() > 0) {
 
       // clear the auto_update flag from the folders if the user deleted files
-      BOOST_FOREACH (const std::string &folder, folders_of_deleted) {
+      for (const auto &folder : folders_of_deleted) {
         if (!pt.isMember(folder))
           continue;
 

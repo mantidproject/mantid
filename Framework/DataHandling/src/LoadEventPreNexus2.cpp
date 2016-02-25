@@ -529,9 +529,9 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 /** Process imbed logs (marked by bad pixel IDs)
  */
 void LoadEventPreNexus2::processImbedLogs() {
-  std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
-  for (pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
+       ++pit) {
     // a. pixel ID -> index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
@@ -1248,7 +1248,6 @@ void LoadEventPreNexus2::setProtonCharge(
   */
 void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
   this->using_mapping_file = false;
-  this->pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -1263,7 +1262,7 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->pixelmap);
+  this->pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(pixelmap.begin(), pixelmap.end(),

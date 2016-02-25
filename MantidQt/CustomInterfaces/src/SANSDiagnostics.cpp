@@ -527,8 +527,7 @@ namespace MantidQt
                                               QString& startWSIndex,QString& endWSIndex)
     {      
             
-      std::vector<size_t> wsindexList;
-      mws_sptr->getIndicesFromSpectra(specList,wsindexList);
+      auto wsindexList = mws_sptr->getIndicesFromSpectra(specList);
       std::string wsStart;
       std::string wsEnd;
       try

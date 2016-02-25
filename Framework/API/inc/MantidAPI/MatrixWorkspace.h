@@ -127,18 +127,18 @@ public:
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
   detid2index_map
   getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets = false) const;
-  virtual void
-  getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out, detid_t &offset,
+  virtual std::vector<size_t>
+  getDetectorIDToWorkspaceIndexVector(detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
-  virtual void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                                 specid_t &offset) const;
-  void getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
-                             std::vector<size_t> &indexList) const;
+  virtual std::vector<size_t>
+  getSpectrumToWorkspaceIndexVector(specid_t &offset) const;
+  std::vector<size_t>
+  getIndicesFromSpectra(const std::vector<specid_t> &spectraList) const;
   size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
-  void getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList,
-                                 std::vector<size_t> &indexList) const;
-  void getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList,
-                                 std::vector<specid_t> &spectraList) const;
+  std::vector<size_t>
+  getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
+  std::vector<specid_t>
+  getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
 
   bool hasGroupedDetectors() const;
 
@@ -405,11 +405,9 @@ public:
   /// Dimensin id for y-dimension.
   static const std::string yDimensionId;
   /// Generate a line plot through the matrix workspace.
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
   /// Get the signal at a coordinate in the workspace.
   signal_t getSignalAtCoord(
       const coord_t *coords,

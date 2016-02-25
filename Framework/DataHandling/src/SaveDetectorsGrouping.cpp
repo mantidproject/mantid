@@ -109,7 +109,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
                     << " has no spectrum.  Impossible!" << std::endl;
       throw;
     }
-    std::set<detid_t> detids = mspec->getDetectorIDs();
+    auto detids = mspec->getDetectorIDs();
     if (detids.size() != 1) {
       g_log.error() << "Spectrum " << mspec->getSpectrumNo() << " has "
                     << detids.size() << " detectors.  Not allowed situation!"

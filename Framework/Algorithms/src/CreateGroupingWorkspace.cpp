@@ -122,16 +122,16 @@ void CreateGroupingWorkspace::init() {
 /** Read old-style .cal file to get the grouping
  *
  * @param groupingFileName :: path to .cal multi-col ascii
- * @param detIDtoGroup :: map of key=detectorID, value=group number.
  * @param prog :: progress reporter
+ * @returns :: map of key=detectorID, value=group number.
  */
-void readGroupingFile(const std::string &groupingFileName,
-                      std::map<detid_t, int> &detIDtoGroup, Progress &prog) {
+std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
+                                        Progress &prog) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile.is_open()) {
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
-  detIDtoGroup.clear();
+  std::map<detid_t, int> detIDtoGroup;
   std::string str;
   while (getline(grFile, str)) {
     // Comment
@@ -147,7 +147,7 @@ void readGroupingFile(const std::string &groupingFileName,
     prog.report();
   }
   grFile.close();
-  return;
+  return detIDtoGroup;
 }
 
 /** Creates a mapping based on a fixed number of groups for a given instrument
@@ -156,13 +156,15 @@ void readGroupingFile(const std::string &groupingFileName,
  * @param compName Name of component in instrument
  * @param numGroups Number of groups to group detectors into
  * @param inst Pointer to instrument
- * @param detIDtoGroup Map of detector IDs to group number
  * @param prog Progress reporter
+ * @returns :: Map of detector IDs to group number
  */
-void makeGroupingByNumGroups(const std::string compName, int numGroups,
-                             Instrument_const_sptr inst,
-                             std::map<detid_t, int> &detIDtoGroup,
-                             Progress &prog) {
+std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
+                                               int numGroups,
+                                               Instrument_const_sptr inst,
+                                               Progress &prog) {
+  std::map<detid_t, int> detIDtoGroup;
+
   // Get detectors for given instument component
   std::vector<IDetector_const_sptr> detectors;
   inst->getDetectorsInBank(detectors, compName);
@@ -187,6 +189,7 @@ void makeGroupingByNumGroups(const std::string compName, int numGroups,
 
     prog.report();
   }
+  return detIDtoGroup;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -220,13 +223,16 @@ bool groupnumber(std::string groupi, std::string groupj) {
  *
  * @param GroupNames :: comma-sep list of bank names
  * @param inst :: instrument
- * @param detIDtoGroup :: output: map of detID: to group number
  * @param prog :: progress report
  * @param sortnames :: sort names - a boolean
+ * @returns:: map of detID to group number
  */
-void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
-                         std::map<detid_t, int> &detIDtoGroup, Progress &prog,
-                         bool sortnames) {
+std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
+                                           Instrument_const_sptr inst,
+                                           Progress &prog, bool sortnames) {
+  // This will contain the grouping
+  std::map<detid_t, int> detIDtoGroup;
+
   // Split the names of the group and insert in a vector
   std::vector<std::string> vgroups;
   boost::split(vgroups, GroupNames,
@@ -300,9 +306,8 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
       }
       prog.report();
     }
-
-    return;
   }
+  return detIDtoGroup;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -395,13 +400,14 @@ void CreateGroupingWorkspace::exec() {
   std::map<detid_t, int> detIDtoGroup;
 
   Progress prog(this, 0.2, 1.0, outWS->getNumberHistograms());
-  // Make the grouping one of two ways:
+  // Make the grouping one of three ways:
   if (!GroupNames.empty())
-    makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
+    detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
   else if (!OldCalFilename.empty())
-    readGroupingFile(OldCalFilename, detIDtoGroup, prog);
+    detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
-    makeGroupingByNumGroups(componentName, numGroups, inst, detIDtoGroup, prog);
+    detIDtoGroup =
+        makeGroupingByNumGroups(componentName, numGroups, inst, prog);
 
   g_log.information() << detIDtoGroup.size()
                       << " entries in the detectorID-to-group map.\n";
@@ -417,7 +423,7 @@ void CreateGroupingWorkspace::exec() {
     // Make the groups, if any
     std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
     std::map<detid_t, int>::const_iterator it;
-    std::set<int> groupCount;
+    std::unordered_set<int> groupCount;
     for (it = detIDtoGroup.begin(); it != it_end; ++it) {
       int detID = it->first;
       int group = it->second;

@@ -197,8 +197,8 @@ void ConvertToDetectorFaceMD::exec() {
     throw std::runtime_error("InputWorkspace is not an EventWorkspace");
 
   // Fill the map, throw if there are grouped pixels.
-  in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI,
-                                             m_detID_to_WI_offset, true);
+  m_detID_to_WI =
+      in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
 
   // Get the map of the banks we'll display
   std::map<int, RectangularDetector_const_sptr> banks = this->getBanks();

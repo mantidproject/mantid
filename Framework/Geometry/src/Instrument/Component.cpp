@@ -447,7 +447,7 @@ Component::getParameterNamesByComponent() const {
   if (!m_map)
     return retVal;
 
-  std::set<std::string> names = m_map->names(this);
+  auto names = m_map->names(this);
   for (const auto &name : names) {
     retVal.insert(
         std::pair<std::string, ComponentID>(name, this->getComponentID()));

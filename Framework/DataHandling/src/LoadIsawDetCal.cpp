@@ -130,7 +130,7 @@ void LoadIsawDetCal::exec() {
       }
     }
   }
-  std::set<int> uniqueBanks; // for CORELLI and WISH
+  std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
   if (instname.compare("WISH") == 0)
     bankPart = "WISHpanel";
@@ -295,8 +295,7 @@ void LoadIsawDetCal::exec() {
     }
     // Loop through tube detectors to match names with number from DetCal file
     idnum = -1;
-    std::set<int>::iterator it;
-    for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
+    for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
       if (*it == id)
         idnum = *it;
     if (idnum < 0)
