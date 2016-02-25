@@ -100,15 +100,17 @@ void MaxentData::correctImage() {
   m_chisq = -1.;
 }
 
-void MaxentData::setImage(const std::vector<double> &image) {
+void MaxentData::updateImage(const std::vector<double> &delta) {
 
-  if (image.size() != m_image.size()) {
-    throw std::invalid_argument("New image must be the same size");
+  // Calculate the new image
+  for (size_t i = 0; i < m_image.size(); i++) {
+    for (size_t k = 0; k < delta.size(); k++) {
+      m_image[i] = m_image[i] + delta[k] * m_directionsIm[k][i];
+    }
   }
-  m_image = image;
   correctImage();
 
-  m_dataCalc = transformImageToData(image);
+  m_dataCalc = transformImageToData(m_image);
 
   calculateChisq();
   m_chisq = getChisq();
@@ -159,6 +161,8 @@ std::vector<double> MaxentData::getReconstructedData() const {
   return m_dataCalc;
 }
 
+std::vector<double> MaxentData::getImage() const { return m_image; }
+
 std::vector<double> MaxentData::getMetric() const {
 
   const size_t size = m_image.size();
@@ -190,7 +194,7 @@ double MaxentData::getChisq() {
   return m_chisq;
 }
 
-void MaxentData::calculateSearchDirections() {
+void MaxentData::calculateQuadraticCoefficients() {
 
   // Two search directions
   const size_t dim = 2;
@@ -250,7 +254,7 @@ void MaxentData::calculateSearchDirections() {
   for (size_t i = 0; i < npoints; i++) {
     m_directionsIm[0][i] = metric[i] * cgrad[i] / cnorm;
     m_directionsIm[1][i] = metric[i] * sgrad[i] / snorm;
-    //m_directionsIm[1][i] = metric[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
+    // m_directionsIm[1][i] = metric[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
   }
 
   // Search directions (data space)

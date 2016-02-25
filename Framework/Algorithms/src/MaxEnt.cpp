@@ -225,38 +225,28 @@ void MaxEnt::exec() {
     std::vector<double> evolChi(niter, 0.);
     std::vector<double> evolTest(niter, 0.);
 
-    // Store image in successive iterations
-    std::vector<double> newImage = image;
-
     // Progress
     Progress progress(this, 0, 1, niter);
 
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      // Calculate search directions and quadratic model coefficients
+      // Calculate quadratic model coefficients
       // (SB eq. 21 and 24)
-      maxentData->calculateSearchDirections();
+      maxentData->calculateQuadraticCoefficients();
       double currAngle = maxentData->getAngle();
       double currChisq = maxentData->getChisq();
-      auto dirs = maxentData->getSearchDirections();
       auto coeffs = maxentData->getQuadraticCoefficients();
 
       // Calculate delta to construct new image (SB eq. 25)
       auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
+      image = maxentData->getImage();
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
-      // Calculate the new image
-      for (size_t i = 0; i < npoints; i++) {
-        for (size_t k = 0; k < delta.size(); k++) {
-          newImage[i] = newImage[i] + delta[k] * dirs[k][i];
-        }
-      }
-
-      // Calculate the new Chi-square
-      maxentData->setImage(newImage);
+      // Update image according to 'delta' and calculate the new Chi-square
+      maxentData->updateImage(delta);
       currChisq = maxentData->getChisq();
 
       // Record the evolution of Chi-square and angle(S,C)
@@ -280,10 +270,11 @@ void MaxEnt::exec() {
 
     // Get calculated data
     auto solData = maxentData->getReconstructedData();
+    auto solImage = maxentData->getImage();
 
     // Populate the output workspaces
     populateOutputWS(inWS, s, nspec, solData, outDataWS, false);
-    populateOutputWS(inWS, s, nspec, newImage, outImageWS, true);
+    populateOutputWS(inWS, s, nspec, solImage, outImageWS, true);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
