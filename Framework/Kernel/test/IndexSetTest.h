@@ -48,10 +48,10 @@ public:
   }
 
   void test_size() {
-    size_t numberOfHistograms = 5;
-    IndexSet set1(numberOfHistograms);
-    TS_ASSERT_EQUALS(set1.size(), numberOfHistograms);
-    IndexSet set2(1, 2, numberOfHistograms);
+    size_t fullRange = 5;
+    IndexSet set1(fullRange);
+    TS_ASSERT_EQUALS(set1.size(), fullRange);
+    IndexSet set2(1, 2, fullRange);
     TS_ASSERT_EQUALS(set2.size(), 2);
   }
 
