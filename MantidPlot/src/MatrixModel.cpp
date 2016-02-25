@@ -493,17 +493,17 @@ QImage MatrixModel::renderImage()
 	d_matrix->range(&minValue, &maxValue);
     const QwtDoubleInterval intensityRange = QwtDoubleInterval (minValue, maxValue);
     for ( int i = 0; i < d_rows; i++ ){
-    	QRgb *line = (QRgb *)image.scanLine(i);
-		for ( int j = 0; j < d_cols; j++){
-		    double val = cell(i,j);//d_data[i*d_cols + j];
-		    if (gsl_isnan (val))
-                *line++ = color_map.rgb(intensityRange, 0.0);
-			else if(fabs(val) < HUGE_VAL)
-				*line++ = color_map.rgb(intensityRange, val);
-		}
-     }
-     QApplication::restoreOverrideCursor();
-	 return image;
+      QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(i));
+      for (int j = 0; j < d_cols; j++) {
+        double val = cell(i, j); // d_data[i*d_cols + j];
+        if (gsl_isnan(val))
+          *line++ = color_map.rgb(intensityRange, 0.0);
+        else if (fabs(val) < HUGE_VAL)
+          *line++ = color_map.rgb(intensityRange, val);
+      }
+    }
+    QApplication::restoreOverrideCursor();
+    return image;
 }
 
 bool MatrixModel::importASCII(const QString &fname, const QString &sep, int ignoredLines,
