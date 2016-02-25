@@ -117,8 +117,7 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  std::vector<size_t> indexList;
-  inputWS->getIndicesFromDetectorIDs(mon, indexList);
+  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -385,8 +384,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
     // set spectra of detector's ID of one selected monitor ID
     std::vector<detid_t> detID(1, monitorID);
     // got the index of correspondent spectra (should be only one).
-    std::vector<size_t> indexList;
-    inputWorkspace->getIndicesFromDetectorIDs(detID, indexList);
+    auto indexList = inputWorkspace->getIndicesFromDetectorIDs(detID);
     if (indexList.empty()) {
       throw std::runtime_error(
           "Can not find spectra, corresponding to the requested monitor ID");
@@ -397,14 +395,13 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
     }
     spectra_num = static_cast<int>(indexList[0]);
   } else { // monitor spectrum is specified.
-    spec2index_map specs;
     const SpectraAxis *axis =
         dynamic_cast<const SpectraAxis *>(inputWorkspace->getAxis(1));
     if (!axis) {
       throw std::runtime_error("Cannot retrieve monitor spectrum - spectrum "
                                "numbers not attached to workspace");
     }
-    axis->getSpectraIndexMap(specs);
+    auto specs = axis->getSpectraIndexMap();
     if (!specs.count(monitorSpec)) {
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");

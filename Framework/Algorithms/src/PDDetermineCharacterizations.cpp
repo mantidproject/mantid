@@ -216,7 +216,7 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
   if (propName == WL_PROP_NAME)
     label = "wavelength";
 
-  std::set<std::string> validUnits;
+  std::unordered_set<std::string> validUnits;
   if (propName == WL_PROP_NAME) {
     validUnits.insert("Angstrom");
     validUnits.insert("A");

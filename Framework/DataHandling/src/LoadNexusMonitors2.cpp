@@ -630,7 +630,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   size_t yLength = m_workspace->blocksize() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
-  ISISRunLogs monLogCreator(m_workspace->run(), static_cast<int>(numPeriods));
+  ISISRunLogs monLogCreator(m_workspace->run());
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
     API::MatrixWorkspace_sptr wsPeriod =

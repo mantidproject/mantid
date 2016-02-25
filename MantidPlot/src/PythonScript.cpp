@@ -698,7 +698,7 @@ bool PythonScript::executeString()
   if(!result)
   {
     emit_error();
-    // If a script was aborted we both raise a KeyboardInterrupt and 
+    // If a script was aborted we both raise a KeyboardInterrupt and
     // call Algorithm::cancel to make sure we capture it. The doubling
     // can leave an interrupt in the pipeline so we clear it was we've
     // got the error info out
@@ -926,8 +926,7 @@ void PythonScript::postDeleteHandle(const std::string& wsName)
  */
 void PythonScript::clearADSHandle()
 {
-  std::set<std::string>::const_iterator iend = m_workspaceHandles.end();
-  for( std::set<std::string>::const_iterator itr = m_workspaceHandles.begin(); itr != iend; )
+  for( auto itr = m_workspaceHandles.cbegin(); itr != m_workspaceHandles.cend(); )
   {
     // This also erases the element from current set. The standard says that erase only invalidates
     // iterators of erased elements so we need to increment the iterator and get back the previous value

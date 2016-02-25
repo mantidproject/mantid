@@ -598,9 +598,9 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   * (3) (Optionally) write out information
   */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
-  std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
-  for (pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
+       ++pit) {
     // Convert Pixel ID to 'wrong detectors ID' map's index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
@@ -1110,8 +1110,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "Number of Wrong Detector IDs = " << wrongdetids.size()
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
+    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
          ++wit) {
       g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
     }
@@ -1360,8 +1359,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
     this->m_numBadEvents += local_numBadEvents;
     this->m_numWrongdetidEvents += local_numWrongdetidEvents;
 
-    std::set<PixelType>::iterator it;
-    for (it = local_wrongdetids.begin(); it != local_wrongdetids.end(); ++it) {
+    for (auto it = local_wrongdetids.begin(); it != local_wrongdetids.end();
+         ++it) {
       PixelType tmpid = *it;
       this->wrongdetids.insert(*it);
 
@@ -1757,14 +1756,12 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                    << " microsec; longest TOF: " << m_longestTof << " microsec."
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
+    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
          ++wit) {
       g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
-         ++git) {
+    for (auto git = this->wrongdetidmap.begin();
+         git != this->wrongdetidmap.end(); ++git) {
       PixelType tmpid = git->first;
       size_t vindex = git->second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
@@ -2339,7 +2336,6 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
  */
 void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   this->m_usingMappingFile = false;
-  this->m_pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -2355,7 +2351,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->m_pixelmap);
+  this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),

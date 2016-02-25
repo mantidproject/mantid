@@ -310,7 +310,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     const SpectraAxis *axis =
         dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
     if (axis)
-      axis->getSpectraIndexMap(specs2index);
+      specs2index = axis->getSpectraIndexMap();
 
     std::stringstream commandsSS;
     // Fill commandsSS with the contents of a map file
@@ -333,7 +333,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // only look at these other parameters if the file wasn't set
   if (!spectraList.empty()) {
-    workspace->getIndicesFromSpectra(spectraList, m_GroupSpecInds[0]);
+    m_GroupSpecInds[0] = workspace->getIndicesFromSpectra(spectraList);
     g_log.debug() << "Converted " << spectraList.size()
                   << " spectra numbers into spectra indices to be combined\n";
   } else { // go through the rest of the properties in order of decreasing
@@ -341,7 +341,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     if (!detectorList.empty()) {
       // we are going to group on the basis of detector IDs, convert from
       // detectors to workspace indices
-      workspace->getIndicesFromDetectorIDs(detectorList, m_GroupSpecInds[0]);
+      m_GroupSpecInds[0] = workspace->getIndicesFromDetectorIDs(detectorList);
       g_log.debug() << "Found " << m_GroupSpecInds[0].size()
                     << " spectra indices from the list of "
                     << detectorList.size() << " detectors\n";
@@ -422,7 +422,7 @@ void GroupDetectors2::processFile(std::string fname,
   const SpectraAxis *axis =
       dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
   if (axis) {
-    axis->getSpectraIndexMap(specs2index);
+    specs2index = axis->getSpectraIndexMap();
   }
 
   try {
@@ -495,7 +495,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
   const SpectraAxis *axis =
       dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
   if (axis) {
-    axis->getSpectraIndexMap(specs2index);
+    specs2index = axis->getSpectraIndexMap();
   }
 
   const detid2index_map detIdToWiMap =

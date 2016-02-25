@@ -313,13 +313,13 @@ public:
     TS_ASSERT_EQUALS(out->getNEvents(), 1000);
 
     double expected_signal(2.);
-    std::vector<size_t> nBins(3), indexes(3);
+    std::vector<size_t> nBins(3);
     nBins[0] = 40;
     nBins[1] = 5;
     nBins[2] = 20;
 
     for (size_t i = 0; i < out->getNPoints(); i++) {
-      Utils::getIndicesFromLinearIndex(i, nBins, indexes);
+      auto indexes = Utils::getIndicesFromLinearIndex(i, nBins);
       if (etta(int(indexes[0]), 4) && etta(int(indexes[2]), 2)) {
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);

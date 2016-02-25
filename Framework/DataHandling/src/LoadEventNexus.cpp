@@ -1489,11 +1489,11 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset);
+    pixelID_to_wi_vector =
+        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
   else
-    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                              pixelID_to_wi_offset, true);
+    pixelID_to_wi_vector =
+        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file

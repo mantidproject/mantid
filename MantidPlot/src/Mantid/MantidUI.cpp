@@ -342,9 +342,9 @@ void MantidUI::saveSettings() const
 QStringList MantidUI::getWorkspaceNames()
 {
   QStringList sl;
-  std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
-    sl<<QString::fromStdString(*it);
+  auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  for (const auto &name : sv)
+    sl<<QString::fromStdString(name);
   return sl;
 }
 

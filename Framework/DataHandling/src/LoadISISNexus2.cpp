@@ -349,8 +349,7 @@ void LoadISISNexus2::exec() {
       loadPeriodData(firstentry, entry, monitor_workspace, true);
       local_workspace->setMonitorWorkspace(monitor_workspace);
 
-      ISISRunLogs monLogCreator(monitor_workspace->run(),
-                                m_detBlockInfo.numberOfPeriods);
+      ISISRunLogs monLogCreator(monitor_workspace->run());
       monLogCreator.addPeriodLogs(1, monitor_workspace->mutableRun());
 
       const std::string monitorPropBase = "MonitorWorkspace";
@@ -1125,8 +1124,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
   ws->populateInstrumentParameters();
 
   // Make log creator object and add the run status log
-  m_logCreator.reset(
-      new ISISRunLogs(ws->run(), m_detBlockInfo.numberOfPeriods));
+  m_logCreator.reset(new ISISRunLogs(ws->run()));
   m_logCreator->addStatusLog(ws->mutableRun());
 }
 

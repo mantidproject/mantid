@@ -52,7 +52,7 @@ class Expression;
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class MANTID_API_DLL FunctionFactoryImpl
+class MANTID_API_DLL FunctionFactoryImpl final
     : public Kernel::DynamicFactory<IFunction> {
 public:
   /**Creates an instance of a function

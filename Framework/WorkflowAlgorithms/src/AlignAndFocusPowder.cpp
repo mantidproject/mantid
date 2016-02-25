@@ -170,32 +170,35 @@ void AlignAndFocusPowder::init() {
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
 }
 
+template <typename NumT> struct RegLowVectorPair {
+  std::vector<NumT> reg;
+  std::vector<NumT> low;
+};
+
 template <typename NumT>
-void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
-                  const std::string &label, std::vector<NumT> &left,
-                  std::vector<NumT> &right) {
-  // clear the outputs
-  left.clear();
-  right.clear();
+RegLowVectorPair<NumT> splitVectors(const std::vector<NumT> &orig,
+                                    const size_t numVal,
+                                    const std::string &label) {
+  RegLowVectorPair<NumT> out;
 
   // check that there is work to do
-  if (orig.empty())
-    return;
-
-  // do the spliting
-  if (orig.size() == numVal) {
-    left.assign(orig.begin(), orig.end());
-    right.assign(orig.begin(), orig.end());
-  } else if (orig.size() == 2 * numVal) {
-    left.assign(orig.begin(), orig.begin() + numVal);
-    right.assign(orig.begin() + numVal, orig.begin());
-  } else {
-    std::stringstream msg;
-    msg << "Input number of " << label << " ids is not equal to "
-        << "the number of histograms or empty (" << orig.size() << " != 0 or "
-        << numVal << " or " << (2 * numVal) << ")";
-    throw std::runtime_error(msg.str());
+  if (!orig.empty()) {
+    // do the spliting
+    if (orig.size() == numVal) {
+      out.reg.assign(orig.begin(), orig.end());
+      out.low.assign(orig.begin(), orig.end());
+    } else if (orig.size() == 2 * numVal) {
+      out.reg.assign(orig.begin(), orig.begin() + numVal);
+      out.low.assign(orig.begin() + numVal, orig.begin());
+    } else {
+      std::stringstream msg;
+      msg << "Input number of " << label << " ids is not equal to "
+          << "the number of histograms or empty (" << orig.size() << " != 0 or "
+          << numVal << " or " << (2 * numVal) << ")";
+      throw std::runtime_error(msg.str());
+    }
   }
+  return out;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -589,25 +592,18 @@ void AlignAndFocusPowder::exec() {
     size_t numreg = m_outputW->getNumberHistograms();
 
     // set up the vectors for doing everything
-    std::vector<int32_t> specidsReg;
-    std::vector<int32_t> specidsLow;
-    splitVectors(specids, numreg, "specids", specidsReg, specidsLow);
-    std::vector<double> tthsReg;
-    std::vector<double> tthsLow;
-    splitVectors(tths, numreg, "two-theta", tthsReg, tthsLow);
-    std::vector<double> l2sReg;
-    std::vector<double> l2sLow;
-    splitVectors(l2s, numreg, "L2", l2sReg, l2sLow);
-    std::vector<double> phisReg;
-    std::vector<double> phisLow;
-    splitVectors(phis, numreg, "phi", phisReg, phisLow);
+    auto specidsSplit = splitVectors(specids, numreg, "specids");
+    auto tthsSplit = splitVectors(tths, numreg, "two-theta");
+    auto l2sSplit = splitVectors(l2s, numreg, "L2");
+    auto phisSplit = splitVectors(phis, numreg, "phi");
 
     // Edit instrument
-    m_outputW = editInstrument(m_outputW, tthsReg, specidsReg, l2sReg, phisReg);
+    m_outputW = editInstrument(m_outputW, tthsSplit.reg, specidsSplit.reg,
+                               l2sSplit.reg, phisSplit.reg);
 
     if (m_processLowResTOF) {
-      m_lowResW =
-          editInstrument(m_lowResW, tthsLow, specidsLow, l2sLow, phisLow);
+      m_lowResW = editInstrument(m_lowResW, tthsSplit.low, specidsSplit.low,
+                                 l2sSplit.low, phisSplit.low);
     }
   }
   m_progress->report();

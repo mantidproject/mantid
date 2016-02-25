@@ -109,7 +109,7 @@ void MaskDetectors::exec() {
   } // End dealing with spectraList
   else if (!detectorList.empty()) {
     // Convert from detectors to workspace indexes
-    WS->getIndicesFromDetectorIDs(detectorList, indexList);
+    indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
   // If we have a workspace that could contain masking,copy that in too
 

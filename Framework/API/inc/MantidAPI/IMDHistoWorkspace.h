@@ -91,11 +91,9 @@ public:
   virtual size_t getLinearIndex(size_t index1, size_t index2, size_t index3,
                                 size_t index4) const = 0;
 
-  virtual void getLineData(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const = 0;
+  virtual LinePlot
+  getLineData(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+              Mantid::API::MDNormalization normalize) const = 0;
 
   virtual double &operator[](const size_t &index) = 0;
 

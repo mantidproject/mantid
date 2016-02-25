@@ -360,10 +360,9 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    std::set<detid_t> &dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator j;
-    for (j = dets.begin(); j != dets.end(); ++j)
-      correctionFactors->getOrAddEventList(i).addDetectorID(*j);
+    auto &dets = eventW->getEventList(i).getDetectorIDs();
+    for (auto const &det : dets)
+      correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getEventList(i).clear();

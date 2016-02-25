@@ -187,16 +187,12 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
     normalization = NoNormalization;
   }
 
-  std::vector<Mantid::coord_t> X;
-  std::vector<Mantid::signal_t> Y;
-  std::vector<Mantid::signal_t> E;
+  auto line = inputWorkspace->getLineData(start, end, normalization);
 
-  inputWorkspace->getLineData(start, end, normalization, X, Y, E);
-
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, X.size(), Y.size());
-  outputWorkspace->dataY(0).assign(Y.begin(), Y.end());
-  outputWorkspace->dataE(0).assign(E.begin(), E.end());
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
+      "Workspace2D", 1, line.x.size(), line.y.size());
+  outputWorkspace->dataY(0).assign(line.y.begin(), line.y.end());
+  outputWorkspace->dataE(0).assign(line.e.begin(), line.e.end());
 
   const size_t numberTransformsToOriginal =
       inputWorkspace->getNumberTransformsToOriginal();
@@ -210,7 +206,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
         NullDeleter());
   }
 
-  assert(X.size() == outputWorkspace->dataX(0).size());
+  assert(line.x.size() == outputWorkspace->dataX(0).size());
 
   std::string xAxisLabel = inputWorkspace->getDimension(id)->getName();
   const bool autoFind = this->getProperty("FindXAxis");
@@ -221,9 +217,9 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
                    xAxisLabel);
   }
 
-  for (size_t i = 0; i < X.size(); ++i) {
+  for (size_t i = 0; i < line.x.size(); ++i) {
     // Coordinates in the workspace being plotted
-    VMD wsCoord = start + dir * X[i];
+    VMD wsCoord = start + dir * line.x[i];
 
     VMD inTargetCoord = transform->applyVMD(wsCoord);
     outputWorkspace->dataX(0)[i] = inTargetCoord[id];

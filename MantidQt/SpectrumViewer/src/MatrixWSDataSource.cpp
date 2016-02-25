@@ -263,14 +263,11 @@ void MatrixWSDataSource::setEModeHandler( EModeHandler* emodeHandler )
  *
  * @param x    The x-coordinate of the point of interest in the data.
  * @param y    The y-coordinate of the point of interest in the data.
- * @param list Vector that will be filled out with the information strings.
+ * @returns Vector filled out with the information strings.
  */
-void MatrixWSDataSource::getInfoList( double x,
-                                      double y,
-                                      std::vector<std::string> &list )
-{
+std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
   // First get the info that is always available for any matrix workspace
-  list.clear();
+  std::vector<std::string> list;
 
   int row = (int)y;
   restrictRow( row );
@@ -288,7 +285,7 @@ void MatrixWSDataSource::getInfoList( double x,
     SVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
-  std::set<detid_t> ids = spec->getDetectorIDs();
+  auto ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
     list.emplace_back("Det ID");
@@ -300,7 +297,7 @@ void MatrixWSDataSource::getInfoList( double x,
   /* first make sure we can get the needed information */
   if ( !(m_instrument && m_source && m_sample) )
   {
-    return;
+    return list;
   }
 
   try
@@ -309,14 +306,14 @@ void MatrixWSDataSource::getInfoList( double x,
     if ( old_unit == 0 )
     {
       g_log.debug("No UNITS on MatrixWorkspace X-axis");
-      return;
+      return list;
     }
 
     auto det = m_matWs->getDetector( row );
     if ( det == 0 )
     {
       g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace" << std::endl;
-      return;
+      return list;
     }
 
     double l1        = m_source->getDistance(*m_sample);
@@ -467,6 +464,7 @@ void MatrixWSDataSource::getInfoList( double x,
   {
     g_log.debug() << "Failed to get information from Workspace:" << e.what() << std::endl;
   }
+  return list;
 }
 
 

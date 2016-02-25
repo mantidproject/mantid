@@ -54,7 +54,7 @@ public:
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
-  size_t getDataChunk() const { return 1; }
+  size_t getDataChunk() const override { return 1; }
 
   bool openFile(const std::string &fileName, const std::string &mode) override;
   void saveBlock(const std::vector<float> & /* DataBlock */,

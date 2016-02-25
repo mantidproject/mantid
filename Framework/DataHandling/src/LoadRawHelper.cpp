@@ -730,7 +730,7 @@ void LoadRawHelper::runLoadLog(const std::string &fileName,
   }
   // Make log creator object and add the run status log if we have the
   // appropriate ICP log
-  m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
+  m_logCreator.reset(new ISISRunLogs(localWorkspace->run()));
   m_logCreator->addStatusLog(localWorkspace->mutableRun());
 }
 

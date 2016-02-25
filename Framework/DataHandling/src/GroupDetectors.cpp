@@ -74,12 +74,12 @@ void GroupDetectors::exec() {
   // appropriate spectra number and adding the indices they are linked to the
   // list to be processed
   if (!spectraList.empty()) {
-    WS->getIndicesFromSpectra(spectraList, indexList);
+    indexList = WS->getIndicesFromSpectra(spectraList);
   } // End dealing with spectraList
   else if (!detectorList.empty()) {
     // Dealing with DetectorList
     // convert from detectors to workspace indices
-    WS->getIndicesFromDetectorIDs(detectorList, indexList);
+    indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
 
   if (indexList.empty()) {
