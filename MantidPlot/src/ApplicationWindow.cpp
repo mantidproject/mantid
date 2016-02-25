@@ -1863,8 +1863,7 @@ void ApplicationWindow::plotPie() {
 
   QStringList s = table->selectedColumns();
   if (s.count() > 0) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::Pie, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::Pie, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"),
                          tr("Please select a column to plot!")); // Mantid
@@ -1899,8 +1898,7 @@ void ApplicationWindow::plotVectXYXY() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::VectXYXY, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::VectXYXY, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -1916,8 +1914,7 @@ void ApplicationWindow::plotVectXYAM() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::VectXYAM, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::VectXYAM, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -2025,8 +2022,7 @@ Note *ApplicationWindow::newStemPlot() {
   if (!t)
     return NULL;
 
-  int ts = t->table()->currentSelection();
-  if (ts < 0)
+  if (!t->hasSelection())
     return NULL;
 
   Note *n = newNote();
@@ -2036,10 +2032,9 @@ Note *ApplicationWindow::newStemPlot() {
 
   QStringList lst = t->selectedColumns();
   if (lst.isEmpty()) {
-    Q3TableSelection sel = t->table()->selection(ts);
-    for (int i = sel.leftCol(); i <= sel.rightCol(); i++)
-      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, sel.topRow() + 1,
-                                      sel.bottomRow() + 1) +
+    for (int i = t->leftSelectedColumn(); i <= t->rightSelectedColumn(); i++)
+      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, t->topSelectedRow() + 1,
+                                      t->bottomSelectedRow() + 1) +
                  "\n");
   } else {
     for (int i = 0; i < lst.count(); i++)
@@ -6711,7 +6706,7 @@ void ApplicationWindow::showColumnValuesDialog() {
   if (!w)
     return;
 
-  if (w->selectedColumns().count() > 0 || w->table()->currentSelection() >= 0) {
+  if (w->selectedColumns().count() > 0 || w->hasSelection()) {
     SetColValuesDialog *vd = new SetColValuesDialog(scriptingEnv(), w);
     vd->setAttribute(Qt::WA_DeleteOnClose);
     vd->exec();
@@ -8722,11 +8717,9 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
 
     nt->setHeader(t->colNames());
 
-    Q3TableItem *io;
-
     for (auto i = 0; i < nt->numCols(); i++) {
       for (auto j = 0; j < nt->numRows(); j++) {
-        io = t->table()->item(j, i);
+        auto io = t->table()->item(j, i);
         nt->table()->setItem(j, i, io);
         // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
       }
@@ -12031,7 +12024,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
 }
 
 void ApplicationWindow::connectTable(Table *w) {
-  connect(w->table(), SIGNAL(selectionChanged()), this,
+  connect(w->table(), SIGNAL(itemSelectionChanged()), this,
           SLOT(customColumnActions()));
   connect(w, SIGNAL(removedCol(const QString &)), this,
           SLOT(removeCurves(const QString &)));
@@ -16038,9 +16031,8 @@ MultiLayer *ApplicationWindow::generate2DGraph(Graph::CurveType type) {
     if (!validFor2DPlot(table))
       return 0;
 
-    Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(),
-                          sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, table->topSelectedRow(),
+                          table->bottomSelectedRow());
   } else if (w->isA("Matrix")) {
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);

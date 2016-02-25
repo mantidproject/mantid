@@ -543,8 +543,9 @@ void Fit::writeParametersToTable(Table *t, bool append)
 		t->setText(j, 2, locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'g', d_prec));
 	}
 
-	for (int i=0; i<3; i++)
-		t->table()->adjustColumn(i);
+	for (int i=0; i<3; i++) {
+		t->table()->resizeColumnToContents(i);
+  }
 }
 
 Matrix* Fit::covarianceMatrix(const QString& matrixName)

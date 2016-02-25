@@ -1216,6 +1216,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     t->setColPlotDesignation(col, Table::None);
   }
   t->setHeaderColType();
+  t->setTextFormat(ncols-1);
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
