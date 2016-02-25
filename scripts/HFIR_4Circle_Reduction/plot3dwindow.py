@@ -28,6 +28,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui.lineEdit_baseColorRed.setText('0.5')
         self.ui.lineEdit_baseColorGreen.setText('0.5')
         self.ui.lineEdit_baseColorBlue.setText('0.5')
+        self.ui.lineEdit_countsThresholdLower.setText('0')
 
         # Event handling
         self.connect(self.ui.pushButton_plot3D, QtCore.SIGNAL('clicked()'),
@@ -55,6 +56,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         """
         self.ui.graphicsView.clear_3d_plots()
         self._dataKeyList = list()
+        self.ui.comboBox_dataKey.clear()
 
         return
 
@@ -63,7 +65,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         :return:
         """
         # get threshold
-        status, ret_obj = guiutility.parse_integers_editors([self.ui.lineEdit_countsThreshold])
+        status, ret_obj = guiutility.parse_integers_editors(self.ui.lineEdit_countsThresholdLower)
         assert status, ret_obj
         threshold = ret_obj
         assert isinstance(threshold, int) and threshold >= 0
@@ -142,14 +144,14 @@ class Plot3DWindow(QtGui.QMainWindow):
         change_b = self.ui.checkBox_changeBlue.isChecked()
 
         # get threshold
-        status, threshold = guiutility.parse_integers_editors([self.ui.lineEdit_countsThreshold])
+        status, threshold = guiutility.parse_integers_editors(self.ui.lineEdit_countsThresholdLower)
         assert status
 
         # data key
         data_key = int(self.ui.comboBox_dataKey.currentText())
 
         # plot
-        self.plot_3d([data_key], rgb_values, threshold, [change_r, change_g, change_b])
+        self.plot_3d(data_key, rgb_values, threshold, [change_r, change_g, change_b])
 
         return
 
@@ -164,7 +166,8 @@ class Plot3DWindow(QtGui.QMainWindow):
         :return:
         """
         # Check
-        assert isinstance(data_key, int)
+        assert isinstance(data_key, int), 'Date key %s must be an integer' \
+                                          ' but not %s' % (str(data_key), str(type(data_key)))
         assert isinstance(base_color, list)
         assert isinstance(threshold, int) and threshold >= 0
         assert isinstance(change_color, list)
@@ -180,10 +183,12 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui.graphicsView.set_xyz_limits(points, None)
 
         # Format intensity to color map
-        color_list = map_to_color(intensities, base_color, change_color)
+        color_list = guiutility.map_to_color(intensities, base_color, change_color)
+        # print color_list
+        assert len(color_list) == len(points)
 
         # self.ui.graphicsView.plot_scatter(data_key, base_color)
-        self.ui.graphicsView.set_xyz_limits()
+        self.ui.graphicsView.set_xyz_limits(points)
         self.ui.graphicsView.plot_scatter(points, color_list)
 
         return

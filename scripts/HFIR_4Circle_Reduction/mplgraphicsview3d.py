@@ -52,10 +52,13 @@ class MplPlot3dCanvas(FigureCanvas):
         Clear all the figures from canvas
         :return:
         """
+        print '[DB-INFO] There are %d plots in current plot list.' % len(self._currPlotList)
         for plt in self._currPlotList:
             # del plt
             self._myAxes.collections.remove(plt)
         self._currPlotList = []
+
+        return
 
     def get_data(self, data_key):
         """ Get data by data key
@@ -125,6 +128,28 @@ class MplPlot3dCanvas(FigureCanvas):
         self._dataKey += 1
 
         return return_value
+
+    def plot_scatter(self, points, color_list):
+        """
+        Plot points with colors in scatter mode
+        :param points:
+        :param color_list:
+        :return:
+        """
+        # check: [TO DO] need MORE!
+        assert isinstance(points, np.ndarray)
+        assert len(points) == len(color_list)
+        assert points.shape[1] == 3, '3D data %s.' % str(points.shape)
+
+        #
+        # plot scatters
+        plt = self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2],
+                                   zdir='z', c=color_list)
+        self._currPlotList.append(plt)
+
+        self.draw()
+
+        return
 
     def plot_scatter_auto(self, data_key, base_color=None):
         """

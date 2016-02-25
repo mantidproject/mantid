@@ -1568,9 +1568,10 @@ class MainWindow(QtGui.QMainWindow):
         # Plot
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
-            self._my3DWindow.add_plot_by_file(md_file_name)
-            self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
-            self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
+
+        self._my3DWindow.add_plot_by_file(md_file_name)
+        self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
+        self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
 
         # Show
         self._my3DWindow.show()

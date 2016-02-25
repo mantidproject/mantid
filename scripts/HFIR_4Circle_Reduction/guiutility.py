@@ -1,7 +1,91 @@
 #
 # GUI Utility Methods
 #
+import math
+import numpy
 from PyQt4 import QtGui
+
+
+def map_to_color(data_array, base_color, change_color_flag):
+    """ Map 1-D data to color list
+    :param data_array:
+    :param base_color:
+    :param change_color_flag:
+    :return:
+    """
+    def convert_value_to_color(base_color, change_color_flag, num_changes, num_steps_color, value):
+        """ Convert a value to color
+        :param base_color:
+        :param change_color_flag:
+        :param num_changes:
+        :param num_steps_color:
+        :param value:
+        :return:
+        """
+        assert 0 < num_changes <= 3
+        if num_changes == 1:
+            step_list = (value, 0, 0)
+        elif num_changes == 2:
+            step_list = (value / num_steps_color, value % num_steps_color, 0)
+        else:
+            num_steps_color_sq = num_steps_color*num_steps_color
+            d2 = value / num_steps_color_sq
+            d1_0 = value % num_steps_color_sq
+            d1 = d1_0 / num_steps_color
+            d0 = d1_0 % num_steps_color
+            step_list = (d2, d1, d0)
+        # END-IF
+
+        step_list_index = 0
+
+        color_value_list = [None, None, None]
+
+        for i_color in xrange(3):
+            c_flag = change_color_flag[i_color]
+            if c_flag:
+                # this color will be changed for color map
+                c_step = step_list[step_list_index]
+                # color value = base value + max_change / step
+                color_value = base_color[i_color] + (1. - base_color[i_color]) / num_steps_color * c_step
+                step_list_index += 1
+            else:
+                # use bae color
+                color_value = base_color[i_color]
+            # ENDIF
+
+            # set
+            color_value_list[i_color] = color_value
+        # END-FOR
+
+        return color_value_list
+
+    # check
+    assert isinstance(data_array, list) or isinstance(data_array, numpy.ndarray)
+    assert len(base_color) == 3
+    assert len(change_color_flag) == 3
+
+    # create output list
+    array_size = len(data_array)
+    color_list = [None] * array_size
+
+    # examine color to change
+    num_changes = 0
+    for change_flag in change_color_flag:
+        if change_flag:
+            num_changes += 1
+    assert num_changes > 0, 'No color to change!'
+
+    # find out number of steps per color
+    num_steps_color = int(math.pow(float(max(data_array)), 1./num_changes)+0.5)
+
+    # calculate
+    for array_index in xrange(array_size):
+        value = data_array[array_index]
+        rgb = convert_value_to_color(base_color, change_color_flag, num_changes, num_steps_color, value)
+        color_list[array_index] = rgb
+    # END-FOR
+
+    return color_list
 
 
 def parse_float_array(array_str):
