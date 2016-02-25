@@ -99,6 +99,16 @@
        </property>
       </widget>
      </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="ckPlotGuess">
+       <property name="text">
+         <string>Plot Guess</string>
+       </property>
+       <property name="checked">
+         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
