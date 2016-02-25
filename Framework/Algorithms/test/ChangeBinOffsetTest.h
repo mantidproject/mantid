@@ -179,18 +179,16 @@ public:
   }
 
   ChangeBinOffsetTestPerformance() {
-    auto input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
-    AnalysisDataService::Instance().add("input", input);
-    auto inputEvent =
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    inputEvent =
         WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
-    AnalysisDataService::Instance().add("inputEvent", inputEvent);
   }
 
   void testExec2D() {
     ChangeBinOffset alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
-    alg.setPropertyValue("Offset", "100.0");
+    alg.setProperty("InputWorkspace", input);
+    alg.setProperty("Offset", 100.0);
     alg.setPropertyValue("OutputWorkspace", "output");
     alg.execute();
   }
@@ -198,11 +196,15 @@ public:
   void testExecEvent() {
     ChangeBinOffset alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "inputEvent");
-    alg.setPropertyValue("Offset", "100.0");
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setProperty("Offset", 100.0);
     alg.setPropertyValue("OutputWorkspace", "output");
     alg.execute();
   }
+
+private:
+  MatrixWorkspace_sptr input;
+  EventWorkspace_sptr inputEvent;
 };
 
 #endif /*CHANGEBINOFFSETTEST_H_*/
