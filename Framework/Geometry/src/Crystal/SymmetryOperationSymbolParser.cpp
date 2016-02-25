@@ -114,7 +114,12 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
       if (vector[r] > 0) {
         currentComponent << "+";
       }
-      currentComponent << vector[r];
+
+      if (vector[r].denominator() != 1) {
+        currentComponent << vector[r];
+      } else {
+        currentComponent << vector[r].numerator();
+      }
     }
 
     components.push_back(currentComponent.str());

@@ -58,6 +58,14 @@ public:
         "x+1/2,y,-z-1/2");
   }
 
+  void testGetNormalizedIdentifierDenominatorOne() {
+    MatrixVectorPair<int, V3R> param1 =
+        SymmetryOperationSymbolParser::parseIdentifier("2+x, y, -z-1");
+    TS_ASSERT_EQUALS(
+        SymmetryOperationSymbolParser::getNormalizedIdentifier(param1),
+        "x+2,y,-z-1");
+  }
+
 private:
   class TestableSymmetryOperationSymbolParser : SymmetryOperationSymbolParser {
     friend class SymmetryOperationSymbolParserTest;
