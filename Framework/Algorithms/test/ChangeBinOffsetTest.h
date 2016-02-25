@@ -198,7 +198,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inputEvent);
     alg.setProperty("Offset", 100.0);
-    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.setPropertyValue("OutputWorkspace", "output2");
     alg.execute();
   }
 
