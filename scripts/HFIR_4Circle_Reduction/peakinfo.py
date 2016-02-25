@@ -1,6 +1,6 @@
+#pylint: disable=W0403,R0902
 from fourcircle_utility import *
 
-import mantid
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -175,10 +175,10 @@ class PeakInfo(object):
 
         num_rows = spice_table_ws.rowCount()
         for row_index in xrange(num_rows):
-            h = spice_table_ws.cell(row_index, h_col_index)
-            k = spice_table_ws.cell(row_index, k_col_index)
-            l = spice_table_ws.cell(row_index, l_col_index)
-            hkl += numpy.array([h, k, l])
+            mi_h = spice_table_ws.cell(row_index, h_col_index)
+            mi_k = spice_table_ws.cell(row_index, k_col_index)
+            mi_l = spice_table_ws.cell(row_index, l_col_index)
+            hkl += numpy.array([mi_h, mi_k, mi_l])
         # END-FOR
 
         self._userHKL = hkl/num_rows
@@ -211,42 +211,28 @@ class PeakInfo(object):
 
         return
 
-    def set_peak_ws_hkl_from_user(self):
-        """
-        Use HKL specified by client or SPICE
-        :return:
-        """
-        # Get peak workspace
-        I_dont_know()
-
-        # Get hkl
-        h = self._userHKL[0]
-        k = self._userHKL[1]
-        l = self._userHKL[2]
-        print '[DB] PeakInfo Get User HKL = (%f, %f, %f) to IPeak ' % (h, k, l)
-
-        self._myPeak.setHKL(h, k, l)
-
-        return
-
-    def set_user_hkl(self, h, k, l):
+    def set_user_hkl(self, mi_h, mi_k, mi_l):
         """
         Set HKL to this peak Info
+        :param mi_h:
+        :param mi_k:
+        :param mi_l:
         :return:
         """
-        assert isinstance(h, float)
-        assert isinstance(k, float)
-        assert isinstance(l, float)
+        assert isinstance(mi_h, float)
+        assert isinstance(mi_k, float)
+        assert isinstance(mi_l, float)
 
-        self._userHKL[0] = h
-        self._userHKL[1] = k
-        self._userHKL[2] = l
+        self._userHKL[0] = mi_h
+        self._userHKL[1] = mi_k
+        self._userHKL[2] = mi_l
 
-        print '[DB] PeakInfo Set User HKL to (%f, %f, %f) ' % (self._userHKL[0], self._userHKL[1], self._userHKL[2])
+        print '[DB] PeakInfo Set User HKL to (%f, %f, %f) ' % (self._userHKL[0], self._userHKL[1],
+                                                               self._userHKL[2])
 
         return
 
-    def getExpInfo(self):
+    def get_experiment_info(self):
         """
 
         :return: 2-tuple of integer as experiment number

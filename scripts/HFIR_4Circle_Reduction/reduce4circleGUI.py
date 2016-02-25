@@ -1795,7 +1795,7 @@ class MainWindow(QtGui.QMainWindow):
         assert isinstance(peak_info, r4c.PeakInfo)
 
         # Get data
-        exp_number, scan_number = peak_info.getExpInfo()
+        exp_number, scan_number = peak_info.get_experiment_info()
         h, k, l = peak_info.get_user_hkl()
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')

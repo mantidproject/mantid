@@ -1,4 +1,4 @@
-#pylint: disable=C0103
+#pylint: disable=C0103,W0403
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -75,6 +75,7 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         # get intensity
         points, intensity_array = self.ui.graphicsView.get_data(data_key)
+        assert points is not None
         num_above_threshold = 0
         array_size = len(intensity_array)
         for index in xrange(array_size):
