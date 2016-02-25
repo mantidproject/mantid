@@ -281,11 +281,10 @@ V3R SymmetryOperation::getReducedVector(const Kernel::IntMatrix &matrix,
 V3R getWrappedVector(const V3R &vector) {
   V3R wrappedVector(vector);
   for (size_t i = 0; i < 3; ++i) {
+    wrappedVector[i] -= (vector[i].numerator() / vector[i].denominator());
+
     if (wrappedVector[i] < 0) {
-      wrappedVector[i] +=
-          (abs(vector[i].numerator() / vector[i].denominator()) + 1);
-    } else if (wrappedVector[i] >= 1) {
-      wrappedVector[i] -= (vector[i].numerator() / vector[i].denominator());
+      wrappedVector[i] += 1;
     }
   }
 

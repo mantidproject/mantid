@@ -139,7 +139,8 @@ public:
     SymmetryOperation screw21z("-x,-y,z+1/2");
 
     // should be identity, since 1/2 + 1/2 = 1
-    TS_ASSERT_EQUALS(screw21z * screw21z, SymmetryOperation("x,y,z+1"));
+    TS_ASSERT_EQUALS(getUnitCellIntervalOperation(screw21z * screw21z),
+                     SymmetryOperation());
   }
 
   void testInverse() {
@@ -177,6 +178,15 @@ public:
 
     V3R five = one + 10;
     TS_ASSERT_EQUALS(one, getWrappedVector(five));
+
+    V3R six = V3R(0, 0, 0) + 1;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(six));
+
+    V3R seven = V3R(0, 0, 0) - 1;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(seven));
+
+    V3R eight = V3R(0, 0, 0) - 8;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(eight));
   }
 
   void testGetWrappedVectorV3D() {
@@ -206,6 +216,12 @@ public:
         getUnitCellIntervalOperation(SymmetryOperation("y,-x,z+12/4"));
 
     TS_ASSERT_EQUALS(symOpGreaterOne.vector(), V3R(0, 0, 0));
+
+    SymmetryOperation symOpLessThanMinusOne =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-12/4"));
+
+    TSM_ASSERT_EQUALS(V3D(symOpLessThanMinusOne.vector()).toString(),
+                      symOpLessThanMinusOne.vector(), V3R(0, 0, 0));
   }
 
   void testGetOrderFromComponents() {
