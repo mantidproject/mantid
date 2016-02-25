@@ -64,10 +64,10 @@ void export_V3D() {
            "Calculates the squared length of the vector")
       .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(),
-        (arg("self"), arg("other")))
+           (arg("self"), arg("other")))
       .def("__sub__", &V3D::operator-, (arg("left"), arg("right")))
       .def("__isub__", &V3D::operator-=, return_self<>(),
-        (arg("self"), arg("other")))
+           (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
       // cppcheck-suppress duplicateExpression

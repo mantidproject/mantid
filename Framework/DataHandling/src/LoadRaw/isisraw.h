@@ -79,7 +79,7 @@ struct RPB_STRUCT {
   int r_prop;         ///< RB (proposal) number
   int spare[10];      ///< to pad out to 32*4 bytes
                       /// constructor
-  
+
   // cppcheck-suppress memsetClassFloat
   RPB_STRUCT() { memset(this, 0, sizeof(RPB_STRUCT)); }
 };
@@ -233,7 +233,7 @@ struct DHDR_STRUCT {
   int unused[26];     ///< to bring size to 32*4 bytes
   /// constructor
   DHDR_STRUCT() {
-  // cppcheck-suppress memsetClassFloat
+    // cppcheck-suppress memsetClassFloat
     memset(this, 0, sizeof(DHDR_STRUCT));
     d_comp = 1;
     d_offset = 1 + 32;
