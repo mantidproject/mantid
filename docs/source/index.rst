@@ -26,6 +26,7 @@ Mantid Documentation
    interfaces/index
    fitfunctions/*
    api/index
+   releasenotes/index
 
 
 This is the documentation for Mantid |release|.
