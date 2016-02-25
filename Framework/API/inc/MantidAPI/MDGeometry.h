@@ -2,11 +2,11 @@
 #define MANTID_API_MDGEOMETRY_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDLeanGeometry.h"
-#include "MantidKernel/VMD.h"
+#include "MantidAPI/MDLeanGeometry.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <Poco/NObserver.h>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -43,27 +43,11 @@ class CoordTransform;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL MDGeometry : public IMDLeanGeometry {
+class MANTID_API_DLL MDGeometry : public MDLeanGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
   virtual ~MDGeometry();
-  void initGeometry(
-      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) override;
-
-  // --------------------------------------------------------------------------------------------
-  // These are the main methods for dimensions, that CAN be overridden (e.g. by
-  // MatrixWorkspace)
-  virtual size_t getNumDims() const override;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimension(size_t index) const override;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimensionWithId(std::string id) const override;
-  size_t getDimensionIndexByName(const std::string &name) const final;
-  size_t getDimensionIndexById(const std::string &id) const final;
-  Mantid::Geometry::VecIMDDimension_const_sptr
-  getNonIntegratedDimensions() const final;
-  virtual std::vector<coord_t> estimateResolution() const override;
 
   // --------------------------------------------------------------------------------------------
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
@@ -71,17 +55,7 @@ public:
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
 
-  std::string getGeometryXML() const final;
-
-  void
-  addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) final;
-  void addDimension(Mantid::Geometry::IMDDimension *dim) final;
-
-  // --------------------------------------------------------------------------------------------
-  Mantid::Kernel::VMD &getBasisVector(size_t index);
-  const Mantid::Kernel::VMD &getBasisVector(size_t index) const;
-  void setBasisVector(size_t index, const Mantid::Kernel::VMD &vec);
-  bool allBasisNormalized() const;
+  std::string getGeometryXML() const;
 
   // --------------------------------------------------------------------------------------------
   bool hasOriginalWorkspace(size_t index = 0) const;
@@ -135,9 +109,6 @@ protected:
   void deleteNotificationReceived(
       Mantid::API::WorkspacePreDeleteNotification_ptr notice);
 
-  /// Vector of the dimensions used, in the order X Y Z t, etc.
-  std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
-
   /// Pointer to the original workspace(s), if this workspace is a coordinate
   /// transformation from an original workspace.
   std::vector<boost::shared_ptr<Workspace>> m_originalWorkspaces;
@@ -172,9 +143,6 @@ protected:
   Kernel::DblMatrix m_Wtransf; // TODO: should be reconciled with the vectors
                                // below and be either always synchroneous or
                                // only one set remains
-  /// Vector of the basis vector (in the original workspace) for each dimension
-  /// of this workspace.
-  std::vector<Mantid::Kernel::VMD> m_basisVectors;
 };
 
 } // namespace API
