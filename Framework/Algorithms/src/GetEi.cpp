@@ -236,7 +236,7 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
     throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum2);
   }
 
-  wsInds.push_back(specIndexTemp[0]);
+  wsInds.push_back(specNumTemp[0]);
   return wsInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
