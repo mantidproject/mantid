@@ -57,7 +57,7 @@ public:
     return std::unique_ptr<Surface>(doClone());
   };
   Surface(const Surface &) = default;
-  Surface &operator=(const Surface &) = delete;
+  Surface &operator=(const Surface &) = default;
   virtual ~Surface() = default;
 
   /// Effective typeid
