@@ -1311,7 +1311,7 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
 
     // Tell the button what to listen for and what to do once clicked (if there
     // is anything to connect it will be set to false)
-    if (firstPass)
+    if (!firstPass)
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this,
               SLOT(saveToProgram(const QString &)));
 

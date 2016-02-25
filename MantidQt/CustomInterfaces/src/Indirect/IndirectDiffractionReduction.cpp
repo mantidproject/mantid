@@ -598,7 +598,7 @@ bool IndirectDiffractionReduction::validateRebin() {
   else {
 #define CHECK_VALID(text, validator)                                           \
   rebinValid = !text.isEmpty();												   \
-  if (text.isEmpty()) {                                                        \
+  if (!rebinValid) {                                                        \
     validator->setText("*");                                                   \
   } else {                                                                     \
     validator->setText("");                                                    \

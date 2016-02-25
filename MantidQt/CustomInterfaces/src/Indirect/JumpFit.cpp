@@ -87,9 +87,10 @@ bool JumpFit::validate() {
   QString errors = uiv.generateErrorMessage();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
+	return false;
   }
 
-  return errors.isEmpty();
+  return true;
 }
 
 /**

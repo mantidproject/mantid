@@ -967,7 +967,7 @@ namespace MantidQt
 		*/
 		bool InstrumentActor::hasMaskWorkspace() const
 		{
-			return static_cast<bool>(m_maskWorkspace);
+			return m_maskWorkspace != nullptr;
 		}
 
 		/**

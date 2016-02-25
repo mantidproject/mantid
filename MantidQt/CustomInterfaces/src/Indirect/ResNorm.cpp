@@ -99,9 +99,10 @@ bool ResNorm::validate() {
   errors.append(uiv.generateErrorMessage());
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
+	return false;
   }
 
-  return errors.isEmpty();
+  return true;
 }
 
 /**

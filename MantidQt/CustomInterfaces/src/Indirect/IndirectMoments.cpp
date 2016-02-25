@@ -101,9 +101,10 @@ namespace CustomInterfaces
     if (!msg.isEmpty())
     {
       emit showMessageBox(msg);
+	  return false;
     }
 
-    return msg.isEmpty();
+    return true;
   }
 
   /**
