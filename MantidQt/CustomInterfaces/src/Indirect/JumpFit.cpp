@@ -118,21 +118,8 @@ void JumpFit::runImpl(bool plot, bool save) {
     return;
 
   // Fit function to use
-  QString functionName = m_uiForm.cbFunction->currentText();
-  QString functionString = "name=" + functionName;
-
-  // Build function string
-  QStringList parameters = getFunctionParameters(functionName);
-  for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-    QString parameterName = *it;
-
-    // Get the value form double manager
-    QString name = "parameter_" + *it;
-    double value = m_dblManager->value(m_properties[name]);
-    QString parameterValue = QString::number(value);
-
-    functionString += "," + parameterName + "=" + parameterValue;
-  }
+  const QString functionName = m_uiForm.cbFunction->currentText();
+  const auto functionString = generateFunctionName(functionName);
 
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
@@ -144,7 +131,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   m_fitAlg = AlgorithmManager::Instance().create("Fit");
   m_fitAlg->initialize();
 
-  m_fitAlg->setProperty("Function", functionString.toStdString());
+  m_fitAlg->setProperty("Function", functionString);
   m_fitAlg->setProperty("InputWorkspace", sample.toStdString());
   m_fitAlg->setProperty("WorkspaceIndex", width);
   m_fitAlg->setProperty("IgnoreInvalidData", true);
@@ -468,6 +455,28 @@ void JumpFit::clearPlot() {
     }
   }
 }
+
+/**
+ * Generates a function string to be used in fitting
+ */
+std::string JumpFit::generateFunctionName(const QString &functionName) {
+	QString functionString = "name=" + functionName;
+
+	// Build function string
+	QStringList parameters = getFunctionParameters(functionName);
+	for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+		QString parameterName = *it;
+
+		// Get the value form double manager
+		QString name = "parameter_" + *it;
+		double value = m_dblManager->value(m_properties[name]);
+		QString parameterValue = QString::number(value);
+
+		functionString += "," + parameterName + "=" + parameterValue;
+	}
+	return functionString.toStdString();
+}
+
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -44,6 +44,9 @@ private:
   /// Gets a list of parameter names for a given fit function
   QStringList getFunctionParameters(const QString &functionName);
 
+  /// Generates the function string for fitting
+  std::string generateFunctionName(const QString &functionName);
+
   /// Clears the mini plot of data excluding sample
   void clearPlot();
 
