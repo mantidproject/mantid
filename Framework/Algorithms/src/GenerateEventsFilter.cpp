@@ -12,6 +12,8 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -601,13 +603,13 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       minvaluei = m_intLog->minValue();
       minvalue = static_cast<double>(minvaluei);
     } else
-      minvaluei = static_cast<int>(std::lround(minvalue));
+      minvaluei = boost::math::iround(minvalue);
 
     if (maxvalue == EMPTY_DBL()) {
       maxvaluei = m_intLog->maxValue();
       maxvalue = static_cast<double>(maxvaluei);
     } else
-      maxvaluei = static_cast<int>(std::lround(maxvalue));
+      maxvaluei = boost::math::iround(maxvalue);
 
     if (minvalue > maxvalue) {
       stringstream errmsg;
@@ -1449,7 +1451,7 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     if (isEmpty(deltadbl))
       delta = maxvalue - minvalue + 1;
     else
-      delta = static_cast<int>(std::lround(deltadbl));
+      delta = boost::math::iround(deltadbl);
 
     if (delta <= 0) {
       stringstream errss;

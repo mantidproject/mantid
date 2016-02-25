@@ -12,6 +12,8 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -372,7 +374,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(std::lround(xValues[i]));
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
@@ -469,7 +471,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(std::lround(xValues[i]));
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());

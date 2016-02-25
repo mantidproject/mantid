@@ -13,6 +13,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 #include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
@@ -541,8 +543,8 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
         instrumentInfo.bm_counts = tmp_int32;
       if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
-        instrumentInfo.att_pos = static_cast<int32_t>(
-            std::lround(tmp_float)); // [1.0, 2.0, ..., 5.0]
+        instrumentInfo.att_pos =
+            boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
 
       if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
@@ -597,8 +599,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("bm1_counts"))
       instrumentInfo.bm_counts = conf->getInt("bm1_counts");
     if (conf->hasProperty("att_pos"))
-      instrumentInfo.att_pos =
-          static_cast<int32_t>(std::lround(conf->getDouble("att_pos")));
+      instrumentInfo.att_pos = boost::math::iround(conf->getDouble("att_pos"));
 
     if (conf->hasProperty("master_chopper_freq"))
       instrumentInfo.period_master =

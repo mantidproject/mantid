@@ -1,10 +1,12 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
-#include "MantidKernel/Quat.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <stdexcept>
+#include "MantidKernel/Quat.h"
 #include <algorithm>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+#include <stdexcept>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
@@ -919,10 +921,10 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
   double num_a_steps = std::round(90.0 / degrees_per_step);
   double gamma_radians = gamma * DEG_TO_RAD;
 
-  long num_b_steps = std::lround(4.0 * sin(gamma_radians) * num_a_steps);
+  int num_b_steps = boost::math::iround(4.0 * sin(gamma_radians) * num_a_steps);
 
   std::vector<V3D> a_dir_list =
-      MakeHemisphereDirections(static_cast<int>(num_a_steps));
+      MakeHemisphereDirections(boost::numeric_cast<int>(num_a_steps));
 
   std::vector<V3D> b_dir_list;
 
@@ -946,8 +948,8 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
     a_dir_temp = V3D(a_dir_temp);
     a_dir_temp *= a;
 
-    b_dir_list =
-        MakeCircleDirections(static_cast<int>(num_b_steps), a_dir_temp, gamma);
+    b_dir_list = MakeCircleDirections(boost::numeric_cast<int>(num_b_steps),
+                                      a_dir_temp, gamma);
 
     for (auto &b_dir_num : b_dir_list) {
       b_dir_temp = b_dir_num;
@@ -1075,7 +1077,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   V3D q_vec;
   // first, make hemisphere of possible directions
   // with specified resolution.
-  int num_steps = static_cast<int>(std::lround(90.0 / degrees_per_step));
+  int num_steps = boost::math::iround(90.0 / degrees_per_step);
   std::vector<V3D> full_list = MakeHemisphereDirections(num_steps);
   // Now, look for possible real-space unit cell edges
   // by checking for vectors with length between
@@ -1083,7 +1085,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   // in some direction, keeping the shortest vector
   // for each direction where the max peaks are indexed
   double delta_d = 0.1f;
-  long n_steps = std::lround(1.0 + (max_d - min_d) / delta_d);
+  int n_steps = boost::math::iround(1.0 + (max_d - min_d) / delta_d);
 
   std::vector<V3D> selected_dirs;
   V3D dir_temp;
@@ -1197,7 +1199,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
 
   // first, make hemisphere of possible directions
   // with specified resolution.
-  int num_steps = static_cast<int>(std::lround(90.0 / degrees_per_step));
+  int num_steps = boost::math::iround(90.0 / degrees_per_step);
   std::vector<V3D> full_list = MakeHemisphereDirections(num_steps);
 
   // find the maximum magnitude of Q to set range
@@ -2202,7 +2204,7 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
     if (error < required_tolerance) {
       fit_error += error * error;
       indexed_qs.push_back(q_vector);
-      index_vals.push_back(static_cast<int>(nearest_int));
+      index_vals.push_back(boost::numeric_cast<int>(nearest_int));
       num_indexed++;
     }
   }
@@ -2394,7 +2396,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
     double phi = static_cast<double>(iPhi) * angle_step;
     double r = sin(phi);
 
-    long n_theta = std::lround(2. * M_PI * r / angle_step);
+    int n_theta = boost::math::iround(2. * M_PI * r / angle_step);
 
     double theta_step;
     if (n_theta == 0) {            // n = ( 0, 1, 0 ).  Just
@@ -2540,7 +2542,7 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
     direction /= plane_spacing;
     for (const auto &q_vector : q_vectors) {
       double dot_product = direction.scalar_prod(q_vector) / (2.0 * M_PI);
-      error = fabs(dot_product - std::round(dot_product));
+      error = std::abs(dot_product - std::round(dot_product));
       sum_sq_error += error * error;
     }
 
@@ -2553,7 +2555,7 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
   int num_indexed = 0;
   for (const auto &q_vector : q_vectors) {
     double proj_value = best_direction.scalar_prod(q_vector) / (2.0 * M_PI);
-    error = fabs(proj_value - std::round(proj_value));
+    error = std::abs(proj_value - std::round(proj_value));
     if (error < required_tolerance)
       num_indexed++;
   }

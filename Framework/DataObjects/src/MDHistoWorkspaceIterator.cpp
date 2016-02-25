@@ -1,12 +1,13 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidKernel/VMD.h"
 #include <algorithm>
-#include <utility>
+#include <boost/math/special_functions/round.hpp>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -16,9 +16,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidGeometry/Surfaces/Surface.h"
 
-//#include <boost/random/poisson_distribution.hpp>
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -934,8 +934,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
 
   panel1->getBoundingBox(B);
 
-  NROWS = static_cast<int>(std::lround((B.yMax() - B.yMin()) / pixHeighty));
-  NCOLS = static_cast<int>(std::lround((B.xMax() - B.xMin()) / pixWidthx));
+  NROWS = boost::math::iround((B.yMax() - B.yMin()) / pixHeighty);
+  NCOLS = boost::math::iround((B.xMax() - B.xMin()) / pixWidthx);
 }
 
 /**
