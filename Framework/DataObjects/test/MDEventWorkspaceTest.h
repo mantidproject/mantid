@@ -321,25 +321,47 @@ public:
   }
 
   void test_getBoxBoundaryBisectsOnLine_with_variable_box_size() {
-    /*
-     MDEventWorkspace3Lean::sptr ew =
-         MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
 
-     // TODO Put >1000 events in a box and then refresh the box splitting
+    // Distribute some events so that one of the boxes will split into 8
+    // along each dimension
+    MDLeanEvent<3> ev(1.0, 1.0);
+    ev.setCenter(0, 1.1);
+    ev.setCenter(1, 0.01);
+    ev.setCenter(2, 0.01);
+    for (size_t i = 0; i < 50; i++) {
+      ew->addEvent(ev);
+    }
+    ev.setCenter(0, 1.4);
+    for (size_t i = 0; i < 50; i++) {
+      ew->addEvent(ev);
+    }
+    ew->splitAllIfNeeded(NULL);
+    ew->refreshCache();
 
-     Mantid::Kernel::VMD start(0.0, 0, 0);
-     Mantid::Kernel::VMD end(4.0, 4.0, 0);
-     Mantid::Kernel::VMD dir = end - start;
-     const auto length = dir.normalize();
+    // Create dimension-aligned line through the workspace
+    Mantid::Kernel::VMD start(0.0, 0, 0);
+    Mantid::Kernel::VMD end(4.0, 0, 0);
+    Mantid::Kernel::VMD dir = end - start;
+    const auto length = dir.normalize();
 
-     auto box_boundaries = ew->getBoxBoundariesOnLine(start, 3, dir, length);
-     TSM_ASSERT_EQUALS("8 boundaries should be found", box_boundaries.size(),
-     8);
-     std::cout << "Boundaries are:" << std::endl;
-     for (const auto &boundary : box_boundaries) {
-       std::cout << boundary << std::endl;
-     }
-     */
+    auto box_mid_points =
+        ew->getBoxBoundaryBisectsOnLine(start, 3, dir, length);
+
+    // Copy set to vector for test
+    TSM_ASSERT_EQUALS("14 box boundary bisections should be found",
+                      box_mid_points.size(), 14);
+    std::vector<double> mid_points_vect(box_mid_points.begin(),
+                                        box_mid_points.end());
+
+    TS_ASSERT_DELTA(mid_points_vect[0], 0.25, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[1], 0.75, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[2], 1.0312, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[3], 1.0937, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[4], 1.1562, 1e-4);
+    TS_ASSERT_DELTA(mid_points_vect[10], 1.75, 1e-4);
+
   }
 
   //-------------------------------------------------------------------------------------
