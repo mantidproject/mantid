@@ -202,8 +202,8 @@ std::vector<double> LoadSwans::loadMetaData() {
       auto tokenizer = Mantid::Kernel::StringTokenizer(
           line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-      for (const auto &v : tokenizer.asVector()) {
-        metadata.push_back(boost::lexical_cast<double>(v));
+      for (const auto &token : tokenizer) {
+        metadata.push_back(boost::lexical_cast<double>(token));
       }
     }
   }
