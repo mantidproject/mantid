@@ -3,6 +3,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
 
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
 #else
@@ -80,8 +81,8 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = std::unique_ptr<TimeSeriesProperty<double>>(
-      new TimeSeriesProperty<double>(this->name() + "_derivative"));
+  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+      this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {
     TYPE v1 = it->value();
@@ -278,17 +279,13 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
-    bool useprefiltertime;
-    if (m_values[istart].time() == start) {
-      // The filter time is on the mark.  Erase [begin(),  istart)
-      useprefiltertime = false;
-    } else {
-      // The filter time is larger than T[istart]. Erase[begin(), istart) ...
-      // filter start(time)
-      // and move istart to filter startime
-      useprefiltertime = true;
-    }
+    // false: The filter time is on the mark.  Erase [begin(),  istart)
 
+    // true: The filter time is larger than T[istart]. Erase[begin(), istart)
+    // ...
+    // filter start(time)
+    // and move istart to filter startime
+    bool useprefiltertime = !(m_values[istart].time() == start);
     // Remove the series
     m_values.erase(m_values.begin(), iterhead);
 

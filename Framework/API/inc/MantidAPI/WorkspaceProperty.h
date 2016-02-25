@@ -322,8 +322,7 @@ public:
     if (this->direction() == Kernel::Direction::Input ||
         this->direction() == Kernel::Direction::InOut) {
       // If an input workspace, get the list of workspaces currently in the ADS
-      std::set<std::string> vals =
-          AnalysisDataService::Instance().getObjectNames();
+      auto vals = AnalysisDataService::Instance().getObjectNames();
       if (isOptional()) // Insert an empty option
       {
         vals.insert("");
@@ -331,8 +330,7 @@ public:
       // Copy-construct a temporary workspace property to test the validity of
       // each workspace
       WorkspaceProperty<TYPE> tester(*this);
-      std::set<std::string>::iterator it;
-      for (it = vals.begin(); it != vals.end();) {
+      for (auto it = vals.begin(); it != vals.end();) {
         // Remove any workspace that's not valid for this algorithm
         if (!tester.setValue(*it).empty()) {
           vals.erase(
@@ -401,12 +399,10 @@ private:
     g_log.debug() << " Input WorkspaceGroup found " << std::endl;
 
     std::vector<std::string> wsGroupNames = wsGroup->getNames();
-    std::vector<std::string>::iterator it = wsGroupNames.begin();
-
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (; it != wsGroupNames.end(); ++it) {
+    for (auto it = wsGroupNames.begin(); it != wsGroupNames.end(); ++it) {
       std::string memberWsName = *it;
       boost::shared_ptr<Workspace> memberWs =
           AnalysisDataService::Instance().retrieve(memberWsName);
@@ -421,7 +417,7 @@ private:
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
-        if (NULL == boost::dynamic_pointer_cast<TYPE>(memberWs)) {
+        if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
           error = "Workspace " + memberWsName + " is not of type " +
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";

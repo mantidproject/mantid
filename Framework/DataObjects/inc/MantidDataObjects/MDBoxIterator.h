@@ -24,10 +24,10 @@ TMDE_CLASS
 class DLLExport MDBoxIterator : public Mantid::API::IMDIterator {
 public:
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-                Mantid::Geometry::MDImplicitFunction *function = NULL);
+                Mantid::Geometry::MDImplicitFunction *function = nullptr);
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
                 SkippingPolicy *skippingPolicy,
-                Mantid::Geometry::MDImplicitFunction *function = NULL);
+                Mantid::Geometry::MDImplicitFunction *function = nullptr);
   MDBoxIterator(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
   void init(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
   ~MDBoxIterator() override;

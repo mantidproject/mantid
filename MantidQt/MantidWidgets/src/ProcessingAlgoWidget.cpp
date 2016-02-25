@@ -132,12 +132,11 @@ void ProcessingAlgoWidget::btnLoadClicked()
  */
 void ProcessingAlgoWidget::changeAlgorithm()
 {
-  QString algName;
-  int version;
-  ui.algoSelector->getSelectedAlgorithm(algName,version);
+  auto alg = ui.algoSelector->getSelectedAlgorithm();
   try
   {
-    m_alg = AlgorithmManager::Instance().createUnmanaged(algName.toStdString(), version);
+    m_alg = AlgorithmManager::Instance().createUnmanaged(alg.name.toStdString(),
+                                                         alg.version);
     m_alg->initialize();
   }
   catch (std::runtime_error &)

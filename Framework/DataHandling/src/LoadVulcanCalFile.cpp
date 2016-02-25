@@ -435,11 +435,10 @@ void LoadVulcanCalFile::processOffsets(
   }
 
   // Get the global correction
-  std::set<int>::iterator biter;
   g_log.information() << "Number of bankds to process = " << set_bankID.size()
                       << "\n";
   map<int, double> map_bankLogCorr;
-  for (biter = set_bankID.begin(); biter != set_bankID.end(); ++biter) {
+  for (auto biter = set_bankID.begin(); biter != set_bankID.end(); ++biter) {
     // Locate inter bank and inter pack correction (log)
     int bankid = *biter;
     double globalfactor = 0.;
@@ -614,7 +613,7 @@ Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   Instrument_const_sptr inst;
 
   Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-  MatrixWorkspace_sptr tempWS(new Workspace2D());
+  MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("InstrumentName", InstrumentName);
   childAlg->setProperty("RewriteSpectraMap",

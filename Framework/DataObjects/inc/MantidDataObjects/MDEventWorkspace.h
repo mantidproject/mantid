@@ -69,7 +69,7 @@ public:
   /// Creates a new iterator pointing to the first cell (box) in the workspace
   std::vector<Mantid::API::IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Returns the (normalized) signal at a given coordinates
   signal_t getSignalAtCoord(
@@ -88,11 +88,9 @@ public:
   getNormalizedSignal(const API::IMDNode *box,
                       const Mantid::API::MDNormalization &normalization) const;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   API::MDNormalization normalize, std::vector<coord_t> &x,
-                   std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       API::MDNormalization normalize) const override;
 
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
@@ -153,7 +151,7 @@ public:
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
-    return (dynamic_cast<MDGridBox<MDE, nd> *>(data) != NULL);
+    return dynamic_cast<MDGridBox<MDE, nd> *>(data) != nullptr;
   }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */

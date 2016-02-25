@@ -124,6 +124,8 @@ public:
 
   virtual bool focusedOutWorkspace() const;
 
+  virtual bool plotCalibWorkspace() const;
+
   virtual void resetFocus();
 
   virtual std::vector<std::string> currentPreprocRunNo() const;
@@ -138,9 +140,15 @@ public:
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
 
-  virtual void plotReplacingWindow(const std::string &wsName);
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+                                   const std::string &type);
 
-  virtual bool saveOutputFiles() const;
+  virtual void plotVanCurvesCalibOutput();
+
+  virtual void plotDifcZeroCalibOutput(const std::string &pyCode);
+
+  virtual bool saveFocusedOutputFiles() const;
 
   int currentPlotType() const { return m_currentType; }
 

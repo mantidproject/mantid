@@ -62,12 +62,12 @@ MatrixWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL
 groupWorkspace(MatrixWorkspace_const_sptr ws, const Mantid::API::Grouping &g);
 
 /// create 'map' relating group number to row number in group table
-void MANTIDQT_CUSTOMINTERFACES_DLL whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, 
-  std::vector<int>& groupToRow);
+std::vector<int> MANTIDQT_CUSTOMINTERFACES_DLL
+whichGroupToWhichRow(const Ui::MuonAnalysis &m_uiForm);
 
 /// create 'map' relating pair number to row number in pair table
-void MANTIDQT_CUSTOMINTERFACES_DLL whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, 
-  std::vector<int>& pairToRow);
+std::vector<int> MANTIDQT_CUSTOMINTERFACES_DLL
+whichPairToWhichRow(const Ui::MuonAnalysis &m_uiForm);
 
 /// Set Group / Group Pair name
 void MANTIDQT_CUSTOMINTERFACES_DLL setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, 

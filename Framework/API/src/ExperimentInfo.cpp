@@ -789,18 +789,14 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
 
 //---------------------------------------------------------------------------------------
 /** A given instrument may have multiple IDFs associated with it. This method
-*return an
-*  identifier which identify a given IDF for a given instrument. An IDF filename
-*is
-*  required to be of the form IDFname + _Definition + Identifier + .xml, the
-*identifier
-*  then is the part of a filename that identifies the IDF valid at a given date.
+*return an identifier which identify a given IDF for a given instrument.
+* An IDF filename is required to be of the form IDFname + _Definition +
+*Identifier + .xml, the identifier then is the part of a filename that
+*identifies the IDF valid at a given date.
 *
 *  If several IDF files are valid at the given date the file with the most
-*recent from
-*  date is selected. If no such files are found the file with the latest from
-*date is
-*  selected.
+*recent from date is selected. If no such files are found the file with the
+*latest from date is selected.
 *
 *  If no file is found for the given instrument, an empty string is returned.
 *
@@ -1129,14 +1125,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
 
-  int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  options += Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer splitter(parameterStr, "|", options);
+  int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+  options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
   auto iend = splitter.end();
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
-    Poco::StringTokenizer tokens(*itr, ";");
+    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];

@@ -45,7 +45,7 @@ public:
   Task *pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
 
-    Task *temp = NULL;
+    Task *temp = nullptr;
 
     std::lock_guard<std::mutex> lock(m_queueLock);
     // Check the size within the same locking block; otherwise the size may
@@ -75,7 +75,7 @@ public:
           }
         }
       }
-      if (temp == NULL) {
+      if (temp == nullptr) {
         // Nothing was found, meaning all mutexes are in use
         // Try the first non-empty map
         SuperMap::iterator it = m_supermap.begin();

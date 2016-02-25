@@ -123,10 +123,9 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
     const ISpectrum *spec = ws1->getSpectrum(i);
     const specid_t spectrum = spec->getSpectrumNo();
     spectra.insert(spectrum);
-    const std::set<detid_t> &dets = spec->getDetectorIDs();
-    std::set<detid_t>::const_iterator it;
-    for (it = dets.begin(); it != dets.end(); ++it) {
-      detectors.insert(*it);
+    const auto &dets = spec->getDetectorIDs();
+    for (auto const &det : dets) {
+      detectors.insert(det);
     }
   }
 
@@ -145,11 +144,10 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
             "The input workspaces have overlapping spectrum numbers");
       }
     }
-    const std::set<detid_t> &dets = spec->getDetectorIDs();
-    std::set<detid_t>::const_iterator it;
-    for (it = dets.begin(); it != dets.end(); ++it) {
-      if (detectors.find(*it) != detectors.end()) {
-        g_log.error() << "The input workspaces have common detectors: " << (*it)
+    const auto &dets = spec->getDetectorIDs();
+    for (const auto &det : dets) {
+      if (detectors.find(det) != detectors.end()) {
+        g_log.error() << "The input workspaces have common detectors: " << (det)
                       << "\n";
         throw std::invalid_argument(
             "The input workspaces have common detectors");

@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL PropertyManagerDataServiceImpl
+class MANTID_API_DLL PropertyManagerDataServiceImpl final
     : public Mantid::Kernel::DataService<Mantid::Kernel::PropertyManager> {
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PropertyManagerDataServiceImpl>;

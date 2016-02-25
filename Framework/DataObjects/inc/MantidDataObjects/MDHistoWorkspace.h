@@ -75,19 +75,15 @@ public:
   uint64_t getNEvents() const override;
   std::vector<Mantid::API::IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
-  void getLineData(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   Mantid::API::MDNormalization normalize,
-                   std::vector<coord_t> &x, std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLineData(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
 
   void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
 

@@ -7,8 +7,6 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-using namespace Mantid::API;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -38,7 +36,7 @@ TMDE(MDBox)::~MDBox() {
  */
 TMDE(MDBox)::MDBox(API::BoxController_sptr &splitter, const uint32_t depth,
                    const size_t nBoxEvents, const size_t boxID)
-    : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID), m_Saveable(NULL),
+    : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID), m_Saveable(nullptr),
       m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
@@ -52,7 +50,7 @@ TMDE(MDBox)::MDBox(API::BoxController_sptr &splitter, const uint32_t depth,
  */
 TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
                    const size_t nBoxEvents, const size_t boxID)
-    : MDBoxBase<MDE, nd>(splitter, depth, boxID), m_Saveable(NULL),
+    : MDBoxBase<MDE, nd>(splitter, depth, boxID), m_Saveable(nullptr),
       m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
@@ -67,12 +65,12 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController_sptr &splitter, const uint32_t depth,
+    API::BoxController_sptr &splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID, extentsVector),
-      m_Saveable(NULL), m_bIsMasked(false) {
+      m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
 //-----------------------------------------------------------------------------------------------
@@ -85,12 +83,12 @@ TMDE(MDBox)::MDBox(
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController *const splitter, const uint32_t depth,
+    API::BoxController *const splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter, depth, boxID, extentsVector),
-      m_Saveable(NULL), m_bIsMasked(false) {
+      m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
 /**Common part of MD box constructor */
@@ -114,7 +112,7 @@ TMDE(void MDBox)::initMDBox(const size_t nBoxEvents) {
  */
 TMDE(MDBox)::MDBox(const MDBox<MDE, nd> &other,
                    Mantid::API::BoxController *const otherBC)
-    : MDBoxBase<MDE, nd>(other, otherBC), m_Saveable(NULL), data(other.data),
+    : MDBoxBase<MDE, nd>(other, otherBC), m_Saveable(nullptr), data(other.data),
       m_bIsMasked(other.m_bIsMasked) {
   if (otherBC) // may be absent in some tests but generally have to be present
   {
@@ -706,8 +704,8 @@ TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
 
 /// Setter for masking the box
 TMDE(void MDBox)::mask() {
-  this->setSignal(MDMaskValue);
-  this->setErrorSquared(MDMaskValue);
+  this->setSignal(API::MDMaskValue);
+  this->setErrorSquared(API::MDMaskValue);
   m_bIsMasked = true;
 }
 
@@ -918,7 +916,7 @@ TMDE(void MDBox)::clearFileBacked(bool loadDiskBackedData) {
     // tell disk buffer that there are no point of tracking this box any more.
     this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
     delete m_Saveable;
-    m_Saveable = NULL;
+    m_Saveable = nullptr;
   }
 }
 

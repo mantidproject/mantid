@@ -160,21 +160,12 @@ void MultipleScatteringCylinderAbsorption::exec() {
   EventWorkspace_sptr in_WSevent =
       boost::dynamic_pointer_cast<EventWorkspace>(in_WS);
   if (in_WSevent) {
-    MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
-    EventWorkspace_sptr out_WSevent =
-        boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
-
     // not in-place so create a new copy
-    if (in_WSevent != out_WSevent) {
-      out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", in_WSevent->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          in_WSevent, out_WSevent, false);
-      // You need to copy over the data as well.
-      out_WSevent->copyDataFrom((*in_WSevent));
+    MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
+    if (in_WS != out_WS) {
+      out_WS = MatrixWorkspace_sptr(in_WS->clone().release());
     }
+    auto out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 
     // convert to weighted events
     out_WSevent->switchEventType(API::WEIGHTED_NOTIME);
@@ -210,9 +201,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // set the output workspace
-    this->setProperty(
-        "OutputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(out_WSevent));
+    setProperty("OutputWorkspace", out_WS);
   } else // histogram case
   {
     // Create the new workspace

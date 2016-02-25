@@ -91,12 +91,12 @@ public:
   getEventList(const size_t workspace_index) const;
 
   DataObjects::EventList &getEventList(const std::size_t workspace_index);
-  void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                         Mantid::specid_t &offset) const;
+  std::vector<size_t>
+  getSpectrumToWorkspaceIndexVector(Mantid::specid_t &offset) const;
 
-  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out,
-                                           Mantid::specid_t &offset,
-                                           bool dothrow) const;
+  std::vector<size_t>
+  getDetectorIDToWorkspaceIndexVector(Mantid::specid_t &offset,
+                                      bool dothrow) const;
   Kernel::DateAndTime getFirstPulseTime() const;
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
   size_t getNumberEvents() const;

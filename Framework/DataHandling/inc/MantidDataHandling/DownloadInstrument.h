@@ -61,9 +61,9 @@ private:
                                 const std::string &key,
                                 const std::string &defaultValue) const;
 
-  size_t
-  removeOrphanedFiles(const std::string &directoryPath,
-                      const std::set<std::string> &filenamesToKeep) const;
+  size_t removeOrphanedFiles(
+      const std::string &directoryPath,
+      const std::unordered_set<std::string> &filenamesToKeep) const;
 
   Kernel::ProxyInfo m_proxyInfo;
 };

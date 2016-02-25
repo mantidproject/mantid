@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <set>
+#include <unordered_set>
 #include <sstream>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -57,7 +57,7 @@ class Algorithm;
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class MANTID_API_DLL AlgorithmFactoryImpl
+class MANTID_API_DLL AlgorithmFactoryImpl final
     : public Kernel::DynamicFactory<Algorithm> {
 public:
   // Unhide the base class version (to satisfy the intel compiler)
@@ -126,7 +126,8 @@ public:
   int highestVersion(const std::string &algorithmName) const;
 
   /// Get the algorithm categories
-  const std::set<std::string> getCategories(bool includeHidden = false) const;
+  const std::unordered_set<std::string>
+  getCategories(bool includeHidden = false) const;
 
   /// Get the algorithm categories
   const std::map<std::string, bool> getCategoriesWithState() const;
@@ -162,7 +163,7 @@ private:
   /// creates an algorithm name convolved from an name and version
   std::string createName(const std::string &, const int &) const;
   /// fills a set with the hidden categories
-  void fillHiddenCategories(std::set<std::string> *categorySet) const;
+  void fillHiddenCategories(std::unordered_set<std::string> *categorySet) const;
 
   /// A typedef for the map of algorithm versions
   typedef std::map<std::string, int> VersionMap;

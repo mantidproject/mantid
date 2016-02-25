@@ -100,7 +100,7 @@ public:
     if (!p.second) {
       /* duplicate item */
       this->il.relocate(this->il.begin(), p.first); /* put in front */
-      return NULL;
+      return nullptr;
     }
 
     bool exceeding_size;
@@ -117,7 +117,7 @@ public:
       this->il.pop_back();
       return toWrite;
     }
-    return NULL;
+    return nullptr;
   }
 
   //---------------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ public:
 
     auto it = il.template get<1>().find(int(index));
     if (it == il.template get<1>().end()) {
-      return NULL;
+      return nullptr;
     } else {
       return *it;
     }

@@ -127,14 +127,14 @@ ANNpointArray annAllocPts(int n, int dim) // allocate n pts in dim
 void annDeallocPt(ANNpoint &p) // deallocate 1 point
 {
   delete[] p;
-  p = NULL;
+  p = nullptr;
 }
 
 void annDeallocPts(ANNpointArray &pa) // deallocate points
 {
   delete[] pa[0]; // dealloc coordinate storage
   delete[] pa;    // dealloc points
-  pa = NULL;
+  pa = nullptr;
 }
 
 ANNpoint annCopyPt(int dim, ANNpoint source) // copy point

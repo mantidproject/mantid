@@ -441,6 +441,95 @@ public:
     FrameworkManager::Instance().deleteWorkspace("FFT_out");
   }
 
+  // Test that unevenly spaced X values are rejected by default
+  void testUnequalBinWidths_Throws() {
+    const int N = 100;
+    auto inputWS = createWS(N, 0, "uneven_points");
+    Mantid::MantidVec &X = inputWS->dataX(0);
+    double aveX = (X[51] + X[49]) / 2.0;
+    X[50] = aveX + 0.01;
+
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_uneven_points");
+  }
+
+  // Test that unevenly spaced X values are accepted if the property is set to
+  // do so
+  void testUnequalBinWidths_acceptRoundingErrors() {
+    const int N = 100;
+    auto inputWS = createWS(N, 0, "uneven_points");
+    Mantid::MantidVec &X = inputWS->dataX(0);
+    double aveX = (X[51] + X[49]) / 2.0;
+    X[50] = aveX + 0.01;
+
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->setProperty("AcceptXRoundingErrors", true);
+    TS_ASSERT_THROWS_NOTHING(fft->execute());
+
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_uneven_points");
+  }
+
+  // Test that algorithm will not accept an empty input workspace
+  void testEmptyInputWorkspace_Throws() {
+    auto inputWS = createWS(1, 0, "empty");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_empty");
+  }
+
+  void testRealOutOfRange_Throws() {
+    auto inputWS = createWS(100, 0, "real_out_of_range");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "100");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_real_out_of_range");
+  }
+
+  void testImaginaryOutOfRange_Throws() {
+    auto inputWS = createWS(100, 0, "imaginary_out_of_range");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->setPropertyValue("Imaginary", "100");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace(
+        "FFT_WS_imaginary_out_of_range");
+  }
+
+  void testRealImaginarySizeMismatch_Throws() {
+    auto inputWS = createWS(100, 0, "real_mismatch");
+    auto inImagWS = createWS(99, 0, "imag_mismatch");
+    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->setPropertyValue("Imaginary", "0");
+    fft->setProperty("InputImagWorkspace", inImagWS);
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_real_mismatch");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_imag_mismatch");
+  }
+
 private:
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
     FrameworkManager::Instance();

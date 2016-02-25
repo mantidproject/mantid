@@ -177,9 +177,6 @@ void LoadPreNexusMonitors::exec() {
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nMonitors, numberTimeBins, tchannels);
 
-  // temp buffer for file reading
-  std::vector<uint32_t> buffer;
-
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
@@ -188,14 +185,15 @@ void LoadPreNexusMonitors::exec() {
                   << std::endl;
 
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
-    monitorFile.loadAllInto(buffer);
+    // temp buffer for file reading
+    std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 
     MantidVec intensity(buffer.begin(), buffer.end());
     // Copy the same data into the error array
     MantidVec error(buffer.begin(), buffer.end());
     // Now take the sqrt()
     std::transform(error.begin(), error.end(), error.begin(),
-                   (double (*)(double))sqrt);
+                   static_cast<double (*)(double)>(sqrt));
 
     localWorkspace->dataX(i) = time_bins;
     localWorkspace->dataY(i) = intensity;

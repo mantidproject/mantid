@@ -13,6 +13,7 @@
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -76,7 +77,7 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   std::generate(y1.access().begin(), y1.access().end(), randFunc);
   e1.access().resize(size);
   std::generate(e1.access().begin(), e1.access().end(), randFunc);
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
   retVal->setData(0, y1, e1);
@@ -89,7 +90,7 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   x1.access().resize(size, 1);
   y1.access().resize(size, value);
   e1.access().resize(size, error);
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
   retVal->setData(0, y1, e1);
@@ -112,7 +113,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
   y1.access().resize(size);
   std::generate(y1.access().begin(), y1.access().end(), FibSeries<double>());
   e1.access().resize(size);
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
   retVal->setData(0, y1, e1);
@@ -159,7 +160,7 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   x1.access().resize(isHist ? nBins + 1 : nBins, xVal);
   y1.access().resize(nBins, yVal);
   e1.access().resize(nBins, eVal);
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nHist, isHist ? nBins + 1 : nBins, nBins);
   for (int i = 0; i < nHist; i++) {
     retVal->setX(i, x1);
@@ -239,7 +240,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
  */
 WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
                                          const std::string &stem) {
-  WorkspaceGroup_sptr group(new WorkspaceGroup);
+  auto group = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().add(stem, group);
   for (int i = 0; i < nEntries; ++i) {
     Workspace2D_sptr ws = Create2DWorkspace(nHist, nBins);
@@ -263,7 +264,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
   for (int i = 0; i < nbins + 1; ++i) {
     x.access()[i] = x0 + i * deltax;
   }
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, nbins + 1, nbins);
   for (int i = 0; i < nhist; i++) {
     retVal->setX(i, x);
@@ -286,7 +287,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
   for (int i = 0; i < numBoundaries; ++i) {
     x.access()[i] = xBoundaries[i];
   }
-  Workspace2D_sptr retVal(new Workspace2D);
+  auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, numBins + 1, numBins);
   for (int i = 0; i < nhist; i++) {
     retVal->setX(i, x);
@@ -344,75 +345,8 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
-  auto testInst = boost::make_shared<Instrument>(instrumentName);
-  testInst->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
-  space->setInstrument(testInst);
-
-  const double pixelRadius(0.05);
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-      pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-
-  const double detXPos(5.0);
-  int ndets = nhist;
-  if (includeMonitors)
-    ndets -= 2;
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream lexer;
-    lexer << "pixel-" << i << ")";
-    Detector *physicalPixel =
-        new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape,
-                     testInst.get());
-    int ycount(i);
-    if (startYNegative)
-      ycount -= 1;
-    const double ypos = ycount * 2.0 * pixelRadius;
-    physicalPixel->setPos(detXPos, ypos, 0.0);
-    testInst->add(physicalPixel);
-    testInst->markAsDetector(physicalPixel);
-    space->getSpectrum(i)->addDetectorID(physicalPixel->getID());
-  }
-
-  // Monitors last
-  if (includeMonitors) // These occupy the last 2 spectra
-  {
-    Detector *monitor1 =
-        new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(),
-                     testInst.get());
-    monitor1->setPos(-9.0, 0.0, 0.0);
-    testInst->add(monitor1);
-    testInst->markAsMonitor(monitor1);
-
-    Detector *monitor2 =
-        new Detector("mon2", space->getAxis(1)->spectraNo(ndets) + 1,
-                     Object_sptr(), testInst.get());
-    monitor2->setPos(-2.0, 0.0, 0.0);
-    testInst->add(monitor2);
-    testInst->markAsMonitor(monitor2);
-  }
-
-  // Define a source and sample position
-  // Define a source component
-  ObjComponent *source = new ObjComponent(
-      "moderator",
-      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-      testInst.get());
-  source->setPos(V3D(-20, 0.0, 0.0));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  ObjComponent *sample = new ObjComponent(
-      "samplePos",
-      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-      testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
-  // chopper position
-  Component *chop_pos =
-      new Component("chopper-position", Kernel::V3D(-10, 0, 0), testInst.get());
-  testInst->add(chop_pos);
+  InstrumentCreationHelper::addFullInstrumentToWorkspace(
+      *space, includeMonitors, startYNegative, instrumentName);
 
   return space;
 }
@@ -600,15 +534,12 @@ void createInstrumentForWorkspaceWithDistances(
 
 //================================================================================================================
 WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value) {
-  WorkspaceSingleValue_sptr retVal(
-      new WorkspaceSingleValue(value, sqrt(value)));
-  return retVal;
+  return boost::make_shared<WorkspaceSingleValue>(value, sqrt(value));
 }
 
 WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value,
                                                               double error) {
-  WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value, error));
-  return retVal;
+  return boost::make_shared<WorkspaceSingleValue>(value, error);
 }
 
 /** Perform some finalization on event workspace stuff */
@@ -657,7 +588,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
   // add one to the number of bins as this is histogram
   numBins++;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   // Make fake events
@@ -712,7 +643,7 @@ EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta) {
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(1, 2, 1);
 
   for (size_t g = 0; g < groups.size(); g++) {
@@ -749,7 +680,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
  */
 EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
                                                double bin_delta) {
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
@@ -1235,7 +1166,7 @@ RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
 
 Mantid::DataObjects::PeaksWorkspace_sptr
 createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
-  PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
+  auto peaksWS = boost::make_shared<PeaksWorkspace>();
   Instrument_sptr inst =
       ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
   peaksWS->setInstrument(inst);

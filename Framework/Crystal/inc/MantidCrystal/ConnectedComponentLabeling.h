@@ -9,7 +9,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/optional.hpp>
 #include <map>
-#include <set>
+#include <unordered_set>
 
 namespace Mantid {
 namespace API {
@@ -27,7 +27,7 @@ typedef std::map<size_t, SignalErrorSQPair> LabelIdIntensityMap;
 typedef std::map<Mantid::Kernel::V3D, size_t> PositionToLabelIdMap;
 typedef std::vector<size_t> VecIndexes;
 typedef std::vector<DisjointElement> VecElements;
-typedef std::set<size_t> SetIds;
+typedef std::unordered_set<size_t> SetIds;
 typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>
     ClusterMap;
 typedef boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>

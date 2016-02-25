@@ -27,6 +27,12 @@ specifying minimum and maximum time-of-flight values. This can speed up
 loading and reduce memory requirements if you are only interested in a
 narrow range of the times-of-flight of your data.
 
+You can specify to load only certain spectra within the file, 
+using the SpectraMax, SpectraMin and SpectraList properties.  
+This will load data only matching those restrictions.  
+At facilities that do not group detectors in hardware such as the SNS, 
+then this will also equate to the detector IDs.
+
 You may also filter out events by providing the start and stop times, in
 seconds, relative to the first pulse (the start of the run).
 

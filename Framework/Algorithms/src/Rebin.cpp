@@ -144,41 +144,16 @@ void Rebin::exec() {
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
-    EventWorkspace_sptr eventOutputWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-    if (inPlace && PreserveEvents) {
-      // -------------Rebin in-place, preserving events
-      // ----------------------------------------------
+    if (PreserveEvents) {
+      if (!inPlace) {
+        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+      }
+      auto eventOutputWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
       // This only sets the X axis. Actual rebinning will be done upon data
       // access.
       eventOutputWS->setAllX(XValues_new);
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutputWS));
-    } else if (!inPlace && PreserveEvents) {
-      // -------- NOT in-place, but you want to keep events for some reason.
-      // ----------------------
-      // Must copy the event workspace to a new EventWorkspace (and bin that).
-
-      // Make a brand new EventWorkspace
-      eventOutputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          inputWS, eventOutputWS, false);
-      // You need to copy over the data as well.
-      eventOutputWS->copyDataFrom((*eventInputWS));
-
-      // This only sets the X axis. Actual rebinning will be done upon data
-      // access.
-      eventOutputWS->setAllX(XValues_new);
-
-      // Cast to the matrixOutputWS and save it
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutputWS));
     } else {
       //--------- Different output, OR you're inplace but not preserving Events
       //--- create a Workspace2D -------
@@ -232,10 +207,10 @@ void Rebin::exec() {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       outputWS->setYUnit(eventInputWS->YUnit());
       outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", outputWS);
     }
+
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace", outputWS);
 
   } // END ---- EventWorkspace
 

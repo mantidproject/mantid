@@ -36,7 +36,6 @@
 #include <Poco/StringTokenizer.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/assign.hpp>
 
 #include <algorithm>
 
@@ -59,12 +58,10 @@
 
 #include <fstream>
 
-//Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-  DECLARE_SUBWINDOW(MuonAnalysis)
+// Add this class to the list of specialised dialogs in this namespace
+namespace MantidQt {
+namespace CustomInterfaces {
+DECLARE_SUBWINDOW(MuonAnalysis)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -75,10 +72,9 @@ using namespace Mantid::Geometry;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::Grouping;
 
-namespace
-{
-  /// static logger
-  Mantid::Kernel::Logger g_log("MuonAnalysis");
+namespace {
+/// static logger
+Mantid::Kernel::Logger g_log("MuonAnalysis");
 }
 
 // Static constants
@@ -103,10 +99,9 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_currentLabel("NoLabelSet"), m_numPeriods(0) {}
 
 /**
- * Initialize local Python environmnet. 
+ * Initialize local Python environmnet.
  */
-void MuonAnalysis::initLocalPython()
-{
+void MuonAnalysis::initLocalPython() {
   QString code;
 
   code += "from mantid.simpleapi import *\n";
@@ -117,48 +112,52 @@ void MuonAnalysis::initLocalPython()
 
   runPythonCode(code);
 
-  // TODO: Following shouldn't be here. It is now because ApplicationWindow sets up the Python 
+  // TODO: Following shouldn't be here. It is now because ApplicationWindow sets
+  // up the Python
   // environment only after the UserSubWindow is shown.
 
   // Hide the toolbars, if user wants to
-  if(m_uiForm.hideToolbars->isChecked())
+  if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);
 }
 
 /// Set up the dialog layout
-void MuonAnalysis::initLayout()
-{
+void MuonAnalysis::initLayout() {
   m_uiForm.setupUi(this);
 
   std::set<std::string> supportedFacilities;
   supportedFacilities.insert("ISIS");
   supportedFacilities.insert("SmuS");
 
-  const std::string userFacility = ConfigService::Instance().getFacility().name();
+  const std::string userFacility =
+      ConfigService::Instance().getFacility().name();
 
-  // Allow to load current run for ISIS only 
-  if ( userFacility != "ISIS" )
+  // Allow to load current run for ISIS only
+  if (userFacility != "ISIS")
     m_uiForm.loadCurrent->setDisabled(true);
 
-  // If facility if not supported by the interface - show a warning, but still open it
-  if ( supportedFacilities.find(userFacility) == supportedFacilities.end() )
-  {
-    const std::string supportedFacilitiesStr = Strings::join(supportedFacilities.begin(), 
-      supportedFacilities.end(), ", ");
+  // If facility if not supported by the interface - show a warning, but still
+  // open it
+  if (supportedFacilities.find(userFacility) == supportedFacilities.end()) {
+    const std::string supportedFacilitiesStr = Strings::join(
+        supportedFacilities.begin(), supportedFacilities.end(), ", ");
 
-    const QString errorTemplate = 
-      "Your facility (%1) is not supported by MuonAnalysis, so you will not be able to load any files. \n\n"
-      "Supported facilities are: %2. \n\n" 
-      "Please use Preferences -> Mantid -> Instrument to update your facility information.";
+    const QString errorTemplate =
+        "Your facility (%1) is not supported by MuonAnalysis, so you will not "
+        "be able to load any files. \n\n"
+        "Supported facilities are: %2. \n\n"
+        "Please use Preferences -> Mantid -> Instrument to update your "
+        "facility information.";
 
-    const QString error = errorTemplate.arg( userFacility.c_str(), supportedFacilitiesStr.c_str() );
+    const QString error =
+        errorTemplate.arg(userFacility.c_str(), supportedFacilitiesStr.c_str());
 
     QMessageBox::warning(this, "Unsupported facility", error);
   }
 
   m_uiForm.fitBrowser->init();
-  connect( m_uiForm.fitBrowser, SIGNAL(sequentialFitRequested()), 
-           this, SLOT(openSequentialFitDialog()) );
+  connect(m_uiForm.fitBrowser, SIGNAL(sequentialFitRequested()), this,
+          SLOT(openSequentialFitDialog()));
 
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
@@ -167,8 +166,10 @@ void MuonAnalysis::initLayout()
   startUpLook();
   m_uiForm.mwRunFiles->readSettings(m_settingsGroup + "mwRunFilesBrowse");
 
-  connect(m_uiForm.previousRun, SIGNAL(clicked()), this, SLOT(checkAppendingPreviousRun()));
-  connect(m_uiForm.nextRun, SIGNAL(clicked()), this, SLOT(checkAppendingNextRun()));
+  connect(m_uiForm.previousRun, SIGNAL(clicked()), this,
+          SLOT(checkAppendingPreviousRun()));
+  connect(m_uiForm.nextRun, SIGNAL(clicked()), this,
+          SLOT(checkAppendingNextRun()));
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_optionTab->initLayout();
@@ -177,78 +178,105 @@ void MuonAnalysis::initLayout()
   m_fitDataTab->init();
 
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
-  connect(m_resultTableTab, SIGNAL(runPythonCode(const QString&, bool)),
-                      this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  connect(m_resultTableTab, SIGNAL(runPythonCode(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   setCurrentDataName(NOT_AVAILABLE);
 
   // connect guess alpha
-  connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
+  connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this,
+          SLOT(guessAlphaClicked()));
 
-  // signal/slot connections to respond to changes in instrument selection combo boxes
-  connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
+  // signal/slot connections to respond to changes in instrument selection combo
+  // boxes
+  connect(m_uiForm.instrSelector,
+          SIGNAL(instrumentSelectionChanged(const QString &)), this,
+          SLOT(userSelectInstrument(const QString &)));
 
   // Load current
-  connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent()));
+  connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this,
+          SLOT(runLoadCurrent()));
 
   // If group table change
-  // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
-  connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this, SLOT(groupTableChanged(int, int)));
-  connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this, SLOT(groupTableClicked(int, int)));
-  connect(m_uiForm.groupTable->verticalHeader(), SIGNAL(sectionClicked(int)), SLOT(groupTableClicked(int)));
+  // currentCellChanged ( int currentRow, int currentColumn, int previousRow,
+  // int previousColumn )
+  connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this,
+          SLOT(groupTableChanged(int, int)));
+  connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this,
+          SLOT(groupTableClicked(int, int)));
+  connect(m_uiForm.groupTable->verticalHeader(), SIGNAL(sectionClicked(int)),
+          SLOT(groupTableClicked(int)));
 
   // group table plot button
-  connect(m_uiForm.groupTablePlotButton, SIGNAL(clicked()), this, SLOT(runGroupTablePlotButton()));
+  connect(m_uiForm.groupTablePlotButton, SIGNAL(clicked()), this,
+          SLOT(runGroupTablePlotButton()));
 
   // If pair table change
-  connect(m_uiForm.pairTable, SIGNAL(cellChanged(int, int)), this, SLOT(pairTableChanged(int, int)));
-  connect(m_uiForm.pairTable, SIGNAL(cellClicked(int, int)), this, SLOT(pairTableClicked(int, int)));
-  connect(m_uiForm.pairTable->verticalHeader(), SIGNAL(sectionClicked(int)), SLOT(pairTableClicked(int)));
+  connect(m_uiForm.pairTable, SIGNAL(cellChanged(int, int)), this,
+          SLOT(pairTableChanged(int, int)));
+  connect(m_uiForm.pairTable, SIGNAL(cellClicked(int, int)), this,
+          SLOT(pairTableClicked(int, int)));
+  connect(m_uiForm.pairTable->verticalHeader(), SIGNAL(sectionClicked(int)),
+          SLOT(pairTableClicked(int)));
   // Pair table plot button
-  connect(m_uiForm.pairTablePlotButton, SIGNAL(clicked()), this, SLOT(runPairTablePlotButton()));
+  connect(m_uiForm.pairTablePlotButton, SIGNAL(clicked()), this,
+          SLOT(runPairTablePlotButton()));
 
   // save grouping
-  connect(m_uiForm.saveGroupButton, SIGNAL(clicked()), this, SLOT(runSaveGroupButton()));
+  connect(m_uiForm.saveGroupButton, SIGNAL(clicked()), this,
+          SLOT(runSaveGroupButton()));
 
   // load grouping
-  connect(m_uiForm.loadGroupButton, SIGNAL(clicked()), this, SLOT(runLoadGroupButton()));
+  connect(m_uiForm.loadGroupButton, SIGNAL(clicked()), this,
+          SLOT(runLoadGroupButton()));
 
   // clear grouping
-  connect(m_uiForm.clearGroupingButton, SIGNAL(clicked()), this, SLOT(runClearGroupingButton()));
+  connect(m_uiForm.clearGroupingButton, SIGNAL(clicked()), this,
+          SLOT(runClearGroupingButton()));
 
   // front plot button
-  connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this, SLOT(runFrontPlotButton()));
+  connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this,
+          SLOT(runFrontPlotButton()));
 
   // front group/ group pair combobox
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( currentIndexChanged(int) ), this, SLOT( updateFront() ));
+  connect(m_uiForm.frontGroupGroupPairComboBox,
+          SIGNAL(currentIndexChanged(int)), this, SLOT(updateFront()));
 
-  // Synchronize plot function selector on the Home tab with the one under the Group Table
-  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ),m_uiForm.groupTablePlotChoice, SLOT( setCurrentIndex(int) ) );
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL( activated(int) ), this, SLOT( syncGroupTablePlotTypeWithHome() ) );
+  // Synchronize plot function selector on the Home tab with the one under the
+  // Group Table
+  connect(m_uiForm.frontPlotFuncs, SIGNAL(activated(int)),
+          m_uiForm.groupTablePlotChoice, SLOT(setCurrentIndex(int)));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this,
+          SLOT(syncGroupTablePlotTypeWithHome()));
 
   connect(m_uiForm.homePeriodBox1, SIGNAL(textChanged(const QString &)), this,
           SLOT(checkForEqualPeriods()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(textChanged(const QString &)), this,
           SLOT(checkForEqualPeriods()));
 
-  connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
+  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this,
+          SIGNAL(setToolbarsHidden(bool)));
 
   // connect "?" (Help) Button
-  connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
-  connect(m_uiForm.muonAnalysisHelpGrouping, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpGroupingClicked()));
+  connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this,
+          SLOT(muonAnalysisHelpClicked()));
+  connect(m_uiForm.muonAnalysisHelpGrouping, SIGNAL(clicked()), this,
+          SLOT(muonAnalysisHelpGroupingClicked()));
 
   // add combo boxes to pairTable
-  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-  {
-    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
-    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
+    m_uiForm.pairTable->setCellWidget(i, 1, new QComboBox);
+    m_uiForm.pairTable->setCellWidget(i, 2, new QComboBox);
   }
 
   // file input
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this,
+          SLOT(inputFileChanged_MWRunFiles()));
 
-  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(setTimeZeroState(int)));
-  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(setFirstGoodDataState(int)));
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this,
+          SLOT(setTimeZeroState(int)));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this,
+          SLOT(setFirstGoodDataState(int)));
 
   // load previous saved values
   loadAutoSavedValues(m_settingsGroup);
@@ -257,55 +285,56 @@ void MuonAnalysis::initLayout()
   loadFittings();
 
   // Detect when the tab is changed
-  connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
+  connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this,
+          SLOT(changeTab(int)));
 
   connectAutoUpdate();
 
   connectAutoSave();
 
-  // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
-  ConfigService::Instance().setString("curvefitting.peakRadius","99");
+  // Muon scientists never fits peaks, hence they want the following parameter,
+  // set to a high number
+  ConfigService::Instance().setString("curvefitting.peakRadius", "99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL( currentIndexChanged(int) ),
-          this, SLOT( onDeadTimeTypeChanged(int) ));
+  connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onDeadTimeTypeChanged(int)));
 
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL( fileFindingFinished() ),
-          this, SLOT( deadTimeFileSelected() ));
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this,
+          SLOT(deadTimeFileSelected()));
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
 
-  connect(this, SIGNAL( setToolbarsHidden(bool) ), this, SLOT( doSetToolbarsHidden(bool) ), 
-    Qt::QueuedConnection ); // We dont' neet this to happen instantly, prefer safer way
+  connect(this, SIGNAL(setToolbarsHidden(bool)), this,
+          SLOT(doSetToolbarsHidden(bool)),
+          Qt::QueuedConnection); // We dont' neet this to happen instantly,
+                                 // prefer safer way
 
   // Manage User Directories
-  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
+  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
+          SLOT(openDirectoryDialog()));
 }
 
 /**
 * Muon Analysis help (slot)
 */
-void MuonAnalysis::muonAnalysisHelpClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "MuonAnalysis"));
+void MuonAnalysis::muonAnalysisHelpClicked() {
+  QDesktopServices::openUrl(
+      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysis"));
 }
 
 /**
 * Muon Analysis Grouping help (slot)
 */
-void MuonAnalysis::muonAnalysisHelpGroupingClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "MuonAnalysisGrouping"));
+void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
+  QDesktopServices::openUrl(
+      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisGrouping"));
 }
-
 
 /**
  * Set the connected workspace name.
  * @param name The new connected ws name
  */
-void MuonAnalysis::setCurrentDataName(const QString& name)
-{
+void MuonAnalysis::setCurrentDataName(const QString &name) {
   m_currentDataName = name;
 
   // Update labels
@@ -317,13 +346,11 @@ void MuonAnalysis::setCurrentDataName(const QString& name)
 /**
 * Front plot button (slot)
 */
-void MuonAnalysis::runFrontPlotButton()
-{
-  if(m_updating)
+void MuonAnalysis::runFrontPlotButton() {
+  if (m_updating)
     return;
 
-  if (m_deadTimesChanged)
-  {
+  if (m_deadTimesChanged) {
     inputFileChanged(m_previousFilenames);
     return;
   }
@@ -334,30 +361,26 @@ void MuonAnalysis::runFrontPlotButton()
 /**
  * Creates a plot of selected group/pair.
  */
-void MuonAnalysis::plotSelectedItem()
-{
+void MuonAnalysis::plotSelectedItem() {
   ItemType itemType;
-  int tableRow; 
+  int tableRow;
 
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
     return; // Nothing to plot
 
-  if (index >= numGroups())
-  {
+  if (index >= numGroups()) {
     itemType = Pair;
-    tableRow = m_pairToRow[index-numGroups()];
-  }
-  else
-  {
+    tableRow = m_pairToRow[index - numGroups()];
+  } else {
     itemType = Group;
     tableRow = m_groupToRow[index];
   }
 
   PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
 
-  plotItem(itemType, tableRow, plotType);  
+  plotItem(itemType, tableRow, plotType);
 }
 
 /**
@@ -365,41 +388,40 @@ void MuonAnalysis::plotSelectedItem()
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
- */ 
-void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
-{
+ */
+void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
+                            PlotType plotType) {
   m_updating = true;
 
-  AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  try 
-  {
+  try {
     // Create workspace and a raw (unbinned) version of it
     auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
     auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
     // Find names for new workspaces
-    const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
-    const std::string wsRawName = wsName + "_Raw"; 
+    const std::string wsName =
+        getNewAnalysisWSName(itemType, tableRow, plotType);
+    const std::string wsRawName = wsName + "_Raw";
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
     ads.addOrReplace(wsRawName, wsRaw);
 
     // Make sure they are grouped
-    std::vector<std::string> wsNames = boost::assign::list_of(wsName)(wsRawName);
+    std::vector<std::string> wsNames = {wsName, wsRawName};
     MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
     // Plot the workspace
-    plotSpectrum( wsNameQ, (plotType == Logorithm) );
-    setCurrentDataName( wsNameQ );
-  }
-  catch(std::exception& e)
-  { 
+    plotSpectrum(wsNameQ, (plotType == Logorithm));
+    setCurrentDataName(wsNameQ);
+  } catch (std::exception &e) {
     g_log.error(e.what());
-    QMessageBox::critical( this, "MuonAnalysis - Error", "Unable to plot the item. Check log for details." ); 
+    QMessageBox::critical(this, "MuonAnalysis - Error",
+                          "Unable to plot the item. Check log for details.");
   }
 
   m_updating = false;
@@ -411,54 +433,48 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
  * @return New name
- */ 
-std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow, PlotType plotType)
-{
+ */
+std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
+                                               PlotType plotType) {
   std::string plotTypeName;
 
-  switch(plotType)
-  {
-    case Asymmetry:
-      plotTypeName = "Asym"; break;
-    case Counts:
-      plotTypeName = "Counts"; break;
-    case Logorithm:
-      plotTypeName = "Logs"; break;
+  switch (plotType) {
+  case Asymmetry:
+    plotTypeName = "Asym";
+    break;
+  case Counts:
+    plotTypeName = "Counts";
+    break;
+  case Logorithm:
+    plotTypeName = "Logs";
+    break;
   }
 
   std::string itemTypeName;
   std::string itemName;
 
-  if ( itemType == Pair )
-  {
+  if (itemType == Pair) {
     itemTypeName = "Pair";
-    itemName = m_uiForm.pairTable->item(tableRow,0)->text().toStdString();
-  }
-  else if ( itemType == Group )
-  {
+    itemName = m_uiForm.pairTable->item(tableRow, 0)->text().toStdString();
+  } else if (itemType == Group) {
     itemTypeName = "Group";
-    itemName = m_uiForm.groupTable->item(tableRow,0)->text().toStdString();
+    itemName = m_uiForm.groupTable->item(tableRow, 0)->text().toStdString();
   }
 
-  const std::string firstPart = (m_currentLabel + "; " + itemTypeName + "; " + itemName + "; "
-                                 + plotTypeName + "; #");
+  const std::string firstPart = (m_currentLabel + "; " + itemTypeName + "; " +
+                                 itemName + "; " + plotTypeName + "; #");
 
   std::string newName;
 
-  if ( isOverwriteEnabled() )
-  {
-    // If ovewrite is enabled, can use the same name again and again 
+  if (isOverwriteEnabled()) {
+    // If ovewrite is enabled, can use the same name again and again
     newName = firstPart + "1";
-  }
-  else
-  { 
+  } else {
     // If overwrite is disabled, need to find unique name for the new workspace
     int plotNum(1);
-    do
-    {
+    do {
       newName = firstPart + boost::lexical_cast<std::string>(plotNum++);
-    }
-    while ( AnalysisDataService::Instance().doesExist(newName) );
+    } while (AnalysisDataService::Instance().doesExist(newName));
   }
 
   return newName;
@@ -468,31 +484,23 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow, 
  * Returns PlotType as chosen using given selector.
  * @param selector :: Widget to use for parsing
  * @return PlotType as selected using the widget
- */ 
-MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
-{
+ */
+MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox *selector) {
   std::string plotTypeName = selector->currentText().toStdString();
 
-  if ( plotTypeName == "Asymmetry" )
-  {
+  if (plotTypeName == "Asymmetry") {
     return Asymmetry;
-  }
-  else if ( plotTypeName == "Counts" )
-  {
+  } else if (plotTypeName == "Counts") {
     return Counts;
-  }
-  else if ( plotTypeName == "Logorithm" )
-  {
+  } else if (plotTypeName == "Logorithm") {
     return Logorithm;
-  }
-  else
-  {
+  } else {
     throw std::runtime_error("Unknown plot type name: " + plotTypeName);
   }
 }
 
 /**
- * Creates workspace ready for analysis and plotting. 
+ * Creates workspace ready for analysis and plotting.
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
@@ -555,45 +563,43 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   }
 
   // ---- Analysis ----
-  if ( itemType == Group )
-  {
+  if (itemType == Group) {
     std::string outputType;
 
-    switch(plotType)
-    {
-      case Counts:
-      case Logorithm:
-        outputType = "GroupCounts"; break;
-      case Asymmetry:
-        outputType = "GroupAsymmetry"; break;
-      default:
-        throw std::invalid_argument("Unsupported plot type");
+    switch (plotType) {
+    case Counts:
+    case Logorithm:
+      outputType = "GroupCounts";
+      break;
+    case Asymmetry:
+      outputType = "GroupAsymmetry";
+      break;
+    default:
+      throw std::invalid_argument("Unsupported plot type");
     }
 
     alg->setProperty("OutputType", outputType);
 
     int groupNum = getGroupNumberFromRow(tableRow);
     alg->setProperty("GroupIndex", groupNum);
-  }
-  else if ( itemType == Pair )
-  {
-    if ( plotType == Asymmetry )
+  } else if (itemType == Pair) {
+    if (plotType == Asymmetry)
       alg->setProperty("OutputType", "PairAsymmetry");
     else
       throw std::invalid_argument("Pairs support asymmetry plot type only");
 
-    QTableWidget* t = m_uiForm.pairTable;
+    QTableWidget *t = m_uiForm.pairTable;
 
-    double alpha = t->item(tableRow,3)->text().toDouble();
-    int index1 = static_cast<QComboBox*>( t->cellWidget(tableRow,1) )->currentIndex();
-    int index2 = static_cast<QComboBox*>( t->cellWidget(tableRow,2) )->currentIndex();
+    double alpha = t->item(tableRow, 3)->text().toDouble();
+    int index1 =
+        static_cast<QComboBox *>(t->cellWidget(tableRow, 1))->currentIndex();
+    int index2 =
+        static_cast<QComboBox *>(t->cellWidget(tableRow, 2))->currentIndex();
 
     alg->setProperty("PairFirstIndex", index1);
     alg->setProperty("PairSecondIndex", index2);
     alg->setProperty("Alpha", alpha);
-  }
-  else
-  {
+  } else {
     throw std::invalid_argument("Unsupported item type");
   }
 
@@ -613,13 +619,11 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
 *
 * @param prefix :: instrument name from QComboBox object
 */
-void MuonAnalysis::userSelectInstrument(const QString& prefix)
-{
+void MuonAnalysis::userSelectInstrument(const QString &prefix) {
   // Set file browsing to current instrument
   m_uiForm.mwRunFiles->setInstrumentOverride(prefix);
 
-  if ( prefix != m_curInterfaceSetup )
-  {
+  if (prefix != m_curInterfaceSetup) {
     runClearGroupingButton();
     m_curInterfaceSetup = prefix;
     clearLoadedRun();
@@ -631,15 +635,13 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
   }
 }
 
-
 /**
  * Save grouping button (slot)
  */
-void MuonAnalysis::runSaveGroupButton()
-{
-  if ( numGroups() <= 0 )
-  {
-    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping to save.");
+void MuonAnalysis::runSaveGroupButton() {
+  if (numGroups() <= 0) {
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
+                         "No grouping to save.");
     return;
   }
 
@@ -648,36 +650,37 @@ void MuonAnalysis::runSaveGroupButton()
 
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
-  QString prevPath = prevValues.value("dir", QString::fromStdString(
-    ConfigService::Instance().getString("defaultsave.directory"))).toString();
+  QString prevPath =
+      prevValues.value("dir", QString::fromStdString(
+                                  ConfigService::Instance().getString(
+                                      "defaultsave.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(this,
-                                   "Save Grouping file as", prevPath, filter);
+  QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
+      this, "Save Grouping file as", prevPath, filter);
 
-  // Add extension if the groupingFile specified doesn't have one. (Solving Linux problem).
+  // Add extension if the groupingFile specified doesn't have one. (Solving
+  // Linux problem).
   if (!groupingFile.endsWith(".xml"))
     groupingFile += ".xml";
 
-  if( ! groupingFile.isEmpty() )
-  {
+  if (!groupingFile.isEmpty()) {
     Mantid::API::Grouping groupingToSave;
     parseGroupingTable(m_uiForm, groupingToSave);
     saveGroupingToXML(groupingToSave, groupingFile.toStdString());
-    
+
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
   }
 }
 
-
 /**
  * Load grouping button (slot)
  */
-void MuonAnalysis::runLoadGroupButton()
-{
+void MuonAnalysis::runLoadGroupButton() {
   m_updating = true;
 
   // Get grouping file
@@ -686,28 +689,29 @@ void MuonAnalysis::runLoadGroupButton()
 
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
-  QString prevPath = prevValues.value("dir", QString::fromStdString(
-    ConfigService::Instance().getString("defaultload.directory"))).toString();
+  QString prevPath =
+      prevValues.value("dir", QString::fromStdString(
+                                  ConfigService::Instance().getString(
+                                      "defaultload.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = QFileDialog::getOpenFileName(this, "Load Grouping file", prevPath, filter);
-  if( groupingFile.isEmpty() || QFileInfo(groupingFile).isDir() ) 
+  QString groupingFile = QFileDialog::getOpenFileName(
+      this, "Load Grouping file", prevPath, filter);
+  if (groupingFile.isEmpty() || QFileInfo(groupingFile).isDir())
     return;
-    
+
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
   Mantid::API::Grouping loadedGrouping;
 
-  try
-  {
+  try {
     Mantid::API::GroupingLoader::loadGroupingFromXML(groupingFile.toStdString(),
                                                      loadedGrouping);
-  }
-  catch (Exception::FileError& e)
-  {
+  } catch (Exception::FileError &e) {
     g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
     m_updating = false;
@@ -719,16 +723,13 @@ void MuonAnalysis::runLoadGroupButton()
 
   m_updating = false;
 
-  if ( m_loaded )
-  {
-    try
-    {
+  if (m_loaded) {
+    try {
       groupLoadedWorkspace();
-    }
-    catch(std::exception& e)
-    {
-      g_log.error( e.what() );
-      QMessageBox::critical(this, "MantidPlot - MuonAnalysis",
+    } catch (std::exception &e) {
+      g_log.error(e.what());
+      QMessageBox::critical(
+          this, "MantidPlot - MuonAnalysis",
           "Unable to group the workspace. See log for details.");
     }
   }
@@ -737,27 +738,21 @@ void MuonAnalysis::runLoadGroupButton()
 /**
  * Clear grouping button (slot)
  */
-void MuonAnalysis::runClearGroupingButton()
-{
-  clearTablesAndCombo();
-}
+void MuonAnalysis::runClearGroupingButton() { clearTablesAndCombo(); }
 
 /**
  * Group table plot button (slot)
  */
-void MuonAnalysis::runGroupTablePlotButton()
-{
-  if(m_updating)
+void MuonAnalysis::runGroupTablePlotButton() {
+  if (m_updating)
     return;
 
-  if (m_deadTimesChanged)
-  {
+  if (m_deadTimesChanged) {
     inputFileChanged(m_previousFilenames);
     return;
   }
 
-  if ( getGroupNumberFromRow(m_groupTableRowInFocus) != -1 )
-  {
+  if (getGroupNumberFromRow(m_groupTableRowInFocus) != -1) {
     PlotType plotType = parsePlotType(m_uiForm.groupTablePlotChoice);
     plotItem(Group, m_groupTableRowInFocus, plotType);
   }
@@ -766,85 +761,81 @@ void MuonAnalysis::runGroupTablePlotButton()
 /**
  * Load current (slot)
  */
-void MuonAnalysis::runLoadCurrent()
-{
+void MuonAnalysis::runLoadCurrent() {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
   // If Argus data then simple
-  if ( instname == "ARGUS" )
-  {
-    QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
-    Poco::File l_path( argusDAE.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis",
-          QString("Can't load ARGUS Current data since\n") +
-          argusDAE + QString("\n") +
-          QString("does not seem to exist"));
+  if (instname == "ARGUS") {
+    QString argusDAE =
+        "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
+    Poco::File l_path(argusDAE.toStdString());
+    try {
+      if (!l_path.exists()) {
+        QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                             QString("Can't load ARGUS Current data since\n") +
+                                 argusDAE + QString("\n") +
+                                 QString("does not seem to exist"));
         return;
       }
-    }
-    catch(Poco::Exception&)
-    {
-       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
-         "\nto access is down or your computer is not currently connected to the network.");
-       return;
+    } catch (Poco::Exception &) {
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
+                           "Can't read from the selected directory, either the "
+                           "computer you are trying"
+                           "\nto access is down or your computer is not "
+                           "currently connected to the network.");
+      return;
     }
     m_uiForm.mwRunFiles->setUserInput(argusDAE);
     m_uiForm.mwRunFiles->setText("CURRENT RUN");
     return;
   }
 
-  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS")
-  {
+  if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
+      instname == "CHRONUS") {
     QString instDirectory = instname;
-    if ( instname == "CHRONUS" )
+    if (instname == "CHRONUS")
       instDirectory = "NDW1030";
     std::string autosavePointsTo = "";
-    std::string autosaveFile = "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
-    Poco::File pathAutosave( autosaveFile );
-    
+    std::string autosaveFile =
+        "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
+    Poco::File pathAutosave(autosaveFile);
+
     try // check if exists
     {
-      if ( pathAutosave.exists() )
-      {
+      if (pathAutosave.exists()) {
         std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in);
         autofileIn >> autosavePointsTo;
       }
-    }
-    catch(Poco::Exception&)
-    {
-       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
-         "\nto access is down or your computer is not currently connected to the network.");
-       return;
+    } catch (Poco::Exception &) {
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
+                           "Can't read from the selected directory, either the "
+                           "computer you are trying"
+                           "\nto access is down or your computer is not "
+                           "currently connected to the network.");
+      return;
     }
 
     QString psudoDAE;
-    if ( autosavePointsTo.empty() )
-      psudoDAE = "\\\\" + instDirectory + "\\data\\" + instDirectory + "auto_A.tmp";
+    if (autosavePointsTo.empty())
+      psudoDAE =
+          "\\\\" + instDirectory + "\\data\\" + instDirectory + "auto_A.tmp";
     else
       psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
 
-    Poco::File l_path( psudoDAE.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis",
-          QString("Can't load ") + "Current data since\n" +
-          psudoDAE + QString("\n") +
-          QString("does not seem to exist"));
+    Poco::File l_path(psudoDAE.toStdString());
+    try {
+      if (!l_path.exists()) {
+        QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                             QString("Can't load ") + "Current data since\n" +
+                                 psudoDAE + QString("\n") +
+                                 QString("does not seem to exist"));
         return;
       }
-    }
-    catch(Poco::Exception&)
-    {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis",
-        QString("Can't load ") + "Current data since\n" +
-        psudoDAE + QString("\n") +
-        QString("does not seem to exist"));
+    } catch (Poco::Exception &) {
+      QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                           QString("Can't load ") + "Current data since\n" +
+                               psudoDAE + QString("\n") +
+                               QString("does not seem to exist"));
       return;
     }
     m_uiForm.mwRunFiles->setUserInput(psudoDAE);
@@ -852,57 +843,53 @@ void MuonAnalysis::runLoadCurrent()
     return;
   }
 
-  QMessageBox::critical(this, "Unsupported instrument",
-                        "Current run loading is not supported for the selected instrument.");
+  QMessageBox::critical(
+      this, "Unsupported instrument",
+      "Current run loading is not supported for the selected instrument.");
 }
 
 /**
  * Pair table plot button (slot)
  */
-void MuonAnalysis::runPairTablePlotButton()
-{
-  if(m_updating)
+void MuonAnalysis::runPairTablePlotButton() {
+  if (m_updating)
     return;
 
-  if (m_deadTimesChanged)
-  {
+  if (m_deadTimesChanged) {
     inputFileChanged(m_previousFilenames);
     return;
   }
 
-  if ( getPairNumberFromRow(m_pairTableRowInFocus) != -1 )
-  {
+  if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
     // Sync with selectors on the front
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(numGroups() + m_pairTableRowInFocus);
-    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.pairTablePlotChoice->currentIndex());
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(
+        numGroups() + m_pairTableRowInFocus);
+    m_uiForm.frontPlotFuncs->setCurrentIndex(
+        m_uiForm.pairTablePlotChoice->currentIndex());
 
     PlotType plotType = parsePlotType(m_uiForm.pairTablePlotChoice);
     plotItem(Pair, m_pairTableRowInFocus, plotType);
   }
-
 }
 
 /**
  * Pair table vertical lable clicked (slot)
  */
-void MuonAnalysis::pairTableClicked(int row)
-{
+void MuonAnalysis::pairTableClicked(int row) {
   m_pairTableRowInFocus = row;
 
   // if something sensible in row then update front
   int pNum = getPairNumberFromRow(row);
-  if ( pNum >= 0 )
-  {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum+numGroups());
+  if (pNum >= 0) {
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum + numGroups());
   }
 }
 
 /**
  * Pair table clicked (slot)
  */
-void MuonAnalysis::pairTableClicked(int row, int column)
-{
-  (void) column;
+void MuonAnalysis::pairTableClicked(int row, int column) {
+  (void)column;
 
   pairTableClicked(row);
 }
@@ -910,9 +897,8 @@ void MuonAnalysis::pairTableClicked(int row, int column)
 /**
  * Group table clicked (slot)
  */
-void MuonAnalysis::groupTableClicked(int row, int column)
-{
-  (void) column;
+void MuonAnalysis::groupTableClicked(int row, int column) {
+  (void)column;
 
   groupTableClicked(row);
 }
@@ -920,19 +906,17 @@ void MuonAnalysis::groupTableClicked(int row, int column)
 /**
 * Group table clicked (slot)
 */
-void MuonAnalysis::groupTableClicked(int row)
-{
+void MuonAnalysis::groupTableClicked(int row) {
   m_groupTableRowInFocus = row;
 
   // if something sensible in row then update front
   int gNum = getGroupNumberFromRow(row);
-  if ( gNum >= 0 )
-  {
+  if (gNum >= 0) {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
-    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
+    m_uiForm.frontPlotFuncs->setCurrentIndex(
+        m_uiForm.groupTablePlotChoice->currentIndex());
   }
 }
-
 
 /**
 * Group table changed, e.g. if:         (slot)
@@ -943,45 +927,37 @@ void MuonAnalysis::groupTableClicked(int row)
 * @param row :: row number
 * @param column :: column number
 */
-void MuonAnalysis::groupTableChanged(int row, int column)
-{
-  if ( column == 2 )
-  {
+void MuonAnalysis::groupTableChanged(int row, int column) {
+  if (column == 2) {
     // Ignore changes to Ndet column, as they will only be made programmatically
     return;
   }
 
   // changes to the IDs
-  if ( column == 1 )
-  {
-    QTableWidgetItem* itemNdet = m_uiForm.groupTable->item(row,2);
-    QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
+  if (column == 1) {
+    QTableWidgetItem *itemNdet = m_uiForm.groupTable->item(row, 2);
+    QTableWidgetItem *item = m_uiForm.groupTable->item(row, 1);
 
     // if IDs list has been changed to empty string
-    if (item->text() == "")
-    {
+    if (item->text() == "") {
       if (itemNdet)
         itemNdet->setText("");
-    }
-    else
-    {
+    } else {
       int numDet = numOfDetectors(item->text().toStdString());
 
       std::stringstream detNumRead;
-      if (numDet > 0 )
-      {
+      if (numDet > 0) {
         detNumRead << numDet;
         if (itemNdet == NULL)
-          m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem(detNumRead.str().c_str()));
-        else
-        {
+          m_uiForm.groupTable->setItem(
+              row, 2, new QTableWidgetItem(detNumRead.str().c_str()));
+        else {
           itemNdet->setText(detNumRead.str().c_str());
         }
-      }
-      else
-      {
+      } else {
         if (itemNdet == NULL)
-          m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem("Invalid IDs string"));
+          m_uiForm.groupTable->setItem(
+              row, 2, new QTableWidgetItem("Invalid IDs string"));
         else
           m_uiForm.groupTable->item(row, 2)->setText("Invalid IDs string");
       }
@@ -989,30 +965,27 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   }
 
   // Change to group name
-  if ( column == 0 )
-  {
-    QTableWidgetItem *itemName = m_uiForm.groupTable->item(row,0);
+  if (column == 0) {
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(row, 0);
 
-    if ( itemName == NULL ) // Just in case it wasn't assigned
+    if (itemName == NULL) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.groupTable->setItem(row, 0, itemName);
     }
-      
-    if ( itemName->text() != "" )
-    {
+
+    if (itemName->text() != "") {
       // check that the group name entered does not already exist
-      for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
-      {
-        if (i==row)
+      for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++) {
+        if (i == row)
           continue;
 
-        QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
-        if (item)
-        {
-          if ( item->text() == itemName->text() )
-          {
-            QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
+        QTableWidgetItem *item = m_uiForm.groupTable->item(i, 0);
+        if (item) {
+          if (item->text() == itemName->text()) {
+            QMessageBox::warning(
+                this, "MantidPlot - MuonAnalysis",
+                "Group names must be unique. Please re-enter Group name.");
             itemName->setText("");
             break;
           }
@@ -1021,26 +994,22 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     }
   }
 
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   updatePairTable();
   updateFrontAndCombo();
-  
-  if ( m_loaded && ! m_updating )
-  {
-    try
-    {
-      groupLoadedWorkspace();
-    }
-    catch(std::exception& e)
-    {
-      g_log.error( e.what() );
 
-      QMessageBox::critical(this, "MantidPlot - MuonAnalysis", 
+  if (m_loaded && !m_updating) {
+    try {
+      groupLoadedWorkspace();
+    } catch (std::exception &e) {
+      g_log.error(e.what());
+
+      QMessageBox::critical(
+          this, "MantidPlot - MuonAnalysis",
           "Unable to group the workspace. See log for details");
     }
   }
 }
-
 
 /**
 * Pair table changed, e.g. if:         (slot)
@@ -1051,79 +1020,67 @@ void MuonAnalysis::groupTableChanged(int row, int column)
 * @param row :: row number
 * @param column:: column number
 */
-void MuonAnalysis::pairTableChanged(int row, int column)
-{
+void MuonAnalysis::pairTableChanged(int row, int column) {
   // alpha been modified
-  if ( column == 3 )
-  {
-    QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
+  if (column == 3) {
+    QTableWidgetItem *itemAlpha = m_uiForm.pairTable->item(row, 3);
 
-    if ( !itemAlpha->text().toStdString().empty() )
-    {
-      try
-      {
-         boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
-      }  catch (boost::bad_lexical_cast&)
-      {
-        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
+    if (!itemAlpha->text().toStdString().empty()) {
+      try {
+        boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
+      } catch (boost::bad_lexical_cast &) {
+        QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
+                             "Alpha must be a number.");
         itemAlpha->setText("");
         return;
       }
     }
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
   }
 
   // pair name been modified
-  if ( column == 0 )
-  {
-    QTableWidgetItem *itemName = m_uiForm.pairTable->item(row,0);
+  if (column == 0) {
+    QTableWidgetItem *itemName = m_uiForm.pairTable->item(row, 0);
 
-    if ( itemName == NULL ) // Just in case it wasn't assigned
+    if (itemName == NULL) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.pairTable->setItem(row, 0, itemName);
     }
-      
-    if ( itemName->text() != "" )
-    {
+
+    if (itemName->text() != "") {
       // check that the group name entered does not already exist
-      for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-      {
-        if (i==row)
+      for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
+        if (i == row)
           continue;
 
-        QTableWidgetItem *item = m_uiForm.pairTable->item(i,0);
-        if (item)
-        {
-          if ( item->text() == itemName->text() )
-          {
-            QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Pair names must be unique. Please re-enter Pair name.");
+        QTableWidgetItem *item = m_uiForm.pairTable->item(i, 0);
+        if (item) {
+          if (item->text() == itemName->text()) {
+            QMessageBox::warning(
+                this, "MantidPlot - MuonAnalysis",
+                "Pair names must be unique. Please re-enter Pair name.");
             itemName->setText("");
           }
         }
       }
     }
 
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
 
     // check to see if alpha is specified (if name!="") and if not
     // assign a default of 1.0
-    if ( itemName->text() != "" )
-    {
-      QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
+    if (itemName->text() != "") {
+      QTableWidgetItem *itemAlpha = m_uiForm.pairTable->item(row, 3);
 
-      if (itemAlpha)
-      {
-        if ( itemAlpha->text().toStdString().empty() )
-        {
+      if (itemAlpha) {
+        if (itemAlpha->text().toStdString().empty()) {
           itemAlpha->setText("1.0");
         }
-      }
-      else
-      {
-        m_uiForm.pairTable->setItem(row,3, new QTableWidgetItem("1.0"));
+      } else {
+        m_uiForm.pairTable->setItem(row, 3, new QTableWidgetItem("1.0"));
       }
     }
   }
@@ -1132,72 +1089,67 @@ void MuonAnalysis::pairTableChanged(int row, int column)
 /**
  * Update pair table
  */
-void MuonAnalysis::updatePairTable()
-{
+void MuonAnalysis::updatePairTable() {
   // number of groups has dropped below 2 and pair names specified then
   // clear pair table
-  if ( numGroups() < 2 && numPairs() > 0 )
-  {
+  if (numGroups() < 2 && numPairs() > 0) {
     m_uiForm.pairTable->clearContents();
-    for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-    {
-      m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
-      m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+    for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
+      m_uiForm.pairTable->setCellWidget(i, 1, new QComboBox);
+      m_uiForm.pairTable->setCellWidget(i, 2, new QComboBox);
     }
     updateFrontAndCombo();
     return;
-  }
-  else if ( numGroups() < 2 && numPairs() <= 0 )
-  {
+  } else if (numGroups() < 2 && numPairs() <= 0) {
     return;
   }
 
   // get previous number of groups as listed in the pair comboboxes
-  QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(0,1));
-  int previousNumGroups = qwF->count(); // how many groups listed in pair combobox
+  QComboBox *qwF =
+      static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(0, 1));
+  int previousNumGroups =
+      qwF->count(); // how many groups listed in pair combobox
   int newNumGroups = numGroups();
 
   // reset context of combo boxes
-  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-  {
-    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
+    QComboBox *qwF =
+        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    QComboBox *qwB =
+        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
 
-    if (previousNumGroups < newNumGroups)
-    {
+    if (previousNumGroups < newNumGroups) {
       // then need to increase the number of entrees in combo box
-      for (int ii = 1; ii <= newNumGroups-previousNumGroups; ii++)
-      {
-        qwF->addItem(""); // effectively here just allocate space for extra items
+      for (int ii = 1; ii <= newNumGroups - previousNumGroups; ii++) {
+        qwF->addItem(
+            ""); // effectively here just allocate space for extra items
         qwB->addItem("");
       }
-    }
-    else if (previousNumGroups > newNumGroups)
-    {
+    } else if (previousNumGroups > newNumGroups) {
       // then need to decrease the number of entrees in combo box
-      for (int ii = 1; ii <= previousNumGroups-newNumGroups; ii++)
-      {
-        qwF->removeItem(qwF->count()-1); // remove top items
-        qwB->removeItem(qwB->count()-1);
+      for (int ii = 1; ii <= previousNumGroups - newNumGroups; ii++) {
+        qwF->removeItem(qwF->count() - 1); // remove top items
+        qwB->removeItem(qwB->count() - 1);
       }
 
       // further for this case check that none of the current combo box
       // indexes are larger than the number of groups
-      if ( qwF->currentIndex()+1 > newNumGroups || qwB->currentIndex()+1 > newNumGroups )
-      {
+      if (qwF->currentIndex() + 1 > newNumGroups ||
+          qwB->currentIndex() + 1 > newNumGroups) {
         qwF->setCurrentIndex(0);
         qwB->setCurrentIndex(1);
       }
     }
 
-    if ( qwF->currentIndex() == 0 && qwB->currentIndex() == 0 )
+    if (qwF->currentIndex() == 0 && qwB->currentIndex() == 0)
       qwB->setCurrentIndex(1);
 
     // re-populate names in combo boxes with group names
-    for (int ii = 0; ii < newNumGroups; ii++)
-    {
-      qwF->setItemText(ii, m_uiForm.groupTable->item(m_groupToRow[ii],0)->text());
-      qwB->setItemText(ii, m_uiForm.groupTable->item(m_groupToRow[ii],0)->text());
+    for (int ii = 0; ii < newNumGroups; ii++) {
+      qwF->setItemText(ii,
+                       m_uiForm.groupTable->item(m_groupToRow[ii], 0)->text());
+      qwB->setItemText(ii,
+                       m_uiForm.groupTable->item(m_groupToRow[ii], 0)->text());
     }
   }
 }
@@ -1205,40 +1157,40 @@ void MuonAnalysis::updatePairTable()
 /**
  * Slot called when the input file is changed.
  */
-void MuonAnalysis::inputFileChanged_MWRunFiles()
-{
+void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
   allowLoading(true);
 }
 
 /**
- * Do some check when reading from MWRun, before actually reading new data file, to see if file is valid
+ * Do some check when reading from MWRun, before actually reading new data file,
+ * to see if file is valid
  */
-void MuonAnalysis::handleInputFileChanges()
-{ 
+void MuonAnalysis::handleInputFileChanges() {
 
-  if ( m_uiForm.mwRunFiles->getText().isEmpty() )
+  if (m_uiForm.mwRunFiles->getText().isEmpty())
     return;
 
-  if ( !m_uiForm.mwRunFiles->isValid() )
-  { 
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", m_uiForm.mwRunFiles->getFileProblem() );
+  if (!m_uiForm.mwRunFiles->isValid()) {
+    QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                         m_uiForm.mwRunFiles->getFileProblem());
     if (m_textToDisplay == "")
       m_uiForm.mwRunFiles->setFileProblem("Error. No File specified.");
     else
-      m_uiForm.mwRunFiles->setFileProblem("Error finding file. Reset to last working data.");
+      m_uiForm.mwRunFiles->setFileProblem(
+          "Error finding file. Reset to last working data.");
     m_uiForm.mwRunFiles->setText(m_textToDisplay);
     return;
   }
 
-  if (!m_updating)
-  {
+  if (!m_updating) {
     inputFileChanged(m_uiForm.mwRunFiles->getFilenames());
 
-    m_textToDisplay =  m_uiForm.mwRunFiles->getText();
+    m_textToDisplay = m_uiForm.mwRunFiles->getText();
 
-    // save selected browse file directory to be reused next time interface is started up
+    // save selected browse file directory to be reused next time interface is
+    // started up
     m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
   }
 }
@@ -1248,9 +1200,9 @@ void MuonAnalysis::handleInputFileChanges()
  * @param files :: A list of files to load
  * @return Struct with various loaded parameters
  */
-boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
-{
-  if ( files.empty() )
+boost::shared_ptr<LoadResult>
+MuonAnalysis::load(const QStringList &files) const {
+  if (files.empty())
     throw std::invalid_argument("Supplied list of files is empty");
 
   auto result = boost::make_shared<LoadResult>();
@@ -1260,23 +1212,22 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
   std::string instrName; // Instrument name all the run files should belong to
 
   // Go through all the files and try to load them
-  for ( auto f = files.constBegin(); f != files.constEnd(); ++f )
-  {
+  for (auto f = files.constBegin(); f != files.constEnd(); ++f) {
     std::string file = (*f).toStdString();
 
     // Setup Load Nexus Algorithm
-    IAlgorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+    IAlgorithm_sptr load =
+        AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
 
     load->initialize();
     load->setChild(true);
     load->setLogging(false); // We'll take care of print messages ourself
-    load->setPropertyValue("Filename", file );
+    load->setPropertyValue("Filename", file);
 
     // Just to pass validation
     load->setPropertyValue("OutputWorkspace", "__NotUsed");
 
-    if ( f == files.constBegin() )
-    {
+    if (f == files.constBegin()) {
       // These are only needed for the first file
       load->setPropertyValue("DeadTimeTable", "__NotUsed");
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
@@ -1286,54 +1237,48 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 
     Workspace_sptr loadedWorkspace = load->getProperty("OutputWorkspace");
 
-    if ( f == files.constBegin() )
-    {
+    if (f == files.constBegin()) {
       instrName = firstPeriod(loadedWorkspace)->getInstrument()->getName();
 
       // Check that is a valid Muon instrument
-      if ( m_uiForm.instrSelector->findText( QString::fromStdString(instrName)) == -1 )
+      if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
+          -1)
         throw std::runtime_error("Instrument is not recognized: " + instrName);
 
       result->loadedDeadTimes = load->getProperty("DeadTimeTable");
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
-      result->mainFieldDirection = static_cast<std::string>(load->getProperty("MainFieldDirection"));
+      result->mainFieldDirection =
+          static_cast<std::string>(load->getProperty("MainFieldDirection"));
       result->timeZero = load->getProperty("TimeZero");
       result->firstGoodData = load->getProperty("FirstGoodData");
-    }
-    else
-    {
-      if ( firstPeriod(loadedWorkspace)->getInstrument()->getName() != instrName )
-        throw std::runtime_error("All the files should be produced by the same instrument");
+    } else {
+      if (firstPeriod(loadedWorkspace)->getInstrument()->getName() != instrName)
+        throw std::runtime_error(
+            "All the files should be produced by the same instrument");
     }
 
     loadedWorkspaces.push_back(loadedWorkspace);
   }
 
-  if (instrName == "ARGUS")
-  {
-    // Some of the ARGUS data files contain wrong information about the instrument main field
+  if (instrName == "ARGUS") {
+    // Some of the ARGUS data files contain wrong information about the
+    // instrument main field
     // direction. It is alway longitudinal.
     result->mainFieldDirection = "longitudinal";
   }
 
-  if ( loadedWorkspaces.size() == 1 )
-  {
+  if (loadedWorkspaces.size() == 1) {
 
     // If single workspace loaded - use it
     Workspace_sptr ws = loadedWorkspaces.front();
     result->loadedWorkspace = ws;
 
     result->label = getRunLabel(ws);
-  }
-  else
-  {
+  } else {
     // If multiple workspaces loaded - sum them to get the one to work with
-    try
-    {
+    try {
       result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
-    }
-    catch(std::exception& e)
-    {
+    } catch (std::exception &e) {
       std::ostringstream error;
       error << "Unable to sum workspaces together: " << e.what() << "\n";
       error << "Make sure they have equal dimensions and number of periods.";
@@ -1357,34 +1302,34 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
 
-  Instrument_const_sptr instr = firstPeriod(loadResult->loadedWorkspace)->getInstrument();
+  Instrument_const_sptr instr =
+      firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
   // Check whether the instrument was changed
-  int instrIndex = m_uiForm.instrSelector->findText( QString::fromStdString(instr->getName()) );
+  int instrIndex = m_uiForm.instrSelector->findText(
+      QString::fromStdString(instr->getName()));
   bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
 
   // Check whether the number of spectra was changed
   bool noSpectraChanged(true);
 
-  if ( AnalysisDataService::Instance().doesExist(m_workspace_name) )
-  {
-    auto currentWs = AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
+  if (AnalysisDataService::Instance().doesExist(m_workspace_name)) {
+    auto currentWs =
+        AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
     size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
 
-    size_t loadedNoSpectra = firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
+    size_t loadedNoSpectra =
+        firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
 
     noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
   }
 
-  if ( !noSpectraChanged && !instrChanged && isGroupingSet() )
-  {
+  if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>();
     parseGroupingTable(m_uiForm, *groupingToUse);
-  }
-  else
-  {
+  } else {
     // Need to load a new grouping
     result->usedExistGrouping = false;
 
@@ -1392,27 +1337,26 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
     {
       Mantid::API::GroupingLoader loader(instr, loadResult->mainFieldDirection);
       groupingToUse = loader.getGroupingFromIDF();
-    }
-    catch(std::runtime_error& e)
-    {
-      g_log.warning() << "Unable to apply grouping from the IDF: " << e.what() << "\n";
+    } catch (std::runtime_error &e) {
+      g_log.warning() << "Unable to apply grouping from the IDF: " << e.what()
+                      << "\n";
 
-      if ( loadResult->loadedGrouping )
-      {
+      if (loadResult->loadedGrouping) {
         ITableWorkspace_sptr groupingTable;
 
-        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
-        {
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
-          groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
+        if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+                  loadResult->loadedGrouping))) {
+          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+              loadResult->loadedGrouping);
+          groupingTable =
+              boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
         }
 
         groupingToUse = tableToGrouping(groupingTable);
         groupingToUse->description = "Grouping from Nexus file";
-      }
-      else
-      {
-        g_log.warning("No grouping set in the Nexus file. Using dummy grouping");
+      } else {
+        g_log.warning(
+            "No grouping set in the Nexus file. Using dummy grouping");
         groupingToUse = getDummyGrouping(instr);
       }
     }
@@ -1424,13 +1368,14 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
 }
 
 /**
- * Input file changed. Update GUI accordingly. Note this method does no check of input filename assumed
- * done elsewhere depending on e.g. whether filename came from MWRunFiles or 'get current run' button.
+ * Input file changed. Update GUI accordingly. Note this method does no check of
+ * input filename assumed
+ * done elsewhere depending on e.g. whether filename came from MWRunFiles or
+ * 'get current run' button.
  *
  * @param files :: All file names for the files loading.
  */
-void MuonAnalysis::inputFileChanged(const QStringList& files)
-{
+void MuonAnalysis::inputFileChanged(const QStringList &files) {
   if (files.size() <= 0)
     return;
 
@@ -1479,7 +1424,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     correctedGroupedWS = alg->getProperty("OutputWorkspace");
   } catch (std::exception &e) {
     g_log.error(e.what());
-    QMessageBox::critical(this, "Loading failed", "Unable to load the file[s]. See log for details.");
+    QMessageBox::critical(this, "Loading failed",
+                          "Unable to load the file[s]. See log for details.");
 
     m_updating = false;
     m_uiForm.tabWidget->setTabEnabled(3, true);
@@ -1487,15 +1433,18 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     return;
   }
 
-  // At this point we are sure that new data was loaded successfully, so we can safely overwrite
+  // At this point we are sure that new data was loaded successfully, so we can
+  // safely overwrite
   // previous one.
 
-  // This is done explicitly because addOrReplace is not replacing groups properly.
+  // This is done explicitly because addOrReplace is not replacing groups
+  // properly.
   deleteWorkspaceIfExists(m_workspace_name);
   deleteWorkspaceIfExists(m_grouped_name);
 
   // Get hold of a pointer to a matrix workspace
-  MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadResult->loadedWorkspace);
+  MatrixWorkspace_sptr matrix_workspace =
+      firstPeriod(loadResult->loadedWorkspace);
 
   // Set various instance variables
   m_dataTimeZero = loadResult->timeZero;
@@ -1504,9 +1453,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   m_previousFilenames = files;
 
   int newInstrIndex = m_uiForm.instrSelector->findText(
-        QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
+      QString::fromStdString(matrix_workspace->getInstrument()->getName()));
 
-  bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
+  bool instrumentChanged =
+      newInstrIndex != m_uiForm.instrSelector->currentIndex();
 
   m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
 
@@ -1516,11 +1466,12 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
                                       loadResult->loadedWorkspace);
   AnalysisDataService::Instance().add(m_grouped_name, correctedGroupedWS);
 
-  // Update the grouping table with the used grouping, if new grouping was loaded
-  // XXX: this should be done after the instrument was changed, because changing the instrument will
+  // Update the grouping table with the used grouping, if new grouping was
+  // loaded
+  // XXX: this should be done after the instrument was changed, because changing
+  // the instrument will
   //      clear the grouping
-  if ( ! groupResult->usedExistGrouping )
-  {
+  if (!groupResult->usedExistGrouping) {
     runClearGroupingButton();
     fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
   }
@@ -1530,13 +1481,15 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   str << "Description: ";
   str << matrix_workspace->getInstrument()->getDetectorIDs().size();
   str << " detector spectrometer, main field ";
-  str << QString(loadResult->mainFieldDirection.c_str()).toLower().toStdString();
+  str << QString(loadResult->mainFieldDirection.c_str())
+             .toLower()
+             .toStdString();
   str << " to muon polarisation";
   m_uiForm.instrumentDescription->setText(str.str().c_str());
 
-  if(instrumentChanged)
-  {
-    // When instrument changes we use information from data no matter what user has chosen before
+  if (instrumentChanged) {
+    // When instrument changes we use information from data no matter what user
+    // has chosen before
     m_uiForm.timeZeroAuto->setCheckState(Qt::Checked);
     m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
   }
@@ -1550,10 +1503,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   std::string label = loadResult->label;
 
   // Remove instrument and leading zeros
-  for (auto it = label.begin(); it != label.end(); ++it)
-  {
-    if ( !(isalpha(*it) || *it == '0') )
-    {
+  for (auto it = label.begin(); it != label.end(); ++it) {
+    if (!(isalpha(*it) || *it == '0')) {
       // When non-letter and non-zero met - delete everything up to it
       label.erase(label.begin(), it);
       break;
@@ -1570,19 +1521,22 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Add other information about the run
   printRunInfo(matrix_workspace, infoStr);
 
-  m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
+  m_uiForm.infoBrowser->setText(QString::fromStdString(infoStr.str()));
 
   // If instrument or number of periods has changed -> update period widgets
-  size_t numPeriods = MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
-  if(instrumentChanged || numPeriods != m_numPeriods)
-  {
+  size_t numPeriods =
+      MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
+  if (instrumentChanged || numPeriods != m_numPeriods) {
     updatePeriodWidgets(numPeriods);
   }
 
   // Populate bin width info in Plot options
-  double binWidth = matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
+  double binWidth =
+      matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
   m_uiForm.optionLabelBinWidth->setText(
-        QString("Data collected with histogram bins of %1 %2s").arg(binWidth).arg(QChar(956)));
+      QString("Data collected with histogram bins of %1 %2s")
+          .arg(binWidth)
+          .arg(QChar(956)));
 
   m_deadTimesChanged = false;
 
@@ -1596,7 +1550,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   m_currentLabel = loadResult->label;
 
-  if(m_uiForm.frontPlotButton->isEnabled())
+  if (m_uiForm.frontPlotButton->isEnabled())
     plotSelectedItem();
 }
 
@@ -1604,11 +1558,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
  * Deletes a workspace _or_ a workspace group with the given name, if one exists
  * @param wsName :: Name of the workspace to delete
  */
-void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
-{
-  if ( AnalysisDataService::Instance().doesExist(wsName) )
-  {
-    IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName) {
+  if (AnalysisDataService::Instance().doesExist(wsName)) {
+    IAlgorithm_sptr deleteAlg =
+        AlgorithmManager::Instance().create("DeleteWorkspace");
     deleteAlg->setLogging(false);
     deleteAlg->setPropertyValue("Workspace", wsName);
     deleteAlg->execute();
@@ -1618,21 +1571,23 @@ void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
 /**
  * Guess Alpha (slot). For now include all data from first good data(bin)
  */
-void MuonAnalysis::guessAlphaClicked()
-{
+void MuonAnalysis::guessAlphaClicked() {
   m_updating = true;
 
-  if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
-  {
-    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
-    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
+  if (getPairNumberFromRow(m_pairTableRowInFocus) >= 0) {
+    QComboBox *qwF = static_cast<QComboBox *>(
+        m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 1));
+    QComboBox *qwB = static_cast<QComboBox *>(
+        m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 2));
 
     if (!qwF || !qwB)
       return;
 
     // group IDs
-    QTableWidgetItem *idsF = m_uiForm.groupTable->item(m_groupToRow[qwF->currentIndex()],1);
-    QTableWidgetItem *idsB = m_uiForm.groupTable->item(m_groupToRow[qwB->currentIndex()],1);
+    QTableWidgetItem *idsF =
+        m_uiForm.groupTable->item(m_groupToRow[qwF->currentIndex()], 1);
+    QTableWidgetItem *idsB =
+        m_uiForm.groupTable->item(m_groupToRow[qwB->currentIndex()], 1);
 
     if (!idsF || !idsB)
       return;
@@ -1643,9 +1598,9 @@ void MuonAnalysis::guessAlphaClicked()
 
     double alphaValue;
 
-    try
-    {
-      IAlgorithm_sptr alphaAlg = AlgorithmManager::Instance().create("AlphaCalc");
+    try {
+      IAlgorithm_sptr alphaAlg =
+          AlgorithmManager::Instance().create("AlphaCalc");
       alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
       alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
       alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
@@ -1653,23 +1608,24 @@ void MuonAnalysis::guessAlphaClicked()
       alphaAlg->execute();
 
       alphaValue = alphaAlg->getProperty("Alpha");
-    }
-    catch(std::exception& e)
-    {
+    } catch (std::exception &e) {
       g_log.error() << "Error when running AlphaCalc: " << e.what() << "\n";
       QMessageBox::critical(this, "Guess alpha error",
-                            "Unable to guess alpha value. AlphaCalc failed. See log for details.");
+                            "Unable to guess alpha value. AlphaCalc failed. "
+                            "See log for details.");
       m_updating = false;
       return;
     }
 
     const QString alpha = QString::number(alphaValue);
 
-    QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
+    QComboBox *qwAlpha = static_cast<QComboBox *>(
+        m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 3));
     if (qwAlpha)
-      m_uiForm.pairTable->item(m_pairTableRowInFocus,3)->setText(alpha);
+      m_uiForm.pairTable->item(m_pairTableRowInFocus, 3)->setText(alpha);
     else
-      m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(alpha));
+      m_uiForm.pairTable->setItem(m_pairTableRowInFocus, 3,
+                                  new QTableWidgetItem(alpha));
   }
 
   m_updating = false;
@@ -1683,9 +1639,8 @@ void MuonAnalysis::guessAlphaClicked()
  *
  * @return number of groups
  */
-int MuonAnalysis::numGroups()
-{
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+int MuonAnalysis::numGroups() {
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   return static_cast<int>(m_groupToRow.size());
 }
 
@@ -1694,17 +1649,16 @@ int MuonAnalysis::numGroups()
  *
  * @return number of pairs
  */
-int MuonAnalysis::numPairs()
-{
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
+int MuonAnalysis::numPairs() {
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
   return static_cast<int>(m_pairToRow.size());
 }
 
 /**
- * Update front "group / group-pair" combo-box based on what the currentIndex now is
+ * Update front "group / group-pair" combo-box based on what the currentIndex
+ * now is
  */
-void MuonAnalysis::updateFront()
-{
+void MuonAnalysis::updateFront() {
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
@@ -1712,22 +1666,19 @@ void MuonAnalysis::updateFront()
 
   int numG = numGroups();
 
-  if (index >= 0 && numG)
-  {
-    if (index >= numG && numG >= 2)
-    {
+  if (index >= 0 && numG) {
+    if (index >= numG && numG >= 2) {
       // i.e. index points to a pair
       m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
 
       m_uiForm.frontAlphaLabel->setVisible(true);
       m_uiForm.frontAlphaNumber->setVisible(true);
 
-      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(m_pairToRow[index-numG],3)->text());
+      m_uiForm.frontAlphaNumber->setText(
+          m_uiForm.pairTable->item(m_pairToRow[index - numG], 3)->text());
 
       m_uiForm.frontAlphaNumber->setCursorPosition(0);
-    }
-    else
-    {
+    } else {
       // i.e. index points to a group
       m_uiForm.frontPlotFuncs->addItems(m_groupPlotFunc);
 
@@ -1737,17 +1688,15 @@ void MuonAnalysis::updateFront()
   }
 }
 
-
 /**
  * Update front including first re-populate pair list combo box
  */
-void MuonAnalysis::updateFrontAndCombo()
-{
+void MuonAnalysis::updateFrontAndCombo() {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to complete reset this combo box
   int currentI = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
-  if (currentI < 0)  // in case this combobox has not been set yet
+  if (currentI < 0) // in case this combobox has not been set yet
     currentI = 0;
   m_uiForm.frontGroupGroupPairComboBox->clear();
 
@@ -1755,12 +1704,12 @@ void MuonAnalysis::updateFrontAndCombo()
   int numP = numPairs();
   for (int i = 0; i < numG; i++)
     m_uiForm.frontGroupGroupPairComboBox->addItem(
-      m_uiForm.groupTable->item(m_groupToRow[i],0)->text());
+        m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
   for (int i = 0; i < numP; i++)
     m_uiForm.frontGroupGroupPairComboBox->addItem(
-      m_uiForm.pairTable->item(m_pairToRow[i],0)->text());
-  
-  if ( currentI >= m_uiForm.frontGroupGroupPairComboBox->count() )
+        m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
+
+  if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count())
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
   else
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
@@ -1797,12 +1746,10 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
  * @param row :: A row in the group table
  * @return Group number
  */
-int MuonAnalysis::getGroupNumberFromRow(int row)
-{
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
-  for (unsigned int i = 0; i < m_groupToRow.size(); i++)
-  {
-    if ( m_groupToRow[i] == row )
+int MuonAnalysis::getGroupNumberFromRow(int row) {
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
+  for (unsigned int i = 0; i < m_groupToRow.size(); i++) {
+    if (m_groupToRow[i] == row)
       return i;
   }
   return -1;
@@ -1815,43 +1762,36 @@ int MuonAnalysis::getGroupNumberFromRow(int row)
  * @param row :: A row in the pair table
  * @return Pair number
  */
-int MuonAnalysis::getPairNumberFromRow(int row)
-{
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
-  for (unsigned int i = 0; i < m_pairToRow.size(); i++)
-  {
-    if ( m_pairToRow[i] == row )
+int MuonAnalysis::getPairNumberFromRow(int row) {
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
+  for (unsigned int i = 0; i < m_pairToRow.size(); i++) {
+    if (m_pairToRow[i] == row)
       return i;
   }
   return -1;
 }
 
-
 /**
  * Return the pair which is in focus and -1 if none
  */
-int MuonAnalysis::pairInFocus()
-{
+int MuonAnalysis::pairInFocus() {
   // plus some code here which double checks that pair
   // table in focus actually sensible
   return m_pairTableRowInFocus;
 }
 
-
 /**
  * Clear tables and front combo box
  */
-void MuonAnalysis::clearTablesAndCombo()
-{
+void MuonAnalysis::clearTablesAndCombo() {
   m_uiForm.groupTable->clearContents();
   m_uiForm.frontGroupGroupPairComboBox->clear();
   m_uiForm.frontPlotFuncs->clear();
 
   m_uiForm.pairTable->clearContents();
-  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-  {
-    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
-    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
+    m_uiForm.pairTable->setCellWidget(i, 1, new QComboBox);
+    m_uiForm.pairTable->setCellWidget(i, 2, new QComboBox);
   }
 
   m_uiForm.groupDescription->clear();
@@ -1869,7 +1809,7 @@ void MuonAnalysis::clearLoadedRun() {
 
 /**
  * Get period labels for the periods selected in the GUI
- * @return Return empty string if no periods (well just one period). If more 
+ * @return Return empty string if no periods (well just one period). If more
  *         one period then return "_#" string for the periods selected by user
  */
 QStringList MuonAnalysis::getPeriodLabels() const {
@@ -1891,115 +1831,111 @@ QStringList MuonAnalysis::getPeriodLabels() const {
  * @param wsName   :: Workspace name
  * @param logScale :: Whether to plot using logarithmic scale
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
-{
-    // List of script lines which acquire a window for plotting. The window is placed to Python
-    // variable named 'w';'
-    QStringList acquireWindowScript;
+void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
+  // List of script lines which acquire a window for plotting. The window is
+  // placed to Python
+  // variable named 'w';'
+  QStringList acquireWindowScript;
 
-    MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
+  MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
 
-    // Hide all the previous plot windows, if creating a new one
-    if ( policy == MuonAnalysisOptionTab::NewWindow && m_uiForm.hideGraphs->isChecked())
-    {
-      hideAllPlotWindows();
-    }
+  // Hide all the previous plot windows, if creating a new one
+  if (policy == MuonAnalysisOptionTab::NewWindow &&
+      m_uiForm.hideGraphs->isChecked()) {
+    hideAllPlotWindows();
+  }
 
-    QStringList& s = acquireWindowScript; // To keep short
-    s << "ws = mtd['%WSNAME%']";
-    s << "altName = ws.name() + '-1'";
+  QStringList &s = acquireWindowScript; // To keep short
+  s << "ws = mtd['%WSNAME%']";
+  s << "altName = ws.name() + '-1'";
 
-    if ( policy == MuonAnalysisOptionTab::PreviousWindow )
-    {
-      s << "ew = graph(altName)";
-      s << "if '%WSNAME%' != '%PREV%' and ew != None:";
-      s << "    ew.close()";
+  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
+    s << "ew = graph(altName)";
+    s << "if '%WSNAME%' != '%PREV%' and ew != None:";
+    s << "    ew.close()";
 
-      s << "pw = graph('%PREV%-1')";
-      s << "if pw == None:";
-      s << "  pw = newGraph(altName, 0)";
-    }
-    else if ( policy == MuonAnalysisOptionTab::NewWindow )
-    {
-      s << "pw = newGraph(altName, 0)";
-    }
+    s << "pw = graph('%PREV%-1')";
+    s << "if pw == None:";
+    s << "  pw = newGraph(altName, 0)";
+  } else if (policy == MuonAnalysisOptionTab::NewWindow) {
+    s << "pw = newGraph(altName, 0)";
+  }
 
-    s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
-         "%CONNECT%, window = pw, "
-         "clearWindow = True)";
-    s << "w.setName(altName)";
-    s << "w.setObjectName(ws.name())";
-    s << "w.show()";
-    s << "w.setFocus()";
+  s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
+       "%CONNECT%, window = pw, "
+       "clearWindow = True)";
+  s << "w.setName(altName)";
+  s << "w.setObjectName(ws.name())";
+  s << "w.show()";
+  s << "w.setFocus()";
 
-    QString pyS;
+  QString pyS;
 
-    // Add line separators
-    pyS += acquireWindowScript.join("\n") + "\n";
+  // Add line separators
+  pyS += acquireWindowScript.join("\n") + "\n";
 
-    // Get plotting params
-    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
+  // Get plotting params
+  const QMap<QString, QString> &params = getPlotStyleParams(wsName);
 
-    // Insert real values
-    QString safeWSName(wsName);
-    safeWSName.replace("'", "\'");
-    pyS.replace("%WSNAME%", safeWSName);
-    pyS.replace("%PREV%", m_currentDataName);
-    pyS.replace("%ERRORS%", params["ShowErrors"]);
-    pyS.replace("%CONNECT%", params["ConnectType"]);
+  // Insert real values
+  QString safeWSName(wsName);
+  safeWSName.replace("'", "\'");
+  pyS.replace("%WSNAME%", safeWSName);
+  pyS.replace("%PREV%", m_currentDataName);
+  pyS.replace("%ERRORS%", params["ShowErrors"]);
+  pyS.replace("%CONNECT%", params["ConnectType"]);
 
-    // Update titles
-    pyS += "l = w.activeLayer()\n"
-           "l.setCurveTitle(0, ws.name())\n"
-           "l.setTitle(ws.getTitle())\n";
+  // Update titles
+  pyS += "l = w.activeLayer()\n"
+         "l.setCurveTitle(0, ws.name())\n"
+         "l.setTitle(ws.getTitle())\n";
 
-    // Set logarithmic scale if required
-    if ( logScale )
-      pyS += "l.logYlinX()\n";
+  // Set logarithmic scale if required
+  if (logScale)
+    pyS += "l.logYlinX()\n";
 
-    // Set scaling
-    if( params["YAxisAuto"] == "True" )
-    {
-      pyS += "l.setAutoScale()\n";
-    }
-    else
-    {
-      pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
-      pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
-    }
-    runPythonCode( pyS );
+  // Set scaling
+  if (params["YAxisAuto"] == "True") {
+    pyS += "l.setAutoScale()\n";
+  } else {
+    pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
+    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+  }
+  runPythonCode(pyS);
 }
 
 /**
- * Get current plot style parameters. wsName is used to get default values. 
+ * Get current plot style parameters. wsName is used to get default values.
  * @param wsName Workspace plot of which we want to style
- * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
+ * @return Maps of the parameters, see
+ MuonAnalysisOptionTab::parsePlotStyleParams for list
            of possible keys
  */
-QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName)
-{
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
 
   // If autoscale disabled
-  if(params["YAxisAuto"] == "False")
-  {
+  if (params["YAxisAuto"] == "False") {
     // Get specified min/max values for Y axis
     QString min = params["YAxisMin"];
     QString max = params["YAxisMax"];
 
     // If any of those is not specified - get min and max by default
-    if(min.isEmpty() || max.isEmpty())
-    {
-      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(0);
+    if (min.isEmpty() || max.isEmpty()) {
+      Workspace_sptr ws_ptr =
+          AnalysisDataService::Instance().retrieve(wsName.toStdString());
+      MatrixWorkspace_sptr matrix_workspace =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      const Mantid::MantidVec &dataY = matrix_workspace->readY(0);
 
-      if(min.isEmpty())
-        params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
+      if (min.isEmpty())
+        params["YAxisMin"] =
+            QString::number(*min_element(dataY.begin(), dataY.end()));
 
-      if(max.isEmpty())
-        params["YAxisMax"] = QString::number(*max_element(dataY.begin(), dataY.end()));
+      if (max.isEmpty())
+        params["YAxisMax"] =
+            QString::number(*max_element(dataY.begin(), dataY.end()));
     }
   }
 
@@ -2011,8 +1947,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName)
  * @param wsName Name of the workspace
  * @return True if exists, false if not
  */
-bool MuonAnalysis::plotExists(const QString& wsName)
-{
+bool MuonAnalysis::plotExists(const QString &wsName) {
   QString code;
 
   code += "g = graph('%1-1')\n"
@@ -2020,13 +1955,13 @@ bool MuonAnalysis::plotExists(const QString& wsName)
           "  print('1')\n"
           "else:\n"
           "  print('0')\n";
-  
+
   QString output = runPythonCode(code.arg(wsName));
 
   bool ok;
   int outputCode = output.toInt(&ok);
 
-  if(!ok)
+  if (!ok)
     throw std::logic_error("Script should print 0 or 1");
 
   return (outputCode == 1);
@@ -2036,20 +1971,19 @@ bool MuonAnalysis::plotExists(const QString& wsName)
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
  */
-void MuonAnalysis::selectMultiPeak(const QString& wsName)
-{
+void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   disableAllTools();
 
-  if( ! plotExists(wsName) )
+  if (!plotExists(wsName))
     plotSpectrum(wsName);
 
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"
-          "if g != None:\n"
-          "  g.show()\n"
-          "  g.setFocus()\n"
-          "  selectMultiPeak(g)\n";
+                                   "if g != None:\n"
+                                   "  g.show()\n"
+                                   "  g.setFocus()\n"
+                                   "  selectMultiPeak(g)\n";
 
   runPythonCode(code);
 }
@@ -2057,16 +1991,12 @@ void MuonAnalysis::selectMultiPeak(const QString& wsName)
 /**
  * Disable tools for all the graphs within MantidPlot.
  */
-void MuonAnalysis::disableAllTools()
-{
-  runPythonCode("disableTools()");
-}
+void MuonAnalysis::disableAllTools() { runPythonCode("disableTools()"); }
 
 /**
  * Hides all the plot windows (MultiLayer ones)
  */
-void MuonAnalysis::hideAllPlotWindows()
-{
+void MuonAnalysis::hideAllPlotWindows() {
   QString code;
 
   code += "for w in windows():\n"
@@ -2079,8 +2009,7 @@ void MuonAnalysis::hideAllPlotWindows()
 /**
  * Shows all the plot windows (MultiLayer ones)
  */
-void MuonAnalysis::showAllPlotWindows()
-{
+void MuonAnalysis::showAllPlotWindows() {
   QString code;
 
   code += "for w in windows():\n"
@@ -2095,10 +2024,8 @@ void MuonAnalysis::showAllPlotWindows()
  *
  * @return true if set
  */
-bool MuonAnalysis::isGroupingSet() const
-{
-  std::vector<int> dummy;
-  whichGroupToWhichRow(m_uiForm, dummy);
+bool MuonAnalysis::isGroupingSet() const {
+  auto dummy = whichGroupToWhichRow(m_uiForm);
 
   if (dummy.empty())
     return false;
@@ -2112,16 +2039,12 @@ bool MuonAnalysis::isGroupingSet() const
  * @param str :: String of type "1-3, 5, 10-15"
  * @return Number of detectors. Return 0 if not recognised
  */
-int MuonAnalysis::numOfDetectors(const std::string& str) const
-{
+int MuonAnalysis::numOfDetectors(const std::string &str) const {
   size_t rangeSize;
 
-  try
-  {
+  try {
     rangeSize = Strings::parseRange(str).size();
-  }
-  catch(...)
-  {
+  } catch (...) {
     rangeSize = 0;
   }
 
@@ -2133,19 +2056,15 @@ int MuonAnalysis::numOfDetectors(const std::string& str) const
  *  @param s :: The input string
  *  @return True is input string is a number
  */
-bool MuonAnalysis::isNumber(const std::string& s) const
-{
-  if( s.empty() )
-  {
+bool MuonAnalysis::isNumber(const std::string &s) const {
+  if (s.empty()) {
     return false;
   }
 
   const std::string allowed("0123456789");
 
-  for (unsigned int i = 0; i < s.size(); i++)
-  {
-    if (allowed.find_first_of(s[i]) == std::string::npos)
-    {
+  for (unsigned int i = 0; i < s.size(); i++) {
+    if (allowed.find_first_of(s[i]) == std::string::npos) {
       return false;
     }
   }
@@ -2153,12 +2072,10 @@ bool MuonAnalysis::isNumber(const std::string& s) const
   return true;
 }
 
-
 /**
 * Return true if data are loaded
 */
-bool MuonAnalysis::areDataLoaded()
-{
+bool MuonAnalysis::areDataLoaded() {
   return AnalysisDataService::Instance().doesExist(m_workspace_name);
 }
 
@@ -2166,8 +2083,7 @@ bool MuonAnalysis::areDataLoaded()
 * Set start up interface look and populate local attributes
 * initiated from info set in QT designer
 */
-void MuonAnalysis::startUpLook()
-{
+void MuonAnalysis::startUpLook() {
   // populate group plot functions
   for (int i = 0; i < m_uiForm.groupTablePlotChoice->count(); i++)
     m_groupPlotFunc.append(m_uiForm.groupTablePlotChoice->itemText(i));
@@ -2175,8 +2091,8 @@ void MuonAnalysis::startUpLook()
   // pair plot functions
   for (int i = 0; i < m_uiForm.pairTablePlotChoice->count(); i++)
     m_pairPlotFunc.append(m_uiForm.pairTablePlotChoice->itemText(i));
-  
-  // Set initial front 
+
+  // Set initial front
   m_uiForm.frontAlphaLabel->setVisible(false);
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
@@ -2189,65 +2105,54 @@ void MuonAnalysis::startUpLook()
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
   m_uiForm.groupTable->setColumnWidth(1, 200);
-  for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
-  {
-    QTableWidgetItem* item = m_uiForm.groupTable->item(i,2);
-    if (!item)
-    {
-      QTableWidgetItem* it = new QTableWidgetItem("");
+  for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++) {
+    QTableWidgetItem *item = m_uiForm.groupTable->item(i, 2);
+    if (!item) {
+      QTableWidgetItem *it = new QTableWidgetItem("");
       it->setFlags(it->flags() & (~Qt::ItemIsEditable));
-      m_uiForm.groupTable->setItem(i,2, it);
-    }
-    else
-    {
+      m_uiForm.groupTable->setItem(i, 2, it);
+    } else {
       item->setFlags(item->flags() & (~Qt::ItemIsEditable));
     }
-    item = m_uiForm.groupTable->item(i,0);
-    if (!item)
-    {
-      QTableWidgetItem* it = new QTableWidgetItem("");
-      m_uiForm.groupTable->setItem(i,0, it);
+    item = m_uiForm.groupTable->item(i, 0);
+    if (!item) {
+      QTableWidgetItem *it = new QTableWidgetItem("");
+      m_uiForm.groupTable->setItem(i, 0, it);
     }
   }
-}
-
- /**
- * Time zero returend in ms
- */
-double MuonAnalysis::timeZero()
-{
-  return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT, "time zero", g_log);
 }
 
 /**
- * Returns params string which can be passed to Rebin, according to what user specified. If no rebin
+* Time zero returend in ms
+*/
+double MuonAnalysis::timeZero() {
+  return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT,
+                            "time zero", g_log);
+}
+
+/**
+ * Returns params string which can be passed to Rebin, according to what user
+ * specified. If no rebin
  * requested by user, returns an empty string.
- * @param wsForRebin :: Workspace we are going to rebin. Use to determine bin size
+ * @param wsForRebin :: Workspace we are going to rebin. Use to determine bin
+ * size
  * @return Params string to pass to rebin
  */
-std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin)
-{
+std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
   MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
-  if ( rebinType == MuonAnalysisOptionTab::NoRebin )
-  {
+  if (rebinType == MuonAnalysisOptionTab::NoRebin) {
     return "";
-  }
-  else if ( rebinType == MuonAnalysisOptionTab::FixedRebin )
-  {
+  } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
     MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
     double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
 
     return boost::lexical_cast<std::string>(binSize * stepSize);
-  }
-  else if ( rebinType == MuonAnalysisOptionTab::VariableRebin )
-  {
+  } else if (rebinType == MuonAnalysisOptionTab::VariableRebin) {
     return m_optionTab->getRebinParams();
-  }
-  else
-  {
+  } else {
     throw std::runtime_error("Unknown rebin type");
   }
 }
@@ -2255,35 +2160,35 @@ std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin)
 /**
  * Return first good bin as set on the interface.
  */
-double MuonAnalysis::firstGoodBin() const
-{
-  return getValidatedDouble(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT, "first good bin",
-                            g_log);
+double MuonAnalysis::firstGoodBin() const {
+  return getValidatedDouble(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT,
+                            "first good bin", g_log);
 }
 
 /**
  * Returns min X value as specified by user.
  * @return Min X value
  */
-double MuonAnalysis::startTime() const
-{
+double MuonAnalysis::startTime() const {
   auto startTimeType = m_optionTab->getStartTimeType();
   double value(0);
 
-  switch(startTimeType)
-  {
-    case MuonAnalysisOptionTab::FirstGoodData:
-      value = firstGoodBin(); break;
+  switch (startTimeType) {
+  case MuonAnalysisOptionTab::FirstGoodData:
+    value = firstGoodBin();
+    break;
 
-    case MuonAnalysisOptionTab::TimeZero:
-      value = 0; break;
+  case MuonAnalysisOptionTab::TimeZero:
+    value = 0;
+    break;
 
-    case MuonAnalysisOptionTab::Custom:
-      value = m_optionTab->getCustomStartTime(); break;
+  case MuonAnalysisOptionTab::Custom:
+    value = m_optionTab->getCustomStartTime();
+    break;
 
-    default:
-      // Just in case added a new one
-      throw std::runtime_error("Unknown start time type");
+  default:
+    // Just in case added a new one
+    throw std::runtime_error("Unknown start time type");
   }
 
   return value;
@@ -2293,21 +2198,20 @@ double MuonAnalysis::startTime() const
  * Returns max X value as specified by user.
  * @return Max X value, or EMPTY_DBL() if not set
  */
-double MuonAnalysis::finishTime() const
-{
+double MuonAnalysis::finishTime() const {
   return m_optionTab->getCustomFinishTime();
 }
 
 /**
  * Load auto saved values
  */
-void MuonAnalysis::loadAutoSavedValues(const QString& group)
-{
+void MuonAnalysis::loadAutoSavedValues(const QString &group) {
   QSettings prevInstrumentValues;
   prevInstrumentValues.beginGroup(group + "instrument");
-  QString instrumentName = prevInstrumentValues.value("name", "MUSR").toString();
-  m_uiForm.instrSelector->setCurrentIndex(m_uiForm.instrSelector->findText(instrumentName));
-
+  QString instrumentName =
+      prevInstrumentValues.value("name", "MUSR").toString();
+  m_uiForm.instrSelector->setCurrentIndex(
+      m_uiForm.instrSelector->findText(instrumentName));
 
   // Load dead time options.
   QSettings deadTimeOptions;
@@ -2328,14 +2232,15 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
 
-
 /**
-*   Loads up the options for the fit browser so that it works in a muon analysis tab
+*   Loads up the options for the fit browser so that it works in a muon analysis
+* tab
 */
-void MuonAnalysis::loadFittings()
-{
-  // Title of the fitting dock widget that now lies within the fittings tab. Should be made
-  // dynamic so that the Chi-sq can be displayed alongside like original fittings widget
+void MuonAnalysis::loadFittings() {
+  // Title of the fitting dock widget that now lies within the fittings tab.
+  // Should be made
+  // dynamic so that the Chi-sq can be displayed alongside like original
+  // fittings widget
   m_uiForm.fitBrowser->setWindowTitle("Fit Function");
   // Make sure that the window can't be moved or closed within the tab.
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
@@ -2344,8 +2249,7 @@ void MuonAnalysis::loadFittings()
 /**
  * Allow/disallow loading.
  */
-void MuonAnalysis::allowLoading(bool enabled)
-{
+void MuonAnalysis::allowLoading(bool enabled) {
   m_uiForm.nextRun->setEnabled(enabled);
   m_uiForm.previousRun->setEnabled(enabled);
   m_uiForm.loadCurrent->setEnabled(enabled);
@@ -2353,49 +2257,41 @@ void MuonAnalysis::allowLoading(bool enabled)
 }
 
 /**
-*   Check to see if the appending option is true when the previous button has been pressed and acts accordingly
+*   Check to see if the appending option is true when the previous button has
+* been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun()
-{
-  if ( m_uiForm.mwRunFiles->getText().isEmpty() )
-  {
+void MuonAnalysis::checkAppendingPreviousRun() {
+  if (m_uiForm.mwRunFiles->getText().isEmpty()) {
     return;
   }
-  
+
   allowLoading(false);
-  
-  if (m_uiForm.mwRunFiles->getText().contains("-"))
-  {
+
+  if (m_uiForm.mwRunFiles->getText().contains("-")) {
     setAppendingRun(-1);
-  }
-  else
-  {
-    //Subtact one from the current run and load
+  } else {
+    // Subtact one from the current run and load
     changeRun(-1);
   }
 }
 
 /**
-*   Check to see if the appending option is true when the next button has been pressed and acts accordingly
+*   Check to see if the appending option is true when the next button has been
+* pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun()
-{
-  if (m_uiForm.mwRunFiles->getText().isEmpty() )
+void MuonAnalysis::checkAppendingNextRun() {
+  if (m_uiForm.mwRunFiles->getText().isEmpty())
     return;
 
   allowLoading(false);
 
-  if (m_uiForm.mwRunFiles->getText().contains("-"))
-  {
+  if (m_uiForm.mwRunFiles->getText().contains("-")) {
     setAppendingRun(1);
-  }
-  else
-  {
-    //Add one to current run and laod
+  } else {
+    // Add one to current run and laod
     changeRun(1);
   }
 }
-
 
 /**
 *   This sets up an appending lot of files so that when the user hits enter
@@ -2404,27 +2300,25 @@ void MuonAnalysis::checkAppendingNextRun()
 *   @param inc :: The number to increase the run by, this can be
 *   -1 if previous has been selected.
 */
-void MuonAnalysis::setAppendingRun(int inc)
-{
+void MuonAnalysis::setAppendingRun(int inc) {
   QString filePath("");
 
   // Get hold of the files to increment or decrement the range to.
-  QStringList currentFiles(m_uiForm.mwRunFiles->getFilenames() );
+  QStringList currentFiles(m_uiForm.mwRunFiles->getFilenames());
   if (currentFiles.empty())
     currentFiles = m_previousFilenames;
 
   // Name and size of the run to change.
   QString run("");
   int runSize(-1);
- 
+
   // The file number that needs to be incremented or decremented.
   int fileNumber(-1);
 
   if (inc < 0) // If the files list only includes one file.
   {
     fileNumber = 0; // Pick the first file in the list to decrement.
-  }
-  else // must be next that has been clicked.
+  } else            // must be next that has been clicked.
   {
     fileNumber = currentFiles.size() - 1; // Pick the last file to increment.
   }
@@ -2432,7 +2326,8 @@ void MuonAnalysis::setAppendingRun(int inc)
   // File path should be the same for both.
   separateMuonFile(filePath, currentFiles[fileNumber], run, runSize);
 
-  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].indexOf('.') );
+  int fileExtensionSize(currentFiles[fileNumber].size() -
+                        currentFiles[fileNumber].indexOf('.'));
   QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
@@ -2446,15 +2341,13 @@ void MuonAnalysis::setAppendingRun(int inc)
   getFullCode(runSize, newRun);
 
   // Increment is positive (next button)
-  if (inc < 0)
-  {
+  if (inc < 0) {
     // Add the file to the beginning of mwRunFiles text box.
-    QString lastName = m_previousFilenames[m_previousFilenames.size()-1];
+    QString lastName = m_previousFilenames[m_previousFilenames.size() - 1];
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);
-  }
-  else // Increment is negative (previous button)
+  } else // Increment is negative (previous button)
   {
     // Add the file onto the end of mwRunFiles text box
     QString firstName = m_previousFilenames[0];
@@ -2470,74 +2363,71 @@ void MuonAnalysis::setAppendingRun(int inc)
 *   @param amountToChange :: if clicked next then you need to open the next
 *   file so 1 is passed, -1 is passed if previous was clicked by the user.
 */
-void MuonAnalysis::changeRun(int amountToChange)
-{
+void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if ( (currentFile.isEmpty() ) )
+  if ((currentFile.isEmpty()))
     currentFile = m_previousFilenames[0];
-  
+
   QString run("");
   int runSize(-1);
 
   // If load current run get the correct run number.
-  if (currentFile.contains("auto") || currentFile.contains("argus0000000"))
-  {
+  if (currentFile.contains("auto") || currentFile.contains("argus0000000")) {
     separateMuonFile(filePath, currentFile, run, runSize);
     currentFile = filePath + QString::fromStdString(m_currentLabel) + ".nxs";
   }
-    
+
   separateMuonFile(filePath, currentFile, run, runSize);
 
-  int fileExtensionSize(currentFile.size()-currentFile.indexOf('.') );
-  QString fileExtension(currentFile.right(fileExtensionSize) );
+  int fileExtensionSize(currentFile.size() - currentFile.indexOf('.'));
+  QString fileExtension(currentFile.right(fileExtensionSize));
   currentFile.chop(fileExtensionSize);
 
   int runNumber = currentFile.right(runSize).toInt();
   currentFile.chop(runSize);
-  
+
   runNumber = runNumber + amountToChange;
   QString newRun("");
   newRun.setNum(runNumber);
 
   getFullCode(runSize, newRun);
 
-  if (m_textToDisplay.contains("\\") || m_textToDisplay.contains("/") || m_textToDisplay == "CURRENT RUN")
+  if (m_textToDisplay.contains("\\") || m_textToDisplay.contains("/") ||
+      m_textToDisplay == "CURRENT RUN")
     m_uiForm.mwRunFiles->setUserInput(filePath + currentFile + newRun);
   else
     m_uiForm.mwRunFiles->setUserInput(newRun);
 }
-
 
 /**
 *   Seperates the a given file into instrument, code and size of the code.
 *   i.e c:/data/MUSR0002419.nxs becomes c:/data/, MUSR0002419.nxs, 2419, 7.
 *
 *   @param filePath :: The file path of the data file.
-*   @param currentFile :: This is the file with path. Can be network path. Return as file with extension.
+*   @param currentFile :: This is the file with path. Can be network path.
+* Return as file with extension.
 *   @param run :: The run as a string without 0's at the beginning.
 *   @param runSize :: contains the size of the run number.
 */
-void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile, QString &run, int &runSize)
-{
+void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile,
+                                    QString &run, int &runSize) {
   int fileStart(-1);
   int firstRunDigit(-1);
 
-  //Find where the file begins
-  for (int i = 0; i<currentFile.size(); i++)
-  {
-    if(currentFile[i] == '/' || currentFile[i] == '\\')  //.isDigit())
+  // Find where the file begins
+  for (int i = 0; i < currentFile.size(); i++) {
+    if (currentFile[i] == '/' || currentFile[i] == '\\') //.isDigit())
     {
-      fileStart = i+1;
+      fileStart = i + 1;
     }
   }
 
   filePath = currentFile.left(fileStart);
   currentFile = currentFile.right(currentFile.size() - fileStart);
 
-  for (int i = 0; i<currentFile.size(); i++)
-  {
-    if(currentFile[i].isDigit())  //.isDigit())
+  for (int i = 0; i < currentFile.size(); i++) {
+    if (currentFile[i].isDigit()) //.isDigit())
     {
       firstRunDigit = i;
       break;
@@ -2545,53 +2435,47 @@ void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile, QSt
   }
 
   runSize = 0;
-  if (! (firstRunDigit < 0) )
-  {
-    //Find where the run number ends
-    for (int i = firstRunDigit; i<currentFile.size(); i++)
-    {
-      if(currentFile[i] == '.')
+  if (!(firstRunDigit < 0)) {
+    // Find where the run number ends
+    for (int i = firstRunDigit; i < currentFile.size(); i++) {
+      if (currentFile[i] == '.')
         break;
-      if(currentFile[i].isDigit())
-      {
+      if (currentFile[i].isDigit()) {
         ++runSize;
       }
     }
   }
-  run = currentFile.right(currentFile.size()-firstRunDigit);
+  run = currentFile.right(currentFile.size() - firstRunDigit);
   run = run.left(runSize);
 }
 
-
 /**
-* Adds the 0's back onto the run which were lost when converting it to an integer.
+* Adds the 0's back onto the run which were lost when converting it to an
+* integer.
 *
 * @param originalSize :: The size of the original run before conversion
 * @param run :: This is the run after it was incremented or decremented.
 */
-void MuonAnalysis::getFullCode(int originalSize, QString & run)
-{
-  while (originalSize > run.size())
-  {
+void MuonAnalysis::getFullCode(int originalSize, QString &run) {
+  while (originalSize > run.size()) {
     run = "0" + run;
   }
 }
-
 
 /**
  * Is called every time when tab gets changed
  *
  * @param newTabIndex :: The index of the tab we switch to
  */
-void MuonAnalysis::changeTab(int newTabIndex)
-{
-  QWidget* newTab = m_uiForm.tabWidget->widget(newTabIndex);
+void MuonAnalysis::changeTab(int newTabIndex) {
+  QWidget *newTab = m_uiForm.tabWidget->widget(newTabIndex);
 
-  // Make sure all toolbars are still not visible. May have brought them back to do a plot.
+  // Make sure all toolbars are still not visible. May have brought them back to
+  // do a plot.
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);
 
-  if(m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
+  if (m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
     emit setFitPropertyBrowser(NULL);
@@ -2599,12 +2483,14 @@ void MuonAnalysis::changeTab(int newTabIndex)
     // Remove PP tool from any plots it was attached to
     disableAllTools();
 
-    // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
-    disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                              this, SLOT(selectMultiPeak(const QString&)));
+    // Disconnect to avoid problems when filling list of workspaces in fit prop.
+    // browser
+    disconnect(m_uiForm.fitBrowser,
+               SIGNAL(workspaceNameChanged(const QString &)), this,
+               SLOT(selectMultiPeak(const QString &)));
   }
 
-  if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
+  if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Save last fitting range
     auto xmin = m_uiForm.fitBrowser->startX();
@@ -2614,31 +2500,32 @@ void MuonAnalysis::changeTab(int newTabIndex)
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
 
     // Show connected plot and attach PP tool to it (if has been assigned)
-    if(m_currentDataName != NOT_AVAILABLE)
+    if (m_currentDataName != NOT_AVAILABLE)
       selectMultiPeak(m_currentDataName);
-    
-    // In future, when workspace gets changed, show its plot and attach PP tool to it
-    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                           this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
+
+    // In future, when workspace gets changed, show its plot and attach PP tool
+    // to it
+    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+            this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
 
     // setFitPropertyBrowser() above changes the fitting range, so we have to
     // either initialise it to the correct values:
     if (xmin == 0.0 && xmax == 0.0) {
-      // A previous fitting range of [0,0] means this is the first time the users goes to "Data Analysis" tab
+      // A previous fitting range of [0,0] means this is the first time the
+      // users goes to "Data Analysis" tab
       // We have to initialise the fitting range
-      m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
+      m_uiForm.fitBrowser->setStartX(
+          m_uiForm.timeAxisStartAtInput->text().toDouble());
+      m_uiForm.fitBrowser->setEndX(
+          m_uiForm.timeAxisFinishAtInput->text().toDouble());
     }
     // or set it to the previous values provided by the user:
-    else
-    {
+    else {
       // A previous fitting range already exists, so we use it
-      m_uiForm.fitBrowser->setStartX (xmin);
-      m_uiForm.fitBrowser->setEndX (xmax);
+      m_uiForm.fitBrowser->setStartX(xmin);
+      m_uiForm.fitBrowser->setEndX(xmax);
     }
-  }
-  else if(newTab == m_uiForm.ResultsTable)
-  {
+  } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
 
@@ -2648,56 +2535,68 @@ void MuonAnalysis::changeTab(int newTabIndex)
 /**
 * Set up the signals and slots for auto updating the plots
 */
-void MuonAnalysis::connectAutoUpdate()
-{
+void MuonAnalysis::connectAutoUpdate() {
   // Home tab Auto Updates
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(activated(int)), this,
+          SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
-  connect(m_uiForm.frontAlphaNumber, SIGNAL( returnPressed() ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.frontPlotFuncs, SIGNAL(activated(int)), this,
+          SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed()), this,
+          SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this,
+          SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed()), this,
+          SLOT(homeTabUpdatePlot()));
 
   connect(m_uiForm.homePeriodBox1, SIGNAL(editingFinished()), this,
           SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(editingFinished()), this,
           SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
+  connect(m_uiForm.deadTimeType, SIGNAL(activated(int)), this,
+          SLOT(deadTimeTypeAutoUpdate(int)));
 
   // Grouping tab Auto Updates
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
-  connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this,
+          SLOT(groupTabUpdatePlot()));
+  connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this,
+          SLOT(groupTabUpdatePlot()));
 
   // Settings tab Auto Updates
-  connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
-  connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
+  connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this,
+          SLOT(settingsTabUpdatePlot()));
+  connect(m_optionTab, SIGNAL(plotStyleChanged()), this,
+          SLOT(updateCurrentPlotStyle()));
 }
 
 /**
- * Connect widgets to saveWidgetValue() slot so their values are automatically saved when they are
+ * Connect widgets to saveWidgetValue() slot so their values are automatically
+ * saved when they are
  * getting changed.
  */
-void MuonAnalysis::connectAutoSave()
-{
-  connect(m_uiForm.timeZeroFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
+void MuonAnalysis::connectAutoSave() {
+  connect(m_uiForm.timeZeroFront, SIGNAL(textChanged(const QString &)), this,
+          SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString &)),
+          this, SLOT(saveWidgetValue()));
 
-  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
-  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this,
+          SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this,
+          SLOT(saveWidgetValue()));
 }
 
 /**
  * Saves the value of the widget which called the slot.
  * TODO: should be done using MuonAnalysisHelper::WidgetAutoSaver
  */
-void MuonAnalysis::saveWidgetValue()
-{
+void MuonAnalysis::saveWidgetValue() {
   // Get the widget which called the slot
-  QWidget* sender = qobject_cast<QWidget*>(QObject::sender());
+  QWidget *sender = qobject_cast<QWidget *>(QObject::sender());
 
-  if(!sender)
+  if (!sender)
     throw std::runtime_error("Unable to save value of non-widget QObject");
 
   QString name = sender->objectName();
@@ -2706,18 +2605,17 @@ void MuonAnalysis::saveWidgetValue()
   settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
 
   // Save value for QLineEdit
-  if(QLineEdit* w = qobject_cast<QLineEdit*>(sender))
-  {
+  if (QLineEdit *w = qobject_cast<QLineEdit *>(sender)) {
     settings.setValue(name, w->text());
   }
   // Save value for QCheckBox
-  else if(QCheckBox* w = qobject_cast<QCheckBox*>(sender))
-  {
+  else if (QCheckBox *w = qobject_cast<QCheckBox *>(sender)) {
     settings.setValue(name, static_cast<int>(w->checkState()));
   }
   // ... add more as neccessary
   else
-    throw std::runtime_error("Value saving for this widget type is not supported");
+    throw std::runtime_error(
+        "Value saving for this widget type is not supported");
 
   settings.endGroup();
 }
@@ -2728,26 +2626,26 @@ void MuonAnalysis::saveWidgetValue()
  * @param       target :: Widget where the value will be loaded to
  * @param defaultValue :: Values which will be set if there is no saved value
  */
-void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue)
-{
+void MuonAnalysis::loadWidgetValue(QWidget *target,
+                                   const QVariant &defaultValue) {
   QString name = target->objectName();
 
   QSettings settings;
   settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
 
   // Load value for QLineEdit
-  if(QLineEdit* w = qobject_cast<QLineEdit*>(target))
-  {
+  if (QLineEdit *w = qobject_cast<QLineEdit *>(target)) {
     w->setText(settings.value(name, defaultValue).toString());
   }
   // Load value for QCheckBox
-  else if(QCheckBox* w = qobject_cast<QCheckBox*>(target))
-  {
-    w->setCheckState(static_cast<Qt::CheckState>(settings.value(name, defaultValue).toInt()));
+  else if (QCheckBox *w = qobject_cast<QCheckBox *>(target)) {
+    w->setCheckState(static_cast<Qt::CheckState>(
+        settings.value(name, defaultValue).toInt()));
   }
   // ... add more as neccessary
   else
-    throw std::runtime_error("Value loading for this widget type is not supported");
+    throw std::runtime_error(
+        "Value loading for this widget type is not supported");
 
   settings.endGroup();
 }
@@ -2764,34 +2662,33 @@ void MuonAnalysis::checkForEqualPeriods() {
   }
 }
 
-void MuonAnalysis::homeTabUpdatePlot()
-{
+void MuonAnalysis::homeTabUpdatePlot() {
   if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Home && m_loaded)
-      runFrontPlotButton();
+    runFrontPlotButton();
 }
 
-void MuonAnalysis::groupTabUpdatePlot()
-{
-  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded)
-      runFrontPlotButton();
+void MuonAnalysis::groupTabUpdatePlot() {
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions &&
+      m_loaded)
+    runFrontPlotButton();
 }
 
-void MuonAnalysis::settingsTabUpdatePlot()
-{
-  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Settings && m_loaded == true)
+void MuonAnalysis::settingsTabUpdatePlot() {
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Settings &&
+      m_loaded == true)
     runFrontPlotButton();
 }
 
 /**
- * Sets plot type combo box on the Home tab to the same value as the one under Group Table.
+ * Sets plot type combo box on the Home tab to the same value as the one under
+ * Group Table.
  */
-void MuonAnalysis::syncGroupTablePlotTypeWithHome()
-{
+void MuonAnalysis::syncGroupTablePlotTypeWithHome() {
   int plotTypeIndex = m_uiForm.groupTablePlotChoice->currentIndex();
 
-  if ( m_uiForm.frontPlotFuncs->count() <= plotTypeIndex )
-  {
-    // This is not the best solution, but I don't have anything brighter at the moment and it
+  if (m_uiForm.frontPlotFuncs->count() <= plotTypeIndex) {
+    // This is not the best solution, but I don't have anything brighter at the
+    // moment and it
     // was working like that for some time without anybody complaining.
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
   }
@@ -2800,19 +2697,17 @@ void MuonAnalysis::syncGroupTablePlotTypeWithHome()
 }
 
 /**
- * Updates the style of the current plot according to actual parameters on settings tab.
+ * Updates the style of the current plot according to actual parameters on
+ * settings tab.
  */
-void MuonAnalysis::updateCurrentPlotStyle()
-{
-  if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
-  {
+void MuonAnalysis::updateCurrentPlotStyle() {
+  if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE) {
     // Replot using new style params
     plotSpectrum(m_currentDataName);
   }
 }
 
-bool MuonAnalysis::isAutoUpdateEnabled()
-{
+bool MuonAnalysis::isAutoUpdateEnabled() {
   int choice(m_uiForm.plotCreation->currentIndex());
   return (choice == 0 || choice == 1);
 }
@@ -2821,8 +2716,7 @@ bool MuonAnalysis::isAutoUpdateEnabled()
  * Whether Overwrite option is enabled on the Settings tab.
  * @return True if enabled, false if not
  */
-bool MuonAnalysis::isOverwriteEnabled()
-{
+bool MuonAnalysis::isOverwriteEnabled() {
   int choice(m_uiForm.plotCreation->currentIndex());
   return (choice == 0 || choice == 2);
 }
@@ -2830,25 +2724,22 @@ bool MuonAnalysis::isOverwriteEnabled()
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *)
-{
+void MuonAnalysis::hideEvent(QHideEvent *) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
-  
+
   // If closed while on DA tab, reassign fit property browser to default one
-  if(m_currentTab == m_uiForm.DataAnalysis)
+  if (m_currentTab == m_uiForm.DataAnalysis)
     emit setFitPropertyBrowser(NULL);
 }
-
 
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *)
-{
+void MuonAnalysis::showEvent(QShowEvent *) {
   // Hide toolbars if requested by user
-  if (m_uiForm.hideToolbars->isChecked() )
+  if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);
 }
 
@@ -2856,28 +2747,24 @@ void MuonAnalysis::showEvent(QShowEvent *)
  * Hide/show MantidPlot toolbars.
  * @param hidden If true, toolbars will be hidden, if false - shown
  */
-void MuonAnalysis::doSetToolbarsHidden(bool hidden)
-{
+void MuonAnalysis::doSetToolbarsHidden(bool hidden) {
   QString isVisibleStr = hidden ? "False" : "True";
 
-  runPythonCode( QString("setToolbarsVisible(%1)").arg(isVisibleStr) );
+  runPythonCode(QString("setToolbarsVisible(%1)").arg(isVisibleStr));
 }
-
 
 /**
  * Called when dead time correction type is changed.
  * @param choice :: New index of dead time correction type combo box
  */
-void MuonAnalysis::onDeadTimeTypeChanged(int choice)
-{
+void MuonAnalysis::onDeadTimeTypeChanged(int choice) {
   m_deadTimesChanged = true;
 
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     m_uiForm.dtcFileLabel->setVisible(false);
-  }
-  else // choice must be from workspace
+  } else // choice must be from workspace
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
     m_uiForm.mwRunDeadTimeFile->setUserInput("");
@@ -2893,24 +2780,22 @@ void MuonAnalysis::onDeadTimeTypeChanged(int choice)
  * Auto-update the plot after user has changed dead time correction type.
  * @param choice :: User selected index of the dead time correction combox box
  */
-void MuonAnalysis::deadTimeTypeAutoUpdate(int choice)
-{
-  // We update the plot only if user switches to "None" or "From Data File" correction type, because
+void MuonAnalysis::deadTimeTypeAutoUpdate(int choice) {
+  // We update the plot only if user switches to "None" or "From Data File"
+  // correction type, because
   // in case of "From Disk" the file should be specified first.
-  if ( choice == 0 || choice == 1 )
-  {
+  if (choice == 0 || choice == 1) {
     homeTabUpdatePlot();
   }
 }
 
 /**
-* If the user selects/changes the file to be used to apply the dead times then 
+* If the user selects/changes the file to be used to apply the dead times then
 * see if the plot needs updating and make sure next time the user plots that the
 * dead times are applied.
 */
-void MuonAnalysis::deadTimeFileSelected()
-{
-  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+void MuonAnalysis::deadTimeFileSelected() {
+  if (!m_uiForm.mwRunDeadTimeFile->isValid())
     return;
 
   // Remember the filename for the next time interface is opened
@@ -2923,42 +2808,43 @@ void MuonAnalysis::deadTimeFileSelected()
 }
 
 /**
- * Updates the enabled-state and value of Time Zero using "auto" check-box state.
- * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
+ * Updates the enabled-state and value of Time Zero using "auto" check-box
+ * state.
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it
+ * from the form
  */
-void MuonAnalysis::setTimeZeroState(int checkBoxState)
-{
-  if(checkBoxState == -1)
+void MuonAnalysis::setTimeZeroState(int checkBoxState) {
+  if (checkBoxState == -1)
     checkBoxState = m_uiForm.timeZeroAuto->checkState();
 
-  if(checkBoxState == Qt::Checked) // From data file
+  if (checkBoxState == Qt::Checked) // From data file
   {
     m_uiForm.timeZeroFront->setEnabled(false);
     m_uiForm.timeZeroFront->setText(QString::number(m_dataTimeZero, 'g', 2));
     homeTabUpdatePlot(); // Auto-update
-  }
-  else // Custom
+  } else                 // Custom
   {
     m_uiForm.timeZeroFront->setEnabled(true);
   }
 }
 
 /**
- * Updates the enabled-state and value of First Good Data using "auto" check-box state.
- * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
+ * Updates the enabled-state and value of First Good Data using "auto" check-box
+ * state.
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it
+ * from the form
  */
-void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
-{
-  if(checkBoxState == -1)
+void MuonAnalysis::setFirstGoodDataState(int checkBoxState) {
+  if (checkBoxState == -1)
     checkBoxState = m_uiForm.firstGoodDataAuto->checkState();
 
-  if(checkBoxState == Qt::Checked) // From data file
+  if (checkBoxState == Qt::Checked) // From data file
   {
     m_uiForm.firstGoodBinFront->setEnabled(false);
-    m_uiForm.firstGoodBinFront->setText(QString::number(m_dataFirstGoodData, 'g', 2));
+    m_uiForm.firstGoodBinFront->setText(
+        QString::number(m_dataFirstGoodData, 'g', 2));
     homeTabUpdatePlot(); // Auto-update
-  }
-  else // Custom
+  } else                 // Custom
   {
     m_uiForm.firstGoodBinFront->setEnabled(true);
   }
@@ -2970,8 +2856,9 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
  * @param groupingName :: ADS name of the grouping table to use
  * @return Grouped workspace
  */
-Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std::string& groupingName) const
-{
+Workspace_sptr
+MuonAnalysis::groupWorkspace(const std::string &wsName,
+                             const std::string &groupingName) const {
   ScopedWorkspace outputEntry;
 
   // Use MuonProcess in "correct and group" mode.
@@ -2991,7 +2878,8 @@ Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
     groupAlg->execute();
   } catch (std::exception &e) {
-    throw std::runtime_error( "Unable to group workspace:\n\n" + std::string(e.what()) );
+    throw std::runtime_error("Unable to group workspace:\n\n" +
+                             std::string(e.what()));
   }
 
   return outputEntry.retrieve();
@@ -3001,16 +2889,17 @@ Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std
  * Groups loaded workspace using information from Grouping Options tab.
  * I.e. m_workspace_name is grouped with result placed to m_grouped_name
  */
-void MuonAnalysis::groupLoadedWorkspace()
-{
+void MuonAnalysis::groupLoadedWorkspace() {
   ITableWorkspace_sptr grouping = parseGrouping();
 
-  if ( ! grouping )
-    throw std::invalid_argument("Unable to parse grouping information from the table, or it is empty.");
+  if (!grouping)
+    throw std::invalid_argument(
+        "Unable to parse grouping information from the table, or it is empty.");
 
   ScopedWorkspace groupingEntry(grouping);
 
-  Workspace_sptr groupedWorkspace = groupWorkspace(m_workspace_name, groupingEntry.name());
+  Workspace_sptr groupedWorkspace =
+      groupWorkspace(m_workspace_name, groupingEntry.name());
 
   deleteWorkspaceIfExists(m_grouped_name);
   AnalysisDataService::Instance().add(m_grouped_name, groupedWorkspace);
@@ -3020,8 +2909,7 @@ void MuonAnalysis::groupLoadedWorkspace()
  * Parses grouping information from the UI table.
  * @return ITableWorkspace of the format returned by LoadMuonNexus
  */
-ITableWorkspace_sptr MuonAnalysis::parseGrouping()
-{
+ITableWorkspace_sptr MuonAnalysis::parseGrouping() {
   auto grouping = boost::make_shared<Mantid::API::Grouping>();
   parseGroupingTable(m_uiForm, *grouping);
   return groupingToTable(grouping);
@@ -3030,15 +2918,12 @@ ITableWorkspace_sptr MuonAnalysis::parseGrouping()
 /**
  * Opens a sequential fit dialog.
  */
-void MuonAnalysis::openSequentialFitDialog()
-{
+void MuonAnalysis::openSequentialFitDialog() {
   Algorithm_sptr loadAlg;
 
-  try
-  {
+  try {
     loadAlg = createLoadAlgorithm();
-  }
-  catch (const std::runtime_error &err) {
+  } catch (const std::runtime_error &err) {
     QString message("Error while setting load properties.\n"
                     "If instrument was changed, properties will have been "
                     "cleared and should be reset.\n\n"
@@ -3047,16 +2932,16 @@ void MuonAnalysis::openSequentialFitDialog()
     QMessageBox::critical(this, "Unable to open dialog", message);
     g_log.error(message.ascii());
     return;
-  }
-  catch(...)
-  {
-    QMessageBox::critical(this, "Unable to open dialog", "Error while setting load properties");
+  } catch (...) {
+    QMessageBox::critical(this, "Unable to open dialog",
+                          "Error while setting load properties");
     return;
   }
 
   m_uiForm.fitBrowser->blockSignals(true);
 
-  MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
+  MuonSequentialFitDialog *dialog =
+      new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
   dialog->exec();
 
   m_uiForm.fitBrowser->blockSignals(false);
@@ -3066,9 +2951,8 @@ void MuonAnalysis::openSequentialFitDialog()
  * Returns custom dead time table file name as set on the interface.
  * @return The filename
  */
-std::string MuonAnalysis::deadTimeFilename() const
-{
-  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+std::string MuonAnalysis::deadTimeFilename() const {
+  if (!m_uiForm.mwRunDeadTimeFile->isValid())
     throw std::runtime_error("Specified Dead Time file is not valid.");
 
   return m_uiForm.mwRunDeadTimeFile->getFirstFilename().toStdString();
@@ -3079,11 +2963,10 @@ std::string MuonAnalysis::deadTimeFilename() const
  * @param filename :: File to load dead times from
  * @return Table (group of tables) with dead times
  */
-Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
-{
-  try
-  {
-    IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
+Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string &filename) const {
+  try {
+    IAlgorithm_sptr loadDeadTimes =
+        AlgorithmManager::Instance().create("LoadNexusProcessed");
     loadDeadTimes->setChild(true);
     loadDeadTimes->setLogging(false); // We'll take care of logging ourself
     loadDeadTimes->setPropertyValue("Filename", filename);
@@ -3091,11 +2974,10 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
     loadDeadTimes->execute();
 
     return loadDeadTimes->getProperty("OutputWorkspace");
-  }
-  catch(std::exception& e)
-  {
+  } catch (std::exception &e) {
     std::ostringstream errorMsg;
-    errorMsg << "Unable to load dead times from the specified file: " << e.what();
+    errorMsg << "Unable to load dead times from the specified file: "
+             << e.what();
     throw std::runtime_error(errorMsg.str());
   }
 }
@@ -3146,11 +3028,11 @@ MuonAnalysis::deadTimesToTable(const Workspace_sptr &deadTimes) const {
 }
 
 /**
- * Creates and algorithm with all the properties set according to widget values on the interface.
+ * Creates and algorithm with all the properties set according to widget values
+ * on the interface.
  * @return The algorithm with properties set
  */
-Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
-{
+Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
   Algorithm_sptr loadAlg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
   loadAlg->initialize();
@@ -3161,14 +3043,13 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   // set too. If it can't be set here (from disk file), the sequential fit
   // must load the dead times from each file.
 
-  if (m_uiForm.deadTimeType->currentIndex() != 0)
-  {
+  if (m_uiForm.deadTimeType->currentIndex() != 0) {
     loadAlg->setProperty("ApplyDeadTimeCorrection", true);
 
     if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
     {
 
-      Workspace_sptr deadTimes = loadDeadTimes( deadTimeFilename() );
+      Workspace_sptr deadTimes = loadDeadTimes(deadTimeFilename());
 
       loadAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
     }
@@ -3176,26 +3057,25 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   // -- Grouping --------------------------------------------------------------
 
-  ITableWorkspace_sptr grouping = parseGrouping(); 
+  ITableWorkspace_sptr grouping = parseGrouping();
   loadAlg->setProperty("DetectorGroupingTable", grouping);
 
   // -- X axis options --------------------------------------------------------
   loadAlg->setProperty("Xmin", startTime());
 
   double Xmax = finishTime();
-  if (Xmax != EMPTY_DBL())
-  {
+  if (Xmax != EMPTY_DBL()) {
     loadAlg->setProperty("Xmax", Xmax);
   }
 
-  double timeZero = m_uiForm.timeZeroFront->text().toDouble(); 
+  double timeZero = m_uiForm.timeZeroFront->text().toDouble();
   loadAlg->setProperty("TimeZero", timeZero);
 
   // -- Rebin options ---------------------------------------------------------
-  std::string params = rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
+  std::string params =
+      rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
 
-  if (!params.empty())
-  {
+  if (!params.empty()) {
     loadAlg->setPropertyValue("RebinParams", params);
   }
 
@@ -3203,24 +3083,23 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
-  if (index >= numGroups())
-  {
+  if (index >= numGroups()) {
     loadAlg->setProperty("OutputType", "PairAsymmetry");
     int tableRow = m_pairToRow[index - numGroups()];
 
-    QTableWidget* t = m_uiForm.pairTable;
+    QTableWidget *t = m_uiForm.pairTable;
 
-    double alpha = t->item(tableRow,3)->text().toDouble();
-    int index1 = static_cast<QComboBox*>( t->cellWidget(tableRow,1) )->currentIndex();
-    int index2 = static_cast<QComboBox*>( t->cellWidget(tableRow,2) )->currentIndex();
+    double alpha = t->item(tableRow, 3)->text().toDouble();
+    int index1 =
+        static_cast<QComboBox *>(t->cellWidget(tableRow, 1))->currentIndex();
+    int index2 =
+        static_cast<QComboBox *>(t->cellWidget(tableRow, 2))->currentIndex();
 
     loadAlg->setProperty("PairFirstIndex", index1);
     loadAlg->setProperty("PairSecondIndex", index2);
     loadAlg->setProperty("Alpha", alpha);
-  }
-  else
-  {
-    if ( parsePlotType(m_uiForm.frontPlotFuncs) == Asymmetry )
+  } else {
+    if (parsePlotType(m_uiForm.frontPlotFuncs) == Asymmetry)
       loadAlg->setProperty("OutputType", "GroupAsymmetry");
     else
       loadAlg->setProperty("OutputType", "GroupCounts");
@@ -3235,8 +3114,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
 
   QString periodLabel2 = m_uiForm.homePeriodBox2->text();
-  if ( periodLabel2 != "None" )
-  {
+  if (periodLabel2 != "None") {
     loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
   }
 
@@ -3246,32 +3124,29 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 /**
  * When no data loaded set various buttons etc to inactive
  */
-void MuonAnalysis::noDataAvailable()
-{
+void MuonAnalysis::noDataAvailable() {
   m_uiForm.frontPlotButton->setEnabled(false);
   m_uiForm.groupTablePlotButton->setEnabled(false);
   m_uiForm.pairTablePlotButton->setEnabled(false);
   m_uiForm.guessAlphaButton->setEnabled(false);
 }
 
-
 /**
  * When data loaded set various buttons etc to active
  */
-void MuonAnalysis::nowDataAvailable()
-{
+void MuonAnalysis::nowDataAvailable() {
   m_uiForm.frontPlotButton->setEnabled(true);
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
 }
 
-void MuonAnalysis::openDirectoryDialog()
-{
-  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+void MuonAnalysis::openDirectoryDialog() {
+  MantidQt::API::ManageUserDirectories *ad =
+      new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }
 
-}//namespace MantidQT
-}//namespace CustomInterfaces
+} // namespace MantidQT
+} // namespace CustomInterfaces

@@ -1210,9 +1210,9 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  declareProperty("SpectrumMin", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMin", EMPTY_INT(), mustBePositive,
                   "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
@@ -1490,11 +1490,11 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset);
+    pixelID_to_wi_vector =
+        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
   else
-    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                              pixelID_to_wi_offset, true);
+    pixelID_to_wi_vector =
+        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -1635,8 +1635,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log"));
+  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");

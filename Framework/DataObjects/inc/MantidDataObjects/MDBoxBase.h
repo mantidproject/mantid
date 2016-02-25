@@ -46,7 +46,7 @@ TMDE_CLASS
 class DLLExport MDBoxBase : public Mantid::API::IMDNode {
 public:
   //-----------------------------------------------------------------------------------------------
-  MDBoxBase(Mantid::API::BoxController *const BoxController = NULL,
+  MDBoxBase(Mantid::API::BoxController *const BoxController = nullptr,
             const uint32_t depth = 0, const size_t boxID = UNDEF_SIZET);
 
   MDBoxBase(Mantid::API::BoxController *const BoxController,

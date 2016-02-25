@@ -74,6 +74,15 @@ public:
   IMDWorkspace();
   ~IMDWorkspace() override;
 
+  /**
+   * Holds X, Y, E for a line plot
+   */
+  struct LinePlot {
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+  };
+
   /// Returns a clone of the workspace
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
@@ -96,7 +105,7 @@ public:
   /// Creates a new iterator pointing to the first cell in the workspace
   virtual std::vector<IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const = 0;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates
   virtual signal_t
@@ -110,14 +119,12 @@ public:
       const Mantid::API::MDNormalization &normalization) const = 0;
 
   /// Method to generate a line plot through a MD-workspace
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  virtual LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                               const Mantid::Kernel::VMD &end,
+                               Mantid::API::MDNormalization normalize) const;
 
-  IMDIterator *
-  createIterator(Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  IMDIterator *createIterator(
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
   void setConvention(std::string m_convention);

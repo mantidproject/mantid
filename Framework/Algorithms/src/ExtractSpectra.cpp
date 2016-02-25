@@ -421,8 +421,8 @@ void ExtractSpectra::checkProperties() {
   // 3. Start and stop index
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   if (!detectorList.empty()) {
-    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList,
-                                                m_workspaceIndexList);
+    m_workspaceIndexList =
+        m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
   } else {
     m_workspaceIndexList = getProperty("WorkspaceIndexList");
 

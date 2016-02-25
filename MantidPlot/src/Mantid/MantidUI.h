@@ -28,6 +28,7 @@
 #include <QProgressDialog>
 #include <QMap>
 #include <QMutex>
+#include <unordered_map>
 
 //----------------------------------
 // Forward declarations
@@ -101,10 +102,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
-Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
-  Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
-  Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
 
 class MantidUI:public QObject
 {
@@ -572,7 +571,7 @@ private:
   QMap<std::string,int> m_DAE_map;
 
   // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
-  std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
+  std::unordered_multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
   QMdiSubWindow *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   //prevents some repeated code realtating to log names
