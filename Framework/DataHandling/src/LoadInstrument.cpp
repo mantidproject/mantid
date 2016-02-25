@@ -289,15 +289,16 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   // Assemble parameter file name
   std::string fullPathParamIDF =
       directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, so look for file based on instrument ID
-               // given by the prefix
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, so look
+                                                // for file based on instrument
+                                                // ID
+                                                // given by the prefix
     fullPathParamIDF =
         directoryPath.setFileName(prefix + "_Parameters.xml").toString();
   }
 
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, indicate none found in this directory.
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, indicate
+                                                // none found in this directory.
     fullPathParamIDF = "";
   }
 

@@ -126,7 +126,7 @@ void MaxMin::exec() {
 
     MantidVec::const_iterator maxY;
     // Find the max/min element
-    if (showMin == true) {
+    if (showMin) {
       maxY = std::min_element(Y.begin() + distmin, Y.begin() + distmax);
     } else {
       maxY = std::max_element(Y.begin() + distmin, Y.begin() + distmax);

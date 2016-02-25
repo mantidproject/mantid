@@ -2545,7 +2545,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
 
         CHECKED_FSEEK(debug, f, LAYER + 0x1C, SEEK_SET);
         CHECKED_FREAD(debug, &h, 1, 1, f);
-        curve.fillarea = (h == 2 ? true : false);
+        curve.fillarea = (h == 2);
 
         CHECKED_FSEEK(debug, f, LAYER + 0x1E, SEEK_SET);
         CHECKED_FREAD(debug, &h, 1, 1, f);
@@ -3392,8 +3392,6 @@ void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug,
 }
 bool OPJFile::IsBigEndian() {
   short word = 0x4321;
-  if ((*(char *)&word) != 0x21)
-    return true;
-  else
-    return false;
+
+  return ((*(char *)&word) != 0x21);
 }

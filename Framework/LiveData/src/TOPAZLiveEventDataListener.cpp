@@ -300,7 +300,7 @@ void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 void TOPAZLiveEventDataListener::run() {
   try {
 
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string("TOPAZLiveEventDataListener::run(): "
                                            "No connection to event_catcher."));
@@ -312,7 +312,7 @@ void TOPAZLiveEventDataListener::run() {
 
     Poco::Net::SocketAddress sendAddr; // address of the sender
     // loop until the foreground thread tells us to stop
-    while (m_stopThread == false) {
+    while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
       if (m_stopThread) {
         break;
@@ -322,7 +322,7 @@ void TOPAZLiveEventDataListener::run() {
       try {
         bytesRead = m_dataSocket.receiveFrom(m_udpBuf, m_udpBufSize, sendAddr);
       } catch (Poco::TimeoutException &) {
-        if (m_stopThread == false) {
+        if (!m_stopThread) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning("Timeout reading from the network.  "
                         "Is event_catcher still sending?");

@@ -204,7 +204,7 @@ void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 /// a temporary workspace.
 void SNSLiveEventDataListener::run() {
   try {
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string(
           "SNSLiveEventDataListener::run(): No connection to SMS server."));
@@ -237,11 +237,10 @@ void SNSLiveEventDataListener::run() {
       m_stopThread = true;
     }
 
-    while (m_stopThread ==
-           false) // loop until the foreground thread tells us to stop
+    while (!m_stopThread) // loop until the foreground thread tells us to stop
     {
 
-      while (m_pauseNetRead && m_stopThread == false) {
+      while (m_pauseNetRead && !m_stopThread) {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
         // &pkt)
@@ -389,7 +388,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && m_keepPausedEvents == false) {
+  if (m_runPaused && m_keepPausedEvents == 0) {
     return false;
   }
 
@@ -540,7 +539,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::GeometryPkt &pkt) {
 
   // TODO: For now, I'm assuming that we only need to process one of these
   // packets the first time it comes in and we can ignore any others.
-  if (m_workspaceInitialized == false) {
+  if (!m_workspaceInitialized) {
     m_instrumentXML = pkt.info(); // save the xml so we can pass it to the
                                   // LoadInstrument algorithm
 
@@ -607,7 +606,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamlineInfoPkt &pkt) {
   // these packets
 
   // We only need to process a beamlineinfo packet once
-  if (m_workspaceInitialized == false) {
+  if (!m_workspaceInitialized) {
     // We need the instrument name
     m_instrumentName = pkt.longName();
   }
