@@ -59,7 +59,8 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
                        .retrieveWS<Mantid::API::MatrixWorkspace>(
                            workspaceName.toStdString());
   if(!workspace){
-    throw std::bad_cast("Workspace must be of type MatrixWorkspace");
+    std::cerr << "Workspace must be of type MatrixWorkspace\n";
+    throw std::bad_cast();
   }
   if (workspace->getNumberHistograms() < 4) {
     throw std::out_of_range("Not enough number of histograms in the workspace");
