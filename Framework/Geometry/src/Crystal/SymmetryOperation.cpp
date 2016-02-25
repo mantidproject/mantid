@@ -280,6 +280,7 @@ V3R SymmetryOperation::getReducedVector(const Kernel::IntMatrix &matrix,
  */
 V3R getWrappedVector(const V3R &vector) {
   V3R wrappedVector(vector);
+
   for (size_t i = 0; i < 3; ++i) {
     wrappedVector[i] -= (vector[i].numerator() / vector[i].denominator());
 
@@ -294,12 +295,13 @@ V3R getWrappedVector(const V3R &vector) {
 /// Returns a V3D with components on the interval (0, 1], as the version for
 /// V3R.
 Kernel::V3D getWrappedVector(const Kernel::V3D &vector) {
-  Kernel::V3D wrappedVector(vector);
+  Kernel::V3D wrappedVector;
+
   for (size_t i = 0; i < 3; ++i) {
+    wrappedVector[i] = fmod(vector[i], 1.0);
+
     if (wrappedVector[i] < 0) {
-      wrappedVector[i] = fmod(vector[i], 1.0) + 1.0;
-    } else if (wrappedVector[i] >= 1) {
-      wrappedVector[i] = fmod(vector[i], 1.0);
+      wrappedVector[i] += 1.0;
     }
   }
 

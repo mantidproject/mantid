@@ -204,6 +204,15 @@ public:
 
     V3D five = one + V3D(10.0, 10.0, 10.0);
     TS_ASSERT_EQUALS(one, getWrappedVector(five));
+
+    V3D six = V3D(1, 1, 1);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(six));
+
+    V3D seven = V3D(-1, -1, -1);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(seven));
+
+    V3D eight = V3D(-8, -8, -8);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(eight));
   }
 
   void testGetUnitCellIntervalSymmetryOperation() {
