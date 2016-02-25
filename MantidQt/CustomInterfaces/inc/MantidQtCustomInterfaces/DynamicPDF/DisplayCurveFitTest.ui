@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Dynamic PDF Slice Selector</string>
+   <string>Dynamic PDF - Test DisplayCurveFit</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
