@@ -685,7 +685,7 @@ namespace MantidQt
 				try
 				{
 					// Find if the detector is masked
-					const std::set<detid_t>& dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
+					const auto &dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
 					bool masked = false;
 
 					if (mask)
@@ -1222,8 +1222,10 @@ namespace MantidQt
 
 			// get the workspace indices of monitors in order to exclude them from finding of the max value
 			auto monitorIDs = getInstrument()->getMonitors();
-			std::vector<size_t> monitorIndices;
-			workspace->getIndicesFromDetectorIDs(monitorIDs, monitorIndices);
+      // clang-format off
+      // because it indents this line half way across the page (?)
+			auto monitorIndices = workspace->getIndicesFromDetectorIDs(monitorIDs);
+      // clang-format on
 
 			// check that there is at least 1 non-monitor spectrum
 			if (monitorIndices.size() == m_specIntegrs.size())

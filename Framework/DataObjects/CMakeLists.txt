@@ -139,7 +139,6 @@ set ( TEST_FILES
 	FakeMDTest.h
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
-	LibraryManagerTest.h
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxFlatTreeTest.h

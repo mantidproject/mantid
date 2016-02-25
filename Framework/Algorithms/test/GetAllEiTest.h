@@ -142,8 +142,8 @@ public:
     m_getAllEi.setProperty("FilterBaseLog", "proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", false);
 
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Kernel::DateAndTime(10000 + 10 * i, 0), 1.);
     }
@@ -171,10 +171,10 @@ public:
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
     // Test sort log by log.
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> goodFram(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
 
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(200 + 10 * i, 0);
@@ -208,7 +208,8 @@ public:
     TSM_ASSERT_DELTA("Chopper delay should have special speed ",
                      (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
 
-    goodFram.reset(new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(100 + 10 * i, 0);
       goodFram->addValue(time, 1);
@@ -237,12 +238,12 @@ public:
     m_getAllEi.setProperty("FilterWithDerivative", true);
 
     // Test select log by log derivative
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> protCharge(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
+    auto protCharge = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
 
     double gf(0);
     for (int i = 0; i < 50; i++) {
@@ -560,12 +561,12 @@ private:
     if (noLogs)
       return ws;
 
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelayLog(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeedLog(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> isRunning(
-        new Kernel::TimeSeriesProperty<double>("is_running"));
+    auto chopDelayLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto chopSpeedLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
+    auto isRunning =
+        Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(10 * i, 0);

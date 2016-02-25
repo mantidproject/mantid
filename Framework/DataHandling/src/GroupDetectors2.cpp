@@ -310,7 +310,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     const SpectraAxis *axis =
         dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
     if (axis)
-      axis->getSpectraIndexMap(specs2index);
+      specs2index = axis->getSpectraIndexMap();
 
     std::stringstream commandsSS;
     // Fill commandsSS with the contents of a map file
@@ -333,7 +333,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // only look at these other parameters if the file wasn't set
   if (!spectraList.empty()) {
-    workspace->getIndicesFromSpectra(spectraList, m_GroupSpecInds[0]);
+    m_GroupSpecInds[0] = workspace->getIndicesFromSpectra(spectraList);
     g_log.debug() << "Converted " << spectraList.size()
                   << " spectra numbers into spectra indices to be combined\n";
   } else { // go through the rest of the properties in order of decreasing
@@ -341,7 +341,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     if (!detectorList.empty()) {
       // we are going to group on the basis of detector IDs, convert from
       // detectors to workspace indices
-      workspace->getIndicesFromDetectorIDs(detectorList, m_GroupSpecInds[0]);
+      m_GroupSpecInds[0] = workspace->getIndicesFromDetectorIDs(detectorList);
       g_log.debug() << "Found " << m_GroupSpecInds[0].size()
                     << " spectra indices from the list of "
                     << detectorList.size() << " detectors\n";
@@ -422,7 +422,7 @@ void GroupDetectors2::processFile(std::string fname,
   const SpectraAxis *axis =
       dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
   if (axis) {
-    axis->getSpectraIndexMap(specs2index);
+    specs2index = axis->getSpectraIndexMap();
   }
 
   try {
@@ -495,7 +495,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
   const SpectraAxis *axis =
       dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
   if (axis) {
-    axis->getSpectraIndexMap(specs2index);
+    specs2index = axis->getSpectraIndexMap();
   }
 
   const detid2index_map detIdToWiMap =
@@ -721,10 +721,11 @@ void GroupDetectors2::processMatrixWorkspace(
 */
 int GroupDetectors2::readInt(std::string line) {
   // remove comments and white space (TOK_TRIM)
-  Poco::StringTokenizer dataComment(line, "#", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer dataComment(
+      line, "#", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (dataComment.begin() != dataComment.end()) {
-    Poco::StringTokenizer data(*(dataComment.begin()), " ",
-                               Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        *(dataComment.begin()), " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     if (data.count() == 1) {
       if (!data[0].empty()) {
         try {
@@ -844,7 +845,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
                                          std::vector<int64_t> &unUsedSpec,
                                          std::string seperator) {
   // remove comments and white space
-  Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
+  Mantid::Kernel::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
   for (const auto &itr : dataComment) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
@@ -1233,12 +1234,13 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
                       // function
     return;
   }
-  Poco::StringTokenizer ranges(line, "-");
+  Mantid::Kernel::StringTokenizer ranges(line, "-");
 
   try {
     size_t loop = 0;
     do {
-      Poco::StringTokenizer beforeHyphen(ranges[loop], " ", IGNORE_SPACES);
+      Mantid::Kernel::StringTokenizer beforeHyphen(ranges[loop], " ",
+                                                   IGNORE_SPACES);
       auto readPostion = beforeHyphen.begin();
       if (readPostion == beforeHyphen.end()) {
         throw std::invalid_argument("'-' found at the start of a list, can't "
@@ -1254,7 +1256,8 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
         break;
       }
 
-      Poco::StringTokenizer afterHyphen(ranges[loop + 1], " ", IGNORE_SPACES);
+      Mantid::Kernel::StringTokenizer afterHyphen(ranges[loop + 1], " ",
+                                                  IGNORE_SPACES);
       readPostion = afterHyphen.begin();
       if (readPostion == afterHyphen.end()) {
         throw std::invalid_argument("A '-' follows straight after another '-', "

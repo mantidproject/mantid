@@ -47,8 +47,7 @@ void RebinToWorkspace::exec() {
 
   // First we need to create the parameter vector from the workspace with which
   // we are matching
-  std::vector<double> rb_params;
-  createRebinParameters(toMatch, rb_params);
+  std::vector<double> rb_params = createRebinParameters(toMatch);
 
   IAlgorithm_sptr runRebin = createChildAlgorithm("Rebin");
   runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
@@ -64,17 +63,17 @@ void RebinToWorkspace::exec() {
 /**
  * Create the vector of rebin parameters
  * @param toMatch :: A shared pointer to the workspace with the desired binning
- * @param rb_params :: A vector to hold the rebin parameters once they have been
+ * @returns :: A vector to hold the rebin parameters once they have been
  * calculated
  */
-void RebinToWorkspace::createRebinParameters(
-    Mantid::API::MatrixWorkspace_sptr toMatch, std::vector<double> &rb_params) {
+std::vector<double> RebinToWorkspace::createRebinParameters(
+    Mantid::API::MatrixWorkspace_sptr toMatch) {
   using namespace Mantid::API;
 
   const MantidVec &matchXdata = toMatch->readX(0);
   // params vector should have the form [x_1, delta_1,x_2, ...
   // ,x_n-1,delta_n-1,x_n), see Rebin.cpp
-  rb_params.clear();
+  std::vector<double> rb_params;
   int xsize = static_cast<int>(matchXdata.size());
   rb_params.reserve(xsize * 2);
   for (int i = 0; i < xsize; ++i) {
@@ -84,4 +83,5 @@ void RebinToWorkspace::createRebinParameters(
     if (i < xsize - 1)
       rb_params.push_back(matchXdata[i + 1] - matchXdata[i]);
   }
+  return rb_params;
 }

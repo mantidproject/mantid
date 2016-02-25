@@ -119,7 +119,6 @@ endif ()
 
 # Unit test helper packages
 if ( CXXTEST_FOUND )
-  add_subdirectory ( UserAlgorithms )
   add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 

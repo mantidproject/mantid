@@ -77,8 +77,8 @@ public:
 
   /// this is required for boost.python
   bool operator==(const PropertyHistory &other) const {
-    return (name() == other.name() && value() == other.value() &&
-            type() == other.type() && isDefault() == other.isDefault());
+    return name() == other.name() && value() == other.value() &&
+           type() == other.type() && isDefault() == other.isDefault();
   }
 
 private:

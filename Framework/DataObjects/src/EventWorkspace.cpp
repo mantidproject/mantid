@@ -798,7 +798,7 @@ void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x) {
 
 //-----------------------------------------------------------------------------
 /** Task for sorting an event list */
-class EventSortingTask : public Task {
+class EventSortingTask final : public Task {
 public:
   /// ctor
   EventSortingTask(const EventWorkspace *WS, size_t wiStart, size_t wiStop,

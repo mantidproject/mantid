@@ -8,7 +8,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -195,8 +194,8 @@ void ReflectometryReductionOne::init() {
                                               Direction::Input),
                   "Enforces spectrum number checking prior to normalization");
 
-  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
-      "None")("PolynomialCorrection")("ExponentialCorrection");
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "PolynomialCorrection", "ExponentialCorrection"};
   declareProperty("CorrectionAlgorithm", "None",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
@@ -690,9 +689,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
 
       if (stitchingStart.is_initialized() && stitchingEnd.is_initialized() &&
           stitchingDelta.is_initialized()) {
-        const std::vector<double> params =
-            boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+        const std::vector<double> params = {
+            stitchingStart.get(), stitchingDelta.get(), stitchingEnd.get()};
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",

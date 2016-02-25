@@ -62,10 +62,7 @@ void DiffractionFocussing::exec() {
   bool dist = inputW->isDistribution();
 
   // do this first to check that a valid file is available before doing any work
-  std::multimap<int64_t, int64_t> detectorGroups; // <group, UDET>
-  if (!readGroupingFile(groupingFileName, detectorGroups)) {
-    throw Exception::FileError("Error reading .cal file", groupingFileName);
-  }
+  auto detectorGroups = readGroupingFile(groupingFileName); // <group, UDET>
 
   // Convert to d-spacing units
   API::MatrixWorkspace_sptr tmpW = convertUnitsToDSpacing(inputW);
@@ -241,18 +238,22 @@ void DiffractionFocussing::calculateRebinParams(
   step = (log(max) - log(min)) / n;
 }
 
-/// Reads in the file with the grouping information
-bool DiffractionFocussing::readGroupingFile(
-    std::string groupingFileName,
-    std::multimap<int64_t, int64_t> &detectorGroups) {
+/**
+ * Reads in the file with the grouping information
+ * @param groupingFileName :: [input] Grouping .cal file name
+ * @returns :: map of groups to detector IDs
+ * @throws FileError if can't read the file
+ */
+std::multimap<int64_t, int64_t>
+DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
                   << std::endl;
-    return false;
+    throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 
-  detectorGroups.clear();
+  std::multimap<int64_t, int64_t> detectorGroups;
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -268,7 +269,7 @@ bool DiffractionFocussing::readGroupingFile(
       detectorGroups.emplace(group, udet);
     }
   }
-  return true;
+  return detectorGroups;
 }
 
 } // namespace Algorithm

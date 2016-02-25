@@ -140,6 +140,7 @@ private:
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+
   //@}
 
   /// @name Focusing related private methods
@@ -231,6 +232,9 @@ private:
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
+  void plotCalibWorkspace(std::vector<double> difc, std::vector<double> tzero,
+                          std::string specNos);
+
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
@@ -244,6 +248,15 @@ private:
 
   // generates a directory if not found and handles the path
   Poco::Path outFilesDir(std::string addToDir);
+
+  // generates appropriate names for table workspaces
+  std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
+
+  std::string DifcZeroWorkspaceFactory(const std::vector<double> &difc,
+                                       const std::vector<double> &tzero,
+                                       const std::string &specNo) const;
+
+  std::string plotDifcZeroWorkspace() const;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

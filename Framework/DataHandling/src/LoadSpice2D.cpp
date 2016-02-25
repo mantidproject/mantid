@@ -18,7 +18,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <Poco/Path.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>

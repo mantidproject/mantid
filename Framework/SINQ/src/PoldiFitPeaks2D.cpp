@@ -469,7 +469,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
@@ -522,7 +522,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) {
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
       boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
@@ -979,7 +979,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
       getNormalizedPeakCollections(peakCollections);
 
   // Create a Poldi2DFunction that collects all sub-functions
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   // Add one Poldi2DFunction for each peak collection
   for (auto &normalizedPeakCollection : normalizedPeakCollections) {

@@ -324,6 +324,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
+   <instrument name="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
    <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>

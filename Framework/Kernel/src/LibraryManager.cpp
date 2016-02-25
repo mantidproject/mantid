@@ -10,6 +10,7 @@
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -80,7 +81,7 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string &filePath,
  * @return True if the library should be skipped
  */
 bool LibraryManagerImpl::skip(const std::string &filename) {
-  static std::set<std::string> excludes;
+  static std::unordered_set<std::string> excludes;
   static bool initialized(false);
   if (!initialized) {
     std::string excludeStr =

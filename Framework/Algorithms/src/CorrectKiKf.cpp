@@ -56,14 +56,8 @@ void CorrectKiKf::init() {
 
 void CorrectKiKf::exec() {
   // Get the workspaces
-  this->inputWS = this->getProperty("InputWorkspace");
-  this->outputWS = this->getProperty("OutputWorkspace");
-
-  // If input and output workspaces are not the same, create a new workspace for
-  // the output
-  if (this->outputWS != this->inputWS) {
-    this->outputWS = API::WorkspaceFactory::Instance().create(this->inputWS);
-  }
+  MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
@@ -73,11 +67,17 @@ void CorrectKiKf::exec() {
     return;
   }
 
-  const size_t size = this->inputWS->blocksize();
+  // If input and output workspaces are not the same, create a new workspace for
+  // the output
+  if (outputWS != inputWS) {
+    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  }
+
+  const size_t size = inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = static_cast<int>(this->inputWS->size() / size);
+  const int numberOfSpectra = static_cast<int>(inputWS->size() / size);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  const bool histogram = this->inputWS->isHistogramData();
+  const bool histogram = inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
 
   const std::string emodeStr = getProperty("EMode");
@@ -86,8 +86,8 @@ void CorrectKiKf::exec() {
   if (efixedProp == EMPTY_DBL()) {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
-      if (this->inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = this->inputWS->run().getProperty("Ei");
+      if (inputWS->run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
         efixedProp = boost::lexical_cast<double>(eiprop->value());
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
@@ -181,7 +181,7 @@ void CorrectKiKf::exec() {
                         << std::endl;
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
     g_log.information() << "Try to set fixed energy" << std::endl;
-  this->setProperty("OutputWorkspace", this->outputWS);
+  this->setProperty("OutputWorkspace", outputWS);
   return;
 }
 
@@ -194,31 +194,17 @@ void CorrectKiKf::execEvent() {
   g_log.information("Processing event workspace");
 
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
+      getProperty("InputWorkspace");
+  auto inputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string emodeStr = getProperty("EMode");
   double efixedProp = getProperty("EFixed"), efixed;
@@ -226,8 +212,8 @@ void CorrectKiKf::execEvent() {
   if (efixedProp == EMPTY_DBL()) {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
-      if (this->inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = this->inputWS->run().getProperty("Ei");
+      if (inputWS->run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
         efixedProp = boost::lexical_cast<double>(eiprop->value());
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {

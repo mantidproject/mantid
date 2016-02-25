@@ -118,8 +118,7 @@ void parseGroupingTable(const Ui::MuonAnalysis &form,
   g.description = form.groupDescription->text().toStdString();
 
   // Parse grouping info
-  std::vector<int> groupToRow;
-  whichGroupToWhichRow(form, groupToRow);
+  std::vector<int> groupToRow = whichGroupToWhichRow(form);
 
   // Resize group arrays
   g.groupNames.resize(groupToRow.size());
@@ -133,8 +132,7 @@ void parseGroupingTable(const Ui::MuonAnalysis &form,
   }
 
   // Parse pair info
-  std::vector<int> pairToRow;
-  whichPairToWhichRow(form, pairToRow);
+  std::vector<int> pairToRow = whichPairToWhichRow(form);
 
   // Resize pair arrays
   g.pairNames.resize(pairToRow.size());
@@ -264,11 +262,10 @@ MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws,
  * create 'map' relating group number to row number in group table
  *
  * @param m_uiForm :: The UI form
- * @param groupToRow :: The 'map' returned
+ * @returns :: The 'map' of group number to table row number
  */
-void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow)
-{
-  groupToRow.clear();
+std::vector<int> whichGroupToWhichRow(const Ui::MuonAnalysis &m_uiForm) {
+  std::vector<int> groupToRow;
 
   int numRows = m_uiForm.groupTable->rowCount();
   for (int i = 0; i < numRows; i++)
@@ -297,6 +294,7 @@ void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& gr
 
     groupToRow.push_back(i);
   }
+  return groupToRow;
 }
 
 
@@ -304,11 +302,10 @@ void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& gr
  * create 'map' relating pair number to row number in pair table
  *
  * @param m_uiForm :: The UI form
- * @param pairToRow :: The 'map' returned
+ * @returns :: The 'map' of pair number to table row number
  */
-void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow)
-{
-  pairToRow.clear();
+std::vector<int> whichPairToWhichRow(const Ui::MuonAnalysis &m_uiForm) {
+  std::vector<int> pairToRow;
 
   int numRows = m_uiForm.pairTable->rowCount();
   for (int i = 0; i < numRows; i++)
@@ -337,6 +334,7 @@ void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pai
 
     pairToRow.push_back(i);
   }
+  return pairToRow;
 }
 
 /**

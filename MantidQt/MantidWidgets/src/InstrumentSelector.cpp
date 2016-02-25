@@ -14,6 +14,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+#include <set>
 
 namespace
 {
@@ -180,18 +181,16 @@ namespace MantidWidgets
       m_currentFacility = &(mantidSettings.getFacility(mantidSettings.getFacilityNames()[0]));
     }
 
-    const std::vector<InstrumentInfo> & instruments = m_currentFacility->instruments();
-    std::vector<InstrumentInfo>::const_iterator iend = instruments.end();
+    const auto &instruments = m_currentFacility->instruments();
     std::set<std::string> alphabetizedNames;
-    for( std::vector<InstrumentInfo>::const_iterator itr = instruments.begin(); itr != iend; ++itr )
+    for( auto itr = instruments.cbegin(); itr != instruments.cend(); ++itr )
     {
       alphabetizedNames.insert(itr->name());
     }
-    std::set<std::string>::const_iterator namesEnd = alphabetizedNames.end();
-    for( std::set<std::string>::const_iterator itr = alphabetizedNames.begin(); itr != namesEnd; ++itr )
+    for(const auto &name_std_str : alphabetizedNames)
     {
-      QString name = QString::fromStdString(*itr);
-      std::string prefix = m_currentFacility->instrument(*itr).shortName();
+      QString name = QString::fromStdString(name_std_str);
+      std::string prefix = m_currentFacility->instrument(name_std_str).shortName();
       QString shortName = QString::fromStdString(prefix);
       this->addItem(name, QVariant(shortName));
     }

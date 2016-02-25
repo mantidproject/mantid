@@ -78,7 +78,7 @@ public:
   // description
   int version() const override { return 1; }
   const std::string name() const override { return "LoadBBY"; }
-  virtual const std::string category() const { return "DataHandling"; }
+  const std::string category() const override { return "DataHandling"; }
   const std::string summary() const override {
     return "Loads a BilBy data file into a workspace.";
   }

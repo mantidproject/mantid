@@ -207,7 +207,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
     dimensions.push_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   signal_t *dd = ws->getSignalArray();
   signal_t *ddE = ws->getErrorSquaredArray();
@@ -339,7 +339,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
   * load all the extras into the Run information
   */
   Run &r = info->mutableRun();
-  std::set<std::string> specialMap = populateSpecialMap();
+  auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {
     if (specialMap.find(it->first) == specialMap.end()) {
       // not in specials!
@@ -366,8 +366,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
     }
   }
 }
-std::set<std::string> LoadFlexiNexus::populateSpecialMap() {
-  std::set<std::string> specialMap;
+std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
+  std::unordered_set<std::string> specialMap;
 
   specialMap.insert("title");
   specialMap.insert("data");

@@ -60,13 +60,16 @@ void FFT::init() {
                   "Direction of the transform: forward or backward");
   declareProperty("Shift", 0.0, "Apply an extra phase equal to this quantity "
                                 "times 2*pi to the transform");
+  declareProperty(
+      "AcceptXRoundingErrors", false,
+      "Continue to process the data even if X values are not evenly spaced",
+      Direction::Input);
 }
 
 /** Executes the algorithm
  *
- *  @throw std::invalid_argument if the input properties are invalid
-                                 or the bins of the spectrum being transformed
- do not have constant width
+ *  The bins of the spectrum being transformed must have constant width
+ *  (unless AcceptXRoundingErrors is set to true)
  */
 void FFT::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
@@ -81,34 +84,6 @@ void FFT::exec() {
   const MantidVec &X = inWS->readX(iReal);
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
-
-  int nHist = static_cast<int>(inWS->getNumberHistograms());
-  if (iReal >= nHist)
-    throw std::invalid_argument("Property Real is out of range");
-  if (isComplex) {
-    const int yImagSize = static_cast<int>(inImagWS->blocksize());
-    if (ySize != yImagSize)
-      throw std::length_error("Real and Imaginary sizes do not match");
-    nHist = static_cast<int>(inImagWS->getNumberHistograms());
-    if (iImag >= nHist)
-      throw std::invalid_argument("Property Imaginary is out of range");
-  }
-
-  // check that the workspace isn't empty
-  if (X.size() < 2) {
-    throw std::invalid_argument(
-        "Input workspace must have at least two values");
-  }
-
-  // Check that the x values are evenly spaced
-  const double dx = X[1] - X[0];
-  for (size_t i = 1; i < X.size() - 2; i++)
-    if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-      g_log.error() << "dx=" << X[i + 1] - X[i] << ' ' << dx << ' ' << i
-                    << std::endl;
-      throw std::invalid_argument(
-          "X axis must be linear (all bins have same width)");
-    }
 
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
@@ -128,6 +103,7 @@ void FFT::exec() {
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(inWS, nOut, xSize, ySize);
 
+  const double dx = X[1] - X[0];
   double df = 1.0 / (dx * ySize);
 
   // Output label
@@ -303,6 +279,110 @@ void FFT::exec() {
   }
 
   setProperty("OutputWorkspace", outWS);
+}
+
+/**
+ * Perform validation of input properties:
+ * - input workspace must not be empty
+ * - X values must be evenly spaced (unless accepting rounding errors)
+ * - Real and Imaginary spectra must be in range of input workspace
+ * - If complex, real and imaginary workspaces must be the same size
+ * @returns :: map of property names to errors (empty map if no errors)
+ */
+std::map<std::string, std::string> FFT::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  const int iReal = getProperty("Real");
+  const int iImag = getProperty("Imaginary");
+  const MantidVec &X = inWS->readX(iReal);
+
+  // check that the workspace isn't empty
+  if (X.size() < 2) {
+    errors["InputWorkspace"] = "Input workspace must have at least two values";
+  } else {
+    // Check that the x values are evenly spaced
+    // If accepting rounding errors, just give a warning if bins are different.
+    if (areBinWidthsUneven(X)) {
+      errors["InputWorkspace"] =
+          "X axis must be linear (all bins have same width)";
+    }
+  }
+
+  // check real, imaginary spectrum numbers and workspace sizes
+  int nHist = static_cast<int>(inWS->getNumberHistograms());
+  if (iReal >= nHist) {
+    errors["Real"] = "Real out of range";
+  }
+  if (iImag != EMPTY_INT()) {
+    MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+    if (inImagWS) {
+      if (inWS->blocksize() != inImagWS->blocksize()) {
+        errors["Imaginary"] = "Real and Imaginary sizes do not match";
+      }
+      nHist = static_cast<int>(inImagWS->getNumberHistograms());
+    }
+    if (iImag >= nHist) {
+      errors["Imaginary"] = "Imaginary out of range";
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Test input X vector for spacing of values.
+ * In normal use, return true if not evenly spaced (error).
+ * If accepting rounding errors, threshold is more lenient, and don't return an
+ * error but just warn the user.
+ * @param xValues :: [input] Values to check
+ * @returns :: True if unevenly spaced, False if not (or accepting errors)
+ */
+bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
+  bool widthsUneven = false;
+  const bool acceptXRoundingErrors = getProperty("AcceptXRoundingErrors");
+  const double tolerance = acceptXRoundingErrors ? 0.5 : 1e-7;
+  const double warnValue = 0.1;
+
+  // Width to check against
+  const double dx = [&] {
+    if (acceptXRoundingErrors) {
+      // use average bin width
+      return (xValues[xValues.size() - 1] - xValues[0]) /
+             static_cast<double>(xValues.size() - 1);
+    } else {
+      // use first bin width
+      return xValues[1] - xValues[0];
+    }
+  }();
+
+  // Use cumulative errors if we are accepting rounding errors.
+  // Otherwise just compare each difference in turn to the tolerance.
+  auto difference = [&](size_t i) {
+    if (acceptXRoundingErrors) {
+      return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
+    } else {
+      return std::abs(dx - xValues[i + 1] + xValues[i]) / dx;
+    }
+  };
+
+  // Check each width against dx
+  for (size_t i = 1; i < xValues.size() - 2; i++) {
+    const double diff = difference(i);
+    if (diff > tolerance) {
+      // return an actual error
+      g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx << ' '
+                    << i << std::endl;
+      widthsUneven = true;
+      break;
+    } else if (acceptXRoundingErrors && diff > warnValue) {
+      // just warn the user
+      g_log.warning() << "Bin widths differ by more than " << warnValue * 100
+                      << "% of average." << std::endl;
+    }
+  }
+
+  return widthsUneven;
 }
 
 } // namespace Algorithm

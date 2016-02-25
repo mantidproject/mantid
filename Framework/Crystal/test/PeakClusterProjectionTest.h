@@ -17,7 +17,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/assign/list_of.hpp>
 #include <math.h>
 
 using namespace Mantid::API;
@@ -54,9 +53,7 @@ private:
     mdworkspaceAlg->setProperty("Dimensionality", dimensionality);
     std::vector<int> numbersOfBins(dimensionality, numberOfBins);
     mdworkspaceAlg->setProperty("NumberOfBins", numbersOfBins);
-    std::vector<double> extents =
-        boost::assign::list_of(min)(max)(min)(max)(min)(max)
-            .convert_to_container<std::vector<double>>();
+    std::vector<double> extents = {min, max, min, max, min, max};
     mdworkspaceAlg->setProperty("Extents", extents);
     std::vector<double> signalValues(totalBins, signalValue);
     mdworkspaceAlg->setProperty("SignalInput", signalValues);

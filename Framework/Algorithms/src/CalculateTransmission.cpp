@@ -21,7 +21,6 @@
 #include <cmath>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -47,10 +46,8 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  * @returns workspace index corresponding to the given detector ID
  */
 size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
-  const std::vector<detid_t> input = boost::assign::list_of(detid);
-  std::vector<size_t> result;
-
-  ws->getIndicesFromDetectorIDs(input, result);
+  const std::vector<detid_t> input = {detid};
+  std::vector<size_t> result = ws->getIndicesFromDetectorIDs(input);
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
@@ -172,7 +169,7 @@ void CalculateTransmission::exec() {
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
-    sampleWS->getIndicesFromDetectorIDs(transDetList, transmissionIndices);
+    transmissionIndices = sampleWS->getIndicesFromDetectorIDs(transDetList);
   } else
     assert(false);
 

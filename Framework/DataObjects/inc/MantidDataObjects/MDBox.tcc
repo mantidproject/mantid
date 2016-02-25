@@ -7,8 +7,6 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-using namespace Mantid::API;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -67,7 +65,7 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController_sptr &splitter, const uint32_t depth,
+    API::BoxController_sptr &splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
@@ -85,7 +83,7 @@ TMDE(MDBox)::MDBox(
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController *const splitter, const uint32_t depth,
+    API::BoxController *const splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
@@ -706,8 +704,8 @@ TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
 
 /// Setter for masking the box
 TMDE(void MDBox)::mask() {
-  this->setSignal(MDMaskValue);
-  this->setErrorSquared(MDMaskValue);
+  this->setSignal(API::MDMaskValue);
+  this->setErrorSquared(API::MDMaskValue);
   m_bIsMasked = true;
 }
 

@@ -435,7 +435,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.

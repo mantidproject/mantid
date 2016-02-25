@@ -166,7 +166,6 @@ AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
 /// Destructor
 AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
 
-//-----------------------------------------------------------------------
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   // Workspace unit must be TOF.
@@ -285,7 +284,6 @@ void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::FileError If the calibration file cannot be opened and
  * read successfully
@@ -360,42 +358,22 @@ void AlignDetectors::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-//-----------------------------------------------------------------------
 /**
  * Execute the align detectors algorithm for an event workspace.
  */
 void AlignDetectors::execEvent() {
-  // g_log.information("Processing event workspace");
-
   // the calibration information is already read in at this point
 
-  // convert the input workspace into the event workspace we already know it is
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+      getProperty("InputWorkspace");
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Set the final unit that our output workspace will have
   setXAxisUnits(outputWS);
@@ -409,7 +387,7 @@ void AlignDetectors::execEvent() {
     PARALLEL_START_INTERUPT_REGION
 
     auto toDspacing = converter.getConversionFunc(
-        inputWS->getSpectrum(size_t(i))->getDetectorIDs());
+        outputWS->getSpectrum(size_t(i))->getDetectorIDs());
     outputWS->getEventList(i).convertTof(toDspacing);
 
     progress.report();

@@ -189,7 +189,7 @@ public:
 
   void testGetCategories() {
     AlgorithmFactory::Instance().subscribe<CategoryAlgorithm>();
-    std::set<std::string> validCategories;
+    std::unordered_set<std::string> validCategories;
     TS_ASSERT_THROWS_NOTHING(
         validCategories = AlgorithmFactory::Instance().getCategories(true));
 

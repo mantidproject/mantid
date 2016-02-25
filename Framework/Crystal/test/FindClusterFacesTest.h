@@ -14,8 +14,6 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -48,9 +46,7 @@ IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10,
   mdworkspaceAlg->setProperty("Dimensionality", dimensionality);
   std::vector<int> numbersOfBins(dimensionality, numberOfBins);
   mdworkspaceAlg->setProperty("NumberOfBins", numbersOfBins);
-  std::vector<double> extents =
-      boost::assign::list_of(min)(max)(min)(max)(min)(max)
-          .convert_to_container<std::vector<double>>();
+  std::vector<double> extents = {min, max, min, max, min, max};
   mdworkspaceAlg->setProperty("Extents", extents);
   std::vector<double> signalValues(totalBins, signalValue);
   mdworkspaceAlg->setProperty("SignalInput", signalValues);

@@ -64,9 +64,8 @@ namespace MantidQt
       //Configure workspace selector
       ui.workspace_selector->setValidatingAlgorithm(m_algName);
       ui.workspace_selector->clear();
-      typedef std::set<std::string> WorkspaceNames;
-      WorkspaceNames names = AnalysisDataService::Instance().getObjectNames();
-      WorkspaceNames::iterator it = names.begin();
+      auto names = AnalysisDataService::Instance().getObjectNames();
+      auto it = names.begin();
       while(it != names.end())
       {
         IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(*it));

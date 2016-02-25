@@ -1,4 +1,5 @@
 #include "MantidKernel/CompositeValidator.h"
+#include <unordered_set>
 
 using namespace Mantid::Kernel;
 
@@ -11,13 +12,13 @@ CompositeValidator::CompositeValidator() : IValidator(), m_children() {}
 CompositeValidator::~CompositeValidator() { m_children.clear(); }
 
 /**
- * The allowed values for the composite vaidator. This returns
+ * The allowed values for the composite validator. This returns
  * the intersection of the allowedValues for the child validators
  * @return
  */
 std::vector<std::string> CompositeValidator::allowedValues() const {
-  std::set<std::string> elem_unique;
-  std::multiset<std::string> elem_all;
+  std::unordered_set<std::string> elem_unique;
+  std::unordered_multiset<std::string> elem_all;
   // how many validators return non-empty list of allowed values
   int n_combinations(0);
   for (const auto &itr : m_children) {
@@ -36,7 +37,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
     auto im = elem_all.find(its);
     elem_all.erase(im);
   }
-  std::set<std::string> rez;
+  std::unordered_set<std::string> rez;
   for (const auto &im : elem_all) {
     rez.insert(im);
   }

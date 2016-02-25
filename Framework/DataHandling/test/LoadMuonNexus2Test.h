@@ -38,7 +38,7 @@ public:
     // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS(output->getSpectrum(6)->getDetectorIDs().size(), 1);
 
-    std::set<detid_t> detectorgroup = output->getSpectrum(99)->getDetectorIDs();
+    auto detectorgroup = output->getSpectrum(99)->getDetectorIDs();
     TS_ASSERT_EQUALS(detectorgroup.size(), 1);
     TS_ASSERT_EQUALS(*detectorgroup.begin(), 100);
   }

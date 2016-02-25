@@ -73,7 +73,7 @@ class InstrumentInfo;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL ConfigServiceImpl {
+class MANTID_KERNEL_DLL ConfigServiceImpl final {
 public:
   /**
   * This is the base class for POCO Notifications sent out from the Config

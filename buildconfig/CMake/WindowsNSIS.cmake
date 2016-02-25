@@ -132,37 +132,6 @@ endforeach()
 install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/sqldrivers )
 
 ###########################################################################
-# Include files/libraries required for User compilation
-###########################################################################
-install ( DIRECTORY ${THIRD_PARTY_DIR}/include/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY  ${THIRD_PARTY_DIR}/include/Poco DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY  ${THIRD_PARTY_DIR}/include/nexus DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( FILES ${THIRD_PARTY_DIR}/include/napi.h DESTINATION include )
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel DESTINATION include
-          PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry DESTINATION include
-          PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/API/inc/MantidAPI DESTINATION include
-          PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-# scons
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/scons-local/ DESTINATION scons-local
-          PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-# user algorithms
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.h" )
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.cpp" )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/build.bat ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/createAlg.py
-          ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/SConstruct DESTINATION UserAlgorithms )
-# Core library export files to allow linking
-install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidKernel.lib" DESTINATION UserAlgorithms)
-install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidGeometry.lib" DESTINATION UserAlgorithms)
-install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidAPI.lib" DESTINATION UserAlgorithms)
-install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidDataObjects.lib" DESTINATION UserAlgorithms)
-install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
-# Third Party libs for building
-install ( FILES ${THIRD_PARTY_DIR}/lib/PocoFoundation.lib ${THIRD_PARTY_DIR}/lib/PocoXML.lib DESTINATION UserAlgorithms)
-install ( FILES ${THIRD_PARTY_DIR}/lib/boost_date_time-mt.lib DESTINATION UserAlgorithms )
-
-###########################################################################
 # Startup files
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )

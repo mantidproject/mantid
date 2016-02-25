@@ -100,7 +100,7 @@ void MultipleExperimentInfos::copyExperimentInfos(
   m_expInfos.reserve(other.m_expInfos.size());
   // Do a deep copy of ExperimentInfo's
   for (const auto &expInfo : other.m_expInfos) {
-    ExperimentInfo_sptr copy(new ExperimentInfo(*expInfo));
+    auto copy(boost::make_shared<ExperimentInfo>(*expInfo));
     m_expInfos.push_back(copy);
   }
 }

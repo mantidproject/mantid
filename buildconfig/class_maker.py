@@ -28,17 +28,17 @@ def write_header(subproject, classname, filename, args):
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const final;
+  int version() const final;
+  const std::string category() const final;
+  const std::string summary() const final;
 
 private:
-  void init();
-  void exec();
+  void init() final;
+  void exec() final;
 """
 
-    alg_class_declare = " : public API::Algorithm"
+    alg_class_declare = " final : public API::Algorithm"
     alg_include = '#include "MantidAPI/Algorithm.h"'
 
     if not args.alg:
@@ -79,10 +79,7 @@ namespace %s {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_%s_DLL %s%s {
-public:
-  %s();
-  virtual ~%s();
-%s};
+public:%s};
 
 } // namespace %s
 } // namespace Mantid
@@ -90,7 +87,7 @@ public:
 #endif /* %s */""" % (guard, guard, subproject,
        alg_include, subproject, classname,
        datetime.datetime.now().date().year, subproject_upper, classname, alg_class_declare,
-       classname, classname, algorithm_header, subproject, guard)
+       algorithm_header, subproject, guard)
 
     f.write(s)
     f.close()
@@ -161,22 +158,12 @@ void %s::exec() {
 
 namespace Mantid {
 namespace %s {
-%s
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-%s::%s() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-%s::~%s() {}
-%s
+%s%s
 } // namespace %s
 } // namespace Mantid
 """ % (
         subproject, args.subfolder, classname, subproject, algorithm_top,
-        classname, classname, classname, classname, algorithm_source, subproject)
+        algorithm_source, subproject)
     f.write(s)
     f.close()
 

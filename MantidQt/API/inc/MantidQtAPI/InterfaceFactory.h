@@ -172,11 +172,9 @@ template<typename TYPE>
 void UserSubWindowFactoryImpl::saveAliasNames(const std::string & realName)
 {
   std::set<std::string> aliases = TYPE::aliases();
-  std::set<std::string>::const_iterator iend = aliases.end();
-  for( std::set<std::string>::const_iterator itr = aliases.begin(); itr != iend;
-       ++itr )
+  for(const auto &alias_std_str : aliases)
   {
-    QString alias = QString::fromStdString(*itr);
+    QString alias = QString::fromStdString(alias_std_str);
     if( m_aliasLookup.contains(alias) )
     {
       if( m_badAliases.contains(alias) )

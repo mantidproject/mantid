@@ -1045,7 +1045,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+  auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map

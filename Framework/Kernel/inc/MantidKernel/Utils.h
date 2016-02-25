@@ -254,21 +254,20 @@ inline void getIndicesFromLinearIndex(const size_t linear_index,
  * @param num_bins :: a vector of [numDims] size, where numDims is the loop
  *depth and each element equal to number of bins in the correspondent dimension
  *
- * @param[out] out_indices :: the vector, sized numDims, which will be
+ * @returns :: a vector, sized numDims, which will be
  *             filled with the index for each dimension, given the linear index
  */
-inline void getIndicesFromLinearIndex(const size_t linear_index,
-                                      const std::vector<size_t> &num_bins,
-                                      std::vector<size_t> &out_indices) {
-  if (num_bins.empty()) {
-    out_indices.clear();
-    return;
-  } else {
+inline std::vector<size_t>
+getIndicesFromLinearIndex(const size_t linear_index,
+                          const std::vector<size_t> &num_bins) {
+  std::vector<size_t> out_indices;
+  if (!num_bins.empty()) {
     size_t nBins = num_bins.size();
     out_indices.resize(nBins);
     getIndicesFromLinearIndex(linear_index, &num_bins[0], nBins,
                               &out_indices[0]);
   }
+  return out_indices;
 }
 
 /**

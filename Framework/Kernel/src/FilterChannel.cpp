@@ -2,7 +2,7 @@
 #include "MantidKernel/FilterChannel.h"
 
 #include <Poco/LoggingRegistry.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Message.h>
 
 namespace Poco {
@@ -23,8 +23,9 @@ void FilterChannel::addChannel(Channel *pChannel) {
 void FilterChannel::setProperty(const std::string &name,
                                 const std::string &value) {
   if (name.compare(0, 7, "channel") == 0) {
-    StringTokenizer tokenizer(value, ",;", StringTokenizer::TOK_IGNORE_EMPTY |
-                                               StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        value, ",;", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                         Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &piece : tokenizer) {
       addChannel(LoggingRegistry::defaultRegistry().channelForName(piece));
     }

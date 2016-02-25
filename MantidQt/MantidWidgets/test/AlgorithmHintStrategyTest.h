@@ -5,6 +5,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
@@ -14,43 +16,74 @@ using namespace Mantid::API;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class AlgorithmHintStrategyTest : public CxxTest::TestSuite
-{
+class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
+
+  // Inner class :: Fake Algorithm
+  class FakeAlgorithm : public Algorithm {
+
+  public:
+    FakeAlgorithm() {}
+    ~FakeAlgorithm() {}
+    const std::string name() const { return "Fake Algorithm"; };
+    int version() const { return 1; };
+    const std::string category() const { return ""; };
+    const std::string summary() const { return "A Fake Algorithm"; };
+
+  private:
+    void init() {
+      declareProperty("IntValue", 0);
+      declareProperty("DoubleValue", 0.01);
+      declareProperty("BoolValue", false);
+      declareProperty("StringValue", "Empty");
+      auto mustBePositive =
+          boost::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+      mustBePositive->setLower(0);
+      declareProperty("PositiveIntValue", 0, mustBePositive);
+      declareProperty("PositiveIntValue1", 0, mustBePositive);
+      declareProperty(new Mantid::Kernel::ArrayProperty<int>("IntArray"));
+      declareProperty(new Mantid::Kernel::ArrayProperty<double>("DoubleArray"));
+      declareProperty(
+          new Mantid::Kernel::ArrayProperty<std::string>("StringArray"));
+    };
+    void exec() { return; };
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmHintStrategyTest *createSuite() { return new AlgorithmHintStrategyTest(); }
-  static void destroySuite( AlgorithmHintStrategyTest *suite ) { delete suite; }
+  static AlgorithmHintStrategyTest *createSuite() {
+    return new AlgorithmHintStrategyTest();
+  }
+  static void destroySuite(AlgorithmHintStrategyTest *suite) { delete suite; }
 
-  AlgorithmHintStrategyTest()
-  {
-    FrameworkManager::Instance();
-    m_propAlg = AlgorithmManager::Instance().create("PropertyAlgorithm");
-    //Expected hints for PropertyAlgorithm
-    m_propMap["IntValue"]          = "";
-    m_propMap["DoubleValue"]       = "";
-    m_propMap["BoolValue"]         = "";
-    m_propMap["StringValue"]       = "";
-    m_propMap["PositiveIntValue"]  = "";
+  AlgorithmHintStrategyTest() {
+    m_propAlg = static_cast<IAlgorithm_sptr>(new FakeAlgorithm());
+    m_propAlg->initialize();
+    // Expected hints for PropertyAlgorithm
+    m_propMap["IntValue"] = "";
+    m_propMap["DoubleValue"] = "";
+    m_propMap["BoolValue"] = "";
+    m_propMap["StringValue"] = "";
+    m_propMap["PositiveIntValue"] = "";
     m_propMap["PositiveIntValue1"] = "";
-    m_propMap["IntArray"]          = "";
-    m_propMap["DoubleArray"]       = "";
-    m_propMap["StringArray"]       = "";
+    m_propMap["IntArray"] = "";
+    m_propMap["DoubleArray"] = "";
+    m_propMap["StringArray"] = "";
   }
 
-  void testCreateHints()
-  {
-    boost::scoped_ptr<HintStrategy> strategy(new AlgorithmHintStrategy(m_propAlg, std::set<std::string>()));
+  void testCreateHints() {
+    boost::scoped_ptr<HintStrategy> strategy(
+        new AlgorithmHintStrategy(m_propAlg, std::set<std::string>()));
     TS_ASSERT_EQUALS(m_propMap, strategy->createHints());
   }
 
-  void testBlacklist()
-  {
+  void testBlacklist() {
     std::set<std::string> blacklist;
     blacklist.insert("DoubleValue");
     blacklist.insert("IntArray");
 
-    boost::scoped_ptr<HintStrategy> strategy(new AlgorithmHintStrategy(m_propAlg, blacklist));
+    boost::scoped_ptr<HintStrategy> strategy(
+        new AlgorithmHintStrategy(m_propAlg, blacklist));
     auto expected = m_propMap;
     expected.erase("DoubleValue");
     expected.erase("IntArray");
@@ -59,7 +92,7 @@ public:
 
 protected:
   IAlgorithm_sptr m_propAlg;
-  std::map<std::string,std::string> m_propMap;
+  std::map<std::string, std::string> m_propMap;
 };
 
 #endif /*MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H */
