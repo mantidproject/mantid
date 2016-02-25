@@ -916,7 +916,7 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
   V3D b_dir;
   V3D c_dir;
 
-  long num_a_steps = std::lround(90.0 / degrees_per_step);
+  double num_a_steps = std::round(90.0 / degrees_per_step);
   double gamma_radians = gamma * DEG_TO_RAD;
 
   long num_b_steps = std::lround(4.0 * sin(gamma_radians) * num_a_steps);
@@ -932,7 +932,7 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
 
   double error;
   double dot_prod;
-  long nearest_int;
+  double nearest_int;
   int max_indexed = 0;
   V3D q_vec;
   // first select those directions
@@ -959,19 +959,19 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
         bool indexes_peak = true;
         q_vec = q_vector / (2.0 * M_PI);
         dot_prod = a_dir_temp.scalar_prod(q_vec);
-        nearest_int = std::lround(dot_prod);
+        nearest_int = std::round(dot_prod);
         error = fabs(dot_prod - nearest_int);
         if (error > required_tolerance)
           indexes_peak = false;
         else {
           dot_prod = b_dir_temp.scalar_prod(q_vec);
-          nearest_int = std::lround(dot_prod);
+          nearest_int = std::round(dot_prod);
           error = fabs(dot_prod - nearest_int);
           if (error > required_tolerance)
             indexes_peak = false;
           else {
             dot_prod = c_dir_temp.scalar_prod(q_vec);
-            nearest_int = std::lround(dot_prod);
+            nearest_int = std::round(dot_prod);
             error = fabs(dot_prod - nearest_int);
             if (error > required_tolerance)
               indexes_peak = false;
@@ -1070,7 +1070,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   double error;
   double fit_error;
   double dot_prod;
-  long nearest_int;
+  double nearest_int;
   int max_indexed = 0;
   V3D q_vec;
   // first, make hemisphere of possible directions
@@ -1097,7 +1097,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
       for (const auto &q_vector : q_vectors) {
         q_vec = q_vector / (2.0 * M_PI);
         dot_prod = dir_temp.scalar_prod(q_vec);
-        nearest_int = std::lround(dot_prod);
+        nearest_int = std::round(dot_prod);
         error = fabs(dot_prod - nearest_int);
         if (error <= required_tolerance)
           num_indexed++;
@@ -1797,7 +1797,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
             NumberIndexed_1D(temp[i], q_vectors, required_tolerance);
         if (num_indexed > max_indexed) {
           max_indexed = num_indexed;
-          max_i = i;
+          max_i = static_cast<long>(i);
         }
       }
 
@@ -2269,9 +2269,9 @@ int IndexingUtils::GetIndexedPeaks_3D(
     hkl(projected_h, projected_k, projected_l);
 
     if (ValidIndex(hkl, required_tolerance)) {
-      long h_int = std::lround(projected_h);
-      long k_int = std::lround(projected_k);
-      long l_int = std::lround(projected_l);
+      double h_int = std::round(projected_h);
+      double k_int = std::round(projected_k);
+      double l_int = std::round(projected_l);
 
       double h_error = fabs(projected_h - h_int);
       double k_error = fabs(projected_k - k_int);
