@@ -814,17 +814,15 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
 //-----------------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
  * Cross the workspace from start to end points, recording the signal along the
- *line.
- * Sets the x,y vectors to the histogram bin boundaries and counts
+ *line halfway between each bin boundary that the line crosses
  *
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: vector of errors for each bin.
+ * @param x :: mid points between positions where the line crosses box
+ *boundaries
+ * @param y :: signal of the box in which corresponding x position lies
+ * @param e :: error of the box in which corresponding x position lies
  */
 TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
                                          const Mantid::Kernel::VMD &end,
@@ -832,61 +830,56 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
                                          std::vector<coord_t> &x,
                                          std::vector<signal_t> &y,
                                          std::vector<signal_t> &e) const {
-  // TODO: Don't use a fixed number of points later
-  size_t numPoints = 500;
+  size_t num_dims = this->getNumDims();
+  if (start.getNumDims() != num_dims)
+    throw std::runtime_error("Start point must have the same number of "
+                             "dimensions as the workspace.");
+  if (end.getNumDims() != num_dims)
+    throw std::runtime_error(
+        "End point must have the same number of dimensions as the workspace.");
 
-  VMD step = (end - start) / double(numPoints - 1);
-  double stepLength = step.norm();
+  // Unit-vector of the direction
+  VMD dir = end - start;
+  const auto length = dir.normalize();
 
-  // These will be the curve as plotted
+  const std::set<coord_t> mid_points =
+      getBoxBoundaryBisectsOnLine(start, num_dims, dir, length);
+
   x.clear();
   y.clear();
   e.clear();
-  for (size_t i = 0; i < numPoints; i++) {
-    // Coordinate along the line
-    VMD coord = start + step * double(i);
 
-    // Look for the box at this coordinate
-    // const MDBoxBase<MDE,nd> * box = NULL;
-    const IMDNode *box = nullptr;
+  if (mid_points.empty()) {
+    this->makeSinglePointWithNaN(x, y, e);
+    return;
+  } else {
 
-    if (isInBounds(coord.getBareArray())) {
-      box = this->data->getBoxAtCoord(coord.getBareArray());
+    for (const auto &line_pos : mid_points) {
+      // This position in coordinates of the workspace is
+      VMD ws_pos = start + (dir * line_pos);
+      auto box = this->data->getBoxAtCoord(ws_pos.getBareArray());
 
-      if (box) {
-        if (!box->getIsMasked()) {
-          // What is our normalization factor?
-          signal_t normalizer = 1.0;
-          switch (normalize) {
-          case NoNormalization:
-            break;
-          case VolumeNormalization:
-            normalizer = box->getInverseVolume();
-            break;
-          case NumEventsNormalization:
-            normalizer = 1.0 / double(box->getNPoints());
-            break;
-          }
-          // Record the position along the line
-          x.push_back(static_cast<coord_t>(stepLength * double(i)));
-          // And add the normalized signal/error to the list
-          y.push_back(box->getSignal() * normalizer);
-          e.push_back(box->getError() * normalizer);
-        }
-      } else {
-        // Record the position along the line
-        x.push_back(static_cast<coord_t>(stepLength * double(i)));
-        y.push_back(std::numeric_limits<double>::quiet_NaN());
-        e.push_back(std::numeric_limits<double>::quiet_NaN());
+      // If the box is not masked then record the signal and error here
+      if (!box->getIsMasked()) {
+        x.push_back(line_pos);
+        y.push_back(this->getNormalizedSignal(box, normalize));
+        e.push_back(box->getError());
       }
-    } else {
-      // Record the position along the line
-      x.push_back(static_cast<coord_t>(stepLength * double(i)));
-      // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
+
+  // If everything was masked
+  if (x.size() == 0) {
+    this->makeSinglePointWithNaN(x, y, e);
+  }
+}
+
+TMDE(void MDEventWorkspace)::makeSinglePointWithNaN(
+    std::vector<coord_t> &x, std::vector<signal_t> &y,
+    std::vector<signal_t> &e) const {
+  x.push_back(0);
+  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
 }
 
 /**

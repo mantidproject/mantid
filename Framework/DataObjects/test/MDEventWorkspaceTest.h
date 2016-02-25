@@ -361,7 +361,6 @@ public:
     TS_ASSERT_DELTA(mid_points_vect[3], 1.0937, 1e-4);
     TS_ASSERT_DELTA(mid_points_vect[4], 1.1562, 1e-4);
     TS_ASSERT_DELTA(mid_points_vect[10], 1.75, 1e-4);
-
   }
 
   //-------------------------------------------------------------------------------------
@@ -614,38 +613,39 @@ public:
 
   void test_getLinePlot() {
     MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
-    double volume = pow(7.0 / 4.0, 3);
+    double volume = pow(8.0 / 12.0, 3);
     double signal = 3.0;
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(2, 0, 0);
+    Mantid::Kernel::VMD end(6.0, 0, 0);
     std::vector<coord_t> x;
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(y.size(), 500);
-    TS_ASSERT_EQUALS(x.size(), 500);
-    for (size_t i = 0; i < y.size(); i += 10) {
+    TS_ASSERT_EQUALS(y.size(), 9);
+    TS_ASSERT_EQUALS(x.size(), 9);
+    TS_ASSERT_EQUALS(e.size(), 9);
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_EQUALS(y[i], signal);
     }
     ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
     }
     ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_EQUALS(y[i], 1.0);
     }
   }
 
   void test_getLinePlotWithMaskedData() {
     MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
     // Mask some of the workspace
     std::vector<coord_t> min{0, 0, 0};
-    std::vector<coord_t> max{0.5, 0.5, 0.5};
+    std::vector<coord_t> max{3.0, 3.0, 3.0};
 
     // Create an function to mask some of the workspace.
     MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
@@ -653,15 +653,15 @@ public:
     ew->refreshCache();
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(5, 0, 0);
+    Mantid::Kernel::VMD end(6.0, 0, 0);
     std::vector<coord_t> x;
     std::vector<signal_t> y, e;
     ew->getLinePlot(start, end, NoNormalization, x, y, e);
     // Masked data is omitted from line
-    TS_ASSERT_EQUALS(y.size(), 325);
-    TS_ASSERT_EQUALS(x.size(), 325);
+    TS_ASSERT_EQUALS(y.size(), 4);
+    TS_ASSERT_EQUALS(x.size(), 4);
     // Unmasked data
-    TS_ASSERT_EQUALS(y[300], 3.0);
+    TS_ASSERT_EQUALS(y[1], 3.0);
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {

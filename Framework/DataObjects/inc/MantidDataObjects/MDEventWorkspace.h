@@ -96,9 +96,9 @@ public:
 
   // Get ordered list of boundaries in position-along-the-line coordinates
   std::set<coord_t> getBoxBoundaryBisectsOnLine(const Kernel::VMD &start,
-                                                   size_t num_d,
-                                                   const Kernel::VMD &dir,
-                                                   coord_t length) const;
+                                                size_t num_d,
+                                                const Kernel::VMD &dir,
+                                                coord_t length) const;
 
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
@@ -230,6 +230,9 @@ protected:
   Mantid::API::MDNormalization m_displayNormalizationHisto;
 
 private:
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
+                              std::vector<signal_t> &e) const;
+
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
   }
