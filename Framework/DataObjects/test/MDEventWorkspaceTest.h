@@ -309,7 +309,7 @@ public:
     // Copy set to vector for test
     std::vector<double> boundaries_vector(box_boundaries.begin(),
                                           box_boundaries.end());
-    TSM_ASSERT_EQUALS("7 boundaries should be found", box_boundaries.size(), 7);
+    TSM_ASSERT_EQUALS("7 boundaries should be found", box_boundaries.size(), 8);
 
     // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
     for (size_t i = 0; i < boundaries_vector.size(); ++i) {

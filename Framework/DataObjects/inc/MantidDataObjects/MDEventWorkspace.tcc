@@ -741,10 +741,10 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
 
   // Get the smallest box size along each dimension
   // We'll assume all boxes are this size and filter out any boundaries
-  // which are not real later
+  // which are not real later (by checking for unique box IDs)
   std::vector<coord_t> smallest_box_sizes = this->estimateResolution();
 
-  // Next, we go through each dimension and see where the bin boundaries
+  // Next, we go through each dimension and see where the box boundaries
   // intersect the line.
   const IMDNode *box = nullptr;
   size_t numVertexes = 0;
@@ -766,7 +766,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
         floor((max_extent - line_start) / smallest_box_sizes[d]) + 1);
 
     if (dir[d] != 0.0) {
-      //VMD lastPos = start;
+      VMD lastPos = start;
       for (size_t i = 0; i <= num_boundaries; i++) {
         // Position in this coordinate
         coord_t thisX = line_start + (i * box_size);
@@ -776,8 +776,13 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
         // Full position
         VMD pos = start + (dir * linePos);
 
-        box = this->data->getBoxAtCoord(pos.getBareArray());
+        // Getting the box using boundary coordinate could return the box we
+        // want or the following box, therefore use a position halfway between
+        // previous boundary and this one
+        VMD middle = (pos + lastPos) * 0.5;
+        box = this->data->getBoxAtCoord(middle.getBareArray());
         size_t current_id = box->getID();
+        lastPos = pos;
         // If we haven't already recorded the boundary of this box...
         // This filters out the extra boundaries that don't really exist that
         // we gained by assuming all boxes are the size of the smallest box
@@ -788,7 +793,6 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundariesOnLine(
               box->getVertexesArray(numVertexes, num_d, dim_mask_arr);
           coord_t lower_bound = vertices_arr[0];
           linePos = (lower_bound - line_start) / dir[d];
-          //lastPos = linePos;
 
           if (linePos >= 0 && linePos <= length) {
             boundaries.insert(linePos);
