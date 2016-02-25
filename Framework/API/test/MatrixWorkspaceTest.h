@@ -123,7 +123,8 @@ public:
     const size_t nhist(10);
     testWS.initialize(nhist, 1, 1);
     for (size_t i = 0; i < testWS.getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specnum_t(i + 1));
+      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(),
+                       specnum_t(i + 1));
       TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i)));
     }
   }

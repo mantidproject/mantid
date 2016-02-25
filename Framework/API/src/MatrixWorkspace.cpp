@@ -390,10 +390,10 @@ MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
 
   // Find the min/max spectra IDs
   specnum_t min = std::numeric_limits<specnum_t>::max(); // So that any number
-                                                       // will be less than this
+  // will be less than this
   specnum_t max = -std::numeric_limits<specnum_t>::max(); // So that any number
-                                                        // will be greater than
-                                                        // this
+  // will be greater than
+  // this
   size_t length = ax->length();
   for (size_t i = 0; i < length; i++) {
     specnum_t spec = ax->spectraNo(i);

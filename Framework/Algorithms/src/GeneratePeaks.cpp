@@ -326,8 +326,9 @@ void GeneratePeaks::importPeaksFromTable(
     mapiter = functionmap.find(wsindex);
     if (mapiter == functionmap.end()) {
       std::vector<std::pair<double, API::IFunction_sptr>> tempvector;
-      std::pair<std::map<specnum_t, std::vector<std::pair<
-                                       double, API::IFunction_sptr>>>::iterator,
+      std::pair<std::map<specnum_t,
+                         std::vector<std::pair<double, API::IFunction_sptr>>>::
+                    iterator,
                 bool> ret;
       ret = functionmap.emplace(wsindex, tempvector);
       mapiter = ret.first;

@@ -434,7 +434,8 @@ void ISISHistoDataListener::getData(int period, int index, int count,
     workspace->setX(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
-    workspace->getSpectrum(wi)->setSpectrumNo(index + static_cast<specnum_t>(i));
+    workspace->getSpectrum(wi)
+        ->setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
     y.assign(dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size());
     std::transform(y.begin(), y.end(), e.begin(), dblSqrt);

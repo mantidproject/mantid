@@ -1385,7 +1385,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     Axis *ax1 = m_ws->getAxis(1);
     specnum_t maxSpecNo =
         -std::numeric_limits<specnum_t>::max(); // So that any number will be
-                                               // greater than this
+                                                // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
       specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)

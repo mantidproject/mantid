@@ -384,8 +384,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
     const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
-    int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes, int64_t lengthIn,
-    int64_t binStart) {
+    int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
+    int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
   typedef double (*uf)(double);

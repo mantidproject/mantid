@@ -210,9 +210,9 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
 std::vector<size_t> GetEi::getMonitorSpecIndexs(
     API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
     specnum_t specNum2) const { // getting spectra numbers from detector IDs is
-                               // hard because the map works the other way,
-                               // getting index numbers from spectra numbers has
-                               // the same problem and we are about to do both
+                                // hard because the map works the other way,
+  // getting index numbers from spectra numbers has
+  // the same problem and we are about to do both
 
   // get the index number of the histogram for the first monitor
 
@@ -220,7 +220,7 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
   auto wsInds = WS->getIndicesFromSpectra(specNumTemp);
 
   if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
-                              // workspace, we can't continue from here
+                            // workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor spectrum, number "
                   << specNum1 << std::endl;
     throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum1);
@@ -230,7 +230,7 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
-                                   // workspace, we can't continue from here
+                                 // workspace, we can't continue from here
     g_log.error() << "Couldn't find the second monitor spectrum, number "
                   << specNum2 << std::endl;
     throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum2);

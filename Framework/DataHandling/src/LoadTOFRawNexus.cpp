@@ -50,7 +50,7 @@ void LoadTOFRawNexus::init() {
       "spectrum_max is set.");
   declareProperty(
       new PropertyWithValue<specnum_t>("SpectrumMax", Mantid::EMPTY_INT(),
-                                      mustBePositive),
+                                       mustBePositive),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
 }

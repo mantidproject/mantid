@@ -331,7 +331,6 @@ public:
     TS_ASSERT_EQUALS(*(ws->getSpectrum(1)->getDetectorIDs().begin()), 10);
     TS_ASSERT(ws->getSpectrum(1)->hasDetectorID(10));
 
-
     Mantid::specnum_t offset;
     auto spectNum2WSInd = ws->getSpectrumToWorkspaceIndexVector(offset);
 
@@ -382,7 +381,6 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(17 - 9)->getSpectrumNo(), 18);
     TS_ASSERT_EQUALS(ws->readY(18 - 9)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18 - 9)->getSpectrumNo(), 19);
-
 
     Mantid::specnum_t offset;
     auto spectNum2WSInd = ws->getSpectrumToWorkspaceIndexVector(offset);

@@ -244,7 +244,8 @@ NearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
  * @param spectraMap :: A reference to the spectra map
  * @returns A map of spectra number to detector pointer
  */
-std::map<specnum_t, IDetector_const_sptr> NearestNeighbours::getSpectraDetectors(
+std::map<specnum_t, IDetector_const_sptr>
+NearestNeighbours::getSpectraDetectors(
     boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap) {
   std::map<specnum_t, IDetector_const_sptr> spectra;
