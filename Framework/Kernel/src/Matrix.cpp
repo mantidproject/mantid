@@ -811,7 +811,7 @@ Matrix<T> &Matrix<T>::Transpose()
 }
 
 template <>
-void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
+void Matrix<int>::GaussJordan(Kernel::Matrix<int> & /*unused*/)
 /**
   Not valid for Integer
   @throw std::invalid_argument

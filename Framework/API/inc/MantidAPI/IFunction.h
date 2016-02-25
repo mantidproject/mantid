@@ -292,13 +292,13 @@ public:
     /// Sets new value if attribute is a string
     void setString(const std::string &str);
     /// Sets new value if attribute is a double
-    void setDouble(const double &);
+    void setDouble(const double & /*d*/);
     /// Sets new value if attribute is a int
-    void setInt(const int &);
+    void setInt(const int & /*i*/);
     /// Sets new value if attribute is a bool
-    void setBool(const bool &);
+    void setBool(const bool & /*b*/);
     /// Sets new value if attribute is a vector
-    void setVector(const std::vector<double> &);
+    void setVector(const std::vector<double> & /*v*/);
     /// Set value from a string.
     void fromString(const std::string &str);
 
@@ -479,7 +479,7 @@ public:
   /// Return a value of attribute attName
   virtual Attribute getAttribute(const std::string &attName) const;
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &attName, const Attribute &);
+  virtual void setAttribute(const std::string &attName, const Attribute & /*value*/);
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string &attName) const;
   /// Set an attribute value

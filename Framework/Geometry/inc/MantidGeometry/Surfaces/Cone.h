@@ -47,20 +47,20 @@ private:
   double alpha;       ///< Angle (degrees)
   double cangle;      ///< Cos(angle)
 
-  void rotate(const Kernel::Matrix<double> &) override;
-  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
   Cone *doClone() const override;
 
 protected:
-  Cone(const Cone &);
-  Cone &operator=(const Cone &);
+  Cone(const Cone & /*A*/);
+  Cone &operator=(const Cone & /*A*/);
 
 public:
   /// Public identifer
   std::string className() const override { return "Cone"; }
   Cone();
   std::unique_ptr<Cone> clone() const;
-  int operator==(const Cone &) const;
+  int operator==(const Cone & /*A*/) const;
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
   int side(const Kernel::V3D &R) const override;
@@ -77,23 +77,23 @@ public:
   /// Edge Angle
   double getCosAngle() const { return cangle; }
   /// This method returns the distance of the point from the cone
-  double distance(const Kernel::V3D &) const override;
+  double distance(const Kernel::V3D & /*unused*/) const override;
 
   /// This method sets the cone surface using the input string in MCNPx format
-  int setSurface(const std::string &) override;
+  int setSurface(const std::string & /*R*/) override;
   /// This method sets the centre of the cone
-  void setCentre(const Kernel::V3D &);
+  void setCentre(const Kernel::V3D & /*A*/);
   /// This method sets the cone normal
-  void setNorm(const Kernel::V3D &);
+  void setNorm(const Kernel::V3D & /*A*/);
   /// This method sets the angle of the cone
-  void setAngle(double const);
+  void setAngle(double const /*A*/);
   /// This method sets the tan angle which will be converted to cos used for
   /// MCNPX format
-  void setTanAngle(double const);
+  void setTanAngle(double const /*A*/);
   /// This method generates the quadratic equation for cone
   void setBaseEqn() override;
   /// This method will write the cone equation in MCNP geometry format
-  void write(std::ostream &) const override;
+  void write(std::ostream & /*unused*/) const override;
 
   /// This will get the bounding box for the cone
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

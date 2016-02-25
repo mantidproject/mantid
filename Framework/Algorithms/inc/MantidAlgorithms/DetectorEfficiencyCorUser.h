@@ -56,10 +56,10 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &, double);
-  MantidVec calculateEfficiency(double, const std::string &, const MantidVec &);
+  double calculateFormulaValue(const std::string & /*formula*/, double /*energy*/);
+  MantidVec calculateEfficiency(double /*eff0*/, const std::string & /*formula*/, const MantidVec & /*xIn*/);
 
-  std::string getValFromInstrumentDef(const std::string &);
+  std::string getValFromInstrumentDef(const std::string & /*parameterName*/);
 
   void applyDetEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
                           const MantidVec &eIn, const MantidVec &effVec,

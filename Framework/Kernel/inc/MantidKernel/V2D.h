@@ -110,7 +110,7 @@ private:
 };
 
 // Overload operator <<
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const V2D &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/, const V2D & /*point*/);
 
 } // namespace Kernel
 } // namespace Mantid

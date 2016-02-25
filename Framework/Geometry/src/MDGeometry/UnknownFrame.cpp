@@ -13,7 +13,7 @@ UnknownFrame::~UnknownFrame() {}
 
 const std::string UnknownFrame::UnknownFrameName = "Unknown frame";
 
-bool UnknownFrame::canConvertTo(const Mantid::Kernel::MDUnit &) const {
+bool UnknownFrame::canConvertTo(const Mantid::Kernel::MDUnit & /*otherUnit*/) const {
   return false; // Cannot convert since it is unknown
 }
 

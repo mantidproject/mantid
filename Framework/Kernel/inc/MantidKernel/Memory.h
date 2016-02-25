@@ -47,7 +47,7 @@ class MANTID_KERNEL_DLL MemoryStats {
 public:
   MemoryStats(const MemoryStatsIgnore ignore = MEMORY_STATS_IGNORE_NONE);
   void update();
-  void ignoreFields(const MemoryStatsIgnore);
+  void ignoreFields(const MemoryStatsIgnore /*ignore*/);
   std::string vmUsageStr() const;
   std::string resUsageStr() const;
   std::string totalMemStr() const;

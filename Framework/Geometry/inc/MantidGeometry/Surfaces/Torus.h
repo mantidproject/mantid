@@ -48,13 +48,13 @@ private:
   double Dradius;      ///< Inner radius
   double Displacement; ///< Displacement
 
-  void rotate(const Kernel::Matrix<double> &) override;
-  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
   Torus *doClone() const override;
 
 protected:
-  Torus(const Torus &);
-  Torus &operator=(const Torus &);
+  Torus(const Torus & /*A*/);
+  Torus &operator=(const Torus & /*A*/);
 
 public:
   /// Public identifier
@@ -62,7 +62,7 @@ public:
 
   Torus();
   std::unique_ptr<Torus> clone() const;
-  int operator==(const Torus &) const;
+  int operator==(const Torus & /*A*/) const;
 
   /// Accept visitor for line calculation
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }

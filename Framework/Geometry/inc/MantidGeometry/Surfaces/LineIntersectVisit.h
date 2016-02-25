@@ -59,17 +59,17 @@ private:
   void procTrack();
 
 public:
-  LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
+  LineIntersectVisit(const Kernel::V3D & /*Pt*/, const Kernel::V3D & /*uVec*/);
   /// Destructor
   ~LineIntersectVisit() override {}
 
-  void Accept(const Surface &) override;
-  void Accept(const Quadratic &);
-  void Accept(const Plane &) override;
-  void Accept(const Sphere &) override;
-  void Accept(const Cone &) override;
-  void Accept(const Cylinder &) override;
-  void Accept(const General &) override;
+  void Accept(const Surface & /*Surf*/) override;
+  void Accept(const Quadratic & /*Surf*/);
+  void Accept(const Plane & /*Surf*/) override;
+  void Accept(const Sphere & /*Surf*/) override;
+  void Accept(const Cone & /*Surf*/) override;
+  void Accept(const Cylinder & /*Surf*/) override;
+  void Accept(const General & /*Surf*/) override;
 
   // Accessor
   /// Get the distance

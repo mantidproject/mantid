@@ -125,9 +125,9 @@ private:
       const size_t boxID = 0);
   // 0-dimensions terminator
   static API::IMDNode *createMDBoxWrong(
-      API::BoxController *,
-      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &,
-      const uint32_t, const size_t, const size_t);
+      API::BoxController * /*unused*/,
+      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> & /*unused*/,
+      const uint32_t /*unused*/, const size_t /*unused*/, const size_t /*unused*/);
 
   // helper class to generate methaloop on MD workspaces dimensions:
   template <size_t nd> friend class LOOP;

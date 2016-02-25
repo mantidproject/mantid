@@ -43,7 +43,7 @@ public:
   IValidator_sptr clone() const override;
 
   /// Allows a for a vector of required strings to be passed to the validator
-  void setRequiredStrings(const std::vector<std::string> &);
+  void setRequiredStrings(const std::vector<std::string> & /*strings*/);
 
   ~StringContainsValidator() override;
 

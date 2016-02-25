@@ -41,17 +41,17 @@ public:
   T third;  ///< Third item
 
   Triple();
-  Triple(const Triple<T> &);
-  Triple(const T &, const T &, const T &);
-  Triple<T> &operator=(const Triple<T> &);
+  Triple(const Triple<T> & /*A*/);
+  Triple(const T & /*A*/, const T & /*B*/, const T & /*C*/);
+  Triple<T> &operator=(const Triple<T> & /*A*/);
   ~Triple();
 
   T operator[](const int A) const;
   T &operator[](const int A);
-  int operator<(const Triple<T> &) const;
-  int operator>(const Triple<T> &) const;
-  int operator==(const Triple<T> &) const;
-  int operator!=(const Triple<T> &) const;
+  int operator<(const Triple<T> & /*A*/) const;
+  int operator>(const Triple<T> & /*A*/) const;
+  int operator==(const Triple<T> & /*A*/) const;
+  int operator!=(const Triple<T> & /*A*/) const;
 };
 
 /**
@@ -73,15 +73,15 @@ public:
   T third;  ///< Third item
 
   DTriple();
-  DTriple(const DTriple<F, S, T> &);
-  DTriple(const F &, const S &, const T &);
-  DTriple<F, S, T> &operator=(const DTriple<F, S, T> &);
+  DTriple(const DTriple<F, S, T> & /*A*/);
+  DTriple(const F & /*A*/, const S & /*B*/, const T & /*C*/);
+  DTriple<F, S, T> &operator=(const DTriple<F, S, T> & /*A*/);
   ~DTriple();
 
-  int operator<(const DTriple<F, S, T> &) const;
-  int operator>(const DTriple<F, S, T> &) const;
-  int operator==(const DTriple<F, S, T> &) const;
-  int operator!=(const DTriple<F, S, T> &) const;
+  int operator<(const DTriple<F, S, T> & /*A*/) const;
+  int operator>(const DTriple<F, S, T> & /*A*/) const;
+  int operator==(const DTriple<F, S, T> & /*A*/) const;
+  int operator!=(const DTriple<F, S, T> & /*A*/) const;
 };
 } // NAMESPACE Mantid
 #endif

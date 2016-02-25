@@ -90,9 +90,9 @@ public:
   FunctionDomain1DVector(std::vector<double>::const_iterator from,
                          std::vector<double>::const_iterator to);
   /// Copy constructor.
-  FunctionDomain1DVector(const FunctionDomain1DVector &);
+  FunctionDomain1DVector(const FunctionDomain1DVector & /*right*/);
   /// Copy assignment operator.
-  FunctionDomain1DVector &operator=(const FunctionDomain1DVector &);
+  FunctionDomain1DVector &operator=(const FunctionDomain1DVector & /*right*/);
 
 protected:
   std::vector<double> m_X; ///< vector of function arguments

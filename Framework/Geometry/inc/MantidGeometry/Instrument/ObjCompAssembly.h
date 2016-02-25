@@ -57,20 +57,20 @@ public:
   ObjCompAssembly(const IComponent *base, const ParameterMap *map);
 
   //! Constructor with a name and parent reference
-  ObjCompAssembly(const std::string &, IComponent *reference = nullptr);
+  ObjCompAssembly(const std::string & /*n*/, IComponent *reference = nullptr);
   //! Copy constructor
-  ObjCompAssembly(const ObjCompAssembly &);
+  ObjCompAssembly(const ObjCompAssembly & /*ass*/);
   ~ObjCompAssembly() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
   //! Return the number of elements in the assembly
   int nelements() const override;
   //! Add a component to the assembly
-  int add(IComponent *) override;
+  int add(IComponent * /*unused*/) override;
   //! Add a copy (clone) of a component
-  int addCopy(IComponent *) override;
+  int addCopy(IComponent * /*unused*/) override;
   //! Add a copy (clone) of a component and rename it
-  int addCopy(IComponent *, const std::string &) override;
+  int addCopy(IComponent * /*unused*/, const std::string & /*unused*/) override;
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
   boost::shared_ptr<IComponent> getChild(const int i) const override {
@@ -86,8 +86,8 @@ public:
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const override;
   //! Print information about all children
-  void printChildren(std::ostream &) const override;
-  void printTree(std::ostream &) const override;
+  void printChildren(std::ostream & /*unused*/) const override;
+  void printTree(std::ostream & /*unused*/) const override;
 
   const Kernel::Quat getRotation() const override;
   Kernel::V3D getPos() const override;
@@ -115,8 +115,8 @@ typedef boost::shared_ptr<ObjCompAssembly> ObjCompAssembly_sptr;
 /// Shared pointer to ObjCompAssembly (const version)
 typedef boost::shared_ptr<const ObjCompAssembly> ObjCompAssembly_const_sptr;
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const ObjCompAssembly &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                             const ObjCompAssembly & /*ass*/);
 
 } // Namespace Geometry
 } // Namespace Mantid

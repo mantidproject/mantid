@@ -45,14 +45,14 @@ private:
   General *doClone() const override;
 
 protected:
-  General(const General &);
-  General &operator=(const General &);
+  General(const General & /*A*/);
+  General &operator=(const General & /*A*/);
 
 public:
   General();
   std::unique_ptr<General> clone() const;
 
-  int setSurface(const std::string &) override;
+  int setSurface(const std::string & /*R*/) override;
   void setBaseEqn() override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin) override;

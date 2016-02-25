@@ -53,14 +53,14 @@ private:
   std::size_t Nvec;   ///< Normal vector is x,y or z :: (1-3) (0 if general)
   double Radius;      ///< Radius of cylinder
 
-  void rotate(const Kernel::Matrix<double> &) override;
-  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
   void setNvec(); ///< check to obtain orientation
   Cylinder *doClone() const override;
 
 protected:
-  Cylinder(const Cylinder &);
-  Cylinder &operator=(const Cylinder &);
+  Cylinder(const Cylinder & /*A*/);
+  Cylinder &operator=(const Cylinder & /*A*/);
 
 public:
   /// Public identifer
@@ -72,15 +72,15 @@ public:
   // Visit acceptor
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
-  virtual double lineIntersect(const Kernel::V3D &, const Kernel::V3D &) const;
+  virtual double lineIntersect(const Kernel::V3D & /*Pt*/, const Kernel::V3D & /*uVec*/) const;
 
-  int side(const Kernel::V3D &) const override;
-  int onSurface(const Kernel::V3D &) const override;
-  double distance(const Kernel::V3D &) const override;
+  int side(const Kernel::V3D & /*unused*/) const override;
+  int onSurface(const Kernel::V3D & /*unused*/) const override;
+  double distance(const Kernel::V3D & /*unused*/) const override;
 
-  int setSurface(const std::string &) override;
-  void setCentre(const Kernel::V3D &);
-  void setNorm(const Kernel::V3D &);
+  int setSurface(const std::string & /*R*/) override;
+  void setCentre(const Kernel::V3D & /*A*/);
+  void setNorm(const Kernel::V3D & /*A*/);
   Kernel::V3D getCentre() const { return Centre; } ///< Return centre point
   Kernel::V3D getNormal() const { return Normal; } ///< Return Central line
   double getRadius() const { return Radius; }      ///< Get Radius
@@ -91,7 +91,7 @@ public:
   }
   void setBaseEqn() override;
 
-  void write(std::ostream &) const override;
+  void write(std::ostream & /*unused*/) const override;
   void print() const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin) override;

@@ -50,10 +50,10 @@ private:
   std::map<char, std::string> ID; ///< Short letter identifiers
 
   SurfaceFactory(); ///< singleton constructor
-  SurfaceFactory(const SurfaceFactory &);
+  SurfaceFactory(const SurfaceFactory & /*A*/);
 
   /// Dummy assignment operator
-  SurfaceFactory &operator=(const SurfaceFactory &) { return *this; }
+  SurfaceFactory &operator=(const SurfaceFactory & /*unused*/) { return *this; }
 
   void registerSurface();
 
@@ -61,9 +61,9 @@ public:
   static SurfaceFactory *Instance();
   ~SurfaceFactory();
 
-  std::unique_ptr<Surface> createSurface(const std::string &) const;
-  std::unique_ptr<Surface> createSurfaceID(const std::string &) const;
-  std::unique_ptr<Surface> processLine(const std::string &) const;
+  std::unique_ptr<Surface> createSurface(const std::string & /*Key*/) const;
+  std::unique_ptr<Surface> createSurfaceID(const std::string & /*Key*/) const;
+  std::unique_ptr<Surface> processLine(const std::string & /*Line*/) const;
 };
 
 } // NAMESPACE Geometry

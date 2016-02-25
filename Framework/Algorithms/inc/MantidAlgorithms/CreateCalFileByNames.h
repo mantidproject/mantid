@@ -95,7 +95,7 @@ private:
   /// @param filename :: GroupingFilename (extension .cal)
   /// @return true if the grouping file exists
   bool groupingFileDoesExist(const std::string &filename) const;
-  void saveGroupingFile(const std::string &, bool overwrite) const;
+  void saveGroupingFile(const std::string & /*filename*/, bool overwrite) const;
   static void writeCalEntry(std::ostream &os, int number, int udet,
                             double offset, int select, int group);
   void writeHeaders(std::ostream &os, const std::string &filename,

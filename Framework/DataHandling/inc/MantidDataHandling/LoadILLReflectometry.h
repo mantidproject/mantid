@@ -64,8 +64,8 @@ private:
   void loadNexusEntriesIntoProperties(std::string nexusfilename);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
-  void centerDetector(double);
-  void placeDetector(double, double);
+  void centerDetector(double /*xCenter*/);
+  void placeDetector(double /*distance*/, double /*angle*/);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

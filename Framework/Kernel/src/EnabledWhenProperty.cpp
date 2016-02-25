@@ -54,11 +54,11 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
   return fulfillsCriterion(algo);
 }
 
-bool EnabledWhenProperty::isVisible(const IPropertyManager *) const {
+bool EnabledWhenProperty::isVisible(const IPropertyManager * /*algo*/) const {
   return true;
 }
 /// does nothing in this case and put here to satisfy the interface.
-void EnabledWhenProperty::modify_allowed_values(Property *const) {}
+void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
 //--------------------------------------------------------------------------------------------
 /// Make a copy of the present type of validator
 IPropertySettings *EnabledWhenProperty::clone() {

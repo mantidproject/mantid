@@ -205,9 +205,9 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
 class NoDeleting {
 public:
   /// Does nothing
-  void operator()(void *) {}
+  void operator()(void * /*unused*/) {}
   /// Does nothing
-  void operator()(const void *) {}
+  void operator()(const void * /*unused*/) {}
 };
 
 } // Namespace Mantid

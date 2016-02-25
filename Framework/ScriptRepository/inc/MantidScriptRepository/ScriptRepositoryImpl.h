@@ -170,10 +170,10 @@ private:
 
 private:
   static std::string printStatus(SCRIPTSTATUS st);
-  void download_directory(const std::string &);
-  void download_file(const std::string &, RepositoryEntry &);
-  void updateLocalJson(const std::string &, const RepositoryEntry &);
-  void updateRepositoryJson(const std::string &, const RepositoryEntry &);
+  void download_directory(const std::string & /*directory_path*/);
+  void download_file(const std::string & /*file_path*/, RepositoryEntry & /*entry*/);
+  void updateLocalJson(const std::string & /*path*/, const RepositoryEntry & /*entry*/);
+  void updateRepositoryJson(const std::string & /*path*/, const RepositoryEntry & /*entry*/);
 
   /// flag that indicate a valid repository
   bool valid;

@@ -45,15 +45,15 @@ class MANTID_GEOMETRY_DLL Sphere : public Quadratic {
 private:
   Kernel::V3D Centre; ///< Point for centre
   double Radius;      ///< Radius of sphere
-  void rotate(const Kernel::Matrix<double> &) override;
-  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
   Sphere *doClone() const override;
 
 protected:
-  Sphere(const Sphere &);
-  Sphere &operator=(const Sphere &);
+  Sphere(const Sphere & /*A*/);
+  Sphere &operator=(const Sphere & /*A*/);
 
 public:
   Sphere();
@@ -63,16 +63,16 @@ public:
   // Visit acceptor
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
   /// Set the sphere defination by input string in MCNP format
-  int setSurface(const std::string &) override;
+  int setSurface(const std::string & /*R*/) override;
   /// Checks the given input point to be inside, outside or on the surface of
   /// sphere
-  int side(const Kernel::V3D &) const override;
+  int side(const Kernel::V3D & /*unused*/) const override;
   /// Checks whether the give input point is on the surface
-  int onSurface(const Kernel::V3D &) const override;
+  int onSurface(const Kernel::V3D & /*unused*/) const override;
   /// Gets the distance from the sphere to the input point
-  double distance(const Kernel::V3D &) const override;
+  double distance(const Kernel::V3D & /*unused*/) const override;
   /// Setter for centre of sphere
-  void setCentre(const Kernel::V3D &);
+  void setCentre(const Kernel::V3D & /*A*/);
   /// Get Centre
   Kernel::V3D getCentre() const { return Centre; }
   /// Get Radius
@@ -85,7 +85,7 @@ public:
   /// Generates the quadratic equation.
   void setBaseEqn() override;
   /// Writes the sphere equatation in MCNP format
-  void write(std::ostream &) const override;
+  void write(std::ostream & /*unused*/) const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin) override;
 

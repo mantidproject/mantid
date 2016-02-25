@@ -37,7 +37,7 @@ public:
   /// Clone the current state
   IValidator_sptr clone() const override;
 
-  void allowEmpty(const bool &);
+  void allowEmpty(const bool & /*allow*/);
 
 private:
   /// Checks the value is valid

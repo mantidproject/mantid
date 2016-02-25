@@ -1449,7 +1449,7 @@ Poco::ActiveResult<bool> Algorithm::executeAsync() {
  * @param i :: Unused argument
  * @return true if executed successfully.
 */
-bool Algorithm::executeAsyncImpl(const Poco::Void &) {
+bool Algorithm::executeAsyncImpl(const Poco::Void & /*unused*/) {
   AsyncFlagHolder running(m_runningAsync);
   return this->execute();
 }

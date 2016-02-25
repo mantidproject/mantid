@@ -31,14 +31,14 @@ namespace DataHandling {
 class XmlHandler {
 public:
   XmlHandler();
-  XmlHandler(std::string);
+  XmlHandler(std::string /*filename*/);
   virtual ~XmlHandler();
 
   std::map<std::string, std::string>
   get_metadata(const std::string &tag_to_ignore = "Detector");
-  std::string get_text_from_tag(const std::string &);
+  std::string get_text_from_tag(const std::string & /*xpath*/);
   std::map<std::string, std::string>
-  get_attributes_from_tag(const std::string &);
+  get_attributes_from_tag(const std::string & /*xpath*/);
 
 private:
   Poco::AutoPtr<Poco::XML::Document> pDoc;

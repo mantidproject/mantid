@@ -56,7 +56,7 @@ protected:
 
   /// This method should be re-implemented by subclasses for additional
   /// parameter processing.
-  virtual void afterScattererPropertySet(const std::string &) {}
+  virtual void afterScattererPropertySet(const std::string & /*unused*/) {}
 
   /// This method should be implemented by subclasses for declaring additional
   /// properties.

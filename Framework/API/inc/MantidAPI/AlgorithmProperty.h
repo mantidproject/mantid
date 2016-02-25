@@ -74,7 +74,7 @@ public:
   ~AlgorithmProperty() override;
 
   /// Add the value of another property. Doesn't make sense here.
-  AlgorithmProperty &operator+=(Kernel::Property const *) override {
+  AlgorithmProperty &operator+=(Kernel::Property const * /*right*/) override {
     throw Kernel::Exception::NotImplementedError(
         "+= operator is not implemented for AlgorithmProperty.");
     return *this;

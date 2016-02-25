@@ -104,7 +104,7 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  bool isVisible(const Kernel::IPropertyManager *) const override {
+  bool isVisible(const Kernel::IPropertyManager * /*algo*/) const override {
     return true;
   }
 

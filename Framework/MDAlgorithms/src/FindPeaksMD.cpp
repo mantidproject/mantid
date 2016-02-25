@@ -34,7 +34,7 @@ template <size_t nd> struct IsFullEvent<MDEvent<nd>, nd> : boost::true_type {};
  * to return true
  */
 template <typename MDE, size_t nd>
-bool isFullMDEvent(const boost::true_type &) {
+bool isFullMDEvent(const boost::true_type & /*unused*/) {
   return true;
 }
 
@@ -43,7 +43,7 @@ bool isFullMDEvent(const boost::true_type &) {
  * to return false
  */
 template <typename MDE, size_t nd>
-bool isFullMDEvent(const boost::false_type &) {
+bool isFullMDEvent(const boost::false_type & /*unused*/) {
   return false;
 }
 
@@ -61,7 +61,7 @@ template <typename MDE, size_t nd> bool isFullMDEvent() {
  */
 template <typename MDE, size_t nd>
 void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box,
-                  const boost::true_type &) {
+                  const boost::true_type & /*unused*/) {
   if (box.getNumChildren() > 0) {
     std::cerr << "Box has children\n";
     addDetectors(peak, box, boost::true_type());
@@ -81,8 +81,8 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box,
 /// Add detectors based on lean events. Always throws as they do not know their
 /// IDs
 template <typename MDE, size_t nd>
-void addDetectors(DataObjects::Peak &, MDBoxBase<MDE, nd> &,
-                  const boost::false_type &) {
+void addDetectors(DataObjects::Peak & /*unused*/, MDBoxBase<MDE, nd> & /*unused*/,
+                  const boost::false_type & /*unused*/) {
   throw std::runtime_error("FindPeaksMD - Workspace contains lean events, "
                            "cannot include detector information");
 }

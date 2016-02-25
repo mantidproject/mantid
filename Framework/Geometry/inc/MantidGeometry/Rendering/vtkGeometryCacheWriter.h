@@ -54,7 +54,7 @@ private:
   void createVTKFileHeader();
 
 public:
-  vtkGeometryCacheWriter(std::string); ///< Constructor
+  vtkGeometryCacheWriter(std::string /*filename*/); ///< Constructor
   ~vtkGeometryCacheWriter();           ///< Destructor
   void addObject(Object *obj);
   void write(); ///< Write the XML to a file

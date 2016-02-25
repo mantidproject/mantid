@@ -180,7 +180,7 @@ public:
 
   //--------------------------------------------------------------------------------------
   /// Add the value of another property
-  WorkspaceProperty &operator+=(Kernel::Property const *) override {
+  WorkspaceProperty &operator+=(Kernel::Property const * /*unused*/) override {
     throw Kernel::Exception::NotImplementedError(
         "+= operator is not implemented for WorkspaceProperty.");
     return *this;

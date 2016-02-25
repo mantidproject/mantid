@@ -55,7 +55,7 @@ public:
   /// Destructor
   virtual ~WorkspaceHistory();
   /// Copy constructor
-  WorkspaceHistory(const WorkspaceHistory &);
+  WorkspaceHistory(const WorkspaceHistory & /*A*/);
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
   /// Retrieve the environment history
@@ -82,7 +82,7 @@ public:
   boost::shared_ptr<HistoryView> createView() const;
 
   /// Pretty print the entire history
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream & /*os*/, const int indent = 0) const;
 
   /// Save the workspace history to a nexus file
   void saveNexus(::NeXus::File *file) const;
@@ -106,8 +106,8 @@ private:
   Mantid::API::AlgorithmHistories m_algorithms;
 };
 
-MANTID_API_DLL std::ostream &operator<<(std::ostream &,
-                                        const WorkspaceHistory &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                        const WorkspaceHistory & /*WH*/);
 
 } // namespace API
 } // namespace Mantid

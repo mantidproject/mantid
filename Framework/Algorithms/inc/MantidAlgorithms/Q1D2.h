@@ -81,8 +81,8 @@ private:
   void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
                   MantidVec::iterator e2InOut) const;
   void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
-                  MantidVec::iterator e2InOut, MantidVec::const_iterator,
-                  MantidVec::const_iterator) const;
+                  MantidVec::iterator e2InOut, MantidVec::const_iterator /*wavePixelAdjData*/,
+                  MantidVec::const_iterator /*wavePixelAdjError*/) const;
   void normToMask(const size_t offSet, const size_t specIndex,
                   const MantidVec::iterator theNorms,
                   const MantidVec::iterator errorSquared) const;

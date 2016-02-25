@@ -90,9 +90,9 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 protected:
-  virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
+  virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr /*unused*/) {}
   void checkOptionalProperties();
-  void runLoadInstrument(DataObjects::Workspace2D_sptr);
+  void runLoadInstrument(DataObjects::Workspace2D_sptr /*localWorkspace*/);
 
   /// The name and path of the input file
   std::string m_filename;

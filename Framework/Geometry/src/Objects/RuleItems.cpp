@@ -709,7 +709,7 @@ std::unique_ptr<SurfPoint> SurfPoint::clone() const
   return std::unique_ptr<SurfPoint>(doClone());
 }
 
-void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
+void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int /*unused*/)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -725,7 +725,7 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
   return;
 }
 
-void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
+void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> /*unused*/)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -1038,7 +1038,7 @@ void CompObj::setObj(Object *val)
   return;
 }
 
-void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
+void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1312,7 +1312,7 @@ std::unique_ptr<BoolValue> BoolValue::clone() const
   return std::unique_ptr<BoolValue>(doClone());
 }
 
-void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
+void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint

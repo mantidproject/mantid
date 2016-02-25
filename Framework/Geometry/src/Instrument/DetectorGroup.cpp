@@ -386,38 +386,38 @@ std::string DetectorGroup::getParameterType(const std::string & /*name*/,
 }
 
 /// Default implementation
-std::vector<double> DetectorGroup::getNumberParameter(const std::string &,
-                                                      bool) const {
+std::vector<double> DetectorGroup::getNumberParameter(const std::string & /*pname*/,
+                                                      bool /*recursive*/) const {
   return std::vector<double>(0);
 }
 
 /// Default implementation
-std::vector<V3D> DetectorGroup::getPositionParameter(const std::string &,
-                                                     bool) const {
+std::vector<V3D> DetectorGroup::getPositionParameter(const std::string & /*pname*/,
+                                                     bool /*recursive*/) const {
   return std::vector<V3D>(0);
 }
 
 /// Default implementation
-std::vector<Quat> DetectorGroup::getRotationParameter(const std::string &,
-                                                      bool) const {
+std::vector<Quat> DetectorGroup::getRotationParameter(const std::string & /*pname*/,
+                                                      bool /*recursive*/) const {
   return std::vector<Quat>(0);
 }
 
 /// Default implementation
-std::vector<std::string> DetectorGroup::getStringParameter(const std::string &,
-                                                           bool) const {
+std::vector<std::string> DetectorGroup::getStringParameter(const std::string & /*pname*/,
+                                                           bool /*recursive*/) const {
   return std::vector<std::string>(0);
 }
 
 /// Default implementation
-std::vector<int> DetectorGroup::getIntParameter(const std::string &,
-                                                bool) const {
+std::vector<int> DetectorGroup::getIntParameter(const std::string & /*pname*/,
+                                                bool /*recursive*/) const {
   return std::vector<int>(0);
 }
 
 /// Default implementation
-std::vector<bool> DetectorGroup::getBoolParameter(const std::string &,
-                                                  bool) const {
+std::vector<bool> DetectorGroup::getBoolParameter(const std::string & /*pname*/,
+                                                  bool /*recursive*/) const {
   return std::vector<bool>(0);
 }
 

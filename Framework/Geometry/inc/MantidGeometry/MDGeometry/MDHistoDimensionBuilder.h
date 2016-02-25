@@ -33,8 +33,8 @@ public:
   size_t getNumBins() const { return m_nbins; }
   MDHistoDimension *createRaw();
   IMDDimension_sptr create();
-  MDHistoDimensionBuilder(const MDHistoDimensionBuilder &);
-  MDHistoDimensionBuilder &operator=(const MDHistoDimensionBuilder &);
+  MDHistoDimensionBuilder(const MDHistoDimensionBuilder & /*other*/);
+  MDHistoDimensionBuilder &operator=(const MDHistoDimensionBuilder & /*other*/);
 
 private:
   /// Cached name

@@ -53,11 +53,11 @@ public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
-  Surface(const Surface &);
+  Surface(const Surface & /*A*/);
   std::unique_ptr<Surface> clone() const {
     return std::unique_ptr<Surface>(doClone());
   };
-  Surface &operator=(const Surface &);
+  Surface &operator=(const Surface & /*A*/);
   virtual ~Surface();
 
   /// Effective typeid
@@ -71,7 +71,7 @@ public:
 
   /// Sets the surface based on a string input in MCNPX format
   virtual int setSurface(const std::string &R) = 0;
-  virtual int side(const Kernel::V3D &) const;
+  virtual int side(const Kernel::V3D & /*unused*/) const;
 
   /// is point valid on surface
   virtual int onSurface(const Kernel::V3D &R) const = 0;
@@ -86,8 +86,8 @@ public:
   /// rotates the surface
   virtual void rotate(const Kernel::Matrix<double> &) = 0;
 
-  void writeHeader(std::ostream &) const;
-  virtual void write(std::ostream &) const;
+  void writeHeader(std::ostream & /*OX*/) const;
+  virtual void write(std::ostream & /*out*/) const;
   virtual void print() const;
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,

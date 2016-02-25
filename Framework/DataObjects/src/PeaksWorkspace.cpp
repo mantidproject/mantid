@@ -835,7 +835,7 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 
 // prevent shared pointer from deleting this
 struct NullDeleter {
-  template <typename T> void operator()(T *) {}
+  template <typename T> void operator()(T * /*unused*/) {}
 };
 /**Get access to shared pointer containing workspace porperties, cashes the
  shared pointer

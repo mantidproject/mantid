@@ -43,16 +43,16 @@ public:
   ~ComponentParser() override;
 
   /// Signals start of element
-  void startElement(const Poco::XML::XMLString &,
+  void startElement(const Poco::XML::XMLString & /*uri*/,
                     const Poco::XML::XMLString &localName,
-                    const Poco::XML::XMLString &,
+                    const Poco::XML::XMLString & /*qname*/,
                     const Poco::XML::Attributes &attr) override;
   /// Signals end of element
-  void endElement(const Poco::XML::XMLString &,
+  void endElement(const Poco::XML::XMLString & /*uri*/,
                   const Poco::XML::XMLString &localName,
-                  const Poco::XML::XMLString &) override;
+                  const Poco::XML::XMLString & /*qname*/) override;
 
-  void characters(const Poco::XML::XMLChar[], int, int) override;
+  void characters(const Poco::XML::XMLChar /*ch*/[], int /*start*/, int /*length*/) override;
 
   Component *getComponent();
 
@@ -62,18 +62,18 @@ public:
   // They are not used them here.
   /// Signals start of XML document
   void startDocument() override {}                                ///<Not used
-  void setDocumentLocator(const Poco::XML::Locator *) override {} ///< Not used
+  void setDocumentLocator(const Poco::XML::Locator * /*loc*/) override {} ///< Not used
   void endDocument() override {}                                  ///< Not used
-  void ignorableWhitespace(const Poco::XML::XMLChar[], int, int) override {
+  void ignorableWhitespace(const Poco::XML::XMLChar /*ch*/[], int /*start*/, int /*length*/) override {
   } ///< Not used
-  void processingInstruction(const Poco::XML::XMLString &,
-                             const Poco::XML::XMLString &) override {
+  void processingInstruction(const Poco::XML::XMLString & /*target*/,
+                             const Poco::XML::XMLString & /*data*/) override {
   } ///< Not used
-  void startPrefixMapping(const Poco::XML::XMLString &,
-                          const Poco::XML::XMLString &) override {
+  void startPrefixMapping(const Poco::XML::XMLString & /*prefix*/,
+                          const Poco::XML::XMLString & /*uri*/) override {
   }                                                               ///< Not used
-  void endPrefixMapping(const Poco::XML::XMLString &) override {} ///< Not used
-  void skippedEntity(const Poco::XML::XMLString &) override {}    ///< Not used
+  void endPrefixMapping(const Poco::XML::XMLString & /*prefix*/) override {} ///< Not used
+  void skippedEntity(const Poco::XML::XMLString & /*name*/) override {}    ///< Not used
 
 private:
   /// The components currently being built up.

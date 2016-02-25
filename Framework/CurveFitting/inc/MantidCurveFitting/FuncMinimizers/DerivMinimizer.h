@@ -49,7 +49,7 @@ public:
   ~DerivMinimizer() override;
 
   /// Do one iteration.
-  bool iterate(size_t) override;
+  bool iterate(size_t /*iteration*/) override;
   /// Return current value of the cost function
   double costFunctionVal() override;
   /// Calculate the covariance matrix.

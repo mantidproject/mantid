@@ -88,7 +88,7 @@ public:
   /// splitting;
   bool ifNeedsSplitting() const { return m_needSplitting; }
   /// method splits list of boxes not yet uses thread sheduler but may be later
-  void splitList(Kernel::ThreadScheduler *) {
+  void splitList(Kernel::ThreadScheduler * /*unused*/) {
     (this->*(mdBoxListSplitter[m_NDimensions]))();
   }
 

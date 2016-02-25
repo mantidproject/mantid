@@ -93,9 +93,9 @@ public:
   void print(int level, ostream &out) override; // print node
   void dump(ostream &out) override;             // dump node
 
-  void ann_search(ANNdist) override;     // standard search
-  void ann_pri_search(ANNdist) override; // priority search
-  void ann_FR_search(ANNdist) override;  // fixed-radius search
+  void ann_search(ANNdist /*box_dist*/) override;     // standard search
+  void ann_pri_search(ANNdist /*box_dist*/) override; // priority search
+  void ann_FR_search(ANNdist /*box_dist*/) override;  // fixed-radius search
 };
 
 #endif

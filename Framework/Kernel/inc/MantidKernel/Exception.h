@@ -159,7 +159,7 @@ public:
 /// Marks code as not implemented yet.
 class MANTID_KERNEL_DLL NotImplementedError final : public std::logic_error {
 public:
-  NotImplementedError(const std::string &);
+  NotImplementedError(const std::string & /*Desc*/);
   NotImplementedError(const NotImplementedError &A);
   /// Assignment operator
   NotImplementedError &operator=(const NotImplementedError &A);
@@ -178,10 +178,10 @@ private:
   std::string outMessage;
 
 public:
-  NotFoundError(const std::string &, const std::string &);
-  NotFoundError(const std::string &, const int &);
-  NotFoundError(const std::string &, const int64_t &);
-  NotFoundError(const std::string &, const std::size_t &);
+  NotFoundError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
+  NotFoundError(const std::string & /*Desc*/, const int & /*ObjectNum*/);
+  NotFoundError(const std::string & /*Desc*/, const int64_t & /*ObjectNum*/);
+  NotFoundError(const std::string & /*Desc*/, const std::size_t & /*ObjectNum*/);
   NotFoundError(const NotFoundError &A);
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
@@ -200,7 +200,7 @@ private:
   std::string outMessage;
 
 public:
-  ExistsError(const std::string &, const std::string &);
+  ExistsError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
   ExistsError(const ExistsError &A);
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
@@ -240,7 +240,7 @@ private:
   std::string outMessage;
 
 public:
-  AbsObjMethod(const std::string &);
+  AbsObjMethod(const std::string & /*ObjectName*/);
   AbsObjMethod(const AbsObjMethod &A);
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
@@ -260,8 +260,8 @@ private:
   std::string outMessage;
 
 public:
-  InstrumentDefinitionError(const std::string &, const std::string &);
-  InstrumentDefinitionError(const std::string &);
+  InstrumentDefinitionError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
+  InstrumentDefinitionError(const std::string & /*Desc*/);
   InstrumentDefinitionError(const InstrumentDefinitionError &A);
   /// Assignment operator
   InstrumentDefinitionError &operator=(const InstrumentDefinitionError &A);
@@ -282,8 +282,8 @@ private:
   std::string outMessage;
 
 public:
-  OpenGLError(const std::string &, const std::string &);
-  OpenGLError(const std::string &);
+  OpenGLError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
+  OpenGLError(const std::string & /*Desc*/);
   OpenGLError(const OpenGLError &A);
   /// Assignment operator
   OpenGLError &operator=(const OpenGLError &A);
@@ -306,7 +306,7 @@ private:
   std::string m_message; ///< The message reported by what()
 
 public:
-  MisMatch(const T &, const T &, const std::string &);
+  MisMatch(const T & /*A*/, const T & /*B*/, const std::string & /*Place*/);
   MisMatch(const MisMatch<T> &A);
   MisMatch<T> &operator=(const MisMatch<T> &rhs);
   ~MisMatch() throw() override {}
@@ -350,7 +350,7 @@ private:
 
 public:
   NullPointerException(const std::string &place, const std::string &objectName);
-  NullPointerException(const NullPointerException &);
+  NullPointerException(const NullPointerException & /*rhs*/);
   ~NullPointerException() throw() override {}
 
   NullPointerException &operator=(const NullPointerException &);
@@ -372,7 +372,7 @@ private:
 
 public:
   InternetError(const std::string &message, const int &errorCode = 0);
-  InternetError(const InternetError &);
+  InternetError(const InternetError & /*A*/);
   ~InternetError() throw() override {}
 
   InternetError &operator=(const InternetError &);

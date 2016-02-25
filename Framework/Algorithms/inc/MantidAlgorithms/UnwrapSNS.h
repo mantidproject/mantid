@@ -69,8 +69,8 @@ private:
   void runMaskDetectors();
 
   double calculateFlightpath(const int &spectrum, bool &isMonitor) const;
-  int unwrapX(const MantidVec &, MantidVec &, const double &Ld);
-  void getTofRangeData(const bool);
+  int unwrapX(const MantidVec & /*datain*/, MantidVec & /*dataout*/, const double &Ld);
+  void getTofRangeData(const bool /*isEvent*/);
   double m_conversionConstant; ///< The constant used in the conversion from TOF
   /// to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace

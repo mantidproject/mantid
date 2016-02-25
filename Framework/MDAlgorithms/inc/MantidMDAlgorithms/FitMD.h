@@ -65,8 +65,8 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
   /// Create a domain from the input workspace
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &,
-                    boost::shared_ptr<API::FunctionValues> &,
+  void createDomain(boost::shared_ptr<API::FunctionDomain> & /*domain*/,
+                    boost::shared_ptr<API::FunctionValues> & /*ivalues*/,
                     size_t i0) override;
   boost::shared_ptr<API::Workspace>
   createOutputWorkspace(const std::string &baseName,

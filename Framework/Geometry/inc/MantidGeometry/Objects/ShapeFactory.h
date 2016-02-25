@@ -131,7 +131,7 @@ private:
                                               const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
-  void createGeometryHandler(Poco::XML::Element *, boost::shared_ptr<Object>);
+  void createGeometryHandler(Poco::XML::Element * /*pElem*/, boost::shared_ptr<Object> /*Obj*/);
 };
 
 } // namespace Geometry

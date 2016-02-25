@@ -70,7 +70,7 @@ private:
                              double tcross) const;
 
   /// Derivative
-  void functionDerivLocal(API::Jacobian *, const double *, const size_t);
+  void functionDerivLocal(API::Jacobian * /*unused*/, const double * /*unused*/, const size_t /*unused*/);
 
   /// Derivative
   // void functionDeriv(const API::FunctionDomain& domain, API::Jacobian&

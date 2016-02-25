@@ -26,7 +26,7 @@ public:
   AffineMatrixParameter *clone() const override;
   void setMatrix(const AffineMatrixType newMatrix);
   AffineMatrixParameter(size_t outD, size_t inD);
-  AffineMatrixParameter(const AffineMatrixParameter &);
+  AffineMatrixParameter(const AffineMatrixParameter & /*other*/);
   AffineMatrixParameter &operator=(const AffineMatrixParameter &other);
   ~AffineMatrixParameter() override;
 

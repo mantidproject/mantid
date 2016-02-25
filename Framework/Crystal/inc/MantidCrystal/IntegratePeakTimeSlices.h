@@ -119,7 +119,7 @@ public:
                              double &Varx, double &Vary, double &Varxy,
                              std::vector<double> &ParameterValues);
 
-  bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
+  bool IsEnoughData(const double *ParameterValues, Kernel::Logger & /*unused*/);
 
   double getNewRCRadius();
 

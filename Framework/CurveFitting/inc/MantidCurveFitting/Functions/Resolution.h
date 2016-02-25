@@ -60,7 +60,7 @@ public:
   /// Return a value of attribute attName
   Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &) override;
+  void setAttribute(const std::string &attName, const Attribute & /*value*/) override;
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &attName) const override;
 

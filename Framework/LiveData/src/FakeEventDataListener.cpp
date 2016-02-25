@@ -37,7 +37,7 @@ FakeEventDataListener::~FakeEventDataListener() {
   delete m_rand;
 }
 
-bool FakeEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FakeEventDataListener::connect(const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
@@ -133,7 +133,7 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 /** Callback method called at specified interval by timer.
  *  Used to fill buffer workspace with events between calls to extractData.
  */
-void FakeEventDataListener::generateEvents(Poco::Timer &) {
+void FakeEventDataListener::generateEvents(Poco::Timer & /*unused*/) {
   Mutex::ScopedLock _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
     m_buffer->getEventList(0)

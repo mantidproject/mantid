@@ -53,7 +53,7 @@ public:
   double operator()(const std::size_t &index,
                     const std::size_t &verticalIndex) const override;
   void setValue(const std::size_t &index, const double &value) override;
-  bool operator==(const Axis &) const override;
+  bool operator==(const Axis & /*axis2*/) const override;
   bool equalWithinTolerance(const Axis &axis2,
                             const double tolerance) const override;
   // We must override these to prevent access to NumericAxis::m_values and

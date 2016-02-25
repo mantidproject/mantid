@@ -110,8 +110,8 @@ private:
   DISABLE_COPY_AND_ASSIGN(ForegroundModel)
 
   /// Required by the interface
-  void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const override {}
+  void function(const Mantid::API::FunctionDomain & /*domain*/,
+                Mantid::API::FunctionValues & /*values*/) const override {}
   /// Add attributes common to all models
   void addAttributes();
 

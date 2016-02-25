@@ -51,7 +51,7 @@ public:
                   const size_t nData) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &) override;
+  void setAttribute(const std::string &attName, const Attribute & /*att*/) override;
 
 private:
   /// ReflectivityMulf layers

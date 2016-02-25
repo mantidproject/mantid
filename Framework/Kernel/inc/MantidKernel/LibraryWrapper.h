@@ -42,9 +42,9 @@ public:
   virtual ~LibraryWrapper();
 
   // Returns true if DLL is opened or already open
-  bool OpenLibrary(const std::string &);
+  bool OpenLibrary(const std::string & /*libName*/);
 
-  bool OpenLibrary(const std::string &, const std::string &);
+  bool OpenLibrary(const std::string & /*libName*/, const std::string & /*filePath*/);
 
 private:
   /** An untyped pointer to the loaded library.

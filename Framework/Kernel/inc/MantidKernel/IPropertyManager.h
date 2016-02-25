@@ -348,7 +348,7 @@ protected:
   /// Override this method to perform a custom action right after a property was
   /// set.
   /// The argument is the property name. Default - do nothing.
-  virtual void afterPropertySet(const std::string &) {}
+  virtual void afterPropertySet(const std::string & /*unused*/) {}
 
   /// Utility class that enables the getProperty() method to effectively be
   /// templated on the return type
@@ -430,7 +430,7 @@ private:
    */
   template <typename T>
   IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const boost::false_type &) {
+                                     const boost::false_type & /*unused*/) {
     PropertyWithValue<T> *prop =
         dynamic_cast<PropertyWithValue<T> *>(getPointerToProperty(name));
     if (prop) {
@@ -451,7 +451,7 @@ private:
    */
   template <typename T>
   IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const boost::true_type &) {
+                                     const boost::true_type & /*unused*/) {
     // T is convertible to DataItem_sptr
     boost::shared_ptr<DataItem> data =
         boost::static_pointer_cast<DataItem>(value);

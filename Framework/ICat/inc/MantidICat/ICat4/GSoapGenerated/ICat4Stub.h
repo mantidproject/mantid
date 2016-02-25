@@ -134,12 +134,12 @@ public:
   int soap_type() const override {
     return 10;
   } /* = unique id SOAP_TYPE_ICat4_xsd__boolean */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__boolean() { xsd__boolean::soap_default(nullptr); }
   ~xsd__boolean() override {}
 };
@@ -156,12 +156,12 @@ public:
   int soap_type() const override {
     return 12;
   } /* = unique id SOAP_TYPE_ICat4_xsd__dateTime */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__dateTime() { xsd__dateTime::soap_default(nullptr); }
   ~xsd__dateTime() override {}
 };
@@ -178,12 +178,12 @@ public:
   int soap_type() const override {
     return 14;
   } /* = unique id SOAP_TYPE_ICat4_xsd__double */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__double() { xsd__double::soap_default(nullptr); }
   ~xsd__double() override {}
 };
@@ -200,12 +200,12 @@ public:
   int soap_type() const override {
     return 16;
   } /* = unique id SOAP_TYPE_ICat4_xsd__int */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__int() { xsd__int::soap_default(nullptr); }
   ~xsd__int() override {}
 };
@@ -222,12 +222,12 @@ public:
   int soap_type() const override {
     return 17;
   } /* = unique id SOAP_TYPE_ICat4_xsd__long */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__long() { xsd__long::soap_default(nullptr); }
   ~xsd__long() override {}
 };
@@ -248,12 +248,12 @@ public:
   int soap_type() const override {
     return 19;
   } /* = unique id SOAP_TYPE_ICat4_xsd__string */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   xsd__string() { xsd__string::soap_default(nullptr); }
   ~xsd__string() override {}
 };
@@ -270,12 +270,12 @@ public:
   int soap_type() const override {
     return 114;
   } /* = unique id SOAP_TYPE_ICat4_ns1__icatExceptionType_ */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__icatExceptionType_() { ns1__icatExceptionType_::soap_default(nullptr); }
   ~ns1__icatExceptionType_() override {}
 };
@@ -292,12 +292,12 @@ public:
   int soap_type() const override {
     return 116;
   } /* = unique id SOAP_TYPE_ICat4_ns1__studyStatus_ */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__studyStatus_() { ns1__studyStatus_::soap_default(nullptr); }
   ~ns1__studyStatus_() override {}
 };
@@ -314,12 +314,12 @@ public:
   int soap_type() const override {
     return 118;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameterValueType_ */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__parameterValueType_() {
     ns1__parameterValueType_::soap_default(nullptr);
   }
@@ -338,12 +338,12 @@ public:
   int soap_type() const override {
     return 120;
   } /* = unique id SOAP_TYPE_ICat4_ns1__relType_ */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__relType_() { ns1__relType_::soap_default(nullptr); }
   ~ns1__relType_() override {}
 };
@@ -360,12 +360,12 @@ public:
   int soap_type() const override {
     return 122;
   } /* = unique id SOAP_TYPE_ICat4_ns1__accessType_ */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__accessType_() { ns1__accessType_::soap_default(nullptr); }
   ~ns1__accessType_() override {}
 };
@@ -381,12 +381,12 @@ public:
   int soap_type() const override {
     return 21;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneClear */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneClear() { ns1__luceneClear::soap_default(nullptr); }
   ~ns1__luceneClear() override {}
 };
@@ -400,12 +400,12 @@ public:
   int soap_type() const override {
     return 22;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneClearResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneClearResponse() {
     ns1__luceneClearResponse::soap_default(nullptr);
   }
@@ -426,12 +426,12 @@ public:
   int soap_type() const override {
     return 23;
   } /* = unique id SOAP_TYPE_ICat4_ns1__IcatException */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__IcatException() { ns1__IcatException::soap_default(nullptr); }
   ~ns1__IcatException() override {}
 };
@@ -449,12 +449,12 @@ public:
   int soap_type() const override {
     return 24;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createMany */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__createMany() { ns1__createMany::soap_default(nullptr); }
   ~ns1__createMany() override {}
 };
@@ -474,12 +474,12 @@ public:
   int soap_type() const override {
     return 25;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityBaseBean */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__entityBaseBean() { ns1__entityBaseBean::soap_default(nullptr); }
   ~ns1__entityBaseBean() override {}
 };
@@ -500,12 +500,12 @@ public:
   int soap_type() const override {
     return 26;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createManyResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__createManyResponse() { ns1__createManyResponse::soap_default(nullptr); }
   ~ns1__createManyResponse() override {}
 };
@@ -522,12 +522,12 @@ public:
   int soap_type() const override {
     return 27;
   } /* = unique id SOAP_TYPE_ICat4_ns1__create */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__create() { ns1__create::soap_default(nullptr); }
   ~ns1__create() override {}
 };
@@ -548,12 +548,12 @@ public:
   int soap_type() const override {
     return 28;
   } /* = unique id SOAP_TYPE_ICat4_ns1__createResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__createResponse() { ns1__createResponse::soap_default(nullptr); }
   ~ns1__createResponse() override {}
 };
@@ -569,12 +569,12 @@ public:
   int soap_type() const override {
     return 29;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getProperties */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getProperties() { ns1__getProperties::soap_default(nullptr); }
   ~ns1__getProperties() override {}
 };
@@ -595,12 +595,12 @@ public:
   int soap_type() const override {
     return 30;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getPropertiesResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getPropertiesResponse() {
     ns1__getPropertiesResponse::soap_default(nullptr);
   }
@@ -621,12 +621,12 @@ public:
   int soap_type() const override {
     return 31;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneSearch */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneSearch() { ns1__luceneSearch::soap_default(nullptr); }
   ~ns1__luceneSearch() override {}
 };
@@ -647,12 +647,12 @@ public:
   int soap_type() const override {
     return 32;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneSearchResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneSearchResponse() {
     ns1__luceneSearchResponse::soap_default(nullptr);
   }
@@ -671,12 +671,12 @@ public:
   int soap_type() const override {
     return 33;
   } /* = unique id SOAP_TYPE_ICat4_ns1__lucenePopulate */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__lucenePopulate() { ns1__lucenePopulate::soap_default(nullptr); }
   ~ns1__lucenePopulate() override {}
 };
@@ -690,12 +690,12 @@ public:
   int soap_type() const override {
     return 34;
   } /* = unique id SOAP_TYPE_ICat4_ns1__lucenePopulateResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__lucenePopulateResponse() {
     ns1__lucenePopulateResponse::soap_default(nullptr);
   }
@@ -715,12 +715,12 @@ public:
   int soap_type() const override {
     return 35;
   } /* = unique id SOAP_TYPE_ICat4_ns1__get */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__get() { ns1__get::soap_default(nullptr); }
   ~ns1__get() override {}
 };
@@ -741,12 +741,12 @@ public:
   int soap_type() const override {
     return 36;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getResponse() { ns1__getResponse::soap_default(nullptr); }
   ~ns1__getResponse() override {}
 };
@@ -760,12 +760,12 @@ public:
   int soap_type() const override {
     return 37;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityNames */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getEntityNames() { ns1__getEntityNames::soap_default(nullptr); }
   ~ns1__getEntityNames() override {}
 };
@@ -786,12 +786,12 @@ public:
   int soap_type() const override {
     return 38;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityNamesResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getEntityNamesResponse() {
     ns1__getEntityNamesResponse::soap_default(nullptr);
   }
@@ -807,12 +807,12 @@ public:
   int soap_type() const override {
     return 39;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getApiVersion */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getApiVersion() { ns1__getApiVersion::soap_default(nullptr); }
   ~ns1__getApiVersion() override {}
 };
@@ -833,12 +833,12 @@ public:
   int soap_type() const override {
     return 40;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getApiVersionResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getApiVersionResponse() {
     ns1__getApiVersionResponse::soap_default(nullptr);
   }
@@ -856,12 +856,12 @@ public:
   int soap_type() const override {
     return 41;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneGetPopulating */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneGetPopulating() {
     ns1__luceneGetPopulating::soap_default(nullptr);
   }
@@ -884,12 +884,12 @@ public:
   int soap_type() const override {
     return 42;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneGetPopulatingResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneGetPopulatingResponse() {
     ns1__luceneGetPopulatingResponse::soap_default(nullptr);
   }
@@ -908,12 +908,12 @@ public:
   int soap_type() const override {
     return 43;
   } /* = unique id SOAP_TYPE_ICat4_ns1__update */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__update() { ns1__update::soap_default(nullptr); }
   ~ns1__update() override {}
 };
@@ -927,12 +927,12 @@ public:
   int soap_type() const override {
     return 44;
   } /* = unique id SOAP_TYPE_ICat4_ns1__updateResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__updateResponse() { ns1__updateResponse::soap_default(nullptr); }
   ~ns1__updateResponse() override {}
 };
@@ -950,12 +950,12 @@ public:
   int soap_type() const override {
     return 45;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteMany */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__deleteMany() { ns1__deleteMany::soap_default(nullptr); }
   ~ns1__deleteMany() override {}
 };
@@ -969,12 +969,12 @@ public:
   int soap_type() const override {
     return 46;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteManyResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__deleteManyResponse() { ns1__deleteManyResponse::soap_default(nullptr); }
   ~ns1__deleteManyResponse() override {}
 };
@@ -990,12 +990,12 @@ public:
   int soap_type() const override {
     return 47;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getUserName */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getUserName() { ns1__getUserName::soap_default(nullptr); }
   ~ns1__getUserName() override {}
 };
@@ -1016,12 +1016,12 @@ public:
   int soap_type() const override {
     return 48;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getUserNameResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getUserNameResponse() {
     ns1__getUserNameResponse::soap_default(nullptr);
   }
@@ -1039,12 +1039,12 @@ public:
   int soap_type() const override {
     return 49;
   } /* = unique id SOAP_TYPE_ICat4_ns1__refresh */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__refresh() { ns1__refresh::soap_default(nullptr); }
   ~ns1__refresh() override {}
 };
@@ -1058,12 +1058,12 @@ public:
   int soap_type() const override {
     return 50;
   } /* = unique id SOAP_TYPE_ICat4_ns1__refreshResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__refreshResponse() { ns1__refreshResponse::soap_default(nullptr); }
   ~ns1__refreshResponse() override {}
 };
@@ -1127,12 +1127,12 @@ public:
   int soap_type() const override {
     return 51;
   } /* = unique id SOAP_TYPE_ICat4_ns1__login */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__login() { ns1__login::soap_default(nullptr); }
   ~ns1__login() override {}
 };
@@ -1153,12 +1153,12 @@ public:
   int soap_type() const override {
     return 52;
   } /* = unique id SOAP_TYPE_ICat4_ns1__loginResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__loginResponse() { ns1__loginResponse::soap_default(nullptr); }
   ~ns1__loginResponse() override {}
 };
@@ -1223,12 +1223,12 @@ public:
   int soap_type() const override {
     return 53;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dummy */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dummy() { ns1__dummy::soap_default(nullptr); }
   ~ns1__dummy() override {}
 };
@@ -1242,12 +1242,12 @@ public:
   int soap_type() const override {
     return 93;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dummyResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dummyResponse() { ns1__dummyResponse::soap_default(nullptr); }
   ~ns1__dummyResponse() override {}
 };
@@ -1263,12 +1263,12 @@ public:
   int soap_type() const override {
     return 94;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityInfo */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getEntityInfo() { ns1__getEntityInfo::soap_default(nullptr); }
   ~ns1__getEntityInfo() override {}
 };
@@ -1289,12 +1289,12 @@ public:
   int soap_type() const override {
     return 95;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getEntityInfoResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getEntityInfoResponse() {
     ns1__getEntityInfoResponse::soap_default(nullptr);
   }
@@ -1316,12 +1316,12 @@ public:
   int soap_type() const override {
     return 96;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityInfo */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__entityInfo() { ns1__entityInfo::soap_default(nullptr); }
   ~ns1__entityInfo() override {}
 };
@@ -1337,12 +1337,12 @@ public:
   int soap_type() const override {
     return 97;
   } /* = unique id SOAP_TYPE_ICat4_ns1__constraint */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__constraint() { ns1__constraint::soap_default(nullptr); }
   ~ns1__constraint() override {}
 };
@@ -1363,12 +1363,12 @@ public:
   int soap_type() const override {
     return 98;
   } /* = unique id SOAP_TYPE_ICat4_ns1__entityField */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__entityField() { ns1__entityField::soap_default(nullptr); }
   ~ns1__entityField() override {}
 };
@@ -1384,12 +1384,12 @@ public:
   int soap_type() const override {
     return 99;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneCommit */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneCommit() { ns1__luceneCommit::soap_default(nullptr); }
   ~ns1__luceneCommit() override {}
 };
@@ -1403,12 +1403,12 @@ public:
   int soap_type() const override {
     return 100;
   } /* = unique id SOAP_TYPE_ICat4_ns1__luceneCommitResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__luceneCommitResponse() {
     ns1__luceneCommitResponse::soap_default(nullptr);
   }
@@ -1429,12 +1429,12 @@ public:
   int soap_type() const override {
     return 101;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchText */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__searchText() { ns1__searchText::soap_default(nullptr); }
   ~ns1__searchText() override {}
 };
@@ -1455,12 +1455,12 @@ public:
   int soap_type() const override {
     return 102;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchTextResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__searchTextResponse() { ns1__searchTextResponse::soap_default(nullptr); }
   ~ns1__searchTextResponse() override {}
 };
@@ -1477,12 +1477,12 @@ public:
   int soap_type() const override {
     return 103;
   } /* = unique id SOAP_TYPE_ICat4_ns1__delete */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__delete() { ns1__delete::soap_default(nullptr); }
   ~ns1__delete() override {}
 };
@@ -1496,12 +1496,12 @@ public:
   int soap_type() const override {
     return 104;
   } /* = unique id SOAP_TYPE_ICat4_ns1__deleteResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__deleteResponse() { ns1__deleteResponse::soap_default(nullptr); }
   ~ns1__deleteResponse() override {}
 };
@@ -1520,12 +1520,12 @@ public:
   int soap_type() const override {
     return 105;
   } /* = unique id SOAP_TYPE_ICat4_ns1__isAccessAllowed */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__isAccessAllowed() { ns1__isAccessAllowed::soap_default(nullptr); }
   ~ns1__isAccessAllowed() override {}
 };
@@ -1546,12 +1546,12 @@ public:
   int soap_type() const override {
     return 106;
   } /* = unique id SOAP_TYPE_ICat4_ns1__isAccessAllowedResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__isAccessAllowedResponse() {
     ns1__isAccessAllowedResponse::soap_default(nullptr);
   }
@@ -1570,12 +1570,12 @@ public:
   int soap_type() const override {
     return 107;
   } /* = unique id SOAP_TYPE_ICat4_ns1__search */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__search() { ns1__search::soap_default(nullptr); }
   ~ns1__search() override {}
 };
@@ -1596,12 +1596,12 @@ public:
   int soap_type() const override {
     return 108;
   } /* = unique id SOAP_TYPE_ICat4_ns1__searchResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__searchResponse() { ns1__searchResponse::soap_default(nullptr); }
   ~ns1__searchResponse() override {}
 };
@@ -1617,12 +1617,12 @@ public:
   int soap_type() const override {
     return 109;
   } /* = unique id SOAP_TYPE_ICat4_ns1__logout */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__logout() { ns1__logout::soap_default(nullptr); }
   ~ns1__logout() override {}
 };
@@ -1636,12 +1636,12 @@ public:
   int soap_type() const override {
     return 110;
   } /* = unique id SOAP_TYPE_ICat4_ns1__logoutResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__logoutResponse() { ns1__logoutResponse::soap_default(nullptr); }
   ~ns1__logoutResponse() override {}
 };
@@ -1657,12 +1657,12 @@ public:
   int soap_type() const override {
     return 111;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getRemainingMinutes */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getRemainingMinutes() {
     ns1__getRemainingMinutes::soap_default(nullptr);
   }
@@ -1685,12 +1685,12 @@ public:
   int soap_type() const override {
     return 112;
   } /* = unique id SOAP_TYPE_ICat4_ns1__getRemainingMinutesResponse */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__getRemainingMinutesResponse() {
     ns1__getRemainingMinutesResponse::soap_default(nullptr);
   }
@@ -1727,12 +1727,12 @@ public:
   int soap_type() const override {
     return 54;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafile */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__datafile() { ns1__datafile::soap_default(nullptr); }
   ~ns1__datafile() override {}
 };
@@ -1750,12 +1750,12 @@ public:
   int soap_type() const override {
     return 55;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionDatafile */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dataCollectionDatafile() {
     ns1__dataCollectionDatafile::soap_default(nullptr);
   }
@@ -1782,12 +1782,12 @@ public:
   int soap_type() const override {
     return 56;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollection */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dataCollection() { ns1__dataCollection::soap_default(nullptr); }
   ~ns1__dataCollection() override {}
 };
@@ -1805,12 +1805,12 @@ public:
   int soap_type() const override {
     return 57;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionDataset */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dataCollectionDataset() {
     ns1__dataCollectionDataset::soap_default(nullptr);
   }
@@ -1845,12 +1845,12 @@ public:
   int soap_type() const override {
     return 58;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataset */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dataset() { ns1__dataset::soap_default(nullptr); }
   ~ns1__dataset() override {}
 };
@@ -1893,12 +1893,12 @@ public:
   int soap_type() const override {
     return 59;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigation */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__investigation() { ns1__investigation::soap_default(nullptr); }
   ~ns1__investigation() override {}
 };
@@ -1936,12 +1936,12 @@ public:
   int soap_type() const override {
     return 60;
   } /* = unique id SOAP_TYPE_ICat4_ns1__facility */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__facility() { ns1__facility::soap_default(nullptr); }
   ~ns1__facility() override {}
 };
@@ -1960,12 +1960,12 @@ public:
   int soap_type() const override {
     return 61;
   } /* = unique id SOAP_TYPE_ICat4_ns1__application */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__application() { ns1__application::soap_default(nullptr); }
   ~ns1__application() override {}
 };
@@ -1986,12 +1986,12 @@ public:
   int soap_type() const override {
     return 62;
   } /* = unique id SOAP_TYPE_ICat4_ns1__job */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__job() { ns1__job::soap_default(nullptr); }
   ~ns1__job() override {}
 };
@@ -2013,12 +2013,12 @@ public:
   int soap_type() const override {
     return 63;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafileFormat */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__datafileFormat() { ns1__datafileFormat::soap_default(nullptr); }
   ~ns1__datafileFormat() override {}
 };
@@ -2038,12 +2038,12 @@ public:
   int soap_type() const override {
     return 64;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datasetType */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__datasetType() { ns1__datasetType::soap_default(nullptr); }
   ~ns1__datasetType() override {}
 };
@@ -2063,12 +2063,12 @@ public:
   int soap_type() const override {
     return 65;
   } /* = unique id SOAP_TYPE_ICat4_ns1__facilityCycle */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__facilityCycle() { ns1__facilityCycle::soap_default(nullptr); }
   ~ns1__facilityCycle() override {}
 };
@@ -2095,12 +2095,12 @@ public:
   int soap_type() const override {
     return 66;
   } /* = unique id SOAP_TYPE_ICat4_ns1__instrument */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__instrument() { ns1__instrument::soap_default(nullptr); }
   ~ns1__instrument() override {}
 };
@@ -2117,12 +2117,12 @@ public:
   int soap_type() const override {
     return 67;
   } /* = unique id SOAP_TYPE_ICat4_ns1__instrumentScientist */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__instrumentScientist() {
     ns1__instrumentScientist::soap_default(nullptr);
   }
@@ -2149,12 +2149,12 @@ public:
   int soap_type() const override {
     return 68;
   } /* = unique id SOAP_TYPE_ICat4_ns1__user */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__user() { ns1__user::soap_default(nullptr); }
   ~ns1__user() override {}
 };
@@ -2173,12 +2173,12 @@ public:
   int soap_type() const override {
     return 69;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationUser */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__investigationUser() { ns1__investigationUser::soap_default(nullptr); }
   ~ns1__investigationUser() override {}
 };
@@ -2200,12 +2200,12 @@ public:
   int soap_type() const override {
     return 70;
   } /* = unique id SOAP_TYPE_ICat4_ns1__study */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__study() { ns1__study::soap_default(nullptr); }
   ~ns1__study() override {}
 };
@@ -2223,12 +2223,12 @@ public:
   int soap_type() const override {
     return 71;
   } /* = unique id SOAP_TYPE_ICat4_ns1__studyInvestigation */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__studyInvestigation() { ns1__studyInvestigation::soap_default(nullptr); }
   ~ns1__studyInvestigation() override {}
 };
@@ -2245,12 +2245,12 @@ public:
   int soap_type() const override {
     return 72;
   } /* = unique id SOAP_TYPE_ICat4_ns1__userGroup */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__userGroup() { ns1__userGroup::soap_default(nullptr); }
   ~ns1__userGroup() override {}
 };
@@ -2269,12 +2269,12 @@ public:
   int soap_type() const override {
     return 73;
   } /* = unique id SOAP_TYPE_ICat4_ns1__grouping */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__grouping() { ns1__grouping::soap_default(nullptr); }
   ~ns1__grouping() override {}
 };
@@ -2292,12 +2292,12 @@ public:
   int soap_type() const override {
     return 74;
   } /* = unique id SOAP_TYPE_ICat4_ns1__rule */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__rule() { ns1__rule::soap_default(nullptr); }
   ~ns1__rule() override {}
 };
@@ -2315,12 +2315,12 @@ public:
   int soap_type() const override {
     return 75;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationInstrument */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__investigationInstrument() {
     ns1__investigationInstrument::soap_default(nullptr);
   }
@@ -2342,12 +2342,12 @@ public:
   int soap_type() const override {
     return 76;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationType */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__investigationType() { ns1__investigationType::soap_default(nullptr); }
   ~ns1__investigationType() override {}
 };
@@ -2393,12 +2393,12 @@ public:
   int soap_type() const override {
     return 77;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameterType */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__parameterType() { ns1__parameterType::soap_default(nullptr); }
   ~ns1__parameterType() override {}
 };
@@ -2420,12 +2420,12 @@ public:
   int soap_type() const override {
     return 79;
   } /* = unique id SOAP_TYPE_ICat4_ns1__parameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__parameter() { ns1__parameter::soap_default(nullptr); }
   ~ns1__parameter() override {}
 };
@@ -2442,12 +2442,12 @@ public:
   int soap_type() const override {
     return 83;
   } /* = unique id SOAP_TYPE_ICat4_ns1__permissibleStringValue */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__permissibleStringValue() {
     ns1__permissibleStringValue::soap_default(nullptr);
   }
@@ -2472,12 +2472,12 @@ public:
   int soap_type() const override {
     return 85;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sample */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__sample() { ns1__sample::soap_default(nullptr); }
   ~ns1__sample() override {}
 };
@@ -2497,12 +2497,12 @@ public:
   int soap_type() const override {
     return 86;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sampleType */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__sampleType() { ns1__sampleType::soap_default(nullptr); }
   ~ns1__sampleType() override {}
 };
@@ -2520,12 +2520,12 @@ public:
   int soap_type() const override {
     return 87;
   } /* = unique id SOAP_TYPE_ICat4_ns1__keyword */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__keyword() { ns1__keyword::soap_default(nullptr); }
   ~ns1__keyword() override {}
 };
@@ -2547,12 +2547,12 @@ public:
   int soap_type() const override {
     return 88;
   } /* = unique id SOAP_TYPE_ICat4_ns1__publication */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__publication() { ns1__publication::soap_default(nullptr); }
   ~ns1__publication() override {}
 };
@@ -2572,12 +2572,12 @@ public:
   int soap_type() const override {
     return 89;
   } /* = unique id SOAP_TYPE_ICat4_ns1__shift */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__shift() { ns1__shift::soap_default(nullptr); }
   ~ns1__shift() override {}
 };
@@ -2595,12 +2595,12 @@ public:
   int soap_type() const override {
     return 90;
   } /* = unique id SOAP_TYPE_ICat4_ns1__relatedDatafile */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__relatedDatafile() { ns1__relatedDatafile::soap_default(nullptr); }
   ~ns1__relatedDatafile() override {}
 };
@@ -2620,12 +2620,12 @@ public:
   int soap_type() const override {
     return 91;
   } /* = unique id SOAP_TYPE_ICat4_ns1__log */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__log() { ns1__log::soap_default(nullptr); }
   ~ns1__log() override {}
 };
@@ -2642,12 +2642,12 @@ public:
   int soap_type() const override {
     return 92;
   } /* = unique id SOAP_TYPE_ICat4_ns1__publicStep */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__publicStep() { ns1__publicStep::soap_default(nullptr); }
   ~ns1__publicStep() override {}
 };
@@ -2664,12 +2664,12 @@ public:
   int soap_type() const override {
     return 78;
   } /* = unique id SOAP_TYPE_ICat4_ns1__dataCollectionParameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__dataCollectionParameter() {
     ns1__dataCollectionParameter::soap_default(nullptr);
   }
@@ -2687,12 +2687,12 @@ public:
   int soap_type() const override {
     return 80;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datafileParameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__datafileParameter() { ns1__datafileParameter::soap_default(nullptr); }
   ~ns1__datafileParameter() override {}
 };
@@ -2708,12 +2708,12 @@ public:
   int soap_type() const override {
     return 81;
   } /* = unique id SOAP_TYPE_ICat4_ns1__datasetParameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__datasetParameter() { ns1__datasetParameter::soap_default(nullptr); }
   ~ns1__datasetParameter() override {}
 };
@@ -2730,12 +2730,12 @@ public:
   int soap_type() const override {
     return 82;
   } /* = unique id SOAP_TYPE_ICat4_ns1__investigationParameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__investigationParameter() {
     ns1__investigationParameter::soap_default(nullptr);
   }
@@ -2753,12 +2753,12 @@ public:
   int soap_type() const override {
     return 84;
   } /* = unique id SOAP_TYPE_ICat4_ns1__sampleParameter */
-  void soap_default(struct soap *) override;
-  void soap_serialize(struct soap *) const override;
-  int soap_put(struct soap *, const char *, const char *) const override;
-  int soap_out(struct soap *, const char *, int, const char *) const override;
-  void *soap_get(struct soap *, const char *, const char *) override;
-  void *soap_in(struct soap *, const char *, const char *) override;
+  void soap_default(struct soap * /*unused*/) override;
+  void soap_serialize(struct soap * /*unused*/) const override;
+  int soap_put(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) const override;
+  int soap_out(struct soap * /*unused*/, const char * /*unused*/, int /*unused*/, const char * /*unused*/) const override;
+  void *soap_get(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
+  void *soap_in(struct soap * /*unused*/, const char * /*unused*/, const char * /*unused*/) override;
   ns1__sampleParameter() { ns1__sampleParameter::soap_default(nullptr); }
   ~ns1__sampleParameter() override {}
 };

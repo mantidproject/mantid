@@ -44,7 +44,7 @@ public:
   /// Virtual destructor
   virtual ~ExperimentInfo();
   /// Copy constructor
-  ExperimentInfo(const ExperimentInfo &);
+  ExperimentInfo(const ExperimentInfo & /*source*/);
   /// Copy everything from the given experiment object
   void copyExperimentInfoFrom(const ExperimentInfo *other);
   /// Clone us

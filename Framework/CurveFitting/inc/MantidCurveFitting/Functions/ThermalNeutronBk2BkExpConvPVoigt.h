@@ -68,7 +68,7 @@ public:
   // virtual void getMillerIndex(int& h, int &k, int &l);
 
   /// Get peak parameters
-  double getPeakParameter(std::string) override;
+  double getPeakParameter(std::string /*unused*/) override;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
   void calculateParameters(bool explicitoutput) const override;

@@ -143,7 +143,7 @@ private:
                        const std::map<int64_t, specid_t> &specInd2specNum_map,
                        const DataBlock &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
-  void runLoadInstrument(DataObjects::Workspace2D_sptr &);
+  void runLoadInstrument(DataObjects::Workspace2D_sptr & /*localWorkspace*/);
   /// Load in details about the run
   void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace,
                       Mantid::NeXus::NXEntry &entry);
@@ -152,7 +152,7 @@ private:
   void parseISODateTime(const std::string &datetime_iso, std::string &date,
                         std::string &time) const;
   /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr &,
+  void loadSampleData(DataObjects::Workspace2D_sptr & /*local_workspace*/,
                       Mantid::NeXus::NXEntry &entry);
   /// Load log data from the nexus file
   void loadLogs(DataObjects::Workspace2D_sptr &ws,
@@ -171,7 +171,7 @@ private:
   void createPeriodLogs(int64_t period,
                         DataObjects::Workspace2D_sptr &local_workspace);
   // Validate multi-period logs
-  void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+  void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr /*ws*/);
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(
       bool range_supplied, int64_t range_min, int64_t range_max,

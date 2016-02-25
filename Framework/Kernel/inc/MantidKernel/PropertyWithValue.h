@@ -108,7 +108,7 @@ std::string toString(const std::vector<std::vector<T>> &value,
 
 /// Specialisation for any type, should be appropriate for properties with a
 /// single value.
-template <typename T> int findSize(const T &) { return 1; }
+template <typename T> int findSize(const T & /*unused*/) { return 1; }
 
 /// Specialisation for properties that are of type vector.
 template <typename T> int findSize(const std::vector<T> &value) {
@@ -142,7 +142,7 @@ template <typename T> void toValue(const std::string &strvalue, T &value) {
 }
 
 template <typename T>
-void toValue(const std::string &, boost::shared_ptr<T> &) {
+void toValue(const std::string & /*unused*/, boost::shared_ptr<T> & /*unused*/) {
   throw boost::bad_lexical_cast();
 }
 
@@ -242,32 +242,32 @@ inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
   }
 }
 
-template <> inline void addingOperator(bool &, const bool &) {
+template <> inline void addingOperator(bool & /*unused*/, const bool & /*unused*/) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
 
-template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
+template <> inline void addingOperator(OptionalBool & /*unused*/, const OptionalBool & /*unused*/) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type OptionalBool");
 }
 
 template <typename T>
-inline void addingOperator(boost::shared_ptr<T> &,
-                           const boost::shared_ptr<T> &) {
+inline void addingOperator(boost::shared_ptr<T> & /*unused*/,
+                           const boost::shared_ptr<T> & /*unused*/) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
 }
 
 template <typename T>
 inline std::vector<std::string>
-determineAllowedValues(const T &, const IValidator &validator) {
+determineAllowedValues(const T & /*unused*/, const IValidator &validator) {
   return validator.allowedValues();
 }
 
 template <>
-inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
-                                                       const IValidator &) {
+inline std::vector<std::string> determineAllowedValues(const OptionalBool & /*unused*/,
+                                                       const IValidator & /*unused*/) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
   for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
@@ -556,7 +556,7 @@ private:
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
    */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::true_type &) {
+  std::string setTypedValue(const U &value, const boost::true_type & /*unused*/) {
     TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
     std::string msg;
     if (data) {
@@ -582,7 +582,7 @@ private:
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
    */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::false_type &) {
+  std::string setTypedValue(const U &value, const boost::false_type & /*unused*/) {
     UNUSED_ARG(value);
     return "Attempt to assign object of type DataItem to property (" + name() +
            ") of incorrect type";

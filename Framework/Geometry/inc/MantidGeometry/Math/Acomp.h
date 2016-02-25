@@ -64,45 +64,45 @@ private:
   std::vector<Acomp> Comp; ///< Components in list
 
   void deleteComp();           ///< delete all of the Comp list
-  void addComp(const Acomp &); ///< add a Component intelligently
-  void addUnitItem(int const); ///< add an Unit intellgently
-  void processIntersection(const std::string &);
-  void processUnion(const std::string &);
+  void addComp(const Acomp & /*AX*/); ///< add a Component intelligently
+  void addUnitItem(int const /*Item*/); ///< add an Unit intellgently
+  void processIntersection(const std::string & /*Ln*/);
+  void processUnion(const std::string & /*Ln*/);
   int joinDepth();                ///< Search table to uplift objects
   int removeEqComp();             ///< Remove non-unique items
-  int copySimilar(const Acomp &); ///< Join two componenet of similar type
+  int copySimilar(const Acomp & /*A*/); ///< Join two componenet of similar type
 
-  void addUnit(const std::vector<int> &,
-               const BnId &); ///< Adds a Binary state to the Component
-  void assignDNF(const std::vector<int> &,
-                 const std::vector<BnId> &); ///< Assigns the Comp with the DNF
-  int getDNFobject(std::vector<int> &, std::vector<BnId> &) const;
-  int getDNFpart(std::vector<Acomp> &) const; ///< get the DNF parts (as Acomp)
+  void addUnit(const std::vector<int> & /*Index*/,
+               const BnId & /*BX*/); ///< Adds a Binary state to the Component
+  void assignDNF(const std::vector<int> & /*Index*/,
+                 const std::vector<BnId> & /*A*/); ///< Assigns the Comp with the DNF
+  int getDNFobject(std::vector<int> & /*keyNumbers*/, std::vector<BnId> & /*DNFobj*/) const;
+  int getDNFpart(std::vector<Acomp> & /*Parts*/) const; ///< get the DNF parts (as Acomp)
 
-  int getCNFobject(std::vector<int> &, std::vector<BnId> &) const;
-  void assignCNF(const std::vector<int> &,
-                 const std::vector<BnId> &); ///< Assigns the Comp with the DNF
+  int getCNFobject(std::vector<int> & /*keyNumbers*/, std::vector<BnId> & /*CNFobj*/) const;
+  void assignCNF(const std::vector<int> & /*Index*/,
+                 const std::vector<BnId> & /*A*/); ///< Assigns the Comp with the DNF
   //  int getCNFpart(std::vector<Acomp>&) const;                   ///< get the
   //  CNF parts (as Acomp)
 
   /// Calculate Principal Components
-  int makePI(std::vector<BnId> &) const;
-  int makeEPI(std::vector<BnId> &, std::vector<BnId> &) const;
+  int makePI(std::vector<BnId> & /*DNFobj*/) const;
+  int makeEPI(std::vector<BnId> & /*DNFobj*/, std::vector<BnId> & /*PIform*/) const;
 
   int makeReadOnce(); ///< Factorize into a read once function
 
 public:
-  Acomp(int const = 0);
-  bool operator==(const Acomp &) const;
-  bool operator!=(const Acomp &) const; ///< Complementary operator
-  bool operator<(const Acomp &) const;
-  bool operator>(const Acomp &) const;
-  Acomp &operator+=(const Acomp &);
-  Acomp &operator-=(const Acomp &);
-  Acomp &operator*=(const Acomp &);
+  Acomp(int const  /*Tx*/= 0);
+  bool operator==(const Acomp & /*A*/) const;
+  bool operator!=(const Acomp & /*A*/) const; ///< Complementary operator
+  bool operator<(const Acomp & /*A*/) const;
+  bool operator>(const Acomp & /*A*/) const;
+  Acomp &operator+=(const Acomp & /*A*/);
+  Acomp &operator-=(const Acomp & /*A*/);
+  Acomp &operator*=(const Acomp & /*A*/);
 
-  const Acomp *itemC(int const) const; ///< returns a pointer to Comp (or zero)
-  int itemN(int const) const; ///< returns an integer to Units (or zero)
+  const Acomp *itemC(int const /*Index*/) const; ///< returns a pointer to Comp (or zero)
+  int itemN(int const /*Index*/) const; ///< returns an integer to Units (or zero)
 
   std::pair<int, int>
   size() const;         ///< get the size of the units and the Acomp sub-comp
@@ -111,36 +111,36 @@ public:
   int isCNF() const;    ///< is Units only in intersections
   int isNull() const;   ///< is nothing in the comp.
   int isSingle() const; ///< only one part
-  int contains(const Acomp &) const;
+  int contains(const Acomp & /*A*/) const;
   int isInter() const { return Intersect; } ///< Deterimine if inter/union
   int isTrue(
-      const std::map<int, int> &) const; ///< Determine if the rule is true.
+      const std::map<int, int> & /*Base*/) const; ///< Determine if the rule is true.
 
   void Sort(); ///< Sort the Units+Comp items
   void
-  getLiterals(std::map<int, int> &) const; ///< Get literals (+/- different)
-  void getAbsLiterals(std::map<int, int> &) const; ///< Get literals (positve)
+  getLiterals(std::map<int, int> & /*literalMap*/) const; ///< Get literals (+/- different)
+  void getAbsLiterals(std::map<int, int> & /*literalMap*/) const; ///< Get literals (positve)
   std::vector<int> getKeys() const;
-  int logicalEqual(const Acomp &) const;
+  int logicalEqual(const Acomp & /*A*/) const;
 
   int makeDNFobject(); ///< Make the object into DNF form (Sum of Products)
   int makeCNFobject(); ///< Make the object into CNF form (Product of Sums)
 
   void complement(); ///< Take complement of component
   std::pair<Acomp, Acomp>
-  algDiv(const Acomp &);               ///< Carry out Algebric division
-  void setString(const std::string &); ///< Processes a line of type abc'+efg
-  void writeFull(std::ostream &,
-                 int const = 0) const; ///< Full write out to determine state
+  algDiv(const Acomp & /*G*/);               ///< Carry out Algebric division
+  void setString(const std::string & /*Line*/); ///< Processes a line of type abc'+efg
+  void writeFull(std::ostream & /*OXF*/,
+                 int const  /*Indent*/= 0) const; ///< Full write out to determine state
   std::string display() const;         ///< Pretty print statment
   std::string
-  displayDepth(int const = 0) const; ///< Really pretty print statment of tree
+  displayDepth(int const  /*dval*/= 0) const; ///< Really pretty print statment of tree
 
-  void printImplicates(const std::vector<BnId> &,
-                       const Kernel::Matrix<int> &) const;
+  void printImplicates(const std::vector<BnId> & /*PIform*/,
+                       const Kernel::Matrix<int> & /*Grid*/) const;
 };
 
-std::ostream &operator<<(std::ostream &, const Acomp &);
+std::ostream &operator<<(std::ostream & /*OX*/, const Acomp & /*A*/);
 
 } // NAMESPACE Geometry
 

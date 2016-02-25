@@ -54,7 +54,7 @@ public:
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string &, IComponent *reference = nullptr);
+  RectangularDetector(const std::string & /*n*/, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
@@ -205,8 +205,8 @@ private:
   int m_idstep;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const RectangularDetector &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                             const RectangularDetector & /*ass*/);
 
 typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
 typedef boost::shared_ptr<const RectangularDetector>

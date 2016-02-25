@@ -61,9 +61,9 @@ private:
   /// get the bin position for the given angle
   int fromAngleToBin(double angle, bool degree = true);
   /// validate the inputs of the algorithm for instrument based workspace
-  void checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr);
+  void checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr /*inputWS*/);
   /// validate the inputs of the algorithm for 2d matrix based instrument
-  void checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr);
+  void checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr /*inputWS*/);
   /// process ring profile for instrument based workspace
   void processInstrumentRingProfile(const API::MatrixWorkspace_sptr inputWS,
                                     std::vector<double> &output_bins);
@@ -71,9 +71,9 @@ private:
   void processNumericImageRingProfile(const API::MatrixWorkspace_sptr inputWS,
                                       std::vector<double> &output_bins);
   /// identify the bin position for the given pixel in the image based workspace
-  void getBinForPixel(const API::MatrixWorkspace_sptr, int, std::vector<int> &);
+  void getBinForPixel(const API::MatrixWorkspace_sptr /*ws*/, int /*spectrum_index*/, std::vector<int> & /*bins_pos*/);
   //// identify the bin position for the pixel related to the given detector
-  int getBinForPixel(Mantid::Geometry::IDetector_const_sptr);
+  int getBinForPixel(Mantid::Geometry::IDetector_const_sptr /*det*/);
   /// copy of the minRadius input
   double min_radius;
   /// copy of the maxRadius input

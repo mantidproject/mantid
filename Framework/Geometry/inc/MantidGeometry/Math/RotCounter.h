@@ -19,7 +19,7 @@ namespace Geometry {
 */
 
 class MANTID_GEOMETRY_DLL RotaryCounter {
-  friend std::ostream &operator<<(std::ostream &, const RotaryCounter &);
+  friend std::ostream &operator<<(std::ostream & /*OX*/, const RotaryCounter & /*A*/);
 
 private:
   int Rmax;            ///< Number to over cycle
@@ -27,13 +27,13 @@ private:
 
 public:
   RotaryCounter(const int S, const int N); ///<Size,Max
-  RotaryCounter(const RotaryCounter &);
-  RotaryCounter &operator=(const RotaryCounter &);
+  RotaryCounter(const RotaryCounter & /*A*/);
+  RotaryCounter &operator=(const RotaryCounter & /*A*/);
   ~RotaryCounter();
 
-  int operator==(const RotaryCounter &) const;
-  int operator<(const RotaryCounter &) const;
-  int operator>(const RotaryCounter &) const;
+  int operator==(const RotaryCounter & /*A*/) const;
+  int operator<(const RotaryCounter & /*A*/) const;
+  int operator>(const RotaryCounter & /*A*/) const;
   /// Accessor operator
   int operator[](const int I) const { return RC[I]; }
   int operator++();
@@ -41,10 +41,10 @@ public:
   int operator--();
   int operator--(const int a);
 
-  void write(std::ostream &) const;
+  void write(std::ostream & /*OX*/) const;
 };
 
-std::ostream &operator<<(std::ostream &, const RotaryCounter &);
+std::ostream &operator<<(std::ostream & /*OX*/, const RotaryCounter & /*A*/);
 }
 }
 

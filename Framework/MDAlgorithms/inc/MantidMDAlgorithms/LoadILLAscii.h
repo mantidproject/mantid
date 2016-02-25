@@ -53,14 +53,14 @@ public:
 private:
   void init() override;
   void exec() override;
-  void loadInstrumentName(ILLParser &);
+  void loadInstrumentName(ILLParser & /*p*/);
   void loadExperimentDetails(ILLParser &p);
   void loadIDF(API::MatrixWorkspace_sptr &workspace);
-  void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &,
-                          const std::vector<int> &);
+  void loadsDataIntoTheWS(API::MatrixWorkspace_sptr & /*thisWorkspace*/,
+                          const std::vector<int> & /*thisSpectrum*/);
   API::IMDEventWorkspace_sptr
-  mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
-  void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr,
+  mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> & /*workspaceList*/);
+  void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr /*ws*/,
                                  double rotationAngle);
 
   // LoadHelper m_loader;

@@ -214,9 +214,9 @@ struct MANTID_API_DLL Boolean {
 };
 
 /// Printing Boolean to an output stream
-MANTID_API_DLL std::ostream &operator<<(std::ostream &, const API::Boolean &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream & /*s*/, const API::Boolean & /*b*/);
 /// Redaing a Boolean from an input stream
-MANTID_API_DLL std::istream &operator>>(std::istream &istr, API::Boolean &);
+MANTID_API_DLL std::istream &operator>>(std::istream &istr, API::Boolean & /*b*/);
 
 typedef boost::shared_ptr<Column> Column_sptr;
 typedef boost::shared_ptr<const Column> Column_const_sptr;

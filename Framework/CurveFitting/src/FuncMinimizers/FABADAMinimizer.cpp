@@ -173,7 +173,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
 /// Do one iteration. Returns true if iterations to be continued, false if they
 /// must stop.
-bool FABADAMinimizer::iterate(size_t) {
+bool FABADAMinimizer::iterate(size_t /*iteration*/) {
 
   if (!m_leastSquares) {
     throw std::runtime_error("Cost function isn't set up.");

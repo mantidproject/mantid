@@ -2392,7 +2392,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
  * @return  true if there is enough data, otherwise false
  */
 bool DataModeHandler::IsEnoughData(const double *ParameterValues,
-                                   Kernel::Logger &) {
+                                   Kernel::Logger & /*unused*/) {
   // Check if flat
   double Varx, Vary, Cov;
 

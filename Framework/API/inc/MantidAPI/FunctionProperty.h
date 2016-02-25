@@ -60,7 +60,7 @@ public:
   operator=(const boost::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property
-  FunctionProperty &operator+=(Kernel::Property const *) override;
+  FunctionProperty &operator+=(Kernel::Property const * /*right*/) override;
 
   /// 'Virtual copy constructor'
   FunctionProperty *clone() const override {

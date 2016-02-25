@@ -52,15 +52,15 @@ private:
   void init() override;
   void exec() override;
   void setInstrumentName(NeXus::NXEntry &entry);
-  void initWorkSpace(NeXus::NXEntry &);
+  void initWorkSpace(NeXus::NXEntry & /*entry*/);
   void loadTimeDetails(NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
-  int getDetectorElasticPeakPosition(const NeXus::NXFloat &);
-  std::vector<double> getTimeBinning(int, double);
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry & /*entry*/);
+  int getDetectorElasticPeakPosition(const NeXus::NXFloat & /*data*/);
+  std::vector<double> getTimeBinning(int /*elasticPeakPosition*/, double /*channelWidth*/);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  void loadExperimentDetails(NeXus::NXEntry &);
-  void loadRunDetails(NeXus::NXEntry &);
+  void loadExperimentDetails(NeXus::NXEntry & /*entry*/);
+  void loadRunDetails(NeXus::NXEntry & /*entry*/);
   void runLoadInstrument();
 
   std::vector<std::string> m_supportedInstruments;

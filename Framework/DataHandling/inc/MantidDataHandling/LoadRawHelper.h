@@ -70,7 +70,7 @@ public:
   FILE *openRawFile(const std::string &fileName);
   /// Read in run parameters Public so that LoadRaw2 can use it
   void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
-                         ISISRAW *const = nullptr) const;
+                         ISISRAW *const  /*rawFile*/= nullptr) const;
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -149,16 +149,16 @@ protected:
   getTimeChannels(const int64_t &regimes, const int64_t &lengthIn);
   /// loadinstrument Child Algorithm
   void runLoadInstrument(const std::string &fileName,
-                         DataObjects::Workspace2D_sptr, double, double);
+                         DataObjects::Workspace2D_sptr /*localWorkspace*/, double /*progStart*/, double /*progEnd*/);
   /// loadinstrumentfromraw algorithm
   void runLoadInstrumentFromRaw(const std::string &fileName,
-                                DataObjects::Workspace2D_sptr);
+                                DataObjects::Workspace2D_sptr /*localWorkspace*/);
   /// loadinstrumentfromraw Child Algorithm
   void runLoadMappingTable(const std::string &fileName,
-                           DataObjects::Workspace2D_sptr);
+                           DataObjects::Workspace2D_sptr /*localWorkspace*/);
   /// load log algorithm
-  void runLoadLog(const std::string &fileName, DataObjects::Workspace2D_sptr,
-                  double, double);
+  void runLoadLog(const std::string &fileName, DataObjects::Workspace2D_sptr /*localWorkspace*/,
+                  double /*progStart*/, double /*progEnd*/);
 
   /// Create the period specific logs
   void createPeriodLogs(int64_t period,
@@ -205,7 +205,7 @@ protected:
   /// load the spectra
   void loadSpectra(FILE *file, const int &period, const int &m_total_specs,
                    DataObjects::Workspace2D_sptr ws_sptr,
-                   std::vector<boost::shared_ptr<MantidVec>>);
+                   std::vector<boost::shared_ptr<MantidVec>> /*timeChannelsVec*/);
 
   /// Has the spectrum_list property been set?
   bool m_list;

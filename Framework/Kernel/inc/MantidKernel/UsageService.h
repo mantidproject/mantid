@@ -109,7 +109,7 @@ private:
   void sendFeatureUsageReport(const bool synchronous);
 
   /// A method to handle the timerCallbacks
-  void timerCallback(Poco::Timer &);
+  void timerCallback(Poco::Timer & /*unused*/);
 
   // generate Json header for feature calls
   ::Json::Value generateFeatureHeader();

@@ -54,7 +54,7 @@ public:
   int runNumber() const override;
 
 private:
-  void generateEvents(Poco::Timer &);
+  void generateEvents(Poco::Timer & /*unused*/);
 
   DataObjects::EventWorkspace_sptr
       m_buffer; ///< Used to buffer events between calls to extractData()

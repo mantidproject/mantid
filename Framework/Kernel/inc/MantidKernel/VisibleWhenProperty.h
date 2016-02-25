@@ -51,7 +51,7 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  bool isEnabled(const IPropertyManager *) const override;
+  bool isEnabled(const IPropertyManager * /*algo*/) const override;
 
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the

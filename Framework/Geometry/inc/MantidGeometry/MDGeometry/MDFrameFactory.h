@@ -69,7 +69,7 @@ private:
   GeneralFrame *createRaw(const MDFrameArgument &argument) const override;
 
 public:
-  bool canInterpret(const MDFrameArgument &) const override;
+  bool canInterpret(const MDFrameArgument & /*unitString*/) const override;
 };
 
 /// QLabFrameFactory derived MDFrameFactory type
