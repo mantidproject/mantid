@@ -467,28 +467,26 @@ void BoxControllerNeXusIO::closeFile() {
     this->flushCache();
     // lock file
     std::lock_guard<std::mutex> _lock(m_fileMutex);
+   
+    m_File->closeData(); // close events data
+    if (!m_ReadOnly) // write free space groups from the disk buffer
     {
-      m_File->closeData(); // close events data
+      std::vector<uint64_t> freeSpaceBlocks;
+      this->getFreeSpaceVector(freeSpaceBlocks);
+      if (!freeSpaceBlocks.empty()) {
+        std::vector<int64_t> free_dims(2, 2);
+        free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
 
-      if (!m_ReadOnly) // write free space groups from the disk buffer
-      {
-        std::vector<uint64_t> freeSpaceBlocks;
-        this->getFreeSpaceVector(freeSpaceBlocks);
-        if (!freeSpaceBlocks.empty()) {
-          std::vector<int64_t> free_dims(2, 2);
-          free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
-
-          m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
-        }
+        m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
       }
-
-      m_File->closeGroup(); // close events group
-      m_File->closeGroup(); // close workspace group
-      m_File->close();      // close NeXus file
-
-      delete m_File;
-      m_File = nullptr;
     }
+
+    m_File->closeGroup(); // close events group
+    m_File->closeGroup(); // close workspace group
+    m_File->close();      // close NeXus file
+
+    delete m_File;
+    m_File = nullptr;
   }
 }
 

@@ -8,7 +8,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-// using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace API {
