@@ -26,7 +26,7 @@ void SpectrumAlgorithm::declareSpectrumIndexSetProperties() {
                   "a list '12,15,26,28' gives '10-20,26,28'.");
 }
 
-Kernel::SpectrumIndexSet SpectrumAlgorithm::getSpectrumIndexSet(
+Kernel::IndexSet SpectrumAlgorithm::getSpectrumIndexSet(
     const API::MatrixWorkspace &workspace) const {
   auto numberOfSpectra = workspace.getNumberHistograms();
 
