@@ -160,7 +160,7 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
                                                       post_process_args["rel_img_dir"])
     download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
-    return post_processed_rst
+    return add_mantid_concept_links(post_processed_rst)
 
 # ------------------------------------------------------------------------------
 
@@ -188,13 +188,13 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
         display_info("Processing image link",m.group(0))
         img_link_dict[m.group(2)] = generate_rst_img_link(m, rel_img_dir)
 
-    #for all of the rst figure links
+    # for all of the rst figure links
     replacements = []
     for m in re.finditer(rst_img_re, rst_text):
         rst_link = img_link_dict[m.group(1)]
         replacements.append((m.start(), m.end(), m.group(1), rst_link))
 
-    #perform replacements in reverse order
+    # perform replacements in reverse order
     for (start, end, imagefile, rst_link) in reversed(replacements):
         rst_text = rst_text[0:start] + rst_link + rst_text[end:]
 
@@ -217,7 +217,7 @@ def generate_rst_img_link(match, rel_img_dir):
     for i in range(3,len(match.groups())):
         if match.group(i) is None:
             break
-        #strip off the first character as it is the | pipe
+        # strip off the first character as it is the | pipe
         img_opt = add_img_option(match.group(i)[1:])
         if img_opt is not None:
             link += "\t\t\t" + img_opt + "\n"
@@ -240,11 +240,11 @@ def add_img_option(mw_img_opt):
 # ------------------------------------------------------------------------------
 
 def clean_inline_img_def(rst_link):
-    match = re.search(r'^\s+:align:\s+\w+\s*$',rstLink,re.MULTILINE)
+    match = re.search(r'^\s+:align:\s+\w+\s*$', rst_link, re.MULTILINE)
     if match is not None:
-        #take the align out
+        # take the align out
         rst_link = rst_link[0:match.start()] + rst_link[match.end()+1:]
-        #then add it at the end as a comment
+        # then add it at the end as a comment
         rst_link += ".. FIXME (inline definition does not allow align)" + match.group(0)
     return rst_link
 
@@ -268,6 +268,57 @@ def download_image_from_wiki(wiki_url, name, img_dir):
         f.write(response.read())
 
     return None
+
+# ------------------------------------------------------------------------------
+
+def add_mantid_concept_links(post_processed_rst):
+    """Adds the concept link for mantid things
+    """
+    concepts = ['EventWorkspace', 'MatrixWorkspace', 'PeaksWorkspace', 'MDWorkspace', 'Table Workspaces', 'WorkspaceGroup',
+                'RectangularDetector', 'RAW File', 'Facilities File', 'FitConstraint', 'Framework Manager',
+                'Instrument Data Service', 'InstrumentDefinitionFile', 'InstrumentParameterFile', 'Properties File',
+                'MDHistoWorkspace', 'MDNorm', 'Nexus file', 'PeaksWorkspace', 'Point and space groups', 'RAW File',
+                'Shared Pointer', 'Symmetry groups', 'Unit Factory', 'UserAlgorithms', 'Workflow Algorithm',
+                'Workspace', 'Workspace2D', 'WorkspaceGroup']
+    post_processed_rst = add_local_links(post_processed_rst, concepts, "")
+    algorithms = mantid.AlgorithmFactory.getRegisteredAlgorithms(False).keys()
+    post_processed_rst = add_local_links(post_processed_rst, algorithms, "algm-")
+    fitfunctions = mantid.FunctionFactory.getFunctionNames()
+    post_processed_rst = add_local_links(post_processed_rst, fitfunctions,"func-")
+
+    return post_processed_rst
+
+
+# ------------------------------------------------------------------------------
+
+def add_local_links(rst_text, linkable_items, prefix):
+    """Add links to items already within the documentation
+    """
+    # build regex string for simple words
+    word_re = re.compile(r"[^`<]((\*{0,2})(\b" + r"\b|\b".join(linkable_items) + r"\b)\2)[^`_]")
+
+    replacements = []
+    for m in re.finditer(word_re, rst_text):
+        link = ":ref:`" + m.group(3) + " <" + prefix + m.group(3) + ">`"
+        replacements.append((m.start(1), m.end(1), m.group(1), link))
+
+    # perform replacements in reverse order
+    for (start, end, item, link) in reversed(replacements):
+        rst_text = rst_text[0:start] + link + rst_text[end:]
+
+    # build regex string for links
+    link_re = re.compile(r"`(.+?)<(\b" + r"\b|\b".join(linkable_items) + r"\b)>`__")
+    replacements = []
+    for m in re.finditer(link_re, rst_text):
+        link = ":ref:`" + m.group(1) + " <" + prefix + m.group(2) + ">`"
+        replacements.append((m.start(), m.end(), m.group(0), link))
+
+    # perform replacements in reverse order
+    for (start, end, item, rstLink) in reversed(replacements):
+        rst_text = rst_text[0:start] + link + rst_text[end:]
+
+    return rst_text
+
 
 # ------------------------------------------------------------------------------
 
