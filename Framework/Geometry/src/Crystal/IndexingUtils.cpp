@@ -1008,17 +1008,17 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
     for (const auto &q_vector : q_vectors) {
       q_vec = q_vector / (2.0 * M_PI);
       dot_prod = a_dir_temp.scalar_prod(q_vec);
-      nearest_int = std::lround(dot_prod);
+      nearest_int = std::round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
 
       dot_prod = b_dir_temp.scalar_prod(q_vec);
-      nearest_int = std::lround(dot_prod);
+      nearest_int = std::round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
 
       dot_prod = c_dir_temp.scalar_prod(q_vec);
-      nearest_int = std::lround(dot_prod);
+      nearest_int = std::round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
     }
@@ -2401,7 +2401,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
       theta_step = 2. * M_PI + 1.; // use one vector at the pole
       n_theta = 1;
     } else {
-      theta_step = 2. * M_PI / n_theta;
+      theta_step = 2. * M_PI / static_cast<double>(n_theta);
     }
 
     // use half the equator to avoid vectors that are the negatives of other
