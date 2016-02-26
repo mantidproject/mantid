@@ -307,7 +307,7 @@ public:
     m_dataWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FindPeaksTest_peaksWS"));
 
-    m_syntheticWS = prepareSyntheticWS();
+    m_syntheticWS = createSyntheticWS();
 
     return;
   }
