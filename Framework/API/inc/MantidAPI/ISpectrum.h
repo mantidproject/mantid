@@ -47,7 +47,7 @@ namespace API {
 class DLLExport ISpectrum {
 public:
   ISpectrum();
-  ISpectrum(const specid_t specNo);
+  ISpectrum(const specnum_t specNo);
   virtual ~ISpectrum() = default;
 
   void copyInfoFrom(const ISpectrum &other);
