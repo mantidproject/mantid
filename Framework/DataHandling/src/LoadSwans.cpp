@@ -62,17 +62,17 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadSwans::init() {
   declareProperty(
-      new FileProperty("FilenameData", "", FileProperty::Load, {".dat"}),
+      make_unique<FileProperty>("FilenameData", "", FileProperty::Load, ".dat"),
       "The name of the text file to read, including its full or "
       "relative path. The file extension must be .dat.");
 
-  declareProperty(new FileProperty("FilenameMetaData", "", FileProperty::Load,
-                                   {"meta.dat"}),
+  declareProperty(make_unique<FileProperty>("FilenameMetaData", "",
+                                            FileProperty::Load, "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
