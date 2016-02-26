@@ -8,6 +8,7 @@ from Direct.PropertyManager import PropertyManager
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
+import time
 from abc import abstractmethod
 
 #pylint: disable=R0921
@@ -411,6 +412,8 @@ class ReductionWrapper(object):
                             Found = False
                         else:
                             wait_counter = 0
+                    else: # found but let's give it some time to finish possible IO operations
+                        time.sleep(30)
                 else:
                     pass # not found, wait more
             #endWhile
@@ -464,8 +467,9 @@ class ReductionWrapper(object):
                 n_found = len(found)
           #end not(ok)
             if n_found > 0:
-            # cash sum can be dropped now if it has not been done before
+                # cash sum can be dropped now if it has not been done before
                 self.reducer.prop_man.cashe_sum_ws = False
+                 # found but let's give it some time to finish possible IO operations             
                 ws = self.reduce()
         else:
             ws = self.reduce()
