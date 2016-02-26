@@ -88,8 +88,7 @@ Momentum Transfer calculations
 -  Some algorithms either returning theta or two theta, but labelling
    the output incorrectly. One candidate being
    :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>`.
-   **This change could affect results when using
-   :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.**
+   **This change could affect results when using** :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
 -  :math:`|Q|` created via :ref:`ConvertUnits <algm-ConvertUnits>`
    and Qx, Qz maps created via
    :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`
