@@ -112,6 +112,24 @@ public:
     }
   }
 
+
+  void test_validateInputs() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 1);
+    AsymmetryCalc asymCalc;
+    asymCalc.initialize();
+    asymCalc.setChild(true);
+    asymCalc.setProperty("InputWorkspace", ws);
+    asymCalc.setPropertyValue("OutputWorkspace", "__Unused");
+    asymCalc.setPropertyValue("ForwardSpectra", "1");
+    asymCalc.setPropertyValue("BackwardSpectra", "3");
+    // Bad spectrum number for BackwardSpectra
+    TS_ASSERT_THROWS(asymCalc.execute(), std::runtime_error);
+    asymCalc.setPropertyValue("BackwardSpectra", "1");
+    asymCalc.setPropertyValue("ForwardSpectra", "3");
+    // Bad spectrum number for ForwardSpectra
+    TS_ASSERT_THROWS(asymCalc.execute(), std::runtime_error);
+  }
+
 private:
   /// Load data from file
   MatrixWorkspace_sptr loadDataFile() {
