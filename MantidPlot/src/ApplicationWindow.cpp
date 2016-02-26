@@ -386,47 +386,31 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   actionSaveProject = NULL;
   actionSaveProjectAs = NULL;
   folders = new FolderListView(this);
-  folders->header()->setClickEnabled(false);
-  folders->addColumn(tr("Folder"));
+  folders->setContextMenuPolicy(Qt::CustomContextMenu);
+  folders->setHeaderLabel("Folder");
   folders->setRootIsDecorated(true);
-  folders->setResizeMode(Q3ListView::LastColumn);
   folders->header()->hide();
-  folders->setSelectionMode(Q3ListView::Single);
+  folders->setSelectionMode(QAbstractItemView::SingleSelection);
 
-  connect(folders, SIGNAL(currentChanged(Q3ListViewItem *)), this,
-          SLOT(folderItemChanged(Q3ListViewItem *)));
-  connect(folders, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
-          this, SLOT(renameFolder(Q3ListViewItem *, int, const QString &)));
+  connect(folders, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this,
+          SLOT(folderItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
   connect(folders,
-          SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint &, int)),
+          SIGNAL(customContextMenuRequested(const QPoint &)),
           this,
-          SLOT(showFolderPopupMenu(Q3ListViewItem *, const QPoint &, int)));
-  connect(folders, SIGNAL(dragItems(QList<Q3ListViewItem *>)), this,
-          SLOT(dragFolderItems(QList<Q3ListViewItem *>)));
-  connect(folders, SIGNAL(dropItems(Q3ListViewItem *)), this,
-          SLOT(dropFolderItems(Q3ListViewItem *)));
-  connect(folders, SIGNAL(renameItem(Q3ListViewItem *)), this,
-          SLOT(startRenameFolder(Q3ListViewItem *)));
-  connect(folders, SIGNAL(addFolderItem()), this, SLOT(addFolder()));
+          SLOT(showFolderPopupMenu(const QPoint &)));
   connect(folders, SIGNAL(deleteSelection()), this,
           SLOT(deleteSelectedItems()));
 
   d_current_folder = new Folder(0, tr("untitled"));
   FolderListItem *fli = new FolderListItem(folders, d_current_folder);
   d_current_folder->setFolderListItem(fli);
-  fli->setOpen(true);
+  fli->setExpanded(true);
 
   lv = new FolderListView();
-  lv->addColumn(tr("Name"), -1);
-  lv->addColumn(tr("Type"), -1);
-  lv->addColumn(tr("View"), -1);
-  lv->addColumn(tr("Size"), -1);
-  lv->addColumn(tr("Created"), -1);
-  lv->addColumn(tr("Label"), -1);
-  lv->setResizeMode(Q3ListView::LastColumn);
+  lv->setContextMenuPolicy(Qt::CustomContextMenu);
+
   lv->setMinimumHeight(80);
-  lv->setSelectionMode(Q3ListView::Extended);
-  lv->setDefaultRenameAction(Q3ListView::Accept);
+  lv->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
   explorerSplitter = new QSplitter(Qt::Horizontal, explorerWindow);
   explorerSplitter->addWidget(folders);
@@ -549,23 +533,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   connect(this, SIGNAL(modified()), this, SLOT(modifiedProject()));
   connect(d_workspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), this,
           SLOT(windowActivated(QMdiSubWindow *)));
-  connect(lv, SIGNAL(doubleClicked(Q3ListViewItem *)), this,
-          SLOT(activateWindow(Q3ListViewItem *)));
-  connect(lv, SIGNAL(doubleClicked(Q3ListViewItem *)), this,
-          SLOT(folderItemDoubleClicked(Q3ListViewItem *)));
   connect(
-      lv, SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint &, int)),
-      this, SLOT(showWindowPopupMenu(Q3ListViewItem *, const QPoint &, int)));
-  connect(lv, SIGNAL(dragItems(QList<Q3ListViewItem *>)), this,
-          SLOT(dragFolderItems(QList<Q3ListViewItem *>)));
-  connect(lv, SIGNAL(dropItems(Q3ListViewItem *)), this,
-          SLOT(dropFolderItems(Q3ListViewItem *)));
-  connect(lv, SIGNAL(renameItem(Q3ListViewItem *)), this,
-          SLOT(startRenameFolder(Q3ListViewItem *)));
-  connect(lv, SIGNAL(addFolderItem()), this, SLOT(addFolder()));
+      lv, SIGNAL(customContextMenuRequested(const QPoint &)),
+      this, SLOT(showWindowPopupMenu(const QPoint &)));
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
-  connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)), this,
-          SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
 
   connect(recentProjectsMenu, SIGNAL(activated(int)), this,
           SLOT(openRecentProject(int)));
@@ -1125,12 +1096,15 @@ void ApplicationWindow::insertTranslatedStrings() {
   if (projectname == "untitled")
     setWindowTitle(tr("MantidPlot - untitled")); // Mantid
 
-  lv->setColumnText(0, tr("Name"));
-  lv->setColumnText(1, tr("Type"));
-  lv->setColumnText(2, tr("View"));
-  lv->setColumnText(3, tr("Size"));
-  lv->setColumnText(4, tr("Created"));
-  lv->setColumnText(5, tr("Label"));
+  QStringList labels;
+  labels << "Name" << "Type"<<"View" << "Size"<< "Created" << "Label";
+  lv->setHeaderLabels(labels);
+  lv->resizeColumnToContents(0);
+  lv->resizeColumnToContents(1);
+  lv->resizeColumnToContents(2);
+  lv->resizeColumnToContents(3);
+  lv->resizeColumnToContents(4);
+  lv->resizeColumnToContents(5);
 
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
@@ -2052,49 +2026,49 @@ Note *ApplicationWindow::newStemPlot() {
 
 void ApplicationWindow::renameListViewItem(const QString &oldName,
                                            const QString &newName) {
-  Q3ListViewItem *it =
-      lv->findItem(oldName, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(0, newName);
+  auto found =
+      lv->findItems(oldName, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(0, newName);
 }
 
 void ApplicationWindow::setListViewLabel(const QString &caption,
                                          const QString &label) {
-  Q3ListViewItem *it =
-      lv->findItem(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(5, label);
+  auto found =
+      lv->findItems(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(5, label);
 }
 
 void ApplicationWindow::setListViewDate(const QString &caption,
                                         const QString &date) {
-  Q3ListViewItem *it =
-      lv->findItem(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(4, date);
+  auto found =
+      lv->findItems(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(4, date);
 }
 
 void ApplicationWindow::setListView(const QString &caption,
                                     const QString &view) {
-  Q3ListViewItem *it =
-      lv->findItem(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(2, view);
+  auto found =
+      lv->findItems(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(2, view);
 }
 
 void ApplicationWindow::setListViewSize(const QString &caption,
                                         const QString &size) {
-  Q3ListViewItem *it =
-      lv->findItem(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(3, size);
+  auto found =
+      lv->findItems(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(3, size);
 }
 
 QString ApplicationWindow::listViewDate(const QString &caption) {
-  Q3ListViewItem *it =
-      lv->findItem(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    return it->text(4);
+  auto found =
+      lv->findItems(caption, 0, Q3ListView::ExactMatch | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    return found[0]->text(4);
   else
     return "";
 }
@@ -4740,7 +4714,7 @@ void ApplicationWindow::openProjectFolder(std::string lines,
     std::string openStr = tsv.sections("open").front();
     int openValue = 0;
     std::stringstream(openStr) >> openValue;
-    currentFolder()->folderListItem()->setOpen(openValue);
+    currentFolder()->folderListItem()->setExpanded(openValue);
   }
 
   if (tsv.hasSection("mantidmatrix")) {
@@ -6337,7 +6311,7 @@ void ApplicationWindow::renameWindow() {
   rwd->exec();
 }
 
-void ApplicationWindow::renameWindow(Q3ListViewItem *item, int,
+void ApplicationWindow::renameWindow(QTreeWidgetItem *item, int,
                                      const QString &text) {
   if (!item)
     return;
@@ -9081,11 +9055,11 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
   emit modified();
 }
 
-void ApplicationWindow::activateWindow(Q3ListViewItem *lbi) {
+void ApplicationWindow::activateWindow(QTreeWidgetItem *lbi) {
   if (!lbi)
     lbi = lv->currentItem();
 
-  if (!lbi || lbi->rtti() == FolderListItem::RTTI)
+  if (!lbi)
     return;
 
   auto wli = dynamic_cast<WindowListItem *>(lbi);
@@ -9093,11 +9067,11 @@ void ApplicationWindow::activateWindow(Q3ListViewItem *lbi) {
     activateWindow(wli->window());
 }
 
-void ApplicationWindow::maximizeWindow(Q3ListViewItem *lbi) {
+void ApplicationWindow::maximizeWindow(QTreeWidgetItem *lbi) {
   if (!lbi)
     lbi = lv->currentItem();
 
-  if (!lbi || lbi->rtti() == FolderListItem::RTTI)
+  if (!lbi)
     return;
 
   auto wli = dynamic_cast<WindowListItem *>(lbi);
@@ -9194,11 +9168,12 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   removeWindowFromLists(window);
 
   // update list view in project explorer
-  Q3ListViewItem *it =
-      lv->findItem(window->objectName(), 0,
+  auto found =
+      lv->findItems(window->objectName(), 0,
                    Q3ListView::ExactMatch | Q3ListView::CaseSensitive);
-  if (it)
-    lv->takeItem(it);
+
+  if (!found.isEmpty())
+    lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
 
   if (show_windows_policy == ActiveFolder) {
     // the old code here relied on currentFolder() to remove its reference to
@@ -9213,16 +9188,16 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   } else if (show_windows_policy == SubFolders &&
              !(currentFolder()->children()).isEmpty()) {
     FolderListItem *fi = currentFolder()->folderListItem();
-    FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
-    int initial_depth = item->depth();
+    FolderListItem *item = dynamic_cast<FolderListItem *>(fi->child(0));
+    //int initial_depth = item->depth();
     bool emptyFolder = true;
-    while (item && item->depth() >= initial_depth) {
+    while (item /*&& item->depth() >= initial_depth*/) {
       QList<MdiSubWindow *> lst = item->folder()->windowsList();
       if (lst.count() > 0) {
         emptyFolder = false;
         break;
       }
-      item = dynamic_cast<FolderListItem *>(item->itemBelow());
+      //item = dynamic_cast<FolderListItem *>(item->itemBelow());
     }
     if (emptyFolder) {
       customMenu(0);
@@ -9391,7 +9366,6 @@ void ApplicationWindow::fileMenuAboutToShow() {
 
   newMenu = fileMenu->addMenu(tr("&New"));
   newMenu->addAction(actionNewProject);
-  newMenu->addAction(actionNewFolder);
   newMenu->addAction(actionNewTable);
   newMenu->addAction(actionNewMatrix);
   newMenu->addAction(actionNewNote);
@@ -9722,7 +9696,7 @@ void ApplicationWindow::newProject() {
   d_current_folder = new Folder(0, tr("untitled"));
   FolderListItem *fli = new FolderListItem(folders, d_current_folder);
   d_current_folder->setFolderListItem(fli);
-  fli->setOpen(true);
+  fli->setExpanded(true);
 
   lv->blockSignals(false);
   folders->blockSignals(false);
@@ -9786,8 +9760,6 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *e) {
   if (e->source()) {
     e->accept(mantidUI->canAcceptDrop(e));
     return;
-  } else {
-    e->accept(Q3UriDrag::canDecode(e));
   }
   e->ignore();
 }
@@ -9889,27 +9861,27 @@ void ApplicationWindow::deleteSelectedItems() {
     return;
   }
 
-  Q3ListViewItem *item;
-  QList<Q3ListViewItem *> lst;
-  for (item = lv->firstChild(); item; item = item->nextSibling()) {
+  QTreeWidgetItem *item;
+  QList<QTreeWidgetItem *> lst;
+  for (item = lv->firstChild(); item; item = lv->itemBelow(item)) {
     if (item->isSelected())
       lst.append(item);
   }
 
   folders->blockSignals(true);
   foreach (item, lst) {
-    if (item->rtti() == FolderListItem::RTTI) {
+//    if (item->rtti() == FolderListItem::RTTI) {
       auto fli = dynamic_cast<FolderListItem *>(item);
       if (!fli)
         continue;
       Folder *f = fli->folder();
       if (deleteFolder(f))
         delete item;
-    } else {
-      auto wli = dynamic_cast<WindowListItem *>(item);
-      if (wli)
-        wli->window()->close();
-    }
+    //} else {
+    //  auto wli = dynamic_cast<WindowListItem *>(item);
+    //  if (wli)
+    //    wli->window()->close();
+    //}
   }
   folders->blockSignals(false);
 }
@@ -9937,26 +9909,23 @@ void ApplicationWindow::showListViewPopupMenu(const QPoint &p) {
   window.addAction(actionNewTiledWindow);
   cm.insertItem(tr("New &Window"), &window);
 
-  cm.insertItem(getQPixmap("newfolder_xpm"), tr("New F&older"), this,
-                SLOT(addFolder()), Qt::Key_F7);
   cm.insertSeparator();
   cm.insertItem(tr("Auto &Column Width"), lv, SLOT(adjustColumns()));
-  cm.exec(p);
+  cm.exec(lv->mapToGlobal(p));
 }
 
-void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
-                                            int) {
-  if (folders->isRenaming())
-    return;
+void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
+
+  auto it = lv->itemAt(p);
 
   if (!it) {
     showListViewPopupMenu(p);
     return;
   }
 
-  Q3ListViewItem *item;
+  QTreeWidgetItem *item;
   int selected = 0;
-  for (item = lv->firstChild(); item; item = item->nextSibling()) {
+  for (item = lv->firstChild(); item; item = lv->itemBelow(item)) {
     if (item->isSelected())
       selected++;
 
@@ -9966,12 +9935,10 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
     }
   }
 
-  if (it->rtti() == FolderListItem::RTTI) {
-    auto fli = dynamic_cast<FolderListItem *>(it);
-    if (fli) {
-      d_current_folder = fli->folder();
-      showFolderPopupMenu(it, p, false);
-    }
+  auto fli = dynamic_cast<FolderListItem *>(it);
+  if (fli) {
+    d_current_folder = fli->folder();
+    showFolderPopupMenu(it, p, false);
     return;
   }
 
@@ -10054,7 +10021,7 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
     } else if (w->isA("TiledWindow")) {
       std::cerr << "Menu for TiledWindow" << std::endl;
     }
-    cm.exec(p);
+    cm.exec(lv->mapToGlobal(p));
   }
 }
 
@@ -10066,10 +10033,10 @@ void ApplicationWindow::showTable(int i) {
   updateWindowLists(t);
 
   t->showMaximized();
-  Q3ListViewItem *it = lv->findItem(t->objectName(), 0,
-                                    Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(2, tr("Maximized"));
+  auto found = lv->findItems(t->objectName(), 0,
+                                    Qt::MatchExactly | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(2, tr("Maximized"));
 }
 
 void ApplicationWindow::showTable(const QString &curve) {
@@ -10083,10 +10050,10 @@ void ApplicationWindow::showTable(const QString &curve) {
   w->table()->clearSelection();
   w->table()->selectColumn(colIndex);
   w->showMaximized();
-  Q3ListViewItem *it = lv->findItem(w->objectName(), 0,
-                                    Q3ListView::ExactMatch | Qt::CaseSensitive);
-  if (it)
-    it->setText(2, tr("Maximized"));
+  auto found = lv->findItems(w->objectName(), 0,
+                                    Qt::MatchExactly | Qt::CaseSensitive);
+  if (!found.isEmpty())
+    found[0]->setText(2, tr("Maximized"));
   emit modified();
 }
 
@@ -12116,10 +12083,10 @@ void ApplicationWindow::createActions() {
   actionSaveFile->setShortcut(tr("Ctrl+S"));
   connect(actionSaveFile, SIGNAL(activated()), this, SLOT(savetoNexusFile()));
 
-  actionNewFolder =
-      new QAction(QIcon(getQPixmap("newFolder_xpm")), tr("New &Project"), this);
-  actionNewProject->setShortcut(Qt::Key_F7);
-  connect(actionNewFolder, SIGNAL(activated()), this, SLOT(addFolder()));
+  //actionNewFolder =
+  //    new QAction(QIcon(getQPixmap("newFolder_xpm")), tr("New &Project"), this);
+  //actionNewProject->setShortcut(Qt::Key_F7);
+  //connect(actionNewFolder, SIGNAL(activated()), this, SLOT(addFolder()));
 
   actionNewGraph =
       new QAction(QIcon(getQPixmap("new_graph_xpm")), tr("New &Graph"), this);
@@ -13167,9 +13134,9 @@ void ApplicationWindow::translateActionsStrings() {
   actionNewProject->setToolTip(tr("Open a New Project"));
   actionNewProject->setShortcut(tr("Ctrl+N"));
 
-  actionNewFolder->setMenuText(tr("New Fol&der"));
-  actionNewFolder->setToolTip(tr("Create a new folder"));
-  actionNewFolder->setShortcut(Qt::Key_F7);
+  //actionNewFolder->setMenuText(tr("New Fol&der"));
+  //actionNewFolder->setToolTip(tr("Create a new folder"));
+  //actionNewFolder->setShortcut(Qt::Key_F7);
 
   actionNewGraph->setMenuText(tr("New &Graph"));
   actionNewGraph->setToolTip(tr("Create an empty 2D plot"));
@@ -14724,15 +14691,13 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
   }
 }
 
-void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
-                                            int) {
-  showFolderPopupMenu(it, p, true);
+void ApplicationWindow::showFolderPopupMenu(const QPoint &p) {
+  auto item = folders->itemAt(p);
+  showFolderPopupMenu(item, p, true);
 }
 
-void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
+void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p,
                                             bool fromFolders) {
-  if (!it || folders->isRenaming())
-    return;
 
   QMenu cm(this);
   QMenu window(this);
@@ -14759,13 +14724,6 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
     cm.insertSeparator();
   }
 
-  if (fli->folder()->parent()) {
-    cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Folder"), this,
-                  SLOT(deleteFolder()), Qt::Key_F8);
-    cm.insertItem(tr("&Rename"), this, SLOT(startRenameFolder()), Qt::Key_F2);
-    cm.insertSeparator();
-  }
-
   if (fromFolders) {
     window.addAction(actionNewTable);
     window.addAction(actionNewMatrix);
@@ -14776,10 +14734,6 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
     window.addAction(actionNewTiledWindow);
     cm.insertItem(tr("New &Window"), &window);
   }
-
-  cm.insertItem(getQPixmap("newfolder_xpm"), tr("New F&older"), this,
-                SLOT(addFolder()), Qt::Key_F7);
-  cm.insertSeparator();
 
   QStringList lst;
   lst << tr("&None") << tr("&Windows in Active Folder")
@@ -14793,7 +14747,11 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
   cm.insertItem(tr("&View Windows"), &viewWindowsMenu);
   cm.insertSeparator();
   cm.insertItem(tr("&Properties..."), this, SLOT(folderProperties()));
-  cm.exec(p);
+  if (fromFolders) {
+    cm.exec(folders->mapToGlobal(p));
+  } else {
+    cm.exec(lv->mapToGlobal(p));
+  }
 }
 
 void ApplicationWindow::setShowWindowsPolicy(int p) {
@@ -14816,76 +14774,6 @@ void ApplicationWindow::showFindDialogue() {
   FindDialog *fd = new FindDialog(this);
   fd->setAttribute(Qt::WA_DeleteOnClose);
   fd->exec();
-}
-
-void ApplicationWindow::startRenameFolder() {
-  FolderListItem *fi = currentFolder()->folderListItem();
-  if (!fi)
-    return;
-
-  disconnect(folders, SIGNAL(currentChanged(Q3ListViewItem *)), this,
-             SLOT(folderItemChanged(Q3ListViewItem *)));
-  fi->setRenameEnabled(0, true);
-  fi->startRename(0);
-}
-
-void ApplicationWindow::startRenameFolder(Q3ListViewItem *item) {
-  if (!item || item == folders->firstChild())
-    return;
-
-  if (item->listView() == lv && item->rtti() == FolderListItem::RTTI) {
-    auto fli = dynamic_cast<FolderListItem *>(item);
-    if (!fli)
-      return;
-
-    disconnect(folders, SIGNAL(currentChanged(Q3ListViewItem *)), this,
-               SLOT(folderItemChanged(Q3ListViewItem *)));
-    d_current_folder = fli->folder();
-    FolderListItem *it = d_current_folder->folderListItem();
-    it->setRenameEnabled(0, true);
-    it->startRename(0);
-  } else {
-    item->setRenameEnabled(0, true);
-    item->startRename(0);
-  }
-}
-
-void ApplicationWindow::renameFolder(Q3ListViewItem *it, int col,
-                                     const QString &text) {
-  Q_UNUSED(col)
-
-  if (!it)
-    return;
-
-  Folder *parent = dynamic_cast<Folder *>(currentFolder()->parent());
-  if (!parent) // the parent folder is the project folder (it always exists)
-    parent = projectFolder();
-
-  while (text.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please enter a valid name!")); // Mantid
-    it->setRenameEnabled(0, true);
-    it->startRename(0);
-    return;
-  }
-
-  QStringList lst = parent->subfolders();
-  lst.remove(currentFolder()->objectName());
-  while (lst.contains(text)) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"), // Mantid
-                          tr("Name already exists!") + "\n" +
-                              tr("Please choose another name!"));
-
-    it->setRenameEnabled(0, true);
-    it->startRename(0);
-    return;
-  }
-
-  currentFolder()->setObjectName(text);
-  it->setRenameEnabled(0, false);
-  connect(folders, SIGNAL(currentChanged(Q3ListViewItem *)), this,
-          SLOT(folderItemChanged(Q3ListViewItem *)));
-  folders->setCurrentItem(parent->folderListItem()); // update the list views
 }
 
 void ApplicationWindow::showAllFolderWindows() {
@@ -14916,14 +14804,13 @@ void ApplicationWindow::showAllFolderWindows() {
   if ((currentFolder()->children()).isEmpty())
     return;
 
+  return;
   FolderListItem *fi = currentFolder()->folderListItem();
-  FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
+  FolderListItem *item = 0;//dynamic_cast<FolderListItem *>(fi->firstChild());
   if (!item)
     return;
-  int initial_depth = item->depth();
-  while (item &&
-         item->depth() >=
-             initial_depth) { // show/hide windows in all subfolders
+
+  while (item) {
     auto fld = dynamic_cast<Folder *>(item->folder());
     if (!fld)
       break;
@@ -14955,7 +14842,7 @@ void ApplicationWindow::showAllFolderWindows() {
         w->hide();
     }
 
-    item = dynamic_cast<FolderListItem *>(item->itemBelow());
+    //item = dynamic_cast<FolderListItem *>(item->itemBelow());
   }
 }
 
@@ -14967,18 +14854,6 @@ void ApplicationWindow::hideAllFolderWindows() {
   if ((currentFolder()->children()).isEmpty())
     return;
 
-  if (show_windows_policy == SubFolders) {
-    FolderListItem *fi = currentFolder()->folderListItem();
-    FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
-    int initial_depth = item->depth();
-    while (item && item->depth() >= initial_depth) {
-      lst = item->folder()->windowsList();
-      foreach (MdiSubWindow *w, lst)
-        hideWindow(w);
-
-      item = dynamic_cast<FolderListItem *>(item->itemBelow());
-    }
-  }
 }
 
 void ApplicationWindow::projectProperties() {
@@ -15059,8 +14934,8 @@ void ApplicationWindow::addFolder() {
   FolderListItem *fi = new FolderListItem(currentFolder()->folderListItem(), f);
   if (fi) {
     f->setFolderListItem(fi);
-    fi->setRenameEnabled(0, true);
-    fi->startRename(0);
+    //fi->setRenameEnabled(0, true);
+    //fi->startRename(0);
   }
 }
 
@@ -15164,8 +15039,8 @@ void ApplicationWindow::deleteFolder() {
   folders->setFocus();
 }
 
-void ApplicationWindow::folderItemDoubleClicked(Q3ListViewItem *it) {
-  if (!it || it->rtti() != FolderListItem::RTTI)
+void ApplicationWindow::folderItemDoubleClicked(QTreeWidgetItem *it) {
+  if (!it/* || it->rtti() != FolderListItem::RTTI*/)
     return;
 
   auto fli = dynamic_cast<FolderListItem *>(it);
@@ -15176,11 +15051,11 @@ void ApplicationWindow::folderItemDoubleClicked(Q3ListViewItem *it) {
   folders->setCurrentItem(item);
 }
 
-void ApplicationWindow::folderItemChanged(Q3ListViewItem *it) {
+void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it, QTreeWidgetItem *) {
   if (!it)
     return;
 
-  it->setOpen(true);
+  it->setExpanded(true);
 
   auto fli = dynamic_cast<FolderListItem *>(it);
 
@@ -15314,10 +15189,10 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
 
 void ApplicationWindow::desactivateFolders() {
   FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
-  while (item) {
-    item->setActive(false);
-    item = dynamic_cast<FolderListItem *>(item->itemBelow());
-  }
+  //while (item) {
+  //  item->setActive(false);
+  //  item = dynamic_cast<FolderListItem *>(item->itemBelow());
+  //}
 }
 
 void ApplicationWindow::addListViewItem(MdiSubWindow *w) {
@@ -15326,22 +15201,22 @@ void ApplicationWindow::addListViewItem(MdiSubWindow *w) {
 
   WindowListItem *it = new WindowListItem(lv, w);
   if (w->isA("Matrix")) {
-    it->setPixmap(0, getQPixmap("matrix_xpm"));
+    it->setIcon(0, getQPixmap("matrix_xpm"));
     it->setText(1, tr("Matrix"));
   } else if (w->inherits("Table")) {
-    it->setPixmap(0, getQPixmap("worksheet_xpm"));
+    it->setIcon(0, getQPixmap("worksheet_xpm"));
     it->setText(1, tr("Table"));
   } else if (w->isA("Note")) {
-    it->setPixmap(0, getQPixmap("note_xpm"));
+    it->setIcon(0, getQPixmap("note_xpm"));
     it->setText(1, tr("Note"));
   } else if (w->isA("MultiLayer")) {
-    it->setPixmap(0, getQPixmap("graph_xpm"));
+    it->setIcon(0, getQPixmap("graph_xpm"));
     it->setText(1, tr("Graph"));
   } else if (w->isA("Graph3D")) {
-    it->setPixmap(0, getQPixmap("trajectory_xpm"));
+    it->setIcon(0, getQPixmap("trajectory_xpm"));
     it->setText(1, tr("3D Graph"));
   } else if (w->isA("MantidMatrix")) {
-    it->setPixmap(0, getQPixmap("mantid_matrix_xpm"));
+    it->setIcon(0, getQPixmap("mantid_matrix_xpm"));
     it->setText(1, tr("Workspace"));
   } else if (w->isA("InstrumentWindow")) {
     it->setText(1, tr("Instrument"));
@@ -15424,7 +15299,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
 
     if (subfolders) {
       FolderListItem *item =
-          dynamic_cast<FolderListItem *>(folders->currentItem()->firstChild());
+          dynamic_cast<FolderListItem *>(folders->currentItem()->child(0));
       while (item) {
         Folder *f = item->folder();
         MdiSubWindow *w =
@@ -15434,7 +15309,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
           activateWindow(w);
           return;
         }
-        item = dynamic_cast<FolderListItem *>(item->itemBelow());
+        item = dynamic_cast<FolderListItem *>(folders->itemBelow(item));
       }
     }
   }
@@ -15448,7 +15323,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
 
     if (subfolders) {
       FolderListItem *item =
-          dynamic_cast<FolderListItem *>(folders->currentItem()->firstChild());
+          dynamic_cast<FolderListItem *>(folders->currentItem()->child(0));
       while (item) {
         Folder *f =
             item->folder()->findSubfolder(s, caseSensitive, partialMatch);
@@ -15457,7 +15332,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
           return;
         }
 
-        item = dynamic_cast<FolderListItem *>(item->itemBelow());
+        item = dynamic_cast<FolderListItem *>(folders->itemBelow(item));
       }
     }
   }
@@ -15466,7 +15341,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
                        tr("Sorry, no match found for string: '%1'").arg(s));
 }
 
-void ApplicationWindow::dropFolderItems(Q3ListViewItem *dest) {
+void ApplicationWindow::dropFolderItems(QTreeWidgetItem *dest) {
   if (!dest || draggedItems.isEmpty())
     return;
 
@@ -15475,61 +15350,61 @@ void ApplicationWindow::dropFolderItems(Q3ListViewItem *dest) {
     return;
   Folder *dest_f = dfli->folder();
 
-  Q3ListViewItem *it;
+//  QTreeWidgetItem *it;
   QStringList subfolders = dest_f->subfolders();
 
-  foreach (it, draggedItems) {
-    if (it->rtti() == FolderListItem::RTTI) {
-      auto itfli = dynamic_cast<FolderListItem *>(it);
-      if (!itfli)
-        continue;
-      Folder *f = itfli->folder();
-      FolderListItem *src = f->folderListItem();
-      if (dest_f == f) {
-        QMessageBox::critical(this, "MantidPlot - Error",
-                              tr("Cannot move an object to itself!")); // Mantid
-        return;
-      }
+  //foreach (it, draggedItems) {
+  //  if (it->rtti() == FolderListItem::RTTI) {
+  //    auto itfli = dynamic_cast<FolderListItem *>(it);
+  //    if (!itfli)
+  //      continue;
+  //    Folder *f = itfli->folder();
+  //    FolderListItem *src = f->folderListItem();
+  //    if (dest_f == f) {
+  //      QMessageBox::critical(this, "MantidPlot - Error",
+  //                            tr("Cannot move an object to itself!")); // Mantid
+  //      return;
+  //    }
 
-      if (dfli->isChildOf(src)) {
-        QMessageBox::critical(
-            this, "MantidPlot - Error",
-            tr("Cannot move a parent folder into a child folder!")); // Mantid
-        draggedItems.clear();
-        folders->setCurrentItem(currentFolder()->folderListItem());
-        return;
-      }
+  //    if (dfli->isChildOf(src)) {
+  //      QMessageBox::critical(
+  //          this, "MantidPlot - Error",
+  //          tr("Cannot move a parent folder into a child folder!")); // Mantid
+  //      draggedItems.clear();
+  //      folders->setCurrentItem(currentFolder()->folderListItem());
+  //      return;
+  //    }
 
-      Folder *parent = dynamic_cast<Folder *>(f->parent());
-      if (!parent)
-        parent = projectFolder();
-      if (dest_f == parent)
-        return;
+  //    Folder *parent = dynamic_cast<Folder *>(f->parent());
+  //    if (!parent)
+  //      parent = projectFolder();
+  //    if (dest_f == parent)
+  //      return;
 
-      if (subfolders.contains(f->objectName())) {
-        QMessageBox::critical(this, tr("MantidPlot") + " - " +
-                                        tr("Skipped moving folder"), // Mantid
-                              tr("The destination folder already contains a "
-                                 "folder called '%1'! Folder skipped!")
-                                  .arg(f->objectName()));
-      } else
-        moveFolder(src, dfli);
-    } else {
-      if (dest_f == currentFolder())
-        return;
+  //    if (subfolders.contains(f->objectName())) {
+  //      QMessageBox::critical(this, tr("MantidPlot") + " - " +
+  //                                      tr("Skipped moving folder"), // Mantid
+  //                            tr("The destination folder already contains a "
+  //                               "folder called '%1'! Folder skipped!")
+  //                                .arg(f->objectName()));
+  //    } else
+  //      moveFolder(src, dfli);
+  //  } else {
+  //    if (dest_f == currentFolder())
+  //      return;
 
-      auto wli = dynamic_cast<WindowListItem *>(it);
-      if (wli) {
-        MdiSubWindow *w = wli->window();
-        if (w) {
-          currentFolder()->removeWindow(w);
-          w->hide();
-          dest_f->addWindow(w);
-          delete it;
-        }
-      }
-    }
-  }
+  //    auto wli = dynamic_cast<WindowListItem *>(it);
+  //    if (wli) {
+  //      MdiSubWindow *w = wli->window();
+  //      if (w) {
+  //        currentFolder()->removeWindow(w);
+  //        w->hide();
+  //        dest_f->addWindow(w);
+  //        delete it;
+  //      }
+  //    }
+  //  }
+  //}
 
   draggedItems.clear();
   d_current_folder = dest_f;
@@ -15567,7 +15442,7 @@ bool ApplicationWindow::copyFolder(Folder *src, Folder *dest) {
   FolderListItem *copy_item =
       new FolderListItem(dest->folderListItem(), dest_f);
   copy_item->setText(0, src->objectName());
-  copy_item->setOpen(src->folderListItem()->isOpen());
+  copy_item->setExpanded(src->folderListItem()->isExpanded());
   dest_f->setFolderListItem(copy_item);
 
   QList<MdiSubWindow *> lst = QList<MdiSubWindow *>(src->windowsList());
@@ -15585,7 +15460,7 @@ bool ApplicationWindow::copyFolder(Folder *src, Folder *dest) {
 
       copy_item = new FolderListItem(parentFolder->folderListItem(), dest_f);
       copy_item->setText(0, src->objectName());
-      copy_item->setOpen(src->folderListItem()->isOpen());
+      copy_item->setExpanded(src->folderListItem()->isExpanded());
       dest_f->setFolderListItem(copy_item);
 
       lst = QList<MdiSubWindow *>(src->windowsList());
@@ -16076,39 +15951,39 @@ bool ApplicationWindow::validFor3DPlot(Table *table) {
 }
 
 void ApplicationWindow::hideSelectedWindows() {
-  Q3ListViewItem *item;
-  QList<Q3ListViewItem *> lst;
-  for (item = lv->firstChild(); item; item = item->nextSibling()) {
+  QTreeWidgetItem *item;
+  QList<QTreeWidgetItem *> lst;
+  for (item = lv->firstChild(); item; item = lv->itemBelow(item)) {
     if (item->isSelected())
       lst.append(item);
   }
 
   folders->blockSignals(true);
   foreach (item, lst) {
-    if (item->rtti() != FolderListItem::RTTI) {
-      auto wli = dynamic_cast<WindowListItem *>(item);
-      if (wli)
-        hideWindow(wli->window());
-    }
+    //if (item->rtti() != FolderListItem::RTTI) {
+    //  auto wli = dynamic_cast<WindowListItem *>(item);
+    //  if (wli)
+    //    hideWindow(wli->window());
+    //}
   }
   folders->blockSignals(false);
 }
 
 void ApplicationWindow::showSelectedWindows() {
-  Q3ListViewItem *item;
-  QList<Q3ListViewItem *> lst;
-  for (item = lv->firstChild(); item; item = item->nextSibling()) {
+  QTreeWidgetItem *item;
+  QList<QTreeWidgetItem *> lst;
+  for (item = lv->firstChild(); item; item = lv->itemBelow(item)) {
     if (item->isSelected())
       lst.append(item);
   }
 
   folders->blockSignals(true);
   foreach (item, lst) {
-    if (item->rtti() != FolderListItem::RTTI) {
-      auto wli = dynamic_cast<WindowListItem *>(item);
-      if (wli)
-        activateWindow(wli->window());
-    }
+    //if (item->rtti() != FolderListItem::RTTI) {
+    //  auto wli = dynamic_cast<WindowListItem *>(item);
+    //  if (wli)
+    //    activateWindow(wli->window());
+    //}
   }
   folders->blockSignals(false);
 }
@@ -17276,10 +17151,10 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow *w) {
     currentFolder()->removeWindow(w);
   }
   removeWindowFromLists(w);
-  Q3ListViewItem *it = lv->findItem(
-      w->objectName(), 0, Q3ListView::ExactMatch | Q3ListView::CaseSensitive);
-  if (it)
-    lv->takeItem(it);
+  auto found = lv->findItems(
+      w->objectName(), 0, Qt::MatchExactly | Q3ListView::CaseSensitive);
+  if (!found.isEmpty())
+    lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
 
   // if it's wrapped in a floating detach from it and close
   FloatingWindow *fw = w->getFloatingWindow();
@@ -17606,7 +17481,7 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
     if (folder == currentFolder())
       text += "\tcurrent";
     text += "\n";
-    text += "<open>" + QString::number(folder->folderListItem()->isOpen()) +
+    text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
             "</open>\n";
   }
 
