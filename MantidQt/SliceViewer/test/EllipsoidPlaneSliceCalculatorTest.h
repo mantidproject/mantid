@@ -396,16 +396,22 @@ public:
     //-----------------------------------------------------------------
     // Tests for bounding box of an ellipse
     //-----------------------------------------------------------------
-    void test_that_bounding_box_of_axis_aligned_ellipse_is_found()
+    void test_that_bounding_box_of_axis_aligned_ellipsoid_is_found()
     {
         // Arrange
+        const double angleIn = 0.0;
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+                                       0);
+        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction3(0, 0, 1);
+        std::vector<Mantid::Kernel::V3D> directions
+            = {direction1, direction2, direction3};
         Mantid::Kernel::V3D origin(1.0, 2.0, -1.0);
-        std::vector<double> radii = {2.0, 1.5};
-        double angle = 0.0;
+        std::vector<double> radii = {2.0, 1.5,0.5};
 
         // Act
-        auto boundingBox = Mantid::SliceViewer::getPeakBoundingBoxForEllipse(
-            origin, radii, angle);
+        auto boundingBox = Mantid::SliceViewer::getPeakBoundingBoxForEllipsoid(
+            directions, radii, origin);
 
         // Assert
         const double expectedLeft = -1.0;
@@ -427,28 +433,33 @@ public:
                          boundingBox.slicePoint(), delta);
     }
 
-    void test_that_bounding_box_of_non_axis_aligned_ellipse_is_found()
+    void test_that_bounding_box_of_non_axis_aligned_ellipsoid_is_found()
     {
         // Arrange
-        Mantid::Kernel::V3D origin(0.0, 0.0, 0.0);
-        std::vector<double> radii = {2.0, 1.0};
-        const double angle = 20.0 * M_PI / 180.0;
+        const double angleIn = 20.0 * M_PI / 180.0;
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+                                       0);
+        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction3(0, 0, 1);
+        std::vector<Mantid::Kernel::V3D> directions
+            = {direction1, direction2, direction3};
+        Mantid::Kernel::V3D origin(3.0, 1.0, 0.0);
+        std::vector<double> radii = {2.0, 1.0,0.5};
 
         // Act
-        auto boundingBox = Mantid::SliceViewer::getPeakBoundingBoxForEllipse(
-            origin, radii, angle);
+        auto boundingBox = Mantid::SliceViewer::getPeakBoundingBoxForEllipsoid( directions, radii, origin);
 
         // Assert
-        const double expectedLeft = -2.0 * std::cos(angle);
-        const double expectedRight = -expectedLeft;
-        const double expectedTop = 1.0 * std::cos(angle);
-        const double expectedBottom = -expectedTop;
-        const double expectedSlicePoint = 0.0;
+        const double expectedLeft = -radii[0] * std::cos(angleIn) + origin[0];
+        const double expectedRight = radii[0] * std::cos(angleIn) + origin[0];
+        const double expectedTop = radii[1] * std::cos(angleIn) + origin[1];
+        const double expectedBottom = -radii[1] * std::cos(angleIn) + origin[1];
+        const double expectedSlicePoint = origin[2];
 
         const double delta = 1e-5;
-        TSM_ASSERT_DELTA("Left should be at -2.0*Cos[angle].", expectedLeft,
+        TSM_ASSERT_DELTA("Left should be at -2.0*Cos[angle] +3.", expectedLeft,
                          boundingBox.left(), delta);
-        TSM_ASSERT_DELTA("Right should be at 2.0*Cos[angle].", expectedRight,
+        TSM_ASSERT_DELTA("Right should be at 2.0*Cos[angle] +3 .", expectedRight,
                          boundingBox.right(), delta);
         TSM_ASSERT_DELTA("Top should be at 1.0*Cos[angle].", expectedTop,
                          boundingBox.top(), delta);
@@ -472,7 +483,7 @@ public:
 
         // Act
         auto projections
-            = Mantid::SliceViewer::getProjections(directions, radii);
+            = Mantid::SliceViewer::getProjectionLengths(directions, radii);
 
         // Assert
         const double delta = 1e-5;
@@ -496,7 +507,7 @@ public:
 
         // Act
         auto projections
-            = Mantid::SliceViewer::getProjections(directions, radii);
+            = Mantid::SliceViewer::getProjectionLengths(directions, radii);
 
         // Assert
         auto expectedProjetionX = dir1[0] * radii[0];

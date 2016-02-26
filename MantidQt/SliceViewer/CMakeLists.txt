@@ -117,6 +117,7 @@ set ( TEST_FILES
     test/PeakPaletteTest.h
     test/PeakRepresentationCrossTest.h
     test/PeakRepresentationSphereTest.h
+    test/PeakRepresentationEllipsoidTest.h
     test/NullPeaksPresenterTest.h
 )
 

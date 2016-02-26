@@ -1,7 +1,13 @@
-#include "MantidKernel/V2D.h"
 #include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeakRepresentationEllipsoid.h"
+#include "MantidKernel/Logger.h"
+
+
+namespace {
+  Mantid::Kernel::Logger g_log("PeakRepresentation");
+
+}
 
 #include <QPainter>
 
@@ -22,15 +28,18 @@ QPainterPath getTransformedPainterPath(double angle, double transX,
                                        double transY, double scaleX,
                                        double scaleY, QPainterPath &painterPath)
 {
-    // Rotate the ellipse (around the z axis/ default) by the angle in the
-    // drawingInformation
-    // Then translate it to originWindow values
-    // Then scale it by the scale factors
+    // The ellipse which is passed in has its major axis along the x axis and
+    // the minor axis
+    // along the y axix. The origin is located at (0,0).
+    // In principal we need to:
+    // 1. Rotate the ellipse
+    // 2. Scale the ellipse
+    // 3. Translate the ellipse
+    // QTransform needs to be specified in reverse order!!!
     QTransform transform;
-    //transform.rotateRadians(angle);
-    transform.translate(transX,
-                        transY);
+    transform.translate(transX, transY);
     transform.scale(scaleX, scaleY);
+    transform.rotateRadians(angle);
 
     return transform.map(painterPath);
 }
@@ -55,8 +64,8 @@ PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
       m_showBackgroundRadii(false), m_calculator(calculator)
 {
     // Get projection lengths onto the xyz axes of the ellipsoid axes
-    auto projections
-        = Mantid::SliceViewer::getProjectionLengths(directions, backgroundOuterRadii);
+    auto projections = Mantid::SliceViewer::getProjectionLengths(
+        directions, backgroundOuterRadii);
 
     const auto opacityRange = m_opacityMin - m_opacityMax;
 
@@ -164,8 +173,7 @@ void PeakRepresentationEllipsoid::showBackgroundRadius(const bool show)
 PeakBoundingBox PeakRepresentationEllipsoid::getBoundingBox() const
 {
     using namespace Mantid::SliceViewer;
-    return getPeakBoundingBoxForEllipse(m_directions,
-                                        m_backgroundOuterRadii,
+    return getPeakBoundingBoxForEllipsoid(m_directions, m_backgroundOuterRadii,
                                         m_origin);
 }
 
@@ -203,7 +211,7 @@ const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const
 
 std::shared_ptr<PeakPrimitives>
 PeakRepresentationEllipsoid::getDrawingInformation(
-    PeakRepresentationViewInformation viewInformation)
+    PeakRepresentationViewInformation)
 {
     auto drawingInformation = std::make_shared<PeakPrimitivesEllipse>(
         Mantid::Kernel::V3D() /*peakOrigin*/, 0.0 /*peakOpacityAtDistance*/,
@@ -261,8 +269,23 @@ void PeakRepresentationEllipsoid::doDraw(
     // Add a pen with color, style and stroke, and a painter path
     auto foregroundColorEllipsoid = foregroundColor.colorEllipsoid;
 
-    const QPointF zeroPoint(0.0, 0.0);
 
+    g_log.warning("===============================");
+    g_log.warning("Directions are:");
+    g_log.warning(std::to_string(m_directions[0][0]) + "  " + std::to_string(m_directions[0][1]) + "  " + std::to_string(m_directions[0][1]));
+    g_log.warning(std::to_string(m_directions[1][0]) + "  " + std::to_string(m_directions[1][1]) + "  " + std::to_string(m_directions[1][1]));
+    g_log.warning(std::to_string(m_directions[2][0]) + "  " + std::to_string(m_directions[2][1]) + "  " + std::to_string(m_directions[2][1]));
+
+    g_log.warning("The radii are:");
+    g_log.warning(std::to_string(m_peakRadii[0]));
+    g_log.warning(std::to_string(m_peakRadii[1]));
+    g_log.warning(std::to_string(m_peakRadii[2]));
+
+    g_log.warning("The angle is");
+    g_log.warning(std::to_string(drawingInformationEllipse->angle/M_PI*180));
+    g_log.warning("--------------------------------");
+
+    const QPointF zeroPoint(0.0, 0.0);
     // Add the ellipse at the origin (in order to rotate)
     QPainterPath peakRadiusInnerPath;
     peakRadiusInnerPath.addEllipse(
@@ -278,6 +301,7 @@ void PeakRepresentationEllipsoid::doDraw(
     QPen pen(foregroundColorEllipsoid);
     pen.setWidth(drawingInformationEllipse->peakLineWidth);
     pen.setStyle(Qt::DashLine);
+
     painter.strokePath(transformedPeakRadiusInnerPath, pen);
 
     if (m_showBackgroundRadii) {
@@ -285,24 +309,27 @@ void PeakRepresentationEllipsoid::doDraw(
         QPainterPath backgroundOuterPath;
         backgroundOuterPath.setFillRule(Qt::WindingFill);
         backgroundOuterPath.addEllipse(
-            zeroPoint, drawingInformationEllipse->backgroundOuterRadiusMajorAxis,
+            zeroPoint,
+            drawingInformationEllipse->backgroundOuterRadiusMajorAxis,
             drawingInformationEllipse->backgroundOuterRadiusMinorAxis);
         auto transformedBackgroundOuterPath = getTransformedPainterPath(
-              drawingInformationEllipse->angle, viewInformation.xOriginWindow,
-              viewInformation.yOriginWindow, scaleX, scaleY, backgroundOuterPath);
+            drawingInformationEllipse->angle, viewInformation.xOriginWindow,
+            viewInformation.yOriginWindow, scaleX, scaleY, backgroundOuterPath);
 
         // Inner demarcation of the fill
         QPainterPath backgroundInnerPath;
         backgroundInnerPath.addEllipse(
-            zeroPoint, drawingInformationEllipse->backgroundInnerRadiusMajorAxis,
+            zeroPoint,
+            drawingInformationEllipse->backgroundInnerRadiusMajorAxis,
             drawingInformationEllipse->backgroundInnerRadiusMinorAxis);
         auto transformedBackgroundInnerPath = getTransformedPainterPath(
-              drawingInformationEllipse->angle, viewInformation.xOriginWindow,
-              viewInformation.yOriginWindow, scaleX, scaleY, backgroundInnerPath);
+            drawingInformationEllipse->angle, viewInformation.xOriginWindow,
+            viewInformation.yOriginWindow, scaleX, scaleY, backgroundInnerPath);
 
         // Subtract inner fill from outer fill
         QPainterPath backgroundRadiusFill
-            = transformedBackgroundOuterPath.subtracted(transformedBackgroundInnerPath);
+            = transformedBackgroundOuterPath.subtracted(
+                transformedBackgroundInnerPath);
 
         painter.fillPath(backgroundRadiusFill, backgroundColor.colorEllipsoid);
     }

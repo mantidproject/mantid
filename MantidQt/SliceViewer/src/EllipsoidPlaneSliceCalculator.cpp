@@ -412,7 +412,7 @@ getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
 }
 
 MantidQt::SliceViewer::PeakBoundingBox
-getPeakBoundingBoxForEllipse(const std::vector<Mantid::Kernel::V3D> &directions,
+getPeakBoundingBoxForEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions,
                              const std::vector<double> &radii,
                              const Mantid::Kernel::V3D &originEllipsoid)
 {
