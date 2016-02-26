@@ -8,9 +8,15 @@
 using namespace Mantid;
 using namespace Algorithms;
 
+/** Declare standard properties for defining ranges/lists of spectra. */
 void SpectrumAlgorithm::declareSpectrumIndexSetProperties() {
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
+  // TODO: The names and descriptions of these properties are temporary and for
+  // now follow the old naming from the algorithm ChangeBinOffset, to not break
+  // its interface. This will be changed once a decision on a generic and
+  // uniform interface has been made. We keep it for now, to avoid breaking that
+  // algorithms interface twice.
   declareProperty("IndexMin", 0, mustBePositive,
                   "The first Workspace index to be included in the summing");
   declareProperty("IndexMax", EMPTY_INT(), mustBePositive,
@@ -26,6 +32,13 @@ void SpectrumAlgorithm::declareSpectrumIndexSetProperties() {
                   "a list '12,15,26,28' gives '10-20,26,28'.");
 }
 
+/** Returns a validated IndexSet refering to spectra in workspace.
+ *
+ * If declareSpectrumIndexSetProperties() has been called in init(), the user
+ * defined range and/or index list will be used to construct the set, otherwise
+ * the set will refer to the full range of indices. The number of histograms in
+ * the workspace is used for validation. Throws an error if indices are out of
+ * range. */
 Kernel::IndexSet SpectrumAlgorithm::getSpectrumIndexSet(
     const API::MatrixWorkspace &workspace) const {
   auto numberOfSpectra = workspace.getNumberHistograms();
@@ -52,6 +65,10 @@ Kernel::IndexSet SpectrumAlgorithm::getSpectrumIndexSet(
   return {indices_list, numberOfSpectra};
 }
 
+/** Internal part of the for_each() implementation.
+ *
+ * This specialization is used to call clearMRU for EventWorkspace, overriding
+ *the default implementation that does nothing. */
 template <>
 void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
     const DataObjects::EventWorkspace &workspace) {

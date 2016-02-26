@@ -41,20 +41,16 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL IndexSet {
 public:
-  /// Constructor for a set covering the full range from 0 to fullRange-1.
   IndexSet(size_t fullRange);
-  /// Constructor for a set covering the range from min to max. Range is
-  /// verified at construction time.
   IndexSet(int64_t min, int64_t max, size_t fullRange);
-  /// Constructor for a set containing all specified indices. Range is verified
-  /// at construction time and duplicates are removed.
   IndexSet(const std::vector<size_t> indices, size_t fullRange);
 
   /// Returns the size of the set.
   size_t size() const { return m_size; }
 
-  // Returns the element at given index (range 0...size()-1).
+  /// Returns the element at given index (range 0...size()-1).
   size_t operator[](size_t index) const {
+    // This is accessed frequently in loops and thus inlined.
     if (m_isRange)
       return m_min + index;
     return m_indices[index];

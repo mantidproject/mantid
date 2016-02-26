@@ -16,16 +16,54 @@ class EventWorkspace;
 
 namespace Algorithms {
 
+/** SpectrumAlgorithm is a base class for algorithms that work with
+  MatrixWorkspace.
+
+  This child class of Algorithm provides several features that make writing more
+  generic and more compact code for algorithms easier. In particular it
+  provides:
+  1. The method for_each() that can be used to implement loops/transformations
+     of spectra or event lists in a workspace.
+  2. A way to define generic properties to allow user specified spectrum number
+     ranges and list.
+
+  @author Simon Heybrock, ESS
+
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 class MANTID_ALGORITHMS_DLL SpectrumAlgorithm : public API::Algorithm {
 private:
-  // 3 little helpers for generating a sequence 1,2,3,.... Used for extracting
-  // arguments from tuple.
+  /** Helpers for for_each(), struct seq and gens with a specialization.
+   *
+   * Used for generating a sequence 0,1,2,.... for extracting arguments from
+   * tuple. */
   template <int...> struct seq {};
   template <int N, int... S> struct gens : gens<N - 1, N - 1, S...> {};
   template <int... S> struct gens<0, S...> { typedef seq<S...> type; };
 
-  /// Helper for for_each (struct contains and 2 specializations). Used to
-  /// determine at compile time if parameter pack contains a certain type.
+  /** Helpers for for_each(), struct contains and 2 specializations.
+   *
+   * Used to determine at compile time if parameter pack contains a certain
+   * type. */
   template <typename Tp, typename... List> struct contains : std::true_type {};
   template <typename Tp, typename Head, typename... Rest>
   struct contains<Tp, Head, Rest...>
@@ -33,6 +71,7 @@ private:
                          contains<Tp, Rest...>>::type {};
   template <typename Tp> struct contains<Tp> : std::false_type {};
 
+  /// Internal implementation of for_each().
   template <class... Flags, class WS, class T, int... S, class OP>
   void for_each(WS &workspace, T getters, seq<S...>, const OP &operation) {
     // If we get the flag Indices::FromProperty we use a potential user-defined
@@ -57,21 +96,35 @@ private:
     ifEventWorkspaceClearMRU(workspace);
   }
 
+  /// Templated function used as 'compile-time conditional', together with
+  /// specialization. See there for details.
   template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) {
     UNUSED_ARG(workspace);
   }
 
 protected:
-  /// These structs are used as compile-time flags to for_each. A strongly typed
-  /// enum used in non-type variadic template arguments would have been the
-  /// other candidate. However, combining flags from multiple enums would not
-  /// have been possible, so all flags would have been required to be in the
-  /// same scoped enum, and we want to avoid noisy flag definitions like
-  /// Flags::IndicesFromProperty or Flags::SkipMasked.
+  /// Dummy struct holding compile-time flags to for_each().
+  // A strongly typed enum used in non-type variadic template arguments would
+  // have been the other candidate. However, combining flags from multiple enums
+  // would not have been possible, so all flags would have been required to be
+  // in the same scoped enum, and we want to avoid noisy flag definitions like
+  // Flags::IndicesFromProperty or Flags::SkipMasked.
   struct Indices {
+    /// Flag: Include only indices specified via properties in for_each.
     struct FromProperty {};
   };
 
+  /** Provides a mechanism for looping over spectra in a workspace.
+   *
+   * This variant works with a single workspace and can to in-place modification
+   * of spectra or event lists in the workspace. Threading and progress
+   * reporting is handled internally.
+   * @tparam Flags Variable number of flags, see ::Indices.
+   * @param workspace Workspace to work with.
+   * @param getters Tuple of getters, pointers to methods of workspace, defaults
+   *     defined for convenience in namespace Getters.
+   * @param operation Callable that is executed for all spectra (etc.). Results
+   *     from ::getters are passed as arguments. */
   template <class... Flags, class WS, class... Args, class OP>
   void for_each(WS &workspace, std::tuple<Args...> getters,
                 const OP &operation) {
