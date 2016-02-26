@@ -2456,8 +2456,14 @@ EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
       outFitParamsTblName = "engggui_calibration_bank_1";
     else if (specNos == "South")
       outFitParamsTblName = "engggui_calibration_bank_2";
-    else
-      outFitParamsTblName = "engggui_calibration_bank_cropped";
+    else {
+      std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
+
+      if (CustomisedBankName == "")
+        outFitParamsTblName = "engggui_calibration_bank_cropped";
+      else
+        outFitParamsTblName = "engggui_calibration_bank_" + CustomisedBankName;
+    }
   } else {
     outFitParamsTblName = "engggui_calibration_bank_" +
                           boost::lexical_cast<std::string>(bank_i + 1);

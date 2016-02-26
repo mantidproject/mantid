@@ -981,6 +981,11 @@ std::string EnggDiffractionViewQtGUI::currentCalibSpecNos() const {
   return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
 }
 
+std::string EnggDiffractionViewQtGUI::currentCalibCustomisedBankName() const {
+  return m_uiTabCalib.lineEdit_cropped_customise_bank_name->text()
+      .toStdString();
+}
+
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
   if (!plotType)

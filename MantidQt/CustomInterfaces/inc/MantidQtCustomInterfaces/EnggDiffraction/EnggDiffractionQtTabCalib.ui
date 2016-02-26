@@ -278,7 +278,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Cropped</string>
+           <string>cropped</string>
           </property>
          </widget>
         </item>

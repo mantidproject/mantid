@@ -97,6 +97,8 @@ public:
 
   std::string currentCalibSpecNos() const;
 
+  std::string currentCalibCustomisedBankName() const;
+
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname);
 
