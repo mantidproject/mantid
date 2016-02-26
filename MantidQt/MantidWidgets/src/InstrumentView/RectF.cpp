@@ -44,8 +44,7 @@ namespace MantidQt
 			double dx = m_x0 < m_x1 ? x - m_x0 : x - m_x1;
 			if (dx < 0 || dx > width()) return false;
 			double dy = m_y0 < m_y1 ? y - m_y0 : y - m_y1;
-			if (dy < 0 || dy > height()) return false;
-			return true;
+			return !(dy < 0 || dy > height());
 		}
 
 		bool RectF::contains(const RectF &rect)

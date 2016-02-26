@@ -75,7 +75,7 @@ public:
   void setWidth(const float flag);
   void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
   void setSpectrumNumberForAllPeriods(const size_t spectrumNumber,
-                                      const specid_t specid);
+                                      const specnum_t specid);
   void setDetectorIdsForAllPeriods(const size_t spectrumNumber,
                                    const detid_t id);
 
@@ -91,11 +91,12 @@ public:
   getEventList(const size_t workspace_index) const;
 
   DataObjects::EventList &getEventList(const std::size_t workspace_index);
-  std::vector<size_t>
-  getSpectrumToWorkspaceIndexVector(Mantid::specid_t &offset) const;
 
   std::vector<size_t>
-  getDetectorIDToWorkspaceIndexVector(Mantid::specid_t &offset,
+  getSpectrumToWorkspaceIndexVector(Mantid::specnum_t &offset) const;
+
+  std::vector<size_t>
+  getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
                                       bool dothrow) const;
   Kernel::DateAndTime getFirstPulseTime() const;
   void setAllX(Kernel::cow_ptr<MantidVec> &x);

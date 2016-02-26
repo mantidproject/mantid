@@ -1948,10 +1948,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   for (size_t row = 0; row < 3; row++)
     for (size_t col = 0; col < 3; col++) {
-      if ((boost::math::isnan)(UB[row][col])) {
-        return false;
-      }
-      if ((boost::math::isinf)(UB[row][col])) {
+      if ((boost::math::isnan)(UB[row][col]) ||
+          (boost::math::isinf)(UB[row][col])) {
         return false;
       }
     }
@@ -1959,7 +1957,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
   double det = UB.determinant();
 
   double abs_det = fabs(det);
-  return !(abs_det > 10 || abs_det < 1e-12); // UB not found correctly
+
+  return !(abs_det > 10 || abs_det < 1e-12);
 }
 
 /**

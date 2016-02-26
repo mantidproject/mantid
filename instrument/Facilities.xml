@@ -459,6 +459,10 @@
       <technique>Imaging</technique>
       <technique>Tomography</technique>
    </instrument>
+   
+   <instrument name="SWANS" shortname="SWANS" beamline="7">
+      <technique>Small Wide Angle Scattering</technique>
+   </instrument>
 
    <livedata listener="SNSLiveEventDataListener"/>
 

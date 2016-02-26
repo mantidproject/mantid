@@ -1677,7 +1677,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
-  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
+  const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try {
     monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   } catch (std::runtime_error &) {

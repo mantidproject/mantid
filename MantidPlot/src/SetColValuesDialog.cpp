@@ -236,13 +236,11 @@ void SetColValuesDialog::setTable(Table* w)
 	for (int i=0; i<cols; i++)
 		boxColumn->insertItem("col(\""+colNames[i]+"\")", i);
 
-	int s = w->table()->currentSelection();
-	if (s >= 0) {
-		Q3TableSelection sel = w->table()->selection(s);
-		w->setSelectedCol(sel.leftCol());
+	if (w->hasSelection()) {
+		w->setSelectedCol(w->leftSelectedColumn());
 
-		start->setValue(sel.topRow() + 1);
-		end->setValue(sel.bottomRow() + 1);
+		start->setValue(w->topSelectedRow() + 1);
+		end->setValue(w->bottomSelectedRow() + 1);
 	} else {
 		start->setValue(1);
 		end->setValue(w->numRows());

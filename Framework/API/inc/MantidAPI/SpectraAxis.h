@@ -61,7 +61,7 @@ public:
   bool operator==(const Axis &) const override;
   std::string label(const std::size_t &index) const override;
 
-  specid_t spectraNo(const std::size_t &index) const override;
+  specnum_t spectraNo(const std::size_t &index) const override;
   // Get a map that contains the spectra index as the key and the index in the
   // array as the value
   spec2index_map getSpectraIndexMap() const;

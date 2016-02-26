@@ -11,7 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
-using Mantid::specid_t;
+using Mantid::specnum_t;
 using Mantid::detid_t;
 
 namespace MantidQt
@@ -420,7 +420,7 @@ namespace MantidQt
     * @param detNum number used to identify detector
     * @param specList  -list of spectrum
     */
-    void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const detid_t detNum,std::vector<specid_t>&specList)
+    void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const detid_t detNum,std::vector<specnum_t>&specList)
     {
       // This metod was wrong ticket #2470. The solution here will cause the system not to perform very well. 
       // The best option would be put this information inside the DetectorDetails
@@ -484,10 +484,10 @@ namespace MantidQt
     * @param minSpec - minimum spectrum number
     * @param maxSpec - maximum spectrum number
     */
-    void SANSDiagnostics::minandMaxSpectrumIds(const std::vector<specid_t>& specList,QString& minSpec, QString& maxSpec)
+    void SANSDiagnostics::minandMaxSpectrumIds(const std::vector<specnum_t>& specList,QString& minSpec, QString& maxSpec)
     {      
-      specid_t spec_min =*std::min_element(specList.begin(),specList.end());
-      specid_t spec_max=*std::max_element(specList.begin(),specList.end());
+      specnum_t spec_min =*std::min_element(specList.begin(),specList.end());
+      specnum_t spec_max=*std::max_element(specList.begin(),specList.end());
     
       std::string s_min,s_max;
       try
@@ -523,7 +523,7 @@ namespace MantidQt
     */
 
     void SANSDiagnostics::getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,
-                                              const std::vector<specid_t>& specList,
+                                              const std::vector<specnum_t>& specList,
                                               QString& startWSIndex,QString& endWSIndex)
     {      
             
@@ -678,7 +678,7 @@ namespace MantidQt
       {
         return;
       }
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
@@ -725,7 +725,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
 
@@ -770,7 +770,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       QString wsStartIndex, wsEndIndex;
@@ -1105,7 +1105,7 @@ namespace MantidQt
         return;
       }
       
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
        
@@ -1149,7 +1149,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
@@ -1190,7 +1190,7 @@ namespace MantidQt
         return;
       }
             
-      std::vector<specid_t> specList;
+      std::vector<specnum_t> specList;
       //get spectrum list from detector ids
       getSpectraList(mws_sptr,detNum,specList);
       // get maximum and minimum spectrum ids

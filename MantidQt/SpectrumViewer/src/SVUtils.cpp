@@ -276,10 +276,7 @@ bool SVUtils::Interpolate( double   min,
 {
   newVal = (val - min)/( max - min ) * (newMax - newMin) + newMin;
 
-  if ( newVal < newMin || newVal > newMax )
-    return false;
-  else
-    return true;
+  return !(newVal < newMin || newVal > newMax);
 }
 
 

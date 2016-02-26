@@ -103,7 +103,7 @@ void SofQWCentre::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
   m_EmodeProperties.initCachedValues(inputWorkspace, this);

@@ -215,7 +215,7 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
           ->setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(static_cast<specid_t>(i) + 1);
+          ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
   }
 }

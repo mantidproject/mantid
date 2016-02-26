@@ -97,7 +97,7 @@ void FindDeadDetectors::exec() {
     } else {
       ++countSpec;
       y = deadValue;
-      const specid_t specNo = spec->getSpectrumNo();
+      const specnum_t specNo = spec->getSpectrumNo();
       // Write the spectrum number to file
       file << i << " " << specNo;
       // Get the list of detectors for this spectrum and iterate over

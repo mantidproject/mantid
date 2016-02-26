@@ -79,7 +79,7 @@ public:
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<specid_t> &mList) { m_monitorList = mList; }
+  void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
   void setImageY(const API::MantidImage &image, size_t start = 0,
@@ -107,7 +107,7 @@ protected:
   std::size_t m_noVectors;
 
   /// a vector holding workspace index of monitors in the workspace
-  std::vector<specid_t> m_monitorList;
+  std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
   std::vector<Mantid::API::ISpectrum *> data;

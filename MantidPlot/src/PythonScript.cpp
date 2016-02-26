@@ -153,18 +153,12 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
   if( PyObject *exception = PyErr_Occurred() )
   {
     // Certain exceptions still mean the code is complete
-    if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_MemoryError))
-    {
-      result = true;
-    }
-    else
-    {
-      result = false;
-    }
+    result = (PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_MemoryError));
+
     PyErr_Clear();
   }
   else
@@ -506,14 +500,8 @@ void PythonScript::endStdoutRedirect()
 bool PythonScript::compileImpl()
 {
   PyObject *codeObject = compileToByteCode(false);
-  if(codeObject)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+
+  return codeObject != NULL;
 }
 
 /**
@@ -771,18 +759,7 @@ PyObject* PythonScript::executeCompiledCode(PyObject *compiledCode)
  * @param result The output from a PyEval call
  * @return A boolean indicating success status
  */
-bool PythonScript::checkResult(PyObject *result)
-{
-  if(result)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
+bool PythonScript::checkResult(PyObject *result) { return result != NULL; }
 
 /**
  * Compile the code

@@ -8,8 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
+#include <mutex>
 
 namespace Mantid {
 namespace LiveData {
@@ -77,7 +77,7 @@ private:
   int m_runNumber;
 
   /// Mutex to exclude generateEvents() and extractData().
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // namespace LiveData

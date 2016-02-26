@@ -13,7 +13,7 @@ Requires: clang
 Requires: cmake-gui >= 2.8.12
 %{?el6:Requires: epel-release}
 %if 0%{?el6}
-Requires: boost148-devel
+Requires: boost157-devel
 %else
 Requires: boost-devel
 %endif

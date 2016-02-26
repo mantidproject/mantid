@@ -344,7 +344,7 @@ void FakeISISHistoDAE::exec() {
   int nbins = getProperty("NBins");
   int port = getProperty("Port");
 
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
 

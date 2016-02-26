@@ -290,16 +290,17 @@ bool Homer::isRebinStringValid() const
   rbParams[2] = m_uiForm.leEHigh->text().toDouble();
   // Create a validator and pass it the vector. Empty string from isValid() signals success.
   Mantid::Kernel::RebinParamsValidator validator;
-  if ( validator.isValid(rbParams).empty() )
+  bool isEmpty = validator.isValid(rbParams).empty();
+  if ( isEmpty )
   {
     m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: white}");
-    return true;
   }
   else
   {
     m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: red}");
-    return false;
   }
+
+  return isEmpty;
 }
 
 /**

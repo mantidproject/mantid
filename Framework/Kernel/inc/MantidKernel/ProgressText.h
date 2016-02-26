@@ -2,8 +2,9 @@
 #define MANTID_KERNEL_PROGRESSTEXT_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
+
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -36,7 +37,7 @@ private:
   size_t m_lastMsgLength;
 
   /// Mutex to avoid mangled output
-  Kernel::Mutex coutMutex;
+  std::mutex coutMutex;
 };
 
 } // namespace Mantid

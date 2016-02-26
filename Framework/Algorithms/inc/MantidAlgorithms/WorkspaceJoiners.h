@@ -57,8 +57,8 @@ protected:
   using Mantid::API::Algorithm::validateInputs;
   void validateInputs(API::MatrixWorkspace_const_sptr ws1,
                       API::MatrixWorkspace_const_sptr ws2);
-  void getMinMax(API::MatrixWorkspace_const_sptr ws, specid_t &min,
-                 specid_t &max);
+  void getMinMax(API::MatrixWorkspace_const_sptr ws, specnum_t &min,
+                 specnum_t &max);
 
   /// Abstract method to be implemented in concrete algorithm classes
   virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
