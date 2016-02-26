@@ -126,7 +126,7 @@ EventList::EventList()
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
-EventList::EventList(EventWorkspaceMRU *mru, specid_t specNo)
+EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
     : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru),
       m_lockedMRU(false) {}
 

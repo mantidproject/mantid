@@ -67,16 +67,16 @@ public:
   ~NearestNeighbours() override{};
 
   // Neighbouring spectra by radius
-  std::map<specid_t, Mantid::Kernel::V3D>
-  neighboursInRadius(specid_t spectrum, double radius = 0.0) const override;
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  neighboursInRadius(specnum_t spectrum, double radius = 0.0) const override;
 
   // Neighbouring spectra by
-  std::map<specid_t, Mantid::Kernel::V3D>
-  neighbours(specid_t spectrum) const override;
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  neighbours(specnum_t spectrum) const override;
 
 protected:
   /// Get the spectra associated with all in the instrument
-  std::map<specid_t, IDetector_const_sptr>
+  std::map<specnum_t, IDetector_const_sptr>
   getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                       const ISpectrumDetectorMapping &spectraMap);
 
@@ -94,15 +94,15 @@ private:
   /// Vertex descriptor object for Graph
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   /// map object of int to Graph Vertex descriptor
-  typedef std::unordered_map<specid_t, Vertex> MapIV;
+  typedef std::unordered_map<specnum_t, Vertex> MapIV;
 
   /// Construct the graph based on the given number of neighbours and the
   /// current instument and spectra-detector mapping
   void build(const int noNeighbours);
   /// Query the graph for the default number of nearest neighbours to specified
   /// detector
-  std::map<specid_t, Mantid::Kernel::V3D>
-  defaultNeighbours(const specid_t spectrum) const;
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  defaultNeighbours(const specnum_t spectrum) const;
   /// The current number of nearest neighbours
   int m_noNeighbours;
   /// The largest value of the distance to a nearest neighbour

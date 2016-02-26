@@ -171,7 +171,7 @@ void LoadNexusMonitors2::exec() {
       } else {
         numHistMon += 1;
         if (inner_entries.find("monitor_number") != inner_entries.end()) {
-          specid_t monitorNo;
+          specnum_t monitorNo;
           file.openData("monitor_number");
           file.getData(&monitorNo);
           file.closeData();
@@ -260,7 +260,8 @@ void LoadNexusMonitors2::exec() {
   }
 
   // a temporary place to put the spectra/detector numbers
-  boost::scoped_array<specid_t> spectra_numbers(new specid_t[m_monitor_count]);
+  boost::scoped_array<specnum_t> spectra_numbers(
+      new specnum_t[m_monitor_count]);
   boost::scoped_array<detid_t> detector_numbers(new detid_t[m_monitor_count]);
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
@@ -283,7 +284,7 @@ void LoadNexusMonitors2::exec() {
     file.openGroup(monitorNames[i], "NXmonitor");
 
     // Check if the spectra index is there
-    specid_t spectrumNo(static_cast<specid_t>(i + 1));
+    specnum_t spectrumNo(static_cast<specnum_t>(i + 1));
     try {
       file.openData("spectrum_index");
       file.getData(&spectrumNo);
@@ -517,10 +518,10 @@ bool LoadNexusMonitors2::allMonitorsHaveHistoData(
  * @param spec_ids :: An array of spectrum numbers that the monitors have
  * @param nmonitors :: The size of the det_ids and spec_ids arrays
  */
-void LoadNexusMonitors2::fixUDets(boost::scoped_array<detid_t> &det_ids,
-                                  ::NeXus::File &file,
-                                  const boost::scoped_array<specid_t> &spec_ids,
-                                  const size_t nmonitors) const {
+void LoadNexusMonitors2::fixUDets(
+    boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
+    const boost::scoped_array<specnum_t> &spec_ids,
+    const size_t nmonitors) const {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {

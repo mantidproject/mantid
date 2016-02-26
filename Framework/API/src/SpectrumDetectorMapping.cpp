@@ -34,7 +34,7 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
  * are not of equal length
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const std::vector<specid_t> &spectrumNumbers,
+    const std::vector<specnum_t> &spectrumNumbers,
     const std::vector<detid_t> &detectorIDs,
     const std::vector<detid_t> &ignoreDetIDs)
     : m_indexIsSpecNo(true) {
@@ -51,7 +51,7 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
  *  @throws std::invalid_argument if a null array pointer is passed in
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const specid_t *const spectrumNumbers, const detid_t *const detectorIDs,
+    const specnum_t *const spectrumNumbers, const detid_t *const detectorIDs,
     size_t arrayLengths)
     : m_indexIsSpecNo(true) {
   if (spectrumNumbers == nullptr || detectorIDs == nullptr) {
@@ -64,7 +64,7 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
 
 /// Called by the c-array constructors to do the actual filling
 void SpectrumDetectorMapping::fillMapFromArray(
-    const specid_t *const spectrumNumbers, const detid_t *const detectorIDs,
+    const specnum_t *const spectrumNumbers, const detid_t *const detectorIDs,
     const size_t arrayLengths) {
   for (size_t i = 0; i < arrayLengths; ++i) {
     m_mapping[spectrumNumbers[i]].insert(detectorIDs[i]);
@@ -73,7 +73,7 @@ void SpectrumDetectorMapping::fillMapFromArray(
 
 /// Called by the vector constructors to do the actual filling
 void SpectrumDetectorMapping::fillMapFromVector(
-    const std::vector<specid_t> &spectrumNumbers,
+    const std::vector<specnum_t> &spectrumNumbers,
     const std::vector<detid_t> &detectorIDs,
     const std::vector<detid_t> &ignoreDetIDs) {
   std::set<detid_t> ignoreIDs(ignoreDetIDs.begin(), ignoreDetIDs.end());
@@ -92,8 +92,8 @@ SpectrumDetectorMapping::SpectrumDetectorMapping()
 SpectrumDetectorMapping::~SpectrumDetectorMapping() {}
 
 /// @returns An ordered set of the unique spectrum numbers
-std::set<specid_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
-  std::set<specid_t> specs;
+std::set<specnum_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
+  std::set<specnum_t> specs;
   auto itend = m_mapping.end();
   for (auto it = m_mapping.begin(); it != itend; ++it) {
     specs.insert(it->first);
@@ -102,7 +102,7 @@ std::set<specid_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
 }
 
 const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(
-    const specid_t spectrumNo) const {
+    const specnum_t spectrumNo) const {
   if (!m_indexIsSpecNo)
     throw std::runtime_error("Indices are in spectrum index, not number.");
   return m_mapping.at(spectrumNo);
