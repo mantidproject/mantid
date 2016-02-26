@@ -250,13 +250,13 @@ private:
   Poco::Path outFilesDir(std::string addToDir);
 
   // generates appropriate names for table workspaces
-  std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
+  std::string outFitParamsTblNameGenerator(const std::string specNos, size_t bank_i) const;
 
-  std::string DifcZeroWorkspaceFactory(const std::vector<double> &difc,
-                                       const std::vector<double> &tzero,
-                                       const std::string &specNo) const;
+  std::string DifcZeroWorkspaceFactory(
+      const std::vector<double> &difc, const std::vector<double> &tzero,
+      const std::string &specNo, const std::string &customisedBankName) const;
 
-  std::string plotDifcZeroWorkspace() const;
+  std::string plotDifcZeroWorkspace(const std::string &customisedBankName) const;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

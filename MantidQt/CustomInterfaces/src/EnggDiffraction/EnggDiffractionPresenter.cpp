@@ -961,6 +961,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
       const std::string outFitParamsTblName =
           outFitParamsTblNameGenerator(specNos, i);
+      const std::string customisedBankName = outFitParamsTblName;
       alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
       alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
@@ -2134,9 +2135,13 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
       m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
                                   "2");
     }
+
+    // Get the Customised Bank Name text-ield string from qt
+    std::string const CustomisedBankName =
+        m_view->currentCalibCustomisedBankName();
     const std::string pythonCode =
-        DifcZeroWorkspaceFactory(difc, tzero, specNos) +
-        plotDifcZeroWorkspace();
+        DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
+        plotDifcZeroWorkspace(CustomisedBankName);
     m_view->plotDifcZeroCalibOutput(pythonCode);
   }
 }
@@ -2327,7 +2332,7 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 */
 std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
     const std::vector<double> &difc, const std::vector<double> &tzero,
-    const std::string &specNo) const {
+    const std::string &specNo, const std::string &customisedBankName) const {
 
   size_t bank1 = size_t(0);
   size_t bank2 = size_t(1);
@@ -2360,14 +2365,15 @@ std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
       " if (plotSpecNum == False):\n"
       "  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
       " else:\n"
-      "  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_" +
+      customisedBankName + "\")\n"
 
-      " xVal = []\n"
-      " yVal = []\n"
-      " y2Val = []\n"
+                           " xVal = []\n"
+                           " yVal = []\n"
+                           " y2Val = []\n"
 
-      " if (i == 1):\n"
-      "  difc=" +
+                           " if (i == 1):\n"
+                           "  difc=" +
       boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
       boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
 
@@ -2396,13 +2402,16 @@ std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
 *
 
 */
-std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
+std::string EnggDiffractionPresenter::plotDifcZeroWorkspace(
+    const std::string &customisedBankName) const {
   std::string pyCode =
       // plotSpecNum is true when SpectrumIDs being used
       " if (plotSpecNum == False):\n"
       "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
       " else:\n"
-      "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
+      "  output_ws = \"engggui_difc_zero_peaks_" +
+      customisedBankName +
+      "\"\n"
 
       // delete workspace if exists within ADS already
       " if(mtd.doesExist(output_ws)):\n"
@@ -2417,7 +2426,9 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
       " if (plotSpecNum == False):\n"
       "  DifcZero = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
       " else:\n"
-      "  DifcZero = \"engggui_difc_zero_peaks_cropped\"\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_" +
+      customisedBankName +
+      "\"\n"
 
       " DifcZeroWs = workspace(DifcZero)\n"
       " DifcZeroPlot = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
@@ -2426,7 +2437,9 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
       "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
       "str(i))\n"
       " else:\n"
-      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks " +
+      customisedBankName +
+      "\")\n"
 
       // set the legend title
       " DifcZeroPlot.setCurveTitle(0, \"Peaks Fitted\")\n"
@@ -2445,9 +2458,8 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
 * @param specNos specIDs or bank name to be passed
 * @param bank_i current loop of the bank during calibration
 */
-std::string
-EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
-                                                       size_t bank_i) {
+std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
+    const std::string specNos, const size_t bank_i) const {
   std::string outFitParamsTblName;
   bool specNumUsed = specNos != "";
 
@@ -2457,6 +2469,7 @@ EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
     else if (specNos == "South")
       outFitParamsTblName = "engggui_calibration_bank_2";
     else {
+      // Get the Customised Bank Name text-ield string from qt
       std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
 
       if (CustomisedBankName == "")
