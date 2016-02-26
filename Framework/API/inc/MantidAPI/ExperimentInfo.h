@@ -115,8 +115,9 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   virtual double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  virtual double getEFixed(const Geometry::IDetector_const_sptr detector =
-                               Geometry::IDetector_const_sptr()) const;
+  virtual double
+  getEFixed(const Geometry::IDetector_const_sptr
+                detector = Geometry::IDetector_const_sptr()) const;
   /// Set the efixed value for a given detector ID
   virtual void setEFixed(const detid_t detID, const double value);
 

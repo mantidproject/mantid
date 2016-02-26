@@ -71,8 +71,8 @@ private:
   void processTableColumnNames();
 
   void importPeaksFromTable(
-      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
-          &functionmap);
+      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
+          functionmap);
 
   /// Import peak and background function parameters from vector
   void importPeakFromVector(
@@ -81,8 +81,8 @@ private:
   /// Generate peaks in output data workspaces
   void generatePeaks(
       const std::map<specnum_t,
-                     std::vector<std::pair<double, API::IFunction_sptr>>>
-          &functionmap,
+                     std::vector<std::pair<double, API::IFunction_sptr>>> &
+          functionmap,
       API::MatrixWorkspace_sptr dataWS);
 
   /// Check whether function has a certain parameter

@@ -288,8 +288,8 @@ public:
 //=====================================================================================
 // clang-format off
 class IntegratePeaksUsingClustersTestPerformance : public CxxTest::TestSuite, public ClusterIntegrationBaseTest
-// clang-format on
-{
+      // clang-format on
+      {
 
 private:
   // Input data

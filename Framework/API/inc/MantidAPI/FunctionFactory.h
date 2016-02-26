@@ -160,8 +160,8 @@ typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>
 typedef FunctionFactoryImpl::UpdateNotification
     FunctionFactoryUpdateNotification;
 /// Convenient typedef for an UpdateNotification AutoPtr
-typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification>
-    &FunctionFactoryUpdateNotification_ptr;
+typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification> &
+    FunctionFactoryUpdateNotification_ptr;
 } // namespace API
 } // namespace Mantid
 

@@ -242,8 +242,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
       if (!rep_json.exists()) {
         g_log.error() << "Corrupted ScriptRepository at " << local_repository
                       << ". Please, remove this folder, and install "
-                         "ScriptRepository again"
-                      << std::endl;
+                         "ScriptRepository again" << std::endl;
       }
     }
   } catch (Poco::FileNotFoundException & /*ex*/) {
@@ -360,8 +359,7 @@ void ScriptRepositoryImpl::ensureValidRepository() {
   if (!isValid()) {
     std::stringstream ss;
     ss << "ScriptRepository is not installed correctly. The current path for "
-          "ScriptRepository is "
-       << local_repository
+          "ScriptRepository is " << local_repository
        << " but some important files that are required are corrupted or not "
           "present."
        << "\nPlease, re-install the ScriptRepository!\n"
@@ -463,12 +461,11 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     // it will proceed in this situation.
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.className() << ":> " << ex.displayText() << std::endl;
+                     "repository. Details: " << ex.className() << ":> "
+                  << ex.displayText() << std::endl;
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.what() << std::endl;
+                     "repository. Details: " << ex.what() << std::endl;
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();

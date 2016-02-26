@@ -1076,14 +1076,12 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
   return std::min_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)
-      ->value();
+                          TimeValueUnit<TYPE>::valueCmp)->value();
 }
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
   return std::max_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)
-      ->value();
+                          TimeValueUnit<TYPE>::valueCmp)->value();
 }
 
 /// Returns the number of values at UNIQUE time intervals in the time series

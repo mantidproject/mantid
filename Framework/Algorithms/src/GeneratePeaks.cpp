@@ -244,8 +244,8 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
  * spectrum
   */
 void GeneratePeaks::importPeaksFromTable(
-    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
-        &functionmap) {
+    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
+        functionmap) {
   size_t numpeaks = m_funcParamWS->rowCount();
   size_t icolchi2 = m_funcParamWS->columnCount() - 1;
   size_t numpeakparams = m_peakFunction->nParams();
@@ -433,8 +433,8 @@ void GeneratePeaks::importPeakFromVector(
   */
 void GeneratePeaks::generatePeaks(
     const std::map<specnum_t,
-                   std::vector<std::pair<double, API::IFunction_sptr>>>
-        &functionmap,
+                   std::vector<std::pair<double, API::IFunction_sptr>>> &
+        functionmap,
     API::MatrixWorkspace_sptr dataWS) {
   // Calcualte function
   std::map<specnum_t,

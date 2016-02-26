@@ -164,8 +164,7 @@ void SaveIsawPeaks::exec() {
     if (true) {
       out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ"
-          << std::endl;
+             "     UpZ" << std::endl;
       // Here would save each detector...
       for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
         // Build up the bank name

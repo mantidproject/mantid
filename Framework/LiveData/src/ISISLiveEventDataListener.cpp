@@ -282,8 +282,8 @@ void ISISLiveEventDataListener::run() {
       saveEvents(events.data, pulseTime, events.head_n.period);
     }
 
-  } catch (std::runtime_error
-               &e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error &
+               e) { // exception handler for generic runtime exceptions
 
     g_log.error() << "Caught a runtime exception." << std::endl
                   << "Exception message: " << e.what() << std::endl;
@@ -291,9 +291,9 @@ void ISISLiveEventDataListener::run() {
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
-  } catch (std::invalid_argument
-               &e) { // TimeSeriesProperty (and possibly some other things) can
-                     // can throw these errors
+  } catch (std::invalid_argument &
+               e) { // TimeSeriesProperty (and possibly some other things) can
+                    // can throw these errors
     g_log.error() << "Caught an invalid argument exception." << std::endl
                   << "Exception message: " << e.what() << std::endl;
     m_isConnected = false;
@@ -304,8 +304,7 @@ void ISISLiveEventDataListener::run() {
 
   } catch (...) { // Default exception handler
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
-                     "read thread."
-                  << std::endl;
+                     "read thread." << std::endl;
     m_isConnected = false;
     m_backgroundException = boost::shared_ptr<std::runtime_error>(
         new std::runtime_error("Unknown error in backgound thread"));

@@ -355,8 +355,8 @@ typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>
-    &ConfigValChangeNotification_ptr;
+typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &
+    ConfigValChangeNotification_ptr;
 
 } // namespace Kernel
 } // namespace Mantid

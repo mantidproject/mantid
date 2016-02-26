@@ -853,8 +853,7 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
       DateAndTime(isisDate.substr(7, 4) + "-" +
                   convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
                   isisDate.substr(0, 2) + "T" +
-                  std::string(localISISRaw->hdr.hd_time, 8))
-          .toISO8601String());
+                  std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601

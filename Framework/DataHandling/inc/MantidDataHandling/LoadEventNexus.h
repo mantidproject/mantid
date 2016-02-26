@@ -241,8 +241,8 @@ public:
   bool m_haveWeights;
 
   /// Pointer to the vector of weighted events
-  typedef std::vector<Mantid::DataObjects::WeightedEvent>
-      *WeightedEventVector_pt;
+  typedef std::vector<Mantid::DataObjects::WeightedEvent> *
+      WeightedEventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.

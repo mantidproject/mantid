@@ -503,7 +503,7 @@ size_t MemoryStats::getPeakRSS() const {
   GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
   return (size_t)info.PeakWorkingSetSize;
 
-#elif (defined(_AIX) || defined(__TOS__AIX__)) ||                              \
+#elif(defined(_AIX) || defined(__TOS__AIX__)) ||                               \
     (defined(__sun__) || defined(__sun) ||                                     \
      defined(sun) && (defined(__SVR4) || defined(__svr4__)))
   /* AIX and Solaris ------------------------------------------ */

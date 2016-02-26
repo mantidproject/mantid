@@ -83,8 +83,8 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy> &
-MDGeometryBuilderXML<CheckDimensionPolicy>::
-operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
+    MDGeometryBuilderXML<CheckDimensionPolicy>::
+    operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
   if (this != &other) {
     m_vecDimensions = other.m_vecDimensions;
     m_spXDimension = other.m_spXDimension;

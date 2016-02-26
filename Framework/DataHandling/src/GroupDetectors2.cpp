@@ -359,8 +359,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
       if (*it > maxIn) {
         g_log.error() << "Spectra index " << *it
                       << " doesn't exist in the input workspace, the highest "
-                         "possible index is "
-                      << maxIn << std::endl;
+                         "possible index is " << maxIn << std::endl;
         throw std::out_of_range("One of the spectra requested to group does "
                                 "not exist in the input workspace");
       }

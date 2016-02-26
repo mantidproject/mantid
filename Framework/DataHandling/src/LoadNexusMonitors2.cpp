@@ -572,8 +572,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
     loadLogs->execute();
   } catch (...) {
     g_log.error() << "Error while loading Logs from Nexus. Some sample logs "
-                     "may be missing."
-                  << std::endl;
+                     "may be missing." << std::endl;
   }
 }
 
@@ -625,8 +624,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
         << "Attempted to split multiperiod histogram workspace with "
         << m_workspace->blocksize() << "data entries, into " << numPeriods
         << "periods."
-           " Aborted."
-        << std::endl;
+           " Aborted." << std::endl;
     return;
   }
 

@@ -446,8 +446,7 @@ void EQSANSLoad::exec() {
   EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
   if (fileName.size() == 0 && !inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided"
-                  << std::endl;
+                     "input workspace must be provided" << std::endl;
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided");
   } else if (fileName.size() > 0 && inputEventWS) {
@@ -688,8 +687,7 @@ void EQSANSLoad::exec() {
     dataWS->mutableRun().addProperty("is_frame_skipping", 0, true);
     if (correct_for_flight_path) {
       g_log.error() << "CorrectForFlightPath and SkipTOFCorrection can't be "
-                       "set to true at the same time"
-                    << std::endl;
+                       "set to true at the same time" << std::endl;
       m_output_message += "    Skipped flight path correction: see error log\n";
     }
   } else {

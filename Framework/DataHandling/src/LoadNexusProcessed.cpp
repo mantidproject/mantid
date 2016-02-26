@@ -302,8 +302,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off."
-           << std::endl;
+                                         "off." << std::endl;
     throw std::runtime_error(buffer.str());
   }
 

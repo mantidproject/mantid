@@ -615,8 +615,7 @@ Load::getOutputWorkspace(const std::string &propName,
 
   g_log.debug() << "Workspace property " << propName
                 << " did not return to MatrixWorkspace, EventWorkspace, "
-                   "IMDEventWorkspace, IMDWorkspace"
-                << std::endl;
+                   "IMDEventWorkspace, IMDWorkspace" << std::endl;
   return Workspace_sptr();
 }
 

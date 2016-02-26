@@ -51,8 +51,8 @@ public:
 
   MDBoxBase(Mantid::API::BoxController *const BoxController,
             const uint32_t depth, const size_t boxID,
-            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-                &extentsVector);
+            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+                extentsVector);
 
   MDBoxBase(const MDBoxBase<MDE, nd> &box,
             Mantid::API::BoxController *const otherBC);

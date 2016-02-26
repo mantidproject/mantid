@@ -948,8 +948,7 @@ public:
     // 0. Check
     if (hkls.size() != heights.size()) {
       std::cout << "createInputHKLWorkspace: input two vectors have different "
-                   "sizes.  It is not supported."
-                << std::endl;
+                   "sizes.  It is not supported." << std::endl;
       throw std::invalid_argument(
           "Vectors for HKL and heights are of different sizes.");
     }

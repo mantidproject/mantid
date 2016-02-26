@@ -97,14 +97,14 @@ void GetEi::exec() {
   // write a lot of stuff to the log at user level as it is very possible for
   // fit routines not to the expected thing
   g_log.information() << "Based on the user selected energy the first peak "
-                         "will be searched for at TOF "
-                      << peakLoc0 << " micro seconds +/-"
+                         "will be searched for at TOF " << peakLoc0
+                      << " micro seconds +/-"
                       << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
   const double peakLoc1 = 1e6 * timeToFly(dist2moni1, E_est);
   g_log.information() << "Based on the user selected energy the second peak "
-                         "will be searched for at TOF "
-                      << peakLoc1 << " micro seconds +/-"
+                         "will be searched for at TOF " << peakLoc1
+                      << " micro seconds +/-"
                       << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
 
@@ -380,8 +380,8 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
                    "the monitor spectrum, which is at TOF "
                 << (m_tempWS->readX(0)[centreInd] +
                     m_tempWS->readX(0)[centreInd + 1]) /
-                       2
-                << " (peak height " << height << " counts/microsecond)\n";
+                       2 << " (peak height " << height
+                << " counts/microsecond)\n";
 }
 /** Estimates the closest time, looking either or back, when the number of
 * counts is

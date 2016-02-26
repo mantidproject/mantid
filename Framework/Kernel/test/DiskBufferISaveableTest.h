@@ -358,8 +358,7 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, 1 "
-                 "thread in "
-              << clock.elapsed() << " sec\n";
+                 "thread in " << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory
@@ -399,8 +398,7 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, "
-                 "multithread in "
-              << clock.elapsed() << " sec\n";
+                 "multithread in " << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory

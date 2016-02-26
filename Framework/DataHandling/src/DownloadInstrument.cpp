@@ -92,8 +92,7 @@ void DownloadInstrument::exec() {
     } else {
       // log the failure at Notice Level
       g_log.notice() << "Internet Connection Failed - cannot update instrument "
-                        "definitions."
-                     << std::endl;
+                        "definitions." << std::endl;
       // log this error at information level
       g_log.information() << errorText << std::endl;
     }
@@ -284,8 +283,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: "
-                      << entryPath.getFileName() << std::endl;
+                         "be deleted: " << entryPath.getFileName() << std::endl;
         filesToDelete.push_back(it->path());
       }
     }
