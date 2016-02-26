@@ -37,18 +37,17 @@ const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  this->declareProperty(new PropertyWithValue<double>("Tolerance", 0.15,
-                                                      mustBePositive,
-                                                      Direction::Input),
-                        "Indexing Tolerance (0.15)");
+  this->declareProperty(
+      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
+                                             Direction::Input),
+      "Indexing Tolerance (0.15)");
 
   std::vector<double> identity_matrix(9, 0.0);
   identity_matrix[0] = 1;
@@ -58,17 +57,18 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      new ArrayProperty<double>("HKLTransform", identity_matrix, threeBythree),
+      Kernel::make_unique<ArrayProperty<double>>("HKLTransform",
+                                                 identity_matrix, threeBythree),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
   this->declareProperty(
-      new PropertyWithValue<int>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
       "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(
-      new PropertyWithValue<double>("AverageError", 0.0, Direction::Output),
-      "Gets set with the average HKL indexing error.");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "AverageError", 0.0, Direction::Output),
+                        "Gets set with the average HKL indexing error.");
 }
 
 //--------------------------------------------------------------------------

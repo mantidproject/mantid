@@ -60,13 +60,13 @@ void NormaliseByDetector::init() {
       boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input,
-                                                         compositeValidator),
-                  "An input workspace in wavelength");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, compositeValidator),
+      "An input workspace in wavelength");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

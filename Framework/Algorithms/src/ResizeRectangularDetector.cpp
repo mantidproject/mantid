@@ -49,8 +49,8 @@ const std::string ResizeRectangularDetector::category() const {
 void ResizeRectangularDetector::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
-                                                   Direction::InOut));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "Workspace", "Anonymous", Direction::InOut));
   declareProperty("ComponentName", "",
                   "The name of the RectangularDetector to resize.");
   declareProperty("ScaleX", 1.0,

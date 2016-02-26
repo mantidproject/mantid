@@ -83,17 +83,17 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  alg.declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                              Direction::Input, wsValidator),
+  alg.declareProperty(make_unique<WorkspaceProperty<>>(
+                          "InputWorkspace", "", Direction::Input, wsValidator),
                       "Reduced data in units of energy transfer DeltaE.\nThe "
                       "workspace must contain histogram data and have common "
                       "bins across all spectra.");
+  alg.declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                       Direction::Output),
+                      "The name to use for the q-omega workspace.");
   alg.declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the q-omega workspace.");
-  alg.declareProperty(
-      new ArrayProperty<double>("QAxisBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
       "The bin parameters to use for the q axis (in the format used by the "
       ":ref:`algm-Rebin` algorithm).");
 

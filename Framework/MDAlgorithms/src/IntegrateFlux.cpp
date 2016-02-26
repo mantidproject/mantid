@@ -48,15 +48,15 @@ const std::string IntegrateFlux::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateFlux::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   auto validator = boost::make_shared<Kernel::BoundedValidator<int>>();
   validator->setLower(2);
   declareProperty("NPoints", 1000, validator,
                   "Number of points per output spectrum.");
-  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

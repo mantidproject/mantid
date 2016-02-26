@@ -51,7 +51,7 @@ const char *colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define ERROR_MSG                                                              \
   "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"
 
-#define SwapBytes(x) ByteSwap((unsigned char *)&x, sizeof(x))
+#define SwapBytes(x) ByteSwap((unsigned char *) & x, sizeof(x))
 
 int strcmp_i(const char *s1,
              const char *s2) { // compare two strings ignoring case

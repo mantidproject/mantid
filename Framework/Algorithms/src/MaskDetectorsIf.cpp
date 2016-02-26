@@ -28,9 +28,9 @@ MaskDetectorsIf::~MaskDetectorsIf() {}
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
-  declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "A 1D Workspace that contains values to select against");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "A 1D Workspace that contains values to select against");
   std::vector<std::string> select_mode(2);
   select_mode[0] = "SelectIf";
   select_mode[1] = "DeselectIf";
@@ -51,12 +51,12 @@ void MaskDetectorsIf::init() {
                       allowedValuesStatement(select_operator));
   declareProperty("Value", 0.0);
   declareProperty(
-      new API::FileProperty("InputCalFile", "", API::FileProperty::Load,
-                            ".cal"),
+      make_unique<API::FileProperty>("InputCalFile", "",
+                                     API::FileProperty::Load, ".cal"),
       "The name of the CalFile with grouping data. Allowed Values: .cal .");
   declareProperty(
-      new API::FileProperty("OutputCalFile", "",
-                            API::FileProperty::OptionalSave, ".cal"),
+      make_unique<API::FileProperty>("OutputCalFile", "",
+                                     API::FileProperty::OptionalSave, ".cal"),
       "The name of the CalFile with grouping data. Allowed Values: .cal .");
 }
 

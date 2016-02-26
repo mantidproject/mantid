@@ -50,8 +50,8 @@ BinMD::~BinMD() {}
 /** Initialize the algorithm's properties.
  */
 void BinMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
@@ -60,14 +60,15 @@ void BinMD::init() {
   // --------------- Processing methods and options
   // ---------------------------------------
   std::string grp = "Methods";
-  declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ImplicitFunctionXML", "", Direction::Input),
                   "XML string describing the implicit function determining "
                   "which bins to use.");
   setPropertyGroup("ImplicitFunctionXML", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("IterateEvents", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("IterateEvents", true,
+                                           Direction::Input),
       "Alternative binning method where you iterate through every event, "
       "placing them in the proper bin.\n"
       "This may be faster for workspaces with few events and lots of output "
@@ -75,14 +76,14 @@ void BinMD::init() {
   setPropertyGroup("IterateEvents", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("Parallel", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Parallel", false, Direction::Input),
       "Temporary parameter: true to run in parallel. This is ignored for "
       "file-backed workspaces, where running in parallel makes things slower "
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output MDHistoWorkspace.");
 }
 

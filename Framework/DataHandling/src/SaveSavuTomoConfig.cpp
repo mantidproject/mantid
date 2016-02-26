@@ -24,13 +24,14 @@ SaveSavuTomoConfig::SaveSavuTomoConfig()
 void SaveSavuTomoConfig::init() {
   // Get a list of table workspaces which contain the plugin information
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the table workspaces containing plugin information.");
 
-  declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
-                                        std::vector<std::string>(1, ".nxs")),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", FileProperty::Save,
+                      std::vector<std::string>(1, ".nxs")),
                   "The name of the tomographic config file to write, as a full "
                   "or relative path. This will overwrite existing files.");
 }

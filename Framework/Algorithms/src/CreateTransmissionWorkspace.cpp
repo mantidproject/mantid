@@ -44,13 +44,13 @@ const std::string CreateTransmissionWorkspace::category() const {
 void CreateTransmissionWorkspace::init() {
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run, or the low wavelength transmision "
                   "run if SecondTransmissionRun is also provided.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator->clone()),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -61,20 +61,20 @@ void CreateTransmissionWorkspace::init() {
   this->initIndexInputs();
   this->initWavelengthInputs();
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output Workspace IvsQ.");
 
-  setPropertySettings(
-      "Params", new Kernel::EnabledWhenProperty("SecondTransmissionWorkspace",
-                                                IS_NOT_DEFAULT));
+  setPropertySettings("Params",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
   setPropertySettings("EndOverlap",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 }
 

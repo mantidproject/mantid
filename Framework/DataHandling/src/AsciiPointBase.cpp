@@ -25,10 +25,11 @@ using namespace API;
 /// Initialisation method.
 void AsciiPointBase::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, {ext()}),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Save, ext()),
                   "The filename of the output file.");
   extraProps();
 }

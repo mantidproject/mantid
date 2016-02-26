@@ -66,9 +66,9 @@ const std::string AddNote::summary() const {
 /** Initialize the algorithm's properties.
  */
 void AddNote::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "", Direction::InOut),
-      "An InOut workspace that will store the new log information");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "An InOut workspace that will store the new log information");
 
   declareProperty("Name", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),

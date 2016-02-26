@@ -86,14 +86,14 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   boost::make_shared<StringListValidator>(propOptions),
                   message.str());
 
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
@@ -101,22 +101,22 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
   auto boundedArrayValidator = boost::make_shared<ArrayBoundedValidator<int>>();
   boundedArrayValidator->setLower(0);
   declareProperty(
-      new ArrayProperty<int>("SpectrumNumbersOfDetectors",
-                             boundedArrayValidator, Direction::Input),
+      make_unique<ArrayProperty<int>>("SpectrumNumbersOfDetectors",
+                                      boundedArrayValidator, Direction::Input),
       "A list of spectrum numbers making up an effective point detector.");
 
-  declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
+                                                       true, Direction::Input),
                   "Enable, disable strict spectrum checking. Strict spectrum "
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
   setPropertySettings("SampleComponentName",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "SpectrumNumbersOfDetectors",
-      new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
+  setPropertySettings("SpectrumNumbersOfDetectors",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleComponentName", IS_NOT_DEFAULT));
 }
 
 /**

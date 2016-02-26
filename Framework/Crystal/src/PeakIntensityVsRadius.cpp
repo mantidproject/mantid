@@ -48,12 +48,12 @@ const std::string PeakIntensityVsRadius::category() const {
 /** Initialize the algorithm's properties.
  */
 void PeakIntensityVsRadius::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace containing the SCD data.");
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                            Direction::Input),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
+                                                     Direction::Input),
       "The list of peaks to integrate, matching the InputWorkspace.");
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
@@ -91,12 +91,12 @@ void PeakIntensityVsRadius::init() {
   setPropertyGroup("BackgroundInnerRadius", "Fixed Background Shell");
   setPropertyGroup("BackgroundOuterRadius", "Fixed Background Shell");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace2D containing intensity vs radius.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace2",
-                                          "NumberPeaksIntegrated",
-                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace2D containing intensity vs radius.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace2",
+                                                   "NumberPeaksIntegrated",
+                                                   Direction::Output),
                   "An output workspace2D containing number of peaks at levels "
                   "of I/sigI vs radius.");
 }
