@@ -332,8 +332,8 @@ void DataComparison::removeAllData()
  */
 void DataComparison::plotWorkspaces()
 {
-  int globalSpecIndex = m_uiForm.sbSpectrum->value();
-  int maxGlobalSpecIndex = 0;
+  int globalWsIndex = m_uiForm.sbSpectrum->value();
+  int maxGlobalWsIndex = 0;
 
   int numRows = m_uiForm.twCurrentData->rowCount();
   for(int row = 0; row < numRows; row++)
@@ -347,14 +347,14 @@ void DataComparison::plotWorkspaces()
     // Calculate spectrum number
     QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
-    int wsIndex = globalSpecIndex - specOffset;
+    int wsIndex = globalWsIndex - specOffset;
     g_log.debug() << "Workspace index for workspace " << workspaceName.toStdString()
                   << " is " << wsIndex << ", with offset " << specOffset << std::endl;
 
     // See if this workspace extends the reach of the global spectrum selector
-    int maxGlobalSpecIndexForWs = numSpec + specOffset - 1;
-    if(maxGlobalSpecIndexForWs > maxGlobalSpecIndex)
-      maxGlobalSpecIndex = maxGlobalSpecIndexForWs;
+    int maxGlobalWsIndexForWs = numSpec + specOffset - 1;
+    if(maxGlobalWsIndexForWs > maxGlobalWsIndex)
+      maxGlobalWsIndex = maxGlobalWsIndexForWs;
 
     // Check the workspace index is in range
     if(wsIndex >= numSpec || wsIndex < 0)
@@ -401,8 +401,8 @@ void DataComparison::plotWorkspaces()
   m_plot->replot();
 
   // Set the max value for global spectrum spin box
-  m_uiForm.sbSpectrum->setMaximum(maxGlobalSpecIndex);
-  m_uiForm.sbSpectrum->setSuffix(" / " + QString::number(maxGlobalSpecIndex));
+  m_uiForm.sbSpectrum->setMaximum(maxGlobalWsIndex);
+  m_uiForm.sbSpectrum->setSuffix(" / " + QString::number(maxGlobalWsIndex));
 }
 
 

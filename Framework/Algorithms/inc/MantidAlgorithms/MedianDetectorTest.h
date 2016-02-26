@@ -108,9 +108,9 @@ private:
   /// over-reading
   double m_hiFrac;
   /// The index of the first spectrum to calculate
-  int m_minSpec;
+  int m_minWsIndex;
   /// The index of the last spectrum to calculate
-  int m_maxSpec;
+  int m_maxWsIndex;
   /// Start point for integration
   double m_rangeLower;
   /// End point for integration

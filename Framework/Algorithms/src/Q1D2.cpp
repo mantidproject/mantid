@@ -520,21 +520,21 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 }
 
 /** Scaled to bin masking, to the normalization
-*  @param[in] offSet the inex number of the first bin in the input wavelengths
+*  @param[in] offSet the index number of the first bin in the input wavelengths
 * that is actually being used
-*  @param[in] specIndex the spectrum to calculate
+*  @param[in] wsIndex the spectrum to calculate
 *  @param[in,out] theNorms normalization for each bin, this is multiplied by the
 * proportion that is not masked and the normalization workspace
 *  @param[in,out] errorSquared the running total of the square of the
 * uncertainty in the normalization
 */
-void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
+void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
                       const MantidVec::iterator theNorms,
                       const MantidVec::iterator errorSquared) const {
   // if any bins are masked it is normally a small proportion
-  if (m_dataWS->hasMaskedBins(specIndex)) {
+  if (m_dataWS->hasMaskedBins(wsIndex)) {
     // Get a reference to the list of masked bins
-    const MatrixWorkspace::MaskList &mask = m_dataWS->maskedBins(specIndex);
+    const MatrixWorkspace::MaskList &mask = m_dataWS->maskedBins(wsIndex);
     // Now iterate over the list, adjusting the weights for the affected bins
     MatrixWorkspace::MaskList::const_iterator it;
     for (it = mask.begin(); it != mask.end(); ++it) {
@@ -556,7 +556,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
 /** Fills a vector with the Q values calculated from the wavelength bin centers
 * from the input workspace and
 *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
-*  @param[in] specInd the spectrum to calculate
+*  @param[in] wsInd the spectrum to calculate
 *  @param[in] doGravity if to include gravity in the calculation of Q
 *  @param[in] offset index number of the first input bin to use
 *  @param[in] extraLength for gravitational correction
@@ -565,17 +565,17 @@ void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
 *  @throw NotFoundError if the detector associated with the spectrum is not
 * found in the instrument definition
 */
-void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
+void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
                           const size_t offset, MantidVec::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
-  IDetector_const_sptr det = m_dataWS->getDetector(specInd);
+  IDetector_const_sptr det = m_dataWS->getDetector(wsInd);
 
   // wavelengths (lamda) to be converted to Q
-  auto waves = m_dataWS->readX(specInd).cbegin() + offset;
+  auto waves = m_dataWS->readX(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
-  const MantidVec::const_iterator end = m_dataWS->readX(specInd).end() - 1;
+  const MantidVec::const_iterator end = m_dataWS->readX(wsInd).end() - 1;
   if (doGravity) {
     GravitySANSHelper grav(m_dataWS, det, extraLength);
     for (; waves != end; ++Qs, ++waves) {

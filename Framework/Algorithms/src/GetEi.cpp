@@ -108,7 +108,7 @@ void GetEi::exec() {
                       << "%\n";
 
   // get the histograms created by the monitors
-  std::vector<size_t> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
+  std::vector<size_t> indexes = getMonitorWsIndexs(inWS, mon1Spec, mon2Spec);
 
   g_log.information()
       << "Looking for a peak in the first monitor spectrum, spectra index "
@@ -207,7 +207,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
 *  @throw NotFoundError if one of the requested spectrum numbers was not found
 * in the workspace
 */
-std::vector<size_t> GetEi::getMonitorSpecIndexs(
+std::vector<size_t> GetEi::getMonitorWsIndexs(
     API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
     specnum_t specNum2) const { // getting spectra numbers from detector IDs is
                                 // hard because the map works the other way,
@@ -223,7 +223,7 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
                             // workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor spectrum, number "
                   << specNum1 << std::endl;
-    throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum1);
+    throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
   // nowe the second monitor
@@ -233,7 +233,7 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
                                  // workspace, we can't continue from here
     g_log.error() << "Couldn't find the second monitor spectrum, number "
                   << specNum2 << std::endl;
-    throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum2);
+    throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 
   wsInds.push_back(specNumTemp[0]);
@@ -307,17 +307,17 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
 }
 /** Calls CropWorkspace as a Child Algorithm and passes to it the InputWorkspace
 * property
-*  @param specInd :: the index number of the histogram to extract
+*  @param wsInd :: the index number of the histogram to extract
 *  @param start :: the number of the first bin to include (starts counting bins
 * at 0)
 *  @param end :: the number of the last bin to include (starts counting bins at
 * 0)
-*  @throw out_of_range if start, end or specInd are set outside of the vaild
+*  @throw out_of_range if start, end or wsInd are set outside of the valid
 * range for the workspace
 *  @throw runtime_error if the algorithm just falls over
 *  @throw invalid_argument if the input workspace does not have common binning
 */
-void GetEi::extractSpec(int64_t specInd, double start, double end) {
+void GetEi::extractSpec(int64_t wsInd, double start, double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm(
       "CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
   m_fracCompl += CROP;
@@ -326,8 +326,8 @@ void GetEi::extractSpec(int64_t specInd, double start, double end) {
                                               getProperty("InputWorkspace"));
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
-  childAlg->setProperty("StartWorkspaceIndex", specInd);
-  childAlg->setProperty("EndWorkspaceIndex", specInd);
+  childAlg->setProperty("StartWorkspaceIndex", wsInd);
+  childAlg->setProperty("EndWorkspaceIndex", wsInd);
   childAlg->executeAsChildAlg();
 
   m_tempWS = childAlg->getProperty("OutputWorkspace");

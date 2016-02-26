@@ -86,13 +86,13 @@ private:
   void getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
                    specnum_t mon1Spec, double &monitor0Dist,
                    double &monitor1Dist) const;
-  std::vector<size_t> getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS,
+  std::vector<size_t> getMonitorWsIndexs(API::MatrixWorkspace_const_sptr WS,
                                            specnum_t specNum1,
                                            specnum_t specNum2) const;
   double timeToFly(double s, double E_KE) const;
   double getPeakCentre(API::MatrixWorkspace_const_sptr WS,
                        const int64_t monitIn, const double peakTime);
-  void extractSpec(int64_t specInd, double start, double end);
+  void extractSpec(int64_t wsInd, double start, double end);
   void getPeakEstimates(double &height, int64_t &centreInd,
                         double &background) const;
   double findHalfLoc(MantidVec::size_type startInd, const double height,

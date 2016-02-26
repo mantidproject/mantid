@@ -847,7 +847,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     // throw if minD >= maxD
     std::stringstream ess;
     ess << "Stuff went wrong with wkspIndex=" << wi
-        << " specIndex=" << inputW->getSpectrum(wi)->getSpectrumNo();
+        << " specNum=" << inputW->getSpectrum(wi)->getSpectrumNo();
     throw std::runtime_error(ess.str());
   }
 

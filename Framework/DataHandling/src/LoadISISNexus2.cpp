@@ -52,7 +52,7 @@ using std::size_t;
 LoadISISNexus2::LoadISISNexus2()
     : m_filename(), m_instrument_name(), m_samplename(), m_detBlockInfo(),
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
-      m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
+      m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
       m_cppFile() {}
@@ -210,7 +210,7 @@ void LoadISISNexus2::exec() {
   checkOptionalProperties(ExcluedMonitorsSpectra);
   // Fill up m_spectraBlocks
   size_t total_specs =
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_loadBlockInfo);
 
   m_progress = boost::make_shared<API::Progress>(
       this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods);
@@ -332,7 +332,7 @@ void LoadISISNexus2::exec() {
               WorkspaceFactory::Instance().create(period_free_workspace));
 
       m_spectraBlocks.clear();
-      m_specInd2specNum_map.clear();
+      m_wsInd2specNum_map.clear();
       std::vector<int64_t> dummyS1;
       // at the moment here we clear this map to enable possibility to load
       // monitors from the spectra block (wiring table bug).
@@ -343,7 +343,7 @@ void LoadISISNexus2::exec() {
                                     m_monBlockInfo.spectraID_max, dummyS1,
                                     ExcluedMonitorsSpectra);
       // lo
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_monBlockInfo);
 
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
@@ -406,7 +406,7 @@ void LoadISISNexus2::exec() {
   m_tof_data.reset();
   m_spec.reset();
   m_monitors.clear();
-  m_specInd2specNum_map.clear();
+  m_wsInd2specNum_map.clear();
 }
 
 // Function object for remove_if STL algorithm
@@ -588,7 +588,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
 
       specnum_t spec_num = static_cast<specnum_t>(*it);
       if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-        m_specInd2specNum_map.insert(
+        m_wsInd2specNum_map.insert(
             std::pair<int64_t, specnum_t>(ic, spec_num));
         ic++;
       }
@@ -599,7 +599,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
       for (int64_t i = range_min; i < range_max + 1; i++) {
         specnum_t spec_num = static_cast<specnum_t>(i);
         if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-          m_specInd2specNum_map.insert(
+          m_wsInd2specNum_map.insert(
               std::pair<int64_t, specnum_t>(ic, spec_num));
           ic++;
         }
@@ -628,16 +628,16 @@ bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
 */
 size_t LoadISISNexus2::prepareSpectraBlocks(
     std::map<int64_t, std::string> &monitors,
-    const std::map<int64_t, specnum_t> &specInd2specNum_map,
+    const std::map<int64_t, specnum_t> &wsInd2specNum_map,
     const DataBlock &LoadBlock) {
   std::vector<int64_t> includedMonitors;
   // fill in the data block descriptor vector
-  if (!specInd2specNum_map.empty()) {
-    auto itSpec = specInd2specNum_map.begin();
+  if (!wsInd2specNum_map.empty()) {
+    auto itSpec = wsInd2specNum_map.begin();
     int64_t hist = itSpec->second;
     SpectraBlock block(hist, hist, false, "");
     itSpec++;
-    for (; itSpec != specInd2specNum_map.end(); ++itSpec) {
+    for (; itSpec != wsInd2specNum_map.end(); ++itSpec) {
       // try to put all consecutive numbers in same block
 
       auto it_mon = monitors.find(hist);
@@ -659,7 +659,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     }
 
     // push the last block
-    hist = specInd2specNum_map.rbegin()->second;
+    hist = wsInd2specNum_map.rbegin()->second;
     block.last = hist;
 
     auto it_mon = monitors.find(hist);
@@ -670,7 +670,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     }
     m_spectraBlocks.push_back(block);
 
-    return specInd2specNum_map.size();
+    return wsInd2specNum_map.size();
   }
 
   // here we are only if ranges are not supplied
@@ -759,10 +759,10 @@ void LoadISISNexus2::loadPeriodData(
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specnum_t>(it->first));
         auto spec = local_workspace->getSpectrum(hist_index);
-        specnum_t specID = m_specInd2specNum_map.at(hist_index);
+        specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
         spec->setDetectorIDs(
-            m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
-        spec->setSpectrumNo(specID);
+            m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+        spec->setSpectrumNo(specNum);
       }
 
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
@@ -859,11 +859,11 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
       // local_workspace->getAxis(1)->setValue(hist,
       // static_cast<specnum_t>(spec_num));
       auto spec = local_workspace->getSpectrum(hist);
-      specnum_t specID = m_specInd2specNum_map.at(hist);
+      specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
-      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
-      spec->setSpectrumNo(specID);
+      spec->setSpectrumNo(specNum);
     }
 
     ++hist;

@@ -639,27 +639,27 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
                                                  xLength, yLength);
 
     // assign x values - restart at start for all periods
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataX(specIndex);
-      const MantidVec &inputVec = m_workspace->readX(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataX(wsIndex);
+      const MantidVec &inputVec = m_workspace->readX(wsIndex);
       for (size_t index = 0; index < xLength; index++) {
         outputVec[index] = inputVec[index];
       }
     }
 
     // assign y values - use the values offset by the period number
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataY(specIndex);
-      const MantidVec &inputVec = m_workspace->readY(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataY(wsIndex);
+      const MantidVec &inputVec = m_workspace->readY(wsIndex);
       for (size_t index = 0; index < yLength; index++) {
         outputVec[index] = inputVec[(yLength * i) + index];
       }
     }
 
     // assign E values
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      MantidVec &outputVec = wsPeriod->dataE(specIndex);
-      const MantidVec &inputVec = m_workspace->readE(specIndex);
+    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
+      MantidVec &outputVec = wsPeriod->dataE(wsIndex);
+      const MantidVec &inputVec = m_workspace->readE(wsIndex);
       for (size_t index = 0; index < yLength; index++) {
         outputVec[index] = inputVec[(yLength * i) + index];
       }

@@ -354,7 +354,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         @param expectedPeaks :: vector of expected peaks, in dSpacing units
         @param in_wks :: input workspace with the relevant instrument/geometry
-        @param wks_index spectrum index
+        @param wks_index workspace index
 
         Returns:
             a vector of ToF values converted from the input (dSpacing) vector.

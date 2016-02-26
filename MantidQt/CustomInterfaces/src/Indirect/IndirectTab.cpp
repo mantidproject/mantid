@@ -238,15 +238,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param specIndex Index of spectrum to plot
+ * @param wsIndex Workspace Index of spectrum to plot
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int specIndex) {
+void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, specIndex);
+  plotSpectrum(workspaceNames, wsIndex);
 }
 
 /**
@@ -324,10 +324,10 @@ void IndirectTab::plot2D(const QString &workspaceName) {
  * This uses the plotTimeBin function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param specIndex Index of spectrum from each workspace to plot
+ * @param binIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
-                              int specIndex) {
+                              int binIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -336,7 +336,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
   pyInput += "plotTimeBin(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(specIndex);
+  pyInput += QString::number(binIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
@@ -347,15 +347,15 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param specIndex Index of spectrum to plot
+ * @param binIndex Index of spectrum to plot
  */
-void IndirectTab::plotTimeBin(const QString &workspaceName, int specIndex) {
+void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotTimeBin(workspaceNames, specIndex);
+  plotTimeBin(workspaceNames, binIndex);
 }
 
 /**

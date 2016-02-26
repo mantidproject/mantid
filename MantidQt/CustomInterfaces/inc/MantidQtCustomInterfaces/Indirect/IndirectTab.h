@@ -103,7 +103,7 @@ protected:
   /// Plot a spectrum plot with a given ws index
   void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
   /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, int specIndex = 0);
+  void plotSpectrum(const QString &workspaceName, int wsIndex = 0);
 
   /// Plot a spectrum plot with a given spectra range
   void plotSpectrum(const QStringList &workspaceNames, int specStart,
@@ -112,9 +112,9 @@ protected:
   void plotSpectrum(const QString &workspaceName, int specStart, int specEnd);
 
   /// Plot a time bin plot given a list of workspace names
-  void plotTimeBin(const QStringList &workspaceNames, int specIndex = 0);
+  void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
   /// Plot a time bin plot of a given workspace
-  void plotTimeBin(const QString &workspaceName, int specIndex = 0);
+  void plotTimeBin(const QString &workspaceName, int binIndex = 0);
 
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
