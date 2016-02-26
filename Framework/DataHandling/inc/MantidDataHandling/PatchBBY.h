@@ -45,23 +45,19 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DLLExport PatchBBY : public API::Algorithm {
 public:
-  // construction
-  PatchBBY() {}
-  virtual ~PatchBBY() {}
-
   // description
-  virtual int version() const override { return 1; }
-  virtual const std::string name() const override { return "PatchBBY"; }
-  virtual const std::string category() const override { return "DataHandling"; }
-  virtual const std::string summary() const override {
+  int version() const override { return 1; }
+  const std::string name() const override { return "PatchBBY"; }
+  const std::string category() const override { return "DataHandling"; }
+  const std::string summary() const override {
     return "Patches a BilBy data file.";
   }
 
 protected:
   // initialisation
-  virtual void init() override;
+  void init() override;
   // execution
-  virtual void exec() override;
+  void exec() override;
 };
 
 } // DataHandling

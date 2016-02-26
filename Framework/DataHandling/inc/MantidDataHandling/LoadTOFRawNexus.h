@@ -10,7 +10,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 
@@ -114,7 +115,7 @@ protected:
   std::string m_xUnits;
 
   /// Mutex to avoid simultaneous file access
-  Kernel::Mutex m_fileMutex;
+  std::mutex m_fileMutex;
 
   /// Flag for whether or not to assume the data is old SNS raw files;
   bool m_assumeOldFile;

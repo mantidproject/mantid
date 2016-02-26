@@ -6,7 +6,7 @@
 #endif
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/MultiThreaded.h"
+#include <mutex>
 
 namespace Mantid {
 
@@ -64,20 +64,20 @@ public:
   /** Get the mutex object for this Task
    * @return Mutex pointer, or NULL
    */
-  boost::shared_ptr<Mutex> getMutex() { return m_mutex; }
+  boost::shared_ptr<std::mutex> getMutex() { return m_mutex; }
 
   //---------------------------------------------------------------------------------------------
   /** Set the mutex object for this Task
    * @param mutex :: Mutex pointer, or NULL
    */
-  void setMutex(boost::shared_ptr<Mutex> &mutex) { m_mutex = mutex; }
+  void setMutex(boost::shared_ptr<std::mutex> &mutex) { m_mutex = mutex; }
 
 protected:
   /// Cached computational cost for the thread.
   double m_cost;
 
   /// Mutex associated with this task (can be NULL)
-  boost::shared_ptr<Mutex> m_mutex;
+  boost::shared_ptr<std::mutex> m_mutex;
 };
 
 } // namespace Kernel

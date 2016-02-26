@@ -5,20 +5,17 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <cfloat>
 
 #include <functional>
 #include <limits>
 #include <math.h>
-#include <Poco/ScopedLock.h>
 #include <stdexcept>
 
 using std::ostream;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using Mantid::Kernel::Mutex;
 
 namespace Mantid {
 namespace DataObjects {
@@ -1144,7 +1141,7 @@ void EventList::sortTof() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1180,7 +1177,7 @@ void EventList::sortTof2() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1214,7 +1211,7 @@ void EventList::sortTof4() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1251,7 +1248,7 @@ void EventList::sortTimeAtSample(const double &tofFactor,
     return;
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TIMEATSAMPLE_SORT && !forceResort)
     return;
@@ -1283,7 +1280,7 @@ void EventList::sortPulseTime() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIME_SORT)
     return;
@@ -1314,7 +1311,7 @@ void EventList::sortPulseTimeTOF() const {
     return; // already ordered.
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIMETOF_SORT)
     return;

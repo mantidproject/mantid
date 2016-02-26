@@ -114,11 +114,7 @@ void ColorBarWidget::setScale(int type)
 
 bool ColorBarWidget::getLog()
 {
-  if (getScale() == 1)
-  {
-    return true;
-  }
-  else return false;
+  return (getScale() == 1);
 }
 
 // Set exponent value for power scale

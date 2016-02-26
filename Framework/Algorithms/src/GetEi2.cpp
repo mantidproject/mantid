@@ -203,10 +203,8 @@ double GetEi2::calculateEi(const double initial_guess) {
   // Covert spectrum numbers to workspace indices
   std::vector<specid_t> spec_nums(2, mon1);
   spec_nums[1] = mon2;
-  std::vector<size_t> mon_indices;
-  mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
-  m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);
+  auto mon_indices = m_input_ws->getIndicesFromSpectra(spec_nums);
 
   if (mon_indices.size() != 2) {
     g_log.error() << "Error retrieving monitor spectra from input workspace. "

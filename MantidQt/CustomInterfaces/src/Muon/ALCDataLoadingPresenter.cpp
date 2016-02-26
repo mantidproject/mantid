@@ -113,7 +113,7 @@ namespace CustomInterfaces
     Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
 
     // Check flag for changes
-    if (m_directoryChanged.load() == true) {
+    if (m_directoryChanged.load()) {
       // Most recent file in directory
       Poco::Path filePath(m_view->firstRun());
       std::string lastFile = getMostRecentFile(filePath.parent().toString());

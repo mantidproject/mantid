@@ -335,10 +335,8 @@ void EQSANSLoad::moveToBeamCenter() {
   // default beam center
   if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.information() << "Setting beam center to ["
-                        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(m_center_y, 1) << "]"
-                        << std::endl;
+    g_log.information() << "Setting beam center to [" << m_center_x << ", "
+                        << m_center_y << "]" << std::endl;
     return;
   }
 
@@ -380,8 +378,8 @@ void EQSANSLoad::moveToBeamCenter() {
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
   m_output_message += "   Beam center: " +
-                      Poco::NumberFormatter::format(m_center_x, 1) + ", " +
-                      Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+                      Poco::NumberFormatter::format(m_center_x) + ", " +
+                      Poco::NumberFormatter::format(m_center_y) + "\n";
 }
 
 /// Read a config file
@@ -430,8 +428,8 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
   dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut,
                                    "microsecond", true);
   m_output_message +=
-      "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1) +
-      " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) +
+      "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut) +
+      " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut) +
       " microsec\n";
 
   if (m_moderator_position != 0) {
@@ -638,7 +636,7 @@ void EQSANSLoad::exec() {
     g_log.information() << "Moving moderator to " << m_moderator_position
                         << std::endl;
     m_output_message += "   Moderator position: " +
-                        Poco::NumberFormatter::format(m_moderator_position, 3) +
+                        Poco::NumberFormatter::format(m_moderator_position) +
                         " m\n";
     mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
     mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
@@ -721,8 +719,8 @@ void EQSANSLoad::exec() {
                                      true);
     wl_combined_max = wl_max;
     m_output_message += "   Wavelength range: " +
-                        Poco::NumberFormatter::format(wl_min, 1) + " - " +
-                        Poco::NumberFormatter::format(wl_max, 1);
+                        Poco::NumberFormatter::format(wl_min) + " - " +
+                        Poco::NumberFormatter::format(wl_max);
     if (frame_skipping) {
       const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
       const double wl_max2 = tofAlg->getProperty("WavelengthMaxFrame2");
@@ -731,8 +729,8 @@ void EQSANSLoad::exec() {
                                        "Angstrom", true);
       dataWS->mutableRun().addProperty("wavelength_max_frame2", wl_max2,
                                        "Angstrom", true);
-      m_output_message += " and " + Poco::NumberFormatter::format(wl_min2, 1) +
-                          " - " + Poco::NumberFormatter::format(wl_max2, 1) +
+      m_output_message += " and " + Poco::NumberFormatter::format(wl_min2) +
+                          " - " + Poco::NumberFormatter::format(wl_max2) +
                           " Angstrom\n";
     } else
       m_output_message += " Angstrom\n";
@@ -771,9 +769,13 @@ void EQSANSLoad::exec() {
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");
   const double wl_step = getProperty("WavelengthStep");
-  std::string params = Poco::NumberFormatter::format(wl_min, 2) + "," +
-                       Poco::NumberFormatter::format(wl_step, 2) + "," +
-                       Poco::NumberFormatter::format(wl_combined_max, 2);
+
+  const double wl_min_rounded = round(wl_min * 100.0) / 100.0;
+  const double wl_max_rounded = round(wl_combined_max * 100.0) / 100.0;
+  std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," +
+                       Poco::NumberFormatter::format(wl_step) + "," +
+                       Poco::NumberFormatter::format(wl_max_rounded, 2);
+  g_log.information() << "Rebin parameters: " << params << std::endl;
   IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents)

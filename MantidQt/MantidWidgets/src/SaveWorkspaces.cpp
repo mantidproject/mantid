@@ -87,8 +87,8 @@ void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne)
 void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const QCheckBox * const, QString> & defSavs)
 {
   m_workspaces = new QListWidget();
-  std::set<std::string> ws = AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator it = ws.begin(), wsEnd = ws.end();
+  auto ws = AnalysisDataService::Instance().getObjectNames();
+  auto it = ws.begin(), wsEnd = ws.end();
   for( ; it != wsEnd; ++it)
   {
     Workspace *wksp =  FrameworkManager::Instance().getWorkspace(*it);

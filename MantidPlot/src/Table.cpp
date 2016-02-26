@@ -50,11 +50,10 @@
 #include <QShortcut>
 #include <QProgressDialog>
 #include <QFile>
+#include <QHeaderView>
+#include <QModelIndex>
 
-#include <q3paintdevicemetrics.h>
-#include <q3dragobject.h>
-#include <Q3TableSelection>
-#include <Q3MemArray>
+#include <QVector>
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
@@ -81,15 +80,8 @@ void Table::init(int rows, int cols)
   d_numeric_precision = 13;
 
   d_table = new MyTable(rows, cols, this, "table");
-  d_table->setSelectionMode (Q3Table::Single);
-  d_table->setRowMovingEnabled(true);
-  d_table->setColumnMovingEnabled(true);
+  d_table->setSelectionMode (QAbstractItemView::ExtendedSelection);
   d_table->setCurrentCell(-1, -1);
-
-  connect(d_table->verticalHeader(), SIGNAL(indexChange(int, int, int)),
-      this, SLOT(notifyChanges()));
-  connect(d_table->horizontalHeader(), SIGNAL(indexChange(int, int, int)),
-      this, SLOT(moveColumn(int, int, int)));
 
   setFocusPolicy(Qt::StrongFocus);
   //setFocus();
@@ -103,11 +95,10 @@ void Table::init(int rows, int cols)
     col_plot_type << Y;
   }
 
-  Q3Header* head=(Q3Header*)d_table->horizontalHeader();
+  auto head=d_table->horizontalHeader();
   head->setMouseTracking(true);
-  head->setResizeEnabled(true);
   head->installEventFilter(this);
-  connect(head, SIGNAL(sizeChange(int, int, int)), this, SLOT(colWidthModified(int, int, int)));
+  connect(head, SIGNAL(sectionResized(int, int, int)), this, SLOT(colWidthModified(int, int, int)));
 
   col_plot_type[0] = X;
   setHeaderColType();
@@ -118,7 +109,7 @@ void Table::init(int rows, int cols)
     h=11*(d_table->verticalHeader())->sectionSize(0);
   setGeometry(50, 50, w + 45, h);
 
-  d_table->verticalHeader()->setResizeEnabled(false);
+  d_table->verticalHeader()->setResizeMode(QHeaderView::Fixed);
   d_table->verticalHeader()->installEventFilter(this);
 
   d_table->installEventFilter(this);
@@ -131,7 +122,8 @@ void Table::init(int rows, int cols)
   QShortcut *accelAll = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_A), this);
   connect(accelAll, SIGNAL(activated()), this, SLOT(selectAllTable()));
 
-  connect(d_table, SIGNAL(valueChanged(int, int)), this, SLOT(cellEdited(int, int)));
+  connect(d_table, SIGNAL(cellChanged(int, int)), this, SLOT(cellEdited(int, int)));
+  connect(d_table, SIGNAL(itemSelectionChanged()), this, SLOT(recordSelection()));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
 }
@@ -167,9 +159,6 @@ void Table::setTextColor(const QColor& col)
 void Table::setTextFont(const QFont& fnt)
 {
   d_table->setFont (fnt);
-  QFontMetrics fm(fnt);
-  int lm = fm.width( QString::number(10*d_table->numRows()));
-  d_table->setLeftMargin( lm );
 }
 
 const QFont & Table::getTextFont()
@@ -219,15 +208,14 @@ void Table::print(const QString& fileName)
   if ( !p.begin(&printer ) )
     return; // paint on printer
 
-  Q3PaintDeviceMetrics metrics( p.device() );
-  int dpiy = metrics.logicalDpiY();
+  int dpiy = p.device()->logicalDpiY();
   const int margin = (int) ( (1/2.54)*dpiy ); // 2 cm margins
 
-  Q3Header *hHeader = d_table->horizontalHeader();
-  Q3Header *vHeader = d_table->verticalHeader();
+  auto *hHeader = d_table->horizontalHeader();
+  auto *vHeader = d_table->verticalHeader();
 
-  int rows=d_table->numRows();
-  int cols=d_table->numCols();
+  int rows=d_table->rowCount();
+  int cols=d_table->columnCount();
   int height=margin;
   int i,vertHeaderWidth=vHeader->width();
   int right = margin + vertHeaderWidth;
@@ -235,7 +223,8 @@ void Table::print(const QString& fileName)
   // print header
   p.setFont(hHeader->font());
   QRect br;
-  br=p.boundingRect(br,Qt::AlignCenter,	hHeader->label(0));
+  auto headerLabel = hHeader->model()->headerData(0, Qt::Horizontal).asString();
+  br=p.boundingRect(br,Qt::AlignCenter,	headerLabel);
   p.drawLine(right,height,right,height+br.height());
   QRect tr(br);
 
@@ -245,11 +234,12 @@ void Table::print(const QString& fileName)
     tr.setTopLeft(QPoint(right,height));
     tr.setWidth(w);
     tr.setHeight(br.height());
-    p.drawText(tr,Qt::AlignCenter,hHeader->label(i),-1);
+    auto headerLabel = hHeader->model()->headerData(i, Qt::Horizontal).asString();
+    p.drawText(tr,Qt::AlignCenter,headerLabel,-1);
     right+=w;
     p.drawLine(right,height,right,height+tr.height());
 
-    if (right >= metrics.width()-2*margin )
+    if (right >= p.device()->width()-2*margin )
       break;
   }
   p.drawLine(margin + vertHeaderWidth, height, right-1, height);//first horizontal line
@@ -260,7 +250,8 @@ void Table::print(const QString& fileName)
   for (i=0;i<rows;i++)
   {
     right = margin;
-    QString text = vHeader->label(i)+"\t";
+    auto headerLabel = vHeader->model()->headerData(i, Qt::Vertical).asString();
+    QString text = headerLabel + "\t";
     tr = p.boundingRect(tr,Qt::AlignCenter,text);
     p.drawLine(right,height,right,height+tr.height());
 
@@ -283,13 +274,13 @@ void Table::print(const QString& fileName)
       right+=w;
       p.drawLine(right,height,right,height+tr.height());
 
-      if (right >= metrics.width()-2*margin )
+      if (right >= p.device()->width()-2*margin )
         break;
     }
     height+=br.height();
     p.drawLine(margin,height,right-1,height);
 
-    if (height >= metrics.height()-margin )
+    if (height >= p.device()->height()-margin )
     {
       printer.newPage();
       height=margin;
@@ -342,7 +333,7 @@ int Table::colX(int col)
     if (col_plot_type[i] == X)
       return i;
   }
-  for(i=col+1; i<(int)d_table->numCols(); i++)
+  for(i=col+1; i<(int)d_table->columnCount(); i++)
   {
     if (col_plot_type[i] == X)
       return i;
@@ -358,7 +349,7 @@ int Table::colY(int col)
     if (col_plot_type[i] == Y)
       return i;
   }
-  for(i=col+1; i<(int)d_table->numCols(); i++)
+  for(i=col+1; i<(int)d_table->columnCount(); i++)
   {
     if (col_plot_type[i] == Y)
       return i;
@@ -369,7 +360,7 @@ int Table::colY(int col)
 void Table::setPlotDesignation(PlotDesignation pd, bool rightColumns)
 {
   if (rightColumns){
-    int cols = d_table->numCols();
+    int cols = d_table->columnCount();
     for (int i = selectedCol; i<cols; i++){
       col_plot_type[i] = pd;
       if (pd == Label)
@@ -416,7 +407,7 @@ void Table::setColPlotDesignation(int col, int pd)
     pd = None;
   }
 
-  if (col < 0 || col >= d_table->numCols() || col_plot_type[col] == pd)
+  if (col < 0 || col >= d_table->columnCount() || col_plot_type[col] == pd)
     return;
 
   col_plot_type[col] = pd;
@@ -475,7 +466,7 @@ int Table::columnWidth(int col)
 QStringList Table::columnWidths()
 {
   QStringList widths;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
     widths<<QString::number(d_table->columnWidth(i));
 
   return widths;
@@ -524,12 +515,13 @@ void Table::setCommands(const QString& com)
 
 bool Table::calculate()
 {
-  Q3TableSelection sel = getSelection();
-  bool success = true;
-  for (int col=sel.leftCol(); col<=sel.rightCol(); col++)
-    if (!calculate(col, sel.topRow(), sel.bottomRow()))
-      success = false;
-  return success;
+  //Q3TableSelection sel = getSelection();
+  //bool success = true;
+  //for (int col=sel.leftCol(); col<=sel.rightCol(); col++)
+  //  if (!calculate(col, sel.topRow(), sel.bottomRow()))
+  //    success = false;
+  //return success;
+  return false;
 }
 
 bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChanges)
@@ -599,7 +591,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
 
 bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, bool notifyChanges)
 {
-  if (col < 0 || col >= d_table->numCols())
+  if (col < 0 || col >= d_table->columnCount())
     return false;
 
   if (d_table->isColumnReadOnly(col)){
@@ -684,25 +676,12 @@ void Table::updateValues(Table* t, const QString& columnName)
   }
 }
 
-Q3TableSelection Table::getSelection()
-{
-  Q3TableSelection sel;
-  if (d_table->numSelections() == 0){
-    sel.init(d_table->currentRow(), d_table->currentColumn());
-    sel.expandTo(d_table->currentRow(), d_table->currentColumn());
-  } else if (d_table->currentSelection()>0)
-    sel = d_table->selection(d_table->currentSelection());
-  else
-    sel = d_table->selection(0);
-  return sel;
-}
-
 std::string Table::saveToProject(ApplicationWindow* app)
 {
   TSVSerialiser tsv;
 
   tsv.writeRaw("<table>");
-  tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate();
+  tsv.writeLine(objectName().toStdString()) << d_table->rowCount() << d_table->columnCount() << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   //If you're looking for most of the table's saving routine, it's in saveTableMetadata().
@@ -714,8 +693,8 @@ std::string Table::saveToProject(ApplicationWindow* app)
   //Save text
   {
     QString text;
-    int cols = d_table->numCols();
-    int rows = d_table->numRows();
+    int cols = d_table->columnCount();
+    int rows = d_table->rowCount();
     for(int i = 0; i < rows; i++)
     {
       if(isEmptyRow(i))
@@ -743,7 +722,7 @@ std::string Table::saveToProject(ApplicationWindow* app)
 int Table::firstXCol()
 {
   int xcol = -1;
-  for (int j=0; j<d_table->numCols(); j++)
+  for (int j=0; j<d_table->columnCount(); j++)
   {
     if (col_plot_type[j] == X)
       return j;
@@ -753,7 +732,7 @@ int Table::firstXCol()
 
 void Table::setColComment(int col, const QString& s)
 {
-  if (col < 0 || col >= d_table->numCols())
+  if (col < 0 || col >= d_table->columnCount())
     return;
 
   if (comments[col] == s)
@@ -767,7 +746,7 @@ void Table::setColComment(int col, const QString& s)
 
 void Table::setColumnWidth(int width, bool allCols)
 {
-  int cols=d_table->numCols();
+  int cols=d_table->columnCount();
   if (allCols)
   {
     for (int i=0;i<cols;i++)
@@ -805,7 +784,7 @@ QString Table::colName(int col)
 
 void Table::setColName(int col, const QString& text, bool enumerateRight)
 {
-  if (text.isEmpty() || col<0 || col >= d_table->numCols())
+  if (text.isEmpty() || col<0 || col >= d_table->columnCount())
     return;
 
   if (col_label[col] == text && !enumerateRight)
@@ -815,7 +794,7 @@ void Table::setColName(int col, const QString& text, bool enumerateRight)
   QString oldLabel = col_label[col];
   int cols = col + 1;
   if (enumerateRight)
-    cols = (int)d_table->numCols();
+    cols = (int)d_table->columnCount();
 
   int n = 1;
   for (int i = col; i<cols; i++){
@@ -851,7 +830,7 @@ void Table::setColName(int col, const QString& text, bool enumerateRight)
 QStringList Table::selectedColumns()
 {
   QStringList names;
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if(d_table->isColumnSelected (i, true))
       names << QString(name()) + "_" + col_label[i];
   }
@@ -861,7 +840,7 @@ QStringList Table::selectedColumns()
 QStringList Table::YColumns()
 {
   QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
   {
     if(col_plot_type[i] == Y)
       names<<QString(name())+"_"+col_label[i];
@@ -872,7 +851,7 @@ QStringList Table::YColumns()
 QStringList Table::selectedYColumns()
 {
   QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
   {
     if(d_table->isColumnSelected (i) && col_plot_type[i] == Y)
       names<<QString(name())+"_"+col_label[i];
@@ -883,7 +862,7 @@ QStringList Table::selectedYColumns()
 QStringList Table::selectedXColumns()
 {
   QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
   {
     if(d_table->isColumnSelected (i) && col_plot_type[i] == X)
       names<<QString(name())+"_"+col_label[i];
@@ -894,13 +873,13 @@ QStringList Table::selectedXColumns()
 QStringList Table::drawableColumnSelection()
 {
   QStringList names;
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
   {
     if(d_table->isColumnSelected (i) && col_plot_type[i] == Y)
       names << QString(objectName()) + "_" + col_label[i];
   }
 
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
   {
     if(d_table->isColumnSelected (i) &&
         (col_plot_type[i] == yErr || col_plot_type[i] == xErr || col_plot_type[i] == Label))
@@ -912,7 +891,7 @@ QStringList Table::drawableColumnSelection()
 QStringList Table::selectedYLabels()
 {
   QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
   {
     if(d_table->isColumnSelected (i) && col_plot_type[i] == Y)
       names<<col_label[i];
@@ -923,7 +902,7 @@ QStringList Table::selectedYLabels()
 QStringList Table::columnsList()
 {
   QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
     names<<QString(objectName())+"_"+col_label[i];
 
   return names;
@@ -931,7 +910,7 @@ QStringList Table::columnsList()
 
 int Table::firstSelectedColumn()
 {
-  for (int i=0;i<d_table->numCols();i++)
+  for (int i=0;i<d_table->columnCount();i++)
   {
     if(d_table->isColumnSelected (i,true))
       return i;
@@ -942,7 +921,7 @@ int Table::firstSelectedColumn()
 int Table::numSelectedRows()
 {
   int r=0;
-  for (int i=0;i<d_table->numRows();i++)
+  for (int i=0;i<d_table->rowCount();i++)
   {
     if(d_table->isRowSelected (i,true))
       r++;
@@ -953,7 +932,7 @@ int Table::numSelectedRows()
 int Table::selectedColsNumber()
 {
   int c=0;
-  for (int i=0;i<d_table->numCols(); i++){
+  for (int i=0;i<d_table->columnCount(); i++){
     if(d_table->isColumnSelected (i,true))
       c++;
   }
@@ -962,8 +941,8 @@ int Table::selectedColsNumber()
 
 QVarLengthArray<double> Table::col(int ycol)
 {
-  int rows=d_table->numRows();
-  int cols=d_table->numCols();
+  int rows=d_table->rowCount();
+  int cols=d_table->columnCount();
   QVarLengthArray<double> Y(rows);
   if (ycol<=cols)
   {
@@ -979,7 +958,7 @@ void Table::insertCols(int start, int count)
     start = 0;
 
   int max = 0;
-  for (int i = 0; i<d_table->numCols(); i++){
+  for (int i = 0; i<d_table->columnCount(); i++){
     if (!col_label[i].contains(QRegExp ("\\D"))){
       int id = col_label[i].toInt();
       if (id > max)
@@ -1055,7 +1034,7 @@ void Table::insertRows(int atRow, int num)
 void Table::addCol(PlotDesignation pd)
 {
   d_table->clearSelection();
-  int index, max=0, cols=d_table->numCols();
+  int index, max=0, cols=d_table->columnCount();
   for (int i=0; i<cols; i++){
     if (!col_label[i].contains(QRegExp ("\\D"))){
       index = col_label[i].toInt();
@@ -1079,7 +1058,7 @@ void Table::addCol(PlotDesignation pd)
 
 void Table::addColumns(int c)
 {
-  int max=0, cols=d_table->numCols();
+  int max=0, cols=d_table->columnCount();
   for (int i=0; i<cols; i++){
     if (!col_label[i].contains(QRegExp ("\\D"))){
       int index=col_label[i].toInt();
@@ -1104,7 +1083,7 @@ void Table::clearCol()
   if (d_table->isColumnReadOnly(selectedCol))
     return;
 
-  for (int i=0; i<d_table->numRows(); i++){
+  for (int i=0; i<d_table->rowCount(); i++){
     if (d_table->isSelected (i, selectedCol))
       d_table->setText(i, selectedCol, "");
   }
@@ -1114,13 +1093,15 @@ void Table::clearCol()
 
 void Table::deleteSelectedRows()
 {
-  Q3TableSelection sel = d_table->selection(0);
-  deleteRows(sel.topRow() + 1, sel.bottomRow() + 1);
+  auto topRow = d_table->topSelectedRow();
+  auto bottomRow = d_table->bottomSelectedRow();
+  if (topRow < 0 || bottomRow < 0) return;
+  deleteRows(topRow + 1, bottomRow + 1);
 }
 
 void Table::deleteRows(int startRow, int endRow)
 {
-  for(int i=0; i<d_table->numCols(); i++){
+  for(int i=0; i<d_table->columnCount(); i++){
     if (d_table->isColumnReadOnly(i)){
       QMessageBox::warning(this, tr("MantidPlot - Error"),
           tr("The table '%1' contains read-only columns! Operation aborted!").arg(objectName()));
@@ -1135,11 +1116,11 @@ void Table::deleteRows(int startRow, int endRow)
   end--;
   if (start < 0)
     start = 0;
-  if (end >= d_table->numRows())
-    end = d_table->numRows() - 1;
+  if (end >= d_table->rowCount())
+    end = d_table->rowCount() - 1;
 
   int rows = abs(end - start) + 1;
-  Q3MemArray<int> rowsToDelete(rows);
+  QVector<int> rowsToDelete(rows);
   for (int i=0; i<rows; i++)
     rowsToDelete[i] = start + i;
 
@@ -1155,7 +1136,7 @@ void Table::cutSelection()
 
 void Table::selectAllTable()
 {
-  d_table->addSelection (Q3TableSelection( 0, 0, d_table->numRows(), d_table->numCols() ));
+  d_table->selectAll();
 }
 
 void Table::deselect()
@@ -1187,13 +1168,12 @@ void Table::clearSelection()
       clearCol();
     }
   } else {
-    Q3TableSelection sel=d_table->selection(0);
-    int top=sel.topRow();
-    int bottom=sel.bottomRow();
-    int left=sel.leftCol();
-    int right=sel.rightCol();
+    int top=d_table->topSelectedRow();
+    int bottom=d_table->bottomSelectedRow();
+    int left=d_table->leftSelectedColumn();
+    int right=d_table->rightSelectedColumn();
 
-    if (sel.isEmpty ()){
+    if (!d_table->hasSelection()){
       int col = d_table->currentColumn();
       QString name = colName(col);
       if (d_table->isColumnReadOnly(col)){
@@ -1236,8 +1216,8 @@ void Table::clearSelection()
 void Table::copySelection()
 {
   QString text;
-  int rows = d_table->numRows();
-  int cols = d_table->numCols();
+  int rows = d_table->rowCount();
+  int cols = d_table->columnCount();
   QString eol = applicationWindow()->endOfLine();
 
   QVarLengthArray<int> selection(1);
@@ -1256,13 +1236,21 @@ void Table::copySelection()
       text += d_table->text(i, selection[c-1]) + eol;
     }
   } else {
-    Q3TableSelection sel = d_table->selection(0);
-    int right = sel.rightCol();
-    int bottom = sel.bottomRow();
-    for (int i = sel.topRow(); i<=bottom; i++){
-      for (int j = sel.leftCol(); j<right; j++)
-        text += d_table->text(i, j) + "\t";
-      text += d_table->text(i, right) + eol;
+
+    if (d_table->hasSelection()) {
+      int right = d_table->rightSelectedColumn();
+      int bottom = d_table->bottomSelectedRow();
+      int top = d_table->topSelectedRow();
+      int left = d_table->leftSelectedColumn();
+      if (right == left && bottom == top) {
+        text = d_table->text(top, left);
+      } else {
+        for (int i = top; i<=bottom; i++){
+          for (int j = left; j<right; j++)
+            text += d_table->text(i, j) + "\t";
+          text += d_table->text(i, right) + eol;
+        }
+      }
     }
   }
 
@@ -1290,10 +1278,17 @@ void Table::pasteSelection()
   }
 
   int top, left, firstCol = firstSelectedColumn();
-  Q3TableSelection sel = d_table->selection(0);
-  if (!sel.isEmpty()){// not columns but only cells are selected
-    top = sel.topRow();
-    left = sel.leftCol();
+  auto sel = d_table->selectionModel();
+  if (sel->hasSelection()){// not columns but only cells are selected
+    QModelIndex parentIndex;
+    top = 0;
+    while(!sel->rowIntersectsSelection(top, parentIndex)) {
+      ++top;
+    }
+    left = 0;
+    while(!sel->columnIntersectsSelection(left, parentIndex)) {
+      ++left;
+    }
   } else if(cols == 1 && rows == 1){
     top = d_table->currentRow();
     left = d_table->currentColumn();
@@ -1304,10 +1299,10 @@ void Table::pasteSelection()
       left = firstCol;
   }
 
-  if (top + rows > d_table->numRows())
-    d_table->setNumRows(top + rows);
-  if (left + cols > d_table->numCols()){
-    addColumns(left + cols - d_table->numCols());
+  if (top + rows > d_table->rowCount())
+    d_table->setRowCount(top + rows);
+  if (left + cols > d_table->columnCount()){
+    addColumns(left + cols - d_table->columnCount());
     setHeaderColType();
   }
 
@@ -1435,7 +1430,7 @@ void Table::normalizeSelection()
 void Table::normalize()
 {
   QStringList lstReadOnly;
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (d_table->isColumnReadOnly(i))
       lstReadOnly << col_label[i];
   }
@@ -1445,7 +1440,7 @@ void Table::normalize()
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
   }
 
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
     normalizeCol(i);
 
   emit modifiedWindow(this);
@@ -1457,7 +1452,7 @@ void Table::normalizeCol(int col)
   if (d_table->isColumnReadOnly(col) || colTypes[col] == Table::Text)
     return;
 
-  int rows = d_table->numRows();
+  int rows = d_table->rowCount();
   gsl_vector *data = gsl_vector_alloc(rows);
   for (int i=0; i<rows; i++)
     gsl_vector_set(data, i, cell(i, col));
@@ -1530,7 +1525,7 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
       return;
     }
 
-    int rows=d_table->numRows();
+    int rows=d_table->rowCount();
     int non_empty_cells = 0;
     QVarLengthArray<int> valid_cell(rows);
     QVarLengthArray<double> data_double(rows);
@@ -1588,7 +1583,7 @@ void Table::sortColumn(int col, int order)
   if (d_table->isColumnReadOnly(col))
     return;
 
-  int rows=d_table->numRows();
+  int rows=d_table->rowCount();
   int non_empty_cells = 0;
   QVarLengthArray<int> valid_cell(rows);
   QVarLengthArray<double> r(rows);
@@ -1652,17 +1647,17 @@ void Table::sortColDesc()
 
 int Table::numRows()
 {
-  return d_table->numRows();
+  return d_table->rowCount();
 }
 
 int Table::numCols()
 {
-  return d_table->numCols();
+  return d_table->columnCount();
 }
 
 bool Table::isEmptyRow(int row)
 {
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
   {
     QString text = d_table->text(row,i);
     if (!text.isEmpty())
@@ -1673,7 +1668,7 @@ bool Table::isEmptyRow(int row)
 
 bool Table::isEmptyColumn(int col)
 {
-  for (int i=0; i<d_table->numRows(); i++)
+  for (int i=0; i<d_table->rowCount(); i++)
   {
     QString text=d_table->text(i,col);
     if (!text.isEmpty())
@@ -1707,25 +1702,25 @@ void Table::setText (int row, int col, const QString & text )
 
 void Table::saveToMemory()
 {
-  d_saved_cells = new double* [d_table->numCols()];
-  for ( int i = 0; i < d_table->numCols(); ++i)
-    d_saved_cells[i] = new double [d_table->numRows()];
+  d_saved_cells = new double* [d_table->columnCount()];
+  for ( int i = 0; i < d_table->columnCount(); ++i)
+    d_saved_cells[i] = new double [d_table->rowCount()];
 
-  for (int col = 0; col<d_table->numCols(); col++){// initialize the matrix to zero
-    for (int row=0; row<d_table->numRows(); row++)
+  for (int col = 0; col<d_table->columnCount(); col++){// initialize the matrix to zero
+    for (int row=0; row<d_table->rowCount(); row++)
       d_saved_cells[col][row] = 0.0;}
 
-  for (int col = 0; col<d_table->numCols(); col++){
+  for (int col = 0; col<d_table->columnCount(); col++){
     if (colTypes[col] == Time){
       QTime ref = QTime(0, 0);
-      for (int row=0; row<d_table->numRows(); row++){
+      for (int row=0; row<d_table->rowCount(); row++){
         QTime t = QTime::fromString(d_table->text(row, col), col_format[col]);
         d_saved_cells[col][row] = ref.msecsTo(t);
       }
     }
     else if (colTypes[col] == Date){
       QTime ref = QTime(0, 0);
-      for (int row=0; row<d_table->numRows(); row++){
+      for (int row=0; row<d_table->rowCount(); row++){
         QDateTime dt = QDateTime::fromString(d_table->text(row, col), col_format[col]);
         d_saved_cells[col][row] = dt.date().toJulianDay() - 1 + (double)ref.msecsTo(dt.time())/864.0e5;
       }
@@ -1733,10 +1728,10 @@ void Table::saveToMemory()
   }
 
   bool wrongLocale = false;
-  for (int col = 0; col<d_table->numCols(); col++){
+  for (int col = 0; col<d_table->columnCount(); col++){
     if (colTypes[col] == Numeric){
       bool ok = false;
-      for (int row=0; row<d_table->numRows(); row++){
+      for (int row=0; row<d_table->rowCount(); row++){
         if (!d_table->text(row, col).isEmpty()){
           d_saved_cells[col][row] = locale().toDouble(d_table->text(row, col), &ok);
           if (!ok){
@@ -1752,10 +1747,10 @@ void Table::saveToMemory()
 
   if (wrongLocale){// fall back to C locale
     wrongLocale = false;
-  for (int col = 0; col<d_table->numCols(); col++){
+  for (int col = 0; col<d_table->columnCount(); col++){
     if (colTypes[col] == Numeric){
       bool ok = false;
-      for (int row=0; row<d_table->numRows(); row++){
+      for (int row=0; row<d_table->rowCount(); row++){
         if (!d_table->text(row, col).isEmpty()){
           d_saved_cells[col][row] = QLocale::c().toDouble(d_table->text(row, col), &ok);
           if (!ok){
@@ -1771,10 +1766,10 @@ void Table::saveToMemory()
   }
   if (wrongLocale){// fall back to German locale
     wrongLocale = false;
-    for (int col = 0; col<d_table->numCols(); col++){
+    for (int col = 0; col<d_table->columnCount(); col++){
       if (colTypes[col] == Numeric){
         bool ok = false;
-        for (int row=0; row<d_table->numRows(); row++){
+        for (int row=0; row<d_table->rowCount(); row++){
           if (!d_table->text(row, col).isEmpty()){
             d_saved_cells[col][row] = QLocale(QLocale::German).toDouble(d_table->text(row, col), &ok);
             if (!ok){
@@ -1790,10 +1785,10 @@ void Table::saveToMemory()
   }
   if (wrongLocale){// fall back to French locale
     wrongLocale = false;
-    for (int col = 0; col<d_table->numCols(); col++){
+    for (int col = 0; col<d_table->columnCount(); col++){
       if (colTypes[col] == Numeric){
         bool ok = false;
-        for (int row=0; row<d_table->numRows(); row++){
+        for (int row=0; row<d_table->rowCount(); row++){
           if (!d_table->text(row, col).isEmpty()){
             d_saved_cells[col][row] = QLocale(QLocale::French).toDouble(d_table->text(row, col), &ok);
             if (!ok){
@@ -1811,7 +1806,7 @@ void Table::saveToMemory()
 
 void Table::freeMemory()
 {
-  for ( int i = 0; i < d_table->numCols(); i++)
+  for ( int i = 0; i < d_table->columnCount(); i++)
     delete[] d_saved_cells[i];
 
   delete[] d_saved_cells;
@@ -1840,7 +1835,7 @@ void Table::setColNumericFormat(int f, int prec, int col, bool updateCells)
     return;
 
   char format = 'g';
-  for (int i=0; i<d_table->numRows(); i++) {
+  for (int i=0; i<d_table->rowCount(); i++) {
     QString t = text(i, col);
     if (!t.isEmpty()) {
       if (!f)
@@ -1850,10 +1845,13 @@ void Table::setColNumericFormat(int f, int prec, int col, bool updateCells)
       else if (f == 2)
         format = 'e';
 
-      if (d_saved_cells)
+      d_table->blockSignals(true);
+      if (d_saved_cells) {
         setText(i, col, locale().toString(d_saved_cells[col][i], format, prec));
-      else
+      } else {
         setText(i, col, locale().toString(locale().toDouble(t), format, prec));
+      }
+      d_table->blockSignals(false);
     }
   }
 }
@@ -1865,7 +1863,7 @@ bool Table::setDateFormat(const QString& format, int col, bool updateCells)
 
   bool first_time = false;
   if (updateCells){
-    for (int i=0; i<d_table->numRows(); i++){
+    for (int i=0; i<d_table->rowCount(); i++){
       QString s = d_table->text(i,col);
       if (!s.isEmpty()){
         QDateTime d = QDateTime::fromString (s, format);
@@ -1890,7 +1888,7 @@ bool Table::setDateFormat(const QString& format, int col, bool updateCells)
   col_format[col] = format;
   QTime ref = QTime(0, 0);
   if (first_time){//update d_saved_cells in case the user changes the time format before pressing OK in the column dialog
-    for (int i=0; i<d_table->numRows(); i++){
+    for (int i=0; i<d_table->rowCount(); i++){
       QDateTime dt = QDateTime::fromString(d_table->text(i, col), format);
       d_saved_cells[col][i] = dt.date().toJulianDay() - 1 + (double)ref.msecsTo(dt.time())/864.0e5;
     }
@@ -1906,7 +1904,7 @@ bool Table::setTimeFormat(const QString& format, int col, bool updateCells)
   QTime ref = QTime(0, 0);
   bool first_time = false;
   if (updateCells){
-    for (int i=0; i<d_table->numRows(); i++){
+    for (int i=0; i<d_table->rowCount(); i++){
       QString s = d_table->text(i,col);
       if (!s.isEmpty()){
         QTime t = QTime::fromString (s, format);
@@ -1932,7 +1930,7 @@ bool Table::setTimeFormat(const QString& format, int col, bool updateCells)
   colTypes[col] = Time;
   col_format[col] = format;
   if (first_time){//update d_saved_cells in case the user changes the time format before pressing OK in the column dialog
-    for (int i=0; i<d_table->numRows(); i++){
+    for (int i=0; i<d_table->rowCount(); i++){
       QTime t = QTime::fromString(d_table->text(i, col), format);
       d_saved_cells[col][i] = ref.msecsTo(t);
     }
@@ -2024,7 +2022,7 @@ void Table::setRandomValues()
 
   time_t tmp;
   srand((unsigned int)(time(&tmp)));
-  int rows=d_table->numRows();
+  int rows=d_table->rowCount();
   for (int j=0; j<(int) list.count(); j++){
     QString name=list[j];
     selectedCol=colIndex(name);
@@ -2122,14 +2120,14 @@ int Table::colIndex(const QString& name)
 void Table::setHeaderColType()
 {
   int xcols=0;
-  for (int j=0;j<(int)d_table->numCols();j++){
+  for (int j=0;j<(int)d_table->columnCount();j++){
     if (col_plot_type[j] == X)
       xcols++;
   }
 
   if (xcols>1){
     xcols = 0;
-    for (int i=0; i<(int)d_table->numCols(); i++){
+    for (int i=0; i<(int)d_table->columnCount(); i++){
       if (col_plot_type[i] == X)
         setColumnHeader(i, col_label[i]+"[X" + QString::number(++xcols) +"]");
       else if (col_plot_type[i] == Y){
@@ -2154,7 +2152,7 @@ void Table::setHeaderColType()
         setColumnHeader(i, col_label[i]);
     }
   } else {
-    for (int i=0; i<(int)d_table->numCols(); i++){
+    for (int i=0; i<(int)d_table->columnCount(); i++){
       if (col_plot_type[i] == X)
         setColumnHeader(i, col_label[i]+"[X]");
       else if (col_plot_type[i] == Y)
@@ -2190,7 +2188,7 @@ void Table::setAscValues()
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  int rows = d_table->numRows();
+  int rows = d_table->rowCount();
   for (int j=0; j<(int) list.count(); j++){
     QString name = list[j];
     selectedCol = colIndex(name);
@@ -2219,7 +2217,7 @@ void Table::setAscValues()
 bool Table::noXColumn()
 {
   bool notSet = true;
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (col_plot_type[i] == X)
       return false;
   }
@@ -2229,7 +2227,7 @@ bool Table::noXColumn()
 bool Table::noYColumn()
 {
   bool notSet = true;
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (col_plot_type[i] == Y)
       return false;
   }
@@ -2274,19 +2272,19 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
 
     QStringList oldHeader;
     int startRow = 0, startCol = 0;
-    int c = d_table->numCols();
-    int r = d_table->numRows();
+    int c = d_table->columnCount();
+    int r = d_table->rowCount();
     switch(importAs){
     case Overwrite:
-      if (d_table->numRows() != rows)
-        d_table->setNumRows(rows);
+      if (d_table->rowCount() != rows)
+        d_table->setRowCount(rows);
 
       oldHeader = col_label;
       if (c != cols){
         if (c < cols)
           addColumns(cols - c);
         else {
-          d_table->setNumCols(cols);
+          d_table->setColumnCount(cols);
           for (int i = c-1; i>=cols; i--){
             emit removedCol(QString(objectName()) + "_" + oldHeader[i]);
             commands.removeLast();
@@ -2303,13 +2301,13 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
       startCol = c;
       addColumns(cols);
       if (r < rows)
-        d_table->setNumRows(rows);
+        d_table->setRowCount(rows);
       break;
     case NewRows:
       startRow = r;
       if (c < cols)
         addColumns(cols - c);
-      d_table->setNumRows(r + rows);
+      d_table->setRowCount(r + rows);
       break;
     }
 
@@ -2362,7 +2360,7 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
 
     int l = 0;
     int row = startRow;
-    rows = d_table->numRows();
+    rows = d_table->rowCount();
     while (!t.atEnd() && row < rows){
       if (progress.wasCanceled()){
         f.close();
@@ -2422,8 +2420,8 @@ bool Table::exportASCII(const QString& fname, const QString& separator,
 
   QString text;
   QString eol = applicationWindow()->endOfLine();
-  int rows=d_table->numRows();
-  int cols=d_table->numCols();
+  int rows=d_table->rowCount();
+  int cols=d_table->columnCount();
   int selectedCols = 0;
   int topRow = 0, bottomRow = 0;
   int *sCols = 0;
@@ -2524,79 +2522,37 @@ bool Table::exportASCII(const QString& fname, const QString& separator,
 
 void Table::moveCurrentCell()
 {
-  int cols=d_table->numCols();
+  int cols=d_table->columnCount();
   int row=d_table->currentRow();
   int col=d_table->currentColumn();
-  d_table->clearSelection (true);
+  d_table->clearSelection();
 
   if (col+1<cols)
   {
     d_table->setCurrentCell(row, col+1);
-    d_table->selectCells(row, col+1, row, col+1);
+    d_table->selectCell(row, col+1);
   }
   else
   {
     if(row+1 >= numRows())
-      d_table->setNumRows(row + 11);
+      d_table->setRowCount(row + 11);
 
     d_table->setCurrentCell (row+1, 0);
-    d_table->selectCells(row+1, 0, row+1, 0);
+    d_table->selectCell(row+1, 0);
   }
 }
 
 bool Table::eventFilter(QObject *object, QEvent *e)
 {
-  Q3Header *hheader = d_table->horizontalHeader();
-  Q3Header *vheader = d_table->verticalHeader();
-
-  if (e->type() == QEvent::MouseButtonDblClick && object == (QObject*)hheader) {
-    const QMouseEvent *me = (const QMouseEvent *)e;
-    selectedCol = hheader->sectionAt (me->pos().x() + hheader->offset());
-
-    QRect rect = hheader->sectionRect (selectedCol);
-    rect.setLeft(rect.right() - 2);
-    rect.setWidth(4);
-
-    if (rect.contains (me->pos())) {
-      d_table->adjustColumn(selectedCol);
-      emit modifiedWindow(this);
-    } else
-      emit optionsDialog();
-    setActiveWindow();
-    return true;
-  } else if (e->type() == QEvent::MouseButtonPress && object == (QObject*)hheader) {
-    const QMouseEvent *me = (const QMouseEvent *)e;
-    if (me->button() == Qt::LeftButton && me->state() == Qt::ControlButton) {
-      selectedCol = hheader->sectionAt (me->pos().x() + hheader->offset());
-      d_table->selectColumn (selectedCol);
-      d_table->setCurrentCell (0, selectedCol);
-      setActiveWindow();
-      return true;
-    } else if (selectedColsNumber() <= 1) {
-      selectedCol = hheader->sectionAt (me->pos().x() + hheader->offset());
-      d_table->clearSelection();
-      d_table->selectColumn (selectedCol);
-      d_table->setCurrentCell (0, selectedCol);
-      setActiveWindow();
-      return false;
-    }
-  } else if (e->type() == QEvent::MouseButtonPress && object == (QObject*)vheader) {
-    const QMouseEvent *me = (const QMouseEvent *)e;
-    if (me->button() == Qt::RightButton && numSelectedRows() <= 1) {
-      d_table->clearSelection();
-      int row = vheader->sectionAt(me->pos().y() + vheader->offset());
-      d_table->selectRow (row);
-      d_table->setCurrentCell (row, 0);
-      setActiveWindow();
-    }
-  } else if (e->type() == QEvent::ContextMenu && object == (QObject*)d_table){
+  if (e->type() == QEvent::ContextMenu && object == (QObject*)d_table){
     const QContextMenuEvent *ce = (const QContextMenuEvent *)e;
-    QRect r = d_table->horizontalHeader()->sectionRect(d_table->numCols()-1);
+    auto indx = d_table->horizontalHeader()->logicalIndexAt(ce->pos());
     setFocus();
-    if (ce->pos().x() > r.right() + d_table->verticalHeader()->width())
+    if (indx < 0) {
       emit showContextMenu(false);
-    else if (d_table->numCols() > 0 && d_table->numRows() > 0)
+    } else if (d_table->columnCount() > 0 && d_table->rowCount() > 0) {
       emit showContextMenu(true);
+    }
     return true;
   }
 
@@ -2613,8 +2569,8 @@ void Table::customEvent(QEvent *e)
 void Table::restore(QString& spec)
 {
   int row;
-  int cols=d_table->numCols();
-  int rows=d_table->numRows();
+  int cols=d_table->columnCount();
+  int rows=d_table->rowCount();
 
   QTextStream t(&spec, QIODevice::ReadOnly);
 
@@ -2629,11 +2585,11 @@ void Table::restore(QString& spec)
 
   int r=list[1].toInt();
   if (rows != r)
-    d_table->setNumRows(r);
+    d_table->setRowCount(r);
 
   int c = list[2].toInt();
   if (cols != c)
-    d_table->setNumCols(c);
+    d_table->setColumnCount(c);
 
   //clear all cells
   for (int i=0; i<r; i++){
@@ -2777,17 +2733,17 @@ void Table::restore(QString& spec)
 
 void Table::setNumRows(int newNumRows)
 {
-  int oldNumRows = d_table->numRows();
+  int oldNumRows = d_table->rowCount();
 
   if(oldNumRows == newNumRows)
     return;
 
-  d_table->setNumRows(newNumRows);
+  d_table->setRowCount(newNumRows);
 
   if(newNumRows < oldNumRows)
   {
     // When rows are deleted, values of some formulas might get changed, so update all columns
-    int numCols = d_table->numCols();
+    int numCols = d_table->columnCount();
     for (int i = 0; i < numCols; i++)
       emit modifiedData(this, colName(i));
   } 
@@ -2795,7 +2751,7 @@ void Table::setNumRows(int newNumRows)
 
 void Table::setNumCols(int newNumCols)
 {
-  int oldNumCols = d_table->numCols();
+  int oldNumCols = d_table->columnCount();
 
   if(oldNumCols == newNumCols)
     return;
@@ -2817,7 +2773,7 @@ void Table::setNumCols(int newNumCols)
     }
 
     // This will take care of removing columns
-    d_table->setNumCols(newNumCols);
+    d_table->setColumnCount(newNumCols);
   }
   // If adding columns
   else if(newNumCols > oldNumCols)
@@ -2829,7 +2785,7 @@ void Table::setNumCols(int newNumCols)
 
 void Table::resizeRows(int newNumRows)
 {
-  if (newNumRows < d_table->numRows()) {
+  if (newNumRows < d_table->rowCount()) {
     // Confirm that user wants to remove rows
     QString text= tr("Rows will be deleted from the table!") + "<p>" 
                   + tr("Do you really want to continue?");
@@ -2848,7 +2804,7 @@ void Table::resizeRows(int newNumRows)
 
 void Table::resizeCols(int newNumCols)
 {
-  if (newNumCols < d_table->numCols()) {
+  if (newNumCols < d_table->columnCount()) {
     // Confirm that user wants to remove columns
     QString text = tr("Columns will be deleted from the table!") + "<p>" 
                    + tr("Do you really want to continue?");
@@ -2867,12 +2823,12 @@ void Table::resizeCols(int newNumCols)
 
 void Table::copy(Table *m)
 {
-  for (int i=0; i<d_table->numRows(); i++){
-    for (int j=0; j<d_table->numCols(); j++)
+  for (int i=0; i<d_table->rowCount(); i++){
+    for (int j=0; j<d_table->columnCount(); j++)
       d_table->setText(i, j, m->text(i, j));
   }
 
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     d_table->setColumnReadOnly(i, m->isReadOnlyColumn(i));
     d_table->setColumnWidth(i, m->columnWidth(i));
     if (m->isColumnHidden(i))
@@ -2934,7 +2890,7 @@ void Table::restore(const QStringList& lst)
 
 void Table::notifyChanges()
 {
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
     emit modifiedData(this, colName(i));
 
   emit modifiedWindow(this);
@@ -2942,9 +2898,9 @@ void Table::notifyChanges()
 
 void Table::clear()
 {
-  for (int i=0; i<d_table->numCols(); i++)
+  for (int i=0; i<d_table->columnCount(); i++)
   {
-    for (int j=0; j<d_table->numRows(); j++)
+    for (int j=0; j<d_table->rowCount(); j++)
       d_table->setText(j, i, QString::null);
 
     emit modifiedData(this, colName(i));
@@ -2971,13 +2927,16 @@ void Table::goToColumn(int col)
 
 void Table::setColumnHeader(int index, const QString& label)
 {
-  Q3Header *head = d_table->horizontalHeader();
+  auto head = d_table->horizontalHeader();
   if (d_show_comments){
     QString s = label;
     int lines = d_table->columnWidth(index)/head->fontMetrics().averageCharWidth();
-    head->setLabel(index, s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[index]);
-  } else
-    head->setLabel(index, label);
+    auto item = new QTableWidgetItem(s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[index]);
+    d_table->setHorizontalHeaderItem(index, item);
+  } else {
+    auto item = new QTableWidgetItem(label);
+    d_table->setHorizontalHeaderItem(index, item);
+  }
 }
 
 void Table::showComments(bool on)
@@ -2987,15 +2946,15 @@ void Table::showComments(bool on)
 
   d_show_comments = on;
   setHeaderColType();
-
-  if(!on)
-    d_table->setTopMargin (d_table->horizontalHeader()->height()/2);
+  //?
+  //if(!on)
+  //  d_table->setTopMargin (d_table->horizontalHeader()->height()/2);
 }
 
 void Table::setNumericPrecision(int prec)
 {
   d_numeric_precision = prec;
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (colTypes[i] == Numeric)
       col_format[i] = "0/" + QString::number(prec);
   }
@@ -3003,7 +2962,7 @@ void Table::setNumericPrecision(int prec)
 
 void Table::updateDecimalSeparators(const QLocale& oldSeparators)
 {
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (colTypes[i] != Numeric)
       continue;
 
@@ -3011,7 +2970,7 @@ void Table::updateDecimalSeparators(const QLocale& oldSeparators)
     int prec;
     columnNumericFormat(i, &format, &prec);
 
-    for (int j=0; j<d_table->numRows(); j++){
+    for (int j=0; j<d_table->rowCount(); j++){
       if (!d_table->text(j, i).isEmpty()){
         double val = oldSeparators.toDouble(d_table->text(j, i));
         d_table->setText(j, i, locale().toString(val, format, prec));
@@ -3024,7 +2983,7 @@ void Table::updateDecimalSeparators()
 {
   saveToMemory();
 
-  for (int i=0; i<d_table->numCols(); i++){
+  for (int i=0; i<d_table->columnCount(); i++){
     if (colTypes[i] != Numeric)
       continue;
 
@@ -3032,7 +2991,7 @@ void Table::updateDecimalSeparators()
     int prec;
     columnNumericFormat(i, &format, &prec);
 
-    for (int j=0; j<d_table->numRows(); j++){
+    for (int j=0; j<d_table->rowCount(); j++){
       if (!d_table->text(j, i).isEmpty())
         d_table->setText(j, i, locale().toString(d_saved_cells[i][j], format, prec));
     }
@@ -3043,7 +3002,7 @@ void Table::updateDecimalSeparators()
 
 bool Table::isReadOnlyColumn(int col)
 {
-  if (col < 0 || col >= d_table->numCols())
+  if (col < 0 || col >= d_table->columnCount())
     return false;
 
   return d_table->isColumnReadOnly(col);
@@ -3051,7 +3010,7 @@ bool Table::isReadOnlyColumn(int col)
 
 void Table::setReadOnlyColumn(int col, bool on)
 {
-  if (col < 0 || col >= d_table->numCols())
+  if (col < 0 || col >= d_table->columnCount())
     return;
 
   d_table->setColumnReadOnly(col, on);
@@ -3082,7 +3041,7 @@ void Table::moveColumn(int, int fromIndex, int toIndex)
 
 void Table::swapColumns(int col1, int col2)
 {
-  if (col1 < 0 || col1 >= d_table->numCols() || col2 < 0 || col2 >= d_table->numCols())
+  if (col1 < 0 || col1 >= d_table->columnCount() || col2 < 0 || col2 >= d_table->columnCount())
     return;
 
   int width1 = d_table->columnWidth(col1);
@@ -3107,17 +3066,19 @@ void Table::moveColumnBy(int cols)
   int newPos = oldPos + cols;
   if (newPos < 0)
     newPos = 0;
-  else if	(newPos >= d_table->numCols())
-    newPos = d_table->numCols() - 1;
+  else if	(newPos >= d_table->columnCount())
+    newPos = d_table->columnCount() - 1;
 
   if (abs(cols) > 1){
-    d_table->insertColumns(newPos);
-    if (cols < 0)
+    if (cols < 0) {
+      d_table->insertColumns(newPos);
       d_table->swapColumns(oldPos + 1, newPos);
-    else
+      d_table->removeColumn(oldPos + 1);
+    } else {
+      d_table->insertColumns(newPos + 1);
       d_table->swapColumns(oldPos, newPos + 1);
-
-    d_table->removeColumn(oldPos);
+      d_table->removeColumn(oldPos);
+    }
 
     col_label.move(oldPos, newPos);
     comments.move(oldPos, newPos);
@@ -3125,10 +3086,11 @@ void Table::moveColumnBy(int cols)
     colTypes.move(oldPos, newPos);
     col_format.move(oldPos, newPos);
     col_plot_type.move(oldPos, newPos);
-  } else
+    setHeaderColType();
+  } else {
     swapColumns(oldPos, newPos);
+  }
 
-  setHeaderColType();
 
   setSelectedCol(newPos);
   d_table->clearSelection();
@@ -3145,7 +3107,7 @@ void Table::hideColumn(int col, bool hide)
 
 void Table::hideSelectedColumns()
 {
-  for(int i = 0; i<d_table->numCols(); i++){
+  for(int i = 0; i<d_table->columnCount(); i++){
     if (d_table->isColumnSelected(i, true))
       d_table->hideColumn(i);
   }
@@ -3153,7 +3115,7 @@ void Table::hideSelectedColumns()
 
 void Table::showAllColumns()
 {
-  for(int i = 0; i<d_table->numCols(); i++){
+  for(int i = 0; i<d_table->columnCount(); i++){
     if (d_table->isColumnHidden(i))
       d_table->showColumn(i);
   }
@@ -3308,7 +3270,7 @@ std::string Table::saveTableMetadata()
 {
   TSVSerialiser tsv;
   tsv.writeLine("header");
-  for(int j = 0; j < d_table->numCols(); j++)
+  for(int j = 0; j < d_table->columnCount(); j++)
   {
     QString val = colLabel(j);
     switch(col_plot_type[j])
@@ -3324,11 +3286,11 @@ std::string Table::saveTableMetadata()
   }
 
   tsv.writeLine("ColWidth");
-  for(int i = 0; i < d_table->numCols(); i++)
+  for(int i = 0; i < d_table->columnCount(); i++)
     tsv << d_table->columnWidth(i);
 
   QString cmds;
-  for(int col = 0; col < d_table->numCols(); col++)
+  for(int col = 0; col < d_table->columnCount(); col++)
   {
     if(!commands[col].isEmpty())
     {
@@ -3340,22 +3302,22 @@ std::string Table::saveTableMetadata()
   tsv.writeSection("com", cmds.toUtf8().constData());
 
   tsv.writeLine("ColType");
-  for(int i = 0; i < d_table->numCols(); i++)
+  for(int i = 0; i < d_table->columnCount(); i++)
   {
     QString val = QString::number(colTypes[i]) + ";" + col_format[i];
     tsv << val;
   }
 
   tsv.writeLine("ReadOnlyColumn");
-  for(int i = 0; i < d_table->numCols(); i++)
+  for(int i = 0; i < d_table->columnCount(); i++)
     tsv << d_table->isColumnReadOnly(i);
 
   tsv.writeLine("HiddenColumn");
-  for(int i = 0; i < d_table->numCols(); i++)
+  for(int i = 0; i < d_table->columnCount(); i++)
     tsv << d_table->isColumnHidden(i);
 
   tsv.writeLine("Comments");
-  for(int i = 0; i < d_table->numCols(); ++i)
+  for(int i = 0; i < d_table->columnCount(); ++i)
   {
     if(comments.count() > i)
       tsv << comments[i];
@@ -3366,6 +3328,17 @@ std::string Table::saveTableMetadata()
   return tsv.outputLines();
 }
 
+int Table::verticalHeaderWidth(){return d_table->verticalHeader()->width();}
+
+void Table::recordSelection() {
+  auto c = leftSelectedColumn();
+  if (c >= 0 && isColumnSelected(c, true)) {
+    setSelectedCol(c);
+  } else {
+    setSelectedCol(-1);
+  }
+}
+
 /*****************************************************************************
  *
  * Class MyTable
@@ -3373,26 +3346,208 @@ std::string Table::saveTableMetadata()
  *****************************************************************************/
 
 MyTable::MyTable(QWidget * parent, const char * name)
-:Q3Table(parent, name),m_blockResizing(false)
-{}
+:QTableWidget(parent),m_blockResizing(false)
+{
+  setWindowTitle(QString::fromAscii(name));
+  makeItemPrototype();
+}
 
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
-:Q3Table(numRows, numCols, parent, name),m_blockResizing(false)
-{}
+:QTableWidget(numRows, numCols, parent),m_blockResizing(false)
+{
+  setWindowTitle(QString::fromAscii(name));
+  makeItemPrototype();
+}
+
+void MyTable::makeItemPrototype() {
+  m_itemPrototype = new QTableWidgetItem();
+  m_itemPrototype->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  setItemPrototype(m_itemPrototype);
+}
+
+QTableWidgetItem* MyTable::addNewItem(int row, int col) {
+  auto item = m_itemPrototype->clone();
+  setItem(row, col, item);
+  return item;
+}
+
+QString MyTable::text(int row, int col) const {
+  auto it = item(row, col);
+  if (it == nullptr) {
+    return QString();
+  }
+  return it->text();
+}
+
+void MyTable::setText(int row, int col, const QString& txt) {
+  auto it = item(row, col);
+  if (it == nullptr) {
+    it = addNewItem(row, col);
+  }
+  it->setText(txt);
+}
 
 void MyTable::blockResizing(bool yes)
 {
   m_blockResizing = yes;
 }
 
-void MyTable::resizeData(int n)
+void MyTable::resizeData(int)
 {
   if ( m_blockResizing )
   {
     emit unwantedResize();
   }
-  else
-  {
-    Q3Table::resizeData(n);
+}
+
+bool MyTable::isColumnReadOnly(int col) const {
+  auto flags = model()->flags(model()->index(0, col));
+  return !bool(flags & Qt::ItemIsEditable);
+}
+
+void MyTable::setColumnReadOnly(int col, bool on) {
+  if (col >= columnCount()) return;
+  auto flags = model()->flags(model()->index(0, col));
+  if (on && (flags & Qt::ItemIsEditable)) {
+    flags ^= Qt::ItemIsEditable;
+  } else if (!on && !bool(flags & Qt::ItemIsEditable)) {
+    flags |= Qt::ItemIsEditable;
   }
+  blockSignals(true);
+  for(int row = 0; row < rowCount(); ++row) {
+    auto it = item(row, col);
+    if (it == nullptr) {
+      it = addNewItem(row, col);
+    }
+    it->setFlags(flags);
+  }
+  blockSignals(false);
+}
+
+void MyTable::insertColumns(int col, int count) {
+  for(int i = col; i < col + count; ++i) {
+    insertColumn(i);
+  }
+}
+
+void MyTable::insertRows(int row, int count) {
+  for(int i = row; i < row + count; ++i) {
+    insertRow(i);
+  }
+}
+
+void MyTable::removeRows(const QVector<int>& rows) {
+  if (rows.isEmpty()) return;
+  auto sortedRows = rows;
+  qSort(sortedRows);
+  for(int i = rows.size() - 1; i >= 0; --i) {
+    removeRow(rows[i]);
+  }
+}
+
+bool MyTable::hasSelection() const {
+  return selectionModel()->hasSelection();
+}
+
+bool MyTable::isColumnSelected(int col, bool full) const {
+  auto selection = selectionModel();
+  if (full) {
+    return selection->isColumnSelected(col, QModelIndex());
+  }
+  for(int row = 0; row < rowCount(); ++row) {
+    if (selection->isSelected(model()->index(row, col))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool MyTable::isRowSelected(int row, bool full) const {
+  auto selection = selectionModel();
+  if (full) {
+    return selection->isRowSelected(row, QModelIndex());
+  }
+  for(int col = 0; col < columnCount(); ++col) {
+    if (selection->isSelected(model()->index(row, col))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool MyTable::isSelected(int row, int col) const {
+  auto selection = selectionModel();
+  return selection->isSelected(model()->index(row, col));
+}
+
+int MyTable::topSelectedRow() const {
+  auto sel = selectionModel();
+  if (sel->hasSelection()) {
+    QModelIndex parentIndex;
+    int top = 0;
+    while (top < rowCount() && !sel->rowIntersectsSelection(top, parentIndex)) {
+      ++top;
+    }
+    return top;
+  }
+  return -1;
+}
+
+int MyTable::bottomSelectedRow() const {
+  auto sel = selectionModel();
+  if (sel->hasSelection()) {
+    QModelIndex parentIndex;
+    int bottom = rowCount() - 1;
+    while (bottom >= 0 && !sel->rowIntersectsSelection(bottom, parentIndex)) {
+      --bottom;
+    }
+    return bottom;
+  }
+  return -1;
+}
+
+
+int MyTable::leftSelectedColumn() const {
+  auto sel = selectionModel();
+  if (sel->hasSelection()) {
+    QModelIndex parentIndex;
+    int left = 0;
+    while (left < columnCount() && !sel->columnIntersectsSelection(left, parentIndex)) {
+      ++left;
+    }
+    return left;
+  }
+  return -1;
+}
+
+int MyTable::rightSelectedColumn() const {
+  auto sel = selectionModel();
+  if (sel->hasSelection()) {
+    QModelIndex parentIndex;
+    int right = columnCount() - 1;
+    while (right >= 0 && !sel->columnIntersectsSelection(right, parentIndex)) {
+      --right;
+    }
+    return right;
+  }
+  return -1;
+}
+
+void MyTable::selectCell(int row, int col) {
+  selectionModel()->select(model()->index(row, col), QItemSelectionModel::Select);
+}
+
+void MyTable::ensureCellVisible(int row, int col) {
+  scrollTo(model()->index(row, col));
+}
+
+void MyTable::swapColumns(int col1, int col2) {
+  blockSignals(true);
+  for(int row = 0; row < rowCount(); ++row) {
+    auto item1 = takeItem(row, col1);
+    auto item2 = takeItem(row, col2);
+    setItem(row, col1, item2);
+    setItem(row, col2, item1);
+  }
+  blockSignals(false);
 }

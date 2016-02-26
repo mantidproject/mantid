@@ -153,18 +153,12 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
   if( PyObject *exception = PyErr_Occurred() )
   {
     // Certain exceptions still mean the code is complete
-    if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_MemoryError))
-    {
-      result = true;
-    }
-    else
-    {
-      result = false;
-    }
+    result = (PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_MemoryError));
+
     PyErr_Clear();
   }
   else
@@ -506,14 +500,8 @@ void PythonScript::endStdoutRedirect()
 bool PythonScript::compileImpl()
 {
   PyObject *codeObject = compileToByteCode(false);
-  if(codeObject)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+
+  return codeObject != NULL;
 }
 
 /**
@@ -698,7 +686,7 @@ bool PythonScript::executeString()
   if(!result)
   {
     emit_error();
-    // If a script was aborted we both raise a KeyboardInterrupt and 
+    // If a script was aborted we both raise a KeyboardInterrupt and
     // call Algorithm::cancel to make sure we capture it. The doubling
     // can leave an interrupt in the pipeline so we clear it was we've
     // got the error info out
@@ -771,18 +759,7 @@ PyObject* PythonScript::executeCompiledCode(PyObject *compiledCode)
  * @param result The output from a PyEval call
  * @return A boolean indicating success status
  */
-bool PythonScript::checkResult(PyObject *result)
-{
-  if(result)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
+bool PythonScript::checkResult(PyObject *result) { return result != NULL; }
 
 /**
  * Compile the code
@@ -926,8 +903,7 @@ void PythonScript::postDeleteHandle(const std::string& wsName)
  */
 void PythonScript::clearADSHandle()
 {
-  std::set<std::string>::const_iterator iend = m_workspaceHandles.end();
-  for( std::set<std::string>::const_iterator itr = m_workspaceHandles.begin(); itr != iend; )
+  for( auto itr = m_workspaceHandles.cbegin(); itr != m_workspaceHandles.cend(); )
   {
     // This also erases the element from current set. The standard says that erase only invalidates
     // iterators of erased elements so we need to increment the iterator and get back the previous value

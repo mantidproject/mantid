@@ -112,12 +112,12 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Extract the required spectra into separate workspaces
   std::vector<detid_t> udets{getProperty("IncidentBeamMonitor")};
-  std::vector<size_t> indices;
 
   // Convert UDETs to workspace indices
   // Get monitors (assume that the detector mapping is the same for all data
   // sets)
-  sample_scatterWS->getIndicesFromDetectorIDs(udets, indices);
+  std::vector<size_t> indices =
+      sample_scatterWS->getIndicesFromDetectorIDs(udets);
   if (indices.size() != 1) {
     g_log.error() << "Could not find the incident monitor spectra\n";
     throw std::invalid_argument(

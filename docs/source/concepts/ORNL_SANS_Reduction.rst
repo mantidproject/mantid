@@ -250,10 +250,15 @@ Solid angle correction
 
     If ``detector_tubes`` is selected, the correction is calculated according to a tube geometry. The cosine term above then becomes:
     
-        :math:`\cos^3(2\theta) \rightarrow \cos(\sqrt{\tan^2(\alpha)+1}) \ \cos^2(2\theta)`
+        :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
-    where :math:`\alpha`: is the angle between the projection of the sample-to-pixel vector on the plane defined by the beam (Z) axis and the Y-axis.
+    where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
     
+.. figure:: /images/sans_solid_angle_correction.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Definition of angles for tube solid angle correction.
+
 ``NoSolidAngle()``
     Tells the reducer not to apply the solid angle correction.
 
@@ -406,8 +411,14 @@ Wedge calculation is done as part of the azimuthal averaging algorithm. The imag
 Data Stitching
 ^^^^^^^^^^^^^^
 
-Data stitching can be done using the SANS reduction UI, or by calling the underlying command directly.
+Data stitching can be done using the SANS reduction UI, or by calling the underlying command directly. The stitching process lets you pick an overlap region that will be used to scale data sets to each other. For any number of input data sets, the data sets are scaled to the first set in the input series. The second set is scaled to the first set, then the third set is scaled to the modified second set. The process continues in pairs until all the data sets are rescaled.
 
+In the process of scaling two data sets, all the points of the lower Q set with a Q value lower than the higher bound of the overlap region are kept. All the points of the higher Q set with a Q value higher than the lower bound of the overlap region are kept (see image). All data points in the overlap region are kept.
+
+.. figure:: /images/stitching_description.png
+   :figwidth: 10 cm
+   :align: right
+   :alt: Description of stitching process.
 
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets

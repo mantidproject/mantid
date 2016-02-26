@@ -207,10 +207,8 @@ namespace MantidWidgets
       return false;  
 
     std::string label = m_ui.labelInput->text().toStdString();
-    if ( ! isValidLabel(label).empty() )
-      return false;
 
-    return true;
+    return isValidLabel(label).empty();
   }
 
   /**

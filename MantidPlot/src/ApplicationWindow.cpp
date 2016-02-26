@@ -647,11 +647,8 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
   // Now check if the version has changed since last time
   const QString version =
       QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
-  if (version != lastVersion) {
-    return true;
-  }
-
-  return false;
+ 
+  return (version != lastVersion);
 }
 
 void ApplicationWindow::initWindow() {
@@ -1594,9 +1591,7 @@ bool ApplicationWindow::getMenuSettingsFlag(const QString &menu_item) {
   }
 
   // If we didn't find it, check whether is was manually removed
-  if (removed_interfaces.contains(menu_item))
-    return false;
-  return true;
+  return !removed_interfaces.contains(menu_item);
 }
 
 void ApplicationWindow::disableActions() {
@@ -1837,8 +1832,7 @@ void ApplicationWindow::plotPie() {
 
   QStringList s = table->selectedColumns();
   if (s.count() > 0) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::Pie, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::Pie, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"),
                          tr("Please select a column to plot!")); // Mantid
@@ -1873,8 +1867,7 @@ void ApplicationWindow::plotVectXYXY() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::VectXYXY, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::VectXYXY, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -1890,8 +1883,7 @@ void ApplicationWindow::plotVectXYAM() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    Q3TableSelection sel = table->getSelection();
-    multilayerPlot(table, s, Graph::VectXYAM, sel.topRow(), sel.bottomRow());
+    multilayerPlot(table, s, Graph::VectXYAM, table->topSelectedRow(), table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -1999,8 +1991,7 @@ Note *ApplicationWindow::newStemPlot() {
   if (!t)
     return NULL;
 
-  int ts = t->table()->currentSelection();
-  if (ts < 0)
+  if (!t->hasSelection())
     return NULL;
 
   Note *n = newNote();
@@ -2010,10 +2001,9 @@ Note *ApplicationWindow::newStemPlot() {
 
   QStringList lst = t->selectedColumns();
   if (lst.isEmpty()) {
-    Q3TableSelection sel = t->table()->selection(ts);
-    for (int i = sel.leftCol(); i <= sel.rightCol(); i++)
-      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, sel.topRow() + 1,
-                                      sel.bottomRow() + 1) +
+    for (int i = t->leftSelectedColumn(); i <= t->rightSelectedColumn(); i++)
+      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, t->topSelectedRow() + 1,
+                                      t->bottomSelectedRow() + 1) +
                  "\n");
   } else {
     for (int i = 0; i < lst.count(); i++)
@@ -5156,7 +5146,7 @@ void ApplicationWindow::readSettings() {
     // if the setting was false then the user changed it
     // sync this to the new location and remove the key for the future
     bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
-    if (qsettingsFlag == false) {
+    if (!qsettingsFlag) {
       cfgSvc.setString("graph1d.autodistribution", "Off");
       try {
         cfgSvc.saveConfig(cfgSvc.getUserFilename());
@@ -6685,7 +6675,7 @@ void ApplicationWindow::showColumnValuesDialog() {
   if (!w)
     return;
 
-  if (w->selectedColumns().count() > 0 || w->table()->currentSelection() >= 0) {
+  if (w->selectedColumns().count() > 0 || w->hasSelection()) {
     SetColValuesDialog *vd = new SetColValuesDialog(scriptingEnv(), w);
     vd->setAttribute(Qt::WA_DeleteOnClose);
     vd->exec();
@@ -8696,11 +8686,9 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
 
     nt->setHeader(t->colNames());
 
-    Q3TableItem *io;
-
     for (auto i = 0; i < nt->numCols(); i++) {
       for (auto j = 0; j < nt->numRows(); j++) {
-        io = t->table()->item(j, i);
+        auto io = t->table()->item(j, i);
         nt->table()->setItem(j, i, io);
         // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
       }
@@ -8851,10 +8839,7 @@ void ApplicationWindow::redo() {
 }
 
 bool ApplicationWindow::hidden(QWidget *window) {
-  if (hiddenWindows->contains(window))
-    return true;
-
-  return false;
+  return hiddenWindows->contains(window);
 }
 
 void ApplicationWindow::updateWindowStatus(MdiSubWindow *w) {
@@ -9733,7 +9718,7 @@ void ApplicationWindow::savedProject() {
 }
 
 void ApplicationWindow::modifiedProject() {
-  if (saved == false)
+  if (!saved)
     return;
   // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and
   // doesn't
@@ -11998,7 +11983,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
 }
 
 void ApplicationWindow::connectTable(Table *w) {
-  connect(w->table(), SIGNAL(selectionChanged()), this,
+  connect(w->table(), SIGNAL(itemSelectionChanged()), this,
           SLOT(customColumnActions()));
   connect(w, SIGNAL(removedCol(const QString &)), this,
           SLOT(removeCurves(const QString &)));
@@ -15913,9 +15898,8 @@ MultiLayer *ApplicationWindow::generate2DGraph(Graph::CurveType type) {
     if (!validFor2DPlot(table))
       return 0;
 
-    Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(),
-                          sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, table->topSelectedRow(),
+                          table->bottomSelectedRow());
   } else if (w->isA("Matrix")) {
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);

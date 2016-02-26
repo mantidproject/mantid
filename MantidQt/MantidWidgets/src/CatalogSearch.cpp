@@ -545,18 +545,19 @@ namespace MantidQt
       // Return false if the user has not input any dates. This prevents any null errors occurring.
       if (startDateInput.size() <= 2 || endDateInput.size() <= 2) return false;
 
+	  bool ret = m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput);
       // If startDate > endDate we want to throw an error and inform the user (red star(*)).
-      if (m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput))
+      if (ret)
       {
         m_icatUiForm.StartDate_err->setToolTip(QString::fromStdString("<span style=\"color: white;\">Start date cannot be greater than end date.</span>"));
         m_icatUiForm.StartDate_err->show();
-        return true;
       }
       else
       {
         m_icatUiForm.StartDate_err->hide();
-        return false;
       }
+
+	  return ret;
     }
 
     /**
@@ -968,7 +969,7 @@ namespace MantidQt
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
-      std::set<std::string> extensions = getDataFileExtensions(workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
+      auto extensions = getDataFileExtensions(workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
 
       // Populate the "Filter type..." combo-box with all possible file extensions.
       populateDataFileType(extensions);
@@ -1057,9 +1058,9 @@ namespace MantidQt
      * @param column :: The fileName column in the dataFile workspace.
      * @return A set containing all file extensions.
      */
-    std::set<std::string> CatalogSearch::getDataFileExtensions(Mantid::API::Column_sptr column)
+    std::unordered_set<std::string> CatalogSearch::getDataFileExtensions(Mantid::API::Column_sptr column)
     {
-      std::set<std::string> extensions;
+      std::unordered_set<std::string> extensions;
 
       // For every filename in the column...
       for (unsigned row = 0; row < column->size(); row++)
@@ -1075,11 +1076,11 @@ namespace MantidQt
     /**
      * Add the list of file extensions to the "Filter type..." drop-down.
      */
-    void CatalogSearch::populateDataFileType(const std::set<std::string> &extensions)
+    void CatalogSearch::populateDataFileType(const std::unordered_set<std::string> &extensions)
     {
-      for( std::set<std::string>::const_iterator iter = extensions.begin(); iter != extensions.end(); ++iter)
+      for(const auto &extension : extensions)
       {
-        m_icatUiForm.dataFileFilterCombo->addItem(QString::fromStdString("." + *iter));
+        m_icatUiForm.dataFileFilterCombo->addItem(QString::fromStdString("." + extension));
       }
     }
 

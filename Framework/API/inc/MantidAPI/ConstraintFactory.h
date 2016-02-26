@@ -51,7 +51,7 @@ class Expression;
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class MANTID_API_DLL ConstraintFactoryImpl
+class MANTID_API_DLL ConstraintFactoryImpl final
     : public Kernel::DynamicFactory<IConstraint> {
 public:
   /// Creates an instance of a Constraint

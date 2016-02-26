@@ -60,7 +60,7 @@ typedef std::set<AlgorithmHistory_sptr,
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class MANTID_API_DLL AlgorithmHistory {
+class MANTID_API_DLL AlgorithmHistory final {
 
 public:
   /// History container

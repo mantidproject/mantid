@@ -103,9 +103,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
     virtual DataArray_const_sptr getDataArray( bool is_log_x );
 
     /// Get list of pairs of strings with info about the data at location x, y
-    virtual void getInfoList( double x,
-                              double y,
-                              std::vector<std::string> &list ) = 0;
+    virtual std::vector<std::string> getInfoList(double x, double y) = 0;
 
   protected:
     double m_totalXMin;

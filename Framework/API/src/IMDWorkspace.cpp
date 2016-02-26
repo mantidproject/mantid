@@ -134,41 +134,36 @@ const std::string IMDWorkspace::toString() const {
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: is set to the boundaries of the bins, relative to start of the
- *line.
- * @param y :: is set to the normalized signal for each bin. Length = length(x)
- *- 1
- * @param e :: is set to the normalized errors for each bin. Length = length(x)
- *- 1
+ * @returns :: a LinePlot in which x is set to the boundaries of the bins,
+ * relative to start of the line, y is set to the normalized signal for
+ * each bin with Length = length(x) - 1 and e is set to the normalized
+ * errors for each bin with Length = length(x) - 1.
  */
-void IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                               const Mantid::Kernel::VMD &end,
-                               Mantid::API::MDNormalization normalize,
-                               std::vector<coord_t> &x,
-                               std::vector<signal_t> &y,
-                               std::vector<signal_t> &e) const {
+IMDWorkspace::LinePlot
+IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
+                          const Mantid::Kernel::VMD &end,
+                          Mantid::API::MDNormalization normalize) const {
   // TODO: Don't use a fixed number of points later
   size_t numPoints = 200;
 
   VMD step = (end - start) / double(numPoints);
   double stepLength = step.norm();
 
-  // These will be the curve as plotted
-  x.clear();
-  y.clear();
-  e.clear();
+  // This will be the curve as plotted
+  LinePlot line;
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
     VMD coord = start + step * double(i);
     // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
+    line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
     signal_t yVal = this->getSignalAtCoord(coord.getBareArray(), normalize);
-    y.push_back(yVal);
-    e.push_back(0.0);
+    line.y.push_back(yVal);
+    line.e.push_back(0.0);
   }
   // And the last point
-  x.push_back((end - start).norm());
+  line.x.push_back((end - start).norm());
+  return line;
 }
 
 /**

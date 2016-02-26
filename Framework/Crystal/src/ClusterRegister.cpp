@@ -4,7 +4,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 #include <list>
-#include <set>
+#include <unordered_set>
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
@@ -26,13 +26,13 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  typedef std::list<std::set<size_t>> GroupType;
+  typedef std::list<std::unordered_set<size_t>> GroupType;
 
   /// Groups of labels to maintain
   GroupType m_groups;
 
   /// Type for identifying labels already seen
-  typedef std::set<size_t> LabelHash;
+  typedef std::unordered_set<size_t> LabelHash;
 
   /// Hash of labels merged
   LabelHash m_labelHash;

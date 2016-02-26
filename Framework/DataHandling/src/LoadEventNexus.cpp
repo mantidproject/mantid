@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
@@ -397,7 +398,7 @@ public:
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
     {
-      Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
+      std::lock_guard<std::mutex> _lock(alg->m_tofMutex);
       if (my_shortest_tof < alg->shortest_tof) {
         alg->shortest_tof = my_shortest_tof;
       }
@@ -480,7 +481,7 @@ public:
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
-                       boost::shared_ptr<Mutex> ioMutex,
+                       boost::shared_ptr<std::mutex> ioMutex,
                        ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
@@ -1489,11 +1490,11 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset);
+    pixelID_to_wi_vector =
+        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
   else
-    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                              pixelID_to_wi_offset, true);
+    pixelID_to_wi_vector =
+        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -1874,7 +1875,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make the thread pool
   ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<Mutex>();
+  auto diskIOMutex = boost::make_shared<std::mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
