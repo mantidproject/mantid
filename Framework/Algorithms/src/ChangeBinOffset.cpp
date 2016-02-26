@@ -41,14 +41,15 @@ void ChangeBinOffset::exec() {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(outputW);
   if (eventWS) {
-    this->for_each(*eventWS, std::make_tuple(Getters::eventList),
-                   [=](EventList &eventList) { eventList.addTof(offset); });
+    this->for_each<Indices::FromProperty>(
+        *eventWS, std::make_tuple(Getters::eventList),
+        [=](EventList &eventList) { eventList.addTof(offset); });
   } else {
-    this->for_each(*outputW, std::make_tuple(Getters::x),
-                   [=](std::vector<double> &dataX) {
-                     for (auto &x : dataX)
-                       x += offset;
-                   });
+    this->for_each<Indices::FromProperty>(*outputW, std::make_tuple(Getters::x),
+                                          [=](std::vector<double> &dataX) {
+                                            for (auto &x : dataX)
+                                              x += offset;
+                                          });
   }
 }
 
