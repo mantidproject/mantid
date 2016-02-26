@@ -58,8 +58,8 @@ protected:
 
 public:
   static int makeCNFcopy(std::unique_ptr<Rule> & /*TopRule*/); ///< Make Rule
-                                                               ///into a CNF
-                                                               ///format (slow)
+  /// into a CNF
+  /// format (slow)
   static int
   makeFullDNF(std::unique_ptr<Rule> &); ///< Make Rule into a full DNF format
   static int
