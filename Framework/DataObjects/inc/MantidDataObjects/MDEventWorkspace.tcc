@@ -303,6 +303,25 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
 
+TMDE(signal_t MDEventWorkspace)::getNormalizedError(
+    const API::IMDNode *box,
+    const Mantid::API::MDNormalization &normalization) const {
+  if (box) {
+    // What is our normalization factor?
+    switch (normalization) {
+    case NoNormalization:
+      return box->getError();
+    case VolumeNormalization:
+      return box->getError() * box->getInverseVolume();
+    case NumEventsNormalization:
+      return box->getError() / double(box->getNPoints());
+    }
+    // Should not reach here
+    return box->getError();
+  } else
+    return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
 TMDE(bool MDEventWorkspace)::isInBounds(const coord_t *coords) const {
   for (size_t d = 0; d < nd; d++) {
     coord_t x = coords[d];
@@ -763,7 +782,7 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     std::copy(dim_mask.begin(), dim_mask.end(), dim_mask_arr);
 
     size_t num_boundaries = static_cast<size_t>(
-        floor((max_extent - line_start) / smallest_box_sizes[d]) + 1);
+        ceil((max_extent - line_start) / smallest_box_sizes[d]));
 
     if (dir[d] != 0.0) {
       VMD lastPos = start;
@@ -782,27 +801,29 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
         // previous boundary and this one
         VMD middle = (pos + lastPos) * 0.5;
         box = this->data->getBoxAtCoord(middle.getBareArray());
-        size_t current_id = box->getID();
         lastPos = pos;
-        // If we haven't already a point for this box...
-        // This filters out the extra boundaries that don't really exist that
-        // we gained by assuming all boxes are the size of the smallest box
-        if (current_id != last_id) {
-          last_id = current_id;
-          // Get the line position at the lower boundary of the box
-          vertices_arr =
-              box->getVertexesArray(numVertexes, num_d, dim_mask_arr);
-          coord_t lower_bound = vertices_arr[0];
-          linePos = (lower_bound - line_start) / dir[d];
+        if (box != nullptr) {
+          size_t current_id = box->getID();
+          // If we haven't already a point for this box...
+          // This filters out the extra boundaries that don't really exist that
+          // we gained by assuming all boxes are the size of the smallest box
+          if (current_id != last_id) {
+            last_id = current_id;
+            // Get the line position at the lower boundary of the box
+            vertices_arr =
+                box->getVertexesArray(numVertexes, num_d, dim_mask_arr);
+            coord_t lower_bound = vertices_arr[0];
+            linePos = (lower_bound - line_start) / dir[d];
 
-          if (linePos >= 0 && linePos <= length) {
-            // Avoid picking up a 0 due to line hitting a box corner
-            if ((linePos - lastLinePos) > 1e-5) {
-              coord_t line_pos_of_box_centre =
-                  static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-              mid_points.insert(line_pos_of_box_centre);
+            if (linePos >= 0 && linePos <= length) {
+              // Avoid picking up a 0 due to line hitting a box corner
+              if ((linePos - lastLinePos) > 1e-5) {
+                coord_t line_pos_of_box_centre =
+                    static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+                mid_points.insert(line_pos_of_box_centre);
+              }
+              lastLinePos = linePos;
             }
-            lastLinePos = linePos;
           }
         }
       }
@@ -862,8 +883,13 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
       // If the box is not masked then record the signal and error here
       if (!box->getIsMasked()) {
         x.push_back(line_pos);
-        y.push_back(this->getNormalizedSignal(box, normalize));
-        e.push_back(box->getError());
+        signal_t signal = this->getNormalizedSignal(box, normalize);
+        if (boost::math::isinf(signal)) {
+          // The plotting library (qwt) doesn't like infs.
+          signal = std::numeric_limits<signal_t>::quiet_NaN();
+        }
+        y.push_back(signal);
+        e.push_back(this->getNormalizedError(box, normalize));
       }
     }
   }

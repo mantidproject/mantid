@@ -88,6 +88,10 @@ public:
   getNormalizedSignal(const API::IMDNode *box,
                       const Mantid::API::MDNormalization &normalization) const;
 
+  signal_t
+  getNormalizedError(const API::IMDNode *box,
+                     const Mantid::API::MDNormalization &normalization) const;
+
   void getLinePlot(const Mantid::Kernel::VMD &start,
                    const Mantid::Kernel::VMD &end,
                    API::MDNormalization normalize, std::vector<coord_t> &x,
@@ -230,7 +234,6 @@ protected:
   Mantid::API::MDNormalization m_displayNormalizationHisto;
 
 private:
-
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
   }
