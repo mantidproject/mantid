@@ -309,7 +309,7 @@ public:
 
     // Copy set to vector for test
     TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
-                      box_mid_points.size(), 7);
+                      box_mid_points.size(), 8);
     std::vector<double> mid_points_vect(box_mid_points.begin(),
                                         box_mid_points.end());
 
