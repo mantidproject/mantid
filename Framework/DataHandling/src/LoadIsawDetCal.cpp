@@ -214,11 +214,15 @@ void LoadIsawDetCal::exec() {
     Detbank << "bank" << id;
     // Loop through detectors to match names with number from DetCal file
     idnum = -1;
-    for (int i = 0; i < static_cast<int>(detList.size()); i++)
-      if (detList[i]->getName().compare(Detbank.str()) == 0)
-        idnum = i;
-    if (idnum >= 0)
-      det = detList[idnum];
+    auto result = std::find_if(
+        detList.begin(), detList.end(),
+        [&Detbank](const boost::shared_ptr<RectangularDetector> &det) {
+          return det->getName().compare(Detbank.str()) == 0;
+        });
+    if (result != detList.end()) {
+      idnum = static_cast<int>(std::distance(detList.begin(), result));
+      det = *result;
+    }
     if (det) {
       detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
@@ -294,12 +298,12 @@ void LoadIsawDetCal::exec() {
       }
     }
     // Loop through tube detectors to match names with number from DetCal file
-    idnum = -1;
-    for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
-      if (*it == id)
-        idnum = *it;
-    if (idnum < 0)
+    auto result2 = std::find_if(uniqueBanks.begin(), uniqueBanks.end(),
+                                [id](const int &bank) { return bank == id; });
+    if (result2 == uniqueBanks.end())
       continue;
+    idnum = *result2;
+
     std::ostringstream mess;
     if (bankPart == "WISHpanel" && idnum < 10)
       mess << bankPart << "0" << idnum;
