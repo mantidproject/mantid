@@ -305,7 +305,7 @@ public:
     auto ws2 = makeWorkspaceWithDetectors(1, 2);
 
     TS_ASSERT(!ws2->hasMaskedBins(0));
-    // Doesn't throw on invalid spectrum index, just returns false
+    // Doesn't throw on invalid spectrum number, just returns false
     TS_ASSERT(!ws2->hasMaskedBins(1));
     TS_ASSERT(!ws2->hasMaskedBins(-1));
 

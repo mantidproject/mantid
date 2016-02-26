@@ -89,7 +89,7 @@ void ConvertEmptyToTof::init() {
       "ElasticPeakPosition", EMPTY_INT(), mustBePositive,
       "Value of elastic peak position if none of the above are filled in.");
   declareProperty("ElasticPeakPositionSpectrum", EMPTY_INT(), mustBePositive,
-                  "Spectrum index used for elastic peak position above.");
+                  "Spectrum number used for elastic peak position above.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ void ConvertEmptyToTof::exec() {
 void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
   auto nHist = m_inputWS->getNumberHistograms();
   if (v.size() == 0) {
-    g_log.information("No spectrum index given. Using all spectra to calculate "
+    g_log.information("No spectrum number given. Using all spectra to calculate "
                       "the elastic peak.");
     // use all spectra indices
     v.reserve(nHist);

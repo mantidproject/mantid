@@ -215,10 +215,10 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param specIndex Index of spectrum from each workspace to plot
+ * @param wsIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int specIndex) {
+                               int wsIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -227,7 +227,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(specIndex);
+  pyInput += QString::number(wsIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);

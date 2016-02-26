@@ -77,8 +77,8 @@ void DataComparison::initLayout()
   connect(m_uiForm.pbZoom, SIGNAL(toggled(bool)), this, SLOT(toggleZoom(bool)));
   connect(m_uiForm.pbResetView, SIGNAL(clicked()), this, SLOT(resetView()));
 
-  // Replot spectra when the spectrum index is changed
-  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(spectrumIndexChanged()));
+  // Replot spectra when the workspace index is changed
+  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(workspaceIndexChanged()));
 
   // Add headers to data table
   QStringList headerLabels;
@@ -323,7 +323,7 @@ void DataComparison::removeAllData()
   }
 
   // Replot the workspaces
-  spectrumIndexChanged();
+  workspaceIndexChanged();
 }
 
 
@@ -347,20 +347,20 @@ void DataComparison::plotWorkspaces()
     // Calculate spectrum number
     QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
-    int specIndex = globalSpecIndex - specOffset;
-    g_log.debug() << "Spectrum index for workspace " << workspaceName.toStdString()
-                  << " is " << specIndex << ", with offset " << specOffset << std::endl;
+    int wsIndex = globalSpecIndex - specOffset;
+    g_log.debug() << "Workspace index for workspace " << workspaceName.toStdString()
+                  << " is " << wsIndex << ", with offset " << specOffset << std::endl;
 
     // See if this workspace extends the reach of the global spectrum selector
     int maxGlobalSpecIndexForWs = numSpec + specOffset - 1;
     if(maxGlobalSpecIndexForWs > maxGlobalSpecIndex)
       maxGlobalSpecIndex = maxGlobalSpecIndexForWs;
 
-    // Check the spectrum index is in range
-    if(specIndex >= numSpec || specIndex < 0)
+    // Check the workspace index is in range
+    if(wsIndex >= numSpec || wsIndex < 0)
     {
       g_log.debug() << "Workspace " << workspaceName.toStdString()
-                    << ", spectrum index out of range." << std::endl;;
+                    << ", workspace index out of range." << std::endl;;
 
       // Give "n/a" in current spectrum display
       m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr("n/a"));
@@ -373,11 +373,11 @@ void DataComparison::plotWorkspaces()
     }
 
     // Update current spectrum display
-    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr(QString::number(specIndex)));
+    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr(QString::number(wsIndex)));
 
     // Create the curve data
     const bool logScale(false), distribution(false);
-    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(specIndex), logScale, distribution);
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), logScale, distribution);
 
     // Detach the old curve from the plot if it exists
     if(m_curves.contains(workspaceName))
@@ -407,7 +407,7 @@ void DataComparison::plotWorkspaces()
 
 
 /**
- * Normalises the spectrum index offsets in the data table to zero.
+ * Normalises the workspace index offsets in the data table to zero.
  */
 void DataComparison::normaliseSpectraOffsets()
 {
@@ -425,7 +425,7 @@ void DataComparison::normaliseSpectraOffsets()
       lowestOffset = specOffset;
   }
 
-  // Subtract the loest offset from all offsets to ensure at least one offset is zero
+  // Subtract the lowest offset from all offsets to ensure at least one offset is zero
   for(int row = 0; row < numRows; row++)
   {
     QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
@@ -449,9 +449,9 @@ void DataComparison::updatePlot()
 
 
 /**
- * Handles a spectrum index or offset being modified.
+ * Handles a workspace index or offset being modified.
  */
-void DataComparison::spectrumIndexChanged()
+void DataComparison::workspaceIndexChanged()
 {
   normaliseSpectraOffsets();
   plotWorkspaces();

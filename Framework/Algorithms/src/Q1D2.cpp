@@ -353,9 +353,9 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 /** Calculate the normalization term for each output bin
 *  @param wavStart [in] the index number of the first bin in the input
 * wavelengths that is actually being used
-*  @param specInd [in] the spectrum to calculate
+*  @param wsIndex [in] the ws index of the spectrum to calculate
 *  @param pixelAdj [in] if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficencies, for the given spectrum index
+* the adjustments, e.g. detector efficencies, for the given ws index
 *  @param wavePixelAdj [in] if not NULL this is workspace that contains the
 * adjustments for the pixels and wavelenght dependend values.
 *  @param binNorms [in] pointer to a contigious array of doubles that are the
@@ -367,7 +367,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 *  @param normETo2 [out] this pointer must point to the end of the norm array,
 * it will be filled with the total of the error on the normalization
 */
-void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
+void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
                                   API::MatrixWorkspace_const_sptr pixelAdj,
                                   API::MatrixWorkspace_const_sptr wavePixelAdj,
                                   double const *const binNorms,
@@ -375,7 +375,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
                                   const MantidVec::iterator norm,
                                   const MantidVec::iterator normETo2) const {
   double detectorAdj, detAdjErr;
-  pixelWeight(pixelAdj, specInd, detectorAdj, detAdjErr);
+  pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
   for (MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
@@ -386,32 +386,32 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
     if (wavePixelAdj)
       // pass the iterator for the wave pixel Adj dependent
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2,
-                 wavePixelAdj->readY(specInd).begin() + wavStart,
-                 wavePixelAdj->readE(specInd).begin() + wavStart);
+                 wavePixelAdj->readY(wsIndex).begin() + wavStart,
+                 wavePixelAdj->readE(wsIndex).begin() + wavStart);
     else
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2);
   }
-  normToMask(wavStart, specInd, norm, normETo2);
+  normToMask(wavStart, wsIndex, norm, normETo2);
 }
 
 /** Calculates the normalisation for the spectrum specified by the index number
 * that was passed
-*  as the solid anlge multiplied by the pixelAdj that was passed
+*  as the solid angle multiplied by the pixelAdj that was passed
 *  @param[in] pixelAdj if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficencies, for the given spectrum index
-*  @param[in] specIndex the spectrum index to return the data from
-*  @param[out] weight the solid angle or if pixelAdj the solid anlge times the
+* the adjustments, e.g. detector efficiencies, for the given ws index
+*  @param[in] wsIndex the workspace index to return the data from
+*  @param[out] weight the solid angle or if pixelAdj the solid angle times the
 * pixel adjustment for this spectrum
 *  @param[out] error the error on the weight, only non-zero if pixelAdj
 *  @throw LogicError if the solid angle is tiny or negative
 */
 void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
-                       const size_t specIndex, double &weight,
+                       const size_t wsIndex, double &weight,
                        double &error) const {
   const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
 
   if (m_doSolidAngle)
-    weight = m_dataWS->getDetector(specIndex)->solidAngle(samplePos);
+    weight = m_dataWS->getDetector(wsIndex)->solidAngle(samplePos);
   else
     weight = 1.0;
 
@@ -421,8 +421,8 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
   }
   // this input multiplies up the adjustment if it exists
   if (pixelAdj) {
-    weight *= pixelAdj->readY(specIndex)[0];
-    error = weight * pixelAdj->readE(specIndex)[0];
+    weight *= pixelAdj->readY(wsIndex)[0];
+    error = weight * pixelAdj->readE(wsIndex)[0];
   } else {
     error = 0.0;
   }

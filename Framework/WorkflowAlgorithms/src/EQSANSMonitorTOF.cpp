@@ -62,7 +62,7 @@ void EQSANSMonitorTOF::exec() {
   try {
     mon = inputWS->getInstrument()->getDetector(monitor_list[0]);
   } catch (Exception::NotFoundError &) {
-    g_log.error() << "Spectrum index " << monitor_list[0]
+    g_log.error() << "Spectrum number " << monitor_list[0]
                   << " has no detector assigned to it - discarding"
                   << std::endl;
     return;

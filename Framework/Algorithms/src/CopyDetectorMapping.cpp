@@ -24,7 +24,7 @@ void CopyDetectorMapping::init() {
       new PropertyWithValue<bool>("IndexBySpectrumNumber", false,
                                   Direction::Input),
       "Will use mapping indexed by spectrum number rather than the default of"
-      "spectrum index (recommended when both workspaces have a vertical axis "
+      "spectrum number (recommended when both workspaces have a vertical axis "
       "in spectrum number).");
 }
 

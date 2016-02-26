@@ -641,7 +641,7 @@ void SaveISISNexus::monitor_i(int i) {
   NXmakegroup(handle, ostr.str().c_str(), "NXmonitor");
   NXopengroup(handle, ostr.str().c_str(), "NXmonitor");
 
-  //  int imon = m_isisRaw->mdet[i]; // spectrum index
+  //  int imon = m_isisRaw->mdet[i]; // spectrum number
   NXmakedata(handle, "data", NX_INT32, 3, dim);
   NXopendata(handle, "data");
   for (int p = 0; p < nper; ++p) {

@@ -278,7 +278,7 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 /**
  * Sets a new preview spectrum for the mini plot.
  *
- * @param value Spectrum index
+ * @param value workspace index
  */
 void ResNorm::previewSpecChanged(int value) {
   m_previewSpec = value;

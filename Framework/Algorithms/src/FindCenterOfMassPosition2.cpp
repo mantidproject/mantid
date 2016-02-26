@@ -154,7 +154,7 @@ void FindCenterOfMassPosition2::exec() {
       try {
         det = inputWS->getDetector(i);
       } catch (Exception::NotFoundError &) {
-        g_log.warning() << "Spectrum index " << i
+        g_log.warning() << "Workspace index " << i
                         << " has no detector assigned to it - discarding"
                         << std::endl;
         continue;

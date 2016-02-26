@@ -100,8 +100,8 @@ protected:
   /// Gets the base name of a workspace
   QString getWorkspaceBasename(const QString &wsName);
 
-  /// Plot a spectrum plot with a given spectrum index
-  void plotSpectrum(const QStringList &workspaceNames, int specIndex = 0);
+  /// Plot a spectrum plot with a given ws index
+  void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
   /// Plot a spectrum plot of a given workspace
   void plotSpectrum(const QString &workspaceName, int specIndex = 0);
 

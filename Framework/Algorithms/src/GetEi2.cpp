@@ -90,7 +90,7 @@ void GetEi2::init()
 
   declareProperty(
       "FirstMonitorIndex", 0,
-      "The spectrum index of the first montitor in the input workspace.",
+      "The workspace index of the first monitor in the input workspace.",
       Direction::Output);
 
   declareProperty("Tzero", 0.0, "", Direction::Output);

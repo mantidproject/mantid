@@ -106,12 +106,12 @@ public:
   std::map<specid_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using a
+  /// Query the NearestNeighbours object for a given spectrum number using a
   /// search radius
   std::map<specid_t, Mantid::Kernel::V3D>
   getNeighbours(specid_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using the
+  /// Query the NearestNeighbours object for a given spectrum number using the
   /// direct number of nearest neighbours
   std::map<specid_t, Mantid::Kernel::V3D>
   getNeighboursExact(specid_t spec, const int nNeighbours,
@@ -312,10 +312,10 @@ public:
 
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
-   * @param index: the spectrum index
+   * @param specNum: the spectrum number
    */
-  virtual bool hasDx(const std::size_t index) const {
-    return getSpectrum(index)->hasDx();
+  virtual bool hasDx(const std::size_t specNum) const {
+    return getSpectrum(specNum)->hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.
@@ -511,7 +511,7 @@ private:
   /// Flag indicating whether the data has common bins. False by default
   mutable bool m_isCommonBinsFlag;
 
-  /// The set of masked bins in a map keyed on spectrum index
+  /// The set of masked bins in a map keyed on spectrum number
   std::map<int64_t, MaskList> m_masks;
 
   /// A workspace holding monitor data relating to the main data in the

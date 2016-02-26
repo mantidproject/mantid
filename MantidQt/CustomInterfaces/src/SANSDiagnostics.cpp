@@ -473,7 +473,7 @@ namespace MantidQt
       if ( min_spec_index == ULONG_MAX || max_spec_index == 0){
         g_log.error()<<"Error : The instrument does not have data associated to the RectangularDetector " << rectDet->getDetectorName().toStdString()<<std::endl;
       }
-      // as long the spectrum index is the workspace index + 1
+      // as long the spectrum number is the workspace index + 1
       specList.clear();
       // it is not really required, it could stay with the workspace id, just for compatibility
       specList.push_back(mws_sptr->getSpectrum(min_spec_index)->getSpectrumNo());
@@ -515,7 +515,7 @@ namespace MantidQt
       
     }
 
-    /** This method returns workspace Indexes for the given spectrum indexes
+    /** This method returns workspace Indexes for the given spectrum numbers
       * @param mws_sptr - shared pointer to workspace
       * @param specList - list of spectra
       * @param startWSIndex - start index of workspace
@@ -797,8 +797,8 @@ namespace MantidQt
     * executes LoadRaw and SumRowColumn algorithm.
     * @param range string entered by user
     * @param orientation orientation
-    * @param specMin- minimum spectrum index
-    * @param specMax - maximum spectrum index
+    * @param specMin- minimum spectrum number
+    * @param specMax - maximum spectrum number
     * @param detectorName - name of the detector.
     * @param integrationType - the type of the integration, i.e. H, V or T
     * @param bMask boolean used for masking
@@ -936,8 +936,8 @@ namespace MantidQt
    /**This method gets called from the handler of TimeIntegral Clicked button click.
     * executes SumSpectra algorithm.
     * @param range string entered by user   
-    * @param minSpec- minimum spectrum index used to separate the Front/Rear Detectors data.
-    * @param maxSpec - maximum spectrum index used to separate the Front/Read Detectors data.
+    * @param minSpec- minimum spectrum number used to separate the Front/Rear Detectors data.
+    * @param maxSpec - maximum spectrum number used to separate the Front/Read Detectors data.
     * @param opws - output workspace.
     * @param pixel_mask boolean used for masking 
     */

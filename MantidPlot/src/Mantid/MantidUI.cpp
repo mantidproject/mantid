@@ -2947,7 +2947,7 @@ y-values and errors (if errs is true) of the following spectra. If visible == tr
 the table is made visible in Qtiplot.
 
 The name of a Y column is "Y"+QString\:\:number(i), where i is the row in the MantidMatrix,
-not the spectrum index in the workspace.
+not the spectrum number in the workspace.
 
 */
 Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool binCentres)
@@ -3041,7 +3041,7 @@ MultiLayer *MantidUI::plot1D(const QStringList &ws_names, const QList<int> &inde
 		{
 			pairs.insert(workspace_name, spec_itr.previous());
 		}
-		//Reset spectrum index pointer
+		//Reset workspace index pointer
 		spec_itr.toBack();
 	}
 

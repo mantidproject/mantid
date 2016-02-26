@@ -53,7 +53,7 @@ namespace CustomInterfaces
     /// Handles updating the plot
     void updatePlot();
     /// Handles updating th eplot after a spectum index is changed
-    void spectrumIndexChanged();
+    void workspaceIndexChanged();
     /// Handles creating and plotting a diff worksapce
     void plotDiffWorkspace();
     /// Toggle the pan plot tool
