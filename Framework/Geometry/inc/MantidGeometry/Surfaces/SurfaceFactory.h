@@ -48,7 +48,8 @@ private:
 
   MapType SGrid;                  ///< The tally stack
   std::map<char, std::string> ID; ///< Short letter identifiers
-
+  SurfaceFactory(const SurfaceFactory &other);
+  SurfaceFactory &operator=(const SurfaceFactory &other);
   SurfaceFactory(); ///< singleton constructor
   void registerSurface();
 
