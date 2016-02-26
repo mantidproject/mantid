@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/VMD.h"
 
 namespace Mantid {
 namespace API {
@@ -61,11 +62,24 @@ public:
   virtual std::vector<coord_t> estimateResolution() const = 0;
   //@}
 
-  virtual std::string getGeometryXML() const = 0;
-
+  //@name Methods to add dimensions.
+  //@{
   virtual void
   addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) = 0;
+
   virtual void addDimension(Mantid::Geometry::IMDDimension *dim) = 0;
+  //@}
+
+  //@name Methods to manipulate the basis vectors for the dimensions.
+  //@{
+  virtual Mantid::Kernel::VMD &getBasisVector(size_t index) = 0;
+
+  virtual const Mantid::Kernel::VMD &getBasisVector(size_t index) const = 0;
+
+  virtual void setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) = 0;
+
+  virtual bool allBasisNormalized() const = 0;
+  //@}
 };
 
 } // namespace API
