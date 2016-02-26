@@ -905,7 +905,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // see where spec number comes from
 
   loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite);
+                               vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
   const std::string instStr = m_view->currentInstrument();
   try {
@@ -1448,7 +1448,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string vanNo = m_view->currentVanadiumNo();
   loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite);
+                               vanCurvesWS, cs.m_forceRecalcOverwrite, "");
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
@@ -1635,7 +1635,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
     ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    bool forceRecalc) {
+    bool forceRecalc, const std::string specNos) {
   bool foundPrecalc = false;
 
   std::string preIntegFilename, preCurvesFilename;
@@ -1678,7 +1678,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                    << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS, vanNo);
+                                    vanIntegWS, vanCurvesWS, vanNo, specNos);
     } catch (std::invalid_argument &ia) {
       g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
@@ -1767,7 +1767,7 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
     ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    const std::string &vanNo) {
+    const std::string &vanNo, const std::string specNos) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg =
@@ -1790,8 +1790,16 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
-  saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
-  saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+  if (specNos != "") {
+    if (specNos == "North") {
+      saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
+    } else if (specNos == "South") {
+      saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+    }
+  } else {
+    saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
+    saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+  }
 }
 
 /**
@@ -2137,7 +2145,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     }
 
     // Get the Customised Bank Name text-ield string from qt
-    std::string const CustomisedBankName =
+    const std::string CustomisedBankName =
         m_view->currentCalibCustomisedBankName();
     const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
