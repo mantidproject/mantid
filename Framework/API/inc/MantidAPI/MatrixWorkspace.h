@@ -103,18 +103,18 @@ public:
   /// Causes the nearest neighbours map to be rebuilt
   void rebuildNearestNeighbours();
   /// Query the NearestNeighbours object for a detector
-  std::map<specid_t, Mantid::Kernel::V3D>
+  std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using a
   /// search radius
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighbours(specid_t spec, const double radius,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighbours(specnum_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using the
   /// direct number of nearest neighbours
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specid_t spec, const int nNeighbours,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighboursExact(specnum_t spec, const int nNeighbours,
                      const bool ignoreMaskedDetectors = false) const;
   //@}
 
@@ -130,14 +130,15 @@ public:
   virtual std::vector<size_t>
   getDetectorIDToWorkspaceIndexVector(detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
+
   virtual std::vector<size_t>
-  getSpectrumToWorkspaceIndexVector(specid_t &offset) const;
+  getSpectrumToWorkspaceIndexVector(specnum_t &offset) const;
   std::vector<size_t>
-  getIndicesFromSpectra(const std::vector<specid_t> &spectraList) const;
-  size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
+  getIndicesFromSpectra(const std::vector<specnum_t> &spectraList) const;
+  size_t getIndexFromSpectrumNumber(const specnum_t specNo) const;
   std::vector<size_t>
   getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
-  std::vector<specid_t>
+  std::vector<specnum_t>
   getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
 
   bool hasGroupedDetectors() const;

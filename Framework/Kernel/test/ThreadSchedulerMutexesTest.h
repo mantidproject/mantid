@@ -18,7 +18,7 @@ public:
    * that sets its mutex */
   class TaskWithMutex : public Task {
   public:
-    TaskWithMutex(boost::shared_ptr<Mutex> mutex, double cost) {
+    TaskWithMutex(boost::shared_ptr<std::mutex> mutex, double cost) {
       m_mutex = mutex;
       m_cost = cost;
     }
@@ -33,8 +33,8 @@ public:
 
   void test_push() {
     ThreadSchedulerMutexes sc;
-    auto mut1 = boost::make_shared<Mutex>();
-    auto mut2 = boost::make_shared<Mutex>();
+    auto mut1 = boost::make_shared<std::mutex>();
+    auto mut2 = boost::make_shared<std::mutex>();
     TaskWithMutex *task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex *task2 = new TaskWithMutex(mut2, 9.0);
 
@@ -46,16 +46,17 @@ public:
 
   void test_queue() {
     ThreadSchedulerMutexes sc;
-    auto mut1 = boost::make_shared<Mutex>();
-    auto mut2 = boost::make_shared<Mutex>();
-    auto mut3 = boost::make_shared<Mutex>();
+    auto mut1 = boost::make_shared<std::mutex>();
+    auto mut2 = boost::make_shared<std::mutex>();
+    auto mut3 = boost::make_shared<std::mutex>();
     TaskWithMutex *task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex *task2 = new TaskWithMutex(mut1, 9.0);
     TaskWithMutex *task3 = new TaskWithMutex(mut1, 8.0);
     TaskWithMutex *task4 = new TaskWithMutex(mut2, 7.0);
     TaskWithMutex *task5 = new TaskWithMutex(mut2, 6.0);
     TaskWithMutex *task6 = new TaskWithMutex(mut3, 5.0);
-    TaskWithMutex *task7 = new TaskWithMutex(boost::shared_ptr<Mutex>(), 4.0);
+    TaskWithMutex *task7 =
+        new TaskWithMutex(boost::shared_ptr<std::mutex>(), 4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
@@ -121,7 +122,7 @@ public:
     ThreadSchedulerMutexes sc;
     for (size_t i = 0; i < 10; i++) {
       TaskWithMutex *task =
-          new TaskWithMutex(boost::make_shared<Mutex>(), 10.0);
+          new TaskWithMutex(boost::make_shared<std::mutex>(), 10.0);
       sc.push(task);
     }
     TS_ASSERT_EQUALS(sc.size(), 10);
@@ -135,7 +136,7 @@ public:
   void test_performance_same_mutex() {
     ThreadSchedulerMutexes sc;
     Timer tim0;
-    auto mut1 = boost::make_shared<Mutex>();
+    auto mut1 = boost::make_shared<std::mutex>();
     size_t num = 500;
     for (size_t i = 0; i < num; i++) {
       sc.push(new TaskWithMutex(mut1, 10.0));
@@ -156,7 +157,7 @@ public:
     Timer tim0;
     size_t num = 500;
     for (size_t i = 0; i < num; i++) {
-      sc.push(new TaskWithMutex(boost::make_shared<Mutex>(), 10.0));
+      sc.push(new TaskWithMutex(boost::make_shared<std::mutex>(), 10.0));
     }
     // std::cout << tim0.elapsed() << " secs to push." << std::endl;
     TS_ASSERT_EQUALS(sc.size(), num);

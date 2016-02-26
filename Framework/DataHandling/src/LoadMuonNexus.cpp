@@ -59,7 +59,7 @@ void LoadMuonNexus::init() {
                   mustBePositive, "Index of last spectrum to read\n"
                                   "(default the last spectrum)");
 
-  declareProperty(make_unique<ArrayProperty<specid_t>>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
                   "load");
   declareProperty("AutoGroup", false,
@@ -114,9 +114,9 @@ void LoadMuonNexus::checkOptionalProperties() {
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    const specid_t minlist =
+    const specnum_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
-    const specid_t maxlist =
+    const specnum_t maxlist =
         *max_element(m_spec_list.begin(), m_spec_list.end());
     if (maxlist > m_numberOfSpectra || minlist == 0) {
       g_log.error("Invalid list of spectra");

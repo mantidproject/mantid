@@ -420,7 +420,8 @@ void LeBailFit::processInputBackground() {
     }
 
     g_log.information() << "[Input] Use background specified with vector with "
-                           "input vector sized " << numparams << ".\n";
+                           "input vector sized "
+                        << numparams << ".\n";
   } else {
     g_log.information()
         << "[Input] Use background specified by table workspace.\n";
@@ -979,10 +980,11 @@ void LeBailFit::parseInstrumentParametersTable() {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> strvalue;
-        strvalue.erase(std::find_if(strvalue.rbegin(), strvalue.rend(),
-                                    std::not1(std::ptr_fun<int, int>(
-                                        std::isspace))).base(),
-                       strvalue.end());
+        strvalue.erase(
+            std::find_if(strvalue.rbegin(), strvalue.rend(),
+                         std::not1(std::ptr_fun<int, int>(std::isspace)))
+                .base(),
+            strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
         tempstrmap.emplace(colname, strvalue);
@@ -2369,7 +2371,7 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
     g_log.debug() << "[TestRandom] dice " << dice << "\n";
     double bar =
         exp(-(new_goodness - cur_goodness) / (cur_goodness * m_Temperature));
-    // random number (dice, 0 and 1) is smaller than bar (between -infty andn0)
+
     accept = dice < bar;
   }
 

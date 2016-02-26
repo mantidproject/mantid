@@ -661,7 +661,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                  boost::lexical_cast<std::string>(peak1TwoSigma) +
                  "\n and Peak at mon2: Ei= " +
                  boost::lexical_cast<std::string>(peak2Pos) + "and height: " +
-                 boost::lexical_cast<std::string>(peak1Height) << std::endl;
+                 boost::lexical_cast<std::string>(peak1Height)
+          << std::endl;
 
       return false;
     }
@@ -879,9 +880,9 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // at this stage all properties are validated so its safe to access them
   // without
   // additional checks.
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
   auto pSpectr1 = inputWS->getSpectrum(wsIndex0);
   auto pSpectr2 = inputWS->getSpectrum(wsIndex1);
@@ -1243,7 +1244,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
                           "Rebin input workspace first.";
   }
 
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum1);
   } catch (std::runtime_error &) {
@@ -1251,7 +1252,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
         "Input workspace does not contain spectra with ID: " +
         boost::lexical_cast<std::string>(specNum1);
   }
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum2);
   } catch (std::runtime_error &) {

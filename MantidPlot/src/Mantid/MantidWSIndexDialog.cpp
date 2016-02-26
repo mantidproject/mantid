@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <QRegExp>
-#include <QtAlgorithms> 
+#include <QtAlgorithms>
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <QPalette>
@@ -52,7 +52,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
 }
 
 /**
- * Returns the user-selected plots 
+ * Returns the user-selected plots
  * @returns Plots selected by user
  */
 QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
@@ -251,7 +251,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
       if (ws->getAxis(i)->isSpectra())
         hasSpectra = true;
     }
-    if (hasSpectra == false) {
+    if (!hasSpectra) {
       m_spectra = false;
       break;
     }
@@ -399,8 +399,7 @@ void MantidWSIndexDialog::plotAll() {
 //----------------------------------
 // MantidWSIndexDialog private methods
 //----------------------------------
-void MantidWSIndexDialog::init()
-{
+void MantidWSIndexDialog::init() {
   m_outer = new QVBoxLayout;
 
   setWindowTitle(tr("MantidPlot"));
@@ -409,10 +408,9 @@ void MantidWSIndexDialog::init()
   setLayout(m_outer);
 }
 
-void MantidWSIndexDialog::initButtons()
-{
+void MantidWSIndexDialog::initButtons() {
   m_buttonBox = new QHBoxLayout;
-  
+
   m_okButton = new QPushButton("OK");
   m_cancelButton = new QPushButton("Cancel");
   m_plotAllButton = new QPushButton("Plot All");
@@ -433,120 +431,81 @@ void MantidWSIndexDialog::initButtons()
 //----------------------------------
 // Interval public methods
 //----------------------------------
-Interval::Interval(int single)
-{
-  init(single, single);
-}
+Interval::Interval(int single) { init(single, single); }
 
-Interval::Interval(int start, int end)
-{
-  init(start, end);
-}
+Interval::Interval(int start, int end) { init(start, end); }
 
-Interval::Interval(QString intervalString)
-{
+Interval::Interval(QString intervalString) {
   // Check to see if string is of the correct format, and then parse.
   // An interval can either be "n" or "n-m" where n and m are integers
   const QString patternSingle("^\\d+$");     // E.g. "2" or "712"
   const QString patternRange("^\\d+-\\d+$"); // E.g. "2-4" or "214-200"
   const QRegExp regExpSingle(patternSingle);
   const QRegExp regExpRange(patternRange);
-  
-  if(regExpSingle.exactMatch(intervalString))
-  {
+
+  if (regExpSingle.exactMatch(intervalString)) {
     int single = intervalString.toInt();
     init(single, single);
-  }
-  else if(regExpRange.exactMatch(intervalString))
-  {
+  } else if (regExpRange.exactMatch(intervalString)) {
     QStringList range = intervalString.split("-");
     int start = range[0].toInt();
     int end = range[1].toInt();
     init(start, end);
-  }
-  else
-  {
+  } else {
     throw std::exception();
   }
 }
 
-Interval::Interval(const Interval& copy)
-{
-  init(copy.m_start, copy.m_end);
-}
+Interval::Interval(const Interval &copy) { init(copy.m_start, copy.m_end); }
 
-bool Interval::merge(const Interval& other) 
-{
+bool Interval::merge(const Interval &other) {
   // If cant merge, return false
-  if(!canMerge(other))
+  if (!canMerge(other))
     return false;
 
   // Else, merge - e.g "2" into "3-5" to create "2-5":
 
-  if(other.start() < m_start)
+  if (other.start() < m_start)
     m_start = other.start();
 
-  if(other.end() > m_end)
+  if (other.end() > m_end)
     m_end = other.end();
 
   return true;
 }
 
-bool Interval::canMerge(const Interval& other) const
-{
-  if(other.start() > m_end + 1 || other.end() + 1 < m_start)
-    return false;
-  else
-    return true;
+bool Interval::canMerge(const Interval &other) const {
+  return !(other.start() > m_end + 1 || other.end() + 1 < m_start);
 }
 
-int Interval::start() const
-{
-  return m_start;
-}
+int Interval::start() const { return m_start; }
 
-int Interval::end() const
-{
-  return m_end;
-}
+int Interval::end() const { return m_end; }
 
 // Note that the length of an interval with only one number is 1.
 // Ergo, "length" is defined as (1 + (end - start))
-int Interval::length() const
-{
-  return 1 + m_end - m_start;
-}
+int Interval::length() const { return 1 + m_end - m_start; }
 
-std::set<int> Interval::getIntSet() const
-{
+std::set<int> Interval::getIntSet() const {
   std::set<int> intSet;
 
-  for(int i = m_start; i <= m_end; i++)
-  {
+  for (int i = m_start; i <= m_end; i++) {
     intSet.insert(i);
   }
 
   return intSet;
 }
 
-bool Interval::contains(const Interval& other) const
-{
-  if(other.m_start >= m_start && other.m_end <= m_end)
-    return true;
-
-  return false;
+bool Interval::contains(const Interval &other) const {
+  return (other.m_start >= m_start && other.m_end <= m_end);
 }
 
-std::string Interval::toStdString() const
-{
+std::string Interval::toStdString() const {
   std::string output;
-  
-  if(m_start == m_end)
-  {
+
+  if (m_start == m_end) {
     output += boost::lexical_cast<std::string>(m_start);
-  }
-  else
-  {
+  } else {
     output += boost::lexical_cast<std::string>(m_start) + "-";
     output += boost::lexical_cast<std::string>(m_end);
   }
@@ -554,17 +513,13 @@ std::string Interval::toStdString() const
   return output;
 }
 
-QString Interval::toQString() const
-{
+QString Interval::toQString() const {
   QString output;
-  
-  if(m_start == m_end)
-  {
+
+  if (m_start == m_end) {
     output.append(QString("%1").arg(m_start));
-  }
-  else
-  {
-    output.append(QString("%1").arg(m_start)); 
+  } else {
+    output.append(QString("%1").arg(m_start));
     output += "-";
     output.append(QString("%1").arg(m_end));
   }
@@ -575,17 +530,14 @@ QString Interval::toQString() const
 //----------------------------------
 // Interval private methods
 //----------------------------------
-void Interval::init(int start, int end)
-{
-  if(start <= end)
-  {
+void Interval::init(int start, int end) {
+  if (start <= end) {
     m_start = start;
     m_end = end;
   }
   // Here we cater for the case where a user sets start to be at say 4 but
   // end at 2.  We redefine the interval to be "2-4".
-  else
-  {
+  else {
     m_start = end;
     m_end = start;
   }
@@ -594,54 +546,35 @@ void Interval::init(int start, int end)
 //----------------------------------
 // IntervalList public methods
 //----------------------------------
-IntervalList::IntervalList(void)
-{
+IntervalList::IntervalList(void) {}
 
-}
+IntervalList::IntervalList(QString intervals) { addIntervals(intervals); }
 
-IntervalList::IntervalList(QString intervals)
-{
-  addIntervals(intervals);
-}
+IntervalList::IntervalList(Interval interval) { m_list.append(interval); }
 
-IntervalList::IntervalList(Interval interval)
-{
-  m_list.append(interval);
-}
+IntervalList::IntervalList(const IntervalList &copy) { m_list = copy.m_list; }
 
-IntervalList::IntervalList(const IntervalList& copy)
-{
-  m_list = copy.m_list;
-}
+const QList<Interval> &IntervalList::getList() const { return m_list; }
 
-const QList<Interval>& IntervalList::getList() const
-{
-  return m_list;
-}
-
-int IntervalList::totalIntervalLength() const
-{
+int IntervalList::totalIntervalLength() const {
   // Total up all the individual Interval lengths in the list:
-  
+
   int total = 0;
 
-  for(int i = 0; i < m_list.size(); i++)
-  {
+  for (int i = 0; i < m_list.size(); i++) {
     total += (m_list.at(i).length());
   }
 
   return total;
 }
 
-std::string IntervalList::toStdString(int numOfIntervals) const
-{
+std::string IntervalList::toStdString(int numOfIntervals) const {
   std::string output;
 
-  if(m_list.size() <= numOfIntervals)
-  {
-    for(int i = 0; i < m_list.size(); i++)
-    {
-      if(i > 0) output += ", ";
+  if (m_list.size() <= numOfIntervals) {
+    for (int i = 0; i < m_list.size(); i++) {
+      if (i > 0)
+        output += ", ";
 
       output += m_list.at(i).toStdString();
     }
@@ -650,11 +583,10 @@ std::string IntervalList::toStdString(int numOfIntervals) const
   // we only print out the first (numOfIntervals - 1) Intervals,
   // followed by a ", ...", followed by the final Interval.
   // E.g. "0,2,4,6,8,10,12,14,16,18" becomes "0,2,4,6,8,...,18"
-  else
-  {
-    for(int i = 0; i < numOfIntervals - 1; i++)
-    {
-      if(i > 0) output += ", ";
+  else {
+    for (int i = 0; i < numOfIntervals - 1; i++) {
+      if (i > 0)
+        output += ", ";
 
       output += m_list[i].toStdString();
     }
@@ -665,132 +597,112 @@ std::string IntervalList::toStdString(int numOfIntervals) const
   return output;
 }
 
-QString IntervalList::toQString(int numOfIntervals) const
-{
+QString IntervalList::toQString(int numOfIntervals) const {
   QString output(toStdString(numOfIntervals).c_str());
 
   return output;
 }
 
-void IntervalList::addInterval(int single)
-{
+void IntervalList::addInterval(int single) {
   Interval interval(single, single);
 
   IntervalList::addInterval(interval);
 }
 
-// Note: this is considerably more efficient in the case where intervals are added
+// Note: this is considerably more efficient in the case where intervals are
+// added
 // smallest first.
-void IntervalList::addInterval(Interval interval)
-{
-  if(m_list.size() == 0)
-  {
+void IntervalList::addInterval(Interval interval) {
+  if (m_list.size() == 0) {
     m_list.append(interval);
     return;
   }
-  
+
   bool added = false;
   QList<int> deleteList;
 
-  for(int i = m_list.size() - 1; i >= 0 ; i--)
-  {
+  for (int i = m_list.size() - 1; i >= 0; i--) {
     // if new interval is completely higher than this interval
-    if(interval.start() > m_list.at(i).end() + 1)
-    {
+    if (interval.start() > m_list.at(i).end() + 1) {
       // add new interval as a seperate interval
       m_list.append(interval);
       added = true;
       break;
     }
     // else if the new interval can be merged with this interval
-    else if(m_list.at(i).canMerge(interval))
-    {
+    else if (m_list.at(i).canMerge(interval)) {
       // for each interval in the list before and including this one
-      for(int j = i; j >= 0; j--)
-      {
+      for (int j = i; j >= 0; j--) {
         // if it can be merged into the new interval
-        if(m_list.at(j).canMerge(interval))
-        {
+        if (m_list.at(j).canMerge(interval)) {
           // do it
           interval.merge(m_list.at(j));
           // then add its index to the list of intervals to be deleted
           deleteList.append(j);
         }
-        // else if it cant, there is no need to continue checking whether 
+        // else if it cant, there is no need to continue checking whether
         // any other intervals can alse be merged
-        else
-        {
+        else {
           break;
         }
       }
       // insert the new large interval in the correct place
-      m_list.insert(i+1, interval);
+      m_list.insert(i + 1, interval);
       added = true;
       break;
     }
   }
   // if deleteList has any elements, delete intervals at those indices
-  if(deleteList.size() > 0)
-  {
+  if (deleteList.size() > 0) {
     qSort(deleteList);
-      
-    for(int i = deleteList.size() - 1; i >=0 ; i--)
-    {
+
+    for (int i = deleteList.size() - 1; i >= 0; i--) {
       m_list.removeAt(deleteList[i]);
     }
   }
-  // if still not assigned, add to the beginning 
-  if(!added)
-  {
+  // if still not assigned, add to the beginning
+  if (!added) {
     m_list.insert(0, interval);
   }
 }
 
-void IntervalList::addInterval(int start, int end)
-{
+void IntervalList::addInterval(int start, int end) {
   Interval interval(start, end);
 
   IntervalList::addInterval(interval);
 }
 
-void IntervalList::addIntervals(QString intervals)
-{
+void IntervalList::addIntervals(QString intervals) {
   // Remove whitespace
   intervals = intervals.simplified();
   intervals = intervals.replace(" ", "");
-  
+
   // Split the string, and add the intervals to the list.
   QStringList intervalList = intervals.split(",");
-  for(int i = 0; i < intervalList.size(); i++)
-  {
+  for (int i = 0; i < intervalList.size(); i++) {
     Interval interval(intervalList[i]);
     addInterval(interval);
   }
 }
 
-void IntervalList::addIntervalList(const IntervalList& intervals)
-{
+void IntervalList::addIntervalList(const IntervalList &intervals) {
   const QList<Interval> list = intervals.getList();
 
   QList<Interval>::const_iterator it = list.constBegin();
 
-  for( ; it != list.constEnd(); ++it)
-  {
+  for (; it != list.constEnd(); ++it) {
     addInterval((*it));
   }
 }
 
-void IntervalList::setIntervalList(const IntervalList& intervals)
-{
+void IntervalList::setIntervalList(const IntervalList &intervals) {
   m_list = QList<Interval>(intervals.getList());
 }
 
-std::set<int> IntervalList::getIntSet() const
-{
+std::set<int> IntervalList::getIntSet() const {
   std::set<int> intSet;
 
-  for(int i = 0; i < m_list.size(); i++)
-  {
+  for (int i = 0; i < m_list.size(); i++) {
     std::set<int> intervalSet = m_list.at(i).getIntSet();
     intSet.insert(intervalSet.begin(), intervalSet.end());
   }
@@ -798,72 +710,60 @@ std::set<int> IntervalList::getIntSet() const
   return intSet;
 }
 
-bool IntervalList::contains(const Interval& other) const
-{
-  for(int i = 0; i < m_list.size(); i++)
-  {
-    if(m_list.at(i).contains(other))
+bool IntervalList::contains(const Interval &other) const {
+  for (int i = 0; i < m_list.size(); i++) {
+    if (m_list.at(i).contains(other))
       return true;
   }
 
   return false;
 }
 
-bool IntervalList::contains(const IntervalList& other) const
-{
-  for(int i = 0; i < other.m_list.size(); i++)
-  {
-    if(!IntervalList::contains(other.m_list.at(i)))
+bool IntervalList::contains(const IntervalList &other) const {
+  for (int i = 0; i < other.m_list.size(); i++) {
+    if (!IntervalList::contains(other.m_list.at(i)))
       return false;
   }
 
   return true;
 }
 
-bool IntervalList::isParsable(const QString &input, const IntervalList &container)
-{
-  try
-  {
+bool IntervalList::isParsable(const QString &input,
+                              const IntervalList &container) {
+  try {
     const IntervalList test(input);
     return container.contains(test);
-  } 
-  catch (std::exception&)
-  {
+  } catch (std::exception &) {
     return false;
   }
 }
 
-bool IntervalList::isParsable(const QString &input)
-{
-  try
-  {
+bool IntervalList::isParsable(const QString &input) {
+  try {
     IntervalList interval(input);
     return true;
-  } 
-  catch (std::exception&)
-  {
+  } catch (std::exception &) {
     return false;
   }
 }
 
-IntervalList IntervalList::intersect(const IntervalList& aList, const Interval& bInterval)
-{
+IntervalList IntervalList::intersect(const IntervalList &aList,
+                                     const Interval &bInterval) {
   const IntervalList bList(bInterval);
 
   return IntervalList::intersect(aList, bList);
 }
 
-IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& b)
-{
+IntervalList IntervalList::intersect(const IntervalList &a,
+                                     const IntervalList &b) {
   IntervalList output;
 
   const std::set<int> aInts = a.getIntSet();
   const std::set<int> bInts = b.getIntSet();
 
-  for( auto aInt = aInts.begin(); aInt != aInts.end(); ++aInt )
-  {
+  for (auto aInt = aInts.begin(); aInt != aInts.end(); ++aInt) {
     const bool inIntervalListB = bInts.find(*aInt) != bInts.end();
-    if( inIntervalListB )
+    if (inIntervalListB)
       output.addInterval(*aInt);
   }
 
@@ -873,22 +773,22 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
 //----------------------------------
 // IntervalListValidator public methods
 //----------------------------------
-IntervalListValidator::IntervalListValidator(QObject * parent, const IntervalList &intervalList) : QValidator(parent), m_intervalList(intervalList)
-{
-}
+IntervalListValidator::IntervalListValidator(QObject *parent,
+                                             const IntervalList &intervalList)
+    : QValidator(parent), m_intervalList(intervalList) {}
 
-QValidator::State IntervalListValidator::validate(QString &input, int &pos) const
-{
+QValidator::State IntervalListValidator::validate(QString &input,
+                                                  int &pos) const {
   UNUSED_ARG(pos)
-  if(IntervalList::isParsable(input, m_intervalList))
+  if (IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
-  
+
   const QString pattern("^(\\d|-|,)*$");
   const QRegExp regExp(pattern);
-  
-  if(regExp.exactMatch(input))
+
+  if (regExp.exactMatch(input))
     return QValidator::Intermediate;
-  
+
   return QValidator::Invalid;
 }
 

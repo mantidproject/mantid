@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <set>
+#include <unordered_set>
 
 namespace Mantid {
 namespace API {
@@ -56,7 +56,7 @@ public:
   Expression(const std::vector<std::string> &ops);
   /// contructor
   Expression(const std::vector<std::string> &binary,
-             const std::set<std::string> &unary);
+             const std::unordered_set<std::string> &unary);
   /// copy contructor
   Expression(const Expression &expr);
   /// Assignment operator
@@ -104,7 +104,7 @@ public:
   /// This method returns first sub-expression without brackets
   const Expression &bracketsRemoved() const;
   /// Return a list of all variable names in this expression
-  std::set<std::string> getVariables() const;
+  std::unordered_set<std::string> getVariables() const;
   /**
    * Rename all variables with a given name
    * @param oldName :: The old name
@@ -192,10 +192,10 @@ private:
   struct Operators {
     std::vector<std::string>
         binary; ///< Binary operators in reverse precedence order
-    std::set<std::string> unary; ///< Unary operators
+    std::unordered_set<std::string> unary; ///< Unary operators
     std::map<std::string, size_t>
         precedence; ///< Map of the operator precedence order
-    std::set<char>
+    std::unordered_set<char>
         symbols; ///< All the symbols that are used in the binary operators
     std::map<std::string, char> op_number; ///< map of operators
   };
@@ -215,7 +215,7 @@ private:
    * Adds new unary operators to the expression
    * @param ops :: A vector with unary operators
    */
-  void add_unary(const std::set<std::string> &ops);
+  void add_unary(const std::unordered_set<std::string> &ops);
   /**
    * Check if a string is a unary operator
    * @param op :: The string to check

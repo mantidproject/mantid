@@ -88,7 +88,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(Load)
 
 // The mutex
-Poco::Mutex Load::m_mutex;
+std::recursive_mutex Load::m_mutex;
 
 using namespace Kernel;
 using namespace API;
@@ -615,7 +615,8 @@ Load::getOutputWorkspace(const std::string &propName,
 
   g_log.debug() << "Workspace property " << propName
                 << " did not return to MatrixWorkspace, EventWorkspace, "
-                   "IMDEventWorkspace, IMDWorkspace" << std::endl;
+                   "IMDEventWorkspace, IMDWorkspace"
+                << std::endl;
   return Workspace_sptr();
 }
 

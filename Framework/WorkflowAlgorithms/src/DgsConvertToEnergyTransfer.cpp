@@ -155,10 +155,10 @@ void DgsConvertToEnergyTransfer::exec() {
 
   double incidentEnergy = 0.0;
   double monPeak = 0.0;
-  specid_t eiMon1Spec =
-      static_cast<specid_t>(reductionManager->getProperty("Monitor1SpecId"));
-  specid_t eiMon2Spec =
-      static_cast<specid_t>(reductionManager->getProperty("Monitor2SpecId"));
+  specnum_t eiMon1Spec =
+      static_cast<specnum_t>(reductionManager->getProperty("Monitor1SpecId"));
+  specnum_t eiMon2Spec =
+      static_cast<specnum_t>(reductionManager->getProperty("Monitor2SpecId"));
 
   if ("SNS" == facility) {
     // SNS wants to preserve events until the last
@@ -252,8 +252,8 @@ void DgsConvertToEnergyTransfer::exec() {
     getei->executeAsChildAlg();
 
     monPeak = getei->getProperty("FirstMonitorPeak");
-    const specid_t monIndex =
-        static_cast<const specid_t>(getei->getProperty("FirstMonitorIndex"));
+    const specnum_t monIndex =
+        static_cast<const specnum_t>(getei->getProperty("FirstMonitorIndex"));
     // Why did the old way get it from the log?
     incidentEnergy = getei->getProperty("IncidentEnergy");
 

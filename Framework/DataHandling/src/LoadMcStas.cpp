@@ -274,7 +274,8 @@ void LoadMcStas::readEventData(
     ::NeXus::Info id_info = nxFile.getInfo();
     if (id_info.dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
-                       "event data block to be two dimensional" << std::endl;
+                       "event data block to be two dimensional"
+                    << std::endl;
       return;
     }
     int64_t nNeutrons = id_info.dims[0];
@@ -284,7 +285,7 @@ void LoadMcStas::readEventData(
                     << std::endl;
       return;
     }
-    if (isAnyNeutrons == false && nNeutrons > 0)
+    if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
     std::vector<int64_t> start(2);

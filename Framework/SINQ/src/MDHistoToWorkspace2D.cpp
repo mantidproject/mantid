@@ -98,7 +98,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     }
     outWS->setX(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specid_t>(m_currentSpectra));
+        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper

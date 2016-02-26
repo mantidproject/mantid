@@ -126,7 +126,8 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
   size_t nEvents = DataBlock.size() / m_EventSize;
   uint64_t position = blockPosition;
   // uint64_t fileLength = this->getFileLength();
-  m_fileMutex.lock();
+  std::lock_guard<std::mutex> lock(m_fileMutex);
+
   if (m_EventSize * (position + nEvents) > fileContents.size()) {
     fileContents.resize((position + nEvents) * m_EventSize);
     this->setFileLength(position + nEvents);
@@ -135,7 +136,6 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
   for (size_t i = 0; i < DataBlock.size(); i++) {
     fileContents[blockPosition * m_EventSize + i] = DataBlock[i];
   }
-  m_fileMutex.unlock();
 }
 /**Load a block of data from properly prepared direct access data file
  @param Block        -- the vector for data to place into. If the size of the
@@ -151,7 +151,7 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
 void BoxControllerDummyIO::loadBlock(std::vector<float> &Block,
                                      const uint64_t blockPosition,
                                      const size_t nPoints) const {
-  Poco::ScopedLock<Mantid::Kernel::Mutex> _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
   if (blockPosition + nPoints > this->getFileLength())
     throw Mantid::Kernel::Exception::FileError(
         "Attemtp to read behind the file end", m_fileName);

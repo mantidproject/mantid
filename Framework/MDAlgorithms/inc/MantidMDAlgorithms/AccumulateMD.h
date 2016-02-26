@@ -51,15 +51,14 @@ getHistoricalDataSources(const API::WorkspaceHistory &ws_history,
 /// historical data sources
 void MANTID_MDALGORITHMS_DLL
 insertDataSources(const std::string &data_sources,
-                  std::set<std::string> &historical_data_sources);
+                  std::unordered_set<std::string> &historical_data_sources);
 
 /// Test if a file with the given full path name exists
 bool fileExists(const std::string &filename);
 
 /// Pad vector of parameters to given length
-extern void MANTID_MDALGORITHMS_DLL
-padParameterVector(std::vector<double> &param_vector,
-                   const size_t grow_to_size);
+extern void MANTID_MDALGORITHMS_DLL padParameterVector(
+    std::vector<double> &param_vector, const size_t grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 

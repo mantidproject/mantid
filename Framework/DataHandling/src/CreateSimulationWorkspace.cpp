@@ -180,7 +180,7 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
   for (size_t i = 0; i < nhist; ++i) {
     std::set<detid_t> group;
     group.insert(detids[i]);
-    m_detGroups.emplace(static_cast<specid_t>(i + 1), group);
+    m_detGroups.emplace(static_cast<specnum_t>(i + 1), group);
   }
 }
 
@@ -306,7 +306,7 @@ void CreateSimulationWorkspace::applyDetectorMapping() {
   for (auto &detGroup : m_detGroups) {
     ISpectrum *spectrum = m_outputWS->getSpectrum(wsIndex);
     spectrum->setSpectrumNo(
-        static_cast<specid_t>(wsIndex + 1)); // Ensure a contiguous mapping
+        static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
     spectrum->clearDetectorIDs();
     spectrum->addDetectorIDs(detGroup.second);
     ++wsIndex;

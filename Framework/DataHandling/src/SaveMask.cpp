@@ -99,16 +99,12 @@ void SaveMask::exec() {
         throw std::invalid_argument("Cannot find spectrum");
       }
 
-      const std::set<detid_t> detids = spec->getDetectorIDs();
+      const auto detids = spec->getDetectorIDs();
 
       // b) get detector id & Store
-      detid_t detid;
-      ;
-      std::set<detid_t>::const_iterator it;
-      for (it = detids.begin(); it != detids.end(); ++it) {
-        detid = *it;
+      for (const auto &det_id : detids) {
         // c) store
-        detid0s.push_back(detid);
+        detid0s.push_back(det_id);
       }
     } // if
   }   // for

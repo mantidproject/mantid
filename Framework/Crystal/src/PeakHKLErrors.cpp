@@ -115,7 +115,7 @@ void PeakHKLErrors::cLone(
     return;
   if (component->isParametrized()) {
 
-    std::set<std::string> nms = pmapSv->names(component.get());
+    auto nms = pmapSv->names(component.get());
     for (const auto &nm : nms) {
 
       if (pmapSv->contains(component.get(), nm, "double")) {
@@ -403,7 +403,8 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   }
 
   g_log.debug() << "------------------------Function---------------------------"
-                   "--------------------" << std::endl;
+                   "--------------------"
+                << std::endl;
   for (size_t p = 0; p < nParams(); p++) {
     g_log.debug() << parameterName(p) << "(" << getParameter(p) << "),";
     if ((p + 1) % 6 == 0)

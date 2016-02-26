@@ -92,7 +92,8 @@ void DownloadInstrument::exec() {
     } else {
       // log the failure at Notice Level
       g_log.notice() << "Internet Connection Failed - cannot update instrument "
-                        "definitions." << std::endl;
+                        "definitions."
+                     << std::endl;
       // log this error at information level
       g_log.information() << errorText << std::endl;
     }
@@ -177,7 +178,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   fileStream.close();
 
-  std::set<std::string> repoFilenames;
+  std::unordered_set<std::string> repoFilenames;
 
   for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
@@ -268,7 +269,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
 **/
 size_t DownloadInstrument::removeOrphanedFiles(
     const std::string &directoryPath,
-    const std::set<std::string> &filenamesToKeep) const {
+    const std::unordered_set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
   std::vector<std::string> filesToDelete;
@@ -283,7 +284,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: " << entryPath.getFileName() << std::endl;
+                         "be deleted: "
+                      << entryPath.getFileName() << std::endl;
         filesToDelete.push_back(it->path());
       }
     }

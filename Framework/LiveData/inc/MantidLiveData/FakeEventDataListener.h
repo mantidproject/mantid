@@ -8,8 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
+#include <mutex>
 
 namespace Mantid {
 namespace LiveData {
@@ -58,8 +58,8 @@ private:
 
   DataObjects::EventWorkspace_sptr
       m_buffer; ///< Used to buffer events between calls to extractData()
-  Kernel::PseudoRandomNumberGenerator *
-      m_rand; ///< Used in generation of random events
+  Kernel::PseudoRandomNumberGenerator
+      *m_rand; ///< Used in generation of random events
   Poco::Timer
       m_timer;    ///< Used to call the event-generating function on a schedule
   int m_datarate; ///< The data rate to (attempt to) generate in events/sec
@@ -77,7 +77,7 @@ private:
   int m_runNumber;
 
   /// Mutex to exclude generateEvents() and extractData().
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // namespace LiveData

@@ -190,16 +190,16 @@ void SumSpectra::exec() {
  * @param localworkspace The workspace to use.
  * @return The minimum spectrum id for all the spectra being summed.
  */
-specid_t
+specnum_t
 SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
-  specid_t specId =
+  specnum_t specId =
       localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
-  specid_t temp;
+  specnum_t temp;
   for (auto index : this->m_indices) {
     if (index < totalSpec) {
       temp = localworkspace->getSpectrum(index)->getSpectrumNo();
@@ -241,9 +241,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numZeros = 0;
 
   // Loop over spectra
-  std::set<int>::iterator it;
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
+  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= this->m_numberOfSpectra) || (i < 0)) {
@@ -356,9 +355,8 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numZeros = 0;
 
   // Loop over spectra
-  std::set<int>::iterator it;
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = m_indices.begin(); it != m_indices.end(); ++it) {
+  for (auto it = m_indices.begin(); it != m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {
@@ -451,12 +449,11 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   outEL.clearDetectorIDs();
 
   // Loop over spectra
-  std::set<int>::iterator it;
   size_t numSpectra(0);
   size_t numMasked(0);
   size_t numZeros(0);
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = indices.begin(); it != indices.end(); ++it) {
+  for (auto it = indices.begin(); it != indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {

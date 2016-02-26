@@ -9,6 +9,7 @@
 
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
+#include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -241,7 +242,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
 
     // Skip some of the properties when setting
-    std::set<std::string> ignoreProps;
+    std::unordered_set<std::string> ignoreProps;
     ignoreProps.insert("InputWorkspace");
     ignoreProps.insert("OutputWorkspace");
 

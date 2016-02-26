@@ -129,7 +129,7 @@ void CalculateUMatrix::exec() {
     }
   }
   // check if enough peaks are indexed or if HS is 0
-  if ((nIndexedpeaks < 2) || (found2nc == false))
+  if ((nIndexedpeaks < 2) || !found2nc)
     throw std::invalid_argument("Less then two non-colinear peaks indexed");
   if (HS == zero)
     throw std::invalid_argument("Something really bad happened");

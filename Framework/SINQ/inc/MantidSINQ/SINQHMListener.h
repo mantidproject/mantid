@@ -56,7 +56,7 @@ public:
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override { return 0; }
 
-  void setSpectra(const std::vector<Mantid::specid_t> &specList) override;
+  void setSpectra(const std::vector<Mantid::specnum_t> &specList) override;
 
 private:
   Poco::Net::HTTPClientSession httpcon;

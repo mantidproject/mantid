@@ -215,7 +215,7 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
           ->setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(static_cast<specid_t>(i) + 1);
+          ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
   }
 }
@@ -673,7 +673,8 @@ void LoadAscii2::exec() {
   if (sep.empty()) {
     g_log.notice() << "\"UserDefined\" has been selected, but no custom "
                       "separator has been entered."
-                      " Using default instead." << std::endl;
+                      " Using default instead."
+                   << std::endl;
     sep = ",";
   }
   m_columnSep = sep;

@@ -279,9 +279,9 @@ public:
              << ".\n";
         return;
       } else {
-        std::set<detid_t> detidset = spec->getDetectorIDs();
-        set<detid_t>::iterator setiter;
-        for (setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
+        auto detidset = spec->getDetectorIDs();
+        for (auto setiter = detidset.begin(); setiter != detidset.end();
+             ++setiter)
           cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter
                << ".\n";
       }

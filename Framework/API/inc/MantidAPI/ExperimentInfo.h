@@ -12,6 +12,7 @@
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -114,9 +115,8 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   virtual double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  virtual double
-  getEFixed(const Geometry::IDetector_const_sptr
-                detector = Geometry::IDetector_const_sptr()) const;
+  virtual double getEFixed(const Geometry::IDetector_const_sptr detector =
+                               Geometry::IDetector_const_sptr()) const;
   /// Set the efixed value for a given detector ID
   virtual void setEFixed(const detid_t detID, const double value);
 
@@ -198,7 +198,7 @@ private:
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 };
 
 /// Shared pointer to ExperimentInfo

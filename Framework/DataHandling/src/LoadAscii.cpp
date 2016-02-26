@@ -237,7 +237,8 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveXErrors)
       localWorkspace->dataDx(i) = spectra[i].dataDx();
     // Just have spectrum number start at 1 and count up
-    localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i) + 1);
+    localWorkspace->getSpectrum(i)
+        ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
   return localWorkspace;
 }
@@ -312,12 +313,9 @@ void LoadAscii::init() {
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");
 
-  std::string spacers[6][6] = {{"Automatic", ",\t:; "},
-                               {"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"}};
+  std::string spacers[6][6] = {{"Automatic", ",\t:; "}, {"CSV", ","},
+                               {"Tab", "\t"},           {"Space", " "},
+                               {"Colon", ":"},          {"SemiColon", ";"}};
   // For the ListValidator
   std::vector<std::string> sepOptions;
   for (size_t i = 0; i < 5; ++i) {

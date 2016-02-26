@@ -59,7 +59,7 @@ std::string CompositeFunction::asString() const {
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool() == true) {
+      getAttribute("NumDeriv").asBool()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
     for (const auto &attName : attr) {
@@ -669,7 +669,8 @@ void CompositeFunction::setUpForFit() {
       ParameterTie *tie = getTie(i);
       if (tie && !tie->isConstant()) {
         g_log.warning() << "Numeric derivatives should be used when "
-                           "non-constant ties defined." << std::endl;
+                           "non-constant ties defined."
+                        << std::endl;
         break;
       }
     }

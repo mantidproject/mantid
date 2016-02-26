@@ -70,9 +70,9 @@ public:
 
 private:
   /// Store the units known to the UnitFactory
-  std::set<std::string> m_unitKeys;
+  std::unordered_set<std::string> m_unitKeys;
   /// Store the units added as options for this algorithm
-  std::set<std::string> m_RKHKeys;
+  std::unordered_set<std::string> m_RKHKeys;
   /// the input stream for the file being loaded
   std::ifstream m_fileIn;
 

@@ -302,7 +302,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off."
+           << std::endl;
     throw std::runtime_error(buffer.str());
   }
 
@@ -1660,7 +1661,7 @@ void LoadNexusProcessed::readInstrumentGroup(
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
     } else if (haveSpectraAxis && !m_axis1vals.empty()) {
-      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
+      spectrum = static_cast<specnum_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }

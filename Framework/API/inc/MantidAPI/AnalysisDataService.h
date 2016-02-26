@@ -56,7 +56,7 @@ class WorkspaceGroup;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataServiceImpl
+class DLLExport AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */
@@ -196,26 +196,26 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
     BeforeReplaceNotification WorkspaceBeforeReplaceNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::BeforeReplaceNotification> &
-    WorkspaceBeforeReplaceNotification_ptr;
+    Mantid::API::Workspace>::BeforeReplaceNotification>
+    &WorkspaceBeforeReplaceNotification_ptr;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
     AfterReplaceNotification WorkspaceAfterReplaceNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::AfterReplaceNotification> &
-    WorkspaceAfterReplaceNotification_ptr;
+    Mantid::API::Workspace>::AfterReplaceNotification>
+    &WorkspaceAfterReplaceNotification_ptr;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
     PreDeleteNotification WorkspacePreDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PreDeleteNotification> &
-    WorkspacePreDeleteNotification_ptr;
+typedef const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification>
+    &WorkspacePreDeleteNotification_ptr;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
     PostDeleteNotification WorkspacePostDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PostDeleteNotification> &
-    WorkspacePostDeleteNotification_ptr;
+typedef const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification>
+    &WorkspacePostDeleteNotification_ptr;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification
     ClearADSNotification;
@@ -225,25 +225,25 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification
     WorkspaceRenameNotification;
 typedef const Poco::AutoPtr<
-    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification> &
-    WorkspaceRenameNotification_ptr;
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification>
+    &WorkspaceRenameNotification_ptr;
 
 typedef AnalysisDataServiceImpl::GroupWorkspacesNotification
     WorkspacesGroupedNotification;
 typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::GroupWorkspacesNotification> &
-    WorkspacesGroupedNotification_ptr;
+    AnalysisDataServiceImpl::GroupWorkspacesNotification>
+    &WorkspacesGroupedNotification_ptr;
 
 typedef AnalysisDataServiceImpl::UnGroupingWorkspaceNotification
     WorkspaceUnGroupingNotification;
 typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &
-    WorkspaceUnGroupingNotification_ptr;
+    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>
+    &WorkspaceUnGroupingNotification_ptr;
 
 typedef AnalysisDataServiceImpl::GroupUpdatedNotification
     GroupUpdatedNotification;
-typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &
-    GroupUpdatedNotification_ptr;
+typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification>
+    &GroupUpdatedNotification_ptr;
 
 } // Namespace API
 } // Namespace Mantid

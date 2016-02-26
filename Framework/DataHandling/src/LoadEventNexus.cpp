@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
@@ -397,7 +398,7 @@ public:
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
     {
-      Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
+      std::lock_guard<std::mutex> _lock(alg->m_tofMutex);
       if (my_shortest_tof < alg->shortest_tof) {
         alg->shortest_tof = my_shortest_tof;
       }
@@ -480,7 +481,7 @@ public:
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
-                       boost::shared_ptr<Mutex> ioMutex,
+                       boost::shared_ptr<std::mutex> ioMutex,
                        ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
@@ -1391,11 +1392,11 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   if (this->event_id_is_spec) {
     // Find max spectrum no
     Axis *ax1 = m_ws->getAxis(1);
-    specid_t maxSpecNo =
-        -std::numeric_limits<specid_t>::max(); // So that any number will be
-                                               // greater than this
+    specnum_t maxSpecNo =
+        -std::numeric_limits<specnum_t>::max(); // So that any number will be
+                                                // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
-      specid_t spec = ax1->spectraNo(i);
+      specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)
         maxSpecNo = spec;
     }
@@ -1882,7 +1883,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make the thread pool
   ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<Mutex>();
+  auto diskIOMutex = boost::make_shared<std::mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1980,11 +1981,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+                       "invalid time-of-flight."
+                    << std::endl;
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data."
+                    << std::endl;
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2311,7 +2314,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+                             " from the data workspace."
+                          << std::endl;
     }
 
     // Perform the load (only events from monitor)
@@ -2333,7 +2337,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace."
+            << std::endl;
       }
     }
 
@@ -2496,7 +2501,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        const specid_t &specNo = spec[it - udet.begin()];
+        const specnum_t &specNo = spec[it - udet.begin()];
         m_ws->setSpectrumNumberForAllPeriods(i, specNo);
         m_ws->setDetectorIdsForAllPeriods(i, id);
       }

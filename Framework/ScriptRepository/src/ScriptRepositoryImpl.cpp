@@ -8,6 +8,8 @@
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 #include <utility>
+#include <unordered_set>
+
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
@@ -240,7 +242,8 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
       if (!rep_json.exists()) {
         g_log.error() << "Corrupted ScriptRepository at " << local_repository
                       << ". Please, remove this folder, and install "
-                         "ScriptRepository again" << std::endl;
+                         "ScriptRepository again"
+                      << std::endl;
       }
     }
   } catch (Poco::FileNotFoundException & /*ex*/) {
@@ -357,7 +360,8 @@ void ScriptRepositoryImpl::ensureValidRepository() {
   if (!isValid()) {
     std::stringstream ss;
     ss << "ScriptRepository is not installed correctly. The current path for "
-          "ScriptRepository is " << local_repository
+          "ScriptRepository is "
+       << local_repository
        << " but some important files that are required are corrupted or not "
           "present."
        << "\nPlease, re-install the ScriptRepository!\n"
@@ -459,11 +463,12 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     // it will proceed in this situation.
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: " << ex.className() << ":> "
-                  << ex.displayText() << std::endl;
+                     "repository. Details: "
+                  << ex.className() << ":> " << ex.displayText() << std::endl;
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: " << ex.what() << std::endl;
+                     "repository. Details: "
+                  << ex.what() << std::endl;
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();
@@ -1482,7 +1487,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
   std::string filename = std::string(local_repository).append(".local.json");
   std::vector<std::string> entries_to_delete;
   Repository::iterator entry_it;
-  std::set<std::string> folders_of_deleted;
+  std::unordered_set<std::string> folders_of_deleted;
 
   try {
     Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
@@ -1530,7 +1535,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     if (entries_to_delete.size() > 0) {
 
       // clear the auto_update flag from the folders if the user deleted files
-      BOOST_FOREACH (const std::string &folder, folders_of_deleted) {
+      for (const auto &folder : folders_of_deleted) {
         if (!pt.isMember(folder))
           continue;
 

@@ -230,7 +230,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
   for (i = 0;
        i < static_cast<int>(sizeof(mex_functions) / sizeof(mexfunc_s_t)) &&
-           !func_called;
+       !func_called;
        i++) {
     if ((mex_functions[i].name != NULL) &&
         !compare_nocase(funcname, mex_functions[i].name)) {
@@ -670,11 +670,11 @@ void CreateSimpleAPIHelper(const std::string &algName,
       mfile << "No";
     mfile << ", Direction: "
           << Mantid::Kernel::Direction::asText(prop->direction()); // << ", ";
-    std::set<std::string> allowed = prop->allowedValues();
+    auto allowed = prop->allowedValues();
     if (!allowed.empty()) {
       mfile << ", Allowed values: ";
-      std::set<std::string>::const_iterator sIter = allowed.begin();
-      std::set<std::string>::const_iterator sEnd = allowed.end();
+      auto sIter = allowed.begin();
+      auto sEnd = allowed.end();
       for (; sIter != sEnd;) {
         mfile << (*sIter);
         if (++sIter != sEnd)
@@ -689,7 +689,8 @@ void CreateSimpleAPIHelper(const std::string &algName,
   // The function definition
   mfile << "if nargin < " << (orderedProperties.size() - iOpt) << "\n"
         << "\tfprintf('All mandatory arguments have not been supplied, type "
-           "\"help " << algName << "\" for more information\\n');\n"
+           "\"help "
+        << algName << "\" for more information\\n');\n"
         << "\treturn\n"
         << "end\n";
 
@@ -778,13 +779,10 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray *prhs[]) {
   * @returns An integer indicating success/failure
   */
 int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-  std::set<std::string> wkspNames =
-      AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator sEnd = wkspNames.end();
+  auto wkspNames = AnalysisDataService::Instance().getObjectNames();
   // print the list of names using mexPrintf
-  for (std::set<std::string>::const_iterator sIter = wkspNames.begin();
-       sIter != sEnd; ++sIter) {
-    mexPrintf((*sIter).c_str());
+  for (auto const &wksp_name : wkspNames) {
+    mexPrintf(wksp_name.c_str());
     mexPrintf("\n");
   }
   return 0;

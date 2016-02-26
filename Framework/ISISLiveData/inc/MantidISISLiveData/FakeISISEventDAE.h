@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
+#include <mutex>
+
 namespace Poco {
 namespace Net {
 class TCPServer;
@@ -65,7 +67,7 @@ private:
   /// Poco TCP server
   Poco::Net::TCPServer *m_server;
   /// Mutex
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // namespace LiveData

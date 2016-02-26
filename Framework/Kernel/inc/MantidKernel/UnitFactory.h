@@ -68,7 +68,7 @@ class Unit;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit> {
+class MANTID_KERNEL_DLL UnitFactoryImpl final : public DynamicFactory<Unit> {
 
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;

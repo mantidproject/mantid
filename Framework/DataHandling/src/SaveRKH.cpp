@@ -154,11 +154,11 @@ void SaveRKH::write1D() {
     const auto &ydata = m_workspace->readY(i);
     const auto &edata = m_workspace->readE(i);
 
-    specid_t specid(0);
+    specnum_t specid(0);
     try {
       specid = m_workspace->getSpectrum(i)->getSpectrumNo();
     } catch (...) {
-      specid = static_cast<specid_t>(i + 1);
+      specid = static_cast<specnum_t>(i + 1);
     }
 
     auto hasDx = m_workspace->hasDx(i);

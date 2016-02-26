@@ -168,7 +168,7 @@ void MergeRuns::buildAdditionTables() {
     table->reserve(nhist);
     for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++) {
       // Get the set of detectors in the output
-      std::set<detid_t> &inDets = ews->getEventList(inWI).getDetectorIDs();
+      auto &inDets = ews->getEventList(inWI).getDetectorIDs();
 
       bool done = false;
 
@@ -177,7 +177,7 @@ void MergeRuns::buildAdditionTables() {
       int outWI = inWI;
       if (outWI < lhs_nhist) // don't go out of bounds
       {
-        std::set<detid_t> &outDets = lhs->getEventList(outWI).getDetectorIDs();
+        auto &outDets = lhs->getEventList(outWI).getDetectorIDs();
 
         // Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),

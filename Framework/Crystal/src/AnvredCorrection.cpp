@@ -66,19 +66,11 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
-std::map<int, double> detScale = {{17, 1.092114823},
-                                  {18, 0.869105443},
-                                  {22, 1.081377685},
-                                  {26, 1.055199489},
-                                  {27, 1.070308725},
-                                  {28, 0.886157884},
-                                  {36, 1.112773972},
-                                  {37, 1.012894506},
-                                  {38, 1.049384146},
-                                  {39, 0.890313805},
-                                  {47, 1.068553893},
-                                  {48, 0.900566426},
-                                  {58, 0.911249203}};
+std::map<int, double> detScale = {
+    {17, 1.092114823}, {18, 0.869105443}, {22, 1.081377685}, {26, 1.055199489},
+    {27, 1.070308725}, {28, 0.886157884}, {36, 1.112773972}, {37, 1.012894506},
+    {38, 1.049384146}, {39, 0.890313805}, {47, 1.068553893}, {48, 0.900566426},
+    {58, 0.911249203}};
 
 AnvredCorrection::AnvredCorrection()
     : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
@@ -142,7 +134,8 @@ void AnvredCorrection::exec() {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "
                            "workspace.  OnlySphericalAbsorption was changed to "
-                           "true." << std::endl;
+                           "true."
+                        << std::endl;
       }
     }
   }
@@ -360,10 +353,9 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    std::set<detid_t> &dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator j;
-    for (j = dets.begin(); j != dets.end(); ++j)
-      correctionFactors->getOrAddEventList(i).addDetectorID(*j);
+    auto &dets = eventW->getEventList(i).getDetectorIDs();
+    for (auto const &det : dets)
+      correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getEventList(i).clear();

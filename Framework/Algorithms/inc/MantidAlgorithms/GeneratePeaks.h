@@ -71,8 +71,8 @@ private:
   void processTableColumnNames();
 
   void importPeaksFromTable(
-      std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap);
+      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap);
 
   /// Import peak and background function parameters from vector
   void importPeakFromVector(
@@ -80,9 +80,9 @@ private:
 
   /// Generate peaks in output data workspaces
   void generatePeaks(
-      const std::map<specid_t,
-                     std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap,
+      const std::map<specnum_t,
+                     std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap,
       API::MatrixWorkspace_sptr dataWS);
 
   /// Check whether function has a certain parameter
@@ -117,11 +117,11 @@ private:
   std::vector<double> m_vecBkgdParamValues;
 
   /// Spectrum map from full spectra workspace to partial spectra workspace
-  std::map<specid_t, specid_t> m_SpectrumMap;
+  std::map<specnum_t, specnum_t> m_SpectrumMap;
 
   /// Set of spectra (workspace indexes) in the original workspace that contain
   /// peaks to generate
-  std::set<specid_t> m_spectraSet;
+  std::set<specnum_t> m_spectraSet;
 
   /// Flag to use automatic background (???)
   bool m_useAutoBkgd;

@@ -45,10 +45,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specid_t>>(
+    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
         "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
-    std::vector<specid_t> specs;
+    std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
     props.setProperty("SpectraList", specs);
 

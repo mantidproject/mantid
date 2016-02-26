@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include <memory>
+#include <mutex>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -184,7 +185,7 @@ public:
   size_t eventsPerChunk;
 
   /// Mutex protecting tof limits
-  Poco::FastMutex m_tofMutex;
+  std::mutex m_tofMutex;
 
   /// Limits found to tof
   double longest_tof;
@@ -211,7 +212,7 @@ public:
   std::vector<std::vector<EventVector_pt>> eventVectors;
 
   /// Mutex to protect eventVectors from each task
-  Poco::Mutex m_eventVectorMutex;
+  std::recursive_mutex m_eventVectorMutex;
 
   /// Maximum (inclusive) event ID possible for this instrument
   int32_t eventid_max;
@@ -240,8 +241,8 @@ public:
   bool m_haveWeights;
 
   /// Pointer to the vector of weighted events
-  typedef std::vector<Mantid::DataObjects::WeightedEvent> *
-      WeightedEventVector_pt;
+  typedef std::vector<Mantid::DataObjects::WeightedEvent>
+      *WeightedEventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.

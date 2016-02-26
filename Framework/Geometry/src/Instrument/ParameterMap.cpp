@@ -222,8 +222,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
     if (!match) {
       // output some information that helps with understanding the mismatch
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
-                   "with name: " << fullName
-                << ". Parameter name is: " << (*param).name()
+                   "with name: "
+                << fullName << ". Parameter name is: " << (*param).name()
                 << " and value: " << (*param).asString() << std::endl;
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
@@ -384,7 +384,8 @@ void ParameterMap::addPositionCoordinate(
     position.setZ(value);
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognized "
-                       "coordinate symbol: " << name;
+                       "coordinate symbol: "
+                    << name;
     // set description if one is provided
     if (pDescription) {
       param->setDescription(*pDescription);
@@ -823,8 +824,8 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           }
         } // found->firdst
       }   // it_found != m_map.end()
-    }     //!m_map.empty()
-  }       // PARALLEL_CRITICAL(m_map_access)
+    } //! m_map.empty()
+  } // PARALLEL_CRITICAL(m_map_access)
   return result;
 }
 
@@ -1045,7 +1046,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+  auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map

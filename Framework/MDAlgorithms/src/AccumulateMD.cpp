@@ -142,7 +142,7 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
                          const std::string &create_alg_name,
                          const std::string &accumulate_alg_name) {
   // Using a set so we only insert unique names
-  std::set<std::string> historical_data_sources;
+  std::unordered_set<std::string> historical_data_sources;
 
   // Get previously added data sources from DataSources property of the original
   // call of CreateMD and any subsequent calls of AccumulateMD
@@ -175,8 +175,9 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
  * sources
  * @param historical_data_sources :: set of data sources
 */
-void insertDataSources(const std::string &data_sources,
-                       std::set<std::string> &historical_data_sources) {
+void insertDataSources(
+    const std::string &data_sources,
+    std::unordered_set<std::string> &historical_data_sources) {
   // Split the property string into a vector of data sources
   std::vector<std::string> data_split;
   boost::split(data_split, data_sources, boost::is_any_of(","));

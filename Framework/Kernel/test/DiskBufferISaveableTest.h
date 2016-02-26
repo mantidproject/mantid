@@ -13,6 +13,7 @@
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <cxxtest/TestSuite.h>
+#include <mutex>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -60,11 +61,11 @@ public:
   virtual size_t getDataMemorySize() const { return 1; };
 
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 // Declare the static members here.
 std::string ISaveableTester::fakeFile = "";
-Kernel::Mutex ISaveableTester::streamMutex;
+std::mutex ISaveableTester::streamMutex;
 
 //====================================================================================
 class DiskBufferISaveableTest : public CxxTest::TestSuite {
@@ -357,7 +358,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, 1 "
-                 "thread in " << clock.elapsed() << " sec\n";
+                 "thread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory
@@ -397,7 +399,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, "
-                 "multithread in " << clock.elapsed() << " sec\n";
+                 "multithread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory

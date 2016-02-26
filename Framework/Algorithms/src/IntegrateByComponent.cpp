@@ -5,6 +5,7 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
+#include <unordered_map>
 
 namespace Mantid {
 namespace Algorithms {
@@ -190,7 +191,7 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
  */
 std::vector<std::vector<size_t>>
 IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
-  std::multimap<Mantid::Geometry::ComponentID, size_t> mymap;
+  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (parents == 0) // this should not happen in this file, but if one reuses
@@ -226,13 +227,16 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it, s_it;
+  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
+      s_it;
 
   for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator,
-              std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator>
-        keyRange = mymap.equal_range(theKey);
+    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator,
+              std::unordered_multimap<Mantid::Geometry::ComponentID,
+                                      size_t>::iterator> keyRange =
+        mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

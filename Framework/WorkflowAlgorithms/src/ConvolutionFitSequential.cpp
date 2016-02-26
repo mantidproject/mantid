@@ -387,7 +387,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
-      if (isTwoL == true) {
+      if (isTwoL) {
         fitType = "2";
       } else {
         fitType = "1";

@@ -49,7 +49,7 @@ ISISHistoDataListener::ISISHistoDataListener()
     : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<specid_t>>("SpectraList"),
+      Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
       "An optional list of spectra to load. If blank, all "
       "available spectra will be loaded.");
 
@@ -106,7 +106,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
 
   // Set the spectra list to load
-  std::vector<specid_t> spectra = getProperty("SpectraList");
+  std::vector<specnum_t> spectra = getProperty("SpectraList");
   if (!spectra.empty()) {
     setSpectra(spectra);
   }
@@ -288,7 +288,7 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
  * spectra.
   * @param specList :: A vector with spectra indices.
   */
-void ISISHistoDataListener::setSpectra(const std::vector<specid_t> &specList) {
+void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
   // after listener has created its first workspace the spectra numbers cannot
   // be changed
   if (!isInitilized) {
@@ -301,7 +301,7 @@ void ISISHistoDataListener::setSpectra(const std::vector<specid_t> &specList) {
   * @param periodList :: A vector with period numbers.
   */
 void ISISHistoDataListener::setPeriods(
-    const std::vector<specid_t> &periodList) {
+    const std::vector<specnum_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be
   // changed
   if (!isInitilized) {
@@ -386,9 +386,9 @@ void ISISHistoDataListener::calculateIndicesForReading(
   } else {
     // combine consecutive spectra but don't exceed the maxNumberOfSpectra
     size_t i0 = 0;
-    specid_t spec = m_specList[i0];
+    specnum_t spec = m_specList[i0];
     for (size_t i = 1; i < m_specList.size(); ++i) {
-      specid_t next = m_specList[i];
+      specnum_t next = m_specList[i];
       if (next - m_specList[i - 1] > 1 ||
           static_cast<int>(i - i0) >= maxNumberOfSpectra) {
         int n = static_cast<int>(i - i0);
@@ -436,7 +436,8 @@ void ISISHistoDataListener::getData(int period, int index, int count,
     workspace->setX(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
-    workspace->getSpectrum(wi)->setSpectrumNo(index + static_cast<specid_t>(i));
+    workspace->getSpectrum(wi)
+        ->setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
     y.assign(dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size());
     std::transform(y.begin(), y.end(), e.begin(), dblSqrt);

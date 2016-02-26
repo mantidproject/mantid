@@ -601,9 +601,9 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   * (3) (Optionally) write out information
   */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
-  std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
-  for (pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (auto pit = this->wrongdetids.begin(); pit != this->wrongdetids.end();
+       ++pit) {
     // Convert Pixel ID to 'wrong detectors ID' map's index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
@@ -850,7 +850,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       EventList &spec = workspace->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }
@@ -1113,8 +1113,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "Number of Wrong Detector IDs = " << wrongdetids.size()
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
+    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
          ++wit) {
       g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
     }
@@ -1363,8 +1362,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
     this->m_numBadEvents += local_numBadEvents;
     this->m_numWrongdetidEvents += local_numWrongdetidEvents;
 
-    std::set<PixelType>::iterator it;
-    for (it = local_wrongdetids.begin(); it != local_wrongdetids.end(); ++it) {
+    for (auto it = local_wrongdetids.begin(); it != local_wrongdetids.end();
+         ++it) {
       PixelType tmpid = *it;
       this->wrongdetids.insert(*it);
 
@@ -1760,14 +1759,12 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                    << " microsec; longest TOF: " << m_longestTof << " microsec."
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
+    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
          ++wit) {
       g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
-         ++git) {
+    for (auto git = this->wrongdetidmap.begin();
+         git != this->wrongdetidmap.end(); ++git) {
       PixelType tmpid = git->first;
       size_t vindex = git->second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
@@ -2226,7 +2223,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
       // EventList & spec = workspace->getOrAddEventList(workspaceIndex);
       // spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      // spec.setSpectrumNo(specid_t(workspaceIndex+1));
+      // spec.setSpectrumNo(specnum_t(workspaceIndex+1));
       workspaceIndex += 1;
     }
   }
@@ -2254,7 +2251,7 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(det.first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
     }
   }
 
