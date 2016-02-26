@@ -961,7 +961,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
       const std::string outFitParamsTblName =
           outFitParamsTblNameGenerator(specNos, i);
-      const std::string customisedBankName = outFitParamsTblName;
       alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
       alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
@@ -1631,6 +1630,10 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 *
 * @param forceRecalc whether to calculate Vanadium corrections even
 * if the files of pre-calculated results are found
+*
+*
+* @param specNos string carrying cropped calib info: spectra to use
+* when cropped calibrating.
 */
 void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
@@ -1763,6 +1766,9 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 *
 * @param vanNo the Vanadium run number used for the openGenieAscii
 * output label
+*
+* @param specNos string carrying cropped calib info: spectra to use
+* when cropped calibrating.
 */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
@@ -2349,6 +2355,7 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 * @param difc vector containing constants difc value of each bank
 * @param tzero vector containing constants tzero value of each bank
 * @param specNo used to set range for Calibration Cropped
+* @param customisedBankName used to set the file and workspace name
 *
 * @return string with a python script
 */
@@ -2419,6 +2426,8 @@ std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
 
 /**
 * Plot the workspace with difc/zero acordding to selected bank
+*
+* @param customisedBankName used to set the file and workspace name
 *
 * @return string with a python script which will merge with
 *
