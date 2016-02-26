@@ -5,46 +5,75 @@
 namespace Mantid {
 namespace Algorithms {
 
+/**
+* Constructor
+* @param entropy : pointer MaxentEntropy object defining the entropy formula to
+* use
+*/
 MaxentData::MaxentData(MaxentEntropy_sptr entropy)
     : m_entropy(entropy), m_angle(-1.), m_chisq(-1.) {}
 
+/**
+* Loads a real signal
+* @param data : [input] A vector containing the experimental data
+* @param errors : [input] A vector containing the experimental errors
+* @param image : [input] A starting distribution for the image
+* @param background : [input] A background level
+* use
+*/
 void MaxentData::loadReal(const std::vector<double> &data,
                           const std::vector<double> &errors,
                           const std::vector<double> &image, double background) {
 
-  if ((data.size() != errors.size()) || (image.size() % data.size())) {
-    // If data and errors have N datapoints, image should have:
-    // 2*X*N data points (complex data)
-    // X*N data points (real data)
+  if (data.size() != errors.size()) {
+    // Data and errors must have the same number of points
     throw std::runtime_error("Couldn't load invalid data");
   }
-  if (m_background == 0) {
+  if (image.size() != 2 * data.size()) {
+    // If data and errors have N datapoints, image should have 2N datapoints
+    throw std::runtime_error("Couldn't load invalid data");
+  }
+  if (background == 0) {
     throw std::runtime_error("Background must be positive");
   }
-
+  // Set to -1, these will be calculated later
   m_angle = -1.;
   m_chisq = -1.;
-
+  // Load image, calculated data and background
   m_image = image;
+  m_background = background;
   correctImage();
   m_dataCalc = transformImageToData(image);
-  m_background = background;
 
   size_t size = data.size();
 
   m_data = std::vector<double>(2 * size);
   m_errors = std::vector<double>(2 * size);
-
+  // Load the experimental (measured data)
+  // Even indices correspond to the real part
+  // Odd indices correspond to the imaginary part
   for (size_t i = 0; i < size; i++) {
     m_data[2 * i] = data[i];
     m_data[2 * i + 1] = 0.;
-    ;
     m_errors[2 * i] = errors[i];
     m_errors[2 * i + 1] = 0.;
-    ;
   }
 }
 
+/**
+* Loads a complex signal
+* @param dataRe : [input] A vector containing the real part of the experimental
+* data
+* @param dataIm : [input] A vector containing the imaginary part of the
+* experimental data
+* @param errorsRe : [input] A vector containing the experimental errors
+* (associated with the real part)
+* @param errorsIm : [input] A vector containing the experimental errors
+* (associated with the imaginary part)
+* @param image : [input] A starting distribution for the image
+* @param background : [input] A background level
+* use
+*/
 void MaxentData::loadComplex(const std::vector<double> &dataRe,
                              const std::vector<double> &dataIm,
                              const std::vector<double> &errorsRe,
@@ -54,41 +83,44 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
 
   if ((dataRe.size() != dataIm.size()) || (errorsRe.size() % errorsIm.size()) ||
       (dataRe.size() != errorsRe.size())) {
-    // If data and errors have N datapoints, image should have:
-    // 2*X*N data points (complex data)
-    // X*N data points (real data)
+    // Real and imaginary components must have the same number of datapoints
     throw std::runtime_error("Couldn't load invalid data");
   }
   if (2 * dataRe.size() != image.size()) {
+    // If real and imaginary parts have N datapoints, image should have 2N
+    // datapoints
     throw std::runtime_error("Couldn't load invalid data");
   }
-  if (m_background == 0) {
+  if (background == 0) {
     throw std::runtime_error("Background must be positive");
   }
-
+  // Set to -1, these will be calculated later
   m_angle = -1.;
   m_chisq = -1.;
-
+  // Set the image, background and calculated data
   m_image = image;
+  m_background = background;
   correctImage();
   m_dataCalc = transformImageToData(image);
-  m_background = background;
 
   size_t size = dataRe.size();
 
   m_data = std::vector<double>(2 * size);
   m_errors = std::vector<double>(2 * size);
-
+  // Load the experimental (measured data)
+  // Even indices correspond to the real part
+  // Odd indices correspond to the imaginary part
   for (size_t i = 0; i < size; i++) {
     m_data[2 * i] = dataRe[i];
     m_data[2 * i + 1] = dataIm[i];
-    ;
     m_errors[2 * i] = errorsRe[i];
     m_errors[2 * i + 1] = errorsIm[i];
-    ;
   }
 }
 
+/**
+* Corrects the image according to the type of entropy
+*/
 void MaxentData::correctImage() {
 
   for (auto &im : m_image) {
@@ -100,8 +132,19 @@ void MaxentData::correctImage() {
   m_chisq = -1.;
 }
 
+/**
+* Updates the image according to an increment delta. Uses the previously
+* calculated search directions.
+* @param delta : [input] The increment to be added to the image
+*/
 void MaxentData::updateImage(const std::vector<double> &delta) {
 
+  if (m_image.empty()) {
+    throw std::runtime_error("No data were loaded");
+  }
+  if (delta.size() != m_directionsIm.size()) {
+    throw std::invalid_argument("Image couldn't be updated");
+  }
   // Calculate the new image
   for (size_t i = 0; i < m_image.size(); i++) {
     for (size_t k = 0; k < delta.size(); k++) {
@@ -119,7 +162,12 @@ void MaxentData::updateImage(const std::vector<double> &delta) {
   m_angle = -1.;
 }
 
-std::vector<double> MaxentData::getChiGrad() const {
+/**
+* Calculates the gradient of chi-square using the experimental data, calculated
+* data and errors
+* @return : The gradient of chi-square as a vector
+*/
+std::vector<double> MaxentData::calculateChiGrad() const {
 
   if ((m_data.size() != m_errors.size()) ||
       (m_data.size() != m_dataCalc.size())) {
@@ -139,12 +187,20 @@ std::vector<double> MaxentData::getChiGrad() const {
   return cgrad;
 }
 
-std::vector<double> MaxentData::getEntropy() const {
+/**
+* Calculates the entropy (not needed for the moment)
+* @return : The entropy as a vector
+*/
+std::vector<double> MaxentData::calculateEntropy() const {
 
   throw std::runtime_error("Not implemented");
 }
 
-std::vector<double> MaxentData::getEntropyGrad() const {
+/**
+* Calculates the gradient of the entropy (depends on the type of entropy)
+* @return : The gradient of the entropy as a vector
+*/
+std::vector<double> MaxentData::calculateEntropyGrad() const {
 
   const size_t size = m_image.size();
 
@@ -157,13 +213,37 @@ std::vector<double> MaxentData::getEntropyGrad() const {
   return entropyGrad;
 }
 
+/**
+* Returns the reconstructed (calculated) data
+* @return : The reconstructed data as a vector
+*/
 std::vector<double> MaxentData::getReconstructedData() const {
+
+  if (m_dataCalc.empty()) {
+    // If it is empty it means we didn't load valid data
+    throw std::runtime_error("No data were loaded");
+  }
   return m_dataCalc;
 }
 
-std::vector<double> MaxentData::getImage() const { return m_image; }
+/**
+* Returns the (reconstructed) image
+* @return : The image as a vector
+*/
+std::vector<double> MaxentData::getImage() const {
 
-std::vector<double> MaxentData::getMetric() const {
+  if (m_image.empty()) {
+    // If it is empty it means we didn't load valid data
+    throw std::runtime_error("No data were loaded");
+  }
+  return m_image;
+}
+
+/**
+* Calculates the metric (depends on the type of entropy)
+* @return : The metric as a vector
+*/
+std::vector<double> MaxentData::calculateMetric() const {
 
   const size_t size = m_image.size();
 
@@ -176,31 +256,72 @@ std::vector<double> MaxentData::getMetric() const {
   return metric;
 }
 
-std::vector<std::vector<double>> MaxentData::getSearchDirections() {
+/**
+* Returns the search directions (in image space)
+* @return : The search directions
+*/
+std::vector<std::vector<double>> MaxentData::getSearchDirections() const {
 
   return m_directionsIm;
 }
-QuadraticCoefficients MaxentData::getQuadraticCoefficients() {
 
+/**
+* Returns the quadratic coefficients
+* @return : The quadratic coefficients
+*/
+QuadraticCoefficients MaxentData::getQuadraticCoefficients() const {
+
+  if (!m_coeffs.c1.size().first) {
+    // This means that none of the coefficients were calculated
+    throw std::runtime_error("Quadratic coefficients have not been calculated");
+  }
   return m_coeffs;
 }
 
-double MaxentData::getAngle() { return m_angle; }
+/**
+* Returns the angle between the gradient of chi-square and the gradient of the
+* entropy (calculated and initialized in calculateQuadraticCoefficients())
+* @return : The angle
+*/
+double MaxentData::getAngle() const {
 
+  if (m_angle == -1) {
+    throw std::runtime_error("Angle has not been calculated");
+  }
+  return m_angle;
+}
+
+/**
+* Returns chi-square (it is calculated if necessary)
+* @return : Chi-square
+*/
 double MaxentData::getChisq() {
+
+  if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
+    throw std::runtime_error("Cannot get chi-square");
+  }
+  // If data were loaded we can calculate chi-square
   if (m_chisq == -1.)
     calculateChisq();
 
   return m_chisq;
 }
 
+/**
+* Calculates the search directions and quadratic coefficients (equations SB. 21
+* and SB. 22). Also calculates the angle between the gradient of chi-square and
+* the gradient of the entropy
+*/
 void MaxentData::calculateQuadraticCoefficients() {
 
   // Two search directions
   const size_t dim = 2;
 
   // Some checks
-  // TODO: check if they are needed
+  if (m_data.empty() || m_errors.empty() || m_image.empty() ||
+      m_dataCalc.empty()) {
+    throw std::runtime_error("Data were not loaded");
+  }
   if (m_dataCalc.size() != m_image.size()) {
     throw std::invalid_argument("Couldn't calculate the search directions");
   }
@@ -208,14 +329,15 @@ void MaxentData::calculateQuadraticCoefficients() {
   size_t npoints = m_image.size();
 
   // Calculate data from start image
+  // TODO: I don't think we need this line
   m_dataCalc = transformImageToData(m_image);
 
   // Gradient of chi (in image space)
-  std::vector<double> cgrad = transformDataToImage(getChiGrad());
+  std::vector<double> cgrad = transformDataToImage(calculateChiGrad());
   // Gradient of entropy
-  std::vector<double> sgrad = getEntropyGrad();
+  std::vector<double> sgrad = calculateEntropyGrad();
   // Metric
-  std::vector<double> metric = getMetric();
+  std::vector<double> metric = calculateMetric();
 
   double cnorm = 0.;
   double snorm = 0.;
@@ -265,6 +387,7 @@ void MaxentData::calculateQuadraticCoefficients() {
   directionsDat[1] = transformImageToData(m_directionsIm[1]);
 
   double chiSq = getChisq();
+
   // Calculate the quadratic coefficients SB. eq 24
 
   // First compute s1, c1
@@ -276,7 +399,6 @@ void MaxentData::calculateQuadraticCoefficients() {
       m_coeffs.s1[k][0] += m_directionsIm[k][i] * sgrad[i];
       m_coeffs.c1[k][0] += m_directionsIm[k][i] * cgrad[i];
     }
-    // Note: the factor chiSQ has to go either here or in calculateChi
     m_coeffs.c1[k][0] /= chiSq;
   }
 
@@ -294,7 +416,6 @@ void MaxentData::calculateQuadraticCoefficients() {
         m_coeffs.s2[k][l] -=
             m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
       }
-      // Note: the factor chiSQ has to go either here or in calculateChi
       m_coeffs.c2[k][l] *= 2.0 / chiSq;
       m_coeffs.s2[k][l] *= 1.0 / m_background;
     }
@@ -308,6 +429,9 @@ void MaxentData::calculateQuadraticCoefficients() {
   }
 }
 
+/**
+* Calculates chi-square
+*/
 void MaxentData::calculateChisq() {
 
   size_t npoints = m_data.size();
@@ -322,6 +446,12 @@ void MaxentData::calculateChisq() {
     }
   }
 }
+
+/**
+* Transforms from image-space to data-space (Backward Fourier Transform)
+* @param input : [input] A vector in image-space
+* @return : The vector in data-space
+*/
 std::vector<double>
 MaxentData::transformImageToData(const std::vector<double> &input) {
 
@@ -353,6 +483,12 @@ MaxentData::transformImageToData(const std::vector<double> &input) {
 
   return output;
 }
+
+/**
+* Transforms from data-space to image-space (Forward Fourier Transform)
+* @param input : [input] A vector in data-space
+* @return : The vector in image-space
+*/
 std::vector<double>
 MaxentData::transformDataToImage(const std::vector<double> &input) {
 
