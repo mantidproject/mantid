@@ -130,11 +130,7 @@ public:
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
-<<<<<<< HEAD
-  QSet<QString> getInterfaceCategories(const QString & interfaceName) const;
-=======
   QSet<QString> getInterfaceCategories(const QString &interfaceName) const;
->>>>>>> origin/master
 
 protected:
   // Unhide the inherited create method
@@ -145,16 +141,8 @@ private:
 
   /// Private Constructor for singleton class
   UserSubWindowFactoryImpl();
-<<<<<<< HEAD
   ///Private Destructor
-=======
-  /// Private copy constructor - NO COPY ALLOWED
-  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UserSubWindowFactoryImpl &operator=(const UserSubWindowFactoryImpl &);
-  /// Private Destructor
->>>>>>> origin/master
-  ~UserSubWindowFactoryImpl() override {}
+  ~UserSubWindowFactoryImpl() override = default
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow *createFromAlias(const std::string &name) const;
 
