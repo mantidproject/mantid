@@ -46,7 +46,8 @@ def map_to_color(data_array, base_color, change_color_flag):
                 # this color will be changed for color map
                 c_step = step_list[step_list_index]
                 # color value = base value + max_change / step
-                color_value = base_color[i_color] + (1. - base_color[i_color]) / num_steps_color * c_step
+                color_value = base_color[i_color] + (0.9999 - base_color[i_color]) / num_steps_color * c_step
+                color_value = min(1.0 - 1.E-10, color_value)
                 step_list_index += 1
             else:
                 # use bae color

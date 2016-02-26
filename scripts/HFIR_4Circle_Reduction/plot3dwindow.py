@@ -30,7 +30,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui.lineEdit_baseColorGreen.setText('0.5')
         self.ui.lineEdit_baseColorBlue.setText('0.5')
         self.ui.lineEdit_countsThresholdLower.setText('0')
-        self.ui.comboBox_scans.setText('unclassified')
+        self.ui.comboBox_scans.addItem('unclassified')
 
         # Event handling
         self.connect(self.ui.pushButton_plot3D, QtCore.SIGNAL('clicked()'),
@@ -192,8 +192,9 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         # get threshold
         status, thresholds = guiutility.parse_integers_editors([self.ui.lineEdit_countsThresholdLower,
-                                                                self.ui.lineEdit_countsThresholdUpper])
-        assert status
+                                                                self.ui.lineEdit_countsThresholdUpper],
+                                                               allow_blank=True)
+        assert status, thresholds
         if thresholds[0] is None:
             thresholds[0] = 0
         if thresholds[1] is None:
@@ -294,7 +295,8 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     """ Filter the data points by intensity threshold
     :param points:
     :param intensities:
-    :param threshold:
+    :param lower_boundary:
+    :param upper_boundary:
     :return: filtered data points and intensities (2-tuple of ndarray)
     """
     # check
