@@ -142,7 +142,7 @@ private:
   /// Private Constructor for singleton class
   UserSubWindowFactoryImpl();
   ///Private Destructor
-  ~UserSubWindowFactoryImpl() override = default
+  ~UserSubWindowFactoryImpl() override = default;
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow *createFromAlias(const std::string &name) const;
 
