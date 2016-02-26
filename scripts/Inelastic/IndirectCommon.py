@@ -609,7 +609,7 @@ def IndentifyDataBoundaries(sample_ws):
     # Convert Bin index to data value
     x_data = sample_ws.readX(0)
     first_data_point = x_data[start_data_idx]
-    last_data_point = x_data[len(x_data) - end_data_idx]
+    last_data_point = x_data[len(x_data) - end_data_idx - 1]
     return first_data_point, last_data_point
 
 def firstNonZero(data):
