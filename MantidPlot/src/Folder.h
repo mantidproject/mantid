@@ -32,8 +32,6 @@
 #include <QObject>
 #include <QEvent>
 #include <QTreeWidget>
-//#include <q3listview.h>
-//#include <q3iconview.h>
 
 #include "MdiSubWindow.h"
 
@@ -42,12 +40,6 @@ class Table;
 class Matrix;
 class MultiLayer;
 class Note;
-
-class QDragEnterEvent;
-class QDragMoveEvent;
-class QDragLeaveEvent;
-class QDropEvent;
-//class Q3DragObject;
 
 //! Folder for the project explorer
 class Folder : public QObject

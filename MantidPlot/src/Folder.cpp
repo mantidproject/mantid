@@ -33,9 +33,6 @@
 #include <QApplication>
 #include <QDateTime>
 
-#include <Q3Header>
-
-
 Folder::Folder( Folder *parent, const QString &name )
     : QObject(parent), birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_log_info(QString()), myFolderListItem(0), d_active_window(0)
 {
@@ -336,6 +333,4 @@ WindowListItem::WindowListItem( QTreeWidget *parent, MdiSubWindow *w )
     : QTreeWidgetItem( parent )
 {
     myWindow = w;
-
-	//setDragEnabled ( true );
 }

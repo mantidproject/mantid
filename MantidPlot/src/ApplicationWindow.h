@@ -33,7 +33,6 @@ Description          : QtiPlot's main window
 #define APPLICATION_H
 
 #include <QMainWindow>
-#include <q3listview.h>
 #include <QFile>
 #include <QSplitter>
 #include <QDesktopServices>
@@ -970,25 +969,6 @@ public slots:
   //!  used by the findDialog
   void find(const QString& s, bool windowNames, bool labels, bool folderNames,
     bool caseSensitive, bool partialMatch, bool subfolders);
-
-  //!  initializes the list of items dragged by the user
-  void dragFolderItems(QList<QTreeWidgetItem *> items){draggedItems = items;};
-
-  //!  Drop the objects in the list draggedItems to the folder of the destination item
-  void dropFolderItems(QTreeWidgetItem *dest);
-
-  //!  moves a folder item to another
-  /**
-  * @param src :: source folder item
-  * @param dest :: destination folder item
-  */
-  void moveFolder(FolderListItem *src, FolderListItem *dest);
-  //!  copies a folder to another
-  /**
-  * @param src :: source folder
-  * @param dest :: destination folder
-  */
-  bool copyFolder(Folder *src, Folder *dest);
 
   void foldersMenuActivated( int id );
   //@}

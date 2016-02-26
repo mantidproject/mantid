@@ -48,6 +48,7 @@
 #include <QUndoStack>
 #include <QCheckBox>
 #include <QTabWidget>
+#include <QScrollBar>
 
 #include <stdlib.h>
 #include <algorithm>
