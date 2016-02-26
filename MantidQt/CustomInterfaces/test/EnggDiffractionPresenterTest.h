@@ -438,6 +438,8 @@ public:
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(1)
         .WillOnce(Return(specid));
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
@@ -554,6 +556,9 @@ public:
         .Times(2)
         .WillRepeatedly(Return(specid));
 
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
+
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
     EXPECT_CALL(mockView,
@@ -608,6 +613,9 @@ public:
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(2)
         .WillRepeatedly(Return(specid));
+
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
