@@ -7,7 +7,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropy : TODO: DESCRIPTION
+/** MaxentEntropy : Abstract base class defining the necessary methods to
+  calculate any type of entropy to be used by MaxEnt
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,12 +33,16 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentEntropy {
 public:
+  // Constructor
   MaxentEntropy() = default;
+  // Destructor
   virtual ~MaxentEntropy() = default;
-
-  virtual double getDerivative(double x) = 0;
-  virtual double getSecondDerivative(double x) = 0;
-  virtual double correctValue(double x, double y) = 0;
+  // First derivative of the entropy
+  virtual double getDerivative(double value) = 0;
+  // Second derivative of the entropy
+  virtual double getSecondDerivative(double value) = 0;
+  // Corrects an invalid value
+  virtual double correctValue(double value, double newValue) = 0;
 };
 
 // Helper typedef for scoped pointer of this type.

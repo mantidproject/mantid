@@ -35,7 +35,7 @@ public:
   MaxentEntropyPositiveValues() = default;
   virtual ~MaxentEntropyPositiveValues() = default;
 
-  double getDerivative(double x) override;
+  double getDerivative(double value) override;
   double getSecondDerivative(double x) override;
   double correctValue(double x, double y) override;
 };

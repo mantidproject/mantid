@@ -9,7 +9,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentData : TODO: DESCRIPTION
+/** MaxentData : Class containing MaxEnt data. MaxEnt data is defined by
+  experimental (measured) data, reconstructed data (both in data and image
+  space), search directions, and quadratic coefficients. Search directions and
+  quadratic coefficients are calculated following J. Skilling and R. K. Bryan:
+  "Maximum entropy image reconstruction: general algorithm" (1984), section 3.6.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -33,6 +37,7 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+// Auxiliary class to store quadratic coefficients
 struct QuadraticCoefficients {
   Kernel::DblMatrix s1; // Quadratic coefficient S_mu
   Kernel::DblMatrix c1; // Quadratic coefficient C_mu
@@ -46,46 +51,71 @@ public:
   MaxentData() = delete;
   virtual ~MaxentData() = default;
 
-  // Setters
+  // Loads real data
   void loadReal(const std::vector<double> &data,
                 const std::vector<double> &errors,
                 const std::vector<double> &image, double background);
+  // Loads complex data
   void loadComplex(const std::vector<double> &dataRe,
                    const std::vector<double> &dataIm,
                    const std::vector<double> &errorsRe,
                    const std::vector<double> &errorsIm,
                    const std::vector<double> &image, double background);
-  void correctImage();
+  // Updates the image
   void updateImage(const std::vector<double> &delta);
-
-  // Getters
-  std::vector<double> getChiGrad() const;
-  std::vector<double> getEntropy() const;
-  std::vector<double> getEntropyGrad() const;
-  std::vector<double> getMetric() const;
+  // Returns the reconstructed (calculated) data
   std::vector<double> getReconstructedData() const;
+  // Returns the image
   std::vector<double> getImage() const;
-  std::vector<std::vector<double>> getSearchDirections();
-  QuadraticCoefficients getQuadraticCoefficients();
-  double getAngle();
+  // Returns the quadratic coefficients
+  QuadraticCoefficients getQuadraticCoefficients() const;
+  // Returns the angle between Grad(S) and Grad(C)
+  double getAngle() const;
+  // Returns the chi-square
   double getChisq();
-
-  // Other
+  // Calculates the quadratic coefficient for the current data
   void calculateQuadraticCoefficients();
-  void calculateChisq();
-  std::vector<double> transformImageToData(const std::vector<double> &input);
-  std::vector<double> transformDataToImage(const std::vector<double> &input);
 
 private:
+  // Calculates the gradient of chi
+  std::vector<double> calculateChiGrad() const;
+  // Calculates the entropy
+  std::vector<double> calculateEntropy() const;
+  // Calculates the gradient of S (entropy)
+  std::vector<double> calculateEntropyGrad() const;
+  // Calculates the metric (second derivative of S)
+  std::vector<double> calculateMetric() const;
+  // Returns the search directions
+  std::vector<std::vector<double>> getSearchDirections() const;
+  // Corrects the image
+  void correctImage();
+  // Calculates chi-square
+  void calculateChisq();
+  // Transforms from image space to data space
+  std::vector<double> transformImageToData(const std::vector<double> &input);
+  // Transforms from data space to image space
+  std::vector<double> transformDataToImage(const std::vector<double> &input);
+
+  // Member variables
+  // The experimental (measured) data
   std::vector<double> m_data;
+  // The experimental (measured) errors
   std::vector<double> m_errors;
+  // The image
   std::vector<double> m_image;
+  // The reconstructed (calculated) data
   std::vector<double> m_dataCalc;
+  // The background
   double m_background;
+  // The angle between Grad(C) and Grad(S)
   double m_angle;
+  // Chi-square
   double m_chisq;
+  // The type of entropy
   MaxentEntropy_sptr m_entropy;
+  // The search directions
   std::vector<std::vector<double>> m_directionsIm;
+  // The quadratic coefficients
   QuadraticCoefficients m_coeffs;
 };
 

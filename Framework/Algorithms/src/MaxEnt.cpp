@@ -179,11 +179,13 @@ void MaxEnt::exec() {
 
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
-  MaxentEntropy_sptr entropy;
+  MaxentData_sptr maxentData;
   if (positiveImage) {
-    entropy = boost::make_shared<MaxentEntropyPositiveValues>();
+    maxentData = boost::make_shared<MaxentData>(
+        boost::make_shared<MaxentEntropyPositiveValues>());
   } else {
-    entropy = boost::make_shared<MaxentEntropyNegativeValues>();
+    maxentData = boost::make_shared<MaxentData>(
+        boost::make_shared<MaxentEntropyNegativeValues>());
   }
 
   // Output workspaces
@@ -199,8 +201,6 @@ void MaxEnt::exec() {
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
-
-  MaxentData_sptr maxentData = boost::make_shared<MaxentData>(entropy);
 
   npoints *= 2;
   for (size_t s = 0; s < nspec; s++) {
