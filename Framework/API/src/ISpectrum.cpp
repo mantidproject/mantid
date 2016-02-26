@@ -13,7 +13,7 @@ ISpectrum::ISpectrum()
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
-ISpectrum::ISpectrum(const specid_t specNo)
+ISpectrum::ISpectrum(const specnum_t specNo)
     : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -212,11 +212,11 @@ std::set<detid_t> &ISpectrum::getDetectorIDs() { return this->detectorIDs; }
 
 // ---------------------------------------------------------
 /// @return the spectrum number of this spectrum
-specid_t ISpectrum::getSpectrumNo() const { return m_specNo; }
+specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
 /** Sets the the spectrum number of this spectrum
  * @param num :: the spectrum number of this spectrum */
-void ISpectrum::setSpectrumNo(specid_t num) { m_specNo = num; }
+void ISpectrum::setSpectrumNo(specnum_t num) { m_specNo = num; }
 
 // ---------------------------------------------------------
 /** Lock access to the data so that it does not get deleted while reading.

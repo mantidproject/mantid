@@ -115,7 +115,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
 }
 
 void SINQHMListener::setSpectra(
-    const std::vector<Mantid::specid_t> & /*specList*/) {
+    const std::vector<Mantid::specnum_t> & /*specList*/) {
   /**
    * Nothing to do: we always go for the full data.
    * SINQHM would do subsampling but this cannot easily

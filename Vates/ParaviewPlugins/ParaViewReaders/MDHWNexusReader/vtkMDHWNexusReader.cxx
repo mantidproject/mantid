@@ -206,10 +206,9 @@ unsigned long vtkMDHWNexusReader::GetMTime()
 */
 void vtkMDHWNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  progressMutex.lock();
+  std::lock_guard<std::mutex> lockGuard(progressMutex);
   this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
-  progressMutex.unlock();
 }
 
 /** Helper function to setup the time range.

@@ -1160,10 +1160,7 @@ void MultiLayer::wheelEvent ( QWheelEvent * e )
 
 bool MultiLayer::isEmpty ()
 {
-	if (graphsList.count() <= 0)
-		return true;
-	else
-		return false;
+	return (graphsList.count() <= 0);
 }
 
 void MultiLayer::setMargins (int lm, int rm, int tm, int bm)

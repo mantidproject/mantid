@@ -5,8 +5,8 @@
 // Includes
 //--------------------------------------------
 #include "MantidKernel/DllConfig.h"
-
 #include <Poco/Logger.h>
+
 #ifdef _MSC_VER
 // Disable a flood of warnings about inheriting from std streams
 // See
@@ -20,7 +20,7 @@
 
 #include <istream>
 #include <Poco/Thread.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -77,7 +77,7 @@ private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
   /// mutex protecting logstream
-  Poco::FastMutex m_mutex;
+  std::mutex m_mutex;
 };
 
 /**

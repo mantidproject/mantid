@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <mutex>
 
 namespace Mantid {
 namespace API {
@@ -76,7 +76,7 @@ private:
    */
   size_t memoryCleared;
   /// Mutex for adding to memoryCleared
-  Kernel::Mutex accumulatorMutex;
+  std::mutex accumulatorMutex;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

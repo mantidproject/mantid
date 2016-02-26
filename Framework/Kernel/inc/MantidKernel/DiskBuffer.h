@@ -4,7 +4,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/multi_index_container.hpp>
@@ -18,6 +17,7 @@
 #include <vector>
 #include <list>
 #include <limits>
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -148,7 +148,7 @@ protected:
   std::list<ISaveable *> m_toWriteBuffer;
 
   /// Mutex for modifying the the toWrite buffer.
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 
   // ----------------------- Free space map
   // --------------------------------------
@@ -159,7 +159,7 @@ protected:
   freeSpace_bySize_t &m_free_bySize;
 
   /// Mutex for modifying the free space list
-  Kernel::Mutex m_freeMutex;
+  std::mutex m_freeMutex;
 
   // ----------------------- File object --------------------------------------
   /// Length of the file. This is where new blocks that don't fit get placed.

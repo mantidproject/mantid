@@ -343,7 +343,7 @@ namespace MantidQt
 
         // hide some columns based on the techniques
         { // shrink variable scope
-          std::set<std::string> techniques = instrInfo.techniques();
+          auto techniques = instrInfo.techniques();
           // required for showing final and delta energy
           const std::string IGS("TOF Indirect Geometry Spectroscopy");
           // required for showing initial and delta energy

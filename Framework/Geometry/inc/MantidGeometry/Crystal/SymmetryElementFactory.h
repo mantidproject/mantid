@@ -8,7 +8,7 @@
 #include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/make_shared.hpp>
-#include <set>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Geometry {
@@ -270,7 +270,7 @@ protected:
                        const SymmetryElement_sptr &prototype);
 
   std::vector<AbstractSymmetryElementGenerator_sptr> m_generators;
-  std::set<std::string> m_generatorNames;
+  std::unordered_set<std::string> m_generatorNames;
   std::map<std::string, SymmetryElement_sptr> m_prototypes;
 
 private:

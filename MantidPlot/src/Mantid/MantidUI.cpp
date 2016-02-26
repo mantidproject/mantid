@@ -342,9 +342,9 @@ void MantidUI::saveSettings() const
 QStringList MantidUI::getWorkspaceNames()
 {
   QStringList sl;
-  std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
-    sl<<QString::fromStdString(*it);
+  auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  for (const auto &name : sv)
+    sl<<QString::fromStdString(name);
   return sl;
 }
 
@@ -1216,6 +1216,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     t->setColPlotDesignation(col, Table::None);
   }
   t->setHeaderColType();
+  t->setTextFormat(ncols-1);
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
@@ -1236,7 +1237,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     try
     {
       ISpectrum *spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specid_t specNo = spectrum->getSpectrumNo();
+      Mantid::specnum_t specNo = spectrum->getSpectrumNo();
       QString detIds("");
       const auto & ids  = spectrum->getDetectorIDs();
       size_t ndets = ids.size();
@@ -1388,11 +1389,8 @@ void MantidUI::deletePressEvent()
 bool MantidUI::canAcceptDrop(QDragEnterEvent *e)
 {
   QString name = e->mimeData()->objectName();
-  if ( name == "MantidWorkspace" || e->mimeData()->hasUrls() || name == "TiledWindow" )
-  {
-    return true;
-  }
-  return false;
+ 
+  return (name == "MantidWorkspace" || e->mimeData()->hasUrls() || name == "TiledWindow");
 }
 
 bool MantidUI::drop(QDropEvent* e)
@@ -3138,7 +3136,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     if (ask.clickedButton() != confirmButton) return NULL;
   }
   // Force waterfall option to false if only 1 curve
-  if ((NULL == plotWindow || clearWindow == true) && toPlot.size() == 1)
+  if ((NULL == plotWindow || clearWindow) && toPlot.size() == 1)
     waterfallPlot = false;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

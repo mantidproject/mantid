@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 namespace DataHandling {
@@ -105,14 +105,14 @@ private:
   groupWsList(const std::vector<API::Workspace_sptr> &wsList);
 
   /// The base properties
-  std::set<std::string> m_baseProps;
+  std::unordered_set<std::string> m_baseProps;
   /// The actual loader
   API::IAlgorithm_sptr m_loader;
   /// The name of the property that will be passed the property from our
   /// Filename
   std::string m_filenamePropName;
   /// Mutex for temporary fix for #5963
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

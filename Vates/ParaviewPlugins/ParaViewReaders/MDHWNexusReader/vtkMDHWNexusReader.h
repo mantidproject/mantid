@@ -5,8 +5,8 @@
 #include "vtkStructuredGridAlgorithm.h"
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/make_unique.h"
+#include <mutex>
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y
@@ -66,7 +66,7 @@ private:
   bool m_loadInMemory;
 
   /// Mutex for thread-safe progress reporting.
-  Mantid::Kernel::Mutex progressMutex;
+  std::mutex progressMutex;
 
   /// Recursion depth.
   size_t m_depth;

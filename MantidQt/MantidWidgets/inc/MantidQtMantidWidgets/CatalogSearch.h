@@ -111,9 +111,9 @@ namespace MantidQt
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
       void updateDataFileLabels(QTableWidgetItem* item);
       /// Obtain all file extensions from the provided column (dataFileResults -> File name).
-      std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
+      std::unordered_set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
-      void populateDataFileType(const std::set<std::string> &extensions);
+      void populateDataFileType(const std::unordered_set<std::string> &extensions);
       /// Disable the download button if user can access the files locally from the archives.
       void disableDownloadButtonIfArchives(int row);
 

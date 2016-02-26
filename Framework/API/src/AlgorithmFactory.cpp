@@ -178,7 +178,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
     return names;
   } else {
     // hidden categories
-    std::set<std::string> hiddenCategories;
+    std::unordered_set<std::string> hiddenCategories;
     fillHiddenCategories(&hiddenCategories);
 
     // strip out any algorithms names where all of the categories are hidden
@@ -245,7 +245,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::map<std::string, bool> resultCategories;
 
   // hidden categories - empty initially
-  std::set<std::string> hiddenCategories;
+  std::unordered_set<std::string> hiddenCategories;
   fillHiddenCategories(&hiddenCategories);
 
   // get all of the algorithm keys, including the hidden ones for speed purposes
@@ -287,20 +287,18 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
 * the default is false
 * @returns The category strings
 */
-const std::set<std::string>
+const std::unordered_set<std::string>
 AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
-  std::set<std::string> validCategories;
+  std::unordered_set<std::string> validCategories;
 
   // get all of the information we need
-  std::map<std::string, bool> categoryMap = getCategoriesWithState();
+  auto categoryMap = getCategoriesWithState();
 
   // iterate around the map
-  std::map<std::string, bool>::const_iterator it_end = categoryMap.end();
-  for (std::map<std::string, bool>::const_iterator it = categoryMap.begin();
-       it != it_end; ++it) {
-    bool isHidden = (*it).second;
+  for (auto const &category : categoryMap) {
+    bool isHidden = (category).second;
     if (includeHidden || (!isHidden)) {
-      validCategories.insert((*it).first);
+      validCategories.insert((category).first);
     }
   }
 
@@ -319,20 +317,18 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 std::vector<Algorithm_descriptor>
 AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   // algorithm names
-  std::vector<std::string> sv;
-  sv = getKeys(true);
+  auto sv = getKeys(true);
 
   // hidden categories
-  std::set<std::string> hiddenCategories;
-  if (includeHidden == false) {
+  std::unordered_set<std::string> hiddenCategories;
+  if (!includeHidden) {
     fillHiddenCategories(&hiddenCategories);
   }
 
   // results vector
   std::vector<Algorithm_descriptor> res;
 
-  for (std::vector<std::string>::const_iterator s = sv.begin(); s != sv.end();
-       ++s) {
+  for (auto s = sv.cbegin(); s != sv.cend(); ++s) {
     if (s->empty())
       continue;
     Algorithm_descriptor desc;
@@ -348,7 +344,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       continue;
 
     boost::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
-    std::vector<std::string> categories = alg->categories();
+    auto categories = alg->categories();
     desc.alias = alg->alias();
 
     // For each category
@@ -387,7 +383,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 }
 
 void AlgorithmFactoryImpl::fillHiddenCategories(
-    std::set<std::string> *categorySet) const {
+    std::unordered_set<std::string> *categorySet) const {
   std::string categoryString = Kernel::ConfigService::Instance().getString(
       "algorithms.categories.hidden");
   Mantid::Kernel::StringTokenizer tokenizer(

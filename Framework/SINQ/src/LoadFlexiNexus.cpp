@@ -168,7 +168,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     ws->setX(wsIndex, xData);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
-        ->setSpectrumNo(static_cast<specid_t>(yData[wsIndex]));
+        ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
         ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
@@ -339,7 +339,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
   * load all the extras into the Run information
   */
   Run &r = info->mutableRun();
-  std::set<std::string> specialMap = populateSpecialMap();
+  auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {
     if (specialMap.find(it->first) == specialMap.end()) {
       // not in specials!
@@ -366,8 +366,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
     }
   }
 }
-std::set<std::string> LoadFlexiNexus::populateSpecialMap() {
-  std::set<std::string> specialMap;
+std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
+  std::unordered_set<std::string> specialMap;
 
   specialMap.insert("title");
   specialMap.insert("data");

@@ -305,14 +305,7 @@ bool MantidMatrixModel::checkMonitorCache(int row) const
       {
         size_t wsIndex = static_cast<size_t>(row);
         auto det = m_workspace->getDetector(wsIndex);
-        if (det->isMonitor())
-        {
-          isMon = true;
-        }
-        else
-        {
-          isMon = false;
-        }
+		isMon = det->isMonitor();
         m_monCache.insert(row, isMon);
       }
       catch (std::exception&)

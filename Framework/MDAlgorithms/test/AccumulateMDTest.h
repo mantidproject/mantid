@@ -191,12 +191,11 @@ public:
 
   void test_insert_data_sources() {
     std::string data_sources = "test1,test2,test3";
-    std::set<std::string> data_sources_set;
+    std::unordered_set<std::string> data_sources_set;
     Mantid::MDAlgorithms::insertDataSources(data_sources, data_sources_set);
 
     // Check set contains "test1", "test2" and "test3"
-    std::set<std::string>::iterator iter;
-    iter = data_sources_set.find("test1");
+    auto iter = data_sources_set.find("test1");
     TS_ASSERT(iter != data_sources_set.end());
 
     iter = data_sources_set.find("test2");
@@ -208,12 +207,11 @@ public:
 
   void test_insert_data_sources_with_whitespace() {
     std::string data_sources = " test1,test2 , test3";
-    std::set<std::string> data_sources_set;
+    std::unordered_set<std::string> data_sources_set;
     Mantid::MDAlgorithms::insertDataSources(data_sources, data_sources_set);
 
     // Check set contains "test1", "test2" and "test3"
-    std::set<std::string>::iterator iter;
-    iter = data_sources_set.find("test1");
+    auto iter = data_sources_set.find("test1");
     TS_ASSERT(iter != data_sources_set.end());
 
     iter = data_sources_set.find("test2");

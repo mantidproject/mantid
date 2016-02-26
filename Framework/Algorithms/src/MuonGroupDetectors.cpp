@@ -98,8 +98,8 @@ void MuonGroupDetectors::exec() {
     std::vector<int> &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
 
     // Recieve detector IDs, but need workspace indices to group, so convert
-    std::vector<size_t> wsIndices;
-    inWS->getIndicesFromDetectorIDs(detectorIDs, wsIndices);
+    std::vector<size_t> wsIndices =
+        inWS->getIndicesFromDetectorIDs(detectorIDs);
 
     if (wsIndices.size() != detectorIDs.size())
       throw std::invalid_argument("Some of the detector IDs were not found");
@@ -127,7 +127,7 @@ void MuonGroupDetectors::exec() {
     outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
     outWS->getSpectrum(groupIndex)
-        ->setSpectrumNo(static_cast<specid_t>(groupIndex + 1));
+        ->setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
   }
 
   setProperty("OutputWorkspace", outWS);

@@ -172,12 +172,12 @@ void LoadRawHelper::setRunNumber(API::Run &run) {
  * @param lengthIn :: size of workspace vectors
  * @param noTimeRegimes :: number of time regime.
  */
-void LoadRawHelper::readworkspaceParameters(specid_t &numberOfSpectra,
+void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
                                             int &numberOfPeriods,
                                             int64_t &lengthIn,
                                             int64_t &noTimeRegimes) {
   // Read in the number of spectra in the RAW file
-  m_numberOfSpectra = numberOfSpectra = static_cast<specid_t>(isisRaw->t_nsp1);
+  m_numberOfSpectra = numberOfSpectra = static_cast<specnum_t>(isisRaw->t_nsp1);
   // Read the number of periods in this file
   numberOfPeriods = isisRaw->t_nper;
   // Read the number of time channels (i.e. bins) from the RAW file
@@ -384,8 +384,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
     const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
-    int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes, int64_t lengthIn,
-    int64_t binStart) {
+    int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
+    int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
   typedef double (*uf)(double);
@@ -423,9 +423,9 @@ void LoadRawHelper::setWorkspaceData(
  *  @param mapping The spectrum number to detector mapping
  *  @return monitorSpecList The spectrum numbers of the monitors
  */
-std::vector<specid_t>
+std::vector<specnum_t>
 LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
-  std::vector<specid_t> spectrumIndices;
+  std::vector<specnum_t> spectrumIndices;
 
   if (!m_monitordetectorList.empty()) {
     const auto &map = mapping.getMapping();
@@ -599,7 +599,7 @@ void LoadRawHelper::runLoadInstrument(
     }
     // Debugging code??
     m_monitordetectorList = loadInst->getProperty("MonitorList");
-    std::vector<specid_t>::const_iterator itr;
+    std::vector<specnum_t>::const_iterator itr;
     for (itr = m_monitordetectorList.begin();
          itr != m_monitordetectorList.end(); ++itr) {
       g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
@@ -626,7 +626,7 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
         "Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
   }
   m_monitordetectorList = loadInst->getProperty("MonitorList");
-  std::vector<specid_t>::const_iterator itr;
+  std::vector<specnum_t>::const_iterator itr;
   for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end();
        ++itr) {
     g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
@@ -730,7 +730,7 @@ void LoadRawHelper::runLoadLog(const std::string &fileName,
   }
   // Make log creator object and add the run status log if we have the
   // appropriate ICP log
-  m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
+  m_logCreator.reset(new ISISRunLogs(localWorkspace->run()));
   m_logCreator->addStatusLog(localWorkspace->mutableRun());
 }
 
@@ -947,8 +947,8 @@ void LoadRawHelper::checkOptionalProperties() {
  * properties
  * @return the size of the workspace (number of spectra)
  */
-specid_t LoadRawHelper::calculateWorkspaceSize() {
-  specid_t total_specs(0);
+specnum_t LoadRawHelper::calculateWorkspaceSize() {
+  specnum_t total_specs(0);
   if (m_interval || m_list) {
     if (m_interval) {
       if (m_spec_min != 1 && m_spec_max == 1)
@@ -969,7 +969,7 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
       }
       if (m_spec_list.size() == 0)
         m_list = false;
-      total_specs += static_cast<specid_t>(m_spec_list.size());
+      total_specs += static_cast<specnum_t>(m_spec_list.size());
       m_total_specs = total_specs;
     }
   } else {
@@ -988,10 +988,10 @@ specid_t LoadRawHelper::calculateWorkspaceSize() {
 /// @param normalwsSpecs :: the spectra for the detector workspace
 /// @param monitorwsSpecs :: the spectra for the monitor workspace
 void LoadRawHelper::calculateWorkspacesizes(
-    const std::vector<specid_t> &monitorSpecList, specid_t &normalwsSpecs,
-    specid_t &monitorwsSpecs) {
+    const std::vector<specnum_t> &monitorSpecList, specnum_t &normalwsSpecs,
+    specnum_t &monitorwsSpecs) {
   if (!m_interval && !m_bmspeclist) {
-    monitorwsSpecs = static_cast<specid_t>(monitorSpecList.size());
+    monitorwsSpecs = static_cast<specnum_t>(monitorSpecList.size());
     normalwsSpecs = m_total_specs - monitorwsSpecs;
     g_log.debug()
         << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  "
@@ -1000,7 +1000,7 @@ void LoadRawHelper::calculateWorkspacesizes(
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
       int msize = 0;
-      std::vector<specid_t>::const_iterator itr1;
+      std::vector<specnum_t>::const_iterator itr1;
       for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end();
            ++itr1) {
         if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
@@ -1014,7 +1014,7 @@ void LoadRawHelper::calculateWorkspacesizes(
     }
     if (m_bmspeclist) {
       if (m_interval) {
-        std::vector<specid_t>::iterator itr;
+        std::vector<specnum_t>::iterator itr;
         for (itr = m_spec_list.begin();
              itr != m_spec_list.end();) { // if  the m_spec_list elements are in
                                           // the range between m_spec_min &
@@ -1031,9 +1031,9 @@ void LoadRawHelper::calculateWorkspacesizes(
         } else { // at this point there are monitors in the list which are not
                  // in the min& max range
           // so find those  monitors  count and calculate the workspace specs
-          std::vector<specid_t>::const_iterator itr;
-          std::vector<specid_t>::const_iterator monitr;
-          specid_t monCounter = 0;
+          std::vector<specnum_t>::const_iterator itr;
+          std::vector<specnum_t>::const_iterator monitr;
+          specnum_t monCounter = 0;
           for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
             monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
             if (monitr != monitorSpecList.end())
@@ -1047,9 +1047,9 @@ void LoadRawHelper::calculateWorkspacesizes(
         }
       }      // end if loop for m_interval
       else { // if only List true
-        specid_t mSize = 0;
-        std::vector<specid_t>::const_iterator itr;
-        std::vector<specid_t>::const_iterator monitr;
+        specnum_t mSize = 0;
+        std::vector<specnum_t>::const_iterator itr;
+        std::vector<specnum_t>::const_iterator monitr;
         for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
           monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
           if (monitr != monitorSpecList.end()) {
@@ -1080,7 +1080,7 @@ void LoadRawHelper::loadSpectra(
   const int64_t periodTimesNSpectraP1 =
       period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
   // loop through spectra
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&

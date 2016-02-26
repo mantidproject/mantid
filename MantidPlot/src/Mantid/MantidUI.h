@@ -28,6 +28,7 @@
 #include <QProgressDialog>
 #include <QMap>
 #include <QMutex>
+#include <unordered_map>
 
 //----------------------------------
 // Forward declarations
@@ -570,7 +571,7 @@ private:
   QMap<std::string,int> m_DAE_map;
 
   // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
-  std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
+  std::unordered_multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
   QMdiSubWindow *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   //prevents some repeated code realtating to log names

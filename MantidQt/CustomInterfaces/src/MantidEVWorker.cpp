@@ -422,10 +422,7 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
 
   alg->setProperty("OutputWorkspace", peaks_ws_name );
 
-  if ( alg->execute() )
-    return true;
-  
-  return false;
+  return alg->execute();
 }
 
 /**
@@ -445,10 +442,7 @@ bool MantidEVWorker::loadNexusPeaks( const std::string & peaks_ws_name,
 
   alg->setProperty("OutputWorkspace", peaks_ws_name );
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 /**
@@ -472,10 +466,7 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
   alg->setProperty("AppendFile", append );
   alg->setProperty("Filename",file_name );
   
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 /**
@@ -510,10 +501,7 @@ bool MantidEVWorker::saveNexusPeaks( const std::string & peaks_ws_name,
   alg->setProperty("InputWorkspace", peaks_ws_name );
   alg->setProperty("Filename",file_name );
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -543,12 +531,7 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
   alg->setProperty("MaxD",max_abc);
   alg->setProperty("Tolerance",tolerance);
 
-  if ( alg->execute() )
-  { 
-    return true;
-  }
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -570,10 +553,7 @@ bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name, 
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
   alg->setProperty("Tolerance",tolerance);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -597,10 +577,7 @@ bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
   alg->setProperty("Filename",file_name);
   alg->setProperty("CheckUMatrix",true);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -623,10 +600,7 @@ bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
   alg->setProperty("InputWorkspace",peaks_ws_name);
   alg->setProperty("Filename",file_name);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -658,10 +632,8 @@ bool MantidEVWorker::optimizePhiChiOmega( const std::string & peaks_ws_name,
   alg->setProperty("MaxIndexingError",0.20);
   alg->setProperty("MaxHKLPeaks2Use",-1.0);
   alg->setProperty("MaxSamplePositionChange_meters",0.05);
-  if ( alg->execute() )
-    return true;
 
-  return false;
+  return alg->execute();
 }
 
 
@@ -688,10 +660,7 @@ bool MantidEVWorker::indexPeaksWithUB( const std::string & peaks_ws_name,
   alg->setProperty("Tolerance",tolerance);
   alg->setProperty("RoundHKLs",round_hkls);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -725,10 +694,7 @@ bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
   alg->setProperty("BestOnly",best_only);
   alg->setProperty("AllowPermutations",allow_perm);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -763,10 +729,7 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
   alg->setProperty("tolerance",0.12);
   alg->setProperty("AllowPermutations",allow_perm);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -798,10 +761,7 @@ bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
   alg->setProperty("tolerance",0.12);
   alg->setProperty("AllowPermutations",allow_perm);
   
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 
@@ -833,10 +793,7 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
   alg->setProperty("HKLTransform",transf_string);
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+  return alg->execute();
 }
 
 

@@ -224,7 +224,7 @@ ScaleEngine::~ScaleEngine() {}
 
 bool ScaleEngine::hasBreak() const
 {
-return (d_break_left == d_break_right || (d_break_left == -DBL_MAX && d_break_right == DBL_MAX))?false:true;
+return !(d_break_left == d_break_right || (d_break_left == -DBL_MAX && d_break_right == DBL_MAX));
 }
 
 double ScaleEngine::axisBreakLeft() const

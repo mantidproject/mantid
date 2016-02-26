@@ -486,11 +486,7 @@ bool MWRunFiles::liveButtonIsChecked() const {
 * @returns True of the file names within the widget are valid, false otherwise
 */
 bool MWRunFiles::isValid() const {
-  if (m_uiForm.valid->isHidden()) {
-    return true;
-  } else {
-    return false;
-  }
+  return m_uiForm.valid->isHidden();
 }
 
 /**

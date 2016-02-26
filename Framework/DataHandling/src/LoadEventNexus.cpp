@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
@@ -397,7 +398,7 @@ public:
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
     {
-      Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
+      std::lock_guard<std::mutex> _lock(alg->m_tofMutex);
       if (my_shortest_tof < alg->shortest_tof) {
         alg->shortest_tof = my_shortest_tof;
       }
@@ -480,7 +481,7 @@ public:
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
-                       boost::shared_ptr<Mutex> ioMutex,
+                       boost::shared_ptr<std::mutex> ioMutex,
                        ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
@@ -1383,11 +1384,11 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   if (this->event_id_is_spec) {
     // Find max spectrum no
     Axis *ax1 = m_ws->getAxis(1);
-    specid_t maxSpecNo =
-        -std::numeric_limits<specid_t>::max(); // So that any number will be
-                                               // greater than this
+    specnum_t maxSpecNo =
+        -std::numeric_limits<specnum_t>::max(); // So that any number will be
+                                                // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
-      specid_t spec = ax1->spectraNo(i);
+      specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)
         maxSpecNo = spec;
     }
@@ -1489,11 +1490,11 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset);
+    pixelID_to_wi_vector =
+        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
   else
-    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                              pixelID_to_wi_offset, true);
+    pixelID_to_wi_vector =
+        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -1874,7 +1875,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make the thread pool
   ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<Mutex>();
+  auto diskIOMutex = boost::make_shared<std::mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -2488,7 +2489,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        const specid_t &specNo = spec[it - udet.begin()];
+        const specnum_t &specNo = spec[it - udet.begin()];
         m_ws->setSpectrumNumberForAllPeriods(i, specNo);
         m_ws->setDetectorIdsForAllPeriods(i, id);
       }

@@ -37,7 +37,7 @@ void MaskDetectors::init() {
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
-  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+  declareProperty(new ArrayProperty<specnum_t>("SpectraList"),
                   "An ArrayProperty containing a list of spectra to mask");
   declareProperty(
       new ArrayProperty<detid_t>("DetectorList"),
@@ -85,7 +85,7 @@ void MaskDetectors::exec() {
   MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
@@ -109,7 +109,7 @@ void MaskDetectors::exec() {
   } // End dealing with spectraList
   else if (!detectorList.empty()) {
     // Convert from detectors to workspace indexes
-    WS->getIndicesFromDetectorIDs(detectorList, indexList);
+    indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
   // If we have a workspace that could contain masking,copy that in too
 
@@ -284,7 +284,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  * @param WS :: The input workspace to be masked
  */
 void MaskDetectors::fillIndexListFromSpectra(
-    std::vector<size_t> &indexList, const std::vector<specid_t> &spectraList,
+    std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
     const API::MatrixWorkspace_sptr WS) {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> spectraSet(spectraList.begin(), spectraList.end());
@@ -293,7 +293,7 @@ void MaskDetectors::fillIndexListFromSpectra(
   indexList.reserve(WS->getNumberHistograms());
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i) {
-    const specid_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
     if (spectraSet.find(currentSpec) != spectraSet.end()) {
       indexList.push_back(i);
     }
