@@ -275,9 +275,9 @@ WeightedEventNoTime::WeightedEventNoTime(double tof, float weight,
  * @param weight: weight of this neutron event.
  * @param errorSquared: the square of the error on the event
  */
-WeightedEventNoTime::WeightedEventNoTime(double tof,
-                                         const Mantid::Kernel::DateAndTime,
-                                         double weight, double errorSquared)
+WeightedEventNoTime::WeightedEventNoTime(
+    double tof, const Mantid::Kernel::DateAndTime /*unused*/, double weight,
+    double errorSquared)
     : m_tof(tof), m_weight(static_cast<float>(weight)),
       m_errorSquared(static_cast<float>(errorSquared)) {}
 
@@ -287,9 +287,9 @@ WeightedEventNoTime::WeightedEventNoTime(double tof,
  * @param weight: weight of this neutron event.
  * @param errorSquared: the square of the error on the event
  */
-WeightedEventNoTime::WeightedEventNoTime(double tof,
-                                         const Mantid::Kernel::DateAndTime,
-                                         float weight, float errorSquared)
+WeightedEventNoTime::WeightedEventNoTime(
+    double tof, const Mantid::Kernel::DateAndTime /*unused*/, float weight,
+    float errorSquared)
     : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared) {}
 
 /** Constructor, copy from a TofEvent object but add weights

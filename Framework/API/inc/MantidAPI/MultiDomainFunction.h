@@ -90,7 +90,7 @@ public:
                               const std::string &attName) const override;
   /// Set a value to attribute attName
   void setLocalAttribute(size_t i, const std::string &attName,
-                         const Attribute &) override;
+                         const Attribute & /*unused*/) override;
   /// Check if attribute attName exists
   bool hasLocalAttribute(const std::string &attName) const override {
     return attName == "domains";

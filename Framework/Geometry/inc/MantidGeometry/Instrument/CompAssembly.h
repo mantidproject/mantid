@@ -59,25 +59,25 @@ public:
   /// Constructor for parametrized version
   CompAssembly(const IComponent *base, const ParameterMap *map);
   //! Constructor with a name and parent reference
-  CompAssembly(const std::string &, IComponent *reference = nullptr);
+  CompAssembly(const std::string & /*n*/, IComponent *reference = nullptr);
   //! Copy constructor
-  CompAssembly(const CompAssembly &);
+  CompAssembly(const CompAssembly & /*assem*/);
   ~CompAssembly() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
   //! Return the number of elements in the assembly
   int nelements() const override;
   //! Add a component to the assembly
-  int add(IComponent *) override;
+  int add(IComponent * /*unused*/) override;
   //! Add a copy (clone) of a component
 
   void addChildren(IComponent *comp);
 
-  int addCopy(IComponent *) override;
+  int addCopy(IComponent * /*unused*/) override;
   //! Add a copy (clone) of a component and rename it
-  int addCopy(IComponent *, const std::string &) override;
+  int addCopy(IComponent * /*unused*/, const std::string & /*unused*/) override;
   /// Remove a component from the assembly
-  int remove(IComponent *);
+  int remove(IComponent * /*comp*/);
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
   boost::shared_ptr<IComponent> getChild(const int i) const override;
@@ -99,8 +99,8 @@ public:
   void getBoundingBox(BoundingBox &boundingBox) const override;
 
   //! Print information about all children
-  void printChildren(std::ostream &) const override;
-  void printTree(std::ostream &) const override;
+  void printChildren(std::ostream & /*unused*/) const override;
+  void printTree(std::ostream & /*unused*/) const override;
 
   /** Test the intersection of the ray with the children of the component
    * assembly, for InstrumentRayTracer  */
@@ -120,8 +120,8 @@ protected:
   mutable BoundingBox *m_cachedBoundingBox;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const CompAssembly &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                             const CompAssembly & /*ass*/);
 
 } // Namespace Geometry
 } // Namespace Mantid

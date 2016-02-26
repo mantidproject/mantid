@@ -13,7 +13,7 @@ double ZERO_EPS = 1e-12;
 /// Forward declaration of helper to raise domain error
 void throwDomainError(const std::string &msg, const double value);
 /// Forward declaration of helper to calculate distribution
-double yOver1MinusExpY(const double);
+double yOver1MinusExpY(const double /*y*/);
 }
 
 /**

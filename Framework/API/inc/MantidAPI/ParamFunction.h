@@ -55,10 +55,11 @@ public:
   ~ParamFunction() override;
 
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
+  void setParameter(size_t /*unused*/, const double &value,
                     bool explicitlySet = true) override;
   /// Set i-th parameter description
-  void setParameterDescription(size_t, const std::string &description) override;
+  void setParameterDescription(size_t /*unused*/,
+                               const std::string &description) override;
   /// Get i-th parameter
   double getParameter(size_t i) const override;
   /// Set parameter by name.

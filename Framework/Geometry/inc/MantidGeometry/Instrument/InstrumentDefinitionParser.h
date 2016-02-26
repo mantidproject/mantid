@@ -166,7 +166,7 @@ private:
                       const Poco::XML::Element *pCompElem, IdList &idList);
   /// Return true if assembly, false if not assembly and throws exception if
   /// string not in assembly
-  bool isAssembly(std::string) const;
+  bool isAssembly(std::string /*type*/) const;
 
   /// Add XML element to parent assuming the element contains no other component
   /// elements
@@ -224,7 +224,7 @@ public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component
   Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly *comp,
-                                              Kernel::V3D);
+                                              Kernel::V3D /*pos*/);
 
 private:
   /// Reads from a cache file.

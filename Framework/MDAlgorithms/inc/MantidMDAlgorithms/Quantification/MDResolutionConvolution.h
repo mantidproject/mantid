@@ -120,8 +120,8 @@ private:
   DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution)
 
   /// Required for function interface
-  void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const override{};
+  void function(const Mantid::API::FunctionDomain & /*domain*/,
+                Mantid::API::FunctionValues & /*values*/) const override{};
 
   /// A reference to the main function under minimzation
   const API::IFunctionMD *m_fittingFunction;

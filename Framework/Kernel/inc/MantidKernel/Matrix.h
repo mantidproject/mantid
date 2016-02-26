@@ -48,26 +48,27 @@ private:
   size_t nx; ///< Number of rows    (x coordinate)
   size_t ny; ///< Number of columns (y coordinate)
 
-  T **V;                     ///< Raw data
-  void deleteMem();          ///< Helper function to delete memory
-  void lubcmp(int *, int &); ///< starts inversion process
-  void lubksb(int const *, double *);
-  void rotate(double const, double const, int const, int const, int const,
-              int const);
+  T **V;            ///< Raw data
+  void deleteMem(); ///< Helper function to delete memory
+  void lubcmp(int * /*rowperm*/,
+              int & /*interchange*/); ///< starts inversion process
+  void lubksb(int const * /*rowperm*/, double * /*b*/);
+  void rotate(double const /*tau*/, double const /*s*/, int const /*i*/,
+              int const /*j*/, int const /*k*/, int const /*m*/);
 
 public:
   Matrix(const size_t nrow = 0, const size_t ncol = 0,
          bool const makeIdentity = false);
   /** Constructor to take two vectors and multiply them to  construct a matrix.
    * (assuming that we have columns x row vector. */
-  Matrix(const std::vector<T> &, const std::vector<T> &);
+  Matrix(const std::vector<T> & /*A*/, const std::vector<T> & /*B*/);
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
   /// nx*nx;
-  Matrix(const std::vector<T> &);
-  Matrix(const Matrix<T> &, const size_t nrow, const size_t ncol);
+  Matrix(const std::vector<T> & /*data*/);
+  Matrix(const Matrix<T> & /*A*/, const size_t nrow, const size_t ncol);
 
-  Matrix(const Matrix<T> &);
-  Matrix<T> &operator=(const Matrix<T> &);
+  Matrix(const Matrix<T> & /*A*/);
+  Matrix<T> &operator=(const Matrix<T> & /*A*/);
   ~Matrix();
 
   /// const Array accessor
@@ -75,32 +76,36 @@ public:
   /// Array accessor. Use, e.g. Matrix[row][col]
   T *operator[](const size_t A) { return V[A]; }
 
-  Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
-  Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator
+  Matrix<T> &operator+=(const Matrix<T> & /*A*/); ///< Basic addition operator
+  Matrix<T>
+  operator+(const Matrix<T> & /*A*/) const; ///< Basic addition operator
 
-  Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
-  Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
+  Matrix<T> &
+  operator-=(const Matrix<T> & /*A*/); ///< Basic subtraction operator
+  Matrix<T>
+  operator-(const Matrix<T> & /*A*/) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &) const;                       ///< Multiply M*Vec
-  Matrix<T> operator*(const T &) const; ///< Multiply by constant
+  Matrix<T> operator*(const Matrix<T> & /*A*/) const; ///< Basic matrix multiply
+  std::vector<T>
+  operator*(const std::vector<T> & /*Vec*/) const; ///< Multiply M*Vec
+  V3D operator*(const V3D & /*Vx*/) const;         ///< Multiply M*Vec
+  Matrix<T> operator*(const T & /*Value*/) const;  ///< Multiply by constant
 
-  Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
-  Matrix<T> &operator*=(const T &);         ///< Multiply by constant
-  Matrix<T> &operator/=(const T &);         ///< Divide by constant
+  Matrix<T> &operator*=(const Matrix<T> & /*A*/); ///< Basic matrix multipy
+  Matrix<T> &operator*=(const T & /*Value*/);     ///< Multiply by constant
+  Matrix<T> &operator/=(const T & /*Value*/);     ///< Divide by constant
 
-  bool operator<(const Matrix<T> &) const;
-  bool operator>=(const Matrix<T> &) const;
-  bool operator!=(const Matrix<T> &) const;
-  bool operator==(const Matrix<T> &) const;
+  bool operator<(const Matrix<T> & /*A*/) const;
+  bool operator>=(const Matrix<T> & /*A*/) const;
+  bool operator!=(const Matrix<T> & /*A*/) const;
+  bool operator==(const Matrix<T> & /*A*/) const;
   bool equals(const Matrix<T> &A, const double Tolerance = FLT_EPSILON) const;
   T item(const int a, const int b) const {
     return V[a][b];
   } ///< disallows access
 
   void print() const;
-  void write(std::ostream &, int const = 0) const;
+  void write(std::ostream & /*Fh*/, int const /*blockCnt*/ = 0) const;
   std::string str() const;
 
   // returns this matrix in 1D vector representation
@@ -121,12 +126,12 @@ public:
   T Trace() const;                 ///< Trace of the matrix
 
   std::vector<T> Diagonal() const; ///< Returns a vector of the diagonal
-  Matrix<T>
-  preMultiplyByDiagonal(const std::vector<T> &) const; ///< pre-multiply D*this
+  Matrix<T> preMultiplyByDiagonal(
+      const std::vector<T> & /*Dvec*/) const; ///< pre-multiply D*this
   Matrix<T> postMultiplyByDiagonal(
-      const std::vector<T> &) const; ///< post-multiply this*D
+      const std::vector<T> & /*Dvec*/) const; ///< post-multiply this*D
 
-  void setMem(const size_t, const size_t);
+  void setMem(const size_t /*a*/, const size_t /*b*/);
 
   /// Access matrix sizes
   std::pair<size_t, size_t> size() const {
@@ -142,20 +147,23 @@ public:
   /// Return the smallest matrix size
   size_t Ssize() const { return (nx > ny) ? ny : nx; }
 
-  void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
-  void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
+  void swapRows(const size_t /*RowI*/,
+                const size_t /*RowJ*/); ///< Swap rows (first V index)
+  void swapCols(const size_t /*colI*/,
+                const size_t /*colJ*/); ///< Swap cols (second V index)
 
-  T Invert();                                      ///< LU inversion routine
-  void averSymmetric();                            ///< make Matrix symmetric
-  int Diagonalise(Matrix<T> &, Matrix<T> &) const; ///< (only Symmetric matrix)
-  void sortEigen(Matrix<T> &);                     ///< Sort eigenvectors
-  Matrix<T> Tprime() const;                        ///< Transpose the matrix
-  Matrix<T> &Transpose();                          ///< Transpose the matrix
+  T Invert();           ///< LU inversion routine
+  void averSymmetric(); ///< make Matrix symmetric
+  int Diagonalise(Matrix<T> & /*EigenVec*/, Matrix<T> & /*DiagMatrix*/)
+      const;                                  ///< (only Symmetric matrix)
+  void sortEigen(Matrix<T> & /*DiagMatrix*/); ///< Sort eigenvectors
+  Matrix<T> Tprime() const;                   ///< Transpose the matrix
+  Matrix<T> &Transpose();                     ///< Transpose the matrix
 
   T factor();            ///< Calculate the factor
   T determinant() const; ///< Calculate the determinant
 
-  void GaussJordan(Matrix<T> &); ///< Create a Gauss-Jordan Inversion
+  void GaussJordan(Matrix<T> & /*B*/); ///< Create a Gauss-Jordan Inversion
   T compSum() const;
 
   // Check if a rotation matrix
@@ -186,15 +194,19 @@ typedef Mantid::Kernel::Matrix<int> IntMatrix;
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+DLLExport std::ostream &operator<<(std::ostream & /*os*/,
+                                   const Kernel::Matrix<T> & /*matrix*/);
 template <typename T>
-DLLExport void dumpToStream(std::ostream &, const Kernel::Matrix<T> &,
-                            const char);
+DLLExport void dumpToStream(std::ostream & /*os*/,
+                            const Kernel::Matrix<T> & /*matrix*/,
+                            const char /*delimiter*/);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+DLLExport std::istream &operator>>(std::istream & /*is*/,
+                                   Kernel::Matrix<T> & /*in*/);
 template <typename T>
-DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+DLLExport void fillFromStream(std::istream & /*is*/, Kernel::Matrix<T> & /*in*/,
+                              const char /*delimiter*/);
 }
 }
 #endif // MANTID_KERNEL_MATRIX_H_

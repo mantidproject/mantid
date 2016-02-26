@@ -517,10 +517,10 @@ typedef float VMD_t;
 typedef VMDBase<VMD_t> VMD;
 
 // Overload operator <<
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const VMDBase<double> &);
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const VMDBase<float> &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const VMDBase<double> & /*v*/);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const VMDBase<float> & /*v*/);
 
 } // namespace Kernel
 } // namespace Mantid

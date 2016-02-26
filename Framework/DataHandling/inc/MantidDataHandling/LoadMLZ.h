@@ -57,7 +57,7 @@ private:
 
   // int getEPPFromVanadium(const std::string
   // &,Mantid::API::MatrixWorkspace_sptr);
-  void loadInstrumentDetails(NeXus::NXEntry &);
+  void loadInstrumentDetails(NeXus::NXEntry & /*firstEntry*/);
   void loadTimeDetails(NeXus::NXEntry &entry);
 
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);

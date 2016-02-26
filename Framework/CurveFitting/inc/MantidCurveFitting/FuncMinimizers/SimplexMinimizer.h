@@ -49,7 +49,7 @@ public:
   /// Overloading base class methods
   std::string name() const override { return "Simplex"; }
   /// Do one iteration
-  bool iterate(size_t) override;
+  bool iterate(size_t /*iteration*/) override;
   /// Return current value of the cost function
   double costFunctionVal() override;
   /// Initialize minimizer, i.e. pass a function to minimize.

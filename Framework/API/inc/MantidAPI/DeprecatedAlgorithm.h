@@ -40,11 +40,12 @@ class MANTID_API_DLL DeprecatedAlgorithm {
 public:
   DeprecatedAlgorithm();
   virtual ~DeprecatedAlgorithm();
-  const std::string deprecationMsg(const IAlgorithm *);
+  const std::string deprecationMsg(const IAlgorithm * /*algo*/);
 
 public:
-  void useAlgorithm(const std::string &, const int version = -1);
-  void deprecatedDate(const std::string &);
+  void useAlgorithm(const std::string & /*replacement*/,
+                    const int version = -1);
+  void deprecatedDate(const std::string & /*date*/);
 
 private:
   /// The algorithm to use instead of this one.

@@ -217,7 +217,7 @@ private:
   //
   void exec() override;
   //
-  void reducePeakList(const peakvector &);
+  void reducePeakList(const peakvector & /*pcv*/);
   /// The value in X to start the search from
   double m_MinRange;
   /// The value in X to finish the search at

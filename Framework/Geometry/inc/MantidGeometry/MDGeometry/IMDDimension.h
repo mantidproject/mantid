@@ -105,10 +105,10 @@ public:
   /// @return true if the dimension is integrated (e.g. has only one single bin)
   virtual bool getIsIntegrated() const { return getNBins() == 1; }
 
-  bool operator==(const IMDDimension &) const {
+  bool operator==(const IMDDimension & /*unused*/) const {
     throw std::runtime_error("Not Implemented.");
   }
-  bool operator!=(const IMDDimension &) const {
+  bool operator!=(const IMDDimension & /*unused*/) const {
     throw std::runtime_error("Not Implemented.");
   }
 };

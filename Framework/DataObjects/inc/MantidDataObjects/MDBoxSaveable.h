@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MDBoxSaveable : public Kernel::ISaveable {
 public:
-  MDBoxSaveable(API::IMDNode *const);
+  MDBoxSaveable(API::IMDNode *const /*Host*/);
 
   /// Save the data to the place, specified by the object
   void save() const override;

@@ -63,8 +63,9 @@ public:
   /// Virtual destructor
   virtual ~IDomainCreator() {}
   /// Initialize
-  virtual void initialize(Kernel::IPropertyManager *, const std::string &,
-                          DomainType) {}
+  virtual void initialize(Kernel::IPropertyManager * /*unused*/,
+                          const std::string & /*unused*/,
+                          DomainType /*unused*/) {}
 
   /// Toggle output of either just composite or composite + members
   void separateCompositeMembersInOutput(const bool value,

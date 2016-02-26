@@ -28,9 +28,9 @@ private:
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
   DataObjects::EventWorkspace_const_sptr
       m_inputEvWS; ///< Pointer to the input event workspace
-  double calcTofMin(const std::size_t);
+  double calcTofMin(const std::size_t /*workspaceIndex*/);
   void runMaskDetectors();
-  void getTminData(const bool);
+  void getTminData(const bool /*isEvent*/);
   double m_DIFCref; ///< The reference value for DIFC to filter with
   double m_K;       ///< Mystery variable that I'm not sure what it is for
   Geometry::Instrument_const_sptr m_instrument; ///< The instrument

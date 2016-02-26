@@ -104,7 +104,7 @@ private:
                 MuonNexusReader &nxload, const int64_t lengthIn,
                 DataObjects::Workspace2D_sptr localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);
-  void runLoadLog(DataObjects::Workspace2D_sptr);
+  void runLoadLog(DataObjects::Workspace2D_sptr /*localWorkspace*/);
   void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
   void addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace,
                     int64_t period);

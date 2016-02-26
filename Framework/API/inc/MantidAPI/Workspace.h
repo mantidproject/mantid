@@ -88,8 +88,8 @@ public:
    */
   bool threadSafe() const override { return true; }
 
-  void virtual setTitle(const std::string &);
-  void setComment(const std::string &);
+  void virtual setTitle(const std::string & /*t*/);
+  void setComment(const std::string & /*c*/);
   virtual const std::string getTitle() const;
   const std::string &getComment() const;
   const std::string &getName() const;
@@ -111,7 +111,7 @@ protected:
   Workspace &operator=(const Workspace &other);
 
 private:
-  void setName(const std::string &);
+  void setName(const std::string & /*name*/);
   /// The title of the workspace
   std::string m_title;
   /// A user-provided comment that is attached to the workspace

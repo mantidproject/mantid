@@ -124,7 +124,7 @@ public:
   virtual bool isDefault() const = 0;
   /// Whether to save input values
   bool remember() const;
-  void setRemember(bool);
+  void setRemember(bool /*remember*/);
 
   void setDocumentation(const std::string &documentation);
   void setBriefDocumentation(const std::string &documentation);
@@ -174,7 +174,7 @@ public:
   /** Just returns the property (*this) unless overridden
   *  @return a property with the value
   */
-  virtual Property &merge(Property *) { return *this; }
+  virtual Property &merge(Property * /*unused*/) { return *this; }
 
   /// Set the group this property belongs to
   void setGroup(const std::string &group) { m_group = group; }

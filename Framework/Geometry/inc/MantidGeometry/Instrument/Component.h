@@ -102,7 +102,7 @@ public:
   IComponent const *getBaseComponent() const override;
 
   //! Assign a parent IComponent. Previous parent link is lost
-  void setParent(IComponent *) override;
+  void setParent(IComponent * /*unused*/) override;
 
   //! Return a pointer to the current parent. as shared pointer
   boost::shared_ptr<const IComponent> getParent() const override;
@@ -113,7 +113,7 @@ public:
   bool isParentNamed(const std::string &expectedName, int maxDepth = -1) const;
 
   //! Set the IComponent name
-  void setName(const std::string &) override;
+  void setName(const std::string & /*unused*/) override;
 
   //! Get the IComponent name
   std::string getName() const override;
@@ -123,26 +123,27 @@ public:
 
   //! Set the IComponent position, x, y, z respective to parent (if present)
   // otherwise absolute
-  void setPos(double, double, double) override;
-  void setPos(const Kernel::V3D &) override;
+  void setPos(double /*unused*/, double /*unused*/, double /*unused*/) override;
+  void setPos(const Kernel::V3D & /*unused*/) override;
 
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
-  void setRot(const Kernel::Quat &) override;
+  void setRot(const Kernel::Quat & /*unused*/) override;
 
   //! Translate the IComponent (vector form). This is relative to parent if
   // present.
-  void translate(const Kernel::V3D &) override;
+  void translate(const Kernel::V3D & /*unused*/) override;
 
   //! Translate the IComponent (x,y,z form). This is relative to parent if
   // present.
-  void translate(double, double, double) override;
+  void translate(double /*unused*/, double /*unused*/,
+                 double /*unused*/) override;
 
   //! Rotate the IComponent. This is relative to parent.
-  void rotate(const Kernel::Quat &) override;
+  void rotate(const Kernel::Quat & /*unused*/) override;
 
   //! Rotate the IComponent by an angle in degrees with respect to an axis.
-  void rotate(double, const Kernel::V3D &) override;
+  void rotate(double /*unused*/, const Kernel::V3D & /*unused*/) override;
 
   //! Get the position relative to the parent IComponent (absolute if no parent)
   const Kernel::V3D getRelativePos() const override;
@@ -158,7 +159,7 @@ public:
   const Kernel::Quat getRotation() const override;
 
   //! Get the distance to another IComponent
-  double getDistance(const IComponent &) const override;
+  double getDistance(const IComponent & /*unused*/) const override;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &boundingBox) const override;
@@ -299,7 +300,7 @@ public:
     return retVal;
   }
 
-  void printSelf(std::ostream &) const override;
+  void printSelf(std::ostream & /*unused*/) const override;
 
   /// Returns the address of the base component
   const IComponent *base() const { return m_base; }

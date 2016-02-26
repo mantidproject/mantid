@@ -66,7 +66,7 @@ public:
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
 
-  bool operator==(const Axis &) const override;
+  bool operator==(const Axis & /*unused*/) const override;
   /// Get the label at the specified index
   std::string label(const std::size_t &index) const override;
   /// Set the label at the given index

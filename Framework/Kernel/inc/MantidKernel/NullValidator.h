@@ -46,7 +46,7 @@ private:
   /** Always returns valid, that is ""
    *  @returns an empty string
    */
-  std::string check(const boost::any &) const override { return ""; }
+  std::string check(const boost::any & /*unused*/) const override { return ""; }
 };
 
 } // namespace Kernel

@@ -340,7 +340,7 @@ TMDE(size_t MDBoxIterator)::getLinearIndex() const {
   throw std::runtime_error("MDBoxIterator does not implement getLinearIndex");
 }
 
-TMDE(bool MDBoxIterator)::isWithinBounds(size_t) const {
+TMDE(bool MDBoxIterator)::isWithinBounds(size_t /*index*/) const {
   throw std::runtime_error("MDBoxIterator does not implement isWithinBounds");
 }
 

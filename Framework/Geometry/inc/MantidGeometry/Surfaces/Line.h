@@ -65,30 +65,34 @@ private:
 
 public:
   Line();
-  Line(const Kernel::V3D &, const Kernel::V3D &);
-  Line(const Line &);
-  Line &operator=(const Line &);
+  Line(const Kernel::V3D & /*O*/, const Kernel::V3D & /*D*/);
+  Line(const Line & /*A*/);
+  Line &operator=(const Line & /*A*/);
   Line *clone() const;
 
   ~Line();
 
-  Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
-  Kernel::V3D getOrigin() const { return Origin; } ///< returns the origin
-  Kernel::V3D getDirect() const { return Direct; } ///< returns the direction
-  double distance(const Kernel::V3D &) const;      ///< distance from line
-  int isValid(const Kernel::V3D &) const;          ///< Is the point on the line
+  Kernel::V3D getPoint(const double lambda) const;  ///< gets the point O+lam*N
+  Kernel::V3D getOrigin() const { return Origin; }  ///< returns the origin
+  Kernel::V3D getDirect() const { return Direct; }  ///< returns the direction
+  double distance(const Kernel::V3D & /*A*/) const; ///< distance from line
+  int isValid(const Kernel::V3D & /*A*/) const; ///< Is the point on the line
   void print() const;
 
-  void rotate(const Kernel::Matrix<double> &);
-  void displace(const Kernel::V3D &);
+  void rotate(const Kernel::Matrix<double> & /*MA*/);
+  void displace(const Kernel::V3D & /*Pt*/);
 
-  int setLine(const Kernel::V3D &,
-              const Kernel::V3D &); ///< input Origin + direction
+  int setLine(const Kernel::V3D & /*O*/,
+              const Kernel::V3D & /*D*/); ///< input Origin + direction
 
-  int intersect(std::list<Kernel::V3D> &, const Quadratic &) const;
-  int intersect(std::list<Kernel::V3D> &, const Cylinder &) const;
-  int intersect(std::list<Kernel::V3D> &, const Plane &) const;
-  int intersect(std::list<Kernel::V3D> &, const Sphere &) const;
+  int intersect(std::list<Kernel::V3D> & /*VecOut*/,
+                const Quadratic & /*Sur*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Cylinder & /*Cyl*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Plane & /*Pln*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Sphere & /*Sph*/) const;
 };
 
 } // NAMESPACE MonteCarlo

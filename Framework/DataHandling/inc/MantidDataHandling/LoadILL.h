@@ -60,12 +60,12 @@ private:
   // Execution code
   void exec() override;
 
-  int getEPPFromVanadium(const std::string &,
-                         Mantid::API::MatrixWorkspace_sptr);
-  void loadInstrumentDetails(NeXus::NXEntry &);
+  int getEPPFromVanadium(const std::string & /*filenameVanadium*/,
+                         Mantid::API::MatrixWorkspace_sptr /*vanaWS*/);
+  void loadInstrumentDetails(NeXus::NXEntry & /*firstEntry*/);
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
   void initWorkSpace(NeXus::NXEntry &entry,
-                     const std::vector<std::vector<int>> &);
+                     const std::vector<std::vector<int>> & /*monitors*/);
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(std::string filename);
   void addEnergyToRun();
@@ -75,14 +75,14 @@ private:
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                           const std::vector<std::vector<int>> &,
+                           const std::vector<std::vector<int>> & /*monitors*/,
                            int vanaCalculatedDetectorElasticPeakPosition = -1);
 
   void runLoadInstrument();
 
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  int validateVanadium(const std::string &);
+  int validateVanadium(const std::string & /*filenameVanadium*/);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

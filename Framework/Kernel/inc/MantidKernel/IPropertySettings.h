@@ -81,7 +81,8 @@ public:
    *  For WorkspaceProperty, which obtains its values from dataservice and
    filters them by validators,
    *  a new validator has to be a new filter      */
-  virtual void applyChanges(const IPropertyManager *, Property *const) {}
+  virtual void applyChanges(const IPropertyManager * /*unused*/,
+                            Property *const /*unused*/) {}
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of IPropertySettings
@@ -90,7 +91,7 @@ public:
 protected:
 private:
   // non-copyable directly
-  IPropertySettings(const IPropertySettings &) {}
+  IPropertySettings(const IPropertySettings & /*unused*/) {}
 };
 
 } // namespace Kernel

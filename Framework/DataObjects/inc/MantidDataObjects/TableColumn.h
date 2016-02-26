@@ -76,9 +76,9 @@ template <class Type> class TableColumn : public API::Column {
   /// Helper struct helping to write a generic casting to double
   struct InconvertibleToDoubleType {
     /// Constructor
-    InconvertibleToDoubleType(const Type &) {}
+    InconvertibleToDoubleType(const Type & /*unused*/) {}
     /// Constructor
-    InconvertibleToDoubleType(const double &) {}
+    InconvertibleToDoubleType(const double & /*unused*/) {}
     /// Convertion to double throws a runtime_error.
     operator double() const {
       throw std::runtime_error(std::string("Cannot convert ") +

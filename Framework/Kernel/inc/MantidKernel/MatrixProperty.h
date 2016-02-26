@@ -54,7 +54,7 @@ public:
   ~MatrixProperty() override;
 
   /// Add the value of another property. Doesn't make sense here.
-  MatrixProperty &operator+=(Kernel::Property const *) override {
+  MatrixProperty &operator+=(Kernel::Property const * /*unused*/) override {
     throw Exception::NotImplementedError(
         "+= operator is not implemented for MatrixProperty.");
     return *this;

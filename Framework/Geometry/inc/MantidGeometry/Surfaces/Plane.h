@@ -56,8 +56,8 @@ private:
   Plane *doClone() const override;
 
 protected:
-  Plane(const Plane &);
-  Plane &operator=(const Plane &);
+  Plane(const Plane & /*A*/);
+  Plane &operator=(const Plane & /*A*/);
 
 public:
   /// Effective typename
@@ -68,27 +68,28 @@ public:
 
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
-  int setPlane(const Kernel::V3D &, const Kernel::V3D &);
+  int setPlane(const Kernel::V3D & /*P*/, const Kernel::V3D & /*N*/);
   //  int setPlane(const std::string&);
-  int side(const Kernel::V3D &) const override;
-  int onSurface(const Kernel::V3D &) const override;
+  int side(const Kernel::V3D & /*unused*/) const override;
+  int onSurface(const Kernel::V3D & /*unused*/) const override;
   // stuff for finding intersections etc.
-  double dotProd(const Plane &) const;        ///< returns normal dot product
-  Kernel::V3D crossProd(const Plane &) const; ///< returns normal cross product
-  double
-  distance(const Kernel::V3D &) const override; ///< distance from a point
+  double dotProd(const Plane & /*A*/) const; ///< returns normal dot product
+  Kernel::V3D
+  crossProd(const Plane & /*A*/) const; ///< returns normal cross product
+  double distance(
+      const Kernel::V3D & /*unused*/) const override; ///< distance from a point
 
   double getDistance() const { return Dist; } ///< Distance from origin
   const Kernel::V3D &getNormal() const {
     return NormV;
   } ///< Normal to plane (+ve surface)
 
-  void rotate(const Kernel::Matrix<double> &) override;
-  void displace(const Kernel::V3D &) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
 
-  int setSurface(const std::string &) override;
+  int setSurface(const std::string & /*R*/) override;
   void print() const override;
-  void write(std::ostream &) const override; ///< Write in MCNPX form
+  void write(std::ostream & /*unused*/) const override; ///< Write in MCNPX form
 
   void setBaseEqn() override; ///< set up to be eqn based
 

@@ -71,9 +71,12 @@ private:
   void init() override;
   void exec() override;
 
-  void rebin(const std::vector<double> &, const std::vector<double> &,
-             const std::vector<double> &, const std::vector<int> &,
-             std::vector<double> &, std::vector<double> &, bool);
+  void rebin(const std::vector<double> & /*xold*/,
+             const std::vector<double> & /*yold*/,
+             const std::vector<double> & /*eold*/,
+             const std::vector<int> & /*xoldIndex*/,
+             std::vector<double> & /*ynew*/, std::vector<double> & /*enew*/,
+             bool /*distribution*/);
 };
 
 } // namespace Algorithm

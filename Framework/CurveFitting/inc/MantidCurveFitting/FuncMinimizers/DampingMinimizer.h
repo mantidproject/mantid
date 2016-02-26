@@ -52,7 +52,7 @@ public:
   void initialize(API::ICostFunction_sptr function,
                   size_t maxIterations = 0) override;
   /// Do one iteration.
-  bool iterate(size_t) override;
+  bool iterate(size_t /*iteration*/) override;
   /// Return current value of the cost function
   double costFunctionVal() override;
 

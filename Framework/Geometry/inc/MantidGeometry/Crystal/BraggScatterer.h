@@ -85,7 +85,7 @@ public:
 
 protected:
   /// Base implementation does nothing, can be re-implemented by subclasses.
-  void afterPropertySet(const std::string &) override {}
+  void afterPropertySet(const std::string & /*unused*/) override {}
 
   /// Base implementation does nothing - for implementing classes only.
   virtual void declareProperties() {}

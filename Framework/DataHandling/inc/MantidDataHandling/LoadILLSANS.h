@@ -77,28 +77,36 @@ public:
 private:
   void init() override;
   void exec() override;
-  void setInstrumentName(const NeXus::NXEntry &, const std::string &);
-  DetectorPosition getDetectorPosition(const NeXus::NXEntry &,
-                                       const std::string &);
-  void initWorkSpace(NeXus::NXEntry &, const std::string &);
-  void createEmptyWorkspace(int, int);
+  void setInstrumentName(const NeXus::NXEntry & /*firstEntry*/,
+                         const std::string & /*instrumentNamePath*/);
+  DetectorPosition
+  getDetectorPosition(const NeXus::NXEntry & /*firstEntry*/,
+                      const std::string & /*instrumentNamePath*/);
+  void initWorkSpace(NeXus::NXEntry & /*firstEntry*/,
+                     const std::string & /*instrumentPath*/);
+  void createEmptyWorkspace(int /*numberOfHistograms*/,
+                            int /*numberOfChannels*/);
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
                                            size_t firstIndex = 0);
 
-  size_t loadDataIntoWorkspaceFromHorizontalTubes(NeXus::NXInt &,
-                                                  const std::vector<double> &,
-                                                  size_t);
-  size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
-                                                const std::vector<double> &,
-                                                size_t);
+  size_t loadDataIntoWorkspaceFromHorizontalTubes(
+      NeXus::NXInt & /*data*/, const std::vector<double> & /*timeBinning*/,
+      size_t /*firstIndex*/);
+  size_t loadDataIntoWorkspaceFromVerticalTubes(
+      NeXus::NXInt & /*data*/, const std::vector<double> & /*timeBinning*/,
+      size_t /*firstIndex*/);
   void runLoadInstrument();
-  void moveDetectors(const DetectorPosition &);
-  void moveDetectorDistance(double, const std::string &);
-  void moveDetectorHorizontal(double, const std::string &);
-  void moveDetectorVertical(double, const std::string &);
+  void moveDetectors(const DetectorPosition & /*detPos*/);
+  void moveDetectorDistance(double /*distance*/,
+                            const std::string & /*componentName*/);
+  void moveDetectorHorizontal(double /*shift*/,
+                              const std::string & /*componentName*/);
+  void moveDetectorVertical(double /*shift*/,
+                            const std::string & /*componentName*/);
   Kernel::V3D getComponentPosition(const std::string &componentName);
-  void loadMetaData(const NeXus::NXEntry &, const std::string &);
+  void loadMetaData(const NeXus::NXEntry & /*entry*/,
+                    const std::string & /*instrumentNamePath*/);
 
   LoadHelper m_loader;
   std::string m_instrumentName; ///< Name of the instrument

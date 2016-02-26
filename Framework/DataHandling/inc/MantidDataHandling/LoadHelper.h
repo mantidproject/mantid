@@ -41,23 +41,26 @@ public:
   LoadHelper();
   virtual ~LoadHelper();
 
-  std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry &);
-  std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry &,
-                                     const std::string &);
-  double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &,
-                                const std::string &);
+  std::string
+  findInstrumentNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/);
+  std::string
+  getStringFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
+                         const std::string & /*nexusPath*/);
+  double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
+                                const std::string & /*nexusPath*/);
   std::vector<double>
-  getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &,
-                              const std::string &);
+  getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
+                              const std::string & /*nexusPath*/);
   static double calculateStandardError(double in) { return sqrt(in); }
-  double calculateEnergy(double);
-  double calculateTOF(double, double);
-  double getL1(const API::MatrixWorkspace_sptr &);
-  double getL2(const API::MatrixWorkspace_sptr &, int detId = 1);
-  double getInstrumentProperty(const API::MatrixWorkspace_sptr &, std::string);
+  double calculateEnergy(double /*wavelength*/);
+  double calculateTOF(double /*distance*/, double /*wavelength*/);
+  double getL1(const API::MatrixWorkspace_sptr & /*workspace*/);
+  double getL2(const API::MatrixWorkspace_sptr & /*workspace*/, int detId = 1);
+  double getInstrumentProperty(const API::MatrixWorkspace_sptr & /*workspace*/,
+                               std::string /*s*/);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
-  std::string dateTimeInIsoFormat(std::string);
+  std::string dateTimeInIsoFormat(std::string /*dateToParse*/);
 
   void moveComponent(API::MatrixWorkspace_sptr ws,
                      const std::string &componentName,

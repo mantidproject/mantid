@@ -49,30 +49,30 @@ private:
 
 public:
   Algebra();
-  Algebra(const Algebra &);
-  Algebra &operator=(const Algebra &);
+  Algebra(const Algebra & /*A*/);
+  Algebra &operator=(const Algebra & /*A*/);
   ~Algebra();
 
   /// Accessor
   const Acomp &getComp() const { return F; }
 
-  bool operator==(const Algebra &) const;
-  bool operator!=(const Algebra &) const;
-  Algebra &operator+=(const Algebra &);
-  Algebra &operator*=(const Algebra &);
-  Algebra operator+(const Algebra &) const;
-  Algebra operator*(const Algebra &) const;
-  int logicalEqual(const Algebra &) const;
+  bool operator==(const Algebra & /*A*/) const;
+  bool operator!=(const Algebra & /*A*/) const;
+  Algebra &operator+=(const Algebra & /*M*/);
+  Algebra &operator*=(const Algebra & /*M*/);
+  Algebra operator+(const Algebra & /*M*/) const;
+  Algebra operator*(const Algebra & /*M*/) const;
+  int logicalEqual(const Algebra & /*A*/) const;
 
   void Complement();
   void makeDNF() { F.makeDNFobject(); } ///< assessor to makeDNFobj
   void makeCNF() { F.makeCNFobject(); } ///< assessor to makeCNFobj
-  std::pair<Algebra, Algebra> algDiv(const Algebra &) const;
-  int setFunctionObjStr(const std::string &);
-  int setFunction(const std::string &);
-  int setFunction(const Acomp &);
+  std::pair<Algebra, Algebra> algDiv(const Algebra & /*D*/) const;
+  int setFunctionObjStr(const std::string & /*A*/);
+  int setFunction(const std::string & /*A*/);
+  int setFunction(const Acomp & /*A*/);
 
-  std::ostream &write(std::ostream &) const;
+  std::ostream &write(std::ostream & /*Out*/) const;
   std::string writeMCNPX() const;
 
   // Debug Functions::
@@ -81,7 +81,7 @@ public:
   std::string display() const;
 };
 
-std::ostream &operator<<(std::ostream &, const Algebra &);
+std::ostream &operator<<(std::ostream & /*OX*/, const Algebra & /*A*/);
 
 } // NAMESPACE Geometry
 

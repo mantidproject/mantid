@@ -97,10 +97,11 @@ private:
 
   void setInputPropertiesAsMemberProperties();
 
-  void addMetadataAsRunProperties(const std::map<std::string, std::string> &);
-  void parseDetectorDimensions(const std::string &);
+  void addMetadataAsRunProperties(
+      const std::map<std::string, std::string> & /*metadata*/);
+  void parseDetectorDimensions(const std::string & /*dims_str*/);
   void createWorkspace();
-  std::vector<int> getData(const std::string &);
+  std::vector<int> getData(const std::string & /*dataXpath*/);
   void createWorkspace(const std::vector<int> &data, const std::string &title,
                        double monitor1_counts, double monitor2_counts);
   void setWavelength(std::map<std::string, std::string> &metadata);

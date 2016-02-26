@@ -70,7 +70,7 @@ public:
              boost::shared_ptr<ParameterMap> map);
   Instrument();
   Instrument(const std::string &name);
-  Instrument(const Instrument &);
+  Instrument(const Instrument & /*instr*/);
   /// Virtual destructor
   ~Instrument() override;
 
@@ -104,7 +104,7 @@ public:
   /// child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
   /// at most one of these.
-  void markAsSamplePos(const IComponent *);
+  void markAsSamplePos(const IComponent * /*comp*/);
 
   /// Marks a Component which already exists in the instrument to the chopper
   /// cache
@@ -114,21 +114,21 @@ public:
   /// child comp.)
   /// to be 'the' source Component. For now it is assumed that we have
   /// at most one of these.
-  void markAsSource(const IComponent *);
+  void markAsSource(const IComponent * /*comp*/);
 
   /// mark a Component which has already been added to the Instrument (as a
   /// child comp.)
   /// to be a Detector component by adding it to _detectorCache
-  void markAsDetector(const IDetector *);
+  void markAsDetector(const IDetector * /*det*/);
 
   /// mark a Component which has already been added to the Instrument (as a
   /// child comp.)
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
-  void markAsMonitor(IDetector *);
+  void markAsMonitor(IDetector * /*det*/);
 
   /// Remove a detector from the instrument
-  void removeDetector(IDetector *);
+  void removeDetector(IDetector * /*det*/);
 
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
@@ -213,7 +213,7 @@ public:
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
-  void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
+  void setPhysicalInstrument(boost::shared_ptr<const Instrument> /*physInst*/);
 
   // ----- Useful static functions ------
   static double calcConversion(const double l1, const Kernel::V3D &beamline,

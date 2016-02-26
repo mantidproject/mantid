@@ -54,23 +54,24 @@ class MANTID_KERNEL_DLL Quat {
 public:
   Quat();
   // direct quat definition
-  Quat(const double, const double, const double, const double);
+  Quat(const double /*_w*/, const double /*_a*/, const double /*_b*/,
+       const double /*_c*/);
   // * Construct a Quat between two vectors;
   // * The angle between them is defined differently from usual if vectors are
   // not unit or the same length vectors, so quat would be not consistent
   Quat(const V3D &vec1, const V3D &vec2);
   Quat(const V3D &rX, const V3D &rY, const V3D &rZ);
-  Quat(const Quat &);
-  Quat &operator=(const Quat &);
+  Quat(const Quat & /*_q*/);
+  Quat &operator=(const Quat & /*q*/);
   //! Set quaternion form an angle in degrees and an axis
   Quat(const double _deg, const V3D &_axis);
   // set a quaternion from a rotational matrix;
   Quat(const DblMatrix &RotMat);
   ~Quat();
-  void operator()(const Quat &);
+  void operator()(const Quat & /*q*/);
   void operator()(const double ww, const double aa, const double bb,
                   const double cc);
-  void operator()(const double angle, const V3D &);
+  void operator()(const double angle, const V3D & /*axis*/);
   void operator()(const V3D &rX, const V3D &rY, const V3D &rZ);
 
   void set(const double ww, const double aa, const double bb, const double cc);
@@ -105,12 +106,12 @@ public:
   std::vector<double> getRotation(bool check_normalisation = false,
                                   bool throw_on_errors = false) const;
   //! Convert GL Matrix into Quat
-  void setQuat(double[16]);
+  void setQuat(double /*mat*/[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
   void setQuat(const DblMatrix &RotMat);
   //! Rotate a vector
-  void rotate(V3D &) const;
+  void rotate(V3D & /*v*/) const;
 
   //! Taking two points defining a cuboid bounding box (xmin,ymin,zmin) and
   //(xmax,ymax,zmax)
@@ -120,16 +121,16 @@ public:
   void rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
                 double &ymax, double &zmax) const;
   //! Overload operators
-  Quat operator+(const Quat &) const;
-  Quat &operator+=(const Quat &);
-  Quat operator-(const Quat &) const;
-  Quat &operator-=(const Quat &);
-  Quat operator*(const Quat &) const;
-  Quat &operator*=(const Quat &);
-  bool operator==(const Quat &) const;
-  bool operator!=(const Quat &) const;
-  const double &operator[](int) const;
-  double &operator[](int);
+  Quat operator+(const Quat & /*_q*/) const;
+  Quat &operator+=(const Quat & /*_q*/);
+  Quat operator-(const Quat & /*_q*/) const;
+  Quat &operator-=(const Quat & /*_q*/);
+  Quat operator*(const Quat & /*_q*/) const;
+  Quat &operator*=(const Quat & /*_q*/);
+  bool operator==(const Quat & /*q*/) const;
+  bool operator!=(const Quat & /*_q*/) const;
+  const double &operator[](int /*Index*/) const;
+  double &operator[](int /*Index*/);
 
   /** @name Element access. */
   //@{
@@ -143,8 +144,8 @@ public:
   inline double imagK() const { return c; }
   //@}
 
-  void printSelf(std::ostream &) const;
-  void readPrinted(std::istream &);
+  void printSelf(std::ostream & /*os*/) const;
+  void readPrinted(std::istream & /*IX*/);
   std::string toString() const;
   void fromString(const std::string &str);
 
@@ -159,8 +160,9 @@ private:
   double c;
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Quat &);
-MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Quat &q);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const Quat & /*q*/);
+MANTID_KERNEL_DLL std::istream &operator>>(std::istream & /*ins*/, Quat &q);
 
 } // Namespace Mantid
 

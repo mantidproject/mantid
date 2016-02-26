@@ -63,7 +63,8 @@ public:
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<Algorithm>::create;
   /// Creates an instance of an algorithm
-  boost::shared_ptr<Algorithm> create(const std::string &, const int &) const;
+  boost::shared_ptr<Algorithm> create(const std::string & /*name*/,
+                                      const int & /*version*/) const;
 
   /// algorithm factory specific function to subscribe algorithms, calls the
   /// dynamic factory subscribe function internally
@@ -161,7 +162,8 @@ private:
   /// Private Destructor
   ~AlgorithmFactoryImpl() override;
   /// creates an algorithm name convolved from an name and version
-  std::string createName(const std::string &, const int &) const;
+  std::string createName(const std::string & /*name*/,
+                         const int & /*version*/) const;
   /// fills a set with the hidden categories
   void fillHiddenCategories(std::unordered_set<std::string> *categorySet) const;
 

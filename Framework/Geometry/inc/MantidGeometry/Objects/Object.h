@@ -66,9 +66,9 @@ public:
   /// Constructor providing shape xml.
   Object(const std::string &shapeXML);
   /// Copy constructor
-  Object(const Object &);
+  Object(const Object & /*A*/);
   /// Assignment operator
-  Object &operator=(const Object &);
+  Object &operator=(const Object & /*A*/);
   /// Destructor
   virtual ~Object();
 
@@ -89,22 +89,22 @@ public:
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
+  int populate(const std::map<int, boost::shared_ptr<Surface>> & /*Smap*/);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);
   int substituteSurf(const int SurfN, const int NsurfN,
                      const boost::shared_ptr<Surface> &SPtr);
   void makeComplement();
-  void convertComplement(const std::map<int, Object> &);
+  void convertComplement(const std::map<int, Object> & /*MList*/);
 
   virtual void print() const;
   void printTree() const;
 
-  bool isValid(const Kernel::V3D &) const; ///< Check if a point is valid
-  bool isValid(const std::map<int, int> &)
+  bool isValid(const Kernel::V3D & /*Pt*/) const; ///< Check if a point is valid
+  bool isValid(const std::map<int, int> & /*SMap*/)
       const; ///< Check if a set of surfaces are valid.
-  bool isOnSide(const Kernel::V3D &) const;
+  bool isOnSide(const Kernel::V3D & /*Pt*/) const;
   int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
@@ -114,13 +114,13 @@ public:
   std::vector<const Surface *> &getSurfacePtr() { return SurList; }
 
   std::string cellCompStr() const;
-  std::string cellStr(const std::map<int, Object> &) const;
+  std::string cellStr(const std::map<int, Object> & /*MList*/) const;
 
   std::string str() const;
-  void write(std::ostream &) const; ///< MCNPX output
+  void write(std::ostream & /*OX*/) const; ///< MCNPX output
 
   // INTERSECTION
-  int interceptSurface(Geometry::Track &) const;
+  int interceptSurface(Geometry::Track & /*UT*/) const;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const;
@@ -161,9 +161,11 @@ public:
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(
+      boost::shared_ptr<vtkGeometryCacheWriter> /*writer*/);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(
+      boost::shared_ptr<vtkGeometryCacheReader> /*reader*/);
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const;
   /// Getter for the shape xml
@@ -175,8 +177,9 @@ private:
 
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
-  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
-  int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
+  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule> /*RItem*/) const;
+  int checkSurfaceValid(const Kernel::V3D & /*C*/,
+                        const Kernel::V3D & /*Nm*/) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
 
   /// Calculate bounding box using Rule system
@@ -199,7 +202,7 @@ private:
   /// getBoundingBox or defineBoundingBox
   // -- --
 
-  int searchForObject(Kernel::V3D &) const;
+  int searchForObject(Kernel::V3D & /*point*/) const;
   double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
                                const Kernel::V3D &c,
                                const Kernel::V3D &observer) const;

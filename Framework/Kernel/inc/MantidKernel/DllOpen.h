@@ -40,45 +40,48 @@ namespace Kernel {
 class MANTID_KERNEL_DLL DllOpen {
 public:
   /// Static method for opening the shared library
-  static void *OpenDll(const std::string &);
+  static void *OpenDll(const std::string & /*libName*/);
 
   /// Static method for opening the shared library
-  static void *OpenDll(const std::string &, const std::string &);
+  static void *OpenDll(const std::string & /*libName*/,
+                       const std::string & /*filePath*/);
 
   /// Static method for retrieving a function pointer
-  static void *GetFunction(void *, const std::string &);
+  static void *GetFunction(void * /*libName*/,
+                           const std::string & /*funcName*/);
 
   /// Static method for closing the shared library
-  static void CloseDll(void *);
+  static void CloseDll(void * /*libName*/);
 
   /// Static method for converting a filename to a libName (without lib___.so or
   /// ___.dll)
-  static const std::string ConvertToLibName(const std::string &);
+  static const std::string ConvertToLibName(const std::string & /*fileName*/);
 
   /// Adds a directiry to the dll search path.
-  static void addSearchDirectory(const std::string &);
+  static void addSearchDirectory(const std::string & /*dir*/);
 
 private:
   /// Constructor private as not needed
   DllOpen(){};
   /// Copy operator private as not needed
-  DllOpen(const DllOpen &){};
+  DllOpen(const DllOpen & /*unused*/){};
   /// Destructor private as not needed
   ~DllOpen(){};
 
   // private functions specific to implementation
   /// Implementation specifc static method for opening a shared library
-  static void *OpenDllImpl(const std::string &);
+  static void *OpenDllImpl(const std::string & /*filePath*/);
 
   /// Implementation specifc static method for retrieving a function pointer
-  static void *GetFunctionImpl(void *, const std::string &);
+  static void *GetFunctionImpl(void * /*libName*/,
+                               const std::string & /*funcName*/);
 
   /// Implementation specifc static method for closing a shared library
-  static void CloseDllImpl(void *);
+  static void CloseDllImpl(void * /*libName*/);
 
   /// Implementation specifc static method for adding a directiry to the dll
   /// search path.
-  static void addSearchDirectoryImpl(const std::string &);
+  static void addSearchDirectoryImpl(const std::string & /*dir*/);
 
   /// lib prefix
   static const std::string LIB_PREFIX;

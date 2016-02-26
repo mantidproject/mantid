@@ -104,9 +104,10 @@ public:
 };
 
 // defining operator << and >>
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const Interpolation &);
-MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Interpolation &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const Interpolation & /*f*/);
+MANTID_KERNEL_DLL std::istream &operator>>(std::istream & /*in*/,
+                                           Interpolation & /*f*/);
 
 } // namespace Kernel
 } // namespace Mantid

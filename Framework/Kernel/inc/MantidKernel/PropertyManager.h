@@ -58,8 +58,8 @@ template <typename T> class TimeSeriesProperty;
 class MANTID_KERNEL_DLL PropertyManager : virtual public IPropertyManager {
 public:
   PropertyManager();
-  PropertyManager(const PropertyManager &);
-  PropertyManager &operator=(const PropertyManager &);
+  PropertyManager(const PropertyManager & /*other*/);
+  PropertyManager &operator=(const PropertyManager & /*other*/);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
   void filterByTime(const Kernel::DateAndTime &start,

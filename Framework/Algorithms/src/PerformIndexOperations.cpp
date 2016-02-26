@@ -52,7 +52,7 @@ typedef std::vector<boost::shared_ptr<Command>> VecCommands;
  */
 class NullCommand : public Command {
   bool isValid() const override { return false; }
-  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr) const override {
+  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr /*input*/) const override {
     throw std::runtime_error(
         "Should not be attempting ::execute on a NullCommand");
   }

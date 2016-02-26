@@ -61,7 +61,7 @@ public:
 
   size_t getNumberSplitters() const override;
 
-  bool removeSplitter(size_t) override;
+  bool removeSplitter(size_t /*index*/) override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

@@ -55,9 +55,9 @@ private:
                        Mantid::API::Progress &prog) override;
 
   /// Get the minimum x across all spectra in workspace
-  uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr) const override;
+  uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr /*ws*/) const override;
   /// Get the maximum x across all spectra in workspace
-  uint64_t getMinX(Mantid::API::IEventWorkspace_sptr) const override;
+  uint64_t getMinX(Mantid::API::IEventWorkspace_sptr /*ws*/) const override;
 };
 
 } // namespace Algorithms

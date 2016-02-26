@@ -35,8 +35,9 @@ private:
   /// Execution code
   void exec() override;
 
-  double calculateFormulaValue(const std::string &, double);
-  std::string getValFromInstrumentDef(const std::string &);
+  double calculateFormulaValue(const std::string & /*formula*/,
+                               double /*energy*/);
+  std::string getValFromInstrumentDef(const std::string & /*parameterName*/);
   void applyMonEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
                           const MantidVec &eIn, const double coeff,
                           MantidVec &yOut, MantidVec &eOut);

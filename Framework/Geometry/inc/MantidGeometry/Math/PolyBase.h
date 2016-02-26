@@ -29,54 +29,56 @@ private:
   std::vector<double> afCoeff; ///< Coefficients
   double Eaccuracy;            ///< Polynomic accuracy
 
-  int solveQuadratic(std::complex<double> &, std::complex<double> &) const;
-  int solveCubic(std::complex<double> &, std::complex<double> &,
-                 std::complex<double> &) const;
+  int solveQuadratic(std::complex<double> & /*AnsA*/,
+                     std::complex<double> & /*AnsB*/) const;
+  int solveCubic(std::complex<double> & /*AnsA*/,
+                 std::complex<double> & /*AnsB*/,
+                 std::complex<double> & /*AnsC*/) const;
 
 public:
-  explicit PolyBase(int const);
-  PolyBase(int const, double const);
-  PolyBase(const PolyBase &);
+  explicit PolyBase(int const /*iD*/);
+  PolyBase(int const /*iD*/, double const /*E*/);
+  PolyBase(const PolyBase & /*A*/);
   ~PolyBase();
 
   // member access
-  void setDegree(int const);
+  void setDegree(int const /*iD*/);
   int getDegree() const;
   operator const std::vector<double> &() const;
   operator std::vector<double> &();
-  double operator[](int const) const;
-  double &operator[](int const);
+  double operator[](int const /*i*/) const;
+  double &operator[](int const /*i*/);
 
   // assignment
-  PolyBase &operator=(const PolyBase &);
+  PolyBase &operator=(const PolyBase & /*A*/);
 
   // evaluation
-  double operator()(double const) const;
+  double operator()(double const /*X*/) const;
 
   // arithmetic updates
-  PolyBase &operator+=(const PolyBase &);
-  PolyBase &operator-=(const PolyBase &);
-  PolyBase &operator*=(const PolyBase &);
+  PolyBase &operator+=(const PolyBase & /*A*/);
+  PolyBase &operator-=(const PolyBase & /*A*/);
+  PolyBase &operator*=(const PolyBase & /*A*/);
 
   // arithmetic operations
-  PolyBase operator+(const PolyBase &) const;
-  PolyBase operator-(const PolyBase &) const;
-  PolyBase operator*(const PolyBase &) const;
+  PolyBase operator+(const PolyBase & /*A*/) const;
+  PolyBase operator-(const PolyBase & /*A*/) const;
+  PolyBase operator*(const PolyBase & /*A*/) const;
   //  PolyBase operator/(const PolyBase&) const;
 
   // input is degree 0 poly
-  PolyBase operator+(double const) const; // input is degree 0 poly
-  PolyBase operator-(double const) const;
-  PolyBase operator*(double const) const;
-  PolyBase operator/(double const) const;
+  PolyBase operator+(double const /*V*/) const; // input is degree 0 poly
+  PolyBase operator-(double const /*V*/) const;
+  PolyBase operator*(double const /*V*/) const;
+  PolyBase operator/(double const /*V*/) const;
 
   PolyBase operator-() const;
 
   // input is degree 0 poly
-  PolyBase &operator+=(double const);
-  PolyBase &operator-=(double const);
-  PolyBase &operator*=(double const);
-  PolyBase &operator/=(double const);
+  PolyBase &operator+=(double const /*V*/);
+  PolyBase &operator-=(double const /*V*/);
+  PolyBase &operator*=(double const /*V*/);
+  PolyBase &operator/=(double const /*V*/);
 
   // derivation
   PolyBase getDerivative() const;
@@ -85,19 +87,19 @@ public:
   // inversion ( invpoly[i] = poly[degree-i] for 0 <= i <= degree )
   PolyBase GetInversion() const;
 
-  void compress(double const);
+  void compress(double const /*epsilon*/);
 
-  void divide(const PolyBase &, PolyBase &, PolyBase &,
-              double const = -1.0) const;
+  void divide(const PolyBase & /*pD*/, PolyBase & /*pQ*/, PolyBase & /*pR*/,
+              double const /*epsilon*/ = -1.0) const;
 
-  std::vector<double> realRoots(double const = -1.0);
-  std::vector<std::complex<double>> calcRoots(double const = -1.0);
+  std::vector<double> realRoots(double const /*epsilon*/ = -1.0);
+  std::vector<std::complex<double>> calcRoots(double const /*epsilon*/ = -1.0);
 
-  void write(std::ostream &) const;
+  void write(std::ostream & /*OX*/) const;
 };
 
 PolyBase operator*(double const, const PolyBase &);
-std::ostream &operator<<(std::ostream &, const PolyBase &);
+std::ostream &operator<<(std::ostream & /*OX*/, const PolyBase & /*A*/);
 
 } // NAMESPACE mathlevel
 

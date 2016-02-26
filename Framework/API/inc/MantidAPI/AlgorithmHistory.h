@@ -71,8 +71,8 @@ public:
       const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   virtual ~AlgorithmHistory();
-  AlgorithmHistory &operator=(const AlgorithmHistory &);
-  AlgorithmHistory(const AlgorithmHistory &);
+  AlgorithmHistory &operator=(const AlgorithmHistory & /*A*/);
+  AlgorithmHistory(const AlgorithmHistory & /*A*/);
   AlgorithmHistory(
       const std::string &name, int vers,
       const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
@@ -110,7 +110,7 @@ public:
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream & /*os*/, const int indent = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
     return (execCount() < other.execCount());
@@ -170,8 +170,8 @@ struct CompareHistory {
   }
 };
 
-MANTID_API_DLL std::ostream &operator<<(std::ostream &,
-                                        const AlgorithmHistory &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                        const AlgorithmHistory & /*AH*/);
 
 } // namespace API
 } // namespace Mantid

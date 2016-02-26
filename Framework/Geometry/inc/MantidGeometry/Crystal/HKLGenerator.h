@@ -137,7 +137,7 @@ public:
 
     /// Required for compilation in VS. Forward iterator can not be used
     /// that way, so the implementation does nothing.
-    inline void advance(difference_type) {}
+    inline void advance(difference_type /*unused*/) {}
     inline void decrement() {}
 
     int m_h, m_k, m_l;

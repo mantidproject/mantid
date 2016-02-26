@@ -126,8 +126,8 @@ private:
   void deleteRandomNumberGenerator();
 
   /// Required by the interface. Does nothing
-  void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const override {}
+  void function(const Mantid::API::FunctionDomain & /*unused*/,
+                Mantid::API::FunctionValues & /*unused*/) const override {}
 
   /// Storage for currently in use random number generators
   mutable std::vector<Kernel::NDRandomNumberGenerator *> m_randomNumbers;

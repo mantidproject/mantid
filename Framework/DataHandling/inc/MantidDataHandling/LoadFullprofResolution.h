@@ -67,44 +67,44 @@ public:
                                  std::map<std::string, size_t> &parammap);
 
   /// Put parameters into a matrix workspace
-  static void putParametersIntoWorkspace(const API::Column_const_sptr,
-                                         API::MatrixWorkspace_sptr ws,
-                                         int profNumber,
-                                         std::string &parameterXMLString);
+  static void
+  putParametersIntoWorkspace(const API::Column_const_sptr /*column*/,
+                             API::MatrixWorkspace_sptr ws, int profNumber,
+                             std::string &parameterXMLString);
 
   /// Add an Ikeda-Carpenter PV ALFBE parameter
-  static void addALFBEParameter(const API::Column_const_sptr,
+  static void addALFBEParameter(const API::Column_const_sptr /*column*/,
                                 Poco::XML::Document *mDoc,
                                 Poco::XML::Element *parent,
                                 const std::string &paramName);
 
   /// Add set of Ikeda-Carpenter PV Sigma parameters
-  static void addSigmaParameters(const API::Column_const_sptr,
+  static void addSigmaParameters(const API::Column_const_sptr /*column*/,
                                  Poco::XML::Document *mDoc,
                                  Poco::XML::Element *parent);
 
   /// Add set of Ikeda-Carpenter PV Gamma parameters
-  static void addGammaParameters(const API::Column_const_sptr,
+  static void addGammaParameters(const API::Column_const_sptr /*column*/,
                                  Poco::XML::Document *mDoc,
                                  Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential S parameters
-  static void addBBX_S_Parameters(const API::Column_const_sptr,
+  static void addBBX_S_Parameters(const API::Column_const_sptr /*column*/,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential A parameters
-  static void addBBX_A_Parameters(const API::Column_const_sptr,
+  static void addBBX_A_Parameters(const API::Column_const_sptr /*column*/,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential B parameters
-  static void addBBX_B_Parameters(const API::Column_const_sptr,
+  static void addBBX_B_Parameters(const API::Column_const_sptr /*column*/,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Get value for XML eq attribute for parameter
-  static std::string getXMLEqValue(const API::Column_const_sptr,
+  static std::string getXMLEqValue(const API::Column_const_sptr /*column*/,
                                    const std::string &name);
 
   /// Get value for XML eq attribute for squared parameter

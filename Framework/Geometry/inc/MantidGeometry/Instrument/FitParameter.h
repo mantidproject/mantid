@@ -127,9 +127,10 @@ private:
 };
 
 // defining operator << and >>
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const FitParameter &);
-MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &, FitParameter &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                             const FitParameter & /*f*/);
+MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream & /*in*/,
+                                             FitParameter & /*f*/);
 
 } // namespace Geometry
 } // namespace Mantid

@@ -54,8 +54,8 @@ public:
 
   /// construct a property history from a property object
   PropertyHistory(Property const *const prop);
-  PropertyHistory(const PropertyHistory &);
-  PropertyHistory &operator=(const PropertyHistory &);
+  PropertyHistory(const PropertyHistory & /*A*/);
+  PropertyHistory &operator=(const PropertyHistory & /*A*/);
   virtual ~PropertyHistory();
   /// get name of algorithm parameter const
   const std::string &name() const { return m_name; };
@@ -70,7 +70,7 @@ public:
   /// get direction flag of algorithm parameter const
   unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream & /*os*/, const int indent = 0) const;
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;
@@ -99,8 +99,8 @@ typedef boost::shared_ptr<PropertyHistory> PropertyHistory_sptr;
 typedef boost::shared_ptr<const PropertyHistory> PropertyHistory_const_sptr;
 typedef std::vector<PropertyHistory_sptr> PropertyHistories;
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const PropertyHistory &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const PropertyHistory & /*AP*/);
 
 } // namespace Kernel
 } // namespace Mantid

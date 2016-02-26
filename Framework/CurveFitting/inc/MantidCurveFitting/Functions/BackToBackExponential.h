@@ -79,10 +79,11 @@ protected:
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
   /// Function evaluation method to be implemented in the inherited classes
-  void functionLocal(double *, const double *, const size_t) const override {}
+  void functionLocal(double * /*out*/, const double * /*xValues*/,
+                     const size_t /*nData*/) const override {}
   /// Derivative evaluation method to be implemented in the inherited classes
-  void functionDerivLocal(API::Jacobian *, const double *,
-                          const size_t) override {}
+  void functionDerivLocal(API::Jacobian * /*out*/, const double * /*xValues*/,
+                          const size_t /*nData*/) override {}
   double expWidth() const;
 };
 

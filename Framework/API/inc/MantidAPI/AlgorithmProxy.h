@@ -104,10 +104,10 @@ public:
   /// To query whether algorithm is a child. A proxy is always at top level,
   /// returns false
   bool isChild() const override { return m_isChild; }
-  void setAlwaysStoreInADS(const bool) override {}
+  void setAlwaysStoreInADS(const bool /*doStore*/) override {}
   void setChild(const bool val) override { m_isChild = val; }
   /// Proxies only manage parent algorithms
-  void enableHistoryRecordingForChild(const bool) override{};
+  void enableHistoryRecordingForChild(const bool /*on*/) override{};
   void setRethrows(const bool rethrow) override;
 
   const std::string workspaceMethodName() const override;
@@ -120,7 +120,7 @@ public:
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
   /// Do something after a property was set
-  void afterPropertySet(const std::string &) override;
+  void afterPropertySet(const std::string & /*unused*/) override;
   /// Make m_properties point to the same PropertyManager as po.
   void copyPropertiesFrom(const PropertyManagerOwner &po) override;
   //@}

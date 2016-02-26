@@ -64,7 +64,7 @@ public:
 
 private:
   /// separate a given string to a vector of comma separated strings
-  std::vector<std::string> separateComma(const std::string &);
+  std::vector<std::string> separateComma(const std::string & /*input*/);
   /// separates a given string to vector of vector of numbers using colon as the
   /// delimeter
   std::vector<std::vector<unsigned int>>

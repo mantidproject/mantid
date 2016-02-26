@@ -58,24 +58,32 @@ private:
   void validateSpectraIndices(std::vector<int> &v);
   void validateChannelIndices(std::vector<int> &v);
 
-  std::map<int, int> findElasticPeakPositions(const std::vector<int> &,
-                                              const std::vector<int> &);
+  std::map<int, int>
+  findElasticPeakPositions(const std::vector<int> & /*spectraIndices*/,
+                           const std::vector<int> & /*channelIndices*/);
 
-  void estimateFWHM(const Mantid::MantidVec &, double &, double &, double &,
-                    double &, double &);
+  void estimateFWHM(const Mantid::MantidVec & /*spec*/, double & /*center*/,
+                    double & /*sigma*/, double & /*height*/, double & /*minX*/,
+                    double & /*maxX*/);
 
-  bool doFitGaussianPeak(int, double &, double &, double &, double, double);
-  std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int> &);
+  bool doFitGaussianPeak(int /*workspaceindex*/, double & /*center*/,
+                         double & /*sigma*/, double & /*height*/,
+                         double /*startX*/, double /*endX*/);
+  std::pair<int, double>
+  findAverageEppAndEpTof(const std::map<int, int> & /*eppMap*/);
 
-  double getL1(API::MatrixWorkspace_const_sptr);
-  double getL2(API::MatrixWorkspace_const_sptr, int);
-  double calculateTOF(double, double);
-  bool areEqual(double, double, double);
+  double getL1(API::MatrixWorkspace_const_sptr /*workspace*/);
+  double getL2(API::MatrixWorkspace_const_sptr /*workspace*/, int /*detId*/);
+  double calculateTOF(double /*distance*/, double /*wavelength*/);
+  bool areEqual(double /*a*/, double /*b*/, double /*epsilon*/);
   template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr, const std::string &);
-  int roundUp(double);
-  std::vector<double> makeTofAxis(int, double, size_t, double);
-  void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
+  T getPropertyFromRun(API::MatrixWorkspace_const_sptr /*inputWS*/,
+                       const std::string & /*propertyName*/);
+  int roundUp(double /*value*/);
+  std::vector<double> makeTofAxis(int /*epp*/, double /*epTof*/,
+                                  size_t /*size*/, double /*channelWidth*/);
+  void setTofInWS(const std::vector<double> & /*tofAxis*/,
+                  API::MatrixWorkspace_sptr /*outputWS*/);
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;

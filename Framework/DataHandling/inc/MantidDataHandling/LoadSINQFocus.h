@@ -66,12 +66,12 @@ private:
   void init() override;
   void exec() override;
   void setInstrumentName(NeXus::NXEntry &entry);
-  void initWorkSpace(NeXus::NXEntry &);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
+  void initWorkSpace(NeXus::NXEntry & /*entry*/);
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry & /*entry*/);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  void loadExperimentDetails(NeXus::NXEntry &);
-  void loadRunDetails(NeXus::NXEntry &);
+  void loadExperimentDetails(NeXus::NXEntry & /*entry*/);
+  void loadRunDetails(NeXus::NXEntry & /*entry*/);
   void runLoadInstrument();
 
   std::vector<std::string> m_supportedInstruments;

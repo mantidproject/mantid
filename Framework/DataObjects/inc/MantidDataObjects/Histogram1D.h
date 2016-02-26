@@ -38,8 +38,8 @@ protected:
 
 public:
   Histogram1D();
-  Histogram1D(const Histogram1D &);
-  Histogram1D &operator=(const Histogram1D &);
+  Histogram1D(const Histogram1D & /*A*/);
+  Histogram1D &operator=(const Histogram1D & /*A*/);
   ~Histogram1D() override;
 
   /// Sets the data.

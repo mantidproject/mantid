@@ -23,13 +23,14 @@ Holds a basic surface with equation form
 
 class MANTID_GEOMETRY_DLL Quadratic : public Surface {
 private:
-  void matrixForm(Kernel::Matrix<double> &, Kernel::V3D &, double &) const;
+  void matrixForm(Kernel::Matrix<double> & /*A*/, Kernel::V3D & /*B*/,
+                  double & /*C*/) const;
   Quadratic *doClone() const override = 0;
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
-  Quadratic(const Quadratic &);
-  Quadratic &operator=(const Quadratic &);
+  Quadratic(const Quadratic & /*A*/);
+  Quadratic &operator=(const Quadratic & /*A*/);
 
 public:
   static const int Nprecision = 10; ///< Precision of the output
@@ -47,22 +48,22 @@ public:
     return BaseEqn;
   } ///< access BaseEquation vector
 
-  int side(const Kernel::V3D &) const override;
+  int side(const Kernel::V3D & /*unused*/) const override;
 
   virtual void setBaseEqn() = 0; ///< Abstract set baseEqn
-  double eqnValue(const Kernel::V3D &) const;
+  double eqnValue(const Kernel::V3D & /*Pt*/) const;
 
   int onSurface(
-      const Kernel::V3D &) const override; ///< is point valid on surface
-  double distance(const Kernel::V3D &)
+      const Kernel::V3D & /*R*/) const override; ///< is point valid on surface
+  double distance(const Kernel::V3D & /*unused*/)
       const override; ///< distance between point and surface (approx)
-  Kernel::V3D
-  surfaceNormal(const Kernel::V3D &) const override; ///< Normal at surface
+  Kernel::V3D surfaceNormal(
+      const Kernel::V3D & /*unused*/) const override; ///< Normal at surface
 
-  void displace(const Kernel::V3D &) override;
-  void rotate(const Kernel::Matrix<double> &) override;
+  void displace(const Kernel::V3D & /*unused*/) override;
+  void rotate(const Kernel::Matrix<double> & /*unused*/) override;
 
-  void write(std::ostream &) const override;
+  void write(std::ostream & /*unused*/) const override;
   void print() const override;
 };
 

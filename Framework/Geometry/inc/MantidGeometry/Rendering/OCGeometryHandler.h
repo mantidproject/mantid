@@ -63,7 +63,7 @@ public:
   ~OCGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
   GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
-  GeometryHandler *createInstance(Object *) override;
+  GeometryHandler *createInstance(Object * /*unused*/) override;
   void Triangulate() override;
   void Render() override;
   void Initialize() override;

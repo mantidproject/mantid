@@ -107,7 +107,7 @@ public:
   /// Return the list of illegal characters as one string
   const std::string &illegalCharacters() const;
   /// Set the list of illegal characters
-  void setIllegalCharacterList(const std::string &);
+  void setIllegalCharacterList(const std::string & /*illegalChars*/);
   /// Is the given name a valid name for an object in the ADS
   const std::string isValid(const std::string &name) const;
   /// Overridden add member to attach the name to the workspace when a workspace

@@ -69,12 +69,12 @@ public:
   //                      ///<Constructor
   //                      BitmapGeometryHandler(Object *obj); ///<Constructor
   ~BitmapGeometryHandler() override;
-  BitmapGeometryHandler *createInstance(
-      IObjComponent *) override; ///< Create an instance of concrete geometry
+  BitmapGeometryHandler *createInstance(IObjComponent * /*comp*/)
+      override; ///< Create an instance of concrete geometry
   /// handler for ObjComponent
-  BitmapGeometryHandler *createInstance(boost::shared_ptr<Object>)
+  BitmapGeometryHandler *createInstance(boost::shared_ptr<Object> /*obj*/)
       override; ///< Create an instance of concrete geometry handler for Object
-  GeometryHandler *createInstance(Object *)
+  GeometryHandler *createInstance(Object * /*obj*/)
       override; ///< Create an instance of concrete geometry handler for Object
   void Triangulate() override; ///< Triangulate the Object
   void Render() override;      ///< Render Object or ObjComponent

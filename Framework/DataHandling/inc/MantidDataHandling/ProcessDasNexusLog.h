@@ -63,11 +63,12 @@ private:
   void addLog(API::MatrixWorkspace_sptr ws,
               std::vector<Kernel::DateAndTime> timevec, double unifylogvalue,
               std::string logname, std::vector<Kernel::DateAndTime> pulsetimes,
-              std::vector<double> orderedtofs, bool);
+              std::vector<double> orderedtofs, bool /*docheck*/);
 
   void checkLog(API::MatrixWorkspace_sptr ws, std::string logname);
 
-  void calDistributions(std::vector<Kernel::DateAndTime>, double dts);
+  void calDistributions(std::vector<Kernel::DateAndTime> /*timevec*/,
+                        double dts);
 
   void exportErrorLog(API::MatrixWorkspace_sptr ws,
                       std::vector<Kernel::DateAndTime> abstimevec,

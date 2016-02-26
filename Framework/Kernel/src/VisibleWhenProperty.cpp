@@ -9,7 +9,7 @@ VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
 
 VisibleWhenProperty::~VisibleWhenProperty() {}
 
-bool VisibleWhenProperty::isEnabled(const IPropertyManager *) const {
+bool VisibleWhenProperty::isEnabled(const IPropertyManager * /*algo*/) const {
   return true;
 }
 

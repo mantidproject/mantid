@@ -79,17 +79,21 @@ public:
   ~GluGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
   GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
-  GeometryHandler *createInstance(Object *) override;
+  GeometryHandler *createInstance(Object * /*obj*/) override;
   /// sets the geometry handler for a cuboid
-  void setCuboid(Kernel::V3D, Kernel::V3D, Kernel::V3D, Kernel::V3D);
+  void setCuboid(Kernel::V3D /*p1*/, Kernel::V3D /*p2*/, Kernel::V3D /*p3*/,
+                 Kernel::V3D /*p4*/);
   /// sets the geometry handler for a cone
-  void setSphere(Kernel::V3D, double);
+  void setSphere(Kernel::V3D /*c*/, double /*r*/);
   /// sets the geometry handler for a cylinder
-  void setCylinder(Kernel::V3D, Kernel::V3D, double, double);
+  void setCylinder(Kernel::V3D /*c*/, Kernel::V3D /*a*/, double /*r*/,
+                   double /*h*/);
   /// sets the geometry handler for a cone
-  void setCone(Kernel::V3D, Kernel::V3D, double, double);
+  void setCone(Kernel::V3D /*c*/, Kernel::V3D /*a*/, double /*r*/,
+               double /*h*/);
   /// sets the geometry handler for a segmented cylinder
-  void setSegmentedCylinder(Kernel::V3D, Kernel::V3D, double, double);
+  void setSegmentedCylinder(Kernel::V3D /*c*/, Kernel::V3D /*a*/, double /*r*/,
+                            double /*h*/);
   void Triangulate() override;
   void Render() override;
   void Initialize() override;

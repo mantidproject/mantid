@@ -71,7 +71,7 @@ public:
   TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
 
   /// Constructor, copy from another TofEvent object
-  TofEvent(const TofEvent &);
+  TofEvent(const TofEvent & /*rhs*/);
 
   /// Empty constructor
   TofEvent();
@@ -137,12 +137,12 @@ public:
                 const Mantid::Kernel::DateAndTime pulsetime, float weight,
                 float errorSquared);
 
-  WeightedEvent(const TofEvent &, double weight, double errorSquared);
-  WeightedEvent(const TofEvent &, float weight, float errorSquared);
+  WeightedEvent(const TofEvent & /*rhs*/, double weight, double errorSquared);
+  WeightedEvent(const TofEvent & /*rhs*/, float weight, float errorSquared);
 
-  WeightedEvent(const WeightedEvent &);
+  WeightedEvent(const WeightedEvent & /*rhs*/);
 
-  WeightedEvent(const TofEvent &);
+  WeightedEvent(const TofEvent & /*rhs*/);
 
   WeightedEvent();
 
@@ -206,14 +206,16 @@ public:
   WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime,
                       float weight, float errorSquared);
 
-  WeightedEventNoTime(const TofEvent &, double weight, double errorSquared);
-  WeightedEventNoTime(const TofEvent &, float weight, float errorSquared);
+  WeightedEventNoTime(const TofEvent & /*rhs*/, double weight,
+                      double errorSquared);
+  WeightedEventNoTime(const TofEvent & /*rhs*/, float weight,
+                      float errorSquared);
 
-  WeightedEventNoTime(const WeightedEventNoTime &);
+  WeightedEventNoTime(const WeightedEventNoTime & /*rhs*/);
 
-  WeightedEventNoTime(const WeightedEvent &);
+  WeightedEventNoTime(const WeightedEvent & /*rhs*/);
 
-  WeightedEventNoTime(const TofEvent &);
+  WeightedEventNoTime(const TofEvent & /*rhs*/);
 
   WeightedEventNoTime();
 

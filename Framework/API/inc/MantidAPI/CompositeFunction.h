@@ -84,10 +84,11 @@ public:
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
+  void setParameter(size_t /*unused*/, const double &value,
                     bool explicitlySet = true) override;
   /// Set i-th parameter description
-  void setParameterDescription(size_t, const std::string &description) override;
+  void setParameterDescription(size_t /*unused*/,
+                               const std::string &description) override;
   /// Get i-th parameter
   double getParameter(size_t i) const override;
   /// Set parameter by name.
@@ -199,13 +200,15 @@ public:
   }
   /// Set a value to attribute attName
   virtual void setLocalAttribute(size_t i, const std::string &attName,
-                                 const Attribute &) {
+                                 const Attribute & /*unused*/) {
     (void)i;
     throw std::invalid_argument("Attribute " + attName +
                                 " not found in function " + this->name());
   }
   /// Check if attribute attName exists
-  virtual bool hasLocalAttribute(const std::string &) const { return false; }
+  virtual bool hasLocalAttribute(const std::string & /*unused*/) const {
+    return false;
+  }
   template <typename T>
   void setLocalAttributeValue(size_t i, const std::string &attName,
                               const T &value) {

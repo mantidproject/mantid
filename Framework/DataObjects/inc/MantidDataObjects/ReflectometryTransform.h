@@ -74,7 +74,8 @@ protected:
   mutable std::vector<double> m_thetaWidths;
 
   boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
-  createMDWorkspace(Geometry::IMDDimension_sptr, Geometry::IMDDimension_sptr,
+  createMDWorkspace(Geometry::IMDDimension_sptr /*a*/,
+                    Geometry::IMDDimension_sptr /*b*/,
                     API::BoxController_sptr boxController) const;
 
 public:

@@ -47,7 +47,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_KERNEL_DLL LibraryManagerImpl {
 public:
   // opens all suitable libraries on a given path
-  int OpenAllLibraries(const std::string &, bool isRecursive = false);
+  int OpenAllLibraries(const std::string & /*filePath*/,
+                       bool isRecursive = false);
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LibraryManagerImpl>;

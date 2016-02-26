@@ -37,7 +37,8 @@ FakeEventDataListener::~FakeEventDataListener() {
   delete m_rand;
 }
 
-bool FakeEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FakeEventDataListener::connect(
+    const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

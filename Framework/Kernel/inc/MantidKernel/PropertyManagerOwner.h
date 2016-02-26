@@ -50,8 +50,8 @@ class PropertyManager;
 class MANTID_KERNEL_DLL PropertyManagerOwner : virtual public IPropertyManager {
 public:
   PropertyManagerOwner();
-  PropertyManagerOwner(const PropertyManagerOwner &);
-  PropertyManagerOwner &operator=(const PropertyManagerOwner &);
+  PropertyManagerOwner(const PropertyManagerOwner & /*po*/);
+  PropertyManagerOwner &operator=(const PropertyManagerOwner & /*po*/);
   ~PropertyManagerOwner() override {}
 
   // Function to declare properties (i.e. store them)
@@ -111,7 +111,7 @@ public:
   /// Override this method to perform a custom action right after a property was
   /// set.
   /// The argument is the property name. Default - do nothing.
-  void afterPropertySet(const std::string &) override;
+  void afterPropertySet(const std::string & /*unused*/) override;
 
   void filterByTime(const DateAndTime & /*start*/,
                     const DateAndTime & /*stop*/) override {

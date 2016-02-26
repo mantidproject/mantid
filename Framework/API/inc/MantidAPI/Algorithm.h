@@ -319,7 +319,7 @@ protected:
   void cacheWorkspaceProperties();
 
   friend class AlgorithmProxy;
-  void initializeFromProxy(const AlgorithmProxy &);
+  void initializeFromProxy(const AlgorithmProxy & /*proxy*/);
 
   void setInitialized();
   void setExecuted(bool state);

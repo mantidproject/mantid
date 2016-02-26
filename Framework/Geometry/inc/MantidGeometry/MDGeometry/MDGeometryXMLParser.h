@@ -94,19 +94,19 @@ public:
 
   bool hasTDimension() const;
 
-  bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isXDimension(Mantid::Geometry::IMDDimension_sptr /*candidate*/) const;
 
-  bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isYDimension(Mantid::Geometry::IMDDimension_sptr /*candidate*/) const;
 
-  bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isZDimension(Mantid::Geometry::IMDDimension_sptr /*candidate*/) const;
 
-  bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isTDimension(Mantid::Geometry::IMDDimension_sptr /*candidate*/) const;
 
   void SetRootNodeCheck(std::string elementName);
 
-  MDGeometryXMLParser &operator=(const MDGeometryXMLParser &);
+  MDGeometryXMLParser &operator=(const MDGeometryXMLParser & /*other*/);
 
-  MDGeometryXMLParser(const MDGeometryXMLParser &);
+  MDGeometryXMLParser(const MDGeometryXMLParser & /*other*/);
 };
 }
 }

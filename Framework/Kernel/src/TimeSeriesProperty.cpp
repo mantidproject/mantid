@@ -648,7 +648,8 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
  */
 template <>
 void TimeSeriesProperty<std::string>::makeFilterByValue(
-    std::vector<SplittingInterval> &, double, double, double, bool) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    double /*TimeTolerance*/, bool /*centre*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -714,8 +715,8 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
  */
 template <>
 void TimeSeriesProperty<std::string>::expandFilterToRange(
-    std::vector<SplittingInterval> &, double, double,
-    const TimeInterval &) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    const TimeInterval & /*range*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -795,7 +796,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
  */
 template <>
 double TimeSeriesProperty<std::string>::averageValueInFilter(
-    const TimeSplitterType &) const {
+    const TimeSplitterType & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -1178,7 +1179,7 @@ std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
+std::string TimeSeriesProperty<TYPE>::setValue(const std::string & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from a "
                                        "std::string");
@@ -1189,8 +1190,8 @@ std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string
-TimeSeriesProperty<TYPE>::setDataItem(const boost::shared_ptr<DataItem>) {
+std::string TimeSeriesProperty<TYPE>::setDataItem(
+    const boost::shared_ptr<DataItem> /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");

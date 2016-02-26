@@ -65,7 +65,7 @@ public:
   /// Set the "my data only" flag to search only user's data if true.
   void setMyData(bool flag);
   /// Set the investigation id to search for.
-  void setInvestigationId(const std::string &);
+  void setInvestigationId(const std::string & /*investigationId*/);
 
   /// Get the start run from user input.
   const double &getRunStart() const;

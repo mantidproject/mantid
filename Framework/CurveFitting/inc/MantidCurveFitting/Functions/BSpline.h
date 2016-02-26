@@ -57,7 +57,8 @@ public:
                     const size_t order) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &) override;
+  void setAttribute(const std::string &attName,
+                    const Attribute & /*unused*/) override;
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames() const override;
 

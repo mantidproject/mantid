@@ -71,10 +71,10 @@ public:
   bool addTDimension(IMDDimension_const_sptr dimension) const;
 
   /// Copy constructor
-  MDGeometryBuilderXML(const MDGeometryBuilderXML &);
+  MDGeometryBuilderXML(const MDGeometryBuilderXML & /*other*/);
 
   /// Assignment Operator
-  MDGeometryBuilderXML &operator=(const MDGeometryBuilderXML &);
+  MDGeometryBuilderXML &operator=(const MDGeometryBuilderXML & /*other*/);
 
   /// Create the xml.
   const std::string &create() const;
@@ -149,7 +149,7 @@ public:
 */
 struct NoDimensionPolicy
     : public std::unary_function<IMDDimension_const_sptr, void> {
-  void operator()(IMDDimension_const_sptr) {
+  void operator()(IMDDimension_const_sptr /*unused*/) {
     // Do nothing.
   }
 };

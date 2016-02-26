@@ -62,9 +62,9 @@ private:
 
 public:
   cow_ptr();
-  cow_ptr(const cow_ptr<DataType> &);
-  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
-  cow_ptr<DataType> &operator=(const ptr_type &);
+  cow_ptr(const cow_ptr<DataType> & /*A*/);
+  cow_ptr<DataType> &operator=(const cow_ptr<DataType> & /*A*/);
+  cow_ptr<DataType> &operator=(const ptr_type & /*A*/);
   ~cow_ptr();
 
   const DataType &operator*() const {

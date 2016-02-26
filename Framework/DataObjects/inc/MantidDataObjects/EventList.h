@@ -85,7 +85,7 @@ public:
   void createFromHistogram(const ISpectrum *spec, bool GenerateZeros,
                            bool GenerateMultipleEvents, int MaxEventsPerBin);
 
-  EventList &operator=(const EventList &);
+  EventList &operator=(const EventList & /*rhs*/);
 
   EventList &operator+=(const TofEvent &event);
 

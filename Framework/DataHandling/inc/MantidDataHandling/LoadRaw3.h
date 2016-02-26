@@ -107,7 +107,7 @@ private:
   void setOptionalProperties();
 
   /// sets progress taking account of progress time taken up by ChildAlgorithms
-  void setProg(double);
+  void setProg(double /*prog*/);
 
   /// The name and path of the input file
   std::string m_filename;
