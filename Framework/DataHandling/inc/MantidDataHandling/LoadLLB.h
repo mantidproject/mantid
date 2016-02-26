@@ -56,7 +56,8 @@ private:
   void loadTimeDetails(NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry & /*entry*/);
   int getDetectorElasticPeakPosition(const NeXus::NXFloat & /*data*/);
-  std::vector<double> getTimeBinning(int /*elasticPeakPosition*/, double /*channelWidth*/);
+  std::vector<double> getTimeBinning(int /*elasticPeakPosition*/,
+                                     double /*channelWidth*/);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
   void loadExperimentDetails(NeXus::NXEntry & /*entry*/);

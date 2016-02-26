@@ -57,12 +57,15 @@ protected:
   Rule &operator=(const Rule & /*unused*/);
 
 public:
-  static int
-  makeCNFcopy(std::unique_ptr<Rule> & /*TopRule*/); ///< Make Rule into a CNF format (slow)
+  static int makeCNFcopy(std::unique_ptr<Rule> & /*TopRule*/); ///< Make Rule
+                                                               ///into a CNF
+                                                               ///format (slow)
   static int
   makeFullDNF(std::unique_ptr<Rule> &); ///< Make Rule into a full DNF format
-  static int makeCNF(std::unique_ptr<Rule> & /*TopRule*/); ///< Make Rule into a CNF format
-  static int removeComplementary(std::unique_ptr<Rule> & /*TopRule*/); ///< NOT WORKING
+  static int
+  makeCNF(std::unique_ptr<Rule> & /*TopRule*/); ///< Make Rule into a CNF format
+  static int
+  removeComplementary(std::unique_ptr<Rule> & /*TopRule*/); ///< NOT WORKING
   static int removeItem(std::unique_ptr<Rule> &TRule, const int SurfN);
 
   Rule();
@@ -76,7 +79,7 @@ public:
   } ///< Returns class name as string
 
   /// No leaf for a base rule
-  virtual Rule *leaf(const int  /*unused*/= 0) const { return nullptr; }
+  virtual Rule *leaf(const int /*unused*/ = 0) const { return nullptr; }
   void setParent(Rule * /*A*/);
   Rule *getParent() const;
   void makeParents();
@@ -143,8 +146,10 @@ protected:
 
 public:
   Intersection();
-  explicit Intersection(std::unique_ptr<Rule> /*Ix*/, std::unique_ptr<Rule> /*Iy*/);
-  explicit Intersection(Rule * /*Parent*/, std::unique_ptr<Rule> /*Ix*/, std::unique_ptr<Rule> /*Iy*/);
+  explicit Intersection(std::unique_ptr<Rule> /*Ix*/,
+                        std::unique_ptr<Rule> /*Iy*/);
+  explicit Intersection(Rule * /*Parent*/, std::unique_ptr<Rule> /*Ix*/,
+                        std::unique_ptr<Rule> /*Iy*/);
   std::unique_ptr<Intersection>
   clone() const; ///< Makes a copy of the whole downward tree
   std::string className() const override {
@@ -201,7 +206,8 @@ protected:
 public:
   Union();
   explicit Union(std::unique_ptr<Rule> /*Ix*/, std::unique_ptr<Rule> /*Iy*/);
-  explicit Union(Rule * /*Parent*/, std::unique_ptr<Rule> /*Ix*/, std::unique_ptr<Rule> /*Iy*/);
+  explicit Union(Rule * /*Parent*/, std::unique_ptr<Rule> /*Ix*/,
+                 std::unique_ptr<Rule> /*Iy*/);
 
   std::unique_ptr<Union> clone() const;
   std::string className() const override {
@@ -257,9 +263,13 @@ public:
   } ///< Returns class name as string
   std::unique_ptr<SurfPoint> clone() const;
 
-  Rule *leaf(const int  /*unused*/= 0) const override { return nullptr; } ///< No Leaves
-  void setLeaves(std::unique_ptr<Rule> /*unused*/, std::unique_ptr<Rule> /*unused*/) override;
-  void setLeaf(std::unique_ptr<Rule> /*unused*/, const int  /*unused*/= 0) override;
+  Rule *leaf(const int /*unused*/ = 0) const override {
+    return nullptr;
+  } ///< No Leaves
+  void setLeaves(std::unique_ptr<Rule> /*unused*/,
+                 std::unique_ptr<Rule> /*unused*/) override;
+  void setLeaf(std::unique_ptr<Rule> /*unused*/,
+               const int /*unused*/ = 0) override;
   int findLeaf(const Rule * /*unused*/) const override;
   Rule *findKey(const int KeyNum) override;
 
@@ -312,8 +322,10 @@ public:
     return "CompObj";
   } ///< Returns class name as string
 
-  void setLeaves(std::unique_ptr<Rule> /*unused*/, std::unique_ptr<Rule> /*unused*/) override;
-  void setLeaf(std::unique_ptr<Rule> /*unused*/, const int  /*unused*/= 0) override;
+  void setLeaves(std::unique_ptr<Rule> /*unused*/,
+                 std::unique_ptr<Rule> /*unused*/) override;
+  void setLeaf(std::unique_ptr<Rule> /*unused*/,
+               const int /*unused*/ = 0) override;
   int findLeaf(const Rule * /*unused*/) const override;
   Rule *findKey(const int i) override;
 
@@ -322,8 +334,8 @@ public:
     return 1;
   } ///< Always returns true (1)
 
-  void setObjN(const int Ky); ///< set object Number
-  void setObj(Object * /*val*/);      ///< Set a Object state
+  void setObjN(const int Ky);    ///< set object Number
+  void setObj(Object * /*val*/); ///< Set a Object state
   bool isValid(const Kernel::V3D & /*unused*/) const override;
   bool isValid(const std::map<int, int> & /*unused*/) const override;
   /// Get object number of component
@@ -372,7 +384,8 @@ public:
   Rule *leaf(const int /*unused*/) const override {
     return A.get();
   } ///< selects leaf component
-  void setLeaves(std::unique_ptr<Rule> /*unused*/, std::unique_ptr<Rule> /*unused*/) override;
+  void setLeaves(std::unique_ptr<Rule> /*unused*/,
+                 std::unique_ptr<Rule> /*unused*/) override;
   void setLeaf(std::unique_ptr<Rule> nR, const int side = 0) override;
   int findLeaf(const Rule * /*unused*/) const override;
   Rule *findKey(const int i) override;
@@ -422,9 +435,13 @@ public:
     return "BoolValue";
   } ///< Returns class name as string
 
-  Rule *leaf(const int  /*unused*/= 0) const override { return nullptr; } ///< No leaves
-  void setLeaves(std::unique_ptr<Rule> /*unused*/, std::unique_ptr<Rule> /*unused*/) override;
-  void setLeaf(std::unique_ptr<Rule> /*unused*/, const int  /*unused*/= 0) override;
+  Rule *leaf(const int /*unused*/ = 0) const override {
+    return nullptr;
+  } ///< No leaves
+  void setLeaves(std::unique_ptr<Rule> /*unused*/,
+                 std::unique_ptr<Rule> /*unused*/) override;
+  void setLeaf(std::unique_ptr<Rule> /*unused*/,
+               const int /*unused*/ = 0) override;
   int findLeaf(const Rule * /*unused*/) const override;
   Rule *findKey(const int /*unused*/) override { return nullptr; }
 

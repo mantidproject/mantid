@@ -686,7 +686,8 @@ public:
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
   void startElement(const XMLString & /*uri*/, const XMLString &localName,
-                    const XMLString & /*qname*/, const Attributes &attrList) override {
+                    const XMLString & /*qname*/,
+                    const Attributes &attrList) override {
     if (localName == "instrument") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
@@ -697,13 +698,17 @@ class myContentHandler : public Poco::XML::ContentHandler {
                   const XMLString & /*qname*/) override {}
   void startDocument() override {}
   void endDocument() override {}
-  void characters(const XMLChar /*ch*/[], int /*start*/, int /*length*/) override {}
+  void characters(const XMLChar /*ch*/[], int /*start*/,
+                  int /*length*/) override {}
   void endPrefixMapping(const XMLString & /*prefix*/) override {}
-  void ignorableWhitespace(const XMLChar /*ch*/[], int /*start*/, int /*length*/) override {}
-  void processingInstruction(const XMLString & /*target*/, const XMLString & /*data*/) override {}
+  void ignorableWhitespace(const XMLChar /*ch*/[], int /*start*/,
+                           int /*length*/) override {}
+  void processingInstruction(const XMLString & /*target*/,
+                             const XMLString & /*data*/) override {}
   void setDocumentLocator(const Locator * /*loc*/) override {}
   void skippedEntity(const XMLString & /*name*/) override {}
-  void startPrefixMapping(const XMLString & /*prefix*/, const XMLString & /*uri*/) override {}
+  void startPrefixMapping(const XMLString & /*prefix*/,
+                          const XMLString & /*uri*/) override {}
 };
 
 //---------------------------------------------------------------------------------------

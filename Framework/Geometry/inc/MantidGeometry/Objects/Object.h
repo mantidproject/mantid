@@ -161,9 +161,11 @@ public:
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter> /*writer*/);
+  void setVtkGeometryCacheWriter(
+      boost::shared_ptr<vtkGeometryCacheWriter> /*writer*/);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader> /*reader*/);
+  void setVtkGeometryCacheReader(
+      boost::shared_ptr<vtkGeometryCacheReader> /*reader*/);
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const;
   /// Getter for the shape xml
@@ -176,7 +178,8 @@ private:
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
   std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule> /*RItem*/) const;
-  int checkSurfaceValid(const Kernel::V3D & /*C*/, const Kernel::V3D & /*Nm*/) const;
+  int checkSurfaceValid(const Kernel::V3D & /*C*/,
+                        const Kernel::V3D & /*Nm*/) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
 
   /// Calculate bounding box using Rule system

@@ -19,7 +19,8 @@ namespace Geometry {
 */
 
 class MANTID_GEOMETRY_DLL RotaryCounter {
-  friend std::ostream &operator<<(std::ostream & /*OX*/, const RotaryCounter & /*A*/);
+  friend std::ostream &operator<<(std::ostream & /*OX*/,
+                                  const RotaryCounter & /*A*/);
 
 private:
   int Rmax;            ///< Number to over cycle

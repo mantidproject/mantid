@@ -69,8 +69,8 @@ public:
   //                      ///<Constructor
   //                      BitmapGeometryHandler(Object *obj); ///<Constructor
   ~BitmapGeometryHandler() override;
-  BitmapGeometryHandler *createInstance(
-      IObjComponent * /*comp*/) override; ///< Create an instance of concrete geometry
+  BitmapGeometryHandler *createInstance(IObjComponent * /*comp*/)
+      override; ///< Create an instance of concrete geometry
   /// handler for ObjComponent
   BitmapGeometryHandler *createInstance(boost::shared_ptr<Object> /*obj*/)
       override; ///< Create an instance of concrete geometry handler for Object

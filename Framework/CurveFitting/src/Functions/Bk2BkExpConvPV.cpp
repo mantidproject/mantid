@@ -129,7 +129,8 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
 
 /** Local derivative
   */
-void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian * /*out*/, const double * /*xValues*/,
+void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian * /*out*/,
+                                        const double * /*xValues*/,
                                         const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDerivLocal is not implemented for IkedaCarpenterPV.");

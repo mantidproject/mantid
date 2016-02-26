@@ -23,7 +23,8 @@ Holds a basic surface with equation form
 
 class MANTID_GEOMETRY_DLL Quadratic : public Surface {
 private:
-  void matrixForm(Kernel::Matrix<double> & /*A*/, Kernel::V3D & /*B*/, double & /*C*/) const;
+  void matrixForm(Kernel::Matrix<double> & /*A*/, Kernel::V3D & /*B*/,
+                  double & /*C*/) const;
   Quadratic *doClone() const override = 0;
 
 protected:
@@ -56,8 +57,8 @@ public:
       const Kernel::V3D & /*R*/) const override; ///< is point valid on surface
   double distance(const Kernel::V3D & /*unused*/)
       const override; ///< distance between point and surface (approx)
-  Kernel::V3D
-  surfaceNormal(const Kernel::V3D & /*unused*/) const override; ///< Normal at surface
+  Kernel::V3D surfaceNormal(
+      const Kernel::V3D & /*unused*/) const override; ///< Normal at surface
 
   void displace(const Kernel::V3D & /*unused*/) override;
   void rotate(const Kernel::Matrix<double> & /*unused*/) override;

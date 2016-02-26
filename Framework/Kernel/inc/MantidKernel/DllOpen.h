@@ -43,10 +43,12 @@ public:
   static void *OpenDll(const std::string & /*libName*/);
 
   /// Static method for opening the shared library
-  static void *OpenDll(const std::string & /*libName*/, const std::string & /*filePath*/);
+  static void *OpenDll(const std::string & /*libName*/,
+                       const std::string & /*filePath*/);
 
   /// Static method for retrieving a function pointer
-  static void *GetFunction(void * /*libName*/, const std::string & /*funcName*/);
+  static void *GetFunction(void * /*libName*/,
+                           const std::string & /*funcName*/);
 
   /// Static method for closing the shared library
   static void CloseDll(void * /*libName*/);
@@ -71,7 +73,8 @@ private:
   static void *OpenDllImpl(const std::string & /*filePath*/);
 
   /// Implementation specifc static method for retrieving a function pointer
-  static void *GetFunctionImpl(void * /*libName*/, const std::string & /*funcName*/);
+  static void *GetFunctionImpl(void * /*libName*/,
+                               const std::string & /*funcName*/);
 
   /// Implementation specifc static method for closing a shared library
   static void CloseDllImpl(void * /*libName*/);

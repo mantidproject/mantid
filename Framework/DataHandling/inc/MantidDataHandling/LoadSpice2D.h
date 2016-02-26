@@ -97,7 +97,8 @@ private:
 
   void setInputPropertiesAsMemberProperties();
 
-  void addMetadataAsRunProperties(const std::map<std::string, std::string> & /*metadata*/);
+  void addMetadataAsRunProperties(
+      const std::map<std::string, std::string> & /*metadata*/);
   void parseDetectorDimensions(const std::string & /*dims_str*/);
   void createWorkspace();
   std::vector<int> getData(const std::string & /*dataXpath*/);

@@ -362,7 +362,8 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
   }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*out*/, const double * /*xValues*/,
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*out*/,
+                                          const double * /*xValues*/,
                                           const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDerivLocal is not implemented for IkedaCarpenterPV.");

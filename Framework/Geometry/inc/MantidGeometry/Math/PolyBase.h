@@ -29,8 +29,10 @@ private:
   std::vector<double> afCoeff; ///< Coefficients
   double Eaccuracy;            ///< Polynomic accuracy
 
-  int solveQuadratic(std::complex<double> & /*AnsA*/, std::complex<double> & /*AnsB*/) const;
-  int solveCubic(std::complex<double> & /*AnsA*/, std::complex<double> & /*AnsB*/,
+  int solveQuadratic(std::complex<double> & /*AnsA*/,
+                     std::complex<double> & /*AnsB*/) const;
+  int solveCubic(std::complex<double> & /*AnsA*/,
+                 std::complex<double> & /*AnsB*/,
                  std::complex<double> & /*AnsC*/) const;
 
 public:
@@ -88,10 +90,10 @@ public:
   void compress(double const /*epsilon*/);
 
   void divide(const PolyBase & /*pD*/, PolyBase & /*pQ*/, PolyBase & /*pR*/,
-              double const  /*epsilon*/= -1.0) const;
+              double const /*epsilon*/ = -1.0) const;
 
-  std::vector<double> realRoots(double const  /*epsilon*/= -1.0);
-  std::vector<std::complex<double>> calcRoots(double const  /*epsilon*/= -1.0);
+  std::vector<double> realRoots(double const /*epsilon*/ = -1.0);
+  std::vector<std::complex<double>> calcRoots(double const /*epsilon*/ = -1.0);
 
   void write(std::ostream & /*OX*/) const;
 };

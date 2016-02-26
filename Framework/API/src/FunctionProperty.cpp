@@ -39,7 +39,8 @@ operator=(const boost::shared_ptr<IFunction> &value) {
 
 //--------------------------------------------------------------------------------------
 /// Add the value of another property
-FunctionProperty &FunctionProperty::operator+=(Kernel::Property const * /*right*/) {
+FunctionProperty &FunctionProperty::
+operator+=(Kernel::Property const * /*right*/) {
   throw Kernel::Exception::NotImplementedError(
       "+= operator is not implemented for FunctionProperty.");
   return *this;

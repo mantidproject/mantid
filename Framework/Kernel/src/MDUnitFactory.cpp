@@ -17,8 +17,8 @@ bool LabelUnitFactory::canInterpret(const std::string & /*unitString*/) const {
   return true; // Can always treat a unit as a label unit.
 }
 
-InverseAngstromsUnit *
-InverseAngstromsUnitFactory::createRaw(const std::string & /*unitString*/) const {
+InverseAngstromsUnit *InverseAngstromsUnitFactory::createRaw(
+    const std::string & /*unitString*/) const {
   return new InverseAngstromsUnit;
 }
 

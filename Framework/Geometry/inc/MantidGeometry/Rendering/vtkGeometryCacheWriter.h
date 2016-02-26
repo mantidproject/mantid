@@ -55,7 +55,7 @@ private:
 
 public:
   vtkGeometryCacheWriter(std::string /*filename*/); ///< Constructor
-  ~vtkGeometryCacheWriter();           ///< Destructor
+  ~vtkGeometryCacheWriter();                        ///< Destructor
   void addObject(Object *obj);
   void write(); ///< Write the XML to a file
 };

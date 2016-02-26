@@ -59,7 +59,8 @@ public:
                        const size_t nData) override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute & /*unused*/) override;
+  void setAttribute(const std::string &attName,
+                    const Attribute & /*unused*/) override;
 
 private:
   /// Polynomial order

@@ -74,8 +74,8 @@ class DLLExport FlatWeighting : public WeightingStrategy {
 public:
   FlatWeighting();
   ~FlatWeighting() override;
-  double weightAt(const double & /*adjX*/, const double & /*ix*/, const double & /*adjY*/,
-                  const double & /*iy*/) override;
+  double weightAt(const double & /*adjX*/, const double & /*ix*/,
+                  const double & /*adjY*/, const double & /*iy*/) override;
   double weightAt(const Mantid::Kernel::V3D & /*distance*/) override;
 };
 
@@ -111,8 +111,8 @@ public:
   NullWeighting();
   ~NullWeighting() override;
   double weightAt(const Mantid::Kernel::V3D & /*distance*/) override;
-  double weightAt(const double & /*adjX*/, const double & /*ix*/, const double & /*adjY*/,
-                  const double & /*iy*/) override;
+  double weightAt(const double & /*adjX*/, const double & /*ix*/,
+                  const double & /*adjY*/, const double & /*iy*/) override;
 };
 
 /*
@@ -125,8 +125,8 @@ public:
   GaussianWeightingnD(double cutOff, double sigma);
   ~GaussianWeightingnD() override;
   double weightAt(const Mantid::Kernel::V3D & /*distance*/) override;
-  double weightAt(const double & /*adjX*/, const double & /*ix*/, const double & /*adjY*/,
-                  const double & /*iy*/) override;
+  double weightAt(const double & /*adjX*/, const double & /*ix*/,
+                  const double & /*adjY*/, const double & /*iy*/) override;
 
 private:
   double calculateGaussian(const double normalisedDistanceSq);

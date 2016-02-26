@@ -50,7 +50,9 @@ public:
   std::string toXMLString() const override;
   //----------------------MDImplicit function methods ------------
   bool isPointContained(const coord_t * /*coords*/) override { return true; }
-  bool isPointContained(const std::vector<coord_t> & /*coords*/) override { return true; }
+  bool isPointContained(const std::vector<coord_t> & /*coords*/) override {
+    return true;
+  }
   // Unhide base class methods (avoids Intel compiler warning)
   using MDImplicitFunction::isPointContained;
   //---------------------------------------------------------------

@@ -178,10 +178,12 @@ private:
   std::string outMessage;
 
 public:
-  NotFoundError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
+  NotFoundError(const std::string & /*Desc*/,
+                const std::string & /*ObjectName*/);
   NotFoundError(const std::string & /*Desc*/, const int & /*ObjectNum*/);
   NotFoundError(const std::string & /*Desc*/, const int64_t & /*ObjectNum*/);
-  NotFoundError(const std::string & /*Desc*/, const std::size_t & /*ObjectNum*/);
+  NotFoundError(const std::string & /*Desc*/,
+                const std::size_t & /*ObjectNum*/);
   NotFoundError(const NotFoundError &A);
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
@@ -260,7 +262,8 @@ private:
   std::string outMessage;
 
 public:
-  InstrumentDefinitionError(const std::string & /*Desc*/, const std::string & /*ObjectName*/);
+  InstrumentDefinitionError(const std::string & /*Desc*/,
+                            const std::string & /*ObjectName*/);
   InstrumentDefinitionError(const std::string & /*Desc*/);
   InstrumentDefinitionError(const InstrumentDefinitionError &A);
   /// Assignment operator

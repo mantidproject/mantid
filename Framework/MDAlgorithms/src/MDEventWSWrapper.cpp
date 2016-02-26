@@ -55,7 +55,8 @@ void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
 }
 /// terminator for attempting initiate 0 dimensions workspace, will throw.
 template <>
-void MDEventWSWrapper::createEmptyEventWS<0>(const MDWSDescription & /*unused*/) {
+void MDEventWSWrapper::createEmptyEventWS<0>(
+    const MDWSDescription & /*unused*/) {
   throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be "
                               "initiated with 0 dimensions"));
 }
@@ -114,8 +115,10 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
 /// the function used in template metaloop termination on 0 dimensions and to
 /// throw the error in attempt to add data to 0-dimension workspace
 template <>
-void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/, uint32_t * /*unused*/,
-                                      coord_t * /*unused*/, size_t /*unused*/) const {
+void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
+                                      uint32_t * /*unused*/,
+                                      coord_t * /*unused*/,
+                                      size_t /*unused*/) const {
   throw(std::invalid_argument(" class has not been initiated, can not add data "
                               "to 0-dimensional workspace"));
 }

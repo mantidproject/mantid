@@ -72,7 +72,8 @@ public:
   // Visit acceptor
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
-  virtual double lineIntersect(const Kernel::V3D & /*Pt*/, const Kernel::V3D & /*uVec*/) const;
+  virtual double lineIntersect(const Kernel::V3D & /*Pt*/,
+                               const Kernel::V3D & /*uVec*/) const;
 
   int side(const Kernel::V3D & /*unused*/) const override;
   int onSurface(const Kernel::V3D & /*unused*/) const override;

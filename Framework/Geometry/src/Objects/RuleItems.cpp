@@ -725,7 +725,8 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int /*unused*/)
   return;
 }
 
-void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> /*unused*/)
+void SurfPoint::setLeaves(std::unique_ptr<Rule> aR,
+                          std::unique_ptr<Rule> /*unused*/)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint

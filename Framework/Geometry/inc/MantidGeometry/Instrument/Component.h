@@ -136,7 +136,8 @@ public:
 
   //! Translate the IComponent (x,y,z form). This is relative to parent if
   // present.
-  void translate(double /*unused*/, double /*unused*/, double /*unused*/) override;
+  void translate(double /*unused*/, double /*unused*/,
+                 double /*unused*/) override;
 
   //! Rotate the IComponent. This is relative to parent.
   void rotate(const Kernel::Quat & /*unused*/) override;

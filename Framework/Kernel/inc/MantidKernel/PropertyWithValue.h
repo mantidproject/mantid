@@ -142,7 +142,8 @@ template <typename T> void toValue(const std::string &strvalue, T &value) {
 }
 
 template <typename T>
-void toValue(const std::string & /*unused*/, boost::shared_ptr<T> & /*unused*/) {
+void toValue(const std::string & /*unused*/,
+             boost::shared_ptr<T> & /*unused*/) {
   throw boost::bad_lexical_cast();
 }
 
@@ -242,12 +243,15 @@ inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
   }
 }
 
-template <> inline void addingOperator(bool & /*unused*/, const bool & /*unused*/) {
+template <>
+inline void addingOperator(bool & /*unused*/, const bool & /*unused*/) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
 
-template <> inline void addingOperator(OptionalBool & /*unused*/, const OptionalBool & /*unused*/) {
+template <>
+inline void addingOperator(OptionalBool & /*unused*/,
+                           const OptionalBool & /*unused*/) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type OptionalBool");
 }
@@ -266,8 +270,9 @@ determineAllowedValues(const T & /*unused*/, const IValidator &validator) {
 }
 
 template <>
-inline std::vector<std::string> determineAllowedValues(const OptionalBool & /*unused*/,
-                                                       const IValidator & /*unused*/) {
+inline std::vector<std::string>
+determineAllowedValues(const OptionalBool & /*unused*/,
+                       const IValidator & /*unused*/) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
   for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
@@ -556,7 +561,8 @@ private:
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
    */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::true_type & /*unused*/) {
+  std::string setTypedValue(const U &value,
+                            const boost::true_type & /*unused*/) {
     TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
     std::string msg;
     if (data) {
@@ -582,7 +588,8 @@ private:
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
    */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::false_type & /*unused*/) {
+  std::string setTypedValue(const U &value,
+                            const boost::false_type & /*unused*/) {
     UNUSED_ARG(value);
     return "Attempt to assign object of type DataItem to property (" + name() +
            ") of incorrect type";

@@ -85,8 +85,9 @@ private:
   @param errorSQ : squared value of the error
   @param coords : pointer to coordinates array
  */
-  void insertMDEvent(float signal, float errorSQ, uint16_t /*unused*/, int32_t /*unused*/,
-                     Mantid::coord_t *coords, IntToType<false> /*unused*/) {
+  void insertMDEvent(float signal, float errorSQ, uint16_t /*unused*/,
+                     int32_t /*unused*/, Mantid::coord_t *coords,
+                     IntToType<false> /*unused*/) {
     m_ws->addEvent(MDEventType(signal, errorSQ, coords));
   }
 

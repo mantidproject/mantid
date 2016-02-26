@@ -67,10 +67,11 @@ public:
   BnId &operator=(const BnId & /*A*/);
   ~BnId();
 
-  int operator==(const BnId & /*A*/) const; ///< Equals operator for tri-state object
-  int operator<(const BnId & /*A*/) const;  ///< operator> for tri-state object
-  int operator>(const BnId & /*A*/) const;  ///< operator> for tri-state object
-  int operator[](int const /*A*/) const;    ///< Access operator
+  int operator==(
+      const BnId & /*A*/) const; ///< Equals operator for tri-state object
+  int operator<(const BnId & /*A*/) const; ///< operator> for tri-state object
+  int operator>(const BnId & /*A*/) const; ///< operator> for tri-state object
+  int operator[](int const /*A*/) const;   ///< Access operator
   int operator++(int); ///< addition operator (returns !carry flag)
   int operator++();    ///< addition operator (returns !carry flag)
   int operator--(int); ///< subtraction operator (returns !carry flag)
@@ -85,7 +86,7 @@ public:
   int hasMinTerm(const int) const;
 
   int equivalent(const BnId & /*A*/) const; ///< Equal but - is assume to be ok
-  void reverse();                     ///< Swap -1 to 1 adn leaver the zeros
+  void reverse(); ///< Swap -1 to 1 adn leaver the zeros
 
   int PIstatus() const { return PI; } ///< PI accessor
   void setPI(const int A) { PI = A; } ///< PI accessor
@@ -99,7 +100,8 @@ public:
   /// Access true count
   int TrueCount() const { return Tnum; }
 
-  void mapState(const std::vector<int> & /*Index*/, std::map<int, int> & /*Base*/) const;
+  void mapState(const std::vector<int> & /*Index*/,
+                std::map<int, int> & /*Base*/) const;
 
   /// Displays the value as a string
   std::string display() const;

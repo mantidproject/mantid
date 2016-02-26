@@ -43,7 +43,8 @@ public:
   const std::string deprecationMsg(const IAlgorithm * /*algo*/);
 
 public:
-  void useAlgorithm(const std::string & /*replacement*/, const int version = -1);
+  void useAlgorithm(const std::string & /*replacement*/,
+                    const int version = -1);
   void deprecatedDate(const std::string & /*date*/);
 
 private:

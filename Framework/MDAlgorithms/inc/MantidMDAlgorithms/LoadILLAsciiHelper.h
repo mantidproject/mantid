@@ -61,7 +61,8 @@ public:
 
   template <typename T> T getValueFromHeader(const std::string & /*field*/);
   template <typename T>
-  T getValue(const std::string & /*field*/, const std::map<std::string, std::string> & /*thisHeader*/);
+  T getValue(const std::string & /*field*/,
+             const std::map<std::string, std::string> & /*thisHeader*/);
 
 private:
   void parseFieldR();

@@ -48,12 +48,13 @@ private:
   size_t nx; ///< Number of rows    (x coordinate)
   size_t ny; ///< Number of columns (y coordinate)
 
-  T **V;                     ///< Raw data
-  void deleteMem();          ///< Helper function to delete memory
-  void lubcmp(int * /*rowperm*/, int & /*interchange*/); ///< starts inversion process
+  T **V;            ///< Raw data
+  void deleteMem(); ///< Helper function to delete memory
+  void lubcmp(int * /*rowperm*/,
+              int & /*interchange*/); ///< starts inversion process
   void lubksb(int const * /*rowperm*/, double * /*b*/);
-  void rotate(double const /*tau*/, double const /*s*/, int const /*i*/, int const /*j*/, int const /*k*/,
-              int const /*m*/);
+  void rotate(double const /*tau*/, double const /*s*/, int const /*i*/,
+              int const /*j*/, int const /*k*/, int const /*m*/);
 
 public:
   Matrix(const size_t nrow = 0, const size_t ncol = 0,
@@ -75,20 +76,24 @@ public:
   /// Array accessor. Use, e.g. Matrix[row][col]
   T *operator[](const size_t A) { return V[A]; }
 
-  Matrix<T> &operator+=(const Matrix<T> & /*A*/);     ///< Basic addition operator
-  Matrix<T> operator+(const Matrix<T> & /*A*/) const; ///< Basic addition operator
+  Matrix<T> &operator+=(const Matrix<T> & /*A*/); ///< Basic addition operator
+  Matrix<T>
+  operator+(const Matrix<T> & /*A*/) const; ///< Basic addition operator
 
-  Matrix<T> &operator-=(const Matrix<T> & /*A*/);     ///< Basic subtraction operator
-  Matrix<T> operator-(const Matrix<T> & /*A*/) const; ///< Basic subtraction operator
+  Matrix<T> &
+  operator-=(const Matrix<T> & /*A*/); ///< Basic subtraction operator
+  Matrix<T>
+  operator-(const Matrix<T> & /*A*/) const; ///< Basic subtraction operator
 
   Matrix<T> operator*(const Matrix<T> & /*A*/) const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> & /*Vec*/) const; ///< Multiply M*Vec
-  V3D operator*(const V3D & /*Vx*/) const;                       ///< Multiply M*Vec
-  Matrix<T> operator*(const T & /*Value*/) const; ///< Multiply by constant
+  std::vector<T>
+  operator*(const std::vector<T> & /*Vec*/) const; ///< Multiply M*Vec
+  V3D operator*(const V3D & /*Vx*/) const;         ///< Multiply M*Vec
+  Matrix<T> operator*(const T & /*Value*/) const;  ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> & /*A*/); ///< Basic matrix multipy
-  Matrix<T> &operator*=(const T & /*Value*/);         ///< Multiply by constant
-  Matrix<T> &operator/=(const T & /*Value*/);         ///< Divide by constant
+  Matrix<T> &operator*=(const T & /*Value*/);     ///< Multiply by constant
+  Matrix<T> &operator/=(const T & /*Value*/);     ///< Divide by constant
 
   bool operator<(const Matrix<T> & /*A*/) const;
   bool operator>=(const Matrix<T> & /*A*/) const;
@@ -100,7 +105,7 @@ public:
   } ///< disallows access
 
   void print() const;
-  void write(std::ostream & /*Fh*/, int const  /*blockCnt*/= 0) const;
+  void write(std::ostream & /*Fh*/, int const /*blockCnt*/ = 0) const;
   std::string str() const;
 
   // returns this matrix in 1D vector representation
@@ -121,8 +126,8 @@ public:
   T Trace() const;                 ///< Trace of the matrix
 
   std::vector<T> Diagonal() const; ///< Returns a vector of the diagonal
-  Matrix<T>
-  preMultiplyByDiagonal(const std::vector<T> & /*Dvec*/) const; ///< pre-multiply D*this
+  Matrix<T> preMultiplyByDiagonal(
+      const std::vector<T> & /*Dvec*/) const; ///< pre-multiply D*this
   Matrix<T> postMultiplyByDiagonal(
       const std::vector<T> & /*Dvec*/) const; ///< post-multiply this*D
 
@@ -142,15 +147,18 @@ public:
   /// Return the smallest matrix size
   size_t Ssize() const { return (nx > ny) ? ny : nx; }
 
-  void swapRows(const size_t /*RowI*/, const size_t /*RowJ*/); ///< Swap rows (first V index)
-  void swapCols(const size_t /*colI*/, const size_t /*colJ*/); ///< Swap cols (second V index)
+  void swapRows(const size_t /*RowI*/,
+                const size_t /*RowJ*/); ///< Swap rows (first V index)
+  void swapCols(const size_t /*colI*/,
+                const size_t /*colJ*/); ///< Swap cols (second V index)
 
-  T Invert();                                      ///< LU inversion routine
-  void averSymmetric();                            ///< make Matrix symmetric
-  int Diagonalise(Matrix<T> & /*EigenVec*/, Matrix<T> & /*DiagMatrix*/) const; ///< (only Symmetric matrix)
-  void sortEigen(Matrix<T> & /*DiagMatrix*/);                     ///< Sort eigenvectors
-  Matrix<T> Tprime() const;                        ///< Transpose the matrix
-  Matrix<T> &Transpose();                          ///< Transpose the matrix
+  T Invert();           ///< LU inversion routine
+  void averSymmetric(); ///< make Matrix symmetric
+  int Diagonalise(Matrix<T> & /*EigenVec*/, Matrix<T> & /*DiagMatrix*/)
+      const;                                  ///< (only Symmetric matrix)
+  void sortEigen(Matrix<T> & /*DiagMatrix*/); ///< Sort eigenvectors
+  Matrix<T> Tprime() const;                   ///< Transpose the matrix
+  Matrix<T> &Transpose();                     ///< Transpose the matrix
 
   T factor();            ///< Calculate the factor
   T determinant() const; ///< Calculate the determinant
@@ -186,15 +194,19 @@ typedef Mantid::Kernel::Matrix<int> IntMatrix;
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream & /*os*/, const Kernel::Matrix<T> & /*matrix*/);
+DLLExport std::ostream &operator<<(std::ostream & /*os*/,
+                                   const Kernel::Matrix<T> & /*matrix*/);
 template <typename T>
-DLLExport void dumpToStream(std::ostream & /*os*/, const Kernel::Matrix<T> & /*matrix*/,
+DLLExport void dumpToStream(std::ostream & /*os*/,
+                            const Kernel::Matrix<T> & /*matrix*/,
                             const char /*delimiter*/);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream & /*is*/, Kernel::Matrix<T> & /*in*/);
+DLLExport std::istream &operator>>(std::istream & /*is*/,
+                                   Kernel::Matrix<T> & /*in*/);
 template <typename T>
-DLLExport void fillFromStream(std::istream & /*is*/, Kernel::Matrix<T> & /*in*/, const char /*delimiter*/);
+DLLExport void fillFromStream(std::istream & /*is*/, Kernel::Matrix<T> & /*in*/,
+                              const char /*delimiter*/);
 }
 }
 #endif // MANTID_KERNEL_MATRIX_H_

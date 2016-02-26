@@ -128,11 +128,16 @@ static void soap_track_unlink(struct soap *, const void *);
 #endif
 
 #ifndef PALM_2
-static int soap_set_error(struct soap * /*soap*/, const char * /*faultcode*/, const char * /*faultsubcodeQName*/,
-                          const char * /*faultstring*/, const char * /*faultdetailXML*/, int /*soaperror*/);
-static int soap_copy_fault(struct soap * /*soap*/, const char * /*faultcode*/, const char * /*faultsubcodeQName*/,
-                           const char * /*faultstring*/, const char * /*faultdetailXML*/);
-static int soap_getattrval(struct soap * /*soap*/, char * /*s*/, size_t /*n*/, soap_wchar /*d*/);
+static int soap_set_error(struct soap * /*soap*/, const char * /*faultcode*/,
+                          const char * /*faultsubcodeQName*/,
+                          const char * /*faultstring*/,
+                          const char * /*faultdetailXML*/, int /*soaperror*/);
+static int soap_copy_fault(struct soap * /*soap*/, const char * /*faultcode*/,
+                           const char * /*faultsubcodeQName*/,
+                           const char * /*faultstring*/,
+                           const char * /*faultdetailXML*/);
+static int soap_getattrval(struct soap * /*soap*/, char * /*s*/, size_t /*n*/,
+                           soap_wchar /*d*/);
 #endif
 
 #ifndef PALM_1
@@ -150,7 +155,8 @@ static int soap_ntlm_handshake(struct soap *soap, int command,
                                int port);
 #endif
 #ifndef WITH_NOIDREF
-static int soap_has_copies(struct soap * /*soap*/, const char * /*start*/, const char * /*end*/);
+static int soap_has_copies(struct soap * /*soap*/, const char * /*start*/,
+                           const char * /*end*/);
 static void soap_init_iht(struct soap * /*soap*/);
 static void soap_free_iht(struct soap * /*soap*/);
 static void soap_init_pht(struct soap * /*soap*/);
@@ -159,7 +165,8 @@ static void soap_free_pht(struct soap * /*soap*/);
 #endif
 
 #ifndef WITH_LEAN
-static const char *soap_set_validation_fault(struct soap * /*soap*/, const char * /*s*/,
+static const char *soap_set_validation_fault(struct soap * /*soap*/,
+                                             const char * /*s*/,
                                              const char * /*t*/);
 static int soap_isnumeric(struct soap * /*soap*/, const char * /*type*/);
 static struct soap_nlist *soap_push_ns(struct soap *soap, const char *id,
@@ -169,15 +176,17 @@ static void soap_utilize_ns(struct soap *soap, const char *tag);
 
 #ifndef WITH_LEANER
 #ifndef PALM_1
-static struct soap_multipart *soap_new_multipart(struct soap * /*soap*/,
-                                                 struct soap_multipart ** /*first*/,
-                                                 struct soap_multipart ** /*last*/,
-                                                 char * /*ptr*/, size_t /*size*/);
-static int soap_putdimefield(struct soap * /*soap*/, const char * /*s*/, size_t /*n*/);
+static struct soap_multipart *
+soap_new_multipart(struct soap * /*soap*/, struct soap_multipart ** /*first*/,
+                   struct soap_multipart ** /*last*/, char * /*ptr*/,
+                   size_t /*size*/);
+static int soap_putdimefield(struct soap * /*soap*/, const char * /*s*/,
+                             size_t /*n*/);
 static char *soap_getdimefield(struct soap * /*soap*/, size_t /*n*/);
 static void soap_select_mime_boundary(struct soap * /*soap*/);
 static int soap_valid_mime_boundary(struct soap * /*soap*/);
-static void soap_resolve_attachment(struct soap * /*soap*/, struct soap_multipart * /*content*/);
+static void soap_resolve_attachment(struct soap * /*soap*/,
+                                    struct soap_multipart * /*content*/);
 #endif
 #endif
 
@@ -192,8 +201,11 @@ static int soap_getgziphdr(struct soap *);
 static int soap_ssl_init_done = 0;
 static int ssl_auth_init(struct soap * /*soap*/);
 static int ssl_verify_callback(int /*ok*/, X509_STORE_CTX * /*store*/);
-static int ssl_verify_callback_allow_expired_certificate(int /*ok*/, X509_STORE_CTX * /*store*/);
-static int ssl_password(char * /*buf*/, int /*num*/, int /*rwflag*/, void * /*userdata*/);
+static int
+ssl_verify_callback_allow_expired_certificate(int /*ok*/,
+                                              X509_STORE_CTX * /*store*/);
+static int ssl_password(char * /*buf*/, int /*num*/, int /*rwflag*/,
+                        void * /*userdata*/);
 #endif
 
 #ifdef WITH_GNUTLS
@@ -215,7 +227,8 @@ GCRY_THREAD_OPTION_PTH_IMPL;
 
 #if !defined(WITH_NOHTTP) || !defined(WITH_LEANER)
 #ifndef PALM_1
-static const char *soap_decode(char * /*buf*/, size_t /*len*/, const char * /*val*/, const char * /*sep*/);
+static const char *soap_decode(char * /*buf*/, size_t /*len*/,
+                               const char * /*val*/, const char * /*sep*/);
 #endif
 #endif
 
@@ -226,13 +239,17 @@ static const char *http_error(struct soap * /*soap*/, int /*status*/);
 static int http_get(struct soap * /*soap*/);
 static int http_405(struct soap * /*soap*/);
 static int http_200(struct soap * /*soap*/);
-static int http_post(struct soap * /*soap*/, const char * /*endpoint*/, const char * /*host*/, int /*port*/,
-                     const char * /*path*/, const char * /*action*/, size_t /*count*/);
+static int http_post(struct soap * /*soap*/, const char * /*endpoint*/,
+                     const char * /*host*/, int /*port*/, const char * /*path*/,
+                     const char * /*action*/, size_t /*count*/);
 static int http_send_header(struct soap * /*soap*/, const char * /*s*/);
-static int http_post_header(struct soap * /*soap*/, const char * /*key*/, const char * /*val*/);
-static int http_response(struct soap * /*soap*/, int /*status*/, size_t /*count*/);
+static int http_post_header(struct soap * /*soap*/, const char * /*key*/,
+                            const char * /*val*/);
+static int http_response(struct soap * /*soap*/, int /*status*/,
+                         size_t /*count*/);
 static int http_parse(struct soap * /*soap*/);
-static int http_parse_header(struct soap * /*soap*/, const char * /*key*/, const char * /*val*/);
+static int http_parse_header(struct soap * /*soap*/, const char * /*key*/,
+                             const char * /*val*/);
 #endif
 #endif
 
@@ -244,13 +261,15 @@ static size_t frecv(struct soap * /*soap*/, char * /*s*/, size_t /*n*/);
 static int tcp_init(struct soap * /*soap*/);
 static const char *tcp_error(struct soap * /*soap*/);
 #ifndef WITH_IPV6
-static int tcp_gethost(struct soap * /*soap*/, const char *addr, struct in_addr *inaddr);
+static int tcp_gethost(struct soap * /*soap*/, const char *addr,
+                       struct in_addr *inaddr);
 #endif
 static SOAP_SOCKET tcp_connect(struct soap * /*soap*/, const char *endpoint,
                                const char *host, int port);
-static SOAP_SOCKET tcp_accept(struct soap * /*soap*/, SOAP_SOCKET, struct sockaddr * /*a*/,
-                              int * /*n*/);
-static int tcp_select(struct soap * /*soap*/, SOAP_SOCKET, int /*flags*/, int /*timeout*/);
+static SOAP_SOCKET tcp_accept(struct soap * /*soap*/, SOAP_SOCKET,
+                              struct sockaddr * /*a*/, int * /*n*/);
+static int tcp_select(struct soap * /*soap*/, SOAP_SOCKET, int /*flags*/,
+                      int /*timeout*/);
 static int tcp_disconnect(struct soap * /*soap*/);
 static int tcp_closesocket(struct soap * /*soap*/, SOAP_SOCKET);
 static int tcp_shutdownsocket(struct soap * /*soap*/, SOAP_SOCKET, int /*how*/);

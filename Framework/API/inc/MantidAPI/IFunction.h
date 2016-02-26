@@ -479,7 +479,8 @@ public:
   /// Return a value of attribute attName
   virtual Attribute getAttribute(const std::string &attName) const;
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &attName, const Attribute & /*value*/);
+  virtual void setAttribute(const std::string &attName,
+                            const Attribute & /*value*/);
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string &attName) const;
   /// Set an attribute value

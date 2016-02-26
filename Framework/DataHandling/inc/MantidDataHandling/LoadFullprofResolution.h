@@ -67,10 +67,10 @@ public:
                                  std::map<std::string, size_t> &parammap);
 
   /// Put parameters into a matrix workspace
-  static void putParametersIntoWorkspace(const API::Column_const_sptr /*column*/,
-                                         API::MatrixWorkspace_sptr ws,
-                                         int profNumber,
-                                         std::string &parameterXMLString);
+  static void
+  putParametersIntoWorkspace(const API::Column_const_sptr /*column*/,
+                             API::MatrixWorkspace_sptr ws, int profNumber,
+                             std::string &parameterXMLString);
 
   /// Add an Ikeda-Carpenter PV ALFBE parameter
   static void addALFBEParameter(const API::Column_const_sptr /*column*/,

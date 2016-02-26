@@ -214,18 +214,53 @@ protected:
   }
   std::string getName() const override;
   std::string getFullName() const override;
-  void setParent(IComponent * /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void setName(const std::string & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
+  void setParent(
+      IComponent * /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void setName(
+      const std::
+          string & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
 
-  void setPos(double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void setPos(const Kernel::V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void setRot(const Kernel::Quat & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void copyRot(const IComponent & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) {}
-  int interceptSurface(Track & /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/) const override { return -10; }
-  void translate(const Kernel::V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void translate(double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void rotate(const Kernel::Quat & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
-  void rotate(double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, const Kernel::V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) override {}
+  void setPos(
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void setPos(
+      const Kernel::
+          V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void setRot(
+      const Kernel::
+          Quat & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void copyRot(
+      const IComponent & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) {
+  }
+  int interceptSurface(
+      Track & /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/ /*track*/)
+      const override {
+    return -10;
+  }
+  void translate(
+      const Kernel::
+          V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void translate(
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void rotate(
+      const Kernel::
+          Quat & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
+  void rotate(
+      double /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      const Kernel::
+          V3D & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      override {}
   const Kernel::V3D getRelativePos() const override {
     throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");
   }
@@ -233,12 +268,21 @@ protected:
     throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup");
   }
   const Kernel::Quat getRotation() const override { return Kernel::Quat(); }
-  void printSelf(std::ostream & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) const override {}
+  void printSelf(
+      std::
+          ostream & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      const override {}
 
   // functions inherited from IObjComponent
 
-  void getBoundingBox(double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/, double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
-                      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) const {};
+  void getBoundingBox(
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/,
+      double & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      const {};
 
   void draw() const override{};
   void drawObject() const override{};

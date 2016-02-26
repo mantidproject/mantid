@@ -48,12 +48,15 @@ private:
   void exec() override;
 
   bool checkForTwoLorentz(const std::string & /*subFunction*/);
-  std::vector<std::string> findValuesFromFunction(const std::string & /*function*/);
-  std::vector<std::string> searchForFitParams(const std::string & /*suffix*/,
-                                              const std::vector<std::string> & /*columns*/);
+  std::vector<std::string>
+  findValuesFromFunction(const std::string & /*function*/);
+  std::vector<std::string>
+  searchForFitParams(const std::string & /*suffix*/,
+                     const std::vector<std::string> & /*columns*/);
   std::vector<double> squareVector(std::vector<double> /*target*/);
   std::vector<double> cloneVector(const std::vector<double> & /*original*/);
-  void convertInputToElasticQ(API::MatrixWorkspace_sptr & /*inputWs*/, const std::string & /*wsName*/);
+  void convertInputToElasticQ(API::MatrixWorkspace_sptr & /*inputWs*/,
+                              const std::string & /*wsName*/);
   void calculateEISF(API::ITableWorkspace_sptr & /*tableWs*/);
   std::string convertBackToShort(const std::string & /*original*/);
   std::string convertFuncToShort(const std::string & /*original*/);

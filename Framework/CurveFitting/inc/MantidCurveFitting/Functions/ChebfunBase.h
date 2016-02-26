@@ -128,9 +128,9 @@ public:
 
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
-  bestFit(double start, double end, ChebfunFunctionType /*f*/, std::vector<double> &p,
-          std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
-          size_t maxSize = 0);
+  bestFit(double start, double end, ChebfunFunctionType /*f*/,
+          std::vector<double> &p, std::vector<double> &a, double maxA = 0.0,
+          double tolerance = 0.0, size_t maxSize = 0);
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
   bestFit(double start, double end, const API::IFunction & /*f*/,

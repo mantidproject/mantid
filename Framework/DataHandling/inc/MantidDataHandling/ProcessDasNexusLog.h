@@ -67,7 +67,8 @@ private:
 
   void checkLog(API::MatrixWorkspace_sptr ws, std::string logname);
 
-  void calDistributions(std::vector<Kernel::DateAndTime> /*timevec*/, double dts);
+  void calDistributions(std::vector<Kernel::DateAndTime> /*timevec*/,
+                        double dts);
 
   void exportErrorLog(API::MatrixWorkspace_sptr ws,
                       std::vector<Kernel::DateAndTime> abstimevec,

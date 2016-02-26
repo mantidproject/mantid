@@ -58,7 +58,9 @@ public:
                     const std::size_t &verticalIndex = 0) const override;
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
-  bool operator==(const Axis & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/) const override;
+  bool operator==(
+      const Axis & /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/ /*unused*/)
+      const override;
   std::string label(const std::size_t &index) const override;
 
   specnum_t spectraNo(const std::size_t &index) const override;

@@ -161,7 +161,8 @@ private:
 };
 
 // Overload operator <<
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/, const V3D & /*v*/);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const V3D & /*v*/);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream & /*IX*/, V3D & /*A*/);
 
 } // Namespace Kernel

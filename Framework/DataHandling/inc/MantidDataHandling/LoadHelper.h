@@ -41,9 +41,11 @@ public:
   LoadHelper();
   virtual ~LoadHelper();
 
-  std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/);
-  std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
-                                     const std::string & /*nexusPath*/);
+  std::string
+  findInstrumentNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/);
+  std::string
+  getStringFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
+                         const std::string & /*nexusPath*/);
   double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry & /*firstEntry*/,
                                 const std::string & /*nexusPath*/);
   std::vector<double>
@@ -54,7 +56,8 @@ public:
   double calculateTOF(double /*distance*/, double /*wavelength*/);
   double getL1(const API::MatrixWorkspace_sptr & /*workspace*/);
   double getL2(const API::MatrixWorkspace_sptr & /*workspace*/, int detId = 1);
-  double getInstrumentProperty(const API::MatrixWorkspace_sptr & /*workspace*/, std::string /*s*/);
+  double getInstrumentProperty(const API::MatrixWorkspace_sptr & /*workspace*/,
+                               std::string /*s*/);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
   std::string dateTimeInIsoFormat(std::string /*dateToParse*/);

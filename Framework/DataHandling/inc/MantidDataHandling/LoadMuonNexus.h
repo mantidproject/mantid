@@ -90,7 +90,8 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 protected:
-  virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr /*unused*/) {}
+  virtual void
+      runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr /*unused*/) {}
   void checkOptionalProperties();
   void runLoadInstrument(DataObjects::Workspace2D_sptr /*localWorkspace*/);
 

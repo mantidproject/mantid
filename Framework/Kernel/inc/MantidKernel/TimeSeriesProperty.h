@@ -228,7 +228,8 @@ public:
   /// Set a property from a string
   std::string setValue(const std::string & /*unused*/) override;
   /// Set a property from a DataItem
-  std::string setDataItem(const boost::shared_ptr<DataItem> /*unused*/) override;
+  std::string
+  setDataItem(const boost::shared_ptr<DataItem> /*unused*/) override;
 
   /// Deletes the series of values in the property
   void clear() override;

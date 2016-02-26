@@ -51,7 +51,8 @@ public:
   int version() const override;
   const std::string category() const override;
 
-  static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr /*inWS*/);
+  static bool
+      inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr /*inWS*/);
 
   static std::vector<double>
       getBoundariesOfNumericImage(API::MatrixWorkspace_sptr /*inWS*/);

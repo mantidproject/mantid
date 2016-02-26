@@ -62,7 +62,8 @@ public:
   Attribute getAttribute(const std::string &attName) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute & /*unused*/) override;
+  void setAttribute(const std::string &attName,
+                    const Attribute & /*unused*/) override;
 
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &attName) const override;

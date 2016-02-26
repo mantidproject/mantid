@@ -49,7 +49,8 @@ SimplexMinimizer::SimplexMinimizer(const double epsabs)
   gslContainer.params = nullptr;
 }
 
-void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t /*maxIterations*/) {
+void SimplexMinimizer::initialize(API::ICostFunction_sptr function,
+                                  size_t /*maxIterations*/) {
   m_costFunction = function;
 
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;

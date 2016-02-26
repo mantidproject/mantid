@@ -1728,7 +1728,8 @@ void MatrixWorkspace::saveSpectraMapNexus(
 MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
-void MatrixWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
+void MatrixWorkspace::setMDMasking(
+    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }

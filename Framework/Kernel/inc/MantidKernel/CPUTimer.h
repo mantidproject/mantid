@@ -33,7 +33,8 @@ private:
   Timer m_wallClockTime;
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*out*/, CPUTimer & /*obj*/);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*out*/,
+                                           CPUTimer & /*obj*/);
 
 } // namespace Mantid
 } // namespace Kernel

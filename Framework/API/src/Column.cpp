@@ -33,8 +33,10 @@ void Column::setPlotType(int t) {
 /**
  * No implementation by default.
  */
-void Column::sortIndex(bool /*unused*/, size_t /*unused*/, size_t /*unused*/, std::vector<size_t> & /*unused*/,
-                       std::vector<std::pair<size_t, size_t>> & /*unused*/) const {
+void Column::sortIndex(
+    bool /*unused*/, size_t /*unused*/, size_t /*unused*/,
+    std::vector<size_t> & /*unused*/,
+    std::vector<std::pair<size_t, size_t>> & /*unused*/) const {
   throw std::runtime_error("Cannot sort column of type " + m_type);
 }
 

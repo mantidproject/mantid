@@ -73,10 +73,11 @@ public:
   int side(const Kernel::V3D & /*unused*/) const override;
   int onSurface(const Kernel::V3D & /*unused*/) const override;
   // stuff for finding intersections etc.
-  double dotProd(const Plane & /*A*/) const;        ///< returns normal dot product
-  Kernel::V3D crossProd(const Plane & /*A*/) const; ///< returns normal cross product
-  double
-  distance(const Kernel::V3D & /*unused*/) const override; ///< distance from a point
+  double dotProd(const Plane & /*A*/) const; ///< returns normal dot product
+  Kernel::V3D
+  crossProd(const Plane & /*A*/) const; ///< returns normal cross product
+  double distance(
+      const Kernel::V3D & /*unused*/) const override; ///< distance from a point
 
   double getDistance() const { return Dist; } ///< Distance from origin
   const Kernel::V3D &getNormal() const {

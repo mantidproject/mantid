@@ -33,7 +33,8 @@ DampingMinimizer::DampingMinimizer(double relTol)
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void DampingMinimizer::initialize(API::ICostFunction_sptr function, size_t /*maxIterations*/) {
+void DampingMinimizer::initialize(API::ICostFunction_sptr function,
+                                  size_t /*maxIterations*/) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           function);

@@ -54,7 +54,8 @@ class MANTID_KERNEL_DLL Quat {
 public:
   Quat();
   // direct quat definition
-  Quat(const double /*_w*/, const double /*_a*/, const double /*_b*/, const double /*_c*/);
+  Quat(const double /*_w*/, const double /*_a*/, const double /*_b*/,
+       const double /*_c*/);
   // * Construct a Quat between two vectors;
   // * The angle between them is defined differently from usual if vectors are
   // not unit or the same length vectors, so quat would be not consistent
@@ -159,7 +160,8 @@ private:
   double c;
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/, const Quat & /*q*/);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream & /*os*/,
+                                           const Quat & /*q*/);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream & /*ins*/, Quat &q);
 
 } // Namespace Mantid

@@ -48,8 +48,9 @@ private:
   void init() override;
   void exec() override;
   std::vector<std::string> listToVector(std::string & /*commaList*/);
-  std::vector<std::string> searchForFitParams(const std::string & /*suffix*/,
-                                              const std::vector<std::string> & /*columns*/);
+  std::vector<std::string>
+  searchForFitParams(const std::string & /*suffix*/,
+                     const std::vector<std::string> & /*columns*/);
   std::vector<std::vector<std::string>>
   reorder2DVector(const std::vector<std::vector<std::string>> & /*original*/);
 };

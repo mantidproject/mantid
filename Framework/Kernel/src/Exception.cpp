@@ -253,7 +253,8 @@ MisMatch<T>::MisMatch(const MisMatch<T> &A)
 */
 {}
 
-template <typename T> MisMatch<T> &MisMatch<T>::operator=(const MisMatch<T> & /*unused*/) {
+template <typename T>
+MisMatch<T> &MisMatch<T>::operator=(const MisMatch<T> & /*unused*/) {
   /**
     Copy assignment
     @param rhs :: MisMatch to copy

@@ -131,7 +131,8 @@ public:
                      API::Jacobian &jacobian) override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute & /*unused*/) override;
+  void setAttribute(const std::string &attName,
+                    const Attribute & /*unused*/) override;
 
   /// Add a function.
   size_t addFunction(API::IFunction_sptr f) override;

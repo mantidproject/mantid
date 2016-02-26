@@ -64,7 +64,8 @@ public:
   using ParamFunction::setParameter;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute & /*unused*/) override;
+  void setAttribute(const std::string &attName,
+                    const Attribute & /*unused*/) override;
 
   /// Set the value of a data point location to x
   void setXAttribute(const size_t index, double x);

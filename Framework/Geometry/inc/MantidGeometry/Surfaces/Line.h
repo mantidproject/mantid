@@ -72,11 +72,11 @@ public:
 
   ~Line();
 
-  Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
-  Kernel::V3D getOrigin() const { return Origin; } ///< returns the origin
-  Kernel::V3D getDirect() const { return Direct; } ///< returns the direction
-  double distance(const Kernel::V3D & /*A*/) const;      ///< distance from line
-  int isValid(const Kernel::V3D & /*A*/) const;          ///< Is the point on the line
+  Kernel::V3D getPoint(const double lambda) const;  ///< gets the point O+lam*N
+  Kernel::V3D getOrigin() const { return Origin; }  ///< returns the origin
+  Kernel::V3D getDirect() const { return Direct; }  ///< returns the direction
+  double distance(const Kernel::V3D & /*A*/) const; ///< distance from line
+  int isValid(const Kernel::V3D & /*A*/) const; ///< Is the point on the line
   void print() const;
 
   void rotate(const Kernel::Matrix<double> & /*MA*/);
@@ -85,10 +85,14 @@ public:
   int setLine(const Kernel::V3D & /*O*/,
               const Kernel::V3D & /*D*/); ///< input Origin + direction
 
-  int intersect(std::list<Kernel::V3D> & /*VecOut*/, const Quadratic & /*Sur*/) const;
-  int intersect(std::list<Kernel::V3D> & /*PntOut*/, const Cylinder & /*Cyl*/) const;
-  int intersect(std::list<Kernel::V3D> & /*PntOut*/, const Plane & /*Pln*/) const;
-  int intersect(std::list<Kernel::V3D> & /*PntOut*/, const Sphere & /*Sph*/) const;
+  int intersect(std::list<Kernel::V3D> & /*VecOut*/,
+                const Quadratic & /*Sur*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Cylinder & /*Cyl*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Plane & /*Pln*/) const;
+  int intersect(std::list<Kernel::V3D> & /*PntOut*/,
+                const Sphere & /*Sph*/) const;
 };
 
 } // NAMESPACE MonteCarlo

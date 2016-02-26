@@ -136,7 +136,8 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheck(const T &value, const boost::false_type & /*unused*/) const {
+  std::string runCheck(const T &value,
+                       const boost::false_type & /*unused*/) const {
     const T *valuePtr =
         &value; // Avoid a copy by storing the pointer in the any holder
     return check(boost::any(valuePtr));
@@ -148,7 +149,8 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheck(const T &value, const boost::true_type & /*unused*/) const {
+  std::string runCheck(const T &value,
+                       const boost::true_type & /*unused*/) const {
     return runCheckWithDataItemPtr(value,
                                    boost::is_convertible<T, DataItem_sptr>());
   }
@@ -159,8 +161,9 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheckWithDataItemPtr(const T &value,
-                                      const boost::false_type & /*unused*/) const {
+  std::string
+  runCheckWithDataItemPtr(const T &value,
+                          const boost::false_type & /*unused*/) const {
     return check(boost::any(value));
   }
   /** Calls the validator for a pointer type that IS convertible to
@@ -170,8 +173,9 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheckWithDataItemPtr(const T &value,
-                                      const boost::true_type & /*unused*/) const {
+  std::string
+  runCheckWithDataItemPtr(const T &value,
+                          const boost::true_type & /*unused*/) const {
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }
 };

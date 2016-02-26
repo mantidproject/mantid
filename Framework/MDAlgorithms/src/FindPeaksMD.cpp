@@ -81,7 +81,8 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box,
 /// Add detectors based on lean events. Always throws as they do not know their
 /// IDs
 template <typename MDE, size_t nd>
-void addDetectors(DataObjects::Peak & /*unused*/, MDBoxBase<MDE, nd> & /*unused*/,
+void addDetectors(DataObjects::Peak & /*unused*/,
+                  MDBoxBase<MDE, nd> & /*unused*/,
                   const boost::false_type & /*unused*/) {
   throw std::runtime_error("FindPeaksMD - Workspace contains lean events, "
                            "cannot include detector information");
