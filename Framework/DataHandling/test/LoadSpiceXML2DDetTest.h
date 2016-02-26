@@ -29,6 +29,10 @@ public:
     TS_ASSERT(testalg.isInitialized());
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Load data without loading instrument
+   * @brief test_LoadHB3AXML
+   */
   void test_LoadHB3AXML() {
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -110,7 +114,7 @@ public:
    * (1) 2theta = -15 degree (15 degree in SPICE): distance of 4 corners should
    * be same. scattering
    *     angles should be paired;
-   * (2) 2theta = 0 degree: scattering angle of all 4 corners should be same;
+   * (2) 2theta = 0 degree: detector (127, 114) / (128, 115) should have 0 degree
    * (3) 2theta = 15 degree: scattering angles should be symmetric to case 1
    */
   void test_LoadHB3AXML2InstrumentedWS() {
@@ -192,10 +196,11 @@ public:
     double distlast0 = sample.distance(detlast0);
     double distmiddle = sample.distance(detmiddle);
 
+    // with new geometry. these will be broken as the center is at (128, 115) now
     TS_ASSERT_DELTA(dist0, dist255, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
-    TS_ASSERT_DELTA(distmiddle, 0.3350, 0.000001);
+    TS_ASSERT_DELTA(distmiddle, 0.3350, 0.000001);  // new: 0.3750
 
     // 2theta value
     Kernel::V3D sample_source = sample - source;
@@ -263,7 +268,7 @@ public:
     Kernel::V3D detlast0_2 = outws2->getDetector(256 * 255)->getPos();
     Kernel::V3D detlast2 = outws2->getDetector(256 * 256 - 1)->getPos();
     Kernel::V3D detmiddle2 =
-        outws2->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+        outws2->getDetector(127 * 256 + 114)->getPos();  // center @ (127, 114)
     std::cout << "Case 2: Middle Det " << detmiddle2.X() << ", "
               << detmiddle2.Y() << ", " << detmiddle2.Z() << "\n";
 

@@ -285,6 +285,14 @@ void LoadSpiceXML2DDet::exec() {
     }
   }
 
+  // Set up Sample-detetor distance calibration
+  Kernel::DateAndTime anytime(1000);
+  double sampledetdistance = 0.;
+  TimeSeriesProperty<double> *distproperty =
+      new TimeSeriesProperty<double>("diffr");
+  distproperty->addValue(anytime, sampledetdistance);
+  outws->mutableRun().addProperty(distproperty);
+
   if (loadinstrument) {
     loadInstrument(outws, idffilename);
     double wavelength;
