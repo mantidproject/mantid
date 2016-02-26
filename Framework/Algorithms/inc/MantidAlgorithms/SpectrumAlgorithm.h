@@ -128,6 +128,20 @@ protected:
   template <class... Flags, class WS, class... Args, class OP>
   void for_each(WS &workspace, std::tuple<Args...> getters,
                 const OP &operation) {
+    // This comment explains some of the rationale and mechanism for the way
+    // templates are used in this and other variants of for_each().
+    // For several variants of for_each() we require a variable number of
+    // arguments for more than one entity, e.g., getters for the input workspace
+    // and getters for the output workspace. For both of them we would thus like
+    // to use a variadic template. However, we cannot make all those getters
+    // direct arguments to for_each(), because the compiler then cannot tell
+    // were the boundary between the two parameter packs is. Therefore getters
+    // are packed into tuples.
+    // At some point we need to extract the getters from the tuple. To this end,
+    // we use the gens template, which recursively constructs a sequence of
+    // indices which are gen used with std::get<>.
+    // The Flags template parameter is used for passing in flags known at
+    // compile time.
     for_each<Flags...>(workspace, getters,
                        typename gens<sizeof...(Args)>::type(), operation);
   }
