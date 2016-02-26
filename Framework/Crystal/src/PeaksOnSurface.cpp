@@ -44,26 +44,26 @@ void PeaksOnSurface::init() {
 
   std::vector<double> vertexDefault;
 
-  declareProperty(new ArrayProperty<double>("Vertex1", vertexDefault,
-                                            manditoryExtents->clone()),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Vertex1", vertexDefault, manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "lower left vertex of the surface. Values to be specified in "
                   "the CoordinateFrame choosen.");
 
-  declareProperty(new ArrayProperty<double>("Vertex2", vertexDefault,
-                                            manditoryExtents->clone()),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Vertex2", vertexDefault, manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "upper left vertex of the surface. Values to be specified in "
                   "the CoordinateFrame choosen.");
 
-  declareProperty(new ArrayProperty<double>("Vertex3", vertexDefault,
-                                            manditoryExtents->clone()),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Vertex3", vertexDefault, manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "upper right vertex of the surface. Values to be specified "
                   "in the CoordinateFrame choosen.");
 
-  declareProperty(new ArrayProperty<double>("Vertex4", vertexDefault,
-                                            manditoryExtents->clone()),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Vertex4", vertexDefault, manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "lower right vertex of the surface. Values to be specified "
                   "in the CoordinateFrame choosen.");

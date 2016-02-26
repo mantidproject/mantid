@@ -65,22 +65,24 @@ FABADAMinimizer::FABADAMinimizer()
       "Variance in Cost Function for considering convergence reached.");
   declareProperty("JumpAcceptanceRate", 0.6666666,
                   "Desired jumping acceptance rate");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "PDF", "PDF", Kernel::Direction::Output),
+                  "The name to give the output workspace");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "Chains", "", Kernel::Direction::Output),
+                  "The name to give the output workspace");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "ConvergedChain", "", Kernel::Direction::Output,
+                      API::PropertyMode::Optional),
+                  "The name to give the output workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("PDF", "PDF", Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "CostFunctionTable", "", Kernel::Direction::Output),
       "The name to give the output workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("Chains", "", Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "Parameters", "", Kernel::Direction::Output),
       "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<>("ConvergedChain", "",
-                                               Kernel::Direction::Output,
-                                               API::PropertyMode::Optional),
-                  "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "CostFunctionTable", "", Kernel::Direction::Output),
-                  "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "Parameters", "", Kernel::Direction::Output),
-                  "The name to give the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------

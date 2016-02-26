@@ -41,11 +41,11 @@ const std::string SortPeaksWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void SortPeaksWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   auto mustHave = boost::make_shared<MandatoryValidator<std::string>>();

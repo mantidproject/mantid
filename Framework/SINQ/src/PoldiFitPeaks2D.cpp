@@ -1183,11 +1183,11 @@ bool PoldiFitPeaks2D::isValidDeltaT(double deltaT) const {
 
 /// Initialization of algorithm properties.
 void PoldiFitPeaks2D::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Measured POLDI 2D-spectrum.");
-  declareProperty(new WorkspaceProperty<Workspace>("PoldiPeakWorkspace", "",
-                                                   Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "PoldiPeakWorkspace", "", Direction::Input),
                   "Table workspace with peak information.");
 
   auto peakFunctionValidator = boost::make_shared<StringListValidator>(
@@ -1220,11 +1220,11 @@ void PoldiFitPeaks2D::init() {
                                           "the fit. Use 0 to calculate "
                                           "2D-spectrum without fitting.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Calculated POLDI 2D-spectrum");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Calculated1DSpectrum",
-                                                         "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Calculated1DSpectrum", "", Direction::Output),
                   "Calculated POLDI 1D-spectrum.");
 
   declareProperty("LambdaMin", 1.1,
@@ -1232,8 +1232,8 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LambdaMax", 5.0,
                   "Maximum wavelength for 1D spectrum calculation");
 
-  declareProperty(new WorkspaceProperty<Workspace>("RefinedPoldiPeakWorkspace",
-                                                   "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
 
   declareProperty("OutputIntegratedIntensities", false,
@@ -1241,13 +1241,13 @@ void PoldiFitPeaks2D::init() {
                   "output will have integrated intensities instead of the "
                   "maximum.");
 
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
 
-  declareProperty(new WorkspaceProperty<Workspace>("RawFitParameters", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
-                  "Table workspace that contains all raw fit parameters.");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>(
+          "RawFitParameters", "", Direction::Output, PropertyMode::Optional),
+      "Table workspace that contains all raw fit parameters.");
 }
 
 /// Executes the algorithm

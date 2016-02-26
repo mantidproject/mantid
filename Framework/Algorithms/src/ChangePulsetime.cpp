@@ -31,17 +31,18 @@ ChangePulsetime::~ChangePulsetime() {}
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
-  declareProperty(new PropertyWithValue<double>("TimeOffset", Direction::Input),
-                  "Number of seconds (a float) to add to each event's pulse "
-                  "time. Required.");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList", ""),
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
+      "Number of seconds (a float) to add to each event's pulse "
+      "time. Required.");
+  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
                   "An optional list of workspace indices to change. If blank, "
                   "all spectra in the workspace are modified.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
 }
 

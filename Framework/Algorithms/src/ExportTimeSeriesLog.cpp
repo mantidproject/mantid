@@ -42,13 +42,13 @@ ExportTimeSeriesLog::~ExportTimeSeriesLog() {}
  */
 void ExportTimeSeriesLog::init() {
   declareProperty(
-      new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous",
-                                                  Direction::InOut),
+      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::InOut),
       "Name of input Matrix workspace containing the log to export. ");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "Dummy",
-                                             Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "Dummy", Direction::Output),
       "Name of the workspace containing the log events in Export. ");
 
   declareProperty("LogName", "", "Log's name to filter events.");

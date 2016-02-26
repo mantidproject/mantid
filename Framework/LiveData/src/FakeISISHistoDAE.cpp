@@ -325,14 +325,18 @@ FakeISISHistoDAE::~FakeISISHistoDAE() {
  * Declare the algorithm properties
  */
 void FakeISISHistoDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),
-                  "Number of bins.");
-  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),
-                  "The port to broadcast on (default 56789, ISISDAE 6789).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
+      "Number of bins.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
+      "The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**

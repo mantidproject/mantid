@@ -87,7 +87,7 @@ bool JumpFit::validate() {
   QString errors = uiv.generateErrorMessage();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
-	return false;
+    return false;
   }
 
   return true;
@@ -221,7 +221,6 @@ void JumpFit::fitAlgDone(bool error) {
       m_dblManager->setValue(m_properties[propName], value);
     }
   }
-
 }
 
 /**

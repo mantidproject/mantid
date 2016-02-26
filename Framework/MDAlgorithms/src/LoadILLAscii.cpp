@@ -102,9 +102,10 @@ const std::string LoadILLAscii::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
-                  "Name of the data file to load.");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ""),
+      "Name of the data file to load.");
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 }

@@ -85,12 +85,13 @@ int LoadILLReflectometry::confidence(
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "File path of the Data file to load");
-
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "File path of the Data file to load");
+
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------

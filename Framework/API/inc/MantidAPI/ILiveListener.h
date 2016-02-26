@@ -135,7 +135,7 @@ public:
    * spectra.
    * @param specList :: A vector with spectra indices.
    */
-  virtual void setSpectra(const std::vector<specid_t> &specList) {
+  virtual void setSpectra(const std::vector<specnum_t> &specList) {
     (void)specList;
   }
 

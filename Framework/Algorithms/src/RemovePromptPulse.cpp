@@ -36,13 +36,13 @@ const string RemovePromptPulse::category() const {
 /** Initialize the algorithm's properties.
  */
 void RemovePromptPulse::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();
   validator->setLower(0.0);

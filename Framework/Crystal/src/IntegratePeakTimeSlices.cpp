@@ -142,17 +142,17 @@ double SQRT(double v) {
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] m_NeighborIDs; }
 
 void IntegratePeakTimeSlices::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "A 2D workspace with X values of time of flight");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output table workspace with Log info");
 
-  declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("Peaks", "", Direction::Input),
-      "Workspace of Peaks");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "Peaks", "", Direction::Input),
+                  "Workspace of Peaks");
 
   declareProperty("PeakIndex", 0,
                   "Index of peak in PeaksWorkspace to integrate");

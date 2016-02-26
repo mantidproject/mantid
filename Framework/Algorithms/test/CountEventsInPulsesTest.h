@@ -280,7 +280,7 @@ public:
       } else {
         /// Regular detector
         DataObjects::EventList &events = eventWS->getOrAddEventList(wsindex);
-        events.setSpectrumNo(static_cast<specid_t>(wsindex + 1));
+        events.setSpectrumNo(static_cast<specnum_t>(wsindex + 1));
         events.clearDetectorIDs();
         events.addDetectorID(it->first);
 

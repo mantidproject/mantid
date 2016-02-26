@@ -11,9 +11,10 @@ DECLARE_ALGORITHM(CatalogMyDataSearch)
 void CatalogMyDataSearch::init() {
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "The name of the workspace to store the search results.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
+      "The name of the workspace to store the search results.");
 }
 
 /// Execution method.

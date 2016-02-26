@@ -39,20 +39,19 @@ SaveOpenGenieAscii::SaveOpenGenieAscii() : Mantid::API::Algorithm() {}
 
 void SaveOpenGenieAscii::init() {
   declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "",
-                                   Kernel::Direction::Input),
+      make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                            Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save,
-                                        {".his", ".txt", ""}),
+  const std::vector<std::string> exts{".his", ".txt", ""};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,
                   "Whether to include the header lines (default: true)");
-  std::vector<std::string> header(2);
-  header[0] = "ENGIN-X Format";
-  header[1] = "Basic Format";
+  std::vector<std::string> header{"ENGIN-X Format", "Basic Format"};
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
                   boost::make_shared<Kernel::StringListValidator>(header),
                   "The format required to succesfully load the file to "
@@ -62,8 +61,8 @@ void SaveOpenGenieAscii::init() {
       "Spec number is a required field for ENGIN-X format of OpenGenie,"
       "an example of spec number would be: 1201 - 1400");
   setPropertySettings("SpecNumberField",
-                      new VisibleWhenProperty("OpenGenieFormat", IS_EQUAL_TO,
-                                              "ENGIN-X Format"));
+                      make_unique<VisibleWhenProperty>(
+                          "OpenGenieFormat", IS_EQUAL_TO, "ENGIN-X Format"));
 }
 
 void SaveOpenGenieAscii::exec() {

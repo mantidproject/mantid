@@ -56,7 +56,7 @@ FindPeaks::FindPeaks()
    */
 void FindPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -78,12 +78,12 @@ void FindPeaks::init() {
                                        "candidates,\n"
                                        "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(new ArrayProperty<double>("PeakPositions"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
 
-  declareProperty(new ArrayProperty<double>("FitWindows"),
+  declareProperty(make_unique<ArrayProperty<double>>("FitWindows"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of windows to fit. The number of values must be "
                   "exactly double the number of specified peaks.");
@@ -122,7 +122,7 @@ void FindPeaks::init() {
                   "option is turned off.");
 
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PeaksList", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of peaks found");

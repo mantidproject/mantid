@@ -85,13 +85,14 @@ const std::string MaskMD::category() const {
  */
 void MaskMD::init() {
   declareProperty(
-      new PropertyWithValue<bool>("ClearExistingMasks", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ClearExistingMasks", true,
+                                           Direction::Input),
       "Clears any existing masks before applying the provided masking.");
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "An input/output workspace.");
   declareProperty(
-      new WorkspaceProperty<IMDWorkspace>("Workspace", "", Direction::InOut),
-      "An input/output workspace.");
-  declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "Dimensions",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
@@ -102,7 +103,7 @@ void MaskMD::init() {
       "workspace).");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Extents",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),

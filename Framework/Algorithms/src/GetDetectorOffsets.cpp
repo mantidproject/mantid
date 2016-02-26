@@ -36,7 +36,7 @@ GetDetectorOffsets::~GetDetectorOffsets() {}
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
@@ -55,16 +55,16 @@ void GetDetectorOffsets::init() {
       "XMax", 0.0,
       "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalSave, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(
-      new WorkspaceProperty<>("MaskWorkspace", "Mask", Direction::Output),
-      "An output workspace containing the mask.");
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                   Direction::Output),
+                  "An output workspace containing the mask.");
   // Only keep peaks
   declareProperty(
       "PeakFunction", "Gaussian",

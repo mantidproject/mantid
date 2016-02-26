@@ -33,10 +33,10 @@ void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace to which the log data will be added.");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load),
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load),
                   "The filename (including its full or relative path) of the "
                   "Muon Nexus file.");
 }

@@ -111,9 +111,9 @@ public:
   void clearDetectorIDs();
 
   // ---------------------------------------------------------
-  specid_t getSpectrumNo() const;
+  specnum_t getSpectrumNo() const;
 
-  void setSpectrumNo(specid_t num);
+  void setSpectrumNo(specnum_t num);
 
   // ---------------------------------------------------------
   virtual void lockData() const;
@@ -125,7 +125,7 @@ public:
 
 protected:
   /// The spectrum number of this spectrum
-  specid_t m_specNo;
+  specnum_t m_specNo;
 
   /// Set of the detector IDs associated with this spectrum
   std::set<detid_t> detectorIDs;
