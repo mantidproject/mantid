@@ -1798,9 +1798,14 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
       // when south bank is selected while cropped calib
       saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
     } else {
+
       // when spectrumIDs are provided
-      const std::string CustomisedBankName =
-          m_view->currentCalibCustomisedBankName();
+      std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
+
+      // assign default value if empty string passed
+      if (CustomisedBankName.empty())
+        CustomisedBankName = "cropped";
+
       saveOpenGenie(curvesWSName, specNos, CustomisedBankName, vanNo);
     }
   } else {
@@ -2153,8 +2158,9 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     }
 
     // Get the Customised Bank Name text-ield string from qt
-    const std::string CustomisedBankName =
-        m_view->currentCalibCustomisedBankName();
+    std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
+    if (CustomisedBankName.empty())
+      CustomisedBankName = "cropped";
     const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
         plotDifcZeroWorkspace(CustomisedBankName);
@@ -2488,7 +2494,7 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
       // Get the Customised Bank Name text-ield string from qt
       std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
 
-      if (CustomisedBankName == "")
+      if (CustomisedBankName.empty())
         outFitParamsTblName = "engggui_calibration_bank_cropped";
       else
         outFitParamsTblName = "engggui_calibration_bank_" + CustomisedBankName;
