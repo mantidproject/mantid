@@ -57,8 +57,10 @@ private:
    * Used for generating a sequence 0,1,2,.... for extracting arguments from
    * tuple. */
   template <int...> struct seq {};
-  template <int N, int... S> struct gens : gens<N - 1, N - 1, S...> {};
+  // Forward declaration to make Doxygen happy.
+  template <int N, int... S> struct gens;
   template <int... S> struct gens<0, S...> { typedef seq<S...> type; };
+  template <int N, int... S> struct gens : gens<N - 1, N - 1, S...> {};
 
   /** Helpers for for_each(), struct contains and 2 specializations.
    *
