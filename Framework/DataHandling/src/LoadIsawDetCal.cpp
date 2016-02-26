@@ -214,7 +214,7 @@ void LoadIsawDetCal::exec() {
     // Loop through detectors to match names with number from DetCal file
     auto matchingDetector = std::find_if(
         detList.begin(), detList.end(),
-        [&Detbank](const boost::shared_ptr<RectangularDetector> &detetector) {
+        [&Detbank](const boost::shared_ptr<RectangularDetector> &detector) {
           return detector->getName().compare(Detbank) == 0;
         });
     if (matchingDetector != detList.end()) {
