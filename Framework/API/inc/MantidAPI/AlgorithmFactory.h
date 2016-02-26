@@ -57,7 +57,7 @@ class Algorithm;
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class MANTID_API_DLL AlgorithmFactoryImpl
+class MANTID_API_DLL AlgorithmFactoryImpl final
     : public Kernel::DynamicFactory<Algorithm> {
 public:
   AlgorithmFactoryImpl(const AlgorithmFactoryImpl &) = delete;

@@ -39,13 +39,13 @@ namespace MantidQt
       QFileInfo finfo(filename);
       QString ext = finfo.extension().toLower();
 
-      if(ext != "asc" && ext != "inx" && ext != "nxs")
-      {
+	  bool invalidExt = (ext != "asc" && ext != "inx" && ext != "nxs");
+
+      if(invalidExt){
         emit showMessageBox("File is not of expected type:\n File type must be .asc, .inx or .nxs");
-        return false;
       }
 
-      return true;
+	  return !invalidExt;
     }
 
     /**

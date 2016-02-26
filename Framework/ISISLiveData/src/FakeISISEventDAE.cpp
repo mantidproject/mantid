@@ -198,7 +198,7 @@ void FakeISISEventDAE::exec() {
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
   m_server = new Poco::Net::TCPServer(

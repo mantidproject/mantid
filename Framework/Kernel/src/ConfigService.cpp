@@ -1883,7 +1883,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
       setString("default.facility", facilityName);
     }
   }
-  if (found == false) {
+  if (!found) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
     throw Exception::NotFoundError("Facilities", facilityName);

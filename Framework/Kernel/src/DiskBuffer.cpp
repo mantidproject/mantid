@@ -47,19 +47,18 @@ void DiskBuffer::toWrite(ISaveable *item) {
                              // its size in memory
   {
     // forget old memory size
-    m_mutex.lock();
+    std::unique_lock<std::mutex> uniqueLock(m_mutex);
     m_writeBufferUsed -= item->getBufferSize();
     // add new size
     size_t newMemorySize = item->getDataMemorySize();
     m_writeBufferUsed += newMemorySize;
-    m_mutex.unlock();
+    uniqueLock.unlock();
     item->setBufferSize(newMemorySize);
   } else {
-    m_mutex.lock();
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_toWriteBuffer.push_front(item);
     m_writeBufferUsed += item->setBufferPosition(m_toWriteBuffer.begin());
     m_nObjectsToWrite++;
-    m_mutex.unlock();
   }
 
   // Should we now write out the old data?
@@ -79,19 +78,18 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
   if (item == nullptr)
     return;
   // have it ever been in the buffer?
-  m_mutex.lock();
+  std::unique_lock<std::mutex> uniqueLock(m_mutex);
   auto opt2it = item->getBufPostion();
   if (opt2it) {
     m_writeBufferUsed -= item->getBufferSize();
     m_toWriteBuffer.erase(*opt2it);
   } else {
-    m_mutex.unlock();
     return;
   }
 
   // indicate to the object that it is not stored in memory any more
   item->clearBufferState();
-  m_mutex.unlock();
+  uniqueLock.unlock();
 
   // Mark the amount of space used on disk as free
   if (item->wasSaved())
@@ -104,7 +102,7 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
  */
 void DiskBuffer::writeOldObjects() {
 
-  Poco::ScopedLock<Kernel::Mutex> _lock(m_mutex);
+  std::lock_guard<std::mutex> _lock(m_mutex);
   // Holder for any objects that you were NOT able to write.
   std::list<ISaveable *> couldNotWrite;
   size_t objectsNotWritten(0);
@@ -203,7 +201,7 @@ void DiskBuffer::flushCache() {
 void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
   if (size == 0 || size == std::numeric_limits<uint64_t>::max())
     return;
-  m_freeMutex.lock();
+  std::lock_guard<std::mutex> lock(m_freeMutex);
 
   // Make the block
   FreeBlock newBlock(pos, size);
@@ -214,7 +212,6 @@ void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
   // Or, if the map has only 1 item then it cannot do any merging. This solves a
   // hanging bug in MacOS. Refs #3652
   if (!p.second || m_free.size() <= 1) {
-    m_freeMutex.unlock();
     return;
   }
 
@@ -249,8 +246,6 @@ void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
       m_free.erase(it_after);
     }
   }
-
-  m_freeMutex.unlock();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -259,7 +254,7 @@ void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size) {
  * automatically defrags neighboring blocks.
  */
 void DiskBuffer::defragFreeBlocks() {
-  m_freeMutex.lock();
+  std::lock_guard<std::mutex> lock(m_freeMutex);
 
   freeSpace_t::iterator it = m_free.begin();
   FreeBlock thisBlock;
@@ -283,7 +278,6 @@ void DiskBuffer::defragFreeBlocks() {
       thisBlock = *it;
     }
   }
-  m_freeMutex.unlock();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -294,7 +288,7 @@ void DiskBuffer::defragFreeBlocks() {
  * @return a new position at which the data can be saved.
  */
 uint64_t DiskBuffer::allocate(uint64_t const newSize) {
-  m_freeMutex.lock();
+  std::unique_lock<std::mutex> uniqueLock(m_freeMutex);
 
   // Now, find the first available block of sufficient size.
   freeSpace_bySize_t::iterator it;
@@ -312,7 +306,6 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
     // And we assume the file will grow by this much.
     m_fileLength += newSize;
     // Will place the new block at the end of the file
-    m_freeMutex.unlock();
     return retVal;
   } else {
     //      std::cout << "Block found for allocate " << newSize << std::endl;
@@ -320,7 +313,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
     uint64_t foundSize = it->getSize();
     // Remove the free block you found - it is no longer free
     m_free_bySize.erase(it);
-    m_freeMutex.unlock();
+    uniqueLock.unlock();
     // Block was too large - free the bit of space after it.
     if (foundSize > newSize) {
       this->freeBlock(foundPos + newSize, foundSize - newSize);

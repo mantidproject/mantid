@@ -545,18 +545,19 @@ namespace MantidQt
       // Return false if the user has not input any dates. This prevents any null errors occurring.
       if (startDateInput.size() <= 2 || endDateInput.size() <= 2) return false;
 
+	  bool ret = m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput);
       // If startDate > endDate we want to throw an error and inform the user (red star(*)).
-      if (m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput))
+      if (ret)
       {
         m_icatUiForm.StartDate_err->setToolTip(QString::fromStdString("<span style=\"color: white;\">Start date cannot be greater than end date.</span>"));
         m_icatUiForm.StartDate_err->show();
-        return true;
       }
       else
       {
         m_icatUiForm.StartDate_err->hide();
-        return false;
       }
+
+	  return ret;
     }
 
     /**

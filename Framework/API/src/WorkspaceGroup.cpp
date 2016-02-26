@@ -7,8 +7,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 
-#include <Poco/ScopedLock.h>
-
 namespace Mantid {
 namespace API {
 namespace {
@@ -36,7 +34,7 @@ WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
  */
 const std::string WorkspaceGroup::toString() const {
   std::string descr = this->id() + "\n";
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     descr += " -- " + workspace->name() + "\n";
   }
@@ -75,7 +73,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
  * @return :: True if the workspace is found.
  */
 bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     // check child groups only
     WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
@@ -93,7 +91,7 @@ bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
  * already exists give a warning.
  */
 void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // check it's not there already
   auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
@@ -111,7 +109,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
  * @returns True if the name is part of this group, false otherwise
  */
 bool WorkspaceGroup::contains(const std::string &wsName) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     if ((*workspace).name() == wsName)
       return true;
@@ -124,7 +122,7 @@ bool WorkspaceGroup::contains(const std::string &wsName) const {
  * @returns True if the workspace exists in the group, false otherwise
  */
 bool WorkspaceGroup::contains(const Workspace_sptr &workspace) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   auto iend = m_workspaces.end();
   auto it = std::find(m_workspaces.begin(), iend, workspace);
   return (it != iend);
@@ -135,7 +133,7 @@ bool WorkspaceGroup::contains(const Workspace_sptr &workspace) const {
  * @param memberList
  */
 void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   memberList.insert(m_workspaces.begin(), m_workspaces.end());
 }
 
@@ -145,7 +143,7 @@ void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
  * vector is being iterated over.
  */
 std::vector<std::string> WorkspaceGroup::getNames() const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
   for (const auto &workspace : m_workspaces) {
     out.push_back((*workspace).name());
@@ -159,7 +157,7 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
  * @throws an out_of_range error if the index is invalid
  */
 Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   if (index >= this->size()) {
     std::ostringstream os;
     os << "WorkspaceGroup - index out of range. Requested=" << index
@@ -176,7 +174,7 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
  * group's list of workspace names
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     if ((*workspace).name() == wsName)
       return workspace;
@@ -194,7 +192,7 @@ void WorkspaceGroup::removeAll() { m_workspaces.clear(); }
  *  @param wsName :: The name of the workspace to be removed from the group.
  */
 void WorkspaceGroup::removeByADS(const std::string &wsName) {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   auto it = m_workspaces.begin();
   for (; it != m_workspaces.end(); ++it) {
     if ((**it).name() == wsName) {
@@ -207,7 +205,7 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
 /// Print the names of all the workspaces in this group to the logger (at debug
 /// level)
 void WorkspaceGroup::print() const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     g_log.debug() << "Workspace name in group vector =  " << (*workspace).name()
                   << std::endl;
@@ -221,7 +219,7 @@ void WorkspaceGroup::print() const {
  * @param index :: Index of a workspace to delete.
  */
 void WorkspaceGroup::removeItem(const size_t index) {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // do not allow this way of removing for groups in the ADS
   if (!name().empty()) {
     throw std::runtime_error(
@@ -247,7 +245,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  */
 void WorkspaceGroup::workspaceDeleteHandle(
     Mantid::API::WorkspacePostDeleteNotification_ptr notice) {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::unique_lock<std::recursive_mutex> _lock(m_mutex);
   const std::string deletedName = notice->objectName();
   if (!this->contains(deletedName))
     return;
@@ -257,6 +255,10 @@ void WorkspaceGroup::workspaceDeleteHandle(
     if (isEmpty()) {
       // We are about to get deleted so we don't want to recieve any
       // notifications
+      // The unique lock needs to be unlocked at this point as the workspace
+      // is about to destroy itself. We have to make sure that the mutex is
+      // not locked.
+      _lock.unlock();
       observeADSNotifications(false);
       AnalysisDataService::Instance().remove(this->getName());
     }
@@ -270,7 +272,7 @@ void WorkspaceGroup::workspaceDeleteHandle(
  */
 void WorkspaceGroup::workspaceReplaceHandle(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
   const std::string replacedName = notice->objectName();
   for (auto &workspace : m_workspaces) {
@@ -286,7 +288,7 @@ void WorkspaceGroup::workspaceReplaceHandle(
  * @return true if workspace is empty
  */
 bool WorkspaceGroup::isEmpty() const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   return m_workspaces.empty();
 }
 
@@ -298,7 +300,7 @@ bool WorkspaceGroup::isEmpty() const {
  * @return true if the names match this pattern.
  */
 bool WorkspaceGroup::areNamesSimilar() const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   if (m_workspaces.empty())
     return false;
 
@@ -325,7 +327,7 @@ Determine in the WorkspaceGroup is multiperiod.
 * @return True if the WorkspaceGroup instance is multiperiod.
 */
 bool WorkspaceGroup::isMultiperiod() const {
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   if (m_workspaces.size() < 1) {
     g_log.debug("Not a multiperiod-group with < 1 nested workspace.");
     return false;
@@ -369,7 +371,7 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
   if (level > MAXIMUM_DEPTH) {
     throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
   }
-  Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     if (workspace.get() == &workspaceToCheck)
       return true;

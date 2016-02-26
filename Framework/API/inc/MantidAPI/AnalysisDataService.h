@@ -56,7 +56,7 @@ class WorkspaceGroup;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataServiceImpl
+class DLLExport AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */

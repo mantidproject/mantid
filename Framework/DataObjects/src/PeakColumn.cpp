@@ -4,8 +4,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 
-#include <Poco/Mutex.h>
-
 #include <boost/variant/get.hpp>
 
 using namespace Mantid::Kernel;

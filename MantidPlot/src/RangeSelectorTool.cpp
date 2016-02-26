@@ -304,7 +304,7 @@ void RangeSelectorTool::clearSelection()
         int end_point = QMAX(d_active_point, d_inactive_point);
         int end_row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(end_point);
         int col = t->colIndex(d_selected_curve->title().text());
-        bool ok_update = (end_point - start_point + 1) < d_selected_curve->dataSize() ? true : false;
+        bool ok_update = (end_point - start_point + 1) < d_selected_curve->dataSize();
         for (int i = start_row; i <= end_row; i++)
             t->setText(i, col, "");
         t->notifyChanges();

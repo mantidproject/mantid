@@ -12,6 +12,7 @@
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -198,7 +199,7 @@ private:
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 };
 
 /// Shared pointer to ExperimentInfo

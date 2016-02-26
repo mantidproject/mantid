@@ -8,7 +8,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 
@@ -52,7 +53,7 @@ class Expression;
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class MANTID_API_DLL FunctionFactoryImpl
+class MANTID_API_DLL FunctionFactoryImpl final
     : public Kernel::DynamicFactory<IFunction> {
 public:
   FunctionFactoryImpl(const FunctionFactoryImpl &) = delete;
@@ -113,7 +114,7 @@ private:
   void addTie(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
 
   mutable std::map<std::string, std::vector<std::string>> m_cachedFunctionNames;
-  mutable Kernel::Mutex m_mutex;
+  mutable std::mutex m_mutex;
 };
 
 /**
@@ -123,7 +124,7 @@ private:
  */
 template <typename FunctionType>
 const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
-  Kernel::Mutex::ScopedLock _lock(m_mutex);
+  std::lock_guard<std::mutex> _lock(m_mutex);
 
   const std::string soughtType(typeid(FunctionType).name());
   if (m_cachedFunctionNames.find(soughtType) != m_cachedFunctionNames.end()) {

@@ -56,7 +56,7 @@ std::string CompositeFunction::asString() const {
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool() == true) {
+      getAttribute("NumDeriv").asBool()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
     for (const auto &attName : attr) {

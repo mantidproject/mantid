@@ -4,7 +4,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include <Poco/Mutex.h>
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 

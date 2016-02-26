@@ -2365,7 +2365,7 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
     g_log.debug() << "[TestRandom] dice " << dice << "\n";
     double bar =
         exp(-(new_goodness - cur_goodness) / (cur_goodness * m_Temperature));
-    // random number (dice, 0 and 1) is smaller than bar (between -infty andn0)
+
     accept = dice < bar;
   }
 

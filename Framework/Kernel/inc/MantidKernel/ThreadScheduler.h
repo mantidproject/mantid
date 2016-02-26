@@ -4,7 +4,6 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <vector>
 #include <deque>
 #include <map>
@@ -124,7 +123,7 @@ protected:
   /// Accumulated cost of tasks that have been executed (popped)
   double m_costExecuted;
   /// Mutex to prevent simultaneous access to the queue.
-  Mutex m_queueLock;
+  std::mutex m_queueLock;
   /// The exception that aborted the run.
   std::runtime_error m_abortException;
   /// The run was aborted due to an exception
@@ -150,7 +149,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    std::lock_guard<std::mutex> _lock(m_queueLock);
     return m_queue.empty();
   }
 
@@ -255,7 +254,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    std::lock_guard<std::mutex> _lock(m_queueLock);
     return m_map.empty();
   }
 

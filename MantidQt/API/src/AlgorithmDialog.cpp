@@ -523,14 +523,8 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
     *   (1) It is contained in the disabled list or
     *   (2) A user passed a value into the dialog
     */
-    if( m_disabled.contains(propName) || m_python_arguments.contains(propName) )
-    {
-      return false;
-    }
-    else
-    {
-      return true;
-    }
+
+    return !(m_disabled.contains(propName) || m_python_arguments.contains(propName));
   }
 
 }
