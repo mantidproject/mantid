@@ -88,7 +88,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(Load)
 
 // The mutex
-Poco::Mutex Load::m_mutex;
+std::recursive_mutex Load::m_mutex;
 
 using namespace Kernel;
 using namespace API;

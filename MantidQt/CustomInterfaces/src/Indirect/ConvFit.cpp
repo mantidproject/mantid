@@ -1390,7 +1390,7 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 
   if (prop == m_properties["UseDeltaFunc"]) {
     updatePlotOptions();
-    if (checked == true) {
+    if (checked) {
       m_properties["DeltaFunction"]->addSubProperty(
           m_properties["DeltaHeight"]);
       m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);

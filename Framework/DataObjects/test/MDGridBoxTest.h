@@ -91,8 +91,7 @@ public:
                 << std::endl;
       std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)"
                 << std::endl;
-      std::cout << sizeof(Mantid::Kernel::Mutex) << " bytes per Mutex"
-                << std::endl;
+      std::cout << sizeof(std::mutex) << " bytes per Mutex" << std::endl;
       std::cout << sizeof(MDDimensionExtents<coord_t>)
                 << " bytes per MDDimensionExtents" << std::endl;
       std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)"

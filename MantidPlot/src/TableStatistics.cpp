@@ -34,6 +34,9 @@
 #include "MantidKernel/Strings.h"
 
 #include <QList>
+
+#include <QHeaderView>
+
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_statistics.h>
 

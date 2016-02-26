@@ -604,11 +604,11 @@ BinaryTreeWidgetItem::BinaryTreeWidgetItem(const QStringList & strings, int type
  */
 bool BinaryTreeWidgetItem::addChildItem(BinaryTreeWidgetItem* child)
 {
-  if( childCount() >= 2 ) return false;
+  bool tooManyChildren = childCount() >= 2;
+  if( !tooManyChildren ) this->addChild(child);
   
   // Call sub-class function
-  this->addChild(child);
-  return true;
+  return !tooManyChildren;
 }
 
 /**

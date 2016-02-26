@@ -84,7 +84,7 @@ void SpectraAxis::setValue(const std::size_t &index, const double &value) {
 /**
  * Finds the index of the given value on the axis
  * @param value A value on the axis. It is treated as a spectrum number and cast
- * to specid_t on input
+ * to specnum_t on input
  * @return The index closest to given value
  * @throws std::out_of_range if the value is out of range of the axis
  */
@@ -109,7 +109,7 @@ size_t SpectraAxis::indexOfValue(const double value) const {
  *  @return The spectrum number as an int
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-specid_t SpectraAxis::spectraNo(const std::size_t &index) const {
+specnum_t SpectraAxis::spectraNo(const std::size_t &index) const {
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1,
                                         "SpectraAxis: Index out of range.");

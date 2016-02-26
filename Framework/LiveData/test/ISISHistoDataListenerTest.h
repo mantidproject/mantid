@@ -46,9 +46,9 @@ public:
 
     Kernel::PropertyManager props;
     props.declareProperty(
-        new Kernel::ArrayProperty<specid_t>("SpectraList", ""));
+        new Kernel::ArrayProperty<specnum_t>("SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
-    std::vector<specid_t> specs;
+    std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
     props.setProperty("SpectraList", specs);
 

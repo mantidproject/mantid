@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 // Setup typedef for later use
-typedef std::map<specid_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
 typedef Geometry::IDetector_const_sptr DetConstPtr;
 
 // Register the algorithm into the AlgorithmFactory
@@ -78,7 +78,7 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
   // Progress reports & cancellation
@@ -130,7 +130,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(detector);
-    const specid_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -321,7 +321,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     m_progress->report("Calculating detector angular widths");
     DetConstPtr detector = workspace->getDetector(i);
     g_log.debug() << "Current histogram: " << i << std::endl;
-    specid_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
+    specnum_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
     SpectraDistanceMap neighbours =
         workspace->getNeighboursExact(inSpec, numNeighbours, true);
 
@@ -334,13 +334,13 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     double theta = workspace->detectorTwoTheta(detector);
     double phi = detector->getPhi();
 
-    specid_t deltaPlus1 = inSpec + 1;
-    specid_t deltaMinus1 = inSpec - 1;
-    specid_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
-    specid_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
+    specnum_t deltaPlus1 = inSpec + 1;
+    specnum_t deltaMinus1 = inSpec - 1;
+    specnum_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
+    specnum_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
     for (auto &neighbour : neighbours) {
-      specid_t spec = neighbour.first;
+      specnum_t spec = neighbour.first;
       g_log.debug() << "Neighbor ID: " << spec << std::endl;
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {

@@ -188,16 +188,16 @@ void SumSpectra::exec() {
  * @param localworkspace The workspace to use.
  * @return The minimum spectrum id for all the spectra being summed.
  */
-specid_t
+specnum_t
 SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
-  specid_t specId =
+  specnum_t specId =
       localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
-  specid_t temp;
+  specnum_t temp;
   for (auto index : this->m_indices) {
     if (index < totalSpec) {
       temp = localworkspace->getSpectrum(index)->getSpectrumNo();

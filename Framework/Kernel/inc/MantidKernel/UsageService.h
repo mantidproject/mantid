@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_USAGESERVICE_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #include <json/value.h>
@@ -11,6 +10,7 @@
 #include <Poco/Timer.h>
 
 #include <queue>
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -130,7 +130,7 @@ private:
   std::queue<FeatureUsage> m_FeatureQueue;
   size_t m_FeatureQueueSizeThreshold;
   bool m_isEnabled;
-  mutable Kernel::Mutex m_mutex;
+  mutable std::mutex m_mutex;
   std::string m_application;
 };
 

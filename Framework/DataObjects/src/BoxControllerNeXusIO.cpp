@@ -116,7 +116,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
   if (m_File)
     return false;
 
-  Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
   m_ReadOnly = true;
   if (mode.find("w") != std::string::npos ||
       mode.find("W") != std::string::npos) {
@@ -332,7 +332,7 @@ void BoxControllerNeXusIO::saveGenericBlock(
   // Specify the dimensions
   std::vector<int64_t> dims(m_BlockSize);
 
-  Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
   start[0] = int64_t(blockPosition);
   dims[0] = int64_t(DataBlock.size() / this->getNDataColums());
 
@@ -384,7 +384,7 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
   std::vector<int64_t> start(2, 0);
   std::vector<int64_t> size(m_BlockSize);
 
-  Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
 
   start[0] = static_cast<int64_t>(blockPosition);
   size[0] = static_cast<int64_t>(nPoints);
@@ -457,7 +457,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> &Block,
 
 /// Clear NeXus internal cache
 void BoxControllerNeXusIO::flushData() const {
-  Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+  std::lock_guard<std::mutex> _lock(m_fileMutex);
   m_File->flush();
 }
 /** flush disk buffer data from memory and close underlying NeXus file*/
@@ -466,29 +466,27 @@ void BoxControllerNeXusIO::closeFile() {
     // write all file-backed data still stack in the data buffer into the file.
     this->flushCache();
     // lock file
-    Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+    std::lock_guard<std::mutex> _lock(m_fileMutex);
+
+    m_File->closeData(); // close events data
+    if (!m_ReadOnly)     // write free space groups from the disk buffer
     {
-      m_File->closeData(); // close events data
+      std::vector<uint64_t> freeSpaceBlocks;
+      this->getFreeSpaceVector(freeSpaceBlocks);
+      if (!freeSpaceBlocks.empty()) {
+        std::vector<int64_t> free_dims(2, 2);
+        free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
 
-      if (!m_ReadOnly) // write free space groups from the disk buffer
-      {
-        std::vector<uint64_t> freeSpaceBlocks;
-        this->getFreeSpaceVector(freeSpaceBlocks);
-        if (!freeSpaceBlocks.empty()) {
-          std::vector<int64_t> free_dims(2, 2);
-          free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
-
-          m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
-        }
+        m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
       }
-
-      m_File->closeGroup(); // close events group
-      m_File->closeGroup(); // close workspace group
-      m_File->close();      // close NeXus file
-
-      delete m_File;
-      m_File = nullptr;
     }
+
+    m_File->closeGroup(); // close events group
+    m_File->closeGroup(); // close workspace group
+    m_File->close();      // close NeXus file
+
+    delete m_File;
+    m_File = nullptr;
   }
 }
 

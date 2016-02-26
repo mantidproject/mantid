@@ -84,8 +84,7 @@ bool InputWorkspaceWidget::isMatrixWorkspace() const
   try
   {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
-    if ( dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) ) return true;
-    return false;
+	return dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != nullptr;
   }
   catch(...)
   {
@@ -103,8 +102,7 @@ bool InputWorkspaceWidget::isMDWorkspace() const
   try
   {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
-    if ( dynamic_cast<Mantid::API::IMDWorkspace*>(ws.get()) ) return true;
-    return false;
+	return dynamic_cast<Mantid::API::IMDWorkspace*>(ws.get()) != nullptr;
   }
   catch(...)
   {

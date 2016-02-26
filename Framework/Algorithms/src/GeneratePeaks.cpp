@@ -153,7 +153,7 @@ void GeneratePeaks::exec() {
   setProperty("OutputWorkspace", outputWS);
 
   // Generate peaks
-  std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+  std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
       functionmap;
   if (m_useFuncParamWS)
     importPeaksFromTable(functionmap);
@@ -228,8 +228,8 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
   // One and only one peak
   if (!m_useFuncParamWS) {
     m_wsIndex = getProperty("WorkspaceIndex");
-    m_spectraSet.insert(static_cast<specid_t>(m_wsIndex));
-    m_SpectrumMap.emplace(static_cast<specid_t>(m_wsIndex), 0);
+    m_spectraSet.insert(static_cast<specnum_t>(m_wsIndex));
+    m_SpectrumMap.emplace(static_cast<specnum_t>(m_wsIndex), 0);
   }
 
   return;
@@ -241,7 +241,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
  * spectrum
   */
 void GeneratePeaks::importPeaksFromTable(
-    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
+    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
         functionmap) {
   size_t numpeaks = m_funcParamWS->rowCount();
   size_t icolchi2 = m_funcParamWS->columnCount() - 1;
@@ -253,7 +253,7 @@ void GeneratePeaks::importPeaksFromTable(
     g_log.warning("There is no background function specified. ");
 
   // Create data structure for all peaks functions
-  std::map<specid_t,
+  std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::iterator
       mapiter;
 
@@ -326,8 +326,9 @@ void GeneratePeaks::importPeaksFromTable(
     mapiter = functionmap.find(wsindex);
     if (mapiter == functionmap.end()) {
       std::vector<std::pair<double, API::IFunction_sptr>> tempvector;
-      std::pair<std::map<specid_t, std::vector<std::pair<
-                                       double, API::IFunction_sptr>>>::iterator,
+      std::pair<std::map<specnum_t,
+                         std::vector<std::pair<double, API::IFunction_sptr>>>::
+                    iterator,
                 bool> ret;
       ret = functionmap.emplace(wsindex, tempvector);
       mapiter = ret.first;
@@ -428,18 +429,18 @@ void GeneratePeaks::importPeakFromVector(
   * @param dataWS :: output matrix workspace
   */
 void GeneratePeaks::generatePeaks(
-    const std::map<specid_t,
+    const std::map<specnum_t,
                    std::vector<std::pair<double, API::IFunction_sptr>>> &
         functionmap,
     API::MatrixWorkspace_sptr dataWS) {
   // Calcualte function
-  std::map<specid_t,
+  std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::const_iterator
       mapiter;
   for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter) {
     // Get spec id and translated to wsindex in the output workspace
-    specid_t specid = mapiter->first;
-    specid_t wsindex;
+    specnum_t specid = mapiter->first;
+    specnum_t wsindex;
     if (m_newWSFromParent)
       wsindex = specid;
     else
@@ -639,7 +640,7 @@ void GeneratePeaks::getSpectraSet(
 
   for (size_t ipk = 0; ipk < numpeaks; ipk++) {
     // Spectrum
-    specid_t specid = static_cast<specid_t>((*col)[ipk]);
+    specnum_t specid = static_cast<specnum_t>((*col)[ipk]);
     m_spectraSet.insert(specid);
 
     std::stringstream outss;
@@ -647,7 +648,7 @@ void GeneratePeaks::getSpectraSet(
     g_log.debug(outss.str());
   }
 
-  specid_t icount = 0;
+  specnum_t icount = 0;
   for (auto pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
     m_SpectrumMap.emplace(*pit, icount);
     ++icount;
@@ -723,7 +724,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
     // workspace.
     for (auto siter = m_spectraSet.begin(); siter != m_spectraSet.end();
          ++siter) {
-      specid_t iws = *siter;
+      specnum_t iws = *siter;
       std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
                 outputWS->dataX(iws).begin());
     }
@@ -791,11 +792,11 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
 
   // Set spectrum numbers
-  std::map<specid_t, specid_t>::iterator spiter;
+  std::map<specnum_t, specnum_t>::iterator spiter;
   for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();
        ++spiter) {
-    specid_t specid = spiter->first;
-    specid_t wsindex = spiter->second;
+    specnum_t specid = spiter->first;
+    specnum_t wsindex = spiter->second;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
                   << specid << "\n";
     ws->getSpectrum(wsindex)->setSpectrumNo(specid);

@@ -743,7 +743,7 @@ void IFunction::setMatrixWorkspace(
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
-                (fitParam.getLookUpTable().containData() == false &&
+                (!fitParam.getLookUpTable().containData() &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
             } else {

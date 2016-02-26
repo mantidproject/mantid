@@ -104,7 +104,7 @@ void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const bool internal) {
   if (isEnabled()) {
-    Kernel::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
     m_FeatureQueue.push(FeatureUsage(type, name, internal));
   }
 }
@@ -242,7 +242,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
   if (!m_FeatureQueue.empty()) {
     // lock around emptying of the Q so any further threads have to wait
-    Kernel::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
     // generate a map containing the counts of identical feature usage records
     while (!m_FeatureQueue.empty()) {
       auto featureUsage = m_FeatureQueue.front();

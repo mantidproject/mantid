@@ -115,13 +115,13 @@ protected:
   /// Have the spectrum_min/max properties been set?
   bool m_interval;
   /// The value of the spectrum_list property
-  std::vector<specid_t> m_spec_list;
+  std::vector<specnum_t> m_spec_list;
   /// The value of the spectrum_min property
   int64_t m_spec_min;
   /// The value of the spectrum_max property
   int64_t m_spec_max;
   /// The group which each detector belongs to in order
-  std::vector<specid_t> m_groupings;
+  std::vector<specnum_t> m_groupings;
 
 private:
   /// Overwrites Algorithm method.

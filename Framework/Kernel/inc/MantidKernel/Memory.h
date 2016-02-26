@@ -3,7 +3,8 @@
 
 #include <string>
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -71,7 +72,7 @@ private:
   friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
                                                     const MemoryStats &stats);
   /// Mutex to avoid simultaneous access to memory resources
-  static Mutex mutexMemory;
+  static std::mutex mutexMemory;
 };
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,

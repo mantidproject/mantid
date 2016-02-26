@@ -130,7 +130,7 @@ protected:
   /// Reads title from the isisraw class
   void readTitle(FILE *file, std::string &title);
   /// reads workspace parameters like number of histograms,size of vectors etc
-  void readworkspaceParameters(specid_t &numberOfSpectra, int &numberOfPeriods,
+  void readworkspaceParameters(specnum_t &numberOfSpectra, int &numberOfPeriods,
                                int64_t &lengthIn, int64_t &noTimeRegimes);
 
   /// skips histrogram data from raw file.
@@ -165,14 +165,14 @@ protected:
                         DataObjects::Workspace2D_sptr local_workspace);
 
   /// gets the monitor spectrum list from the workspace
-  std::vector<specid_t>
+  std::vector<specnum_t>
   getmonitorSpectrumList(const API::SpectrumDetectorMapping &mapping);
 
   /// This method sets the raw file data to workspace vectors
   void setWorkspaceData(
       DataObjects::Workspace2D_sptr newWorkspace,
       const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
-      int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes,
+      int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
       int64_t lengthIn, int64_t binStart);
 
   /// ISISRAW class instance which does raw file reading. Shared pointer to
@@ -197,11 +197,11 @@ protected:
   /// Validates the optional 'spectra to read' properties, if they have been set
   void checkOptionalProperties();
   /// calculate workspace size
-  specid_t calculateWorkspaceSize();
+  specnum_t calculateWorkspaceSize();
   /// calculate workspace sizes if separate or exclude monitors are selected
-  void calculateWorkspacesizes(const std::vector<specid_t> &monitorSpecList,
-                               specid_t &normalwsSpecs,
-                               specid_t &monitorwsSpecs);
+  void calculateWorkspacesizes(const std::vector<specnum_t> &monitorSpecList,
+                               specnum_t &normalwsSpecs,
+                               specnum_t &monitorwsSpecs);
   /// load the spectra
   void loadSpectra(FILE *file, const int &period, const int &m_total_specs,
                    DataObjects::Workspace2D_sptr ws_sptr,
@@ -212,11 +212,11 @@ protected:
   /// Have the spectrum_min/max properties been set?
   bool m_interval;
   /// The value of the spectrum_list property
-  std::vector<specid_t> m_spec_list;
+  std::vector<specnum_t> m_spec_list;
   /// The value of the spectrum_min property
-  specid_t m_spec_min;
+  specnum_t m_spec_min;
   /// The value of the spectrum_max property
-  specid_t m_spec_max;
+  specnum_t m_spec_max;
   /// The number of periods in the raw file
   int m_numberOfPeriods;
 
@@ -229,21 +229,21 @@ private:
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;
   /// A map for storing the time regime for each spectrum
-  std::map<specid_t, specid_t> m_specTimeRegimes;
+  std::map<specnum_t, specnum_t> m_specTimeRegimes;
   /// The current value of the progress counter
   double m_prog;
 
   /// number of spectra
-  specid_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
 
   /// a vector holding the indexes of monitors
-  std::vector<specid_t> m_monitordetectorList;
+  std::vector<specnum_t> m_monitordetectorList;
 
   /// boolean for list spectra options
   bool m_bmspeclist;
 
   /// the total nuumber of spectra
-  specid_t m_total_specs;
+  specnum_t m_total_specs;
 
   /// A ptr to the log creator
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
