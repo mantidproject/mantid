@@ -1528,10 +1528,40 @@ class MainWindow(QtGui.QMainWindow):
         Launch the sub window to view merged data in 3D.
         :return:
         """
-        # self._my3DWindow = plot3dwindow.Plot3DWindow(self)
-        # self._my3DWindow.show()
+        # get a list of rows that are selected
+        row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
+        assert len(row_index_list) > 0, 'There is no row that is selected to view.'
 
-        raise RuntimeError('Think of share codes with do_view_data_3d()')
+        # get the information from the selected row
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        assert status, 'Experiment number is not a valid integer.'
+
+        # create window
+        if self._my3DWindow is None:
+            self._my3DWindow = plot3dwindow.Plot3DWindow(self)
+
+        for i_row in row_index_list:
+            exp_info = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
+            scan_number = exp_info[0]
+
+            # prepare data
+            ret_obj = self._prepare_view_merged(exp_number, scan_number)
+            assert len(ret_obj) == 5
+            md_file_name, weight_peak_centers, weight_peak_intensities, avg_peak_centre, avg_peak_intensity = ret_obj
+
+            # add the 3D window
+            self._my3DWindow.initialize_group('%s' % scan_number)
+            self._my3DWindow.add_plot_by_file(md_file_name)
+            self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
+            self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
+            self._my3DWindow.close_session()
+
+        # END-FOR
+
+        # Show
+        self._my3DWindow.show()
+
+        return
 
     def do_view_data_3d(self):
         """
