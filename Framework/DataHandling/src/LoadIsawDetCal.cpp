@@ -83,7 +83,7 @@ void LoadIsawDetCal::exec() {
   std::string filename2 = getProperty("Filename2");
 
   // Output summary to log file
-  int idnum = 0, count, id, nrows, ncols;
+  int count, id, nrows, ncols;
   double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
       up_y, up_z;
   std::ifstream input(filename.c_str(), std::ios_base::in);
@@ -210,18 +210,15 @@ void LoadIsawDetCal::exec() {
       }
     }
     boost::shared_ptr<RectangularDetector> det;
-    std::ostringstream Detbank;
-    Detbank << "bank" << id;
+    std::string Detbank = "bank" + std::to_string(id);
     // Loop through detectors to match names with number from DetCal file
-    idnum = -1;
-    auto result = std::find_if(
+    auto matchingDetector = std::find_if(
         detList.begin(), detList.end(),
         [&Detbank](const boost::shared_ptr<RectangularDetector> &det) {
-          return det->getName().compare(Detbank.str()) == 0;
+          return det->getName().compare(Detbank) == 0;
         });
-    if (result != detList.end()) {
-      idnum = static_cast<int>(std::distance(detList.begin(), result));
-      det = *result;
+    if (matchingDetector != detList.end()) {
+      det = *matchingDetector;
     }
     if (det) {
       detname = det->getName();
@@ -298,10 +295,10 @@ void LoadIsawDetCal::exec() {
       }
     }
     // Loop through tube detectors to match names with number from DetCal file
-    auto result2 = uniqueBanks.find(id);
-    if (result2 == uniqueBanks.end())
+    auto bank = uniqueBanks.find(id);
+    if (bank == uniqueBanks.end())
       continue;
-    idnum = *result2;
+    int idnum = *bank;
 
     std::ostringstream mess;
     if (bankPart == "WISHpanel" && idnum < 10)
