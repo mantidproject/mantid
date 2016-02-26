@@ -331,8 +331,9 @@ public:
     TS_ASSERT_EQUALS(*(ws->getSpectrum(1)->getDetectorIDs().begin()), 10);
     TS_ASSERT(ws->getSpectrum(1)->hasDetectorID(10));
 
-    Mantid::specid_t offset;
+    Mantid::specnum_t offset;
     auto spectNum2WSInd = ws->getSpectrumToWorkspaceIndexVector(offset);
+
     TS_ASSERT_EQUALS(38 + offset + 1, spectNum2WSInd.size());
     size_t sample[] = {5,  10, 11, 12, 13, 14, 15, 16,
                        17, 18, 19, 20, 34, 35, 38};
@@ -381,7 +382,7 @@ public:
     TS_ASSERT_EQUALS(ws->readY(18 - 9)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18 - 9)->getSpectrumNo(), 19);
 
-    Mantid::specid_t offset;
+    Mantid::specnum_t offset;
     auto spectNum2WSInd = ws->getSpectrumToWorkspaceIndexVector(offset);
     TS_ASSERT_EQUALS(20 + offset + 1, spectNum2WSInd.size());
     size_t sample[] = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};

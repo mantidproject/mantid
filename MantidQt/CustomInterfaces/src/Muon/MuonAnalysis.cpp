@@ -2027,10 +2027,7 @@ void MuonAnalysis::showAllPlotWindows() {
 bool MuonAnalysis::isGroupingSet() const {
   auto dummy = whichGroupToWhichRow(m_uiForm);
 
-  if (dummy.empty())
-    return false;
-  else
-    return true;
+  return !dummy.empty();
 }
 
 /**

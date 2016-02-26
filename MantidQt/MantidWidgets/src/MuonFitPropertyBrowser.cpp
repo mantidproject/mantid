@@ -228,7 +228,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
       if ((categories[j] == "Muon") || (categories[j] == "General") || (categories[j] == "Background"))
         muon = true;
     }
-    if (muon == true)
+    if (muon)
     {
       m_registeredFunctions << qfnName;
     }
@@ -354,10 +354,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws)const
   if ( workspaceName.endsWith("_Workspace") )
     return false;
 
-  if (dynamic_cast<MatrixWorkspace*>(ws.get()) != 0)
-    return true;
-  else
-    return false;
+  return dynamic_cast<MatrixWorkspace*>(ws.get()) != 0;
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm* alg)

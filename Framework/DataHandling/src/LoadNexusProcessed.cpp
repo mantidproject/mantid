@@ -1658,7 +1658,7 @@ void LoadNexusProcessed::readInstrumentGroup(
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
     } else if (haveSpectraAxis && !m_axis1vals.empty()) {
-      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
+      spectrum = static_cast<specnum_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }

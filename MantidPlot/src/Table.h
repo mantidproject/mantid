@@ -32,9 +32,7 @@
 #ifndef TABLE_H
 #define TABLE_H
 
-#include <q3table.h>
-#include <q3header.h>
-#include <Q3ValueList>
+#include <QTableWidget>
 #include <QVarLengthArray>
 
 #include "Graph.h"
@@ -45,20 +43,42 @@
 #include "Mantid/IProjectSerialisable.h"
 
 class Folder;
+class QTableWidgetItem;
 
-class MyTable : public Q3Table
+class MyTable : public QTableWidget
 {
   Q_OBJECT
 public:
     MyTable(QWidget * parent = 0, const char * name = 0);
     MyTable(int numRows, int numCols, QWidget * parent = 0, const char * name = 0);
     void blockResizing(bool yes);
+    QString text(int row, int col) const;
+    void setText(int row, int col, const QString& txt);
+    bool isColumnReadOnly(int col) const;
+    void setColumnReadOnly(int col, bool on);
+    void insertColumns(int col, int count = 1);
+    void insertRows(int row, int count = 1);
+    void removeRows(const QVector<int>& rows);
+    bool isColumnSelected(int col, bool full = false) const;
+    bool isRowSelected(int row, bool full = false) const;
+    bool isSelected(int row, int col) const;
+    bool hasSelection() const;
+    int topSelectedRow() const;
+    int bottomSelectedRow() const;
+    int leftSelectedColumn() const;
+    int rightSelectedColumn() const;
+    void selectCell(int row, int col);
+    void ensureCellVisible(int row, int col);
+    void swapColumns(int col1, int col2);
 
 signals:
     void unwantedResize();
 private:
-  void resizeData(int n) override;
+    void resizeData(int n);
+    QTableWidgetItem* addNewItem(int row, int col);
+    void makeItemPrototype();
     bool m_blockResizing; // a workaround to prevent unwanted resizes
+    QTableWidgetItem* m_itemPrototype;
 };
 
 /**\brief MDI window providing a spreadsheet table with column logic.
@@ -82,7 +102,11 @@ public:
 
 	Table(ScriptingEnv *env, int r,int c, const QString &label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
 
-	Q3TableSelection getSelection();
+  int topSelectedRow() const {return d_table->topSelectedRow();}
+  int bottomSelectedRow() const {return d_table->bottomSelectedRow();}
+  int leftSelectedColumn() const {return d_table->leftSelectedColumn();}
+  int rightSelectedColumn() const {return d_table->rightSelectedColumn();}
+  bool hasSelection() const {return d_table->hasSelection();}
 
 	//! Sets the number of significant digits
 	void setNumericPrecision(int prec);
@@ -119,7 +143,7 @@ public slots:
 	int colPlotDesignation(int col){return col_plot_type[col];};
 	void setColPlotDesignation(int col, PlotDesignation pd);
 	void setPlotDesignation(PlotDesignation pd, bool rightColumns = false);
-	Q3ValueList<int> plotDesignations(){return col_plot_type;};
+	QList<int> plotDesignations(){return col_plot_type;};
 
 	void setHeader(QStringList header);
 	void loadHeader(QStringList header);
@@ -283,8 +307,8 @@ public slots:
 	void columnNumericFormat(int col, int *f, int *precision);
 	int columnType(int col){return colTypes[col];};
 
-	Q3ValueList<int> columnTypes(){return colTypes;};
-	void setColumnTypes(Q3ValueList<int> ctl){colTypes = ctl;};
+	QList<int> columnTypes(){return colTypes;};
+	void setColumnTypes(QList<int> ctl){colTypes = ctl;};
 	void setColumnTypes(const QStringList& ctl);
 	void setColumnType(int col, ColType val) { colTypes[col] = val; }
 
@@ -328,7 +352,7 @@ public slots:
 	const QFont & getTextFont();
 	void setHeaderFont(const QFont& fnt);
 
-	int verticalHeaderWidth(){return d_table->verticalHeader()->width();};
+	int verticalHeaderWidth();
 
 	QString colComment(int col){return comments[col];};
 	void setColComment(int col, const QString& s);
@@ -369,6 +393,10 @@ protected:
 	void setColPlotDesignation(int col, int pd);
 
 	MyTable *d_table;
+
+private slots:
+
+  void recordSelection();
 
 private:
 	void clearCol();

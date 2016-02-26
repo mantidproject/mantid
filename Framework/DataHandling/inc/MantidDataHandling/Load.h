@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 namespace DataHandling {
@@ -112,7 +112,7 @@ private:
   /// Filename
   std::string m_filenamePropName;
   /// Mutex for temporary fix for #5963
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

@@ -39,7 +39,7 @@ std::string createWorkspaceIndexListFromDetectorWorkspace(
   auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
   auto it = spectrumMap.begin();
   std::stringstream result;
-  specid_t specId = (*it).first;
+  specnum_t specId = (*it).first;
   result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
   ++it;
   for (; it != spectrumMap.end(); ++it) {

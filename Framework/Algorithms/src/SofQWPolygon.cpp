@@ -60,7 +60,7 @@ void SofQWPolygon::exec() {
   const MantidVec &X = inputWS->readX(0);
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
   // Select the calculate Q method based on the mode

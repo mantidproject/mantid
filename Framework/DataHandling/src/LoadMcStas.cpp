@@ -283,7 +283,7 @@ void LoadMcStas::readEventData(
                     << std::endl;
       return;
     }
-    if (isAnyNeutrons == false && nNeutrons > 0)
+    if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
     std::vector<int64_t> start(2);
