@@ -119,12 +119,12 @@ protected:
    * This variant works with a single workspace and can to in-place modification
    * of spectra or event lists in the workspace. Threading and progress
    * reporting is handled internally.
-   * @tparam Flags Variable number of flags, see ::Indices.
+   * @tparam Flags Variable number of flags, see struct Indices.
    * @param workspace Workspace to work with.
    * @param getters Tuple of getters, pointers to methods of workspace, defaults
    *     defined for convenience in namespace Getters.
    * @param operation Callable that is executed for all spectra (etc.). Results
-   *     from ::getters are passed as arguments. */
+   *     from getters are passed as arguments. */
   template <class... Flags, class WS, class... Args, class OP>
   void for_each(WS &workspace, std::tuple<Args...> getters,
                 const OP &operation) {
