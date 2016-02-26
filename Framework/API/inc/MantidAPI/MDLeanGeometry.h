@@ -57,7 +57,7 @@ public:
   size_t getDimensionIndexById(const std::string &id) const final;
 
   Mantid::Geometry::VecIMDDimension_const_sptr
-  getNonIntegratedDimensions() const final;
+  getNonIntegratedDimensions() const override;
 
   virtual std::vector<coord_t> estimateResolution() const override;
 
