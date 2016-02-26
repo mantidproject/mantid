@@ -28,46 +28,44 @@
 
 namespace Mantid {
 
-	namespace Geometry {
+namespace Geometry {
 
-		SurfaceFactory *SurfaceFactory::FOBJ(nullptr);
+SurfaceFactory *SurfaceFactory::FOBJ(nullptr);
 
-		SurfaceFactory *SurfaceFactory::Instance()
-			/**
-			  Effective new command / this command
-			  @return Single instance of SurfaceFactory
-			*/
-		{
-			if (!FOBJ) {
-				FOBJ = new SurfaceFactory();
-			}
-			return FOBJ;
-		}
+SurfaceFactory *SurfaceFactory::Instance()
+/**
+  Effective new command / this command
+  @return Single instance of SurfaceFactory
+*/
+{
+  if (!FOBJ) {
+    FOBJ = new SurfaceFactory();
+  }
+  return FOBJ;
+}
 
-		SurfaceFactory::SurfaceFactory()
-			/**
-			  Constructor
-			*/
-		{
-			registerSurface();
-		}
+SurfaceFactory::SurfaceFactory()
+/**
+  Constructor
+*/
+{
+  registerSurface();
+}
 
-		SurfaceFactory::SurfaceFactory(const SurfaceFactory &other) : ID(other.ID)
-		{
-			for (const auto& vc : other.SGrid)
-				this->SGrid.emplace_back(vc.first, vc.second->clone());
-		}
+SurfaceFactory::SurfaceFactory(const SurfaceFactory &other) : ID(other.ID) {
+  for (const auto &vc : other.SGrid)
+    this->SGrid.emplace_back(vc.first, vc.second->clone());
+}
 
-		SurfaceFactory &SurfaceFactory::operator=(const SurfaceFactory &other)
-		{
-			if (this != &other) // protect against invalid self-assignment
-			{
-				this->ID = other.ID;
-				for (const auto & vc : other.SGrid)
-					this->SGrid.emplace_back(vc.first, vc.second->clone());
-			}
-			return *this;
-		}
+SurfaceFactory &SurfaceFactory::operator=(const SurfaceFactory &other) {
+  if (this != &other) // protect against invalid self-assignment
+  {
+    this->ID = other.ID;
+    for (const auto &vc : other.SGrid)
+      this->SGrid.emplace_back(vc.first, vc.second->clone());
+  }
+  return *this;
+}
 
 void SurfaceFactory::registerSurface()
 /**

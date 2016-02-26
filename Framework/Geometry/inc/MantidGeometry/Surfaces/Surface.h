@@ -51,6 +51,7 @@ private:
   virtual Surface *doClone() const = 0; ///< Abstract clone function
 protected:
   Surface(const Surface &) = default;
+
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
