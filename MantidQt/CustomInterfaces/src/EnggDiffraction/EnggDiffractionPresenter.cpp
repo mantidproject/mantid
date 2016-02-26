@@ -1792,11 +1792,19 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
 
   if (specNos != "") {
     if (specNos == "North") {
+      // when north bank is selected while cropped calib
       saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
     } else if (specNos == "South") {
+      // when south bank is selected while cropped calib
       saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+    } else {
+      // when spectrumIDs are provided
+      const std::string CustomisedBankName =
+          m_view->currentCalibCustomisedBankName();
+      saveOpenGenie(curvesWSName, specNos, CustomisedBankName, vanNo);
     }
   } else {
+    // when full calibration is carried; saves both banks
     saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
     saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
   }
