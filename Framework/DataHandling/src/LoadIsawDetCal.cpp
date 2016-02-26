@@ -298,8 +298,7 @@ void LoadIsawDetCal::exec() {
       }
     }
     // Loop through tube detectors to match names with number from DetCal file
-    auto result2 = std::find_if(uniqueBanks.begin(), uniqueBanks.end(),
-                                [id](const int &bank) { return bank == id; });
+    auto result2 = uniqueBanks.find(id);
     if (result2 == uniqueBanks.end())
       continue;
     idnum = *result2;
