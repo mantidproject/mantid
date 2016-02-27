@@ -182,7 +182,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
 
     // Keep looking for the next interval where there is a gap (start > old
     // stop);
-    while ((it != a.end()) && (it->start() <= stop)) {
+    while ((it != a.cend()) && (it->start() <= stop)) {
       // Extend the stop point (the start cannot be extended since the list is
       // sorted)
       if (it->stop() > stop)
