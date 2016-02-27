@@ -80,11 +80,11 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init() {
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the CanSAS1D file to load");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Kernel::Direction::Output),
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the CanSAS1D file to load");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -246,7 +246,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   runLoadInstrument(instname, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
-  if (isCommon == true)
+  if (isCommon)
     dataWS->setYUnitLabel(yUnit);
   return dataWS;
 }
@@ -283,8 +283,8 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
   // the following code registers the workspace with the AnalysisDataService and
   // with the workspace group, I'm taking this oone trust I don't know why it's
   // done this way sorry, Steve
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(propName, newWorkName,
-                                                         Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      propName, newWorkName, Direction::Output));
   container->addWorkspace(newWork);
   setProperty(propName, newWork);
 }

@@ -47,12 +47,12 @@ ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
-  declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("RunInfoWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "RunInfoWorkspace", "", Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
                   "It serves as parent workspace in the algorithm.");
@@ -86,18 +86,18 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty("DurationLogName", "time",
                   "Name of the sample log to record the duration of each run.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("DetectorEfficiencyTableWorkspace",
-                                            "", Direction::Input,
-                                            PropertyMode::Optional),
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorEfficiencyTableWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "Name of a table workspace containing the detectors' efficiency.");
 }
 

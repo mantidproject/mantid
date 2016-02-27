@@ -41,55 +41,57 @@
 
 #include <stdexcept>
 
+namespace {
+// Avoids a compiler warning about implicit 'const char *'->'char*' conversion
+// under clang
+#define STR_LITERAL(str) const_cast<char *>(str)
 
-namespace
-{
-  // Avoids a compiler warning about implicit 'const char *'->'char*' conversion under clang
-  #define STR_LITERAL(str) const_cast<char*>(str)
-
-  /**
-   * A callback, set using PyEval_SetTrace, that is called by Python
-   * to allow inspection into the current execution frame. It is currently
-   * used to emit the line number of the frame that is being executed.
-   * @param scriptObj :: A reference to the object passed as the second argument of PyEval_SetTrace
-   * @param frame :: A reference to the current frame object
-   * @param event :: An integer defining the event type, see http://docs.python.org/c-api/init.html#profiling-and-tracing
-   * @param arg :: Meaning varies depending on event type, see http://docs.python.org/c-api/init.html#profiling-and-tracing
-   */
-  int traceLineNumber(PyObject *scriptObj, PyFrameObject *frame, int event, PyObject *arg)
-  {
-    Q_UNUSED(arg);
-    int retcode(0);
-    if(event != PyTrace_LINE) return retcode;
-    PyObject_CallMethod(scriptObj, STR_LITERAL("lineNumberChanged"), STR_LITERAL("O i"),
-                        frame->f_code->co_filename, frame->f_lineno);
+/**
+ * A callback, set using PyEval_SetTrace, that is called by Python
+ * to allow inspection into the current execution frame. It is currently
+ * used to emit the line number of the frame that is being executed.
+ * @param scriptObj :: A reference to the object passed as the second argument
+ * of PyEval_SetTrace
+ * @param frame :: A reference to the current frame object
+ * @param event :: An integer defining the event type, see
+ * http://docs.python.org/c-api/init.html#profiling-and-tracing
+ * @param arg :: Meaning varies depending on event type, see
+ * http://docs.python.org/c-api/init.html#profiling-and-tracing
+ */
+int traceLineNumber(PyObject *scriptObj, PyFrameObject *frame, int event,
+                    PyObject *arg) {
+  Q_UNUSED(arg);
+  int retcode(0);
+  if (event != PyTrace_LINE)
     return retcode;
-  }
-
-  /// Message to emit when everything worked out fine
-  static const QString MSG_FINISHED = "Script execution finished.";
-  /// Message to emit when starting
-  static const QString MSG_STARTED = "Script execution started.";
+  PyObject_CallMethod(scriptObj, STR_LITERAL("lineNumberChanged"),
+                      STR_LITERAL("O i"), frame->f_code->co_filename,
+                      frame->f_lineno);
+  return retcode;
 }
 
+/// Message to emit when everything worked out fine
+static const QString MSG_FINISHED = "Script execution finished.";
+/// Message to emit when starting
+static const QString MSG_STARTED = "Script execution started.";
+}
 
 /**
  * Constructor
  */
-PythonScript::PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
-                           QObject * context)
-  : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
-    stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL), m_threadID(-1), isFunction(false),
-    m_isInitialized(false), m_pathHolder(name), m_workspaceHandles()
-{
+PythonScript::PythonScript(PythonScripting *env, const QString &name,
+                           const InteractionType interact, QObject *context)
+    : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
+      stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL),
+      m_threadID(-1), isFunction(false), m_isInitialized(false),
+      m_pathHolder(name), m_workspaceHandles() {
   initialize(name, context);
 }
 
 /**
  * Destructor
  */
-PythonScript::~PythonScript()
-{
+PythonScript::~PythonScript() {
   ScopedPythonGIL lock;
   this->abort();
   observeAdd(false);
@@ -103,25 +105,26 @@ PythonScript::~PythonScript()
 }
 
 /**
- * Set the name of the script. If empty, set a default so that the code object behaves correctly
+ * Set the name of the script. If empty, set a default so that the code object
+ * behaves correctly
  * w.r.t inspect.stack(). If no name is set inspect.stack throws a RangeError.
- * @param name An identifier for this object. Used in stack traces when reporting errors
+ * @param name An identifier for this object. Used in stack traces when
+ * reporting errors
  */
-void PythonScript::setIdentifier(const QString & name)
-{
+void PythonScript::setIdentifier(const QString &name) {
   QString identifier = name;
-  if(identifier.isEmpty()) identifier = "New script";
+  if (identifier.isEmpty())
+    identifier = "New script";
   Script::setIdentifier(identifier);
 
   // Update or set the __file__ attribute
-  if( QFileInfo(identifier).exists() )
-  {
+  if (QFileInfo(identifier).exists()) {
     QString scriptPath = QFileInfo(identifier).absoluteFilePath();
     // Make sure the __file__ variable is set
-    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
+    PyDict_SetItem(localDict, PyString_FromString("__file__"),
+                   PyString_FromString(scriptPath.toAscii().data()));
   }
 }
-
 
 /**
  * Creates a PyObject that wraps the calling C++ instance.
@@ -129,11 +132,9 @@ void PythonScript::setIdentifier(const QString & name)
  * is responsible for calling Py_DECREF
  * @return A PyObject wrapping this instance
  */
-PyObject * PythonScript::createSipInstanceFromMe()
-{
+PyObject *PythonScript::createSipInstanceFromMe() {
   static sipWrapperType *sipClass(NULL);
-  if(!sipClass)
-  {
+  if (!sipClass) {
     sipClass = sipFindClass("PythonScript");
   }
   PyObject *sipWrapper = sipConvertFromInstance(this, sipClass, NULL);
@@ -145,30 +146,20 @@ PyObject * PythonScript::createSipInstanceFromMe()
  * @param code A lump of python code
  * @return True if the code forms a complete statment
  */
-bool PythonScript::compilesToCompleteStatement(const QString & code) const
-{
+bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
   ScopedPythonGIL gil;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
-  if( PyObject *exception = PyErr_Occurred() )
-  {
+  if (PyObject *exception = PyErr_Occurred()) {
     // Certain exceptions still mean the code is complete
-    if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
-       PyErr_GivenExceptionMatches(exception, PyExc_MemoryError))
-    {
-      result = true;
-    }
-    else
-    {
-      result = false;
-    }
+    result = (PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
+              PyErr_GivenExceptionMatches(exception, PyExc_MemoryError));
+
     PyErr_Clear();
-  }
-  else
-  {
+  } else {
     result = true;
   }
   Py_XDECREF(compiledCode);
@@ -176,15 +167,14 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
 }
 
 /**
- * Called from Python with the codeObject and line number of the currently executing line
+ * Called from Python with the codeObject and line number of the currently
+ * executing line
  * @param codeObject A pointer to the code object whose line is executing
  * @param lineNo The line number that the code is currently executing, note that
  * this will be relative to the top of the code that was executed
  */
-void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
-{
-  if(codeObject == m_codeFileObject)
-  {
+void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo) {
+  if (codeObject == m_codeFileObject) {
     sendLineChangeSignal(getRealLineNo(lineNo), false);
   }
 }
@@ -194,33 +184,27 @@ void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
  * @param lineNo The line number to flag
  * @param error True if it is an error
  */
-void PythonScript::sendLineChangeSignal(int lineNo, bool error)
-{
+void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
   emit currentLineChanged(lineNo, error);
 }
-
 
 /**
  * Create a list autocomplete keywords
  */
-void PythonScript::generateAutoCompleteList()
-{
+void PythonScript::generateAutoCompleteList() {
   ScopedPythonGIL gil;
 
   PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
+  PyObject *method =
+      PyString_FromString("_ScopeInspector_GetFunctionAttributes");
   PyObject *keywords(NULL);
-  if( method && main_module )
-  {
+  if (method && main_module) {
     keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  }
-  else
-  {
+  } else {
     return;
   }
   QStringList keywordList;
-  if(PyErr_Occurred() || !keywords)
-  {
+  if (PyErr_Occurred() || !keywords) {
     PyErr_Print();
     return;
   }
@@ -235,14 +219,12 @@ void PythonScript::generateAutoCompleteList()
  * This emits the error signal and resets the error state
  * of the python interpreter.
  */
-void PythonScript::emit_error()
-{
+void PythonScript::emit_error() {
   // gil is necessary so other things don't continue
   ScopedPythonGIL gil;
 
   // return early if nothing happened
-  if (!PyErr_Occurred())
-  {
+  if (!PyErr_Occurred()) {
     emit finished(MSG_FINISHED);
     return;
   }
@@ -251,20 +233,17 @@ void PythonScript::emit_error()
   PyErr_Fetch(&exception, &value, &traceback);
 
   // special check for system exceptions
-  if (bool(exception)
-      && PyErr_GivenExceptionMatches(exception, PyExc_SystemExit)
-      && PyObject_HasAttrString(exception, "code"))
-  {
+  if (bool(exception) &&
+      PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) &&
+      PyObject_HasAttrString(exception, "code")) {
     // value is the return code handed to sys.exit
     long code = 0;
-    if (bool(value) && PyInt_Check(value))
-    {
+    if (bool(value) && PyInt_Check(value)) {
       code = PyInt_AsLong(value);
     }
 
     // if we are returning 0 then cleanup and return
-    if (code == 0)
-    {
+    if (code == 0) {
       // maybe shouldn't clear the error, but for now this
       // is the agreed upon behavior
       PyErr_Clear();
@@ -283,9 +262,8 @@ void PythonScript::emit_error()
   // convert the traceback into something useful
   int lineNumber = 0;
   QString filename;
-  if (traceback)
-  {
-    PyTracebackObject* tb = (PyTracebackObject*)traceback;
+  if (traceback) {
+    PyTracebackObject *tb = (PyTracebackObject *)traceback;
     lineNumber = tb->tb_lineno;
     filename = PyString_AsString(tb->tb_frame->f_code->co_filename);
   }
@@ -294,22 +272,18 @@ void PythonScript::emit_error()
   PyObject *str_repr = PyObject_Str(value);
   QString message;
   QTextStream msgStream(&message);
-  if( value && str_repr )
-  {
-    if(exception == PyExc_SyntaxError)
-    {
+  if (value && str_repr) {
+    if (exception == PyExc_SyntaxError) {
       msgStream << constructSyntaxErrorStr(value);
-    }
-    else
-    {
-      QString excTypeName(value->ob_type->tp_name); // This is fully qualified with the module name
+    } else {
+      QString excTypeName(
+          value->ob_type
+              ->tp_name); // This is fully qualified with the module name
       excTypeName = excTypeName.section(".", -1);
       msgStream << excTypeName << ": " << PyString_AsString(str_repr);
     }
 
-  }
-  else
-  {
+  } else {
     msgStream << "Unknown exception has occurred.";
   }
   tracebackToMsg(msgStream, (PyTracebackObject *)(traceback));
@@ -326,100 +300,92 @@ void PythonScript::emit_error()
  * Constructs a string error message from a syntax exception value object
  * @param syntaxError An instance of PyExc_SyntaxError
  */
-QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
-{
+QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError) {
   QString exceptionAsStr = m_pythonEnv->toString(syntaxError);
   exceptionAsStr = exceptionAsStr.section("(", 0, 0).trimmed();
-  const QString filename = m_pythonEnv->toString(PyObject_GetAttrString(syntaxError, "filename"), true);
-  int lineno = static_cast<int>(m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "lineno")));
+  const QString filename = m_pythonEnv->toString(
+      PyObject_GetAttrString(syntaxError, "filename"), true);
+  int lineno = static_cast<int>(
+      m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "lineno")));
 #if PY_VERSION_HEX < 0x02070000
-  // Syntax errors generated by earlier versions seem to have a line number off by 1
+  // Syntax errors generated by earlier versions seem to have a line number off
+  // by 1
   lineno -= 1;
 #endif
 
   QString msg;
-  // If the text attribute is not None then an offset in the code can be shown using a ^ character
+  // If the text attribute is not None then an offset in the code can be shown
+  // using a ^ character
   PyObject *textObject = PyObject_GetAttrString(syntaxError, "text");
-  if(textObject != Py_None)
-  {
+  if (textObject != Py_None) {
     QString text = m_pythonEnv->toString(textObject, true).trimmed();
-    int offset = static_cast<int>(m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "offset")));
-    QString offsetMarker = QString(offset-1, ' ') + "^";
-    msg =
-      "File \"%1\", line %2\n"
-      "    %3\n"
-      "    %4\n"
-      "SyntaxError: %5";
+    int offset = static_cast<int>(
+        m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "offset")));
+    QString offsetMarker = QString(offset - 1, ' ') + "^";
+    msg = "File \"%1\", line %2\n"
+          "    %3\n"
+          "    %4\n"
+          "SyntaxError: %5";
     msg = msg.arg(filename);
     msg = msg.arg(lineno);
     msg = msg.arg(text, offsetMarker, exceptionAsStr);
-  }
-  else
-  {
-    msg =
-      "File \"%1\", line %2\n"
-      "SyntaxError: %3";
+  } else {
+    msg = "File \"%1\", line %2\n"
+          "SyntaxError: %3";
     msg = msg.arg(filename);
     msg = msg.arg(lineno);
     msg = msg.arg(exceptionAsStr);
   }
-  if(filename == identifier().c_str())
-  {
+  if (filename == identifier().c_str()) {
     sendLineChangeSignal(lineno, true);
   }
   return msg;
 }
 
-  /**
-   * Form a traceback
-   * @param msg The reference to the textstream to accumulate the message
-   * @param traceback A traceback object
-   * @param root If true then this is the root of the traceback
-   */
+/**
+ * Form a traceback
+ * @param msg The reference to the textstream to accumulate the message
+ * @param traceback A traceback object
+ * @param root If true then this is the root of the traceback
+ */
 void PythonScript::tracebackToMsg(QTextStream &msgStream,
-                                  PyTracebackObject* traceback,
-                                  bool root)
-{
-  if(traceback == NULL) return;
+                                  PyTracebackObject *traceback, bool root) {
+  if (traceback == NULL)
+    return;
   msgStream << "\n  ";
-  if (root) msgStream << "at";
-  else msgStream << "caused by";
+  if (root)
+    msgStream << "at";
+  else
+    msgStream << "caused by";
 
   int lineno = traceback->tb_lineno;
-  QString filename = QString::fromAscii(PyString_AsString(traceback->tb_frame->f_code->co_filename));
-  if(filename == identifier().c_str())
-  {
+  QString filename = QString::fromAscii(
+      PyString_AsString(traceback->tb_frame->f_code->co_filename));
+  if (filename == identifier().c_str()) {
     lineno = getRealLineNo(lineno);
     sendLineChangeSignal(lineno, true);
-
   }
 
-  msgStream << " line " << lineno << " in \'" << filename  << "\'";
+  msgStream << " line " << lineno << " in \'" << filename << "\'";
   tracebackToMsg(msgStream, traceback->tb_next, false);
 }
 
-bool PythonScript::setQObject(QObject *val, const char *name)
-{
-  if (localDict)
-  {
+bool PythonScript::setQObject(QObject *val, const char *name) {
+  if (localDict) {
     return pythonEnv()->setQObject(val, name, localDict);
-  }
-  else
+  } else
     return false;
 }
 
-bool PythonScript::setInt(int val, const char *name)
-{
+bool PythonScript::setInt(int val, const char *name) {
   return pythonEnv()->setInt(val, name, localDict);
 }
 
-bool PythonScript::setDouble(double val, const char *name)
-{
+bool PythonScript::setDouble(double val, const char *name) {
   return pythonEnv()->setDouble(val, name, localDict);
 }
 
-void PythonScript::setContext(QObject *context)
-{
+void PythonScript::setContext(QObject *context) {
   Script::setContext(context);
   setQObject(context, "self");
 }
@@ -428,18 +394,17 @@ void PythonScript::setContext(QObject *context)
  * Clears the current set of local variables, if they exist, and resets
  * the dictionary context back to the default set
  */
-void PythonScript::clearLocals()
-{
+void PythonScript::clearLocals() {
   ScopedPythonGIL pythonLock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
 
-  if(localDict)
-  {
+  if (localDict) {
     // Pull out variables that are not user-related
-    PyObject * value = PyDict_GetItemString(localDict, "__file__");
-    if(value) PyDict_SetItemString(cleanLocals, "__file__", value);
+    PyObject *value = PyDict_GetItemString(localDict, "__file__");
+    if (value)
+      PyDict_SetItemString(cleanLocals, "__file__", value);
     // reset locals
     Py_DECREF(localDict);
     localDict = NULL;
@@ -453,19 +418,19 @@ void PythonScript::clearLocals()
  * @param name A string identifier for the script
  * @param context A QObject defining the context
  */
-void PythonScript::initialize(const QString & name, QObject *context)
-{
+void PythonScript::initialize(const QString &name, QObject *context) {
   clearLocals(); // holds and releases GIL
 
   ScopedPythonGIL pythonlock;
   PythonScript::setIdentifier(name);
   setContext(context);
 
-  PyObject *ialgorithm = PyObject_GetAttrString(PyImport_AddModule("mantid.api"), "IAlgorithm");
-  m_algorithmInThread = PyObject_GetAttrString(ialgorithm, "_algorithmInThread");
+  PyObject *ialgorithm =
+      PyObject_GetAttrString(PyImport_AddModule("mantid.api"), "IAlgorithm");
+  m_algorithmInThread =
+      PyObject_GetAttrString(ialgorithm, "_algorithmInThread");
   Py_INCREF(m_algorithmInThread);
 }
-
 
 //-------------------------------------------------------
 // Private
@@ -473,9 +438,9 @@ void PythonScript::initialize(const QString & name, QObject *context)
 /**
  * Redirect the std out to this object
  */
-void PythonScript::beginStdoutRedirect()
-{
-  if(!redirectStdOut()) return;
+void PythonScript::beginStdoutRedirect() {
+  if (!redirectStdOut())
+    return;
   stdoutSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
   stderrSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stderr");
@@ -488,9 +453,9 @@ void PythonScript::beginStdoutRedirect()
  * Restore the std out to this object to what it was before the last call to
  * beginStdouRedirect
  */
-void PythonScript::endStdoutRedirect()
-{
-  if(!redirectStdOut()) return;
+void PythonScript::endStdoutRedirect() {
+  if (!redirectStdOut())
+    return;
 
   PyDict_SetItemString(pythonEnv()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
@@ -503,52 +468,38 @@ void PythonScript::endStdoutRedirect()
  * @param code
  * @return True if success, false otherwise
  */
-bool PythonScript::compileImpl()
-{
+bool PythonScript::compileImpl() {
   PyObject *codeObject = compileToByteCode(false);
-  if(codeObject)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+
+  return codeObject != NULL;
 }
 
 /**
  * Evaluate the code and return the value
  * @return
  */
-QVariant PythonScript::evaluateImpl()
-{
+QVariant PythonScript::evaluateImpl() {
   ScopedPythonGIL gil;
   PyObject *compiledCode = this->compileToByteCode(true);
-  if(!compiledCode)
-  {
+  if (!compiledCode) {
     return QVariant("");
   }
   PyObject *pyret;
   beginStdoutRedirect();
-  if (PyCallable_Check(compiledCode)){
+  if (PyCallable_Check(compiledCode)) {
     PyObject *empty_tuple = PyTuple_New(0);
     pyret = PyObject_Call(compiledCode, empty_tuple, localDict);
     Py_DECREF(empty_tuple);
-  }
-  else
-  {
-    pyret = PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, localDict);
+  } else {
+    pyret = PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, localDict);
   }
   endStdoutRedirect();
-  if (!pyret)
-  {
-    if (PyErr_ExceptionMatches(PyExc_ValueError) || PyErr_ExceptionMatches(PyExc_ZeroDivisionError))
-    {
+  if (!pyret) {
+    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
+        PyErr_ExceptionMatches(PyExc_ZeroDivisionError)) {
       PyErr_Clear(); // silently ignore errors
       return QVariant("");
-    }
-    else
-    {
+    } else {
       emit_error();
       return QVariant();
     }
@@ -556,53 +507,40 @@ QVariant PythonScript::evaluateImpl()
 
   QVariant qret = QVariant();
   /* None */
-  if (pyret == Py_None)
-  {
+  if (pyret == Py_None) {
     qret = QVariant("");
   }
   /* numeric types */
-  else if (PyFloat_Check(pyret))
-  {
+  else if (PyFloat_Check(pyret)) {
     qret = QVariant(PyFloat_AS_DOUBLE(pyret));
-  }
-  else if (PyInt_Check(pyret))
-  {
+  } else if (PyInt_Check(pyret)) {
     qret = QVariant((qlonglong)PyInt_AS_LONG(pyret));
-  }
-  else if (PyLong_Check(pyret))
-  {
+  } else if (PyLong_Check(pyret)) {
     qret = QVariant((qlonglong)PyLong_AsLongLong(pyret));
-  }
-  else if (PyNumber_Check(pyret))
-  {
+  } else if (PyNumber_Check(pyret)) {
     PyObject *number = PyNumber_Float(pyret);
-    if (number)
-    {
+    if (number) {
       qret = QVariant(PyFloat_AS_DOUBLE(number));
       Py_DECREF(number);
     }
   }
   /* bool */
-  else if (PyBool_Check(pyret))
-  {
-    qret = QVariant(pyret==Py_True, 0);
+  else if (PyBool_Check(pyret)) {
+    qret = QVariant(pyret == Py_True, 0);
   }
   // could handle advanced types (such as PyList->QValueList) here if needed
   /* fallback: try to convert to (unicode) string */
-  if(!qret.isValid())
-  {
+  if (!qret.isValid()) {
     PyObject *pystring = PyObject_Unicode(pyret);
-    if (pystring)
-    {
-      PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
+    if (pystring) {
+      PyObject *asUTF8 =
+          PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring),
+                               (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
       Py_DECREF(pystring);
-      if (asUTF8)
-      {
+      if (asUTF8) {
         qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
         Py_DECREF(asUTF8);
-      }
-      else if ((pystring = PyObject_Str(pyret)))
-      {
+      } else if ((pystring = PyObject_Str(pyret))) {
         qret = QVariant(QString(PyString_AS_STRING(pystring)));
         Py_DECREF(pystring);
       }
@@ -610,15 +548,12 @@ QVariant PythonScript::evaluateImpl()
   }
 
   Py_DECREF(pyret);
-  if (PyErr_Occurred())
-  {
-    if (PyErr_ExceptionMatches(PyExc_ValueError) || PyErr_ExceptionMatches(PyExc_ZeroDivisionError))
-    {
+  if (PyErr_Occurred()) {
+    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
+        PyErr_ExceptionMatches(PyExc_ZeroDivisionError)) {
       PyErr_Clear(); // silently ignore errors
-      return  QVariant("");
-    }
-    else
-    {
+      return QVariant("");
+    } else {
       emit_error();
     }
     return QVariant();
@@ -631,25 +566,22 @@ QVariant PythonScript::evaluateImpl()
  * to its original
  */
 struct TemporaryValue {
-  TemporaryValue(long & refVal, long tmp) : initial(refVal), ref(refVal){
+  TemporaryValue(long &refVal, long tmp) : initial(refVal), ref(refVal) {
     ref = tmp;
   }
-  ~TemporaryValue() {
-    ref = initial;
-  }
+  ~TemporaryValue() { ref = initial; }
+
 private:
   long initial;
-  long & ref;
+  long &ref;
 };
 
-bool PythonScript::executeImpl()
-{
+bool PythonScript::executeImpl() {
   TemporaryValue holder(m_threadID, getThreadID());
   return executeString();
 }
 
-void PythonScript::abortImpl()
-{
+void PythonScript::abortImpl() {
   // The current thread for this script could be
   // in one of two states:
   //   1. A C++ algorithm is being executed so it must be
@@ -657,12 +589,14 @@ void PythonScript::abortImpl()
   //   2. Pure Python is executing and can be interrupted
   //      with a KeyboardInterrupt exception
   // In both situations we issue a KeyboardInterrupt just in case the algorithm
-  // hasn't implemented cancel() checking so that when control returns the Python the
+  // hasn't implemented cancel() checking so that when control returns the
+  // Python the
   // interrupt should be picked up.
   ScopedPythonGIL lock;
   m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
-  PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
-  if(curAlg && curAlg != Py_None){
+  PyObject *curAlg =
+      PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
+  if (curAlg && curAlg != Py_None) {
     PyObject_CallMethod(curAlg, STR_LITERAL("cancel"), STR_LITERAL(""));
   }
 }
@@ -672,45 +606,37 @@ void PythonScript::abortImpl()
  * thread that has a valid Python threadstate
  * @return A long int giving a unique ID for the thread
  */
-long PythonScript::getThreadID()
-{
+long PythonScript::getThreadID() {
   ScopedPythonGIL lock;
   return PyThreadState_Get()->thread_id;
 }
 
-
 /// Performs the call to Python
-bool PythonScript::executeString()
-{
+bool PythonScript::executeString() {
   emit started(MSG_STARTED);
   bool success(false);
   ScopedPythonGIL gil;
 
-  PyObject * compiledCode = compileToByteCode(false);
+  PyObject *compiledCode = compileToByteCode(false);
   PyObject *result(NULL);
-  if(compiledCode)
-  {
+  if (compiledCode) {
     result = executeCompiledCode(compiledCode);
   }
   // If an error has occurred we need to construct the error message
   // before any other python code is run
   QString msg;
-  if(!result)
-  {
+  if (!result) {
     emit_error();
     // If a script was aborted we both raise a KeyboardInterrupt and
     // call Algorithm::cancel to make sure we capture it. The doubling
     // can leave an interrupt in the pipeline so we clear it was we've
     // got the error info out
     m_pythonEnv->raiseAsyncException(m_threadID, NULL);
-  }
-  else
-  {
+  } else {
     emit finished(MSG_FINISHED);
     success = true;
   }
-  if(isInteractive())
-  {
+  if (isInteractive()) {
     generateAutoCompleteList();
   }
 
@@ -720,33 +646,29 @@ bool PythonScript::executeString()
   return success;
 }
 
-namespace
-{
-  /**
-   * RAII struct for installing a tracing function
-   * to monitor the line number events and ensuring it is removed
-   * when the object is destroyed
-   */
-  struct InstallTrace
-  {
-    explicit InstallTrace(PythonScript &scriptObject)
-        : m_sipWrappedScript(NULL) {
-      if(scriptObject.reportProgress())
-      {
-        m_sipWrappedScript = scriptObject.createSipInstanceFromMe();
-        PyEval_SetTrace((Py_tracefunc)&traceLineNumber, m_sipWrappedScript);
-      }
+namespace {
+/**
+ * RAII struct for installing a tracing function
+ * to monitor the line number events and ensuring it is removed
+ * when the object is destroyed
+ */
+struct InstallTrace {
+  explicit InstallTrace(PythonScript &scriptObject) : m_sipWrappedScript(NULL) {
+    if (scriptObject.reportProgress()) {
+      m_sipWrappedScript = scriptObject.createSipInstanceFromMe();
+      PyEval_SetTrace((Py_tracefunc)&traceLineNumber, m_sipWrappedScript);
     }
-    ~InstallTrace()
-    {
-      PyEval_SetTrace(NULL, NULL);
-      Py_XDECREF(m_sipWrappedScript);
-    }
-  private:
-    InstallTrace();
-    Q_DISABLE_COPY(InstallTrace)
-    PyObject *m_sipWrappedScript;
-  };
+  }
+  ~InstallTrace() {
+    PyEval_SetTrace(NULL, NULL);
+    Py_XDECREF(m_sipWrappedScript);
+  }
+
+private:
+  InstallTrace();
+  Q_DISABLE_COPY(InstallTrace)
+  PyObject *m_sipWrappedScript;
+};
 }
 
 /**
@@ -754,14 +676,14 @@ namespace
  * @param compiledCode An object that has been compiled from a code fragment
  * @return The result python object
  */
-PyObject* PythonScript::executeCompiledCode(PyObject *compiledCode)
-{
+PyObject *PythonScript::executeCompiledCode(PyObject *compiledCode) {
   PyObject *result(NULL);
-  if(!compiledCode) return result;
+  if (!compiledCode)
+    return result;
 
   InstallTrace traceInstall(*this);
   beginStdoutRedirect();
-  result = PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, localDict);
+  result = PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, localDict);
   endStdoutRedirect();
   return result;
 }
@@ -771,33 +693,21 @@ PyObject* PythonScript::executeCompiledCode(PyObject *compiledCode)
  * @param result The output from a PyEval call
  * @return A boolean indicating success status
  */
-bool PythonScript::checkResult(PyObject *result)
-{
-  if(result)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
+bool PythonScript::checkResult(PyObject *result) { return result != NULL; }
 
 /**
  * Compile the code
  */
-PyObject *PythonScript::compileToByteCode(bool for_eval)
-{
+PyObject *PythonScript::compileToByteCode(bool for_eval) {
   // Support for the convenient col() and cell() functions.
   // This can't be done anywhere else, because we need access to the local
   // variables self, i and j.
-  if( context() )
-  {
-    if( context()->inherits("Table") )
-    {
-      // A bit of a hack, but we need either IndexError or len() from __builtins__.
-      PyDict_SetItemString(localDict, "__builtins__",
+  if (context()) {
+    if (context()->inherits("Table")) {
+      // A bit of a hack, but we need either IndexError or len() from
+      // __builtins__.
+      PyDict_SetItemString(
+          localDict, "__builtins__",
           PyDict_GetItemString(pythonEnv()->globalDict(), "__builtins__"));
       PyObject *ret = PyRun_String(
           "def col(c,*arg):\n"
@@ -815,17 +725,17 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
         Py_DECREF(ret);
       else
         PyErr_Print();
-    }
-    else if(context()->inherits("Matrix"))
-    {
-      // A bit of a hack, but we need either IndexError or len() from __builtins__.
-      PyDict_SetItemString(localDict, "__builtins__",
+    } else if (context()->inherits("Matrix")) {
+      // A bit of a hack, but we need either IndexError or len() from
+      // __builtins__.
+      PyDict_SetItemString(
+          localDict, "__builtins__",
           PyDict_GetItemString(pythonEnv()->globalDict(), "__builtins__"));
-      PyObject *ret = PyRun_String(
-          "def cell(*arg):\n"
-          "\ttry: return self.cell(arg[0],arg[1])\n"
-          "\texcept(IndexError): return self.cell(i,j)\n",
-          Py_file_input, localDict, localDict);
+      PyObject *ret =
+          PyRun_String("def cell(*arg):\n"
+                       "\ttry: return self.cell(arg[0],arg[1])\n"
+                       "\texcept(IndexError): return self.cell(i,j)\n",
+                       Py_file_input, localDict, localDict);
       if (ret)
         Py_DECREF(ret);
       else
@@ -834,14 +744,12 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
   }
   bool success(false);
   // Simplest case: Code is a single expression
-  PyObject *compiledCode = Py_CompileString(codeString().c_str(), identifier().c_str(), Py_file_input);
+  PyObject *compiledCode = Py_CompileString(
+      codeString().c_str(), identifier().c_str(), Py_file_input);
 
-  if( compiledCode )
-  {
+  if (compiledCode) {
     success = true;
-  }
-  else if (for_eval)
-  {
+  } else if (for_eval) {
     // Code contains statements (or errors) and we want to get a return
     // value from it.
     // So we wrap the code into a function definition,
@@ -852,35 +760,29 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
     PyObject *key(NULL), *value(NULL);
     Py_ssize_t i(0);
     QString signature = "";
-    while(PyDict_Next(localDict, &i, &key, &value))
-    {
+    while (PyDict_Next(localDict, &i, &key, &value)) {
       signature.append(PyString_AsString(key)).append(",");
     }
-    signature.truncate(signature.length()-1);
-    std::string fdef = "def __doit__("+signature.toStdString()+"):\n";
+    signature.truncate(signature.length() - 1);
+    std::string fdef = "def __doit__(" + signature.toStdString() + "):\n";
     fdef += codeString();
-    compiledCode = Py_CompileString(fdef.c_str(), identifier().c_str(), Py_file_input);
-    if( compiledCode )
-    {
+    compiledCode =
+        Py_CompileString(fdef.c_str(), identifier().c_str(), Py_file_input);
+    if (compiledCode) {
       PyObject *tmp = PyDict_New();
-      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, tmp));
+      Py_XDECREF(PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, tmp));
       Py_DECREF(compiledCode);
-      compiledCode = PyDict_GetItemString(tmp,"__doit__");
+      compiledCode = PyDict_GetItemString(tmp, "__doit__");
       Py_XINCREF(compiledCode);
       Py_DECREF(tmp);
     }
     success = (compiledCode != NULL);
-  }
-  else
-  {
+  } else {
   }
 
-  if(success)
-  {
-    m_codeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
-  }
-  else
-  {
+  if (success) {
+    m_codeFileObject = ((PyCodeObject *)(compiledCode))->co_filename;
+  } else {
     compiledCode = NULL;
     m_codeFileObject = NULL;
   }
@@ -890,24 +792,26 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
 //--------------------------------------------------------------------------------------------
 
 /**
- * Listen to add notifications from the ADS and add a Python variable of the workspace name
+ * Listen to add notifications from the ADS and add a Python variable of the
+ * workspace name
  * to the current scope
  * @param wsName The name of the workspace
  * @param ws The ws ptr (unused)
  */
-void PythonScript::addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
+void PythonScript::addHandle(const std::string &wsName,
+                             const Mantid::API::Workspace_sptr ws) {
   addPythonReference(wsName, ws);
 }
 
 /**
- * Listen to add/replace notifications from the ADS and add a Python variable of the workspace name
+ * Listen to add/replace notifications from the ADS and add a Python variable of
+ * the workspace name
  * to the current scope
  * @param wsName The name of the workspace
  * @param ws The ws ptr (unused)
  */
-void PythonScript::afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
+void PythonScript::afterReplaceHandle(const std::string &wsName,
+                                      const Mantid::API::Workspace_sptr ws) {
   addPythonReference(wsName, ws);
 }
 
@@ -916,20 +820,20 @@ void PythonScript::afterReplaceHandle(const std::string& wsName,const Mantid::AP
  * @param wsName The name of the workspace
  * @param ws The ws ptr (unused)
  */
-void PythonScript::postDeleteHandle(const std::string& wsName)
-{
+void PythonScript::postDeleteHandle(const std::string &wsName) {
   deletePythonReference(wsName);
 }
 
 /**
  * Clear all workspace handle references
  */
-void PythonScript::clearADSHandle()
-{
-  for( auto itr = m_workspaceHandles.cbegin(); itr != m_workspaceHandles.cend(); )
-  {
-    // This also erases the element from current set. The standard says that erase only invalidates
-    // iterators of erased elements so we need to increment the iterator and get back the previous value
+void PythonScript::clearADSHandle() {
+  for (auto itr = m_workspaceHandles.cbegin();
+       itr != m_workspaceHandles.cend();) {
+    // This also erases the element from current set. The standard says that
+    // erase only invalidates
+    // iterators of erased elements so we need to increment the iterator and get
+    // back the previous value
     // i.e. the postfix operator
     this->deletePythonReference(*(itr++));
   }
@@ -937,66 +841,58 @@ void PythonScript::clearADSHandle()
   assert(m_workspaceHandles.empty());
 }
 
-
 /**
  * Add a Python variable of the workspace name
  * to the current scope
  * @param wsName The name of the workspace
  * @param ws The ws ptr (unused)
  */
-void PythonScript::addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
+void PythonScript::addPythonReference(const std::string &wsName,
+                                      const Mantid::API::Workspace_sptr ws) {
   UNUSED_ARG(ws);
 
   // Compile a code object
   const size_t length = wsName.length() * 2 + 10;
-  char * code = new char[length + 1];
-  const char * name = wsName.c_str();
+  char *code = new char[length + 1];
+  const char *name = wsName.c_str();
   sprintf(code, "%s = mtd['%s']", name, name);
-  PyObject *codeObj = Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
-  if( codeObj )
-  {
-    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,localDict, localDict);
+  PyObject *codeObj =
+      Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
+  if (codeObj) {
+    PyObject *ret =
+        PyEval_EvalCode((PyCodeObject *)codeObj, localDict, localDict);
     Py_XDECREF(ret);
   }
-  if( PyErr_Occurred() )
-  {
+  if (PyErr_Occurred()) {
     PyErr_Clear();
-  }
-  else
-  {
+  } else {
     // Keep track of it
     m_workspaceHandles.insert(m_workspaceHandles.end(), wsName);
   }
   Py_XDECREF(codeObj);
-  delete [] code;
+  delete[] code;
 }
-
 
 /**
  * Delete a Python reference to the given workspace name
  * @param wsName The name of the workspace
  */
-void PythonScript::deletePythonReference(const std::string& wsName)
-{
+void PythonScript::deletePythonReference(const std::string &wsName) {
   const size_t length = wsName.length() + 4;
-  char * code = new char[length + 1];
+  char *code = new char[length + 1];
   sprintf(code, "del %s", wsName.c_str());
-  PyObject *codeObj = Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
-  if( codeObj )
-  {
-    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,localDict, localDict);
+  PyObject *codeObj =
+      Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
+  if (codeObj) {
+    PyObject *ret =
+        PyEval_EvalCode((PyCodeObject *)codeObj, localDict, localDict);
     Py_XDECREF(ret);
   }
-  if( PyErr_Occurred() )
-  {
+  if (PyErr_Occurred()) {
     PyErr_Clear();
-  }
-  else
-  {
+  } else {
     m_workspaceHandles.erase(wsName);
   }
   Py_XDECREF(codeObj);
-  delete [] code;
-
+  delete[] code;
 }

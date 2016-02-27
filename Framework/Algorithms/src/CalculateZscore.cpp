@@ -34,14 +34,12 @@ CalculateZscore::~CalculateZscore() {}
 /** Define properties
   */
 void CalculateZscore::init() {
-  auto inwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputWorkspace", "Anonymous", Direction::Input);
-  declareProperty(inwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "Anonymous", Direction::Input),
                   "Name of input MatrixWorkspace to have Z-score calculated.");
 
-  auto outwsprop = new WorkspaceProperty<Workspace2D>("OutputWorkspace", "",
-                                                      Direction::Output);
-  declareProperty(outwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output Workspace2D containing the Z-scores.");
 
   declareProperty("WorkspaceIndex", EMPTY_INT(),

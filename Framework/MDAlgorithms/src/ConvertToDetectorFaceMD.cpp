@@ -54,17 +54,18 @@ const std::string ConvertToDetectorFaceMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToDetectorFaceMD::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MatrixWorkspace.");
-  declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-                  "A list of the bank numbers to convert. If empty, will use "
-                  "all banksMust have at least one entry.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
+      "A list of the bank numbers to convert. If empty, will use "
+      "all banksMust have at least one entry.");
 
   // Now the box controller settings
   this->initBoxControllerProps("2", 200, 20);
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }

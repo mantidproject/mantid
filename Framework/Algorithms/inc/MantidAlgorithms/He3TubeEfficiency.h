@@ -120,7 +120,7 @@ private:
   /// Sample position
   Kernel::V3D samplePos;
   /// The spectra numbers that were skipped
-  std::vector<specid_t> spectraSkipped;
+  std::vector<specnum_t> spectraSkipped;
   /// Algorithm progress keeper
   API::Progress *progress;
 };

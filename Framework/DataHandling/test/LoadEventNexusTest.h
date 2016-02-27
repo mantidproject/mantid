@@ -717,7 +717,7 @@ public:
     }
     // Make sure that the spectraNo are equal for all child workspaces.
     auto isFirstChildWorkspace = true;
-    std::vector<Mantid::specid_t> specids;
+    std::vector<Mantid::specnum_t> specids;
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =

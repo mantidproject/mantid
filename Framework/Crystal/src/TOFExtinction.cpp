@@ -36,11 +36,11 @@ TOFExtinction::~TOFExtinction() {}
 /** Initialize the algorithm's properties.
  */
 void TOFExtinction::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      "OutputWorkspace", "", Direction::Output));
   std::vector<std::string> corrOptions{
       "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",
       "Type II Zachariasen",   "Type II Gaussian",   "Type II Lorentzian",

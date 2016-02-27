@@ -45,7 +45,8 @@ LoadCanSAS1D2::~LoadCanSAS1D2() {}
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
   declareProperty(
-      new PropertyWithValue<bool>("LoadTransmission", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
+                                           Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
 }
@@ -92,7 +93,7 @@ void LoadCanSAS1D2::processTransmission(
   if (trans_gp.size() == 1) {
     MatrixWorkspace_sptr WS = trans_gp[0];
     WS->mutableRun().addProperty("Filename", fileName);
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                         propertyWS, trans_wsname, Direction::Output),
                     doc);
 
@@ -107,15 +108,15 @@ void LoadCanSAS1D2::processTransmission(
       std::stringstream name;
       pname << propertyWS << i;
       name << trans_wsname << i;
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                           pname.str(), name.str(), Direction::Output),
                       doc);
       setProperty(pname.str(), newWork);
       group->addWorkspace(newWork);
     }
     std::string pname = std::string(propertyWS).append("GP");
-    declareProperty(new WorkspaceProperty<WorkspaceGroup>(pname, trans_wsname,
-                                                          Direction::Output),
+    declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                        pname, trans_wsname, Direction::Output),
                     doc);
     setProperty(pname, group);
   }

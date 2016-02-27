@@ -52,26 +52,28 @@ LoadInstrument::LoadInstrument() : Algorithm() {}
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalLoad, ".xml"),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(new ArrayProperty<detid_t>("MonitorList", Direction::Output),
-                  "Will be filled with a list of the detector ids of any "
-                  "monitors loaded in to the workspace.");
+  declareProperty(
+      make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
+      "Will be filled with a list of the detector ids of any "
+      "monitors loaded in to the workspace.");
   declareProperty(
       "InstrumentName", "",
       "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
   declareProperty(
-      new PropertyWithValue<OptionalBool>(
+      make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
           boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If true then a 1:1 map between the spectrum numbers and "
@@ -289,15 +291,16 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   // Assemble parameter file name
   std::string fullPathParamIDF =
       directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, so look for file based on instrument ID
-               // given by the prefix
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, so look
+                                                // for file based on instrument
+                                                // ID
+                                                // given by the prefix
     fullPathParamIDF =
         directoryPath.setFileName(prefix + "_Parameters.xml").toString();
   }
 
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, indicate none found in this directory.
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, indicate
+                                                // none found in this directory.
     fullPathParamIDF = "";
   }
 

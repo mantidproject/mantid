@@ -42,11 +42,12 @@ void CreatePSDBleedMask::init() {
   using Kernel::Direction;
   using Kernel::BoundedValidator;
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "The name of the input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                               Direction::Output),
       "The name of the output MaskWorkspace which will contain the result "
       "masks.");
   auto mustBePosDbl = boost::make_shared<BoundedValidator<double>>();

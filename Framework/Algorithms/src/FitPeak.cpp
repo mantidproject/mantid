@@ -1091,17 +1091,17 @@ FitPeak::~FitPeak() {}
 /** Declare properties
  */
 void FitPeak::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing fitted peak.");
 
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("ParameterTableWorkspace", "",
-                                            Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "ParameterTableWorkspace", "", Direction::Output),
       "Name of the table workspace containing the fitted parameters. ");
 
   boost::shared_ptr<BoundedValidator<int>> mustBeNonNegative =
@@ -1116,16 +1116,18 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
-  declareProperty(new ArrayProperty<string>("PeakParameterNames"),
-                  "List of peak parameter names. ");
-
-  declareProperty(new ArrayProperty<double>("PeakParameterValues"),
-                  "List of peak parameter values.  They must have a 1-to-1 "
-                  "mapping to PeakParameterNames list. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<string>>("PeakParameterNames"),
+      "List of peak parameter names. ");
 
   declareProperty(
-      new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
-      "Fitted peak parameter values. ");
+      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      "List of peak parameter values.  They must have a 1-to-1 "
+      "mapping to PeakParameterNames list. ");
+
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "FittedPeakParameterValues", Direction::Output),
+                  "Fitted peak parameter values. ");
 
   vector<string> bkgdtypes{"Flat", "Flat (A0)", "Linear", "Linear (A0, A1)",
                            "Quadratic", "Quadratic (A0, A1, A2)"};
@@ -1133,25 +1135,26 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
-  declareProperty(new ArrayProperty<string>("BackgroundParameterNames"),
-                  "List of background parameter names. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
+      "List of background parameter names. ");
 
   declareProperty(
-      new ArrayProperty<double>("BackgroundParameterValues"),
+      Kernel::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
       "List of background parameter values.  "
       "They must have a 1-to-1 mapping to BackgroundParameterNames list. ");
 
-  declareProperty(new ArrayProperty<double>("FittedBackgroundParameterValues",
-                                            Direction::Output),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "FittedBackgroundParameterValues", Direction::Output),
                   "Fitted background parameter values. ");
 
-  declareProperty(new ArrayProperty<double>("FitWindow"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Enter a comma-separated list of the expected X-position of "
                   "windows to fit. "
                   "The number of values must be 2.");
 
   declareProperty(
-      new ArrayProperty<double>("PeakRange"),
+      Kernel::make_unique<ArrayProperty<double>>("PeakRange"),
       "Enter a comma-separated list of expected x-position as peak range. "
       "The number of values must be 2.");
 

@@ -38,26 +38,28 @@ const std::string PeaksInRegion::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksInRegion::init() {
-  declareProperty(new PropertyWithValue<bool>("CheckPeakExtents", false),
-                  "Include any peak in the region that has a shape extent "
-                  "extending into that region.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("CheckPeakExtents", false),
+      "Include any peak in the region that has a shape extent "
+      "extending into that region.");
 
   this->initBaseProperties();
 
-  auto manditoryExtents = boost::make_shared<
+  auto mandatoryExtents = boost::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   std::vector<double> extents(2, 0);
   extents[0] = -50;
   extents[1] = +50;
   declareProperty(
-      new ArrayProperty<double>("Extents", extents, manditoryExtents),
+      Kernel::make_unique<ArrayProperty<double>>("Extents", extents,
+                                                 mandatoryExtents),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in "
       "each dimension.");
 
-  setPropertySettings("PeakRadius", new EnabledWhenProperty("CheckPeakExtents",
-                                                            IS_NOT_DEFAULT));
+  setPropertySettings("PeakRadius", make_unique<EnabledWhenProperty>(
+                                        "CheckPeakExtents", IS_NOT_DEFAULT));
 }
 
 void PeaksInRegion::validateExtentsInput() const {

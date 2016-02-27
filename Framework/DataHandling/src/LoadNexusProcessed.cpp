@@ -217,12 +217,13 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {".nxs", ".nx5", ".xml"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Nexus file to read, as a full or relative path.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service. For multiperiod "
@@ -238,7 +239,7 @@ void LoadNexusProcessed::init() {
                   "Number of first spectrum to read.");
   declareProperty("SpectrumMax", static_cast<int64_t>(Mantid::EMPTY_INT()),
                   mustBePositive, "Number of last spectrum to read.");
-  declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int64_t>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -248,7 +249,8 @@ void LoadNexusProcessed::init() {
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
-      new PropertyWithValue<bool>("FastMultiPeriod", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
+                                           Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
@@ -509,7 +511,7 @@ void LoadNexusProcessed::exec() {
                       1. / nWorkspaceEntries_d);
       }
 
-      declareProperty(new WorkspaceProperty<API::Workspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
           prop_name + os.str(), wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);
@@ -1658,7 +1660,7 @@ void LoadNexusProcessed::readInstrumentGroup(
     if (spectraInfo.hasSpectra) {
       spectrum = spectraInfo.spectraNumbers[i - 1];
     } else if (haveSpectraAxis && !m_axis1vals.empty()) {
-      spectrum = static_cast<specid_t>(m_axis1vals[i - 1]);
+      spectrum = static_cast<specnum_t>(m_axis1vals[i - 1]);
     } else {
       spectrum = i + 1;
     }

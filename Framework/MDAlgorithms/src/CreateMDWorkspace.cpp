@@ -40,25 +40,26 @@ CreateMDWorkspace::~CreateMDWorkspace() {}
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {
-  declareProperty(new PropertyWithValue<int>("Dimensions", 1, Direction::Input),
-                  "Number of dimensions that the workspace will have.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Dimensions", 1, Direction::Input),
+      "Number of dimensions that the workspace will have.");
 
   std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
 
-  declareProperty(new ArrayProperty<double>("Extents"),
+  declareProperty(make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Names"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Units"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
   declareProperty(
-      new ArrayProperty<std::string>("Frames"),
+      make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."
@@ -71,7 +72,7 @@ void CreateMDWorkspace::init() {
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 
-  declareProperty(new PropertyWithValue<int>("MinRecursionDepth", 0),
+  declareProperty(make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
                   "Optional. If specified, then all the boxes will be split to "
                   "this minimum recursion depth. 0 = no splitting, 1 = one "
                   "level of splitting, etc.\n"
@@ -80,21 +81,22 @@ void CreateMDWorkspace::init() {
                   "NumDimensions)).");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "Optional: to use a file as the back end, give the path to the file to "
       "save.");
 
   declareProperty(
-      new PropertyWithValue<int>("Memory", -1),
+      make_unique<PropertyWithValue<int>>("Memory", -1),
       "If Filename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory",
-                      new EnabledWhenProperty("Filename", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "Memory", make_unique<EnabledWhenProperty>("Filename", IS_NOT_DEFAULT));
 }
 
 /** Finish initialisation

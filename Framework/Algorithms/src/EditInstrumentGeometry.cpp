@@ -46,7 +46,8 @@ int EditInstrumentGeometry::version() const { return 1; }
  */
 void EditInstrumentGeometry::init() {
   // Input workspace
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+                                                           Direction::InOut),
                   "Workspace to edit the detector information");
 
   // L1
@@ -54,7 +55,7 @@ void EditInstrumentGeometry::init() {
                   "Primary flight path L1 of the powder diffractomer. ");
 
   // Spectrum ID for the spectrum to have instrument geometry edited
-  declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
                   "Spectrum IDs (note that it is not detector ID or workspace "
                   "indices). The list must be either empty or have a size "
                   "equal to input workspace's histogram number. ");
@@ -62,23 +63,23 @@ void EditInstrumentGeometry::init() {
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
 
   // Vector for L2
-  declareProperty(new ArrayProperty<double>("L2", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("L2", required),
                   "Seconary flight (L2) paths for each detector.  Number of L2 "
                   "given must be same as number of histogram.");
 
   // Vector for 2Theta
-  declareProperty(new ArrayProperty<double>("Polar", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Polar", required),
                   "Polar angles (two thetas) for detectors. Number of 2theta "
                   "given must be same as number of histogram.");
 
   // Vector for Azimuthal angle
   declareProperty(
-      new ArrayProperty<double>("Azimuthal"),
+      Kernel::make_unique<ArrayProperty<double>>("Azimuthal"),
       "Azimuthal angles (out-of-plane) for detectors. "
       "Number of azimuthal angles given must be same as number of histogram.");
 
   // Detector IDs
-  declareProperty(new ArrayProperty<int>("DetectorIDs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("DetectorIDs"),
                   "User specified detector IDs of the spectra. "
                   "Number of specified detector IDs must be either zero or "
                   "number of histogram");

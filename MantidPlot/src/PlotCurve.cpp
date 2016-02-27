@@ -311,7 +311,7 @@ void PlotCurve::computeWaterfallOffsets() {
     }
     if (g->grid())
       g->grid()->setZ(-g->curves() /*Count()*/ - 1);
-  } 
+  }
 }
 
 // --- DataCurve --- //
@@ -363,10 +363,7 @@ void DataCurve::setFullRange() {
 }
 
 bool DataCurve::isFullRange() const {
-  if (d_start_row != 0 || d_end_row != d_table->numRows() - 1)
-    return false;
-  else
-    return true;
+  return !(d_start_row != 0 || d_end_row != d_table->numRows() - 1);
 }
 
 QString DataCurve::plotAssociation() const {
@@ -957,12 +954,11 @@ void DataCurve::setLabelsSelected(bool on) {
 
 bool DataCurve::validCurveType() const {
   int style = type();
-  if (style == Graph::Function || style == Graph::Box || style == Graph::Pie ||
-      style == Graph::ErrorBars || style == Graph::ColorMap ||
-      style == Graph::GrayScale || style == Graph::Contour ||
-      style == Graph::ImagePlot)
-    return false;
-  return true;
+
+  return !(style == Graph::Function || style == Graph::Box ||
+           style == Graph::Pie || style == Graph::ErrorBars ||
+           style == Graph::ColorMap || style == Graph::GrayScale ||
+           style == Graph::Contour || style == Graph::ImagePlot);
 }
 
 void DataCurve::moveLabels(const QPoint &pos) {

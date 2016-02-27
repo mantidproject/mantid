@@ -342,7 +342,7 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spSpectraMax->setValue(specMax);
 
   // Plot time spectra spinners
-  m_uiForm.spPlotTimeSpecMin->setMinimum(1);		// 1 to allow for monitors
+  m_uiForm.spPlotTimeSpecMin->setMinimum(1); // 1 to allow for monitors
   m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMin->setValue(1);
 
@@ -490,7 +490,7 @@ std::vector<std::string> ISISEnergyTransfer::getSaveFormats() {
  * performed.
  */
 void ISISEnergyTransfer::plotRaw() {
-  using Mantid::specid_t;
+  using Mantid::specnum_t;
   using MantidQt::API::BatchAlgorithmRunner;
 
   if (!m_uiForm.dsRunFiles->isValid()) {
@@ -574,8 +574,8 @@ void ISISEnergyTransfer::plotRaw() {
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
   inputFromRebin["InputWorkspace"] = name;
 
-  std::vector<specid_t> detectorList;
-  for (specid_t i = detectorMin; i <= detectorMax; i++)
+  std::vector<specnum_t> detectorList;
+  for (specnum_t i = detectorMin; i <= detectorMax; i++)
     detectorList.push_back(i);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {

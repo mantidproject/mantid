@@ -15,16 +15,16 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void SINQTranspose3D::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
   std::vector<std::string> transposeOptions{"Y,X,Z", "X,Z,Y", "TRICS", "AMOR"};
   this->declareProperty(
       "TransposeOption", "Y,X,Z",
       boost::make_shared<StringListValidator>(transposeOptions),
       "The transpose option");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void SINQTranspose3D::exec() {

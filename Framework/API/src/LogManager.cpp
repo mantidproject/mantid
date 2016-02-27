@@ -202,7 +202,7 @@ void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
        prop->name() == "run_title")) {
     removeProperty(name);
   }
-  m_manager.declareProperty(prop.release(), "");
+  m_manager.declareProperty(std::move(prop), "");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -400,12 +400,13 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
-      Property *prop = PropertyNexus::loadProperty(file, name_class.first);
+      auto prop = std::unique_ptr<Property>(
+          PropertyNexus::loadProperty(file, name_class.first));
       if (prop) {
         if (m_manager.existsProperty(prop->name())) {
           m_manager.removeProperty(prop->name());
         }
-        m_manager.declareProperty(prop);
+        m_manager.declareProperty(std::move(prop));
       }
     }
   }

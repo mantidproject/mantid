@@ -229,7 +229,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
     }
   }
 
-  if (defaultAlgebra == false) {
+  if (!defaultAlgebra) {
     // Translate algebra string defined by the user into something Mantid can
     // understand
 

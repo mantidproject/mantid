@@ -40,14 +40,15 @@ const std::string SaveMDWorkspaceToVTK::summary() const {
 }
 
 void SaveMDWorkspaceToVTK::init() {
-  declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::IMDWorkspace>(
-                      "InputWorkspace", "", Mantid::Kernel::Direction::Input),
-                  "MDWorkspace to save/export");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::IMDWorkspace>>(
+          "InputWorkspace", "", Mantid::Kernel::Direction::Input),
+      "MDWorkspace to save/export");
 
   std::vector<std::string> extensions = {
       SaveMDWorkspaceToVTKImpl::structuredGridExtension,
       SaveMDWorkspaceToVTKImpl::unstructuredGridExtension};
-  declareProperty(new Mantid::API::FileProperty(
+  declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save,
                       extensions, Mantid::Kernel::Direction::Input),
                   "Save location.");

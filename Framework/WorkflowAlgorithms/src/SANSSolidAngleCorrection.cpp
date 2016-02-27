@@ -52,10 +52,10 @@ void SANSSolidAngleCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
   declareProperty("DetectorTubes", false, "If true, the algorithm will assume "
                                           "that the detectors are tubes in the "
                                           "Y direction.");
@@ -79,9 +79,9 @@ void SANSSolidAngleCorrection::exec() {
 
   // If the solid angle algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("SolidAngleAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("SolidAngleAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("SolidAngleAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");

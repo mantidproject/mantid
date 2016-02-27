@@ -64,12 +64,13 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialise the algorithm
   */
 void LoadGSS::init() {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".gsa", ".gss", ".gda", ".txt"}),
+  const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace name to load into.");
 
   declareProperty("UseBankIDasSpectrumNumber", false,
@@ -414,7 +415,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
-      specid_t specno = static_cast<specid_t>(detectorIDs[i]);
+      specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
       outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
     }
   }
