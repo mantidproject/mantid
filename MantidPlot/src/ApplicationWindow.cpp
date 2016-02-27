@@ -8713,7 +8713,8 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     nw = newTable(caption, t->numRows(), t->numCols());
 
     Table *nt = dynamic_cast<Table *>(nw);
-
+    if (!nt)
+      return NULL;
     nt->setHeader(t->colNames());
 
     for (auto i = 0; i < nt->numCols(); i++) {
