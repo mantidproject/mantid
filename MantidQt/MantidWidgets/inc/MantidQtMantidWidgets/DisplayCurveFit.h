@@ -13,14 +13,21 @@ namespace MantidWidgets {
 
 // forward declarations
 class PreviewPlot;
+class RangeSelector;
 
-/** A widget to display fitting , guess, and residuals curves against data.
- *
- * Two PreviewPlot widgets take care of plotting the curves. One for residuals only, and
- * the other for fitting, guess, and data.
- * It is required that all the neccessary data to plot the curves are stored in one
- * or more workspaces. Subscriptions to the Analysis Data Service to receive notifications
- * regarding modification of the workspaces is implemented in the PreviewPlot widgets.
+/** A widget to display the results of a curve fitting. Its main features:
+ * - An upper panel to plot the data curve, the evaluation of the model with
+ *   current model parameters (guess curve), and the evaluation of the
+ *   model with optimized parameters (fit curve).
+ * - A lower panel to plot the residuals curve, the different between
+ *   the data curve  and the fit curve.
+ * - A range limited by two vertical lines over which the fit should
+ *   be carried out (fit-range).
+ * - A range over which the model is evaluated (evaluate-range). Sometimes
+ *   one may wish to evaluate the model over a range slightly bigger than
+ *   the range over which the fit is carried out.
+ * All curves to be plotted need to be stored in workspaces. The Analysis
+ * Data Service notifies DisplayCurveFit of changes of these workspaces.
 
   @date 2016-02-11
 
@@ -55,11 +62,11 @@ public:
   using curveTypes = std::vector<curveType>;
 
   /** Ranges on the X-axis */
-  enum class fitRange {
-    standard = 1, /** range over which the fitting procedure is carried out */
-    extended      /** extended range over which the fit and residuals curves are
-                     evaluated. Usually extends beyond the boundaries of the standard
-                     range */
+  enum class dcRange {
+    fit = 1, /** range over which the fitting procedure is carried out */
+    evaluate /** range over which the fit and residuals curves are
+                evaluated. Usually extends beyond the boundaries of the fit
+                range */
   };
   DisplayCurveFit(QWidget *parent = nullptr);
   virtual ~DisplayCurveFit();
@@ -74,21 +81,25 @@ public:
                    const size_t specIndex = 0);
   void removeSpectrum(const curveType &aType);
   bool hasCurve(const curveType &aType);
-  RangeSelector *
-  addRangeSelector(const fitRange &aRange,
+  void
+  addRangeSelector(const dcRange &adcRange,
                    RangeSelector::SelectType type = RangeSelector::XMINMAX);
-
+  void addResidualsZeroline();
   static std::map<curveType, QString> const m_curveTypeToQString;
   static std::map<curveType, Qt::GlobalColor> const m_curveTypeToColor;
-  static std::map<fitRange, QString> const m_fitRangeToQString;
+  static std::map<dcRange, QString> const m_dcRangeToQString;
 
-  private:
-    curveType nameToType(const QString &name) const;
-    curveTypes namesToTypes(const QStringList &names) const;
-    Ui::DisplayCurveFit m_uiForm;
-    // map a curve type onto a PreviewPlot panel
-    std::map<curveType, PreviewPlot *> m_plotPanel;
-  };
+  /// Pointers to the range selector objects.
+  std::map<dcRange, RangeSelector *> m_rangeSelector;
+
+private:
+  curveType nameToType(const QString &name) const;
+  curveTypes namesToTypes(const QStringList &names) const;
+  /// Object holding the widgets defined in the form created in Qt-designer
+  Ui::DisplayCurveFit m_uiForm;
+  // maps a curve type onto one of the two PreviewPlot panels
+  std::map<curveType, PreviewPlot *> m_plotPanel;
+};
 }
 }
 
