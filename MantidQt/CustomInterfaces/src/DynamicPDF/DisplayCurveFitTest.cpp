@@ -58,12 +58,17 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
   auto workspace = Mantid::API::AnalysisDataService::Instance()
                        .retrieveWS<Mantid::API::MatrixWorkspace>(
                            workspaceName.toStdString());
-  if(!workspace){
-    std::cerr << "Workspace must be of type MatrixWorkspace\n";
-    throw std::bad_cast();
+  if (!workspace) {
+    auto title = QString::fromStdString(this->name());
+    auto error = QString::fromStdString("Workspace must be of type MatrixWorkspace");
+    QMessageBox::warning(this, title, error);
+    return;
   }
   if (workspace->getNumberHistograms() < 4) {
-    throw std::out_of_range("Not enough number of histograms in the workspace");
+    auto title = QString::fromStdString(this->name());
+    auto error= QString("Not enough number of histograms in the workspace");
+    QMessageBox::warning(this, title, error);
+    return;
   }
   m_uiForm.displayFit->addSpectrum(curveType::data, workspace, 0);
   auto curveRange = m_uiForm.displayFit->getCurveRange(curveType::data);
@@ -71,8 +76,7 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
 
   // Set up the range selector for the fit
   m_uiForm.displayFit->addRangeSelector(dcRange::fit);
-  auto rangeSelectorFit =
-      m_uiForm.displayFit->m_rangeSelector.at(dcRange::fit);
+  auto rangeSelectorFit = m_uiForm.displayFit->m_rangeSelector.at(dcRange::fit);
   if (firstPass || m_uiForm.updateRangeSelectors->isChecked()) {
     rangeSelectorFit->setRange(curveRange.first, curveRange.second);
     rangeSelectorFit->setMinimum(1.05 * curveRange.first);
