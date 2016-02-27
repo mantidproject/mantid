@@ -448,7 +448,7 @@ ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len)
 }
 
 ClientHelloPkt::ClientHelloPkt(const ClientHelloPkt &pkt)
-    : Packet(pkt), m_reqStart(pkt.m_reqStart) {}
+    : Packet(pkt), m_reqStart(pkt.m_reqStart), m_clientFlags(0) {}
 
 /* ------------------------------------------------------------------------ */
 
