@@ -21,7 +21,13 @@ namespace
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char ** argv ) : QApplication(argc, argv)
 {
-  Mantid::Kernel::UsageService::Instance().setApplication("mantidplot");
+   try {
+     Mantid::Kernel::UsageService::Instance().setApplication("mantidplot");
+   } catch(std::runtime_error &rexc) {
+     g_log.error() << "Failed to initialize the Mantid usage service. This "
+       "is probably a sign that this Mantid is not fully or correctly set up."
+       << std::endl;
+   }
 }
 
 bool MantidApplication::notify( QObject * receiver, QEvent * event )
