@@ -858,7 +858,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // get exception from the read_json parser
       std::string server_reply_str;
       server_reply_str = server_reply.str();
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1179,7 +1179,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
       server_reply_str = server_reply.str();
       // remove the status message from the end of the reply,
       // in order not to get exception from the read_json parser
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1698,7 +1698,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
 }
 
 std::string ScriptRepositoryImpl::getParentFolder(const std::string &file) {
-  size_t pos = file.rfind("/");
+  size_t pos = file.rfind('/');
   if (pos == file.npos) {
     return "";
   }

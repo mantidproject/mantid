@@ -74,7 +74,7 @@ void SaveFocusedXYE::exec() {
     std::string directory = path.parent().toString();
     std::string name = path.getFileName();
 
-    std::size_t pos = name.find_first_of(".");
+    std::size_t pos = name.find_first_of('.');
     if (pos != std::string::npos) // Remove the extension
     {
       ext = name.substr(pos + 1, name.npos);
