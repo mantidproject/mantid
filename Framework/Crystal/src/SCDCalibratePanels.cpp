@@ -183,7 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (auto bankName : AllBankNames) {
+    for (const auto &bankName : AllBankNames) {
       vector<string> vbankName;
       vbankName.push_back(bankName);
       Groups.push_back(vbankName);
@@ -192,7 +192,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (auto bankName : AllBankNames) {
+    for (const auto &bankName : AllBankNames) {
       vbankName.push_back(bankName);
     }
 
@@ -310,7 +310,7 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
   auto pmap1 = boost::make_shared<ParameterMap>();
 
-  for (auto bankName : AllBankNames) {
+  for (const auto &bankName : AllBankNames) {
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
 
@@ -1632,7 +1632,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (auto bankName : bankNames) {
+  for (const auto &bankName : bankNames) {
 
     boost::shared_ptr<const IComponent> bank1 =
         NewInstrument->getComponentByName(bankName);

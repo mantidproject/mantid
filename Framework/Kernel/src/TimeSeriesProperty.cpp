@@ -339,7 +339,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
                 << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (auto splitter : splittervec) {
+  for (const auto &splitter : splittervec) {
     Kernel::DateAndTime t_start = splitter.start();
     Kernel::DateAndTime t_stop = splitter.stop();
 

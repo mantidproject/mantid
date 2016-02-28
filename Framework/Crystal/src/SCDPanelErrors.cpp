@@ -664,10 +664,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     AllBankNames.insert(m_peaks->getPeak(i).getBankName());
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
-  for (auto bankName : AllBankNames) {
-    boost::shared_ptr<const IComponent> panel =
-        instrNew->getComponentByName(bankName);
-    bankDetMap[bankName] = panel;
+  for (const auto &bankName : AllBankNames) {
+    bankDetMap[bankName] = instrNew->getComponentByName(bankName);
   }
 
   boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();

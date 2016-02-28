@@ -1098,7 +1098,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (auto str : columnNames) {
+  for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();

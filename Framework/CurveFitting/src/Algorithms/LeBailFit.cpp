@@ -676,7 +676,7 @@ void LeBailFit::execRefineBackground() {
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");
 
-  for (auto parname : m_bkgdParameterNames) {
+  for (const auto &parname : m_bkgdParameterNames) {
     double parvalue = m_backgroundFunction->getParameter(parname);
 
     TableRow newrow = outtablews->appendRow();
@@ -1908,14 +1908,14 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
 
   // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
   // a) Sig0, Sig1, Sig2
-  for (auto parname : sigs) {
+  for (const auto &parname : sigs) {
     m_funcParameters[parname].mcA0 = 2.0;
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = true;
   }
 
   // b) Alpha
-  for (auto parname : alphs) {
+  for (const auto &parname : alphs) {
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = false;
   }
@@ -2156,7 +2156,7 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
 
   // Find out parameters to refine in this step/MC group
   g_log.debug() << "Parameter Number In Group = " << mcgroup.size() << "\n";
-  for (auto paramname : mcgroup) {
+  for (const auto &paramname : mcgroup) {
     // Find out the i-th parameter to be refined or not
     auto mapiter = curparammap.find(paramname);
     if (mapiter == curparammap.end()) {

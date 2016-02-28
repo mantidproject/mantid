@@ -844,7 +844,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
                                                       // starting matching IDF
-  for (auto directoryName : directoryNames) {
+  for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;

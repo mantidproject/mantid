@@ -316,7 +316,7 @@ VecCommands interpret(const std::string &processingInstructions) {
   commandParsers.push_back(boost::make_shared<AdditionParser>());
 
   VecCommands commands;
-  for (auto candidate : processingInstructionsSplit) {
+  for (const auto &candidate : processingInstructionsSplit) {
     bool parserFound = false;
     for (auto commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
