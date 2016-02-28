@@ -8,7 +8,7 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-struct PeakPrimitives {
+struct DLLExport PeakPrimitives {
     PeakPrimitives(Mantid::Kernel::V3D peakOrigin, double peakOpacityAtDistance,
                    int peakLineWidth)
         : peakOrigin(peakOrigin),
@@ -21,7 +21,7 @@ struct PeakPrimitives {
     int peakLineWidth;
 };
 
-struct PeakPrimitivesCross : public PeakPrimitives {
+struct DLLExport PeakPrimitivesCross : public PeakPrimitives {
     PeakPrimitivesCross(Mantid::Kernel::V3D peakOrigin,
                         double peakOpacityAtDistance, int peakLineWidth,
                         int peakHalfCrossWidth, int peakHalfCrossHeight)
@@ -34,7 +34,7 @@ struct PeakPrimitivesCross : public PeakPrimitives {
     int peakHalfCrossHeight;
 };
 
-struct PeakPrimitiveCircle : public PeakPrimitives {
+struct DLLExport PeakPrimitiveCircle : public PeakPrimitives {
         PeakPrimitiveCircle(Mantid::Kernel::V3D peakOrigin,
                          double peakOpacityAtDistance, int peakLineWidth,
                          double peakInnerRadiusX, double peakInnerRadiusY,
@@ -59,7 +59,7 @@ struct PeakPrimitiveCircle : public PeakPrimitives {
     double backgroundInnerRadiusY;
 };
 
-struct PeakPrimitivesEllipse : public PeakPrimitives {
+struct DLLExport PeakPrimitivesEllipse : public PeakPrimitives {
   PeakPrimitivesEllipse(Mantid::Kernel::V3D peakOrigin,
     double peakOpacityAtDistance, int peakLineWidth,
     double peakInnerRadiusMajorAxis, double peakInnerRadiusMinorAxis,

@@ -15,7 +15,6 @@ template <class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
 almost_equal(T x, T y)
 {
-    // TODO: Add ULP
     return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y)
            || std::abs(x - y) < std::numeric_limits<T>::min();
 }
@@ -222,9 +221,9 @@ public:
         const double angleIn = 30 / 180 * M_PI;
         Mantid::SliceViewer::EllipsoidPlaneSliceCalculator calculator;
         double zCutPlane = 1.5; // We cut at z = 1.5
-        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
                                        0); // The directions are simply x, y, z
-        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
         Mantid::Kernel::V3D direction3(0, 0, 1);
         std::vector<Mantid::Kernel::V3D> directions
             = {direction1, direction2, direction3};
@@ -239,7 +238,7 @@ public:
         // Assert
         const double delta = 1e-5;
 
-        // The rotation was 45deg, but we have a sphere so angle should be 0
+        // The rotation was 30deg, but we have a sphere so angle should be 0
         TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
 
         // Radius is 1 and we are looking at 0.5 from the origin
@@ -351,9 +350,9 @@ public:
         // Arrange
         const double angleIn = 30.0 * 2 * M_PI / 360;
         double zCutPlane = 1.5;
-        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
                                        0);
-        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
         Mantid::Kernel::V3D direction3(0, 0, 1);
         std::vector<Mantid::Kernel::V3D> directions
             = {direction1, direction2, direction3};
@@ -370,8 +369,8 @@ public:
         const double delta = 1e-5;
 
         // The angle we get from info is the angle
-        TSM_ASSERT_DELTA("The angle should be 30", std::abs(angleIn),
-                         std::abs(info.angle), delta);
+        TSM_ASSERT_DELTA("The angle should be 30", angleIn,
+                         info.angle, delta);
 
         // From (x/4)^2 + (y/3)^2 + (0.5/2)^2 = 1 we get
         // r1 = 4* Sqrt[1-(0.5/2)^2]
@@ -400,9 +399,9 @@ public:
     {
         // Arrange
         const double angleIn = 0.0;
-        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
                                        0);
-        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
         Mantid::Kernel::V3D direction3(0, 0, 1);
         std::vector<Mantid::Kernel::V3D> directions
             = {direction1, direction2, direction3};
@@ -437,9 +436,9 @@ public:
     {
         // Arrange
         const double angleIn = 20.0 * M_PI / 180.0;
-        Mantid::Kernel::V3D direction1(std::cos(angleIn), -std::sin(angleIn),
+        Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
                                        0);
-        Mantid::Kernel::V3D direction2(std::sin(angleIn), std::cos(angleIn), 0);
+        Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
         Mantid::Kernel::V3D direction3(0, 0, 1);
         std::vector<Mantid::Kernel::V3D> directions
             = {direction1, direction2, direction3};
@@ -500,7 +499,7 @@ public:
         // Arrange
       const double angle = 35.0 * M_PI / 180.0;
         Mantid::Kernel::V3D dir1(std::cos(angle), std::sin(angle), 0.0);
-        Mantid::Kernel::V3D dir2(-1 * std::sin(angle), std::cos(angle), 0.0);
+        Mantid::Kernel::V3D dir2(-std::sin(angle), std::cos(angle), 0.0);
         Mantid::Kernel::V3D dir3(0.0, 0.0, 1.0);
         std::vector<Mantid::Kernel::V3D> directions = {dir1, dir2, dir3};
         std::vector<double> radii = {3.0, 2.0, 1.0};
@@ -532,7 +531,7 @@ public:
       // Arrange
       const double angle = 35.0 * M_PI / 180.0;
       Mantid::Kernel::V3D dir1(std::cos(angle), std::sin(angle), 0.0);
-      Mantid::Kernel::V3D dir2(-1 * std::sin(angle), std::cos(angle), 0.0);
+      Mantid::Kernel::V3D dir2(-std::sin(angle), std::cos(angle), 0.0);
       Mantid::Kernel::V3D dir3(0.0, 0.0, 1.0);
       std::vector<Mantid::Kernel::V3D> directions{dir1, dir2, dir3};
       std::vector<double> radii = {3.0, 2.0, 1.0};
@@ -550,7 +549,7 @@ public:
       // Arrange
       const double angle = 35.0 * M_PI / 180.0;
       Mantid::Kernel::V3D dir1(std::cos(angle), std::sin(angle), 0.0);
-      Mantid::Kernel::V3D dir2(-1 * std::sin(angle), std::cos(angle), 0.0);
+      Mantid::Kernel::V3D dir2(-std::sin(angle), std::cos(angle), 0.0);
       Mantid::Kernel::V3D dir3(0.0, 0.0, 1.0);
       std::vector<Mantid::Kernel::V3D> directions{dir1, dir2, dir3};
       std::vector<double> radii = {3.0, 2.0, 1.0};

@@ -33,7 +33,7 @@ namespace SliceViewer
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class PeakRepresentationEllipsoid : public PeakRepresentation
+class DLLExport PeakRepresentationEllipsoid : public PeakRepresentation
 {
 public:
   PeakRepresentationEllipsoid(const Mantid::Kernel::V3D &origin,

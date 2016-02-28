@@ -13,7 +13,7 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-struct PeakRepresentationViewInformation {
+struct DLLExport PeakRepresentationViewInformation {
     double windowHeight;
     double windowWidth;
     double viewHeight;

@@ -285,6 +285,18 @@ void PeakRepresentationEllipsoid::doDraw(
     g_log.warning(std::to_string(drawingInformationEllipse->angle/M_PI*180));
     g_log.warning("--------------------------------");
 
+    g_log.warning("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+    g_log.warning("Parameters of the drawing ellipse");
+    g_log.warning("Origin " + std::to_string(drawingInformationEllipse->peakOrigin.X()) + " "
+                            + std::to_string(drawingInformationEllipse->peakOrigin.Y()) + " "
+                            + std::to_string(drawingInformationEllipse->peakOrigin.Z()));
+
+    g_log.warning("RadiiEllipse " + std::to_string(drawingInformationEllipse->peakInnerRadiusMajorAxis) + " "
+      + std::to_string(drawingInformationEllipse->peakInnerRadiusMinorAxis));
+    g_log.warning("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
+
+
+
     const QPointF zeroPoint(0.0, 0.0);
     // Add the ellipse at the origin (in order to rotate)
     QPainterPath peakRadiusInnerPath;
