@@ -97,7 +97,11 @@ Json::Value readJsonFile(const std::string &filename,
   }
   Json::Reader json_reader;
   Json::Value read;
-  json_reader.parse(filestream, read);
+  if (!json_reader.parse(filestream, read)) {
+    throw ScriptRepoException("Bad JSON string from file: " + filename + ". " +
+                              error);
+  }
+
   return read;
 }
 
