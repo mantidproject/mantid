@@ -38,6 +38,8 @@ namespace API {
 */
 class MANTID_API_DLL CatalogManagerImpl {
 public:
+  CatalogManagerImpl(const CatalogManagerImpl &) = delete;
+  CatalogManagerImpl &operator=(const CatalogManagerImpl &) = delete;
   /// Creates a new catalog and session, and adds it to the activeCatalogs
   /// container.
   CatalogSession_sptr login(const std::string &username,
@@ -57,10 +59,8 @@ public:
 private:
   /// These methods are required to create a singleton.
   friend struct Kernel::CreateUsingNew<CatalogManagerImpl>;
-  CatalogManagerImpl();
-  CatalogManagerImpl(const CatalogManagerImpl &);
-  CatalogManagerImpl &operator=(const CatalogManagerImpl &);
-  virtual ~CatalogManagerImpl();
+  CatalogManagerImpl() = default;
+  virtual ~CatalogManagerImpl() = default;
 
   // Holds a list of active catalogs and uses their sessionId as unique
   // identifier.

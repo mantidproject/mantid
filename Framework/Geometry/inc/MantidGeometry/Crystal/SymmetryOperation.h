@@ -125,8 +125,6 @@ public:
   SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
   SymmetryOperation(const Kernel::DblMatrix &matrix, const V3R &vector);
 
-  ~SymmetryOperation() {}
-
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
   const V3R &reducedVector() const;

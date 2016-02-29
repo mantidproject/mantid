@@ -39,8 +39,8 @@ RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() {}
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputPeakPositionWorkspace",
-                                         "Anonymous", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "InputPeakPositionWorkspace", "Anonymous", Direction::Input),
       "Data workspace containing workspace positions in TOF agains dSpacing.");
 
   // Workspace Index
@@ -50,20 +50,20 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Output workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("OutputPeakPositionWorkspace",
-                                         "Anonymous2", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
       "agains dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputInstrumentParameterWorkspace",
-                                            "Anonymous3", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputInstrumentParameterWorkspace", "Anonymous3", Direction::Input),
       "INput tableWorkspace containg instrument's parameters.");
 
   // Output table workspace containing the refined parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "Anonymous4",
           Direction::Output),
       "Output tableworkspace containing instrument's fitted parameters. ");
@@ -635,7 +635,6 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
     // Higher Rwp. Take a chance to accept
     double dice = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
     double bar = exp(-(newchisq - curchisq) / (curchisq * temperature));
-    // random number (dice, 0 and 1) is smaller than bar (between -infty and
     accept = dice < bar;
   }
 

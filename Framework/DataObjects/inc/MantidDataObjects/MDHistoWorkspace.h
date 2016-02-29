@@ -51,7 +51,7 @@ public:
   MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
                    Mantid::API::MDNormalization displayNormalization =
                        Mantid::API::NoNormalization);
-
+  MDHistoWorkspace &operator=(const MDHistoWorkspace &other) = delete;
   ~MDHistoWorkspace() override;
 
   /// Returns a clone of the workspace
@@ -473,8 +473,6 @@ private:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
 
   /// Linear array of masks for each bin
   bool *m_masks;

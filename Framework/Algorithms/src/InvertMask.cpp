@@ -22,16 +22,15 @@ InvertMask::InvertMask() {}
 InvertMask::~InvertMask() {}
 
 void InvertMask::init() {
-  this->declareProperty(new API::WorkspaceProperty<DataObjects::MaskWorkspace>(
-                            "InputWorkspace", "Anonymous", Direction::Input),
-                        "MaskWorkspace to be inverted. ");
+  this->declareProperty(
+      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::Input),
+      "MaskWorkspace to be inverted. ");
 
   this->declareProperty(
-      new API::WorkspaceProperty<DataObjects::MaskWorkspace>(
+      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputWorkspace", "AnonynmousOutput", Direction::Output),
       "MaskWorkspace has inverted bits from input MaskWorkspace.");
-
-  return;
 }
 
 void InvertMask::exec() {

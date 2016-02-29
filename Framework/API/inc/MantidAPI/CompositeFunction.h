@@ -61,8 +61,6 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction {
 public:
   /// Default constructor
   CompositeFunction();
-  /// Destructor
-  ~CompositeFunction() override;
 
   /* Overriden methods */
 

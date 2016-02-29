@@ -38,6 +38,9 @@ public:
     TS_ASSERT(!(wghtEvent1 == wghtEvent2));
     TS_ASSERT(wghtEvent1.equals(wghtEvent2, .1, .1, 1));
 
+    WeightedEvent fromTofEvent(tofEvent1);
+    TS_ASSERT(wghtEvent1 == fromTofEvent);
+
     // weighted no time
     WeightedEventNoTime notimeEvent1(20.0, 1., 1.);
     WeightedEventNoTime notimeEvent2(20.05, 1.05, 1.05);

@@ -55,26 +55,26 @@ FilterEvents::~FilterEvents() {}
 /** Declare Inputs
  */
 void FilterEvents::init() {
-  declareProperty(new API::WorkspaceProperty<EventWorkspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "SplitterWorkspace", "", Direction::Input),
                   "An input SpilltersWorskpace for filtering");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                   "The base name to use for the output workspace");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace",
-                                                        "", Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional output for the information of each splitter "
-                  "workspace index.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional output for the information of each splitter "
+      "workspace index.");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace",
-                                             "TOFCorrectWS", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
       "Name of output workspace for TOF correction factor. ");
 
   declareProperty("FilterByPulseTime", false,
@@ -98,22 +98,22 @@ void FilterEvents::init() {
                   "Type of correction on neutron events to sample time from "
                   "detector time. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "DetectorTOFCorrectionWorkspace", "", Direction::Input,
-      PropertyMode::Optional);
-  declareProperty(tablewsprop, "Name of table workspace containing the log "
-                               "time correction factor for each detector. ");
-  setPropertySettings(
-      "DetectorTOFCorrectionWorkspace",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Customized"));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "DetectorTOFCorrectionWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Name of table workspace containing the log "
+                  "time correction factor for each detector. ");
+  setPropertySettings("DetectorTOFCorrectionWorkspace",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
-  setPropertySettings(
-      "IncidentEnergy",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
+  setPropertySettings("IncidentEnergy",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
   vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};
@@ -133,9 +133,9 @@ void FilterEvents::init() {
   declareProperty("DBSpectrum", EMPTY_INT(),
                   "Spectrum (workspace index) for debug purpose. ");
 
-  declareProperty(
-      new ArrayProperty<string>("OutputWorkspaceNames", Direction::Output),
-      "List of output workspaces names");
+  declareProperty(Kernel::make_unique<ArrayProperty<string>>(
+                      "OutputWorkspaceNames", Direction::Output),
+                  "List of output workspaces names");
 
   declareProperty(
       "RelativeTime", false,
@@ -520,16 +520,13 @@ void FilterEvents::createOutputWorkspaces() {
   }
 
   // Set up new workspaces
-  std::set<int>::iterator groupit;
   int numoutputws = 0;
   double numnewws = static_cast<double>(m_workGroupIndexes.size());
   double wsgindex = 0.;
 
-  for (groupit = m_workGroupIndexes.begin();
-       groupit != m_workGroupIndexes.end(); ++groupit) {
+  for (auto const wsgroup : m_workGroupIndexes) {
     // Generate new workspace name
     bool add2output = true;
-    int wsgroup = *groupit;
     std::stringstream wsname;
     if (wsgroup >= 0) {
       wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
@@ -580,7 +577,8 @@ void FilterEvents::createOutputWorkspaces() {
 
       // Set (property) to output workspace and set to ADS
       declareProperty(
-          new API::WorkspaceProperty<DataObjects::EventWorkspace>(
+          Kernel::make_unique<
+              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
               propertynamess.str(), wsname.str(), Direction::Output),
           "Output");
       setProperty(propertynamess.str(), optws);
@@ -776,8 +774,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
       const DataObjects::EventList events = m_eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
+      auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
         stringstream errss;
@@ -788,7 +785,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         throw runtime_error(errss.str());
       }
       detid_t detid = 0;
-      for (detit = detids.begin(); detit != detids.end(); ++detit)
+      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
         detid = *detit;
       vecDetIDs[i] = detid;
     }

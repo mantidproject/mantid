@@ -121,32 +121,32 @@ FindPeaksMD::~FindPeaksMD() {}
 /** Initialize the algorithm's properties.
  */
 void FindPeaksMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace with at least "
                   "3 dimensions.");
 
   declareProperty(
-      new PropertyWithValue<double>("PeakDistanceThreshold", 0.1,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
+                                             Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(
-      new PropertyWithValue<int64_t>("MaxPeaks", 500, Direction::Input),
-      "Maximum number of peaks to find. Default: 500.");
+  declareProperty(make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
+                                                          Direction::Input),
+                  "Maximum number of peaks to find. Default: 500.");
 
-  declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 10.0,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
                   "to get a threshold signal density below which boxes are NOT "
                   "considered to be peaks. See the help.\n"
                   "Default: 10.0");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
 
   declareProperty("AppendPeaks", false,

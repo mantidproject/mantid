@@ -115,9 +115,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Virtual destructor
-  ~WrappedObject() override {}
-
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
@@ -1886,7 +1883,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
       setString("default.facility", facilityName);
     }
   }
-  if (found == false) {
+  if (!found) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
     throw Exception::NotFoundError("Facilities", facilityName);

@@ -461,260 +461,62 @@ public:
    */
   void generateData(std::vector<double> &vecX, std::vector<double> &vecY,
                     std::vector<double> &vecE) {
-    vecX.push_back(70931.750);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70943.609);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70955.477);
-    vecY.push_back(0.69562334);
-    vecX.push_back(70967.336);
-    vecY.push_back(0.99016321);
-    vecX.push_back(70979.203);
-    vecY.push_back(1.4097446);
-    vecX.push_back(70991.063);
-    vecY.push_back(2.0066566);
-    vecX.push_back(71002.930);
-    vecY.push_back(2.8569770);
-    vecX.push_back(71014.789);
-    vecY.push_back(4.0666742);
-    vecX.push_back(71026.656);
-    vecY.push_back(5.7899261);
-    vecX.push_back(71038.516);
-    vecY.push_back(8.2414885);
-    vecX.push_back(71050.383);
-    vecY.push_back(11.733817);
-    vecX.push_back(71062.242);
-    vecY.push_back(16.702133);
-    vecX.push_back(71074.109);
-    vecY.push_back(23.779659);
-    vecX.push_back(71085.969);
-    vecY.push_back(33.848408);
-    vecX.push_back(71097.836);
-    vecY.push_back(48.191662);
-    vecX.push_back(71109.695);
-    vecY.push_back(68.596909);
-    vecX.push_back(71121.563);
-    vecY.push_back(97.664757);
-    vecX.push_back(71133.430);
-    vecY.push_back(139.04889);
-    vecX.push_back(71145.289);
-    vecY.push_back(197.90808);
-    vecX.push_back(71157.156);
-    vecY.push_back(281.60803);
-    vecX.push_back(71169.016);
-    vecY.push_back(399.65021);
-    vecX.push_back(71180.883);
-    vecY.push_back(562.42670);
-    vecX.push_back(71192.742);
-    vecY.push_back(773.34192);
-    vecX.push_back(71204.609);
-    vecY.push_back(1015.2813);
-    vecX.push_back(71216.469);
-    vecY.push_back(1238.3613);
-    vecX.push_back(71228.336);
-    vecY.push_back(1374.9380);
-    vecX.push_back(71240.195);
-    vecY.push_back(1380.5173);
-    vecX.push_back(71252.063);
-    vecY.push_back(1266.3978);
-    vecX.push_back(71263.922);
-    vecY.push_back(1086.2141);
-    vecX.push_back(71275.789);
-    vecY.push_back(894.75891);
-    vecX.push_back(71287.648);
-    vecY.push_back(723.46112);
-    vecX.push_back(71299.516);
-    vecY.push_back(581.04535);
-    vecX.push_back(71311.375);
-    vecY.push_back(465.93588);
-    vecX.push_back(71323.242);
-    vecY.push_back(373.45383);
-    vecX.push_back(71335.102);
-    vecY.push_back(299.35800);
-    vecX.push_back(71346.969);
-    vecY.push_back(239.92720);
-    vecX.push_back(71358.836);
-    vecY.push_back(192.29497);
-    vecX.push_back(71370.695);
-    vecY.push_back(154.14153);
-    vecX.push_back(71382.563);
-    vecY.push_back(123.54013);
-    vecX.push_back(71394.422);
-    vecY.push_back(99.028404);
-    vecX.push_back(71406.289);
-    vecY.push_back(79.368507);
-    vecX.push_back(71418.148);
-    vecY.push_back(63.620914);
-    vecX.push_back(71430.016);
-    vecY.push_back(50.990391);
-    vecX.push_back(71441.875);
-    vecY.push_back(40.873333);
-    vecX.push_back(71453.742);
-    vecY.push_back(32.758839);
-    vecX.push_back(71465.602);
-    vecY.push_back(26.259121);
-    vecX.push_back(71477.469);
-    vecY.push_back(21.045954);
-    vecX.push_back(71489.328);
-    vecY.push_back(16.870203);
-    vecX.push_back(71501.195);
-    vecY.push_back(13.520998);
-    vecX.push_back(71513.055);
-    vecY.push_back(10.838282);
-    vecX.push_back(71524.922);
-    vecY.push_back(8.6865807);
-    vecX.push_back(71536.781);
-    vecY.push_back(6.9630671);
-    vecX.push_back(71548.648);
-    vecY.push_back(5.5807042);
-    vecX.push_back(71560.508);
-    vecY.push_back(4.4734306);
-    vecX.push_back(71572.375);
-    vecY.push_back(3.5853302);
-    vecX.push_back(71584.242);
-    vecY.push_back(2.8735423);
-    vecX.push_back(71596.102);
-    vecY.push_back(2.3033996);
-    vecX.push_back(71607.969);
-    vecY.push_back(1.8461106);
-    vecX.push_back(71619.828);
-    vecY.push_back(0.0000000);
-    vecX.push_back(86911.852);
-    vecY.push_back(0.28651541);
-    vecX.push_back(86923.719);
-    vecY.push_back(0.39156997);
-    vecX.push_back(86935.578);
-    vecY.push_back(0.53503412);
-    vecX.push_back(86947.445);
-    vecY.push_back(0.73121130);
-    vecX.push_back(86959.305);
-    vecY.push_back(0.99911392);
-    vecX.push_back(86971.172);
-    vecY.push_back(1.3654519);
-    vecX.push_back(86983.039);
-    vecY.push_back(1.8661126);
-    vecX.push_back(86994.898);
-    vecY.push_back(2.5498226);
-    vecX.push_back(87006.766);
-    vecY.push_back(3.4847479);
-    vecX.push_back(87018.625);
-    vecY.push_back(4.7614965);
-    vecX.push_back(87030.492);
-    vecY.push_back(6.5073609);
-    vecX.push_back(87042.352);
-    vecY.push_back(8.8915405);
-    vecX.push_back(87054.219);
-    vecY.push_back(12.151738);
-    vecX.push_back(87066.078);
-    vecY.push_back(16.603910);
-    vecX.push_back(87077.945);
-    vecY.push_back(22.691912);
-    vecX.push_back(87089.805);
-    vecY.push_back(31.005537);
-    vecX.push_back(87101.672);
-    vecY.push_back(42.372311);
-    vecX.push_back(87113.531);
-    vecY.push_back(57.886639);
-    vecX.push_back(87125.398);
-    vecY.push_back(79.062233);
-    vecX.push_back(87137.258);
-    vecY.push_back(107.82082);
-    vecX.push_back(87149.125);
-    vecY.push_back(146.58661);
-    vecX.push_back(87160.984);
-    vecY.push_back(197.83006);
-    vecX.push_back(87172.852);
-    vecY.push_back(263.46185);
-    vecX.push_back(87184.711);
-    vecY.push_back(343.08966);
-    vecX.push_back(87196.578);
-    vecY.push_back(432.57846);
-    vecX.push_back(87208.445);
-    vecY.push_back(522.64124);
-    vecX.push_back(87220.305);
-    vecY.push_back(600.01373);
-    vecX.push_back(87232.172);
-    vecY.push_back(651.22260);
-    vecX.push_back(87244.031);
-    vecY.push_back(667.17743);
-    vecX.push_back(87255.898);
-    vecY.push_back(646.90039);
-    vecX.push_back(87267.758);
-    vecY.push_back(597.38873);
-    vecX.push_back(87279.625);
-    vecY.push_back(530.12573);
-    vecX.push_back(87291.484);
-    vecY.push_back(456.83890);
-    vecX.push_back(87303.352);
-    vecY.push_back(386.05295);
-    vecX.push_back(87315.211);
-    vecY.push_back(322.58456);
-    vecX.push_back(87327.078);
-    vecY.push_back(267.96231);
-    vecX.push_back(87338.938);
-    vecY.push_back(222.04863);
-    vecX.push_back(87350.805);
-    vecY.push_back(183.80043);
-    vecX.push_back(87362.664);
-    vecY.push_back(152.11101);
-    vecX.push_back(87374.531);
-    vecY.push_back(125.85820);
-    vecX.push_back(87386.391);
-    vecY.push_back(104.14707);
-    vecX.push_back(87398.258);
-    vecY.push_back(86.170067);
-    vecX.push_back(87410.117);
-    vecY.push_back(71.304932);
-    vecX.push_back(87421.984);
-    vecY.push_back(58.996807);
-    vecX.push_back(87433.844);
-    vecY.push_back(48.819309);
-    vecX.push_back(87445.711);
-    vecY.push_back(40.392483);
-    vecX.push_back(87457.578);
-    vecY.push_back(33.420235);
-    vecX.push_back(87469.438);
-    vecY.push_back(27.654932);
-    vecX.push_back(87481.305);
-    vecY.push_back(22.881344);
-    vecX.push_back(87493.164);
-    vecY.push_back(18.934097);
-    vecX.push_back(87505.031);
-    vecY.push_back(15.665835);
-    vecX.push_back(87516.891);
-    vecY.push_back(12.963332);
-    vecX.push_back(87528.758);
-    vecY.push_back(10.725698);
-    vecX.push_back(87540.617);
-    vecY.push_back(8.8754158);
-    vecX.push_back(87552.484);
-    vecY.push_back(7.3434072);
-    vecX.push_back(87564.344);
-    vecY.push_back(6.0766010);
-    vecX.push_back(87576.211);
-    vecY.push_back(5.0277033);
-    vecX.push_back(87588.070);
-    vecY.push_back(4.1603775);
-    vecX.push_back(87599.938);
-    vecY.push_back(3.4422443);
-    vecX.push_back(87611.797);
-    vecY.push_back(2.8484249);
-    vecX.push_back(87623.664);
-    vecY.push_back(2.3567512);
-    vecX.push_back(87635.523);
-    vecY.push_back(1.9501896);
-    vecX.push_back(87647.391);
-    vecY.push_back(1.6135623);
-    vecX.push_back(87659.250);
-    vecY.push_back(1.3352078);
-    vecX.push_back(87671.117);
-    vecY.push_back(1.1047342);
-    vecX.push_back(87682.984);
-    vecY.push_back(0.91404319);
-    vecX.push_back(87694.844);
-    vecY.push_back(0.75636220);
-    vecX.push_back(87706.711);
-    vecY.push_back(0.0000000);
+
+    vecX = std::vector<double>{
+        70931.750000, 70943.609000, 70955.477000, 70967.336000, 70979.203000,
+        70991.063000, 71002.930000, 71014.789000, 71026.656000, 71038.516000,
+        71050.383000, 71062.242000, 71074.109000, 71085.969000, 71097.836000,
+        71109.695000, 71121.563000, 71133.430000, 71145.289000, 71157.156000,
+        71169.016000, 71180.883000, 71192.742000, 71204.609000, 71216.469000,
+        71228.336000, 71240.195000, 71252.063000, 71263.922000, 71275.789000,
+        71287.648000, 71299.516000, 71311.375000, 71323.242000, 71335.102000,
+        71346.969000, 71358.836000, 71370.695000, 71382.563000, 71394.422000,
+        71406.289000, 71418.148000, 71430.016000, 71441.875000, 71453.742000,
+        71465.602000, 71477.469000, 71489.328000, 71501.195000, 71513.055000,
+        71524.922000, 71536.781000, 71548.648000, 71560.508000, 71572.375000,
+        71584.242000, 71596.102000, 71607.969000, 71619.828000, 86911.852000,
+        86923.719000, 86935.578000, 86947.445000, 86959.305000, 86971.172000,
+        86983.039000, 86994.898000, 87006.766000, 87018.625000, 87030.492000,
+        87042.352000, 87054.219000, 87066.078000, 87077.945000, 87089.805000,
+        87101.672000, 87113.531000, 87125.398000, 87137.258000, 87149.125000,
+        87160.984000, 87172.852000, 87184.711000, 87196.578000, 87208.445000,
+        87220.305000, 87232.172000, 87244.031000, 87255.898000, 87267.758000,
+        87279.625000, 87291.484000, 87303.352000, 87315.211000, 87327.078000,
+        87338.938000, 87350.805000, 87362.664000, 87374.531000, 87386.391000,
+        87398.258000, 87410.117000, 87421.984000, 87433.844000, 87445.711000,
+        87457.578000, 87469.438000, 87481.305000, 87493.164000, 87505.031000,
+        87516.891000, 87528.758000, 87540.617000, 87552.484000, 87564.344000,
+        87576.211000, 87588.070000, 87599.938000, 87611.797000, 87623.664000,
+        87635.523000, 87647.391000, 87659.250000, 87671.117000, 87682.984000,
+        87694.844000, 87706.711000};
+
+    vecY = std::vector<double>{
+        0.000000,    0.000000,    0.695623,    0.990163,    1.409745,
+        2.006657,    2.856977,    4.066674,    5.789926,    8.241489,
+        11.733817,   16.702133,   23.779659,   33.848408,   48.191662,
+        68.596909,   97.664757,   139.048890,  197.908080,  281.608030,
+        399.650210,  562.426700,  773.341920,  1015.281300, 1238.361300,
+        1374.938000, 1380.517300, 1266.397800, 1086.214100, 894.758910,
+        723.461120,  581.045350,  465.935880,  373.453830,  299.358000,
+        239.927200,  192.294970,  154.141530,  123.540130,  99.028404,
+        79.368507,   63.620914,   50.990391,   40.873333,   32.758839,
+        26.259121,   21.045954,   16.870203,   13.520998,   10.838282,
+        8.686581,    6.963067,    5.580704,    4.473431,    3.585330,
+        2.873542,    2.303400,    1.846111,    0.000000,    0.286515,
+        0.391570,    0.535034,    0.731211,    0.999114,    1.365452,
+        1.866113,    2.549823,    3.484748,    4.761496,    6.507361,
+        8.891540,    12.151738,   16.603910,   22.691912,   31.005537,
+        42.372311,   57.886639,   79.062233,   107.820820,  146.586610,
+        197.830060,  263.461850,  343.089660,  432.578460,  522.641240,
+        600.013730,  651.222600,  667.177430,  646.900390,  597.388730,
+        530.125730,  456.838900,  386.052950,  322.584560,  267.962310,
+        222.048630,  183.800430,  152.111010,  125.858200,  104.147070,
+        86.170067,   71.304932,   58.996807,   48.819309,   40.392483,
+        33.420235,   27.654932,   22.881344,   18.934097,   15.665835,
+        12.963332,   10.725698,   8.875416,    7.343407,    6.076601,
+        5.027703,    4.160378,    3.442244,    2.848425,    2.356751,
+        1.950190,    1.613562,    1.335208,    1.104734,    0.914043,
+        0.756362,    0.000000};
 
     for (size_t i = 0; i < vecY.size(); ++i) {
       double e = 1.0;

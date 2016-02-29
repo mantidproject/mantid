@@ -23,8 +23,8 @@ using DataObjects::EventWorkspace_const_sptr;
 *
 */
 void SortEvents::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "EventWorkspace to be sorted.");
 
   std::vector<std::string> propOptions{"X Value", "Pulse Time",

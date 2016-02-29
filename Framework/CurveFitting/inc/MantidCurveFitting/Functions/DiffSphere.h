@@ -46,9 +46,6 @@ public:
   /// Constructor
   ElasticDiffSphere();
 
-  /// Destructor
-  ~ElasticDiffSphere() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "ElasticDiffSphere"; }
 
@@ -82,8 +79,6 @@ class DLLExport InelasticDiffSphere : public API::ParamFunction,
                                       public API::IFunction1D {
 public:
   InelasticDiffSphere();
-
-  ~InelasticDiffSphere() override {}
 
   /// overwrite IFunction base class methods
   void init() override;
@@ -141,9 +136,6 @@ private:
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
-  /// Destructor
-  ~DiffSphere() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "DiffSphere"; }
 

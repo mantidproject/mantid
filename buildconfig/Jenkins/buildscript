@@ -22,7 +22,6 @@ export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 # Print out the versions of things we are using
 ###############################################################################
 cmake --version
-echo "SHA1=${sha1}"
 
 ###############################################################################
 # Check job requirements from the name

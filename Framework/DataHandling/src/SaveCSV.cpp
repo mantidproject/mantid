@@ -55,11 +55,11 @@ SaveCSV::SaveCSV() {}
  *
  */
 void SaveCSV::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The filename of the output CSV file");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, ".csv"),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".csv"),
       "The name of the workspace containing the data you want to save to\n"
       "a CSV file");
   declareProperty(
@@ -70,7 +70,8 @@ void SaveCSV::init() {
                   "The string to place at the end of lines (default new line\n"
                   "character)");
   declareProperty(
-      new PropertyWithValue<bool>("SaveXerrors", 0, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
+                                           Direction::Input),
       "This option saves out the x errors if any are present. If you have x "
       "errors\n"
       "in your workspace and you do not select this option, then the x errors\n"

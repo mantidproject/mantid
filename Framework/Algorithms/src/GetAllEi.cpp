@@ -36,10 +36,11 @@ GetAllEi::GetAllEi()
 /// Initialization method.
 void GetAllEi::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "Workspace", "", Kernel::Direction::Input),
-                  "The input workspace containing the monitor's spectra "
-                  "measured after the last chopper");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Kernel::Direction::Input),
+      "The input workspace containing the monitor's spectra "
+      "measured after the last chopper");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
@@ -80,11 +81,11 @@ void GetAllEi::init() {
       "values where the derivative of the log turns zero.\n"
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
-  setPropertySettings(
-      "FilterWithDerivative",
-      new Kernel::EnabledWhenProperty("FilterBaseLog",
-                                      Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                                      "Defined in IDF"));
+  setPropertySettings("FilterWithDerivative",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FilterBaseLog",
+                          Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                          "Defined in IDF"));
 
   auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);
@@ -124,8 +125,8 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"
       "together with total intensity within each peak.");
@@ -878,9 +879,9 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // at this stage all properties are validated so its safe to access them
   // without
   // additional checks.
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
   auto pSpectr1 = inputWS->getSpectrum(wsIndex0);
   auto pSpectr2 = inputWS->getSpectrum(wsIndex1);
@@ -1242,7 +1243,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
                           "Rebin input workspace first.";
   }
 
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum1);
   } catch (std::runtime_error &) {
@@ -1250,7 +1251,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
         "Input workspace does not contain spectra with ID: " +
         boost::lexical_cast<std::string>(specNum1);
   }
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum2);
   } catch (std::runtime_error &) {

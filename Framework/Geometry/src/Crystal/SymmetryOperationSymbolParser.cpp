@@ -9,9 +9,6 @@
 namespace Mantid {
 namespace Geometry {
 
-/// Default constructor
-SymmetryOperationSymbolParser::SymmetryOperationSymbolParser() {}
-
 /// Verify that the matrix does not contain elements with abs(element) > 1 and
 /// has an acceptable number of non-zero elements.
 void SymmetryOperationSymbolParser::verifyMatrix(

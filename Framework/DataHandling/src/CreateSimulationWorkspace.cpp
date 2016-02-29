@@ -54,24 +54,24 @@ void CreateSimulationWorkspace::init() {
                   "containing an xml extension).",
                   Direction::Input);
 
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
                       "BinParams", boost::make_shared<RebinParamsValidator>(),
                       Direction::Input),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. See Rebin for more details");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The new workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The new workspace");
 
   auto knownUnits = UnitFactory::Instance().getKeys();
   declareProperty("UnitX", "DeltaE",
                   boost::make_shared<ListValidator<std::string>>(knownUnits),
                   "The unit to assign to the X axis", Direction::Input);
 
-  declareProperty(new FileProperty("DetectorTableFilename", "",
-                                   FileProperty::OptionalLoad, "",
-                                   Direction::Input),
+  declareProperty(make_unique<FileProperty>("DetectorTableFilename", "",
+                                            FileProperty::OptionalLoad, "",
+                                            Direction::Input),
                   "An optional filename (currently RAW or ISIS NeXus) that "
                   "contains UDET & SPEC tables to access hardware grouping");
 }
@@ -180,7 +180,7 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
   for (size_t i = 0; i < nhist; ++i) {
     std::set<detid_t> group;
     group.insert(detids[i]);
-    m_detGroups.emplace(static_cast<specid_t>(i + 1), group);
+    m_detGroups.emplace(static_cast<specnum_t>(i + 1), group);
   }
 }
 
@@ -306,7 +306,7 @@ void CreateSimulationWorkspace::applyDetectorMapping() {
   for (auto &detGroup : m_detGroups) {
     ISpectrum *spectrum = m_outputWS->getSpectrum(wsIndex);
     spectrum->setSpectrumNo(
-        static_cast<specid_t>(wsIndex + 1)); // Ensure a contiguous mapping
+        static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
     spectrum->clearDetectorIDs();
     spectrum->addDetectorIDs(detGroup.second);
     ++wsIndex;

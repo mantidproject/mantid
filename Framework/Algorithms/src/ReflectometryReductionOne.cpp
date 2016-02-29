@@ -39,7 +39,7 @@ std::string createWorkspaceIndexListFromDetectorWorkspace(
   auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
   auto it = spectrumMap.begin();
   std::stringstream result;
-  specid_t specId = (*it).first;
+  specnum_t specId = (*it).first;
   result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
   ++it;
   for (; it != spectrumMap.end(); ++it) {
@@ -111,8 +111,8 @@ const std::string ReflectometryReductionOne::category() const {
 */
 void ReflectometryReductionOne::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
   std::vector<std::string> propOptions;
@@ -124,11 +124,11 @@ void ReflectometryReductionOne::init() {
       boost::make_shared<StringListValidator>(propOptions),
       "The type of analysis to perform. Point detector or multi detector.");
 
-  declareProperty(new ArrayProperty<int>("RegionOfInterest"),
+  declareProperty(make_unique<ArrayProperty<int>>("RegionOfInterest"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the region of interest (reflected "
                   "beam) in multi-detector mode.");
-  declareProperty(new ArrayProperty<int>("RegionOfDirectBeam"),
+  declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the direct beam in multi-detector "
                   "mode.");
@@ -136,52 +136,52 @@ void ReflectometryReductionOne::init() {
   this->initIndexInputs();
   this->initWavelengthInputs();
 
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output Workspace IvsQ.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output Workspace IvsQ.");
 
-  declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "",
-                                          Direction::Output,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
+                                                   "", Direction::Output,
+                                                   PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
 
-  declareProperty(new PropertyWithValue<double>("ThetaIn", Mantid::EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Final theta value in degrees. Optional, this value will be "
                   "calculated internally and provided as ThetaOut if not "
                   "provided.");
 
-  declareProperty(new PropertyWithValue<double>("ThetaOut", Mantid::EMPTY_DBL(),
-                                                Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ThetaOut", Mantid::EMPTY_DBL(), Direction::Output),
                   "Calculated final theta in degrees.");
 
   declareProperty("NormalizeByIntegratedMonitors", true,
                   "Normalize by dividing by the integrated monitors.");
 
-  declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "CorrectDetectorPositions", true, Direction::Input),
                   "Correct detector positions using ThetaIn (if given)");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
       "First transmission run, or the low wavelength transmission run if "
       "SecondTransmissionRun is also provided.");
 
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>(tofUnitId);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -190,8 +190,8 @@ void ReflectometryReductionOne::init() {
 
   this->initStitchingInputs();
 
-  declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
+                                                       true, Direction::Input),
                   "Enforces spectrum number checking prior to normalization");
 
   std::vector<std::string> correctionAlgorithms = {
@@ -200,16 +200,16 @@ void ReflectometryReductionOne::init() {
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
-  declareProperty(new ArrayProperty<double>("Polynomial"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
       "C0 value to be passed to the ExponentialCorrection algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
@@ -217,15 +217,16 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -234,26 +235,30 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("EndOverlap", "Transmission");
 
   // Only do transmission corrections when point detector.
-  setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                  "AnalysisMode", IS_EQUAL_TO,
-                                                  "PointDetectorAnalysis"));
-  setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                   "AnalysisMode", IS_EQUAL_TO,
-                                                   "PointDetectorAnalysis"));
   setPropertySettings(
-      "Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                "PointDetectorAnalysis"));
-  setPropertySettings("StartOverlap", new Kernel::EnabledWhenProperty(
-                                          "AnalysisMode", IS_EQUAL_TO,
-                                          "PointDetectorAnalysis"));
+      "FirstTransmissionRun",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
   setPropertySettings(
-      "EndOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                    "PointDetectorAnalysis"));
+      "SecondTransmissionRun",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "Params", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                    "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "StartOverlap",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+  setPropertySettings(
+      "EndOverlap", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                        "AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
 
   // Only use region of direct beam when in multi-detector analysis mode.
-  setPropertySettings("RegionOfDirectBeam", new Kernel::EnabledWhenProperty(
-                                                "AnalysisMode", IS_EQUAL_TO,
-                                                "MultiDetectorAnalysis"));
+  setPropertySettings(
+      "RegionOfDirectBeam",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
 }
 
 /**

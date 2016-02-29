@@ -50,9 +50,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Gaussian : public API::IPeakFunction {
 public:
-  /// Destructor
-  ~Gaussian() override{};
-
   /// overwrite IPeakFunction base class methods
   double centre() const override { return getParameter("PeakCentre"); }
   double height() const override { return getParameter("Height"); }

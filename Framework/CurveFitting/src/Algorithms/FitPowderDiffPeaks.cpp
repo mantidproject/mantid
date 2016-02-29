@@ -84,47 +84,48 @@ FitPowderDiffPeaks::~FitPowderDiffPeaks() {}
  */
 void FitPowderDiffPeaks::init() {
   // Input data workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
                   "Input workspace for data (diffraction pattern). ");
 
   // Output workspace
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "Anonymous2", Direction::Output),
                   "Output Workspace2D for the fitted peaks. ");
 
   // Input/output peaks table workspace
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("BraggPeakParameterWorkspace",
-                                            "AnonymousPeak", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "BraggPeakParameterWorkspace", "AnonymousPeak", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InstrumentParameterWorkspace", "AnonymousInstrument",
                       Direction::InOut),
                   "TableWorkspace containg instrument's parameters.");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("OutputBraggPeakParameterWorkspace",
-                                            "AnonymousOut2", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "OutputBraggPeakParameterWorkspace", "AnonymousOut2",
+          Direction::Output),
       "Output TableWorkspace containing the fitted peak parameters for each "
       "peak.");
 
   // Data workspace containing fitted peak parameters
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputBraggPeakParameterDataWorkspace", "ParameterData",
                       Direction::Output),
                   "Output Workspace2D containing fitted peak parameters for "
                   "further refinement.");
 
   // Zscore table workspace
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputZscoreWorkspace",
-                                                        "ZscoreTable",
-                                                        Direction::Output),
-                  "Output TableWorkspace containing the Zscore of the fitted "
-                  "peak parameters. ");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "OutputZscoreWorkspace", "ZscoreTable", Direction::Output),
+      "Output TableWorkspace containing the Zscore of the fitted "
+      "peak parameters. ");
 
   // Workspace index of the
   declareProperty("WorkspaceIndex", 0,
@@ -171,9 +172,10 @@ void FitPowderDiffPeaks::init() {
       "are correlated by an analytical function");
 
   // Option for peak's HKL for minimum d-spacing
-  auto arrayprop = new ArrayProperty<int>("MinimumHKL", "");
-  declareProperty(arrayprop, "Miller index of the left most peak (peak with "
-                             "minimum d-spacing) to be fitted. ");
+  auto arrayprop = Kernel::make_unique<ArrayProperty<int>>("MinimumHKL", "");
+  declareProperty(std::move(arrayprop),
+                  "Miller index of the left most peak (peak with "
+                  "minimum d-spacing) to be fitted. ");
 
   // Number of the peaks to fit left to peak with minimum HKL
   declareProperty("NumberPeaksToFitBelowLowLimit", 0,
@@ -181,8 +183,9 @@ void FitPowderDiffPeaks::init() {
                   "less than specified minimum. ");
 
   // Right most peak property
-  auto righthklprop = new ArrayProperty<int>("RightMostPeakHKL", "");
-  declareProperty(righthklprop,
+  auto righthklprop =
+      Kernel::make_unique<ArrayProperty<int>>("RightMostPeakHKL", "");
+  declareProperty(std::move(righthklprop),
                   "Miller index of the right most peak. "
                   "It is only required and used in RobustFit mode.");
 

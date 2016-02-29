@@ -31,21 +31,21 @@ ExtractMaskToTable::~ExtractMaskToTable() {}
 /** Declare properties
   */
 void ExtractMaskToTable::init() {
-  auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input);
   declareProperty(
-      inwsprop,
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                      Direction::Input),
       "A workspace whose masking is to be extracted or a MaskWorkspace. ");
 
-  auto intblprop = new WorkspaceProperty<TableWorkspace>(
-      "MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(intblprop, "A mask table workspace containing 3 columns: "
-                             "XMin, XMax and DetectorIDsList. ");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A mask table workspace containing 3 columns: "
+      "XMin, XMax and DetectorIDsList. ");
 
-  auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output);
-  declareProperty(outwsprop, "A comma separated list or array containing a "
-                             "list of masked detector ID's ");
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "A comma separated list or array containing a "
+                  "list of masked detector ID's ");
 
   declareProperty("Xmin", EMPTY_DBL(), "Minimum of X-value.");
 

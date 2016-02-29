@@ -21,9 +21,11 @@ public:
   virtual int version() const { return 1; }
   virtual const std::string summary() const { return "Test summary"; }
   virtual void init() {
-    declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces"));
     declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "");
+        make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                     Direction::Output),
+                    "");
     declareProperty(
         "PropertyA", 1,
         boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
@@ -59,13 +61,14 @@ public:
   virtual const std::string summary() const { return "Test summary"; }
   virtual void init() {
     declareProperty(
-        new WorkspaceProperty<>("PropertyA", "ws1", Direction::Input));
+        make_unique<WorkspaceProperty<>>("PropertyA", "ws1", Direction::Input));
     declareProperty(
-        new WorkspaceProperty<>("PropertyB", "ws2", Direction::Input));
+        make_unique<WorkspaceProperty<>>("PropertyB", "ws2", Direction::Input));
     declareProperty(
-        new WorkspaceProperty<>("PropertyC", "ws3", Direction::Input));
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "");
+        make_unique<WorkspaceProperty<>>("PropertyC", "ws3", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                     Direction::Output),
+                    "");
     declareProperty(
         "PropertyX", 1,
         boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
@@ -121,12 +124,12 @@ public:
       virtual int version() const { return 1; }
       virtual const std::string summary() const { return "Test summary"; }
       virtual void init() {
-        declareProperty(new WorkspaceProperty<WorkspaceGroup>(
+        declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                             "InputWorkspaces", "", Direction::Input),
                         "");
-        declareProperty(
-            new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-            "");
+        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "");
       }
       virtual void exec() {
         setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
@@ -162,10 +165,11 @@ public:
       virtual int version() const { return 1; }
       virtual const std::string summary() const { return "Test summary"; }
       virtual void init() {
-        declareProperty(new ArrayProperty<std::string>("InputWorkspaces"));
         declareProperty(
-            new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-            "Name of the output workspace");
+            make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
+        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "Name of the output workspace");
       }
       virtual void exec() {
         setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));

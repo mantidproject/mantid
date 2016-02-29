@@ -64,11 +64,12 @@ const std::string SetMDFrame::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SetMDFrame::init() {
-  declareProperty(new WorkspaceProperty<Mantid::API::IMDWorkspace>(
-                      "InputWorkspace", "", Direction::InOut),
-                  "The workspace for which the MDFrames are to be changed. "
-                  "Note that only MDHisto and MDEvent workspaces can be "
-                  "altered by this algorithm.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<Mantid::API::IMDWorkspace>>(
+          "InputWorkspace", "", Direction::InOut),
+      "The workspace for which the MDFrames are to be changed. "
+      "Note that only MDHisto and MDEvent workspaces can be "
+      "altered by this algorithm.");
 
   // Options for the MDFrames
   std::vector<std::string> mdFrames;
@@ -91,8 +92,8 @@ void SetMDFrame::init() {
   axisValidator->clearUpper();
   axisValidator->setLower(0);
   declareProperty(
-      new Mantid::Kernel::ArrayProperty<int>("Axes", std::vector<int>(0),
-                                             axisValidator, Direction::Input),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>(
+          "Axes", std::vector<int>(0), axisValidator, Direction::Input),
       "Selects the axes which are going to be set to the new MDFrame type.");
 }
 

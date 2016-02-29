@@ -35,11 +35,13 @@ LoadIsawUB::~LoadIsawUB() {}
  */
 void LoadIsawUB::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                Direction::InOut),
       "An input workspace to which to add the lattice information.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".mat", ".ub", ".txt"}),
+  const std::vector<std::string> exts{".mat", ".ub", ".txt"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to an ISAW-style UB matrix text file.");
 
   declareProperty("CheckUMatrix", true, "If True (default) then a check is "

@@ -68,11 +68,12 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSPE::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".spe"),
-                  "The name of the SPE file to load.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
+      "The name of the SPE file to load.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 /**

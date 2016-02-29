@@ -245,7 +245,7 @@ private:
 
     for (size_t i = 0; i < nhist; ++i) {
       ISpectrum *spec = ws->getSpectrum(0);
-      spec->setSpectrumNo(static_cast<Mantid::specid_t>(i + 1));
+      spec->setSpectrumNo(static_cast<Mantid::specnum_t>(i + 1));
       spec->clearDetectorIDs();
       spec->addDetectorID(static_cast<Mantid::detid_t>(i + 1));
     }

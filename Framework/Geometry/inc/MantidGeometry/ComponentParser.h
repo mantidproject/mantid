@@ -39,9 +39,6 @@ namespace Geometry {
 */
 class DLLExport ComponentParser : public Poco::XML::ContentHandler {
 public:
-  ComponentParser();
-  ~ComponentParser() override;
-
   /// Signals start of element
   void startElement(const Poco::XML::XMLString &,
                     const Poco::XML::XMLString &localName,

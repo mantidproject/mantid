@@ -35,15 +35,15 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(new WorkspaceProperty<>("InputImagWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 

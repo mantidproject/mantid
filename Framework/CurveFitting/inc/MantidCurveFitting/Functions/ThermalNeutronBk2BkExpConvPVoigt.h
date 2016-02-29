@@ -42,7 +42,6 @@ class DLLExport ThermalNeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 public:
   ThermalNeutronBk2BkExpConvPVoigt();
-  ~ThermalNeutronBk2BkExpConvPVoigt() override;
 
   /// Overwrite IFunction base class methods
   std::string name() const override {

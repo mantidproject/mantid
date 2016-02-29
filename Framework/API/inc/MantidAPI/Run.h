@@ -46,15 +46,6 @@ namespace API {
 */
 class MANTID_API_DLL Run : public LogManager {
 public:
-  /// Default constructor
-  Run();
-  /// Destructor. Doesn't need to be virtual as long as nothing inherits from
-  /// this class.
-  ~Run() override;
-  /// Copy constructor
-  Run(const Run &copy);
-  /// Assignment operator
-  const Run &operator=(const Run &rhs);
   /// Addition
   Run &operator+=(const Run &rhs);
 

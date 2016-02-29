@@ -46,7 +46,7 @@ public:
   virtual Mantid::Kernel::SpecialCoordinateSystem
   equivalientSpecialCoordinateSystem() const = 0;
   virtual MDFrame *clone() const = 0;
-  virtual ~MDFrame() {}
+  virtual ~MDFrame() = default;
 };
 
 typedef std::unique_ptr<MDFrame> MDFrame_uptr;

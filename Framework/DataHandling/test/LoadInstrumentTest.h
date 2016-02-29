@@ -138,7 +138,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 257);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
-    std::set<detid_t> ids_from_map = output->getSpectrum(257)->getDetectorIDs();
+    auto ids_from_map = output->getSpectrum(257)->getDetectorIDs();
     IDetector_const_sptr det_from_ws = output->getDetector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);

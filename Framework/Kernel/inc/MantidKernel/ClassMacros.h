@@ -29,11 +29,11 @@
  */
 
 /// Disable default construction
-#define DISABLE_DEFAULT_CONSTRUCT(ClassType) ClassType();
+#define DISABLE_DEFAULT_CONSTRUCT(ClassType) ClassType() = delete;
 
 /// Disable copy & assign
 #define DISABLE_COPY_AND_ASSIGN(ClassType)                                     \
-  ClassType(const ClassType &);                                                \
-  ClassType &operator=(const ClassType &);
+  ClassType(const ClassType &) = delete;                                       \
+  ClassType &operator=(const ClassType &) = delete;
 
 #endif /* MANTID_KERNEL_CLASSMACROS_H_ */

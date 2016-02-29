@@ -22,23 +22,22 @@
 #include <Poco/DOM/Text.h>
 
 #ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from std::basic_istream
-  // See http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-  #pragma warning( push )
-  #pragma warning( disable : 4250 )
-  #include <Poco/XML/XMLWriter.h>
-  #pragma warning( pop ) 
+// Disable a flood of warnings from Poco about inheriting from
+// std::basic_istream
+// See
+// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
+#pragma warning(push)
+#pragma warning(disable : 4250)
+#include <Poco/XML/XMLWriter.h>
+#pragma warning(pop)
 #endif
 
 //-----------------------------------------------------------------------------
 using namespace Poco::XML;
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace Muon
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
 
 using namespace Poco::XML;
 using namespace MantidQt::API;
@@ -53,7 +52,8 @@ void saveGroupingToXML(const Mantid::API::Grouping &g,
                        const std::string &filename) {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
-    throw Mantid::Kernel::Exception::FileError("Unable to open output file", filename);
+    throw Mantid::Kernel::Exception::FileError("Unable to open output file",
+                                               filename);
 
   DOMWriter writer;
   writer.setNewLine("\n");
@@ -67,8 +67,7 @@ void saveGroupingToXML(const Mantid::API::Grouping &g,
   mDoc->appendChild(rootElem);
 
   // Create group elements
-  for (size_t gi = 0; gi < g.groups.size(); gi++)
-  {
+  for (size_t gi = 0; gi < g.groups.size(); gi++) {
     Poco::AutoPtr<Element> gElem = mDoc->createElement("group");
     gElem->setAttribute("name", g.groupNames[gi]);
     rootElem->appendChild(gElem);
@@ -79,8 +78,7 @@ void saveGroupingToXML(const Mantid::API::Grouping &g,
   }
 
   // Create pair elements
-  for (size_t pi = 0; pi < g.pairs.size(); pi++)
-  {
+  for (size_t pi = 0; pi < g.pairs.size(); pi++) {
     Poco::AutoPtr<Element> gElem = mDoc->createElement("pair");
     gElem->setAttribute("name", g.pairNames[pi]);
     rootElem->appendChild(gElem);
@@ -94,9 +92,10 @@ void saveGroupingToXML(const Mantid::API::Grouping &g,
     gElem->appendChild(bwElem);
 
     Poco::AutoPtr<Element> alphaElem = mDoc->createElement("alpha");
-    alphaElem->setAttribute("val", boost::lexical_cast<std::string>(g.pairAlphas[pi]));
+    alphaElem->setAttribute("val",
+                            boost::lexical_cast<std::string>(g.pairAlphas[pi]));
     gElem->appendChild(alphaElem);
-  } 
+  }
 
   // Create default group/pair name element
   Poco::AutoPtr<Element> gElem = mDoc->createElement("default");
@@ -125,10 +124,11 @@ void parseGroupingTable(const Ui::MuonAnalysis &form,
   g.groups.resize(groupToRow.size());
 
   // Fill group arrays
-  for (size_t gi = 0; gi < groupToRow.size(); gi++)
-  {
-    g.groupNames[gi] = form.groupTable->item(groupToRow[gi],0)->text().toStdString();
-    g.groups[gi] = form.groupTable->item(groupToRow[gi],1)->text().toStdString();
+  for (size_t gi = 0; gi < groupToRow.size(); gi++) {
+    g.groupNames[gi] =
+        form.groupTable->item(groupToRow[gi], 0)->text().toStdString();
+    g.groups[gi] =
+        form.groupTable->item(groupToRow[gi], 1)->text().toStdString();
   }
 
   // Parse pair info
@@ -140,17 +140,20 @@ void parseGroupingTable(const Ui::MuonAnalysis &form,
   g.pairAlphas.resize(pairToRow.size());
 
   // Fill pair arrays
-  for (size_t pi = 0; pi < pairToRow.size(); pi++)
-  {
-    g.pairNames[pi] = form.pairTable->item(pairToRow[pi],0)->text().toStdString();
+  for (size_t pi = 0; pi < pairToRow.size(); pi++) {
+    g.pairNames[pi] =
+        form.pairTable->item(pairToRow[pi], 0)->text().toStdString();
 
-    QComboBox* fwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pairToRow[pi],1));
-    QComboBox* bwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pairToRow[pi],2));
+    QComboBox *fwd =
+        static_cast<QComboBox *>(form.pairTable->cellWidget(pairToRow[pi], 1));
+    QComboBox *bwd =
+        static_cast<QComboBox *>(form.pairTable->cellWidget(pairToRow[pi], 2));
 
     g.pairs[pi] = std::make_pair(fwd->currentIndex(), bwd->currentIndex());
 
-    g.pairAlphas[pi] = form.pairTable->item(pairToRow[pi],3)->text().toDouble();
-  } 
+    g.pairAlphas[pi] =
+        form.pairTable->item(pairToRow[pi], 3)->text().toDouble();
+  }
 
   // Use currently selected group/pair as default value
   g.defaultName = form.frontGroupGroupPairComboBox->currentText().toStdString();
@@ -162,30 +165,32 @@ void parseGroupingTable(const Ui::MuonAnalysis &form,
  * @param    g :: Grouping struct to use for filling the table
  * @param form :: Muon Analysis UI containing table widgets
  */
-void fillGroupingTable(const Mantid::API::Grouping& g, Ui::MuonAnalysis& form)
-{
+void fillGroupingTable(const Mantid::API::Grouping &g, Ui::MuonAnalysis &form) {
   // Add groups to a table
-  for(int gi = 0; gi < static_cast<int>(g.groups.size()); gi++)
-  {
-    form.groupTable->setItem(gi, 0, new QTableWidgetItem(g.groupNames[gi].c_str()));
+  for (int gi = 0; gi < static_cast<int>(g.groups.size()); gi++) {
+    form.groupTable->setItem(gi, 0,
+                             new QTableWidgetItem(g.groupNames[gi].c_str()));
     form.groupTable->setItem(gi, 1, new QTableWidgetItem(g.groups[gi].c_str()));
   }
 
   // Add pairs to the table
-  for(int pi = 0; pi < static_cast<int>(g.pairs.size()); pi++)
-  {
+  for (int pi = 0; pi < static_cast<int>(g.pairs.size()); pi++) {
     // Set the name
-    form.pairTable->setItem(pi, 0, new QTableWidgetItem(g.pairNames[pi].c_str()));
+    form.pairTable->setItem(pi, 0,
+                            new QTableWidgetItem(g.pairNames[pi].c_str()));
 
     // Set selected forward/backward groups
-    QComboBox* fwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pi,1));
+    QComboBox *fwd =
+        static_cast<QComboBox *>(form.pairTable->cellWidget(pi, 1));
     fwd->setCurrentIndex(static_cast<int>(g.pairs[pi].first));
-    QComboBox* bwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pi,2));
+    QComboBox *bwd =
+        static_cast<QComboBox *>(form.pairTable->cellWidget(pi, 2));
     bwd->setCurrentIndex(static_cast<int>(g.pairs[pi].second));
 
     // Set alpha
-    form.pairTable->setItem(pi, 3, 
-      new QTableWidgetItem(boost::lexical_cast<std::string>(g.pairAlphas[pi]).c_str()));
+    form.pairTable->setItem(
+        pi, 3, new QTableWidgetItem(
+                   boost::lexical_cast<std::string>(g.pairAlphas[pi]).c_str()));
   }
 
   // Set description
@@ -201,13 +206,10 @@ void fillGroupingTable(const Mantid::API::Grouping& g, Ui::MuonAnalysis& form)
  * @param m_uiForm :: The UI form
  * @param name :: Name you want to set the front Group / Group Pair name to
  */
-void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
-{
+void setGroupGroupPair(Ui::MuonAnalysis &m_uiForm, const std::string &name) {
   QString qsname(name.c_str());
-  for (int i = 0; i < m_uiForm.frontGroupGroupPairComboBox->count(); i++)
-  {
-    if ( m_uiForm.frontGroupGroupPairComboBox->itemText(i) == qsname )
-    {
+  for (int i = 0; i < m_uiForm.frontGroupGroupPairComboBox->count(); i++) {
+    if (m_uiForm.frontGroupGroupPairComboBox->itemText(i) == qsname) {
       m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(i);
       return;
     }
@@ -223,22 +225,27 @@ void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
  */
 MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws,
                                     const Mantid::API::Grouping &g) {
-  // As I couldn't specify multiple groups for GroupDetectors, I am going down quite a complicated
-  // route - for every group distinct grouped workspace is created using GroupDetectors. These
+  // As I couldn't specify multiple groups for GroupDetectors, I am going down
+  // quite a complicated
+  // route - for every group distinct grouped workspace is created using
+  // GroupDetectors. These
   // workspaces are then merged into the output workspace.
 
   // Create output workspace
-  MatrixWorkspace_sptr outWs =
-    WorkspaceFactory::Instance().create(ws, g.groups.size(), ws->readX(0).size(), ws->blocksize());
+  MatrixWorkspace_sptr outWs = WorkspaceFactory::Instance().create(
+      ws, g.groups.size(), ws->readX(0).size(), ws->blocksize());
 
-  for(size_t gi = 0; gi < g.groups.size(); gi++)
-  {
-    Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("GroupDetectors");
+  for (size_t gi = 0; gi < g.groups.size(); gi++) {
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("GroupDetectors");
     alg->setChild(true); // So Output workspace is not added to the ADS
     alg->initialize();
-    alg->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(ws));
+    alg->setProperty("InputWorkspace",
+                     boost::const_pointer_cast<MatrixWorkspace>(ws));
     alg->setPropertyValue("SpectraList", g.groups[gi]);
-    alg->setPropertyValue("OutputWorkspace", "grouped"); // Is not actually used, just to make validators happy
+    alg->setPropertyValue(
+        "OutputWorkspace",
+        "grouped"); // Is not actually used, just to make validators happy
     alg->execute();
 
     MatrixWorkspace_sptr grouped = alg->getProperty("OutputWorkspace");
@@ -247,7 +254,7 @@ MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws,
     *(outWs->getSpectrum(gi)) = *(grouped->getSpectrum(0));
 
     // Update spectrum number
-    outWs->getSpectrum(gi)->setSpectrumNo(static_cast<specid_t>(gi));
+    outWs->getSpectrum(gi)->setSpectrumNo(static_cast<specnum_t>(gi));
 
     // Copy to the output workspace
     outWs->dataY(gi) = grouped->readY(0);
@@ -268,27 +275,24 @@ std::vector<int> whichGroupToWhichRow(const Ui::MuonAnalysis &m_uiForm) {
   std::vector<int> groupToRow;
 
   int numRows = m_uiForm.groupTable->rowCount();
-  for (int i = 0; i < numRows; i++)
-  {
+  for (int i = 0; i < numRows; i++) {
     // test if group name valid
-    QTableWidgetItem *item0 = m_uiForm.groupTable->item(i,0);
+    QTableWidgetItem *item0 = m_uiForm.groupTable->item(i, 0);
     if (!item0)
       continue;
-    if ( item0->text().isEmpty() )
+    if (item0->text().isEmpty())
       continue;
 
     // test if group IDs valid
-    QTableWidgetItem *item1 = m_uiForm.groupTable->item(i,1);
-    QTableWidgetItem *item2 = m_uiForm.groupTable->item(i,2);
+    QTableWidgetItem *item1 = m_uiForm.groupTable->item(i, 1);
+    QTableWidgetItem *item2 = m_uiForm.groupTable->item(i, 2);
     if (!item1 || !item2)
       continue;
-    if ( item1->text().isEmpty() || item2->text().isEmpty() )
+    if (item1->text().isEmpty() || item2->text().isEmpty())
       continue;
-    try
-    {
-       boost::lexical_cast<int>(item2->text().toStdString().c_str());
-    }  catch (boost::bad_lexical_cast&)
-    {
+    try {
+      boost::lexical_cast<int>(item2->text().toStdString().c_str());
+    } catch (boost::bad_lexical_cast &) {
       continue;
     }
 
@@ -296,7 +300,6 @@ std::vector<int> whichGroupToWhichRow(const Ui::MuonAnalysis &m_uiForm) {
   }
   return groupToRow;
 }
-
 
 /**
  * create 'map' relating pair number to row number in pair table
@@ -308,28 +311,29 @@ std::vector<int> whichPairToWhichRow(const Ui::MuonAnalysis &m_uiForm) {
   std::vector<int> pairToRow;
 
   int numRows = m_uiForm.pairTable->rowCount();
-  for (int i = 0; i < numRows; i++)
-  {
+  for (int i = 0; i < numRows; i++) {
     // test if pair name valid
-    QTableWidgetItem *item0 = m_uiForm.pairTable->item(i,0);
+    QTableWidgetItem *item0 = m_uiForm.pairTable->item(i, 0);
     if (!item0)
       continue;
-    if ( item0->text().isEmpty() )
+    if (item0->text().isEmpty())
       continue;
 
     // test if alpha is specified
-    QTableWidgetItem *item3 = m_uiForm.pairTable->item(i,3);
+    QTableWidgetItem *item3 = m_uiForm.pairTable->item(i, 3);
     if (!item3)
       continue;
-    if ( item3->text().isEmpty() )
+    if (item3->text().isEmpty())
       continue;
 
     // test if content in combo boxes
-    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+    QComboBox *qwF =
+        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    QComboBox *qwB =
+        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
     if (!qwF || !qwB)
       continue;
-    if ( qwF->count() < 2 || qwB->count() < 2 )
+    if (qwF->count() < 2 || qwB->count() < 2)
       continue;
 
     pairToRow.push_back(i);
@@ -346,12 +350,11 @@ boost::shared_ptr<Mantid::API::Grouping>
 tableToGrouping(ITableWorkspace_sptr table) {
   auto grouping = boost::make_shared<Mantid::API::Grouping>();
 
-  for ( size_t row = 0; row < table->rowCount(); ++row )
-  {
-    std::vector<int> detectors = table->cell< std::vector<int> >(row,0);
+  for (size_t row = 0; row < table->rowCount(); ++row) {
+    std::vector<int> detectors = table->cell<std::vector<int>>(row, 0);
 
     // toString() expects the sequence to be sorted
-    std::sort( detectors.begin(), detectors.end() );
+    std::sort(detectors.begin(), detectors.end());
 
     // Convert to a range string, i.e. 1-5,6-8,9
     std::string detectorRange = Strings::toString(detectors);
@@ -361,8 +364,7 @@ tableToGrouping(ITableWorkspace_sptr table) {
   }
 
   // If we have 2 groups only - create a longitudinal pair
-  if ( grouping->groups.size() == 2 )
-  {
+  if (grouping->groups.size() == 2) {
     grouping->pairNames.emplace_back("long");
     grouping->pairAlphas.push_back(1.0);
     grouping->pairs.emplace_back(0, 1);
@@ -372,7 +374,8 @@ tableToGrouping(ITableWorkspace_sptr table) {
 }
 
 /**
- * Converts a grouping information to a grouping table. Discard all the information not stored in a
+ * Converts a grouping information to a grouping table. Discard all the
+ * information not stored in a
  * table - group names, pairing, description.
  * @param grouping :: Grouping information to convert
  * @return A grouping table as accepted by MuonGroupDetectors
@@ -380,12 +383,11 @@ tableToGrouping(ITableWorkspace_sptr table) {
 ITableWorkspace_sptr
 groupingToTable(boost::shared_ptr<Mantid::API::Grouping> grouping) {
   auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace") );
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   newTable->addColumn("vector_int", "Detectors");
 
-  for ( auto it = grouping->groups.begin(); it != grouping->groups.end(); ++it )
-  {
+  for (auto it = grouping->groups.begin(); it != grouping->groups.end(); ++it) {
     TableRow newRow = newTable->appendRow();
     newRow << Strings::parseRange(*it);
   }
@@ -410,7 +412,6 @@ getDummyGrouping(Instrument_const_sptr instrument) {
   dummyGrouping->groups.push_back(all.str());
   return dummyGrouping;
 }
-
 }
 }
 }

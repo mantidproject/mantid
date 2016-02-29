@@ -58,15 +58,6 @@ Torus::Torus()
   throw Kernel::Exception::NotImplementedError("Torus is not implemented.");
 }
 
-Torus::Torus(const Torus &A)
-    : Surface(A), Centre(A.Centre), Normal(A.Normal), Iradius(A.Iradius),
-      Dradius(A.Dradius), Displacement(A.Displacement)
-/**
-  Standard Copy Constructor
-  @param A :: Torus to copy
-*/
-{}
-
 Torus *Torus::doClone() const
 /**
   Makes a clone (implicit virtual copy constructor)
@@ -83,24 +74,6 @@ std::unique_ptr<Torus> Torus::clone() const
  */
 {
   return std::unique_ptr<Torus>(doClone());
-}
-
-Torus &Torus::operator=(const Torus &A)
-/**
-  Assignment operator
-  @param A :: Torus to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Surface::operator=(A);
-    Centre = A.Centre;
-    Normal = A.Normal;
-    Iradius = A.Iradius;
-    Dradius = A.Dradius;
-    Displacement = A.Displacement;
-  }
-  return *this;
 }
 
 int Torus::operator==(const Torus &A) const

@@ -124,8 +124,6 @@ public:
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  ~MultipleFileProperty() override;
-
   /// 'Virtual copy constructor
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
