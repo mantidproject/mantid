@@ -7,8 +7,9 @@ import numpy as np
 
 class IndirectNormSpectra(DataProcessorAlgorithm):
 
+    _input_ws_name = None
     _input_ws = None
-    _output_ws = None
+    _output_ws_name = None
 
 
     def category(self):
@@ -28,18 +29,20 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='Output workspace')
 
+    def validateInputs(self):
+        self._setup()
+        issues = dict()
+
+        # Ensure there is atleast 1 histogram
+        num_hists = self._input_ws.getNumberHistograms()
+        if num_hists == 0:
+            issues['InputWorkspace'] = 'InputWorkspace must have atleast 1 histogram'
 
     def PyExec(self):
-        self._setup()
-
-        ws_in = mtd[self._input_ws]
-        num_hist = ws_in.getNumberHistograms()  # no. of hist/groups in WS
-        if num_hist == 0:
-            raise ValueError('Workspace %s has NO histograms' % self._input_ws)
 
         CloneWorkspace(InputWorkspace=self._input_ws,
-                       OutputWorkspace=self._output_ws)
-        ws_out = mtd[self._output_ws]
+                       OutputWorkspace=self._output_ws_name)
+        ws_out = mtd[self._output_ws_name]
 
         for idx in range(num_hist):
             y = ws_in.readY(idx)
@@ -51,7 +54,7 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
             ws_out.setE(idx, e)
 
 
-        self.setProperty('OutputWorkspace', self._output_ws)
+        self.setProperty('OutputWorkspace', ws_out)
 
 
     def _setup(self):
@@ -59,8 +62,9 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         Gets properties.
         """
 
-        self._input_ws = self.getPropertyValue('InputWorkspace')
-        self._output_ws = self.getPropertyValue('OutputWorkspace')
+        self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._input_ws = self.getProperty('InputWorkspace')
+        self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectNormSpectra)
