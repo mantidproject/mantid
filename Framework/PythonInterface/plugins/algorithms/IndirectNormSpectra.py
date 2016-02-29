@@ -1,14 +1,12 @@
 #pylint: disable=no-init
 from mantid.kernel import *
-from mantid.api import (WorkspaceProperty, FileProperty, FileAction, TextAxis,
-                        DataProcessorAlgorithm, AlgorithmFactory, mtd)
+from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
 import numpy as np
 
 class IndirectNormSpectra(DataProcessorAlgorithm):
 
     _input_ws_name = None
-    _input_ws = None
     _output_ws_name = None
 
 
@@ -21,30 +19,23 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '',
-                                               direction=Direction.Input),
-                             doc='Input workspace')
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+                                                     doc='Input workspace')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
-                             doc='Output workspace')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',direction=Direction.Output),
+                                                     doc='Output workspace')
 
-    def validateInputs(self):
-        self._setup()
-        issues = dict()
-
-        # Ensure there is atleast 1 histogram
-        num_hists = self._input_ws.getNumberHistograms()
-        if num_hists == 0:
-            issues['InputWorkspace'] = 'InputWorkspace must have atleast 1 histogram'
 
     def PyExec(self):
 
-        CloneWorkspace(InputWorkspace=self._input_ws,
+        ws_in = mtd[self._input_ws_name]
+        CloneWorkspace(InputWorkspace=self._input_ws_name,
                        OutputWorkspace=self._output_ws_name)
-        ws_out = mtd[self._output_ws_name]
 
-        for idx in range(num_hist):
+        ws_out = mtd[self._output_ws_name]
+        num_hists = ws_in.getNumberHistograms()
+
+        for idx in range(num_hists):
             y = ws_in.readY(idx)
             ymax = np.amax(y)
             y = y/ymax
@@ -63,7 +54,6 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         """
 
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
-        self._input_ws = self.getProperty('InputWorkspace')
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
