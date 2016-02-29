@@ -368,7 +368,7 @@ void SaveOpenGenieAscii::applyEnginxFormat(const std::string fourspc) {
   std::string SpecNumberField = getProperty("SpecNumberField");
   // while field is not empty
   if (SpecNumberField != "") {
-    if (SpecNumberField.std::string::find("-") != std::string::npos) {
+    if (SpecNumberField.std::string::find('-') != std::string::npos) {
       std::string specNum = "spec_no";
 
       auto specNumOut = ("  \"" + specNum + "\"" + "\n" + fourspc + typeStr +

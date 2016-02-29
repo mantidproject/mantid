@@ -522,9 +522,9 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
   std::string month("");
   std::string day("");
   for (size_t i = 0; i < 3; ++i) {
-    if (formatterms[i].find("Y") != std::string::npos)
+    if (formatterms[i].find('Y') != std::string::npos)
       year = dateterms[i];
-    else if (formatterms[i].find("M") != std::string::npos) {
+    else if (formatterms[i].find('M') != std::string::npos) {
       month = dateterms[i];
       if (month.size() == 1)
         month = "0" + month;

@@ -1927,10 +1927,10 @@ void InstrumentDefinitionParser::setLogfile(
     std::string tie = "";
 
     if (type.compare("fitting") == 0) {
-      size_t found = paramName.find(":");
+      size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
-        size_t index = paramName.find(":", found + 1);
+        size_t index = paramName.find(':', found + 1);
         if (index != std::string::npos) {
           g_log.error()
               << "Fitting <parameter> in instrument definition file defined "

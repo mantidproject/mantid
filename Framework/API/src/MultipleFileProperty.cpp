@@ -29,7 +29,7 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
  * a "*" wild card in the file extension string passed to it.
  */
 bool doesNotContainWildCard(const std::string &ext) {
-  return std::string::npos == ext.find("*");
+  return std::string::npos == ext.find('*');
 }
 } // anonymous namespace
 

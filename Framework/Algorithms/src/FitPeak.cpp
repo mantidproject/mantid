@@ -1493,7 +1493,7 @@ std::string FitPeak::parseFunctionTypeFull(const std::string &fullstring,
 
   size_t n = std::count(fullstring.begin(), fullstring.end(), '(');
   if (n > 0) {
-    peaktype = fullstring.substr(0, fullstring.find("("));
+    peaktype = fullstring.substr(0, fullstring.find('('));
     boost::algorithm::trim(peaktype);
     defaultparorder = true;
   } else {
