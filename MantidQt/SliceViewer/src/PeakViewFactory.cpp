@@ -90,6 +90,8 @@ boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     PeaksPresenter *const presenter,
     Mantid::Geometry::PeakTransform_const_sptr transform) const
 {
+  double largestEffectiveRadius = 0.0;
+  double currentEffectiveRadius = 0.0;
     VecPeakRepresentation peakRepresentations(m_peaksWS->rowCount());
     int index = 0;
     for (auto &peakRepresentation : peakRepresentations) {
@@ -97,12 +99,17 @@ boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
         auto position = transform->transformPeak(peak);
         peakRepresentation
             = createSinglePeakRepresentation(peak, position, transform);
+        // Get the largest radius of the data set
+        currentEffectiveRadius = peakRepresentation->getEffectiveRadius();
+        if (currentEffectiveRadius > largestEffectiveRadius) {
+          largestEffectiveRadius = currentEffectiveRadius;
+        }
         ++index;
     }
 
     return boost::make_shared<PeakView>(
         presenter, m_plot, m_parent, peakRepresentations, m_plotXIndex,
-        m_plotYIndex, m_foregroundColor, m_backgroundColor);
+        m_plotYIndex, m_foregroundColor, m_backgroundColor, largestEffectiveRadius);
 }
 
 PeakRepresentation_sptr PeakViewFactory::createSinglePeakRepresentation(

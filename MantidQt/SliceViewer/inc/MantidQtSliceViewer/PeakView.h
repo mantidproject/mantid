@@ -40,7 +40,8 @@ public:
     PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
              const VecPeakRepresentation &vecPeakRepresentation,
              const int plotXIndex, const int plotYIndex,
-             PeakViewColor foregroundColor, PeakViewColor backgroundColor);
+             PeakViewColor foregroundColor, PeakViewColor backgroundColor,
+             double largestEffectiveRadius);
 
     virtual ~PeakView();
 
@@ -129,6 +130,9 @@ private:
     /// Foreground color
     PeakViewColor m_foregroundColor;
     PeakViewColor m_backgroundColor;
+
+    /// Largeste effective radius of all sub-representations
+    double m_largestEffectiveRadius;
 };
 }
 }

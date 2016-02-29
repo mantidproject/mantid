@@ -94,8 +94,6 @@ void PeakRepresentationSphere::showBackgroundRadius(const bool show)
     m_showBackgroundRadius = show;
 }
 
-// TODO: Add getShowBackgroundRadius
-
 /**
  *@return bounding box for peak in natural coordinates.
  */
@@ -129,13 +127,13 @@ void PeakRepresentationSphere::setOccupancyIntoView(const double)
 double PeakRepresentationSphere::getOccupancyInView() const
 {
     // DO NOTHING
-  return 0.0;
+  return -1.0;
 }
 
 double PeakRepresentationSphere::getOccupancyIntoView() const
 {
     // DO NOTHING
-  return 0.0;
+  return -1.0;
 }
 
 const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const
