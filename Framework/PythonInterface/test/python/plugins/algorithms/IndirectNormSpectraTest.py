@@ -7,13 +7,18 @@ class IndirectNormSpectraTest(unittest.TestCase):
 
 #----------------------------------Algorithm tests----------------------------------------
 
-    def test_with_MatrixWorkspace_one_hist(self):
-        in_ws = self._create_MatrixWorkspace(1, 'test')
+    def test_with_MatrixWorkspace_one_hist_positive(self):
+        in_ws = self._create_MatrixWorkspace(1, 'test', True)
         out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
-    def test_with_MatrixWorkspace_multi_hist(self):
-        in_ws = self._create_MatrixWorkspace(3, 'test')
+    def test_with_MatrixWorkspace_one_hist_negative(self):
+        in_ws = self._create_MatrixWorkspace(1, 'test', False)
+        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
+
+    def test_with_MatrixWorkspace_multi_hist_(self):
+        in_ws = self._create_MatrixWorkspace(3, 'test', True)
         out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
@@ -28,13 +33,16 @@ class IndirectNormSpectraTest(unittest.TestCase):
             self.assertLessEqual(y_data[i], 1)
 
 #--------------------------------Helper Functions-----------------------------------------
-    def _create_MatrixWorkspace(self, nhists, out_name):
+    def _create_MatrixWorkspace(self, nhists, out_name, positive):
         """
         Creates a basic Matrixworkspace
         """
         data = ""
         for i in range(nhists):
-            data +='1,2,3,4,5'
+            if positive:
+                data +='1,2,3,4,5'
+            else:
+                data +='-5,-4,-3,-2,-1'
             if i != (nhists - 1):
                 data += ','
         CreateWorkspace(OutputWorkspace=out_name, DataX=data,
