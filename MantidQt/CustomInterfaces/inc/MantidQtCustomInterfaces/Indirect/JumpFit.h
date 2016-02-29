@@ -52,7 +52,7 @@ private:
   void clearPlot();
 
   /// Deletes Plot Guess Workspace after use
-  void deletePlotGuessWorkspaces();
+  void deletePlotGuessWorkspaces(const bool &removePlotGuess);
 
   // The UI form
   Ui::JumpFit m_uiForm;

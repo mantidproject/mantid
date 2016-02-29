@@ -465,7 +465,7 @@ void JumpFit::generatePlotGuess() {
     return;
   if (!m_uiForm.ckPlotGuess->isChecked()) {
     m_uiForm.ppPlot->removeSpectrum("PlotGuess");
-    deletePlotGuessWorkspaces();
+    deletePlotGuessWorkspaces(true);
     return;
   }
 
@@ -506,6 +506,7 @@ void JumpFit::plotGuess(bool error) {
              SLOT(plotGuess(bool)));
   m_uiForm.ppPlot->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
                                Qt::green);
+  deletePlotGuessWorkspaces(false);
 }
 
 /**
@@ -531,14 +532,19 @@ std::string JumpFit::generateFunctionName(const QString &functionName) {
 
 /**
  * Remove PlotGuess related workspaces from the ADS
+ * @param removePlotGuess :: Removes the plotGuess data and not just the
+ * unwanted workspaces
  */
-void JumpFit::deletePlotGuessWorkspaces() {
+void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
   auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteAlg->initialize();
   deleteAlg->setLogging(false);
-  if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Workspace")) {
-    deleteAlg->setProperty("Workspace", "__PlotGuessData_Workspace");
-    deleteAlg->execute();
+  if (removePlotGuess) {
+    if (AnalysisDataService::Instance().doesExist(
+            "__PlotGuessData_Workspace")) {
+      deleteAlg->setProperty("Workspace", "__PlotGuessData_Workspace");
+      deleteAlg->execute();
+    }
   }
   if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Parameters")) {
     deleteAlg->setProperty("Workspace", "__PlotGuessData_Parameters");
