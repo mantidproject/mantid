@@ -12,12 +12,24 @@ class IndirectNormSpectraTest(unittest.TestCase):
 #----------------------------------Algorithm tests----------------------------------------
 
     def test_with_MatrixWorkspace_one_hist(self):
+        in_ws = self._create_MatrixWorkspace(1, test)
+        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
     def test_with_MatrixWorkspace_multi_hist(self):
+        in_ws = self._create_MatrixWorkspace(3, test)
+        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
     
     def test_with_WorkspaceGroup_one_workspace(self):
+        in_ws = self._create_WorkspaceGroup(1, test)
+        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
     
     def test_with_WorkspaceGroup_multi_workspace(self):
+        in_ws = self._create_WorkspaceGroup(1, test)
+        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
 #----------------------------------Failure cases------------------------------------------
 
