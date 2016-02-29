@@ -786,11 +786,12 @@ void MuonAnalysis::runLoadCurrent() {
         autofileIn >> autosavePointsTo;
       }
     } catch (Poco::Exception &) {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
-                           "Can't read from the selected directory, either the "
-                           "computer you are trying"
-                           "\nto access is down or your computer is not "
-                           "currently connected to the network.");
+      QString message("Can't read from the selected directory, either the "
+                      "computer you are trying"
+                      "\nto access is down or your computer is not "
+                      "currently connected to the network.");
+      message.append("\n\nRemote path: ").append(autosaveFile.c_str());
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", message);
       return;
     }
 
