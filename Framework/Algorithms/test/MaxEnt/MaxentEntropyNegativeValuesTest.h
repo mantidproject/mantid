@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MaxentEntropyNegativeValues.h"
+#include "MantidAlgorithms/Maxent/MaxentEntropyNegativeValues.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 

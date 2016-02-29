@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MaxentEntropyPositiveValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 
 using Mantid::Algorithms::MaxentEntropyPositiveValues;
 

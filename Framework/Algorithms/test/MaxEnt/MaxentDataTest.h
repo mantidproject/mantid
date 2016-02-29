@@ -4,17 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidAlgorithms/MaxentData.h"
-#include "MantidAlgorithms/MaxentEntropy.h"
+#include "MantidAlgorithms/MaxEnt/MaxentData.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Algorithms;
 using namespace testing;
-// using Mantid::Algorithms::MaxentData;
-// using Mantid::Algorithms::MaxentEntropyNegativeValues;
-// using Mantid::Algorithms::MaxentEntropyNegativeValues;
 
 class MockEntropy : public MaxentEntropy {
 
@@ -115,6 +112,13 @@ public:
     std::vector<double> img = {0, 0, 0, 0};
     maxentData->loadComplex(dat, dat, dat, dat, img, 0.1);
 
+    // Trying to update without calculating search directions first
+    TS_ASSERT_THROWS(maxentData->updateImage(std::vector<double>{0, 0}),
+                     std::runtime_error);
+
+    // Calculate search directions
+    maxentData->calculateQuadraticCoefficients();
+
     // Trying to update using a vector with wrong size
     TS_ASSERT_THROWS(maxentData->updateImage(std::vector<double>{0, 0, 0}),
                      std::invalid_argument);
@@ -182,6 +186,47 @@ public:
     TS_ASSERT_DELTA(coeff.c2[1][0], 1, 1E-6);
     TS_ASSERT_DELTA(coeff.c2[0][1], 1, 1E-6);
     TS_ASSERT_DELTA(coeff.c2[1][1], 1, 1E-6);
+  }
+
+  void test_update_image_updates_dataCalc() {
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MaxentData_sptr maxentData =
+        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
+
+    std::vector<double> dat = {0.5, 0.5};
+    std::vector<double> err = {0.1, 0.1};
+    std::vector<double> img = {1, 1, 1, 1};
+    double bkg = 0.1;
+
+    EXPECT_CALL(*entropy, correctValue(1., bkg))
+        .Times(4)
+        .WillRepeatedly(Return(1.));
+    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
+
+    // Get the calculated data
+    auto dataCalc = maxentData->getReconstructedData();
+
+    // Calculate quad coeffs and search directions
+    EXPECT_CALL(*entropy, getDerivative(1. / 0.1))
+        .Times(4)
+        .WillRepeatedly(Return(1.));
+    EXPECT_CALL(*entropy, getSecondDerivative(1.))
+        .Times(4)
+        .WillRepeatedly(Return(1.));
+    TS_ASSERT_THROWS_NOTHING(maxentData->calculateQuadraticCoefficients());
+
+    // Update the image
+    EXPECT_CALL(*entropy, correctValue(_, _))
+        .Times(4)
+        .WillRepeatedly(Return(0.5));
+    TS_ASSERT_THROWS_NOTHING(
+        maxentData->updateImage(std::vector<double>{1, 1}));
+
+    // Get the calculated data
+    auto newDataCalc = maxentData->getReconstructedData();
+    // Should have been updated
+    TS_ASSERT_DIFFERS(dataCalc, newDataCalc);
   }
 };
 

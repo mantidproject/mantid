@@ -142,6 +142,9 @@ void MaxentData::updateImage(const std::vector<double> &delta) {
   if (m_image.empty()) {
     throw std::runtime_error("No data were loaded");
   }
+  if (m_directionsIm.empty()) {
+    throw std::runtime_error("Search directions haven't been calculated");
+  }
   if (delta.size() != m_directionsIm.size()) {
     throw std::invalid_argument("Image couldn't be updated");
   }
@@ -327,10 +330,6 @@ void MaxentData::calculateQuadraticCoefficients() {
   }
 
   size_t npoints = m_image.size();
-
-  // Calculate data from start image
-  // TODO: I don't think we need this line
-  m_dataCalc = transformImageToData(m_image);
 
   // Gradient of chi (in image space)
   std::vector<double> cgrad = transformDataToImage(calculateChiGrad());
