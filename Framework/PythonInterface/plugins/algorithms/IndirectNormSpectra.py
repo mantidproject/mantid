@@ -29,7 +29,7 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._setup()
-        self._scale_negative_data()
+        self._scale_negative_and_zero_data()
         CloneWorkspace(InputWorkspace=self._input_ws,
                        OutputWorkspace=self._output_ws_name)
 
@@ -49,20 +49,22 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
 #----------------------------------Helper Functions---------------------------------
 
-    def _scale_negative_data(self):
+    def _scale_negative_and_zero_data(self):
         """
         Checks for negative data in workspace and scales workspace if data is negative
         """
         num_hists = self._input_ws.getNumberHistograms()
-        lowest_value = 0
+        lowest_value = 0.0
         for hist in range(num_hists):
             y_data = self._input_ws.readY(hist)
             ymin = np.amin(y_data)
             if ymin < lowest_value:
                 lowest_value = ymin
-        if lowest_value < 0:
+            logger.warning(str(lowest_value))
+            logger.warning(str(type(lowest_value)))
+        if lowest_value <= 0.0:
             logger.warning('scaling Workspace to remove negative data')
-            scale_factor = 0-lowest_value
+            scale_factor = 1-lowest_value
             Scale(InputWorkspace=self._input_ws, OutputWorkspace=self._input_ws,
                   Factor=scale_factor, Operation='Add')
 
