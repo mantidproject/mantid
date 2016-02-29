@@ -44,28 +44,29 @@ void LoadLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace to which the log data will be added.");
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".txt", ".log"}),
-      "The filename (including its full or relative path) of a SNS "
-      "text log file (not cvinfo), "
-      "an ISIS log file, or an ISIS raw file. "
-      "If a raw file is specified all log files associated with "
-      "that raw file are loaded into the specified workspace. The "
-      "file extension must "
-      "either be .raw or .s when specifying a raw file");
+  const std::vector<std::string> exts{".txt", ".log"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The filename (including its full or relative path) of a SNS "
+                  "text log file (not cvinfo), "
+                  "an ISIS log file, or an ISIS raw file. "
+                  "If a raw file is specified all log files associated with "
+                  "that raw file are loaded into the specified workspace. The "
+                  "file extension must "
+                  "either be .raw or .s when specifying a raw file");
 
   declareProperty(
-      new ArrayProperty<std::string>("Names"),
+      make_unique<ArrayProperty<std::string>>("Names"),
       "For SNS-style log files only: the names of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file.");
 
   declareProperty(
-      new ArrayProperty<std::string>("Units"),
+      make_unique<ArrayProperty<std::string>>("Units"),
       "For SNS-style log files only: the units of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file. "

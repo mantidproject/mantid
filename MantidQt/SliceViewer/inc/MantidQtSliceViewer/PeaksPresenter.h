@@ -87,7 +87,7 @@ public:
     virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
         = 0;
     virtual bool hasPeakAddMode() const = 0;
-    virtual ~PeaksPresenter() {}
+    ~PeaksPresenter() override{};
 };
 
 typedef boost::shared_ptr<PeaksPresenter> PeaksPresenter_sptr;

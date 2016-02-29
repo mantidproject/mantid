@@ -2,10 +2,8 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 from mantid.kernel import Logger
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
@@ -20,6 +18,10 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
+def generateRegExpValidator(widget, expression):
+    rx = QtCore.QRegExp(expression)
+    return QtGui.QRegExpValidator(rx, widget)
 
 class RunSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -103,21 +105,14 @@ class RunSetupWidget(BaseWidget):
         self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
-        # Integers
-        iv0 = QtGui.QIntValidator(self._content.emptyrun_edit)
-        iv0.setBottom(0)
+        expression = r'[\d,-]*'
+        iv0 = generateRegExpValidator(self._content.emptyrun_edit, expression)
         self._content.emptyrun_edit.setValidator(iv0)
 
-        iv1 = QtGui.QIntValidator(self._content.vanrun_edit)
-        iv1.setBottom(0)
+        iv1 = generateRegExpValidator(self._content.vanrun_edit, expression)
         self._content.vanrun_edit.setValidator(iv1)
 
-        # iv2 = QtGui.QIntValidator(self._content.vannoiserun_edit)
-        # iv2.setBottom(0)
-        # self._content.vannoiserun_edit.setValidator(iv2)
-
-        iv3 = QtGui.QIntValidator(self._content.vanbkgdrun_edit)
-        iv3.setBottom(0)
+        iv3 = generateRegExpValidator(self._content.vanbkgdrun_edit, expression)
         self._content.vanbkgdrun_edit.setValidator(iv3)
 
         siv = QtGui.QIntValidator(self._content.resamplex_edit)
@@ -176,11 +171,13 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
+
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
-        # Set binning type (logarithm or linear) 
+        # Set binning type (logarithm or linear)
         bintype_index = 1
         if state.doresamplex is True:
             # resample x
@@ -221,15 +218,15 @@ class RunSetupWidget(BaseWidget):
 
         # Background correction
         if state.bkgdrunnumber is not None and state.bkgdrunnumber != "":
-            self._content.emptyrun_edit.setText(str(int(state.bkgdrunnumber)))
+            self._content.emptyrun_edit.setText(state.bkgdrunnumber)
         self._content.disablebkgdcorr_chkbox.setChecked(state.disablebkgdcorrection)
         # Vanadium correction
         if state.vanrunnumber is not None and state.vanrunnumber != "":
-            self._content.vanrun_edit.setText(str(abs(int(state.vanrunnumber))))
+            self._content.vanrun_edit.setText(state.vanrunnumber)
         self._content.disablevancorr_chkbox.setChecked(state.disablevancorrection)
         # Vanadium background correction
         if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "":
-            self._content.vanbkgdrun_edit.setText(str(int(state.vanbkgdrunnumber)))
+            self._content.vanbkgdrun_edit.setText(state.vanbkgdrunnumber)
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
 
         # self._content.vannoiserun_edit.setText(str(state.vannoiserunnumber))
@@ -267,7 +264,7 @@ class RunSetupWidget(BaseWidget):
             s.doresamplex = True
             try:
                 s.resamplex = int(self._content.resamplex_edit.text())
-            except ValueError as e:
+            except ValueError:
                 raise RuntimeError('ResampleX parameter is not given!')
 
             if s.resamplex < 0 and bintypestr.startswith('Linear'):

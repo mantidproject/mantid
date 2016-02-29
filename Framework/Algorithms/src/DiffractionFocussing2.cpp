@@ -5,9 +5,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
@@ -42,19 +44,19 @@ DiffractionFocussing2::~DiffractionFocussing2() {}
 void DiffractionFocussing2::init() {
 
   auto wsValidator = boost::make_shared<API::RawCountValidator>();
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The result of diffraction focussing of InputWorkspace");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
+                  "The result of diffraction focussing of InputWorkspace");
 
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalLoad, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalLoad, ".cal"),
                   "Optional: The name of the CalFile with grouping data.");
 
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use instead of a grouping file.");
 
@@ -299,7 +301,7 @@ void DiffractionFocussing2::exec() {
 
     // Take the square root of the errors
     std::transform(Eout.begin(), Eout.end(), Eout.begin(),
-                   static_cast<double (*)(double)>(std::sqrt));
+                   static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used
@@ -651,7 +653,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Build up the X vector.
     boost::shared_ptr<MantidVec> xnew =
-        boost::shared_ptr<MantidVec>(new MantidVec(xPoints)); // New X vector
+        boost::make_shared<MantidVec>(xPoints); // New X vector
     (*xnew)[0] = Xmin;
     for (int64_t j = 1; j < xPoints; j++) {
       (*xnew)[j] = Xmin * (1.0 + step);

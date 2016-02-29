@@ -120,11 +120,6 @@ bool get_proxy_configuration_win(const std::string &target_url,
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_win") {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NetworkProxy::~NetworkProxy() {}
-
 /**
  * Get the http proxy information
  * @param targetURLString

@@ -21,11 +21,6 @@ SplittersWorkspace::SplittersWorkspace() {
   this->addColumn("int", "workspacegroup");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplittersWorkspace::~SplittersWorkspace() {}
-
 /*
  * Add a Splitter to
  */

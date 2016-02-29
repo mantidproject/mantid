@@ -41,8 +41,9 @@ namespace DataHandling {
 class DLLExport SNSDataArchive : public API::IArchiveSearch {
 public:
   /// Find the archive location of a set of files.
-  std::string getArchivePath(const std::set<std::string> &filenames,
-                             const std::vector<std::string> &exts) const;
+  std::string
+  getArchivePath(const std::set<std::string> &filenames,
+                 const std::vector<std::string> &exts) const override;
 };
 }
 }

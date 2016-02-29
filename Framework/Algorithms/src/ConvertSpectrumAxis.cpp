@@ -7,6 +7,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,12 +34,12 @@ void ConvertSpectrumAxis::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsVal),
-      "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, wsVal),
+                  "The name of the input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
   std::vector<std::string> targetOptions =
       Mantid::Kernel::UnitFactory::Instance().getKeys();
   targetOptions.emplace_back("theta");
@@ -66,8 +68,7 @@ void ConvertSpectrumAxis::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   std::string unitTarget = getProperty("Target");
   // Loop over the original spectrum axis, finding the theta (n.b. not 2theta!)
-  // for each spectrum
-  // and storing it's corresponding workspace index
+  // for each spectrum and storing it's corresponding workspace index
   // Map will be sorted on theta, so resulting axis will be ordered as well
   std::multimap<double, size_t> indexMap;
   const size_t nHist = inputWS->getNumberHistograms();
@@ -95,9 +96,8 @@ void ConvertSpectrumAxis::exec() {
     const double delta = 0.0;
     double efixed;
     for (size_t i = 0; i < nHist; i++) {
-      std::vector<double> xval;
-      xval.push_back(inputWS->readX(i).front());
-      xval.push_back(inputWS->readX(i).back());
+      std::vector<double> xval{inputWS->readX(i).front(),
+                               inputWS->readX(i).back()};
       IDetector_const_sptr detector = inputWS->getDetector(i);
       double twoTheta, l1val, l2;
       if (!detector->isMonitor()) {
@@ -154,7 +154,7 @@ void ConvertSpectrumAxis::exec() {
   outputWS->replaceAxis(1, newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else {
     newAxis->unit() = UnitFactory::Instance().create(unitTarget);
   }

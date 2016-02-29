@@ -4,8 +4,11 @@
  *WIKI*/
 
 #include "MantidDataHandling/LoadILLReflectometry.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
@@ -82,12 +85,13 @@ int LoadILLReflectometry::confidence(
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "File path of the Data file to load");
-
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "File path of the Data file to load");
+
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------

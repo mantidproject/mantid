@@ -47,11 +47,6 @@ HKL &HKL::operator=(const HKL &other) {
   return *this;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-HKL::~HKL() {}
-
 Kernel::UnitLabel HKL::getUnitLabel() const { return m_unit->getUnitLabel(); }
 
 const Kernel::MDUnit &HKL::getMDUnit() const { return *m_unit; }

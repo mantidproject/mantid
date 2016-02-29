@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -29,13 +32,13 @@ MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() {}
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "The workspace to correct for monitor efficiency");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the result.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "The workspace to correct for monitor efficiency");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace in which to store the result.");
 }
 
 void MonitorEfficiencyCorUser::exec() {

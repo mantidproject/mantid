@@ -3,11 +3,13 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -594,11 +596,10 @@ bool IndirectDiffractionReduction::validateRebin() {
     m_uiForm.valRebinEnd->setText("");
   } else {
 #define CHECK_VALID(text, validator)                                           \
-  if (text.isEmpty()) {                                                        \
-    rebinValid = false;                                                        \
+  rebinValid = !text.isEmpty();                                                \
+  if (!rebinValid) {                                                           \
     validator->setText("*");                                                   \
   } else {                                                                     \
-    rebinValid = true;                                                         \
     validator->setText("");                                                    \
   }
 

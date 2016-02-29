@@ -34,21 +34,21 @@ namespace Crystal {
 class DLLExport DiffPeaksWorkspaces : public API::Algorithm {
 public:
   DiffPeaksWorkspaces();
-  virtual ~DiffPeaksWorkspaces();
+  ~DiffPeaksWorkspaces() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Removes from a workspace any peaks that match a peak in a second "
            "workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

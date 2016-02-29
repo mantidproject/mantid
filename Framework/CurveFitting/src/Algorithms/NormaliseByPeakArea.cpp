@@ -1,9 +1,12 @@
 #include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/BoundedValidator.h"
@@ -60,8 +63,8 @@ void NormaliseByPeakArea::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -74,18 +77,20 @@ void NormaliseByPeakArea::init() {
       "If true all spectra on the Y-space, fitted & symmetrised workspaces "
       "are summed in quadrature to produce the final result");
 
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Input workspace normalised by the fitted peak area");
+  declareProperty(make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace", "",
+                                                   Direction::Output),
+                  "Input workspace converted to units of Y-space");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Input workspace normalised by the fitted peak area");
-  declareProperty(
-      new WorkspaceProperty<>("YSpaceDataWorkspace", "", Direction::Output),
-      "Input workspace converted to units of Y-space");
-  declareProperty(
-      new WorkspaceProperty<>("FittedWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
+                                       Direction::Output),
       "Output from fit of the single mass peakin y-space. The output units are "
       "in momentum (A^-1)");
   declareProperty(
-      new WorkspaceProperty<>("SymmetrisedWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
+                                       Direction::Output),
       "The input data symmetrised about Y=0.  The output units are in momentum "
       "(A^-1)");
 }

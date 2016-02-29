@@ -64,28 +64,28 @@ public:
   /// Constructor
   SaveFocusedXYE();
   /// Virtual destructor
-  virtual ~SaveFocusedXYE() {}
+  ~SaveFocusedXYE() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveFocusedXYE"; }
+  const std::string name() const override { return "SaveFocusedXYE"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a focused data set (usually the output of a diffraction "
            "focusing routine but not exclusively) into a three column format "
            "containing X_i, Y_i, and E_i.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Write the header information
   void writeHeaders(std::ostream &os,
                     API::MatrixWorkspace_const_sptr &workspace) const;
@@ -114,7 +114,8 @@ private:
 
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int perioidNum);
+                          const std::string &propertyValue,
+                          int perioidNum) override;
 
   /// Header type
   HeaderType m_headerType;

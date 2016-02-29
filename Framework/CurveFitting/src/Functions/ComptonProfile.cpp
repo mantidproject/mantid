@@ -4,6 +4,10 @@
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
+
 #include <gsl/gsl_poly.h>
 
 namespace Mantid {

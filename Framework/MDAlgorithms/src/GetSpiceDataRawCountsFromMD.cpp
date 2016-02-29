@@ -1,9 +1,13 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -28,19 +32,19 @@ GetSpiceDataRawCountsFromMD::~GetSpiceDataRawCountsFromMD() {}
  * @brief GetSpiceDataRawCountsFromMD::init
  */
 void GetSpiceDataRawCountsFromMD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input data MDEventWorkspace from which the raw "
                   "values are retrieved.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "MonitorWorkspace", "", Direction::Input),
                   "Name of the input monitor MDEventWorkspace paired with "
                   "input data workspace. ");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "Name of the output MatrixWorkspace containing the raw data required.");
 
   std::vector<std::string> vecmode{"Pt.", "Detector", "Sample Log"};

@@ -98,7 +98,7 @@ MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
 /**
  * Destructor
  */
-MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() {}
+MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
 
 /**
  * Correct the data for absorption and multiple scattering effects. Allows

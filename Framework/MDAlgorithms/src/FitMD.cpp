@@ -79,8 +79,7 @@ void FitMD::declareDatasetProperties(const std::string &suffix, bool addProp) {
   if (m_domainType != Simple) {
     m_maxSizePropertyName = "MaxSize" + suffix;
     if (addProp && !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive =
-          boost::shared_ptr<BoundedValidator<int>>(new BoundedValidator<int>());
+      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(1);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),

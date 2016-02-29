@@ -99,17 +99,12 @@ namespace MantidWidgets
   //---------------------------------------------------------------------------
   /** Slot called to execute whatever is the selected algorithm
    **/
-  void AlgorithmSelectorWidget::executeSelected()
-  {
-    QString algName;
-    int version;
-    this->getSelectedAlgorithm(algName,version);
-    if (!algName.isEmpty())
-    {
-      emit executeAlgorithm(algName, version);
+  void AlgorithmSelectorWidget::executeSelected() {
+    auto alg = this->getSelectedAlgorithm();
+    if (!alg.name.isEmpty()) {
+      emit executeAlgorithm(alg.name, alg.version);
     }
   }
-
 
   //---------------------------------------------------------------------------
   /** Show the selection in the tree when it changes in the combo */
@@ -123,46 +118,33 @@ namespace MantidWidgets
     m_tree->blockSignals(false);
 
     // Emit the signal
-    QString algName;
-    int version;
-    this->getSelectedAlgorithm(algName,version);
-    emit algorithmSelectionChanged(algName, version);
+    auto alg = this->getSelectedAlgorithm();
+    emit algorithmSelectionChanged(alg.name, alg.version);
   }
 
   //---------------------------------------------------------------------------
   /** Show the selection in the combo when it changes in the tree */
   void AlgorithmSelectorWidget::treeSelectionChanged()
   {
-    QString algName;
-    int version;
-    this->getSelectedAlgorithm(algName,version);
+    auto alg = this->getSelectedAlgorithm();
     // Select in the combo box
     m_findAlg->blockSignals(true);
-    m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
+    m_findAlg->setCurrentIndex(
+        m_findAlg->findText(alg.name, Qt::MatchFixedString));
     m_findAlg->blockSignals(false);
     // Emit the signal
-    emit algorithmSelectionChanged(algName, version);
+    emit algorithmSelectionChanged(alg.name, alg.version);
   }
 
   //---------------------------------------------------------------------------
   /** Return the selected algorithm.
    * The tree has priority. If nothing is selected in the tree,
    * return the ComboBox selection */
-  void AlgorithmSelectorWidget::getSelectedAlgorithm(QString& algName, int& version)
-  {
-    algName.clear();
-    m_tree->getSelectedAlgorithm(algName, version);
-    if (algName.isEmpty())
-      m_findAlg->getSelectedAlgorithm(algName, version);
-  }
-
-  //---------------------------------------------------------------------------
-  /** @return just the name of the selected algorithm */
-  QString AlgorithmSelectorWidget::getSelectedAlgorithm()
-  {
-    QString algName; int version;
-    this->getSelectedAlgorithm(algName, version);
-    return algName;
+  SelectedAlgorithm AlgorithmSelectorWidget::getSelectedAlgorithm() {
+    SelectedAlgorithm alg = m_tree->getSelectedAlgorithm();
+    if (alg.name.isEmpty())
+      alg = m_findAlg->getSelectedAlgorithm();
+    return alg;
   }
 
   //---------------------------------------------------------------------------
@@ -219,30 +201,25 @@ namespace MantidWidgets
   //============================================================================
   //======================= AlgorithmTreeWidget ================================
   //============================================================================
-  /** Return the selected algorithm in the tree */
-  void AlgorithmTreeWidget::getSelectedAlgorithm(QString& algName, int& version)
-  {
-    QList<QTreeWidgetItem*> items = this->selectedItems();
-    if ( items.size() == 0 )
-    {
-      // Nothing selected
-      algName = "";
-      version = 0;
-    }
-    else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
-    {
-      algName = "";
-      version = 0;
-    }
-    else
-    {
+  /** Return the selected algorithm in the tree 
+   * @returns :: algorithm selected by user
+   */
+  SelectedAlgorithm AlgorithmTreeWidget::getSelectedAlgorithm() {
+    SelectedAlgorithm alg("", 0);
+
+    auto isCategoryName = [](const QTreeWidgetItem *item) {
+      return (item->childCount() != 0 && !item->text(0).contains(" v."));
+    };
+
+    QList<QTreeWidgetItem *> items = this->selectedItems();
+    if (items.size() > 0 && !isCategoryName(items[0])) {
       QString str = items[0]->text(0);
       QStringList lst = str.split(" v.");
-      algName = lst[0];
-      version = lst[1].toInt();
+      alg.name = lst[0];
+      alg.version = lst[1].toInt();
     }
+    return alg;
   }
-
 
   //---------------------------------------------------------------------------
   /** SLOT called when clicking the mouse around the tree */
@@ -281,13 +258,10 @@ namespace MantidWidgets
   /** SLOT called when double-clicking on an entry in the tree */
   void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
   {
-    QString algName;
-    int version;
-    this->getSelectedAlgorithm(algName,version);
-    if ( ! algName.isEmpty() )
-    {
+    auto alg = this->getSelectedAlgorithm();
+    if (!alg.name.isEmpty()) {
       // Emit the signal that we are executing
-      emit executeAlgorithm(algName, version);
+      emit executeAlgorithm(alg.name, alg.version);
       return;
     }
     QTreeWidget::mouseDoubleClickEvent(e);
@@ -436,7 +410,7 @@ namespace MantidWidgets
 
   //---------------------------------------------------------------------------
   /** Return the selected algorithm */
-  void FindAlgComboBox::getSelectedAlgorithm(QString& algName, int& version)
+  SelectedAlgorithm FindAlgComboBox::getSelectedAlgorithm()
   {
     //typed selection
     QString typedText = this->currentText().stripWhiteSpace(); //text as typed in the combobox
@@ -450,9 +424,7 @@ namespace MantidWidgets
         typedText = stripAlias(typedText);
       }
     }
-    //set return values
-    algName = typedText;
-    version = -1;
+    return SelectedAlgorithm(typedText, -1);
   }
 
 

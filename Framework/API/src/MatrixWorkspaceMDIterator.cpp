@@ -1,9 +1,10 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/NumericAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -52,11 +53,6 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
   m_workspaceIndex = size_t(-1); // This makes sure calcWorkspacePos() updates
   calcWorkspacePos(m_beginWI);
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MatrixWorkspaceMDIterator::~MatrixWorkspaceMDIterator() {}
 
 //----------------------------------------------------------------------------------------------
 /** @return the number of points to be iterated on */

@@ -49,7 +49,7 @@ public:
     sendInitialSetup();
   }
   /// Destructor.
-  ~TestServerConnection() {}
+  ~TestServerConnection() override {}
   /// Sends an OK message when there is nothing to send or an error occured
   void sendOK() {
     std::string comm = "OK";
@@ -67,7 +67,7 @@ public:
   /**
   * Main method that sends out the data.
   */
-  void run() {
+  void run() override {
     Kernel::MersenneTwister tof(0, 10000.0, 20000.0);
     Kernel::MersenneTwister spec(1234, 0.0, static_cast<double>(m_nSpectra));
     Kernel::MersenneTwister period(0, 0.0, static_cast<double>(m_nPeriods));
@@ -141,7 +141,7 @@ public:
   * @param socket :: The socket.
   */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
                                     m_nEvents, m_prog);
   }
@@ -162,17 +162,22 @@ FakeISISEventDAE::~FakeISISEventDAE() {
 * Declare the algorithm properties
 */
 void FakeISISEventDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("Rate", 20, Direction::Input),
-                  "Rate of sending the data: stream of NEvents events is sent "
-                  "every Rate milliseconds.");
-  declareProperty(new PropertyWithValue<int>("NEvents", 1000, Direction::Input),
-                  "Number of events in each packet.");
-  declareProperty(new PropertyWithValue<int>("Port", 59876, Direction::Input),
-                  "The port to broadcast on (default 59876, ISISDAE 10000).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
+      "Rate of sending the data: stream of NEvents events is sent "
+      "every Rate milliseconds.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NEvents", 1000, Direction::Input),
+      "Number of events in each packet.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
+      "The port to broadcast on (default 59876, ISISDAE 10000).");
 }
 
 /**
@@ -198,7 +203,7 @@ void FakeISISEventDAE::exec() {
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
   m_server = new Poco::Net::TCPServer(

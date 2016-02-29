@@ -3,12 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -46,10 +49,10 @@ void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 
@@ -210,18 +213,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   // the output
   if (outputWS != inputWS) {
     if (m_inputEvents) {
-      // Need to create by name as WorkspaceFactory otherwise spits out
-      // Workspace2D when EventWS passed in
-      outputWS = WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1);
-      // Copy geometry etc. over
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        false);
-      // Need to copy over the data as well
-      EventWorkspace_const_sptr inputEventWS =
-          boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS)
-          ->copyDataFrom(*inputEventWS);
+      outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
     } else {
       // Create the output workspace
       outputWS = WorkspaceFactory::Instance().create(inputWS);
@@ -594,12 +586,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
 
-  std::vector<double> retval;
-  retval.push_back(XMin);
-  retval.push_back(step);
-  retval.push_back(XMax);
-
-  return retval;
+  return {XMin, step, XMax};
 }
 
 /** Reverses the workspace if X values are in descending order

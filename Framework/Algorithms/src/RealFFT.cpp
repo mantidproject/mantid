@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RealFFT.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -34,10 +35,10 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void RealFFT::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace. It contains three "
                   "spectra: the real, the imaginary parts of the transform and "

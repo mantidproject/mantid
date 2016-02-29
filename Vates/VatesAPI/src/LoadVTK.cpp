@@ -115,7 +115,9 @@ namespace Mantid
     {
       std::vector<std::string> exts;
       exts.push_back("vtk");
-      this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+      this->declareProperty(
+          Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                            exts),
           "Binary legacy VTK uniform structured image file to load.");
 
       auto manditorySignalArrayName = boost::make_shared<MandatoryValidator<std::string> >();
@@ -130,15 +132,23 @@ namespace Mantid
       auto rangeValidator = boost::make_shared<BoundedValidator<double> >(0, 100);
       this->declareProperty("KeepTopPercent", 25.0, rangeValidator, "Only keep the top percentage of SignalArray values in the range min to max. Allow sparse regions to be ignored. Defaults to 25%.");
 
-      setPropertySettings("KeepTopPercent",
-                new EnabledWhenProperty("AdaptiveBinned", IS_DEFAULT));
+      setPropertySettings("KeepTopPercent", make_unique<EnabledWhenProperty>(
+                                                "AdaptiveBinned", IS_DEFAULT));
 
-      declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "", Direction::Output),
-          "MDWorkspace equivalent of vtkStructuredPoints input.");
+      declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                          "OutputWorkspace", "", Direction::Output),
+                      "MDWorkspace equivalent of vtkStructuredPoints input.");
 
-      declareProperty(new PropertyWithValue<int>("SignalMaximum", 0, Direction::Output), "Maximum signal value determined from input array." );
-      declareProperty(new PropertyWithValue<int>("SignalMinimum", 0, Direction::Output), "Minimum signal value determined from input array." );
-      declareProperty(new PropertyWithValue<int>("SignalThreshold", 0, Direction::Output), "Actual calculated signal threshold determined from minimum, and maximum signal." );
+      declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
+                          "SignalMaximum", 0, Direction::Output),
+                      "Maximum signal value determined from input array.");
+      declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
+                          "SignalMinimum", 0, Direction::Output),
+                      "Minimum signal value determined from input array.");
+      declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
+                          "SignalThreshold", 0, Direction::Output),
+                      "Actual calculated signal threshold determined from "
+                      "minimum, and maximum signal.");
     }
 
     void LoadVTK::execMDHisto(vtkUnsignedShortArray* signals, vtkUnsignedShortArray* errorsSQ, MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY, MDHistoDimension_sptr dimZ, Progress& prog, const int64_t nPoints, const int64_t frequency)

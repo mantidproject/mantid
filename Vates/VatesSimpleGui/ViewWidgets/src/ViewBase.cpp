@@ -316,7 +316,8 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName, 
   // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
   // with top level splitting, but this is not updated in the plugin line edit field.
   // We do this here.
-  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+  auto workspaceProvider = Mantid::Kernel::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString(), std::move(workspaceProvider))) {
     vtkSMPropertyHelper(src->getProxy(),
               "Recursion Depth").Set(split.get());
   }
@@ -954,6 +955,13 @@ void ViewBase::setAxesGrid(bool on) {
   }
 }
 
+/**
+ * Check if there is an active source available
+ * @returns true if there is an active source else false
+ */
+bool ViewBase::hasActiveSource() {
+  return this->getPvActiveSrc() != nullptr;
+}
 
 } // namespace SimpleGui
 } // namespace Vates

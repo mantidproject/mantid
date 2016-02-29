@@ -52,8 +52,8 @@ namespace API
 
   public:
     explicit AlgorithmRunner(QObject * parent = 0);
-    virtual ~AlgorithmRunner();
-    
+    ~AlgorithmRunner() override;
+
     void cancelRunningAlgorithm();
 
     void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);

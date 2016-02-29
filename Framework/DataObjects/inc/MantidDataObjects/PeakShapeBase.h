@@ -44,23 +44,21 @@ public:
   PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
                 std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
-  /// Destructor
-  virtual ~PeakShapeBase();
   /// Get the coordinate frame
-  Kernel::SpecialCoordinateSystem frame() const;
+  Kernel::SpecialCoordinateSystem frame() const override;
   /// Get the name of the algorithm used to make this shape
-  std::string algorithmName() const;
+  std::string algorithmName() const override;
   /// Get the version of the algorithm used to make this shape
-  int algorithmVersion() const;
+  int algorithmVersion() const override;
   /// Radius
   virtual double radius() const = 0;
 
 protected:
   /// Copy constructor
-  PeakShapeBase(const PeakShapeBase &other);
+  PeakShapeBase(const PeakShapeBase &) = default;
 
   /// Assignment operator
-  PeakShapeBase &operator=(const PeakShapeBase &other);
+  PeakShapeBase &operator=(const PeakShapeBase &) = default;
 
   /// Special coordinate system
   Mantid::Kernel::SpecialCoordinateSystem m_frame;

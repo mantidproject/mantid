@@ -37,8 +37,6 @@ class MANTID_ICAT_DLL CatalogSearchParam {
 public:
   /// constructor
   CatalogSearchParam();
-  /// Destructor
-  ~CatalogSearchParam();
 
   /// Set the start run to search for.
   void setRunStart(const double &startRun);

@@ -74,36 +74,36 @@ class DLLExport CheckWorkspacesMatch : public API::Algorithm,
                                        public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
-  virtual ~CheckWorkspacesMatch();
+  ~CheckWorkspacesMatch() override;
 
   /// Algorithm's name
-  virtual const std::string name() const { return "CheckWorkspacesMatch"; }
+  const std::string name() const override { return "CheckWorkspacesMatch"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Compares two workspaces for equality. This algorithm is mainly "
            "intended for use by the Mantid development team as part of the "
            "testing process.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
   /// The string that is returned when comparison is successful.
   static std::string successString() { return "Success!"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Called when comparing two individual workspaces
-  void exec();
+  void exec() override;
 
   /// Called when comparing workspace groups
-  virtual bool processGroups();
+  bool processGroups() override;
 
   /// This algorithm is now deprecated and calls CompareWorkspaces instead
   std::string runCompareWorkspaces(bool group_compare = false);

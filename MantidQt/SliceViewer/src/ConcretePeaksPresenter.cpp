@@ -580,7 +580,16 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   alg->initialize();
   alg->setProperty("Workspace", peaksWS);
   alg->setProperty("HKL", std::vector<double>(hkl));
-  alg->execute();
+
+
+// Execute the algorithm
+try {
+    alg->execute();
+} catch (...) {
+    g_log.warning("ConcretePeaksPresenter: Could not add the peak. Make sure "
+                  "that it is added within a valid workspace region");
+}
+
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -593,6 +602,7 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   this->informOwnerUpdate();
 
   return alg->isExecuted();
+
 }
 
 bool ConcretePeaksPresenter::hasPeakAddMode() const {

@@ -40,11 +40,11 @@ namespace CustomInterfaces
   {
   public:
     // -- IALCPeakFittingModel interface -----------------------------------------------------------
-    IFunction_const_sptr fittedPeaks() const { return m_fittedPeaks; }
-    MatrixWorkspace_const_sptr data() const { return m_data; }
+    IFunction_const_sptr fittedPeaks() const override { return m_fittedPeaks; }
+    MatrixWorkspace_const_sptr data() const override { return m_data; }
     ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
-    void fitPeaks(IFunction_const_sptr peaks);
+    void fitPeaks(IFunction_const_sptr peaks) override;
     // -- End of IALCPeakFittingModel interface ----------------------------------------------------
 
     /// Update the data

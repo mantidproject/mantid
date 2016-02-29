@@ -3,6 +3,7 @@
 //
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"

@@ -50,11 +50,6 @@ TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(
     Mantid::API::MatrixWorkspace_const_sptr ws)
     : m_ws(ws) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TimeAtSampleStrategyElastic::~TimeAtSampleStrategyElastic() {}
-
 /**
  * @brief Calculate correction
  * @param workspace_index

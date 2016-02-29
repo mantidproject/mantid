@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	src/ColorBarWidget.cpp
 	src/CompositePeaksPresenter.cpp
 	src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
@@ -23,8 +22,8 @@ set ( SRC_FILES
 	src/PeaksWorkspaceWidget.cpp
 	src/ProxyCompositePeaksPresenter.cpp
 	src/QPeaksTableModel.cpp
-	src/QScienceSpinBox.cpp
 	src/SliceViewer.cpp
+	src/SliceViewerFunctions.cpp
 	src/SliceViewerWindow.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
@@ -33,7 +32,6 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
@@ -66,8 +64,8 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
-	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SliceViewer.h
+	inc/MantidQtSliceViewer/SliceViewerFunctions.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/UpdateableOnDemand.h
@@ -86,8 +84,6 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
-	inc/MantidQtSliceViewer/ColorBarWidget.h
-	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
@@ -101,7 +97,6 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
 	inc/MantidQtSliceViewer/LinePlotOptions.ui
-	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui
@@ -119,6 +114,7 @@ set ( TEST_FILES
     test/PeakRepresentationSphereTest.h
     test/PeakRepresentationEllipsoidTest.h
     test/NullPeaksPresenterTest.h
+    test/SliceViewerFunctionsTest.h
 )
 
 # Python unit tests
@@ -181,8 +177,10 @@ if ( CXXTEST_FOUND )
 
   include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc)
 
-  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
-  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+  set ( TESTHELPER_SRCS
+    ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )

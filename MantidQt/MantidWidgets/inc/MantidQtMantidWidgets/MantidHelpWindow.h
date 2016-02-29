@@ -23,21 +23,22 @@ Q_OBJECT
 
 public:
   MantidHelpWindow(QWidget* parent=0, Qt::WindowFlags flags=0);
-  virtual ~MantidHelpWindow();
+  ~MantidHelpWindow() override;
 
-  virtual void showPage(const std::string & url=std::string());
-  virtual void showPage(const QString & url);
-  virtual void showPage(const QUrl & url);
-  virtual void showWikiPage(const std::string &page=std::string());
-  virtual void showWikiPage(const QString &page);
-  virtual void showAlgorithm(const std::string &name=std::string(), const int version=-1);
-  virtual void showAlgorithm(const QString &name, const int version=-1);
-  virtual void showConcept(const std::string &name);
-  virtual void showConcept(const QString &name);
-  virtual void showFitFunction(const std::string &name=std::string());
-  virtual void showFitFunction(const QString &name);
-  virtual void showCustomInterface(const std::string &name=std::string());
-  virtual void showCustomInterface(const QString &name);
+  void showPage(const std::string &url = std::string()) override;
+  void showPage(const QString &url) override;
+  void showPage(const QUrl &url) override;
+  void showWikiPage(const std::string &page = std::string()) override;
+  void showWikiPage(const QString &page) override;
+  void showAlgorithm(const std::string &name = std::string(),
+                     const int version = -1) override;
+  void showAlgorithm(const QString &name, const int version = -1) override;
+  void showConcept(const std::string &name) override;
+  void showConcept(const QString &name) override;
+  void showFitFunction(const std::string &name = std::string()) override;
+  void showFitFunction(const QString &name) override;
+  void showCustomInterface(const std::string &name = std::string()) override;
+  void showCustomInterface(const QString &name) override;
 
 private:
   void showHelp(const QString &url);
@@ -59,7 +60,7 @@ private:
 
 public slots:
   /// Perform any clean up on main window shutdown
-  virtual void shutdown();
+  void shutdown() override;
   void warning(QString msg);
 };
 

@@ -1,23 +1,24 @@
 #include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadFullprofResolution.h"
-
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
+#include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <fstream>
 
@@ -53,40 +54,42 @@ LoadGSASInstrumentFile::~LoadGSASInstrumentFile() {}
  */
 void LoadGSASInstrumentFile::init() {
   // Input file name
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".prm"}),
-      "Path to an GSAS file to load.");
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, ".prm"),
+                  "Path to an GSAS file to load.");
 
   // Output table workspace
-  auto wsprop = new WorkspaceProperty<API::ITableWorkspace>(
+  auto wsprop = Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
       "OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
-  declareProperty(wsprop, "Name of the output TableWorkspace containing "
-                          "instrument parameter information read from file. ");
+  declareProperty(std::move(wsprop),
+                  "Name of the output TableWorkspace containing "
+                  "instrument parameter information read from file. ");
 
   // Use bank numbers as given in file
   declareProperty(
-      new PropertyWithValue<bool>("UseBankIDsInFile", true, Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
+                                                   Direction::Input),
       "Use bank IDs as given in file rather than ordinal number of bank. "
       "If the bank IDs in the file are not unique, it is advised to set this "
       "to false.");
 
   // Bank to import
-  declareProperty(new ArrayProperty<int>("Banks"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("Banks"),
                   "ID(s) of specified bank(s) to load, "
                   "The IDs are as specified by UseBankIDsInFile. "
                   "Default is all banks contained in input .prm file.");
 
   // Workspace to put parameters into. It must be a workspace group with one
   // worskpace per bank from the prm file
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace", "",
-                                                        Direction::InOut,
-                                                        PropertyMode::Optional),
-                  "A workspace group with the instrument to which we add the "
-                  "parameters from the GSAS instrument file, with one "
-                  "workspace for each bank of the .prm file");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+          "Workspace", "", Direction::InOut, PropertyMode::Optional),
+      "A workspace group with the instrument to which we add the "
+      "parameters from the GSAS instrument file, with one "
+      "workspace for each bank of the .prm file");
 
   // Workspaces for each bank
-  declareProperty(new ArrayProperty<int>("WorkspacesForBanks"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("WorkspacesForBanks"),
                   "For each bank,"
                   " the ID of the corresponding workspace in same order as the "
                   "banks are specified. "
@@ -434,7 +437,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.

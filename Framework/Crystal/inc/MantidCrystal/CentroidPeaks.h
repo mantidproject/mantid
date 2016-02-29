@@ -18,26 +18,26 @@ namespace Crystal {
 class DLLExport CentroidPeaks : public API::Algorithm {
 public:
   CentroidPeaks();
-  ~CentroidPeaks();
+  ~CentroidPeaks() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CentroidPeaks"; };
+  const std::string name() const override { return "CentroidPeaks"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Find the centroid of single-crystal peaks in a 2D Workspace, in "
            "order to refine their positions.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   void integrate();
   void integrateEvent();
   int findPixelID(std::string bankName, int col, int row);

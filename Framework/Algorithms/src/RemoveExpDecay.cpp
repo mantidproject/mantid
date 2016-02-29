@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/RemoveExpDecay.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,15 +26,15 @@ DECLARE_ALGORITHM(MuonRemoveExpDecay)
  *
  */
 void MuonRemoveExpDecay::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      new Kernel::ArrayProperty<int>("Spectra", empty),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
 }
 

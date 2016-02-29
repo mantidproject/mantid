@@ -2,18 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMLZ.h"
+#include "MantidDataHandling/LoadHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 
-#include <limits>
 #include <algorithm>
-#include <vector>
 #include <cmath>
+#include <limits>
+#include <vector>
 //-----------------------------------------------------------------------
 
 namespace Mantid {
@@ -67,13 +71,14 @@ const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMLZ::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".nxs", ".hdf", ".hd5"}),
+  const std::vector<std::string> exts{".nxs", ".hdf", ".hd5"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "File path of the Data file to load");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //---------------------------------------------------------------------------

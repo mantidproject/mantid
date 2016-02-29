@@ -8,18 +8,22 @@
  *WIKI*/
 
 #include "MantidMDAlgorithms/LoadILLAscii.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
+
+#include <boost/shared_ptr.hpp>
+#include <Poco/TemporaryFile.h>
 
 #include <algorithm>
 #include <iterator> // std::distance
@@ -27,9 +31,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-
-#include <boost/shared_ptr.hpp>
-#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -101,9 +102,10 @@ const std::string LoadILLAscii::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
-                  "Name of the data file to load.");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ""),
+      "Name of the data file to load.");
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 }

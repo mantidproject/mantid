@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/BoundedValidator.h"
@@ -18,10 +21,10 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 

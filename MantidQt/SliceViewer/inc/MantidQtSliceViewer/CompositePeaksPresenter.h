@@ -35,15 +35,15 @@ class DLLExport CompositePeaksPresenter : public PeaksPresenter,
                                           public ZoomableOnDemand {
 public:
   // Overrriden methods from Peaks Presenter
-  virtual void update();
-  virtual void updateWithSlicePoint(const PeakBoundingBox &);
-  virtual bool changeShownDim();
-  virtual bool isLabelOfFreeAxis(const std::string &label) const;
-  SetPeaksWorkspaces presentedWorkspaces() const;
-  virtual void setForegroundColor(const PeakViewColor) {
+  void update() override;
+  void updateWithSlicePoint(const PeakBoundingBox &) override;
+  bool changeShownDim() override;
+  bool isLabelOfFreeAxis(const std::string &label) const override;
+  SetPeaksWorkspaces presentedWorkspaces() const override;
+  virtual void setForegroundColor(const PeakViewColor) override {
     /*Do nothing*/
   }
-  virtual void setBackgroundColor(const PeakViewColor) {
+  virtual void setBackgroundColor(const PeakViewColor) override {
     /*Do nothing*/
   }
   /// Get the foreground colour. This should never be used on the composite
@@ -58,35 +58,35 @@ public:
                        "composite presenter");
     return PeakViewColor();
   }
-  void showBackgroundRadius(const bool) { /*Do nothing*/
+  void showBackgroundRadius(const bool) override { /*Do nothing*/
   }
-  void setShown(const bool) { /*Do nothing*/
+  void setShown(const bool) override { /*Do nothing*/
   }
-  virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {
+  PeakBoundingBox getBoundingBox(const int peakIndex) const override {
     return m_default->getBoundingBox(peakIndex);
   }
-  virtual void sortPeaksWorkspace(const std::string &,
-                                  const bool) { /*Do Nothing*/
+  void sortPeaksWorkspace(const std::string &,
+                          const bool) override { /*Do Nothing*/
   }
-  virtual bool getShowBackground() const {
+  bool getShowBackground() const override {
     return m_default->getShowBackground();
   }
-  virtual void zoomToPeak(const int) { /* Do nothing */
+  void zoomToPeak(const int) override { /* Do nothing */
   }
-  virtual std::string getTransformName() const;
-  virtual bool isHidden() const { return m_default->isHidden(); }
-  virtual void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
+  std::string getTransformName() const override;
+  bool isHidden() const override { return m_default->isHidden(); }
+  void reInitialize(
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace>) override { /*Do nothing*/
   }
-  virtual bool deletePeaksIn(PeakBoundingBox box);
-  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
+  bool deletePeaksIn(PeakBoundingBox box) override;
+  bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
 
   /// Constructor
   CompositePeaksPresenter(ZoomablePeaksView *const zoomablePlottingWidget,
                           PeaksPresenter_sptr defaultPresenter =
                               PeaksPresenter_sptr(new NullPeaksPresenter));
   /// Destructor
-  virtual ~CompositePeaksPresenter();
+  ~CompositePeaksPresenter() override;
   /// Add a peaks presenter onto the composite.
   void addPeaksPresenter(PeaksPresenter_sptr presenter);
   /// Get the number of subjects.
@@ -94,15 +94,15 @@ public:
   /// Clear the owned presenters.
   void clear();
   /// Set the peaks size within the current projection
-  virtual void setPeakSizeOnProjection(const double fraction);
+  void setPeakSizeOnProjection(const double fraction) override;
   /// Set the peaks size into the current projection
-  virtual void setPeakSizeIntoProjection(const double fraction);
+  void setPeakSizeIntoProjection(const double fraction) override;
   /// Get the peaks size onto the current projection
-  virtual double getPeakSizeOnProjection() const;
+  double getPeakSizeOnProjection() const override;
   /// Get the peaks size into the current projection
-  virtual double getPeakSizeIntoProjection() const;
+  double getPeakSizeIntoProjection() const override;
   /// Enter peak edit mode.
-  void peakEditMode(EditMode mode);
+  void peakEditMode(EditMode mode) override;
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
                       const PeakViewColor);
@@ -140,16 +140,17 @@ public:
   /// Get the named peaks presenter.
   PeaksPresenter *getPeaksPresenter(const QString &name);
   /// Register any owning presenter
-  virtual void registerOwningPresenter(UpdateableOnDemand *owner);
+  void registerOwningPresenter(UpdateableOnDemand *owner) override;
   /// Is the presenter hidden.
   bool getIsHidden(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
   /// Perform update on demand
-  virtual void performUpdate();
+  void performUpdate() override;
   /// Zoom to the rectangle
-  virtual void zoomToPeak(PeaksPresenter *const presenter, const int peakIndex);
+  void zoomToPeak(PeaksPresenter *const presenter,
+                  const int peakIndex) override;
   /// Forget zoom
-  void resetZoom();
+  void resetZoom() override;
   /// Get optional zoomed peak presenter.
   boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
   /// Get optional zoomed peak index.
@@ -159,18 +160,20 @@ public:
       const std::string &wsName,
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
   /// Determine if the presenter contents are different.
-  bool contentsDifferent(PeaksPresenter const * other) const;
+  bool contentsDifferent(PeaksPresenter const *other) const override;
   /// Enter the requested edit mode for the peaks workspace.
   void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add peaks to this peaks workspace.
   bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add peaks
-  bool hasPeakAddMode() const;
+  bool hasPeakAddMode() const override;
+
 private:
   /// Updateable on demand method.
-  void updatePeaksWorkspace(
-      const std::string &toName,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
+  void
+  updatePeaksWorkspace(const std::string &toName,
+                       boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
+                           toWorkspace) override;
   /// Alias for container of subjects type.
   typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
   /// Subject presenters.

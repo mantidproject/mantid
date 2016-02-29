@@ -46,9 +46,6 @@ const V3D DEFAULT_AXIS(0, 0, 1);
 Logger g_log("ShapeFactory");
 }
 
-/// Empty default constructor
-ShapeFactory::ShapeFactory() {}
-
 /** Creates a geometric object directly from a XML shape string
  *
  *  @param shapeXML :: XML shape string
@@ -71,8 +68,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML,
   } catch (...) {
     g_log.warning("Unable to parse XML string " + shapeXML +
                   " . Empty geometry Object is returned.");
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
-    return retVal;
+
+    return boost::make_shared<Object>();
+    ;
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
@@ -228,7 +226,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
     }
   }
 
-  if (defaultAlgebra == false) {
+  if (!defaultAlgebra) {
     // Translate algebra string defined by the user into something Mantid can
     // understand
 
@@ -398,11 +396,7 @@ std::string ShapeFactory::parseInfiniteCylinder(
   // create infinite-cylinder
   auto pCylinder = boost::make_shared<Cylinder>();
   pCylinder->setCentre(parsePosition(pElemCentre));
-
-  V3D dummy1 = pCylinder->getCentre();
-
   pCylinder->setNorm(parsePosition(pElemAxis));
-  V3D dummy2 = pCylinder->getNormal();
 
   pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;
@@ -1285,13 +1279,15 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
   if (pElem->tagName() == "cuboid") {
-    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    boost::shared_ptr<GeometryHandler> handler =
+        boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     auto corners = parseCuboid(pElem);
     ((GluGeometryHandler *)(handler.get()))
         ->setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
   } else if (pElem->tagName() == "sphere") {
-    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    boost::shared_ptr<GeometryHandler> handler =
+        boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
     Element *pElemRadius = getShapeElement(pElem, "radius");
@@ -1301,7 +1297,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     ((GluGeometryHandler *)(handler.get()))
         ->setSphere(centre, atof((pElemRadius->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "cylinder") {
-    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    boost::shared_ptr<GeometryHandler> handler =
+        boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1314,7 +1311,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                       atof((pElemRadius->getAttribute("val")).c_str()),
                       atof((pElemHeight->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "segmented-cylinder") {
-    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    boost::shared_ptr<GeometryHandler> handler =
+        boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1328,7 +1326,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
             atof((pElemRadius->getAttribute("val")).c_str()),
             atof((pElemHeight->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "cone") {
-    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    boost::shared_ptr<GeometryHandler> handler =
+        boost::make_shared<GluGeometryHandler>(Obj);
     Obj->setGeometryHandler(handler);
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");

@@ -57,14 +57,14 @@ public:
   /// Constructor
   LoadRawDialog(QWidget *parent = 0);
   ///Destructor
-  ~LoadRawDialog();
+  ~LoadRawDialog() override;
 
 private:
 
   /** @name Virtual functions. */
   //@{
   /// Create the layout
-  void initLayout();
+  void initLayout() override;
   //@}
   
 private slots:

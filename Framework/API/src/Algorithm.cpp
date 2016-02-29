@@ -26,7 +26,7 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/RWLock.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Void.h>
 
 #include <json/json.h>
@@ -201,11 +201,12 @@ void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
-  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
+  auto res = tokenizer.asVector();
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
@@ -227,12 +228,11 @@ const std::string Algorithm::workspaceMethodName() const { return ""; }
  *workspaceMethodName attached
  */
 const std::vector<std::string> Algorithm::workspaceMethodOn() const {
-  Poco::StringTokenizer tokenizer(this->workspaceMethodOnTypes(),
-                                  WORKSPACE_TYPES_SEPARATOR,
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-
-  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
+  Mantid::Kernel::StringTokenizer tokenizer(
+      this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -1230,7 +1230,7 @@ bool Algorithm::processGroups() {
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
     Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop) {
-      WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
+      auto outWSGrp = boost::make_shared<WorkspaceGroup>();
       outGroups.push_back(outWSGrp);
       // Put the GROUP in the ADS
       AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);

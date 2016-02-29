@@ -32,35 +32,35 @@ public:
       Mantid::API::IPeaksWorkspace_sptr peaksWS,
       boost::shared_ptr<Mantid::API::MDGeometry> mdWS,
       Mantid::Geometry::PeakTransformFactory_sptr transformFactory);
-  void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS);
-  virtual ~ConcretePeaksPresenter();
-  virtual void update();
-  virtual void updateWithSlicePoint(const PeakBoundingBox &slicePoint);
-  virtual bool changeShownDim();
-  virtual bool isLabelOfFreeAxis(const std::string &label) const;
-  SetPeaksWorkspaces presentedWorkspaces() const;
+  void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
+  ~ConcretePeaksPresenter() override;
+  void update() override;
+  void updateWithSlicePoint(const PeakBoundingBox &slicePoint) override;
+  bool changeShownDim() override;
+  bool isLabelOfFreeAxis(const std::string &label) const override;
+  SetPeaksWorkspaces presentedWorkspaces() const override;
   void setForegroundColor(const PeakViewColor) override;
   void setBackgroundColor(const PeakViewColor) override;
-  std::string getTransformName() const;
-  void setShown(const bool shown);
-  virtual PeakBoundingBox getBoundingBox(const int) const;
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending);
-  virtual void setPeakSizeOnProjection(const double fraction);
-  virtual void setPeakSizeIntoProjection(const double fraction);
-  virtual double getPeakSizeOnProjection() const;
-  virtual double getPeakSizeIntoProjection() const;
-  virtual void registerOwningPresenter(UpdateableOnDemand *owner);
-  virtual bool getShowBackground() const;
+  std::string getTransformName() const override;
+  void setShown(const bool shown) override;
+  PeakBoundingBox getBoundingBox(const int) const override;
+  void sortPeaksWorkspace(const std::string &byColumnName,
+                          const bool ascending) override;
+  void setPeakSizeOnProjection(const double fraction) override;
+  void setPeakSizeIntoProjection(const double fraction) override;
+  double getPeakSizeOnProjection() const override;
+  double getPeakSizeIntoProjection() const override;
+  void registerOwningPresenter(UpdateableOnDemand *owner) override;
+  bool getShowBackground() const override;
   PeakViewColor getBackgroundPeakViewColor() const override;
   PeakViewColor getForegroundPeakViewColor() const override;
-  virtual void zoomToPeak(const int index);
-  virtual bool isHidden() const;
-  virtual bool contentsDifferent(PeaksPresenter const *  other) const;
-  virtual void peakEditMode(EditMode mode);
-  virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox);
-  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
-  virtual bool hasPeakAddMode() const;
+  void zoomToPeak(const int index) override;
+  bool isHidden() const override;
+  bool contentsDifferent(PeaksPresenter const *other) const override;
+  void peakEditMode(EditMode mode) override;
+  bool deletePeaksIn(PeakBoundingBox plotCoordsBox) override;
+  bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
+  bool hasPeakAddMode() const override;
 
 private:
   /// Peak overlay view.
@@ -96,7 +96,7 @@ private:
   /// peaks workspace.
   bool isDimensionNameOfFreeAxis(const std::string &name) const;
   /// Switch between showing background radius or not
-  void showBackgroundRadius(const bool show);
+  void showBackgroundRadius(const bool show) override;
   /// Produce the views from the PeaksWorkspace
   void produceViews();
   /// Check workspace compatibilities.

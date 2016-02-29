@@ -3,10 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -14,6 +15,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -230,8 +232,8 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(
-          new WorkspaceProperty<Workspace>(outws, WSName, Direction::Output));
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);
     }

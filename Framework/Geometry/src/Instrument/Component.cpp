@@ -1,6 +1,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/Exception.h"
+
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/SAX/AttributesImpl.h>
 
@@ -60,9 +62,6 @@ Component::Component(const std::string &name, const V3D &position,
                      const Quat &rotation, IComponent *parent)
     : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
       m_pos(position), m_rot(rotation) {}
-
-/// Destructor
-Component::~Component() {}
 
 //------------------------------------------------------------------------------------------------
 /** Return true if the Component is, in fact, parametrized
@@ -445,7 +444,7 @@ Component::getParameterNamesByComponent() const {
   if (!m_map)
     return retVal;
 
-  std::set<std::string> names = m_map->names(this);
+  auto names = m_map->names(this);
   for (const auto &name : names) {
     retVal.insert(
         std::pair<std::string, ComponentID>(name, this->getComponentID()));

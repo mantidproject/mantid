@@ -12,7 +12,7 @@ using namespace Mantid::Kernel;
 class NotebookWriterTest : public CxxTest::TestSuite {
 public:
   void test_writeNotebook() {
-    std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
+    auto notebook = make_unique<NotebookWriter>();
 
     std::string notebookText = notebook->writeNotebook();
 
@@ -24,7 +24,7 @@ public:
   }
 
   void test_markdownCell() {
-    std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
+    auto notebook = make_unique<NotebookWriter>();
     std::string test_data = "Test markdown cell";
     std::string notebookText = notebook->markdownCell(test_data);
 
@@ -38,7 +38,7 @@ public:
   }
 
   void test_codeCell() {
-    std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
+    auto notebook = make_unique<NotebookWriter>();
     std::string test_data = "print 'Test code cell'";
     std::string notebookText = notebook->codeCell(test_data);
 

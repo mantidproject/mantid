@@ -85,7 +85,7 @@ public:
   void setFirstColor(int index){d_first_color = index;};
   int firstColor(){return d_first_color;};
 
-  void loadData();
+  void loadData() override;
   void initLabels();
 
   void addLabel(PieLabel *l, bool clone = false);
@@ -95,8 +95,8 @@ public:
 
 private:
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-  void draw(QPainter *painter,const QwtScaleMap &xMap,
-      const QwtScaleMap &yMap, int from, int to) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            int from, int to) const override;
   void drawSlices(QPainter *painter, const QwtScaleMap &xMap,
       const QwtScaleMap &yMap, int from, int to) const;
   void drawDisk(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap) const;
@@ -132,7 +132,7 @@ public:
   void setPieCurve(QwtPieCurve *pie){d_pie_curve = pie;};
 
 private:
-  void closeEvent(QCloseEvent* e);
+  void closeEvent(QCloseEvent *e) override;
 
   QwtPieCurve *d_pie_curve;
   QString d_custom_text;

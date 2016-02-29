@@ -36,8 +36,6 @@ PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D() {
   initMode = 0;
 }
 
-PeakHKLErrors::~PeakHKLErrors() {}
-
 void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
   declareParameter("SampleYOffset", 0.0, "Sample y offset");
@@ -115,7 +113,7 @@ void PeakHKLErrors::cLone(
     return;
   if (component->isParametrized()) {
 
-    std::set<std::string> nms = pmapSv->names(component.get());
+    auto nms = pmapSv->names(component.get());
     for (const auto &nm : nms) {
 
       if (pmapSv->contains(component.get(), nm, "double")) {
@@ -181,7 +179,7 @@ void PeakHKLErrors::cLone(
 boost::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
-  boost::shared_ptr<Geometry::ParameterMap> pmap(new Geometry::ParameterMap());
+  auto pmap = boost::make_shared<Geometry::ParameterMap>();
   boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
       instSave->getParameterMap();
 
@@ -189,20 +187,18 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  boost::shared_ptr<Geometry::Instrument> instChange(
-      new Geometry::Instrument());
+  auto instChange = boost::shared_ptr<Geometry::Instrument>();
 
   if (!instSave->isParametrized()) {
 
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    boost::shared_ptr<Geometry::Instrument> Pinsta(
-        new Geometry::Instrument(instSave, pmap));
+    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
     instChange = Pinsta;
   } else // catch(... )
   {
-    boost::shared_ptr<Geometry::Instrument> P1(
-        new Geometry::Instrument(instSave->baseInstrument(), pmap));
+    auto P1 = boost::make_shared<Geometry::Instrument>(
+        instSave->baseInstrument(), pmap);
     instChange = P1;
   }
 
@@ -514,8 +510,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
 
-    V3D hkl = UBinv * peak.getQSampleFrame();
-
     // Deriv wrt chi phi and omega
     if (phiParamNum < nParams()) {
       Matrix<double> chiMatrix = RotationMatrixAboutRegAxis(chi, 'z');
@@ -596,7 +590,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     V3D D = peak.getDetPos() - samplePosition;
     double vmag = (L0 + D.norm()) / peak.getTOF();
     double t1 = peak.getTOF() - L0 / vmag;
-    V3D V = D / t1;
 
     // Derivs wrt sample x, y, z
     // Ddsx =( - 1, 0, 0),  d|D|^2/dsx -> 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2

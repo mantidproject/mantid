@@ -1,20 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
-#include <fstream>
-
-#include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -236,7 +237,8 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveXErrors)
       localWorkspace->dataDx(i) = spectra[i].dataDx();
     // Just have spectrum number start at 1 and count up
-    localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i) + 1);
+    localWorkspace->getSpectrum(i)
+        ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
   return localWorkspace;
 }
@@ -299,13 +301,14 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".dat", ".txt", ".csv", ""}),
+  const std::vector<std::string> extensions{".dat", ".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
                   "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .tst, .dat, or "
+                  "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");

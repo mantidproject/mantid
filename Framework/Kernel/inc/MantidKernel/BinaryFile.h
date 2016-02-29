@@ -38,7 +38,7 @@ template <typename T> class DLLExport BinaryFile {
 public:
   //------------------------------------------------------------------------------------
   /// Empty constructor
-  BinaryFile() : handle(NULL), num_elements(0), offset(0) {}
+  BinaryFile() : handle(nullptr), num_elements(0), offset(0) {}
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
@@ -55,7 +55,7 @@ public:
    * @throw invalid_argument if the file does not exist
    * */
   void open(const std::string &filename) {
-    this->handle = NULL;
+    this->handle = nullptr;
     if (!Poco::File(filename).exists()) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
@@ -74,7 +74,7 @@ public:
    * */
   void close() {
     delete handle;
-    handle = NULL;
+    handle = nullptr;
   }
 
   //-----------------------------------------------------------------------------
@@ -139,15 +139,13 @@ public:
   /**
    * Loads the entire contents of the file into a std::vector.
    * The file is closed once done.
-   * @param data :: The contents to load into the file
+   * @returns :: vector with contents of the file
    */
-  void loadAllInto(std::vector<T> &data) {
+  std::vector<T> loadAllIntoVector() {
     if (!handle) {
       throw std::runtime_error("BinaryFile: file is not open.");
     }
-
-    // Clear the vector
-    data.clear();
+    std::vector<T> data;
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
@@ -169,6 +167,8 @@ public:
     this->close();
     // Free memory
     delete[] buffer;
+
+    return data;
   }
 
   //-----------------------------------------------------------------------------

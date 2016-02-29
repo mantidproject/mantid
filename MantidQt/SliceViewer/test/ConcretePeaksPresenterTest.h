@@ -163,7 +163,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     }
 
     // Create a mock view object that will be returned by the mock factory.
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(new NiceMock<MockPeakOverlayView>);
+    auto mockView = boost::make_shared<NiceMock<MockPeakOverlayView>>();
     EXPECT_CALL(*mockView.get(), getRadius()).WillRepeatedly(Return(radius));
 
     

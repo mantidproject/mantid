@@ -1,11 +1,13 @@
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -64,7 +66,7 @@ const std::string ConvolutionFitSequential::summary() const {
  */
 void ConvolutionFitSequential::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();
@@ -180,7 +182,7 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
-  auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
+  convertInputToElasticQ(inputWs, tempFitWsName);
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
@@ -385,7 +387,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
-      if (isTwoL == true) {
+      if (isTwoL) {
         fitType = "2";
       } else {
         fitType = "1";
@@ -446,19 +448,17 @@ ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
 }
 
 /**
- * Converts the input workspaces to get the Elastic Q axis
+ * Converts the input workspaces to spectrum axis to ElasticQ and adds it to the
+ * ADS to be used by PlotPeakBylogValue
  * @param inputWs - The MatrixWorkspace to be converted
  * @param wsName - The desired name of the output workspace
- * @return Shared pointer to the converted workspace
  */
-API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
+void ConvolutionFitSequential::convertInputToElasticQ(
     API::MatrixWorkspace_sptr &inputWs, const std::string &wsName) {
-  auto tempFitWs = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
-    // remains in ADS for use in embedded algorithm call
+    // Store in ADS to allow use by PlotPeakByLogValue
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", wsName);
@@ -471,16 +471,15 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
+    // Store in ADS to allow use by PlotPeakByLogValue
+    cloneWs->setAlwaysStoreInADS(true);
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
-    tempFitWs = cloneWs->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
   }
-
-  return tempFitWs;
 }
 
 /**
@@ -554,7 +553,8 @@ void ConvolutionFitSequential::calculateEISF(
     // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
     auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
     std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                   sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+                   sqrtESqOverYSq.begin(),
+                   static_cast<double (*)(double)>(sqrt));
     // eisfYSumRoot = eisfY * sqrtESqOverYSq
     auto eisfYSumRoot = cloneVector(eisfY);
     std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),

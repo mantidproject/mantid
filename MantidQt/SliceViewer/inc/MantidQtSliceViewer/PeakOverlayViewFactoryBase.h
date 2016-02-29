@@ -47,9 +47,9 @@ namespace MantidQt
       const int m_plotYIndex;
     public:
       PeakOverlayViewFactoryBase(QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber=0);
-      virtual ~PeakOverlayViewFactoryBase();
-      virtual std::string getPlotXLabel() const;
-      virtual std::string getPlotYLabel() const;
+      ~PeakOverlayViewFactoryBase() override;
+      std::string getPlotXLabel() const override;
+      std::string getPlotYLabel() const override;
     };
   }
 }

@@ -96,7 +96,7 @@ private:
   Mantid::API::IAlgorithm_sptr
   createAlgorithm(const std::string &workspace = "",
                   const std::string &model = "") {
-    auto alg = boost::shared_ptr<CreateChopperModel>(new CreateChopperModel);
+    auto alg = boost::make_shared<CreateChopperModel>();
     alg->setRethrows(true);
     alg->initialize();
 

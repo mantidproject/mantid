@@ -22,7 +22,7 @@ namespace Kernel {
  * @author Janik Zikovsky, SNS
  * @date Feb 8, 2011
  */
-class DLLExport FunctionTask : public Task {
+class DLLExport FunctionTask final : public Task {
 public:
   /// Typedef for a function with no arguments and no return
   typedef void (*voidFunction)();
@@ -60,8 +60,8 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
-  virtual void run() {
-    if (m_voidFunc != NULL)
+  void run() override {
+    if (m_voidFunc)
       m_voidFunc();
     else
       throw std::runtime_error("FunctionTask: NULL method pointer provided.");

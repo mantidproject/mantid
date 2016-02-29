@@ -287,7 +287,7 @@ public:
   void testColumnCheckConsistency() {
     TestablePoldiPeakCollection peaks;
 
-    TableWorkspace_sptr newTable(new TableWorkspace());
+    auto newTable = boost::make_shared<TableWorkspace>();
     peaks.prepareTable(newTable);
 
     TS_ASSERT(peaks.checkColumns(newTable));

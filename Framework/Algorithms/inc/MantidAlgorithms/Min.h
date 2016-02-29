@@ -57,15 +57,15 @@ public:
   /// Default constructor
   Min() : API::Algorithm(){};
   /// Destructor
-  virtual ~Min(){};
+  ~Min() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Min"; }
+  const std::string name() const override { return "Min"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a 2D workspace as input and find the minimum in each 1D "
            "spectrum. "
            "The algorithm creates a new 1D workspace containing all minima as "
@@ -76,8 +76,8 @@ public:
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

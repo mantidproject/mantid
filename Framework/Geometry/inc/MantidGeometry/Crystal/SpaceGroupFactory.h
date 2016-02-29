@@ -37,7 +37,7 @@ class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator {
 public:
   AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                               const std::string &generatorInformation);
-  virtual ~AbstractSpaceGroupGenerator() {}
+  virtual ~AbstractSpaceGroupGenerator() = default;
 
   inline size_t getNumber() const { return m_number; }
   inline std::string getHMSymbol() const { return m_hmSymbol; }
@@ -71,10 +71,9 @@ class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator
 public:
   AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                  const std::string &generatorInformation);
-  virtual ~AlgorithmicSpaceGroupGenerator() {}
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
   std::string getCenteringSymbol() const;
 };
 
@@ -85,10 +84,9 @@ class MANTID_GEOMETRY_DLL TransformationSpaceGroupGenerator
 public:
   TransformationSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                     const std::string &generatorInformation);
-  virtual ~TransformationSpaceGroupGenerator() {}
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
   virtual SpaceGroup_const_sptr getBaseSpaceGroup() const;
 
   void setBaseAndTransformation(const std::string &generatorInformation);
@@ -104,10 +102,9 @@ class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator
 public:
   TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                const std::string &generatorInformation);
-  virtual ~TabulatedSpaceGroupGenerator() {}
 
 protected:
-  Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const override;
 };
 
 /**
@@ -158,7 +155,7 @@ protected:
 */
 class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl {
 public:
-  virtual ~SpaceGroupFactoryImpl() {}
+  virtual ~SpaceGroupFactoryImpl() = default;
 
   SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol);
 

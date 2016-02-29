@@ -1,10 +1,11 @@
 #include "MantidDataHandling/LoadSassena.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -348,19 +349,20 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".h5", ".hd5"}),
+  const std::vector<std::string> exts{".h5", ".hd5"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the group workspace to be created.");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       "TimeUnit", 1.0, Kernel::Direction::Input),
                   "The Time unit in between data points, in picoseconds. "
                   "Default is 1.0 picosec.");
-  declareProperty(new Kernel::PropertyWithValue<bool>("SortByQVectors", true,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "SortByQVectors", true, Kernel::Direction::Input),
                   "Sort structure factors by increasing momentum transfer?");
 }
 

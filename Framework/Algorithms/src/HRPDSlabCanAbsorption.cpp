@@ -2,6 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -18,9 +22,9 @@ using namespace Mantid::PhysicalConstants;
 
 void HRPDSlabCanAbsorption::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

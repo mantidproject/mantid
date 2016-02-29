@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -9,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
+
 #include <cmath>
 #include <ctime>
 #include <numeric>
@@ -56,9 +58,9 @@ const std::string CreateSampleWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateSampleWorkspace::init() {
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
   std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",
                   boost::make_shared<StringListValidator>(typeOptions),
@@ -304,7 +306,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   std::transform(y.access().begin(), y.access().end(), e.access().begin(),
                  dblSqrt);
 
-  MatrixWorkspace_sptr retVal(new DataObjects::Workspace2D);
+  MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
   retVal->initialize(numPixels, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
@@ -312,7 +314,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setX(wi, x);
     retVal->setData(wi, y, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
-    retVal->getSpectrum(wi)->setSpectrumNo(specid_t(wi + 1));
+    retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
   }
 
   return retVal;
@@ -329,7 +331,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   retVal->setInstrument(inst);
@@ -468,11 +470,11 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
     const double bankDistanceFromSample, const double sourceSampleDistance) {
-  boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  auto testInst = boost::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
