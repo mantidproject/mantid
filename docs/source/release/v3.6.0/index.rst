@@ -39,7 +39,7 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *Mantid 3.6: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: `http://dx.doi.org/10.5286/SOFTWARE/MANTID3.6`
+- *Mantid 3.6: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.6
 
 -------
 
