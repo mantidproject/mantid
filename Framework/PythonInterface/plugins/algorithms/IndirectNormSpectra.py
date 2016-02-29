@@ -27,25 +27,25 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-
-        ws_in = mtd[self._input_ws_name]
-        CloneWorkspace(InputWorkspace=self._input_ws_name,
+        self._setup()
+        input_ws = mtd[self._input_ws_name]
+        CloneWorkspace(InputWorkspace=input_ws,
                        OutputWorkspace=self._output_ws_name)
 
-        ws_out = mtd[self._output_ws_name]
-        num_hists = ws_in.getNumberHistograms()
+        num_hists = input_ws.getNumberHistograms()
+        output_ws = mtd[self._output_ws_name]
 
         for idx in range(num_hists):
-            y = ws_in.readY(idx)
+            y = input_ws.readY(idx)
             ymax = np.amax(y)
             y = y/ymax
-            ws_out.setY(idx, y)
-            e = ws_in.readE(idx)
+            output_ws.setY(idx, y)
+            e = input_ws.readE(idx)
             e = e/ymax
-            ws_out.setE(idx, e)
+            output_ws.setE(idx, e)
 
 
-        self.setProperty('OutputWorkspace', ws_out)
+        self.setProperty('OutputWorkspace', output_ws)
 
 
     def _setup(self):
@@ -54,7 +54,7 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         """
 
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
-        self._output_ws_name = self.getPropertyValue('OutputWorkspace')
+        self._output_ws_name= self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectNormSpectra)
