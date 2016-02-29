@@ -9,6 +9,7 @@ from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
 import time
+import h5py
 from abc import abstractmethod
 
 #pylint: disable=R0921
@@ -375,6 +376,41 @@ class ReductionWrapper(object):
         else:
             Pause(timeToWait)
     #
+    def _check_access_granted(self,input_file):
+        """ Check if the access to the found nxs file is granted
+
+            Created to fix issue on ISIS archive, when file
+            is copied through the network for ~2min and become available
+            2 minutes after it has been found.
+        """
+
+        file_name,found_ext=os.path.splitext(input_file)
+        if found_ext != '.nxs': # problem solution for nxs files only. Others are seems ok
+            return 
+        ic=0
+        #ok = os.access(input_file,os.R_OK) # does not work in this case
+        try:
+            f = h5py.File(input_file,'r')
+            ok = True
+        except IOError:
+            ok = False
+            while not ok:
+                self.reducer.prop_man.log \
+                ('*** File found but access can not be gained. Waiting for 10 sec','notice')
+                time.sleep(10)
+                ic = ic+1
+                try:
+                    f = h5py.File(input_file,'r')
+                    ok = True
+                except IOError:
+                    ok = False
+                    if ic>24:
+                        raise IOError
+                        ("Can not get read access to input file: "+input_file+" after 4 min of trying")
+        if ok:
+            f.close()
+
+
     def reduce(self,input_file=None,output_directory=None):
         """ The method performs all main reduction operations over
             single run file
@@ -412,11 +448,13 @@ class ReductionWrapper(object):
                             Found = False
                         else:
                             wait_counter = 0
-                    else: # found but let's give it some time to finish possible IO operations
-                        time.sleep(30)
+                    else:
+                        pass
                 else:
                     pass # not found, wait more
             #endWhile
+            # found but let's give it some time to finish possible IO operations
+            self._check_access_granted(input_file)
             converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
@@ -469,7 +507,8 @@ class ReductionWrapper(object):
             if n_found > 0:
                 # cash sum can be dropped now if it has not been done before
                 self.reducer.prop_man.cashe_sum_ws = False
-                 # found but let's give it some time to finish possible IO operations             
+                for fil in found:
+                    self._check_access_granted(fil)
                 ws = self.reduce()
         else:
             ws = self.reduce()
