@@ -130,6 +130,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
   QString outputName =
       getWorkspaceBasename(QString::fromStdString(sample)) + "_" + functionName + "_fit";
+
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
 
@@ -533,6 +534,29 @@ std::string JumpFit::generateFunctionName(const QString &functionName) {
 		functionString += "," + parameterName + "=" + parameterValue;
 	}
 	return functionString.toStdString();
+}
+
+/**
+ * Remove PlotGuess related workspaces from the ADS
+ */
+void JumpFit::deletePlotGuessWorkspaces() {
+  auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setLogging(false);
+  if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Workspace")) {
+    deleteAlg->setProperty("Workspace", "__PlotGuessData_Workspace");
+    deleteAlg->execute();
+  }
+  if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Parameters")) {
+    deleteAlg->setProperty("Workspace", "__PlotGuessData_Parameters");
+    deleteAlg->execute();
+  }
+  if (AnalysisDataService::Instance().doesExist(
+          "__PlotGuessData_NormalisedCovarianceMatrix")) {
+    deleteAlg->setProperty("Workspace",
+                           "__PlotGuessData_NormalisedCovarianceMatrix");
+    deleteAlg->execute();
+  }
 }
 
 } // namespace IDA
