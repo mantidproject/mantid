@@ -5,10 +5,6 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 class IndirectNormSpectraTest(unittest.TestCase):
 
-    def setUp(self):
-
-    def tearDown(self):
-
 #----------------------------------Algorithm tests----------------------------------------
 
     def test_with_MatrixWorkspace_one_hist(self):
@@ -34,8 +30,16 @@ class IndirectNormSpectraTest(unittest.TestCase):
 #----------------------------------Failure cases------------------------------------------
 
     def test_with_MatrixWorkspace_with_zero_histograms(self):
-    
+        in_ws = self._create_MatrixWorkspace(0, test)
+        self.assertRaises(InvalidInput, IndirectNormSpectra,
+                          InputWorkspace=in_ws,
+                          OutputWorkspace='output_ws')
+
     def test_with_TableWorkspace(self):
+        in_ws = CreateEmptyTableWorkspace()
+        self.assertRaises(InvalidInput, IndirectNormSpectra,
+                          InputWorkspace=in_ws,
+                          OutputWorkspace='output_ws')
     
 #--------------------------------Validate results-----------------------------------------
     def _check_all_items_in_workspace_group(self, workspace_group):
