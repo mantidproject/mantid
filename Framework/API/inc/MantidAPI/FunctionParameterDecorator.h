@@ -42,9 +42,9 @@ namespace API {
 */
 class MANTID_API_DLL FunctionParameterDecorator : virtual public IFunction {
 public:
+  // MSVC 2015 segfaults without this default constructor.
+  // still segfaults with = default
   FunctionParameterDecorator() : IFunction(), m_wrappedFunction() {}
-  ~FunctionParameterDecorator() override {}
-
   void setDecoratedFunction(const std::string &wrappedFunctionName);
   IFunction_sptr getDecoratedFunction() const;
 

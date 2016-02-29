@@ -346,9 +346,6 @@ public:
     return new PropertyWithValue<TYPE>(*this);
   }
 
-  /// Virtual destructor
-  ~PropertyWithValue() override {}
-
   /** Get the value of the property as a string
    *  @return The property's value
    */

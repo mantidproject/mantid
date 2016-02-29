@@ -441,7 +441,6 @@ void OptimizeCrystalPlacement::exec() {
   PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
 
   double L0 = peak.getL1();
-  V3D oldSampPos = OldInstrument->getSample()->getPos();
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 

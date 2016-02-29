@@ -52,7 +52,7 @@ public:
       : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
 
   /// Destructor
-  virtual ~ThreadScheduler() {}
+  virtual ~ThreadScheduler() = default;
 
   //-----------------------------------------------------------------------------------
   /** Add a Task to the queue.

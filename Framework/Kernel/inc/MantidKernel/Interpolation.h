@@ -67,7 +67,7 @@ protected:
 public:
   /// Constructor default to linear interpolation and x-unit set to TOF
   Interpolation();
-  virtual ~Interpolation() {}
+  virtual ~Interpolation() = default;
 
   /// add data point
   void addPoint(const double &xx, const double &yy);

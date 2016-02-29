@@ -25,17 +25,16 @@ public:
 
 class DLLExport SpecialWorkspace2D : public Workspace2D {
 public:
-  SpecialWorkspace2D();
+  SpecialWorkspace2D() = default;
   SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                      const bool includeMonitors = false);
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
-  ~SpecialWorkspace2D() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const {
     return std::unique_ptr<SpecialWorkspace2D>(doClone());
   }
-
+  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "SpecialWorkspace2D"; }
@@ -64,9 +63,7 @@ private:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SpecialWorkspace2D(const SpecialWorkspace2D &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other);
+  SpecialWorkspace2D(const SpecialWorkspace2D &) = default;
 
   void init(const size_t &NVectors, const size_t &XLength,
             const size_t &YLength) override;

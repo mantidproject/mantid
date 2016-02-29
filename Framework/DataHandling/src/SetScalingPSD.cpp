@@ -158,7 +158,6 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
         Kernel::V3D diffI = detPos - detPosLast;
         Kernel::V3D diffT = truPos - truPosLast;
         double scale = diffT.norm() / diffI.norm();
-        Kernel::V3D scaleDir = diffT / diffT.norm();
         // Wish to store the scaling in a map, if we already have a scaling
         // for this detector (i.e. from the other side) we average the two
         // values. End of tube detectors only have one scaling estimate.
@@ -206,7 +205,6 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
         Kernel::V3D diffI = detPos - detPosLast;
         Kernel::V3D diffT = truepos[i] - truPosLast;
         double scale = diffT.norm() / diffI.norm();
-        Kernel::V3D scaleDir = diffT / diffT.norm();
         scaleMap[detIndex] = scale;
         its = scaleMap.find(detIndex - 1);
         if (its == scaleMap.end()) {

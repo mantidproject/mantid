@@ -10,16 +10,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace DataObjects {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakShapeEllipsoidFactory::PeakShapeEllipsoidFactory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeEllipsoidFactory::~PeakShapeEllipsoidFactory() {}
-
 /**
  * @brief Create the PeakShape
  * @param source : source JSON

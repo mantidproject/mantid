@@ -308,7 +308,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
   for (const auto &workspace : m_workspaces) {
     const std::string wsName = (*workspace).name();
     // Find the last underscore _
-    std::size_t pos = wsName.find_last_of("_");
+    std::size_t pos = wsName.find_last_of('_');
     // No underscore = not similar
     if (pos == std::string::npos)
       return false;

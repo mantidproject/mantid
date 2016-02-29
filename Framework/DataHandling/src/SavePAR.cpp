@@ -39,10 +39,6 @@ void SavePAR::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  // Get the sample position
-  const Kernel::V3D samplePos =
-      inputWorkspace->getInstrument()->getSample()->getPos();
-
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
 

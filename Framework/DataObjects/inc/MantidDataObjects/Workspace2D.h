@@ -50,6 +50,7 @@ public:
   const std::string id() const override { return "Workspace2D"; }
 
   Workspace2D();
+  Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 
   /// Returns a clone of the workspace
@@ -96,8 +97,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  Workspace2D &operator=(const Workspace2D &other);
 
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,

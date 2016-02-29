@@ -57,11 +57,11 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<DomainCreatorFactoryImpl>;
 
   /// Private Constructor for singleton class
-  DomainCreatorFactoryImpl();
+  DomainCreatorFactoryImpl() = default;
   /// No copying
   DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
   /// Private Destructor for singleton
-  ~DomainCreatorFactoryImpl() override;
+  ~DomainCreatorFactoryImpl() override = default;
 
   // Do not use default methods
   using Kernel::DynamicFactory<IDomainCreator>::create;

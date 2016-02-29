@@ -1166,7 +1166,7 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
   std::string l_filenamePart =
       Poco::Path(l_path.path()).getFileName(); // get filename part only
   if (isAscii(pathToRawFile) &&
-      l_filenamePart.rfind("_") != std::string::npos) {
+      l_filenamePart.rfind('_') != std::string::npos) {
     // then we will assume that the file is an ISIS log file
     potentialLogFiles.insert(pathToRawFile);
   } else {
@@ -1256,7 +1256,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
-  size_t pos = pathToRawFile.find_last_of("/");
+  size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
     pos = pathToRawFile.find_last_of("\\");
   }
@@ -1265,7 +1265,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   }
   while (Mantid::Kernel::Strings::extractToEOL(adstream, str)) {
     std::string fileName;
-    pos = str.find("*");
+    pos = str.find('*');
     if (pos == std::string::npos)
       continue;
     fileName = str.substr(pos + 1, str.length() - pos);

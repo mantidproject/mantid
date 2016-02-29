@@ -1728,11 +1728,11 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   std::string::size_type index1, index2;
   std::string num1, num2;
   // find the number after "_" in algorithm name ( eg:MantidAlogorthm_1)
-  index1 = elem1.nxname.find("_");
+  index1 = elem1.nxname.find('_');
   if (index1 != std::string::npos) {
     num1 = elem1.nxname.substr(index1 + 1, elem1.nxname.length() - index1);
   }
-  index2 = elem2.nxname.find("_");
+  index2 = elem2.nxname.find('_');
   if (index2 != std::string::npos) {
     num2 = elem2.nxname.substr(index2 + 1, elem2.nxname.length() - index2);
   }

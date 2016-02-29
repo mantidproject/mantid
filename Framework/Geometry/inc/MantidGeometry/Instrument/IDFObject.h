@@ -46,7 +46,7 @@ National Laboratory & European Spallation Source
  */
 class DLLExport AbstractIDFObject {
 public:
-  AbstractIDFObject() {}
+  AbstractIDFObject() = default;
   static const std::string expectedExtension();
   virtual const Poco::Path getParentDirectory() const = 0;
   virtual const Poco::Path &getFileFullPath() const = 0;
@@ -55,7 +55,7 @@ public:
   virtual std::string getExtension() const = 0;
   virtual std::string getMangledName() const = 0;
   virtual bool exists() const = 0;
-  virtual ~AbstractIDFObject(){};
+  virtual ~AbstractIDFObject() = default;
 
 private:
   AbstractIDFObject(const AbstractIDFObject &);
@@ -75,7 +75,6 @@ public:
   std::string getExtension() const override;
   std::string getMangledName() const override;
   bool exists() const override;
-  ~IDFObject() override;
 
 private:
   IDFObject(const IDFObject &);
@@ -111,7 +110,6 @@ public:
     throw std::runtime_error("Not implemented on NullIDFObject");
   }
   bool exists() const override { return false; }
-  ~NullIDFObject() override{};
 };
 
 typedef boost::shared_ptr<AbstractIDFObject> IDFObject_sptr;

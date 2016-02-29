@@ -75,7 +75,7 @@ Logger g_log("ConfigService");
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
-  if (path.find(";") == std::string::npos) { // don't bother tokenizing
+  if (path.find(';') == std::string::npos) { // don't bother tokenizing
     splitted.push_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
@@ -114,9 +114,6 @@ public:
   WrappedObject(const WrappedObject<T> &A) : T(A) {
     m_pPtr = static_cast<T *>(this);
   }
-
-  /// Virtual destructor
-  ~WrappedObject() override {}
 
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
@@ -1226,7 +1223,7 @@ std::string getValueFromStdOut(const std::string &orig,
   }
   start += key.size();
 
-  size_t stop = orig.find("\n", start);
+  size_t stop = orig.find('\n', start);
   if (stop == std::string::npos) {
     return std::string();
   }

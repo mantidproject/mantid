@@ -12,16 +12,6 @@ namespace Geometry {
 using Kernel::V3D;
 using Kernel::Quat;
 
-/**
- * Constructor
- */
-GluGeometryRenderer::GluGeometryRenderer() {}
-
-/**
- * Destructor
- */
-GluGeometryRenderer::~GluGeometryRenderer() {}
-
 void GluGeometryRenderer::RenderSphere(const V3D &center, double radius) {
   while (glGetError() != GL_NO_ERROR)
     ;

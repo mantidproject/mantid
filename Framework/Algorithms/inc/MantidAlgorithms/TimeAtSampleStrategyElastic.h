@@ -40,7 +40,6 @@ class DLLExport TimeAtSampleStrategyElastic
 public:
   TimeAtSampleStrategyElastic(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
-  ~TimeAtSampleStrategyElastic() override;
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

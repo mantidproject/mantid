@@ -100,17 +100,10 @@ public:
       : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
                                           validator, direction) {}
 
-  /// Copy constructor
-  ArrayProperty(const ArrayProperty &right)
-      : PropertyWithValue<std::vector<T>>(right) {}
-
   /// 'Virtual copy constructor'
   ArrayProperty<T> *clone() const override {
     return new ArrayProperty<T>(*this);
   }
-
-  /// Virtual destructor
-  ~ArrayProperty() override {}
 
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;
