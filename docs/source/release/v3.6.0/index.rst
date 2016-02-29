@@ -2,7 +2,7 @@
 Mantid 3.6.0 Release Notes
 ==========================
 
-.. figure:: ../images/Release36.png
+.. figure:: ../../images/Release36.png
    :class: screenshot
    :width: 600px
    :align: right
@@ -46,14 +46,14 @@ Changes
 .. toctree::
    :titlesonly:
 
-   Framework <3.6.0/framework>
-   User Interface & Usability <3.6.0/ui>
-   Direct Inelastic <3.6.0/direct_inelastic>
-   Indirect Inelastic <3.6.0/indirect_inelastic>
-   SANS <3.6.0/sans>
-   Diffraction <3.6.0/diffraction>
-   Muon Analysis <3.6.0/muon>
-   Reflectometry <3.6.0/reflectometry>
+   Framework <framework>
+   User Interface & Usability <ui>
+   Direct Inelastic <direct_inelastic>
+   Indirect Inelastic <indirect_inelastic>
+   SANS <sans>
+   Diffraction <diffraction>
+   Muon Analysis <muon>
+   Reflectometry <reflectometry>
 
 Full Change Listings
 --------------------
