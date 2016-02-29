@@ -25,6 +25,18 @@ bool radiusIsInListOfRadii(double radius, const std::vector<double> &radii)
         [radius](double toCheck) { return almost_equal(radius, toCheck); };
     return std::any_of(radii.cbegin(), radii.cend(), comparison);
 }
+
+// Check if the two angles are the same, note that angles which are shifted by 180 degrees
+// are the same for an ellipsoid, ie one is free to have the major axis point in the
+// + or - direction
+bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
+                                          double actualAngle)
+{
+    return almost_equal(expectedAngle, actualAngle)
+           || almost_equal(expectedAngle, actualAngle + M_PI)
+           || almost_equal(expectedAngle, actualAngle - M_PI);
+}
+
 }
 
 class EllipsoidPlaneSliceCalculatorTest : public CxxTest::TestSuite
@@ -122,7 +134,7 @@ public:
 
         // Assert
         const double delta = 1e-5;
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
 
         TSM_ASSERT("The first radius should be 1",
                    radiusIsInListOfRadii(info.radiusMajorAxis, radii));
@@ -159,7 +171,7 @@ public:
 
         // Assert
         const double delta = 1e-5;
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
         TSM_ASSERT("The first radius should be 1",
                    radiusIsInListOfRadii(info.radiusMajorAxis, radii));
         TSM_ASSERT("The second radius should be 1",
@@ -196,7 +208,7 @@ public:
 
         // Assert
         const double delta = 1e-5;
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
 
         // Radius is 1 and we are looking at 0.5 from the origin
         // ie x^2 + y^2 + 0.5^2 == r^2 ==> reffective^2 = 1^2 -0.5^2 = 0.75
@@ -239,7 +251,7 @@ public:
         const double delta = 1e-5;
 
         // The rotation was 30deg, but we have a sphere so angle should be 0
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
 
         // Radius is 1 and we are looking at 0.5 from the origin
         // ie x^2 + y^2 + 0.5^2 == r^2 ==> reffective^2 = 1^2 -0.5^2 = 0.75
@@ -283,7 +295,7 @@ public:
         // Assert
         const double delta = 1e-5;
 
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
 
         TSM_ASSERT("The first radius should be 1",
                    radiusIsInListOfRadii(info.radiusMajorAxis, radii));
@@ -322,7 +334,7 @@ public:
         // Assert
         const double delta = 1e-5;
 
-        TSM_ASSERT_DELTA("The angle should be 0", 0.0, info.angle, delta);
+        TSM_ASSERT("The angle should be 0", isAngleEitherValueOr180DegreesRoated(0.0,info.angle));
 
         // From (x/4)^2 + (y/3)^2 + (0.5/2)^2 = 1 we get
         // r1 = 4* Sqrt[1-(0.5/2)^2]
@@ -345,18 +357,42 @@ public:
     }
 
     void
-    test_correct_for_ellipsoid_with_cut_through_1_5_and_origin_at_3_2_1_with_axis_tilt()
+    test_correct_for_ellipsoid_with_cut_through_1_5_and_origin_at_3_2_1_with_axis_tilt_with_less_than_45_degrees()
+    {
+      double const angle = 32; // in degree
+      double const expectedAngle = 32; // in degree
+      do_test_ellipsoid_with_tilt(angle, expectedAngle);
+    }
+
+    void
+    test_correct_for_ellipsoid_with_cut_through_1_5_and_origin_at_3_2_1_with_axis_tilt_with_45_degrees()
+    {
+      double const angle = 45; // in degree
+      double const expectedAngle = 45; // in degree
+      do_test_ellipsoid_with_tilt(angle, expectedAngle);
+    }
+
+    void
+    test_correct_for_ellipsoid_with_cut_through_1_5_and_origin_at_3_2_1_with_axis_tilt_with_more_than_45_degrees()
+    {
+      double const angle = 48; // in degree
+      double const expectedAngle = 48; // in degree
+      do_test_ellipsoid_with_tilt(angle, expectedAngle);
+    }
+
+    void
+    test_finds_ellipse_for_ellipsoid_with_major_axis_along_z_and_cut_through_5_and_origin_at_3_2_1_with_axis_tilt()
     {
         // Arrange
-        const double angleIn = 30.0 * 2 * M_PI / 360;
-        double zCutPlane = 1.5;
+        const double angleIn = 34.0 * 2 * M_PI / 360;
+        double zCutPlane = 5.0;
         Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
                                        0);
         Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
         Mantid::Kernel::V3D direction3(0, 0, 1);
         std::vector<Mantid::Kernel::V3D> directions
             = {direction1, direction2, direction3};
-        std::vector<double> radii = {4.0, 3.0, 2.0};
+        std::vector<double> radii = {4.0, 3.0, 7.0};
         Mantid::Kernel::V3D origin(3.0, 2.0, 1.0);
 
         Mantid::SliceViewer::EllipsoidPlaneSliceCalculator calculator;
@@ -369,15 +405,14 @@ public:
         const double delta = 1e-5;
 
         // The angle we get from info is the angle
-        TSM_ASSERT_DELTA("The angle should be 30", angleIn,
-                         info.angle, delta);
+        TSM_ASSERT("The angle should be 34", isAngleEitherValueOr180DegreesRoated(angleIn,info.angle));
 
-        // From (x/4)^2 + (y/3)^2 + (0.5/2)^2 = 1 we get
-        // r1 = 4* Sqrt[1-(0.5/2)^2]
-        // r2 = 3* Sqrt[1-(0.5/2)^2]
+        // From (x/4)^2 + (y/3)^2 + ((5-1)/7)^2 = 1 we get
+        // r1 = 4* Sqrt[1-(4/7)^2]
+        // r2 = 3* Sqrt[1-(4/7)^2]
         std::vector<double> expectedRadii
-            = {4.0 * std::sqrt(1 - std::pow(0.25, 2)),
-               3.0 * std::sqrt(1 - std::pow(0.25, 2))};
+            = {4.0 * std::sqrt(1 - std::pow(4.0/7.0, 2)),
+               3.0 * std::sqrt(1 - std::pow(4.0/7.0, 2))};
 
         TSM_ASSERT("The first radius should be 1",
                    radiusIsInListOfRadii(info.radiusMajorAxis, expectedRadii));
@@ -388,9 +423,10 @@ public:
                          info.origin.X(), 3.0, delta);
         TSM_ASSERT_DELTA("The y part of the origin should be at 2",
                          info.origin.Y(), 2.0, delta);
-        TSM_ASSERT_DELTA("The z part of the origin should be at 1.5",
-                         info.origin.Z(), 1.5, delta);
+        TSM_ASSERT_DELTA("The z part of the origin should be at 5",
+                         info.origin.Z(), 5, delta);
     }
+
 
     //-----------------------------------------------------------------
     // Tests for bounding box of an ellipse
@@ -563,7 +599,51 @@ public:
       TSM_ASSERT("Cut should not be possible", !cutExists);
     }
 
+private:
+    void do_test_ellipsoid_with_tilt(double angle, double expectedAngle) {
+      // Arrange
+      const double angleIn = angle * 2 * M_PI / 360.0;
+      double zCutPlane = 1.5;
+      Mantid::Kernel::V3D direction1(std::cos(angleIn), std::sin(angleIn),
+                                     0);
+      Mantid::Kernel::V3D direction2(-std::sin(angleIn), std::cos(angleIn), 0);
+      Mantid::Kernel::V3D direction3(0, 0, 1);
+      std::vector<Mantid::Kernel::V3D> directions
+          = {direction1, direction2, direction3};
+      std::vector<double> radii = {4.0, 3.0, 2.0};
+      Mantid::Kernel::V3D origin(3.0, 2.0, 1.0);
 
+      Mantid::SliceViewer::EllipsoidPlaneSliceCalculator calculator;
+
+      // Act
+      auto info = calculator.getSlicePlaneInfo(directions, radii, origin,
+                                               zCutPlane);
+
+      // Assert
+      const double delta = 1e-5;
+
+      // The angle we get from info is the angle
+      TSM_ASSERT("The angle should be be equal", isAngleEitherValueOr180DegreesRoated(expectedAngle*M_PI/180.0,info.angle));
+
+      // From (x/4)^2 + (y/3)^2 + (0.5/2)^2 = 1 we get
+      // r1 = 4* Sqrt[1-(0.5/2)^2]
+      // r2 = 3* Sqrt[1-(0.5/2)^2]
+      std::vector<double> expectedRadii
+          = {4.0 * std::sqrt(1 - std::pow(0.25, 2)),
+             3.0 * std::sqrt(1 - std::pow(0.25, 2))};
+
+      TSM_ASSERT("The first radius should be 1",
+                 radiusIsInListOfRadii(info.radiusMajorAxis, expectedRadii));
+      TSM_ASSERT("The second radius should be 1",
+                 radiusIsInListOfRadii(info.radiusMinorAxis, expectedRadii));
+
+      TSM_ASSERT_DELTA("The x part of the origin should be at 3",
+                       info.origin.X(), 3.0, delta);
+      TSM_ASSERT_DELTA("The y part of the origin should be at 2",
+                       info.origin.Y(), 2.0, delta);
+      TSM_ASSERT_DELTA("The z part of the origin should be at 1.5",
+                       info.origin.Z(), 1.5, delta);
+    }
 };
 
 #endif

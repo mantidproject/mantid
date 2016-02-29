@@ -76,7 +76,6 @@ private:
   PeaksViewer* const m_parent;
 
 private slots:
-  void onBackgroundColorCrossClicked();
   void onForegroundColorCrossClicked();
   void onBackgroundColorSphereClicked();
   void onForegroundColorSphereClicked();

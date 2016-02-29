@@ -32,7 +32,7 @@ QPainterPath getTransformedPainterPath(double angle, double transX,
     // the minor axis
     // along the y axix. The origin is located at (0,0).
     // In principal we need to:
-    // 1. Rotate the ellipse
+    // 1. Rotate the ellipse in radians
     // 2. Scale the ellipse
     // 3. Translate the ellipse
     // QTransform needs to be specified in reverse order!!!
