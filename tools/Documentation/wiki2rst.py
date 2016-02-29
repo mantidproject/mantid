@@ -143,9 +143,9 @@ def execute_process(cmd, args):
     cmd = [cmd]
     cmd.extend(args)
     display_debug("Running command '{}' in child process".format(" ".join(cmd)))
-    p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                         startupinfo=startupinfo)
-    output, _ = p.communicate()
+    proc = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            startupinfo=startupinfo)
+    output, _ = proc.communicate()
     output = output.replace("\r\n","\n")
     return output
 
@@ -165,10 +165,10 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
 # ------------------------------------------------------------------------------
 
 def fix_underscores_in_ref_links(pandoc_rst):
-    """Defalt pandoc-translated references links seem to contain \_
-    This removes the backslash
+    """Defalt pandoc-translated references links seem to contain a backslash before
+    the underscore of a link. This removes the backslash
     """
-    return re.sub(r"\b\\\_","_", pandoc_rst)
+    return re.sub(r"\b\\\_", "_", pandoc_rst)
 
 # ------------------------------------------------------------------------------
 
@@ -184,28 +184,28 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
 
     img_link_dict = dict()
     # for all of the mediawiki links
-    for m in re.finditer(mw_img_re, wiki_markup):
-        display_info("Processing image link",m.group(0))
-        img_link_dict[m.group(2)] = generate_rst_img_link(m, rel_img_dir)
+    for match in re.finditer(mw_img_re, wiki_markup):
+        display_info("Processing image link",match.group(0))
+        img_link_dict[match.group(2)] = generate_rst_img_link(match, rel_img_dir)
 
     # for all of the rst figure links
     replacements = []
-    for m in re.finditer(rst_img_re, rst_text):
-        rst_link = img_link_dict[m.group(1)]
-        replacements.append((m.start(), m.end(), m.group(1), rst_link))
+    for match in re.finditer(rst_img_re, rst_text):
+        rst_link = img_link_dict[match.group(1)]
+        replacements.append((match.start(), match.end(), match.group(1), rst_link))
 
     # perform replacements in reverse order
-    for (start, end, imagefile, rst_link) in reversed(replacements):
+    for (start, end, _, rst_link) in reversed(replacements):
         rst_text = rst_text[0:start] + rst_link + rst_text[end:]
 
     replacements = []
-    for m in re.finditer(rst_sub_re, rst_text):
-        rst_link = img_link_dict[m.group(2)]
+    for match in re.finditer(rst_sub_re, rst_text):
+        rst_link = img_link_dict[match.group(2)]
         rst_link = clean_inline_img_def(rst_link)
-        replacements.append((m.start(), m.end(), m.group(2), rst_link))
+        replacements.append((match.start(), match.end(), match.group(2), rst_link))
 
     # perform replacements in reverse order
-    for (start, end, imagefile, rst_link) in reversed(replacements):
+    for (start, end, _, rst_link) in reversed(replacements):
         rst_text = rst_text[0:start] + rst_link + rst_text[end:]
 
     return rst_text, img_link_dict.keys()
@@ -245,7 +245,7 @@ def clean_inline_img_def(rst_link):
         # take the align out
         rst_link = rst_link[0:match.start()] + rst_link[match.end()+1:]
         # then add it at the end as a comment
-        rst_link += ".. FIXME (inline definition does not allow align)" + match.group(0)
+        rst_link += ".. FIX (inline definition does not allow align)" + match.group(0)
     return rst_link
 
 # ------------------------------------------------------------------------------
@@ -264,8 +264,8 @@ def download_image_from_wiki(wiki_url, name, img_dir):
         raise RuntimeError("Failed to fetch image data: {}".format(str(err)))
     filename = os.path.join(img_dir, name)
     display_info("Downloading {0} to {1}".format(name, filename))
-    with open(filename, 'w+b') as f:
-        f.write(response.read())
+    with open(filename, 'w+b') as imagefile:
+        imagefile.write(response.read())
 
     return None
 
@@ -298,23 +298,23 @@ def add_local_links(rst_text, linkable_items, prefix):
     word_re = re.compile(r"[^`<]((\*{0,2})(\b" + r"\b|\b".join(linkable_items) + r"\b)\2)[^`_]")
 
     replacements = []
-    for m in re.finditer(word_re, rst_text):
-        link = ":ref:`" + m.group(3) + " <" + prefix + m.group(3) + ">`"
-        replacements.append((m.start(1), m.end(1), m.group(1), link))
+    for match in re.finditer(word_re, rst_text):
+        link = ":ref:`" + match.group(3) + " <" + prefix + match.group(3) + ">`"
+        replacements.append((match.start(1), match.end(1), match.group(1), link))
 
     # perform replacements in reverse order
-    for (start, end, item, link) in reversed(replacements):
+    for (start, end, _, link) in reversed(replacements):
         rst_text = rst_text[0:start] + link + rst_text[end:]
 
     # build regex string for links
     link_re = re.compile(r"`(.+?)<(\b" + r"\b|\b".join(linkable_items) + r"\b)>`__")
     replacements = []
-    for m in re.finditer(link_re, rst_text):
-        link = ":ref:`" + m.group(1) + " <" + prefix + m.group(2) + ">`"
-        replacements.append((m.start(), m.end(), m.group(0), link))
+    for match in re.finditer(link_re, rst_text):
+        link = ":ref:`" + match.group(1) + " <" + prefix + match.group(2) + ">`"
+        replacements.append((match.start(), match.end(), match.group(0), link))
 
     # perform replacements in reverse order
-    for (start, end, item, rstLink) in reversed(replacements):
+    for (start, end, _, link) in reversed(replacements):
         rst_text = rst_text[0:start] + link + rst_text[end:]
 
     return rst_text
@@ -322,23 +322,33 @@ def add_local_links(rst_text, linkable_items, prefix):
 
 # ------------------------------------------------------------------------------
 
+def main(argv):
+    """Run the script as a program
+    """
+    args = parse_arguments(argv)
+    try:
+        wiki_url = WikiURL(args.index_url, args.pagename)
+        display_info("Converting {} to reStructeredText..".format(wiki_url.pretty()))
+
+        if args.output_file:
+            output_dir = os.path.dirname(args.output_file)
+            rel_img_dir = args.images_dir
+            img_dir = os.path.normpath(os.path.join(output_dir, rel_img_dir))
+        else:
+            rel_img_dir, img_dir = None, None
+        post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir}
+        display_debug("Post processing arguments: '{}'".format(post_process_args))
+        rst_text = to_rst(wiki_url, post_process_args)
+        if args.output_file:
+            open(args.output_file, 'w').write(rst_text + "\n")
+        else:
+            display_info(rst_text)
+    except RuntimeError, exc:
+        display_info(str(exc))
+        return 1
+    return 0
+
+# ------------------------------------------------------------------------------
+
 if __name__ == '__main__':
-    args = parse_arguments(sys.argv[1:])
-
-    wiki_url = WikiURL(args.index_url, args.pagename)
-    display_info("Converting {} to reStructeredText..".format(wiki_url.pretty()))
-
-    if args.output_file:
-        output_dir = os.path.dirname(args.output_file)
-        rel_img_dir = args.images_dir
-        img_dir = os.path.normpath(os.path.join(output_dir, rel_img_dir))
-    else:
-        rel_img_dir, img_dir = None, None
-    post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir}
-    display_debug("Post processing arguments: '{}'".format(post_process_args))
-    rst_text = to_rst(wiki_url, post_process_args)
-    if args.output_file:
-        open(args.output_file, 'w').write(rst_text + "\n")
-    else:
-        display_info(rst_text)
-    sys.exit()
+    sys.exit(main(sys.argv[1:]))
