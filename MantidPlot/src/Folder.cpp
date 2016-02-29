@@ -28,17 +28,18 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#include "ApplicationWindow.h"
 #include "Folder.h"
 #include "pixmaps.h"
-#include "ApplicationWindow.h"
 
 #include <QApplication>
 #include <QDateTime>
 
-Folder::Folder( Folder *parent, const QString &name )
-    : QObject(parent), birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_log_info(QString()), myFolderListItem(0), d_active_window(0)
-{
-	setObjectName(name);
+Folder::Folder(Folder *parent, const QString &name)
+    : QObject(parent),
+      birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
+      d_log_info(QString()), myFolderListItem(0), d_active_window(0) {
+  setObjectName(name);
 }
 
 QList<Folder *> Folder::folders() {
@@ -236,34 +237,31 @@ Folder *Folder::rootFolder() {
  *
  *****************************************************************************/
 
-FolderListItem::FolderListItem( QTreeWidget *parent, Folder *f )
-    : QTreeWidgetItem( parent )
-{
-    myFolder = f;
+FolderListItem::FolderListItem(QTreeWidget *parent, Folder *f)
+    : QTreeWidgetItem(parent) {
+  myFolder = f;
 
   setText(0, f->objectName());
-	setExpanded(true);
-	setActive(true);
+  setExpanded(true);
+  setActive(true);
   setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
-FolderListItem::FolderListItem( FolderListItem *parent, Folder *f )
-    : QTreeWidgetItem( parent )
-{
-    myFolder = f;
+FolderListItem::FolderListItem(FolderListItem *parent, Folder *f)
+    : QTreeWidgetItem(parent) {
+  myFolder = f;
 
   setText(0, f->objectName());
-	setExpanded(true);
-	setActive(true);
+  setExpanded(true);
+  setActive(true);
 }
 
-void FolderListItem::setActive( bool o )
-{
-    if (o) {
-      setIcon(0, getQPixmap("folder_open_xpm"));
-    } else {
-		  setIcon(0, getQPixmap("folder_closed_xpm") );
-    }
+void FolderListItem::setActive(bool o) {
+  if (o) {
+    setIcon(0, getQPixmap("folder_open_xpm"));
+  } else {
+    setIcon(0, getQPixmap("folder_closed_xpm"));
+  }
   setSelected(o);
 }
 
@@ -284,39 +282,37 @@ bool FolderListItem::isChildOf(FolderListItem *src) {
  *
  *****************************************************************************/
 
-FolderListView::FolderListView( QWidget *parent, const char *name )
-    : QTreeWidget(parent)
-{
+FolderListView::FolderListView(QWidget *parent, const char *name)
+    : QTreeWidget(parent) {
   setWindowTitle(name);
-  setAcceptDrops( true );
-  viewport()->setAcceptDrops( true );
+  setAcceptDrops(true);
+  viewport()->setAcceptDrops(true);
 
-	if (parent){
-    connect(this, SIGNAL(collapsed(const QModelIndex &)), dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
-    connect(this, SIGNAL(expanded(const QModelIndex &)), dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
-		connect(this, SIGNAL(expanded(const QModelIndex &)), this, SLOT(expandedItem(const QModelIndex &)));
-	}
+  if (parent) {
+    connect(this, SIGNAL(collapsed(const QModelIndex &)),
+            dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
+    connect(this, SIGNAL(expanded(const QModelIndex &)),
+            dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
+    connect(this, SIGNAL(expanded(const QModelIndex &)), this,
+            SLOT(expandedItem(const QModelIndex &)));
+  }
 }
 
-void FolderListView::expandedItem(const QModelIndex &index)
-{
+void FolderListView::expandedItem(const QModelIndex &index) {
   auto item = itemFromIndex(index);
-	QTreeWidgetItem *next = itemBelow(item);
-	if (next) {
+  QTreeWidgetItem *next = itemBelow(item);
+  if (next) {
     next->setSelected(true);
   }
 }
 
-void FolderListView::adjustColumns()
-{
-  for (int i=0; i < columnCount(); i++) {
+void FolderListView::adjustColumns() {
+  for (int i = 0; i < columnCount(); i++) {
     resizeColumnToContents(i);
   }
 }
 
-QTreeWidgetItem* FolderListView::firstChild() {
-  return topLevelItem(0);
-}
+QTreeWidgetItem *FolderListView::firstChild() { return topLevelItem(0); }
 
 /*****************************************************************************
  *
@@ -324,8 +320,7 @@ QTreeWidgetItem* FolderListView::firstChild() {
  *
  *****************************************************************************/
 
-WindowListItem::WindowListItem( QTreeWidget *parent, MdiSubWindow *w )
-    : QTreeWidgetItem( parent )
-{
-    myWindow = w;
+WindowListItem::WindowListItem(QTreeWidget *parent, MdiSubWindow *w)
+    : QTreeWidgetItem(parent) {
+  myWindow = w;
 }
