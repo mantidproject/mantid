@@ -2,7 +2,8 @@
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONSYMBOLPARSER_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/MatrixVectorPair.h"
+#include "MantidGeometry/Crystal/V3R.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -65,10 +66,10 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SymmetryOperationSymbolParser {
 public:
-  static std::pair<Kernel::IntMatrix, V3R>
+  static MatrixVectorPair<int, V3R>
   parseIdentifier(const std::string &identifier);
   static std::string
-  getNormalizedIdentifier(const std::pair<Kernel::IntMatrix, V3R> &data);
+  getNormalizedIdentifier(const MatrixVectorPair<int, V3R> &data);
   static std::string getNormalizedIdentifier(const Kernel::IntMatrix &matrix,
                                              const V3R &vector);
 

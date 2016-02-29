@@ -132,8 +132,11 @@ void Group::setSymmetryOperations(
     throw std::invalid_argument("Group needs at least one element.");
   }
 
-  m_operationSet = std::set<SymmetryOperation>(symmetryOperations.begin(),
-                                               symmetryOperations.end());
+  m_operationSet.clear();
+  std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
+                 std::inserter(m_operationSet, m_operationSet.begin()),
+                 &getUnitCellIntervalOperation);
+
   m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(),
                                                    m_operationSet.end());
   m_axisSystem = getCoordinateSystemFromOperations(m_allOperations);
@@ -183,7 +186,7 @@ bool Group::hasIdentity() const {
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
   for (const auto &operation : m_allOperations) {
-    if (!containsOperation(operation.inverse())) {
+    if (!containsOperation(getUnitCellIntervalOperation(operation.inverse()))) {
       return false;
     }
   }
