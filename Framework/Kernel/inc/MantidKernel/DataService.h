@@ -470,7 +470,7 @@ public:
 protected:
   /// Protected constructor (singleton)
   DataService(const std::string &name) : svcName(name), g_log(svcName) {}
-  virtual ~DataService() {}
+  virtual ~DataService() = default;
 
 private:
   /// Private, unimplemented copy constructor

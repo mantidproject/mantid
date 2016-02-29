@@ -45,7 +45,7 @@ void LoadRawBin0::init() {
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectrumList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if "
       "explicitly set.");
 }
@@ -135,7 +135,7 @@ void LoadRawBin0::exec() {
         period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
     skipData(file, periodTimesNSpectraP1);
     int64_t wsIndex = 0;
-    for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+    for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
       int64_t histToRead = i + periodTimesNSpectraP1;
       if ((i >= m_spec_min && i < m_spec_max) ||
           (m_list &&

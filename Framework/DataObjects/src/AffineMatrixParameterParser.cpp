@@ -74,7 +74,5 @@ void AffineMatrixParameterParser::setSuccessorParser(
   throw std::runtime_error(
       "Cannot set a successor parser on a AffineMatrixParameterParser");
 }
-
-AffineMatrixParameterParser::~AffineMatrixParameterParser() {}
 }
 }

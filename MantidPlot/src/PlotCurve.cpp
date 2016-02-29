@@ -311,7 +311,7 @@ void PlotCurve::computeWaterfallOffsets() {
     }
     if (g->grid())
       g->grid()->setZ(-g->curves() /*Count()*/ - 1);
-  } 
+  }
 }
 
 // --- DataCurve --- //

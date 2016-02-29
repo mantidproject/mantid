@@ -30,7 +30,7 @@ SelectCellOfType::~SelectCellOfType() {}
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -63,12 +63,12 @@ void SelectCellOfType::init() {
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
   this->declareProperty(
-      new PropertyWithValue<int>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
       "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(
-      new PropertyWithValue<double>("AverageError", 0.0, Direction::Output),
-      "The average HKL indexing error if apply==true.");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "AverageError", 0.0, Direction::Output),
+                        "The average HKL indexing error if apply==true.");
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");

@@ -133,17 +133,10 @@ public:
     DataObjects::Workspace2D_sptr dataws = createWorkspace2D(datafile);
     API::AnalysisDataService::Instance().addOrReplace("DiffractionData",
                                                       dataws);
-
-    std::vector<double> bkgdpts;
     /// Background points for bank 7
-    bkgdpts.push_back(57741.0);
-    bkgdpts.push_back(63534.0);
-    bkgdpts.push_back(69545.0);
-    bkgdpts.push_back(89379.0);
-    bkgdpts.push_back(115669.0);
-    bkgdpts.push_back(134830.0);
-    bkgdpts.push_back(165131.0);
-    bkgdpts.push_back(226847.0);
+    std::vector<double> bkgdpts = {57741.0,  63534.0,  69545.0,
+                                   89379.0,  89379.0,  115669.0,
+                                   134830.0, 165131.0, 226847.0};
 
     // 2. Prepare algorithm
     ProcessBackground alg;
@@ -190,12 +183,7 @@ public:
     API::AnalysisDataService::Instance().addOrReplace("DiffractionData",
                                                       dataws);
 
-    std::vector<double> bkgdpts;
-
-    bkgdpts.push_back(577.400);
-    bkgdpts.push_back(635.340);
-    bkgdpts.push_back(695.450);
-    bkgdpts.push_back(893.790);
+    std::vector<double> bkgdpts = {577.400, 635.340, 695.450, 893.790};
 
     // Prepare algorithm
     ProcessBackground alg;

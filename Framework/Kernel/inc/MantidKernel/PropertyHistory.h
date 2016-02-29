@@ -54,9 +54,8 @@ public:
 
   /// construct a property history from a property object
   PropertyHistory(Property const *const prop);
-  PropertyHistory(const PropertyHistory &);
-  PropertyHistory &operator=(const PropertyHistory &);
-  virtual ~PropertyHistory();
+  /// destructor
+  virtual ~PropertyHistory() = default;
   /// get name of algorithm parameter const
   const std::string &name() const { return m_name; };
   /// get value of algorithm parameter const

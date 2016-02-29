@@ -2,8 +2,10 @@
     File                 : Folder.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen, Knut Franke
-    Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net, knut.franke*gmx.de
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen, Knut Franke
+    Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net,
+ knut.franke*gmx.de
     Description          : Folder for the project explorer
 
  ***************************************************************************/
@@ -39,198 +41,193 @@ Folder::Folder( Folder *parent, const QString &name )
 	setObjectName(name);
 }
 
-QList<Folder*> Folder::folders()
-{
-	QList<Folder*> lst;
-	foreach(QObject *f, children())
-    lst.append(static_cast<Folder*>(f));
-	return lst;
+QList<Folder *> Folder::folders() {
+  QList<Folder *> lst;
+  foreach (QObject *f, children())
+    lst.append(static_cast<Folder *>(f));
+  return lst;
 }
 
-QStringList Folder::subfolders()
-{
-	QStringList list = QStringList();
-	QObjectList folderList = children();
-	if (!folderList.isEmpty()){
-		QObject * f;
-		foreach(f,folderList)
-			list << static_cast<Folder *>(f)->objectName();
-	}
-	return list;
+QStringList Folder::subfolders() {
+  QStringList list = QStringList();
+  QObjectList folderList = children();
+  if (!folderList.isEmpty()) {
+    QObject *f;
+    foreach (f, folderList)
+      list << static_cast<Folder *>(f)->objectName();
+  }
+  return list;
 }
 
-QString Folder::path()
-{
-    QString s = "/" + QString(objectName()) + "/";
-    Folder *parentFolder = static_cast<Folder *>(parent());
-    while (parentFolder){
-        s.prepend("/" + QString(parentFolder->objectName()));
-        parentFolder = static_cast<Folder *>(parentFolder->parent());
-	}
-    return s;
+QString Folder::path() {
+  QString s = "/" + QString(objectName()) + "/";
+  Folder *parentFolder = static_cast<Folder *>(parent());
+  while (parentFolder) {
+    s.prepend("/" + QString(parentFolder->objectName()));
+    parentFolder = static_cast<Folder *>(parentFolder->parent());
+  }
+  return s;
 }
 
-int Folder::depth()
-{
-	int d = 0;
-    Folder *parentFolder = static_cast<Folder *>(parent());
-    while (parentFolder){
-        ++d;
-        parentFolder = static_cast<Folder *>(parentFolder->parent());
-	}
-    return d;
+int Folder::depth() {
+  int d = 0;
+  Folder *parentFolder = static_cast<Folder *>(parent());
+  while (parentFolder) {
+    ++d;
+    parentFolder = static_cast<Folder *>(parentFolder->parent());
+  }
+  return d;
 }
 
-Folder* Folder::folderBelow()
-{
-	QList<Folder*> lst = folders();
-	if (!lst.isEmpty())
-		return lst.first();
+Folder *Folder::folderBelow() {
+  QList<Folder *> lst = folders();
+  if (!lst.isEmpty())
+    return lst.first();
 
   Folder *parentFolder = static_cast<Folder *>(parent());
-	Folder *childFolder = this;
-	while (parentFolder && childFolder){
-		lst = parentFolder->folders();
-		int pos = lst.indexOf(childFolder) + 1;
-		if (pos < lst.size())
-			return lst.at(pos);
+  Folder *childFolder = this;
+  while (parentFolder && childFolder) {
+    lst = parentFolder->folders();
+    int pos = lst.indexOf(childFolder) + 1;
+    if (pos < lst.size())
+      return lst.at(pos);
 
-		childFolder = parentFolder;
+    childFolder = parentFolder;
     parentFolder = static_cast<Folder *>(parentFolder->parent());
-	}
-	return NULL;
+  }
+  return NULL;
 }
 
-Folder* Folder::findSubfolder(const QString& s, bool caseSensitive, bool partialMatch)
-{
-	QObjectList folderList = children();
-	if (!folderList.isEmpty()){
-		QObject * f;
-		foreach(f,folderList){
-			QString name = static_cast<Folder *>(f)->objectName();
-			if (partialMatch){
-				if (caseSensitive && name.startsWith(s,Qt::CaseSensitive))
-					return static_cast<Folder *>(f);
-				else if (!caseSensitive && name.startsWith(s,Qt::CaseInsensitive))
-					return static_cast<Folder *>(f);
-			} else {// partialMatch == false
-				if (caseSensitive && name == s)
-					return static_cast<Folder *>(f);
-				else if ( !caseSensitive && (name.toLower() == s.toLower()) )
-					return static_cast<Folder *>(f);
-			}
+Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
+                              bool partialMatch) {
+  QObjectList folderList = children();
+  if (!folderList.isEmpty()) {
+    QObject *f;
+    foreach (f, folderList) {
+      QString name = static_cast<Folder *>(f)->objectName();
+      if (partialMatch) {
+        if (caseSensitive && name.startsWith(s, Qt::CaseSensitive))
+          return static_cast<Folder *>(f);
+        else if (!caseSensitive && name.startsWith(s, Qt::CaseInsensitive))
+          return static_cast<Folder *>(f);
+      } else { // partialMatch == false
+        if (caseSensitive && name == s)
+          return static_cast<Folder *>(f);
+        else if (!caseSensitive && (name.toLower() == s.toLower()))
+          return static_cast<Folder *>(f);
+      }
 
-      Folder* folder = (static_cast<Folder*>(f))->findSubfolder(s, caseSensitive, partialMatch);
-            if(folder)
-                return folder;
-		}
-	}
-	return 0;
+      Folder *folder = (static_cast<Folder *>(f))
+                           ->findSubfolder(s, caseSensitive, partialMatch);
+      if (folder)
+        return folder;
+    }
+  }
+  return 0;
 }
 
-MdiSubWindow* Folder::findWindow(const QString& s, bool windowNames, bool labels,
-							 bool caseSensitive, bool partialMatch)
-{
-	MdiSubWindow* w;
-	foreach(w,lstWindows){
-		if (windowNames){
-			QString name = w->objectName();
-			if (partialMatch && name.startsWith(s, caseSensitive))
-				return w;
-			else if (caseSensitive && name == s)
-				return w;
-			else{
-				QString text = s;
-				if (name == text.lower())
-					return w;
-			}
-		}
+MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
+                                 bool labels, bool caseSensitive,
+                                 bool partialMatch) {
+  MdiSubWindow *w;
+  foreach (w, lstWindows) {
+    if (windowNames) {
+      QString name = w->objectName();
+      if (partialMatch && name.startsWith(s, caseSensitive))
+        return w;
+      else if (caseSensitive && name == s)
+        return w;
+      else {
+        QString text = s;
+        if (name == text.lower())
+          return w;
+      }
+    }
 
-		if (labels){
-			QString label = w->windowLabel();
-			if (partialMatch && label.startsWith(s, caseSensitive))
-				return w;
-			else if (caseSensitive && label == s)
-				return w;
-			else{
-				QString text = s;
-				if (label == text.lower())
-					return w;
-			}
-		}
-	}
-	return 0;
+    if (labels) {
+      QString label = w->windowLabel();
+      if (partialMatch && label.startsWith(s, caseSensitive))
+        return w;
+      else if (caseSensitive && label == s)
+        return w;
+      else {
+        QString text = s;
+        if (label == text.lower())
+          return w;
+      }
+    }
+  }
+  return 0;
 }
 
-MdiSubWindow *Folder::window(const QString &name, const char *cls, bool recursive)
-{
-	foreach (MdiSubWindow *w, lstWindows){
-		if (w->inherits(cls) && name == w->objectName())
-			return w;
-	}
+MdiSubWindow *Folder::window(const QString &name, const char *cls,
+                             bool recursive) {
+  foreach (MdiSubWindow *w, lstWindows) {
+    if (w->inherits(cls) && name == w->objectName())
+      return w;
+  }
 
-	if (!recursive) return NULL;
-	foreach (QObject *f, children()){
+  if (!recursive)
+    return NULL;
+  foreach (QObject *f, children()) {
     MdiSubWindow *w = (static_cast<Folder *>(f))->window(name, cls, true);
-		if (w) return w;
-	}
-	return NULL;
+    if (w)
+      return w;
+  }
+  return NULL;
 }
 
-void Folder::addWindow( MdiSubWindow *w )
-{
-	if (w) {
-		lstWindows.append( w );
-    connect(w,SIGNAL(closedWindow(MdiSubWindow *)),this,SLOT(removeWindow(MdiSubWindow *)));
-	}
+void Folder::addWindow(MdiSubWindow *w) {
+  if (w) {
+    lstWindows.append(w);
+    connect(w, SIGNAL(closedWindow(MdiSubWindow *)), this,
+            SLOT(removeWindow(MdiSubWindow *)));
+  }
 }
 
-void Folder::removeWindow( MdiSubWindow *w )
-{
-	if (!w)
-		return;
+void Folder::removeWindow(MdiSubWindow *w) {
+  if (!w)
+    return;
 
-	if (d_active_window && d_active_window == w)
-		d_active_window = NULL;
+  if (d_active_window && d_active_window == w)
+    d_active_window = NULL;
 
-	int index = lstWindows.indexOf(w);
-	if (index >= 0 && index < lstWindows.size())
-		lstWindows.removeAt(index);
+  int index = lstWindows.indexOf(w);
+  if (index >= 0 && index < lstWindows.size())
+    lstWindows.removeAt(index);
 }
 
 /**
   * Returns true if this folder contains a sub-window.
   * @param w :: A sub-window to check.
   */
-bool Folder::hasWindow(MdiSubWindow *w) const
-{
-  return lstWindows.contains(w);
+bool Folder::hasWindow(MdiSubWindow *w) const { return lstWindows.contains(w); }
+
+QString Folder::sizeToString() {
+  size_t size = 0;
+
+  QObjectList folderList = children();
+  if (!folderList.isEmpty()) {
+    QObject *f;
+    foreach (f, folderList)
+      size += sizeof(static_cast<Folder *>(f)); // FIXME: Doesn't this function
+                                                // add the size of pointers
+                                                // together? For what?
+  }
+
+  MdiSubWindow *w;
+  foreach (w, lstWindows)
+    size += sizeof(w);
+
+  return QString::number(double(8 * size) / 1024.0, 'f', 1) + " " + tr("kB") +
+         " (" + QString::number(8 * size) + " " + tr("bytes") + ")";
 }
 
-QString Folder::sizeToString()
-{
-	size_t size = 0;
-
-	QObjectList folderList = children();
-	if (!folderList.isEmpty()){
-		QObject *f;
-		foreach(f,folderList)
-			size +=  sizeof(static_cast<Folder *>(f)); // FIXME: Doesn't this function add the size of pointers together? For what?
-	}
-
-	MdiSubWindow * w;
-	foreach(w, lstWindows)
-		size += sizeof(w);
-
-	return QString::number(double(8*size)/1024.0,'f',1)+" "+tr("kB")+" ("+QString::number(8*size)+" "+tr("bytes")+")";
-}
-
-Folder* Folder::rootFolder()
-{
-	Folder *i = this;
-	while(i->parent())
-    i = static_cast<Folder*>(i->parent());
-	return i;
+Folder *Folder::rootFolder() {
+  Folder *i = this;
+  while (i->parent())
+    i = static_cast<Folder *>(i->parent());
+  return i;
 }
 
 /*****************************************************************************
@@ -267,20 +264,18 @@ void FolderListItem::setActive( bool o )
     } else {
 		  setIcon(0, getQPixmap("folder_closed_xpm") );
     }
-
-	setSelected(o);
+  setSelected(o);
 }
 
-bool FolderListItem::isChildOf(FolderListItem *src)
-{
+bool FolderListItem::isChildOf(FolderListItem *src) {
   FolderListItem *parent = dynamic_cast<FolderListItem *>(this->parent());
-	while (parent){
-	if (parent == src)
-		return true;
+  while (parent) {
+    if (parent == src)
+      return true;
 
-  parent = dynamic_cast<FolderListItem *>(parent->parent());
-	}
-	return false;
+    parent = dynamic_cast<FolderListItem *>(parent->parent());
+  }
+  return false;
 }
 
 /*****************************************************************************

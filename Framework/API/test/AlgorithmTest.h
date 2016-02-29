@@ -30,16 +30,16 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                     Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace1", "", Direction::Output));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
+                                                     Direction::Output));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
   void exec() {
@@ -73,10 +73,10 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
@@ -129,8 +129,8 @@ public:
   static const std::string FAIL_MSG;
 
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                     Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 

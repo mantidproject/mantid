@@ -79,8 +79,6 @@ public:
       }
     }
   }
-  /// Destructor
-  ~ListValidator() override{};
   /// Clone the validator
   IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);

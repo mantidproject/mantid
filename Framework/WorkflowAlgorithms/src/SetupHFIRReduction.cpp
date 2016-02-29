@@ -73,21 +73,21 @@ void SetupHFIRReduction::init() {
                   "Position of the beam center, in pixel");
   declareProperty("BeamCenterY", EMPTY_DBL(),
                   "Position of the beam center, in pixel");
-  setPropertySettings(
-      "BeamCenterX",
-      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
-  setPropertySettings(
-      "BeamCenterY",
-      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("BeamCenterX",
+                      make_unique<VisibleWhenProperty>("BeamCenterMethod",
+                                                       IS_EQUAL_TO, "Value"));
+  setPropertySettings("BeamCenterY",
+                      make_unique<VisibleWhenProperty>("BeamCenterMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(new API::FileProperty("BeamCenterFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load");
-  setPropertySettings(
-      "BeamCenterFile",
-      new VisibleWhenProperty("BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
+  declareProperty(
+      make_unique<API::FileProperty>("BeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings("BeamCenterFile",
+                      make_unique<VisibleWhenProperty>(
+                          "BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
   // declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass
   // position between each iteration [m]. Default: 0.00125");
@@ -97,9 +97,9 @@ void SetupHFIRReduction::init() {
       "BeamRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings(
-      "BeamRadius",
-      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+  setPropertySettings("BeamRadius",
+                      make_unique<VisibleWhenProperty>(
+                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
   setPropertyGroup("BeamCenterMethod", center_grp);
   setPropertyGroup("BeamCenterX", center_grp);
@@ -119,17 +119,17 @@ void SetupHFIRReduction::init() {
       "Options for data normalisation");
 
   // Dark current
-  declareProperty(new API::FileProperty("DarkCurrentFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load as dark current.");
+  declareProperty(
+      make_unique<API::FileProperty>("DarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
-  declareProperty(new API::FileProperty("SensitivityFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "Flood field or sensitivity file.");
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "Flood field or sensitivity file.");
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
@@ -139,13 +139,13 @@ void SetupHFIRReduction::init() {
   declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
                                         "from the sample data will also be "
                                         "subtracted from the flood field.");
-  declareProperty(new API::FileProperty("SensitivityDarkCurrentFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input file to load as dark current.");
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input file to load as dark current.");
   setPropertySettings(
       "SensitivityDarkCurrentFile",
-      new VisibleWhenProperty("UseDefaultDC", IS_EQUAL_TO, "0"));
+      make_unique<VisibleWhenProperty>("UseDefaultDC", IS_EQUAL_TO, "0"));
 
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
@@ -156,33 +156,34 @@ void SetupHFIRReduction::init() {
   declareProperty("SensitivityBeamCenterX", EMPTY_DBL(),
                   "Sensitivity beam center location in X [pixels]");
   setPropertySettings("SensitivityBeamCenterX",
-                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
-                                              IS_EQUAL_TO, "Value"));
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
 
   declareProperty("SensitivityBeamCenterY", EMPTY_DBL(),
                   "Sensitivity beam center location in Y [pixels]");
   setPropertySettings("SensitivityBeamCenterY",
-                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
-                                              IS_EQUAL_TO, "Value"));
+                      make_unique<VisibleWhenProperty>(
+                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(new API::FileProperty("SensitivityBeamCenterFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load");
-  setPropertySettings("SensitivityBeamCenterFile",
-                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
-                                              IS_NOT_EQUAL_TO, "None"));
+  declareProperty(
+      make_unique<API::FileProperty>("SensitivityBeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings(
+      "SensitivityBeamCenterFile",
+      make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod",
+                                       IS_NOT_EQUAL_TO, "None"));
 
   declareProperty(
       "SensitivityBeamCenterRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings(
-      "SensitivityBeamCenterRadius",
-      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+  setPropertySettings("SensitivityBeamCenterRadius",
+                      make_unique<VisibleWhenProperty>(
+                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputSensitivityWorkspace", "", Direction::Output,
       PropertyMode::Optional));
 
@@ -211,117 +212,117 @@ void SetupHFIRReduction::init() {
   // - Transmission value entered by hand
   declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
                   "Transmission value.");
-  setPropertySettings(
-      "TransmissionValue",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("TransmissionValue",
+                      make_unique<VisibleWhenProperty>("TransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
   declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
                   "Transmission error.");
-  setPropertySettings(
-      "TransmissionError",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("TransmissionError",
+                      make_unique<VisibleWhenProperty>("TransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
   declareProperty(
       "TransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
-  setPropertySettings(
-      "TransmissionBeamRadius",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(new API::FileProperty("TransmissionSampleDataFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "Sample data file for transmission calculation");
-  setPropertySettings(
-      "TransmissionSampleDataFile",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(new API::FileProperty("TransmissionEmptyDataFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "Empty data file for transmission calculation");
-  setPropertySettings(
-      "TransmissionEmptyDataFile",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings("TransmissionBeamRadius",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransmissionSampleDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
+  setPropertySettings("TransmissionSampleDataFile",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransmissionEmptyDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
+  setPropertySettings("TransmissionEmptyDataFile",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
-  setPropertySettings(
-      "TransmissionBeamCenterMethod",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings("TransmissionBeamCenterMethod",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 1: Set beam center by hand
   declareProperty("TransmissionBeamCenterX", EMPTY_DBL(),
                   "Transmission beam center location in X [pixels]");
-  setPropertySettings(
-      "TransmissionBeamCenterX",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings("TransmissionBeamCenterX",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty("TransmissionBeamCenterY", EMPTY_DBL(),
                   "Transmission beam center location in Y [pixels]");
-  setPropertySettings(
-      "TransmissionBeamCenterY",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings("TransmissionBeamCenterY",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(new API::FileProperty("TransmissionBeamCenterFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load");
-  setPropertySettings(
-      "TransmissionBeamCenterFile",
-      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransmissionBeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings("TransmissionBeamCenterFile",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - Beam spreader transmission method
-  declareProperty(new API::FileProperty("TransSampleSpreaderFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransSampleSpreaderFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("TransSampleSpreaderFilename",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
-  declareProperty(new API::FileProperty("TransDirectSpreaderFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransDirectSpreaderFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("TransDirectSpreaderFilename",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
-  declareProperty(new API::FileProperty("TransSampleScatteringFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransSampleScatteringFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("TransSampleScatteringFilename",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
-  declareProperty(new API::FileProperty("TransDirectScatteringFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("TransDirectScatteringFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("TransDirectScatteringFilename",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
   declareProperty("SpreaderTransmissionValue", 1.0,
                   "Beam spreader transmission value");
   setPropertySettings("SpreaderTransmissionValue",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
   declareProperty("SpreaderTransmissionError", 0.0,
                   "Beam spreader transmission error");
   setPropertySettings("SpreaderTransmissionError",
-                      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO,
-                                              "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
 
   declareProperty(
-      new API::FileProperty("TransmissionDarkCurrentFile", "",
-                            API::FileProperty::OptionalLoad, ".xml"),
+      make_unique<API::FileProperty>("TransmissionDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
       "The name of the input data file to load as transmission dark current.");
-  setPropertySettings(
-      "TransmissionDarkCurrentFile",
-      new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+  setPropertySettings("TransmissionDarkCurrentFile",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
   declareProperty(
       "TransmissionUseSampleDC", true,
       "If true, the sample dark current will be used IF a dark current file is"
       "not set.");
-  setPropertySettings(
-      "TransmissionUseSampleDC",
-      new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+  setPropertySettings("TransmissionUseSampleDC",
+                      make_unique<VisibleWhenProperty>(
+                          "TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
   declareProperty(
       "ThetaDependentTransmission", true,
@@ -358,109 +359,116 @@ void SetupHFIRReduction::init() {
   // - Transmission value entered by hand
   declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble,
                   "Transmission value.");
-  setPropertySettings(
-      "BckTransmissionValue",
-      new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("BckTransmissionValue",
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble,
                   "Transmission error.");
-  setPropertySettings(
-      "BckTransmissionError",
-      new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("BckTransmissionError",
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
   declareProperty(
       "BckTransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
   setPropertySettings("BckTransmissionBeamRadius",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(new API::FileProperty("BckTransmissionSampleDataFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "Sample data file for transmission calculation");
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransmissionSampleDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
   setPropertySettings("BckTransmissionSampleDataFile",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(new API::FileProperty("BckTransmissionEmptyDataFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "Empty data file for transmission calculation");
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransmissionEmptyDataFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
   setPropertySettings("BckTransmissionEmptyDataFile",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("BckTransmissionBeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("BckTransmissionBeamCenterMethod",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   //    Option 1: Set beam center by hand
   declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(),
                   "Transmission beam center location in X [pixels]");
   setPropertySettings("BckTransmissionBeamCenterX",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(),
                   "Transmission beam center location in Y [pixels]");
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   setPropertySettings("BckTransmissionBeamCenterY",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(new API::FileProperty("BckTransmissionBeamCenterFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load");
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransmissionBeamCenterFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
   setPropertySettings("BckTransmissionBeamCenterFile",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "DirectBeam"));
+                      make_unique<VisibleWhenProperty>(
+                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - Beam spreader transmission method
-  declareProperty(new API::FileProperty("BckTransSampleSpreaderFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransSampleSpreaderFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("BckTransSampleSpreaderFilename",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
-  declareProperty(new API::FileProperty("BckTransDirectSpreaderFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransDirectSpreaderFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("BckTransDirectSpreaderFilename",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
-  declareProperty(new API::FileProperty("BckTransSampleScatteringFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransSampleScatteringFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("BckTransSampleScatteringFilename",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
-  declareProperty(new API::FileProperty("BckTransDirectScatteringFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransDirectScatteringFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("BckTransDirectScatteringFilename",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
   declareProperty("BckSpreaderTransmissionValue", 1.0,
                   "Beam spreader transmission value");
   setPropertySettings("BckSpreaderTransmissionValue",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
   declareProperty("BckSpreaderTransmissionError", 0.0,
                   "Beam spreader transmission error");
   setPropertySettings("BckSpreaderTransmissionError",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
 
-  declareProperty(new API::FileProperty("BckTransmissionDarkCurrentFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"),
-                  "The name of the input data file to load as background "
-                  "transmission dark current.");
+  declareProperty(
+      make_unique<API::FileProperty>("BckTransmissionDarkCurrentFile", "",
+                                     API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as background "
+      "transmission dark current.");
   setPropertySettings("BckTransmissionDarkCurrentFile",
-                      new VisibleWhenProperty("BckTransmissionMethod",
-                                              IS_EQUAL_TO, "BeamSpreader"));
+                      make_unique<VisibleWhenProperty>("BckTransmissionMethod",
+                                                       IS_EQUAL_TO,
+                                                       "BeamSpreader"));
 
   declareProperty(
       "BckThetaDependentTransmission", true,
@@ -491,10 +499,10 @@ void SetupHFIRReduction::init() {
 
   // Masking
   std::string mask_grp = "Mask";
-  declareProperty(new ArrayProperty<int>("MaskedDetectorList"),
+  declareProperty(make_unique<ArrayProperty<int>>("MaskedDetectorList"),
                   "List of detector IDs to be masked");
   declareProperty(
-      new ArrayProperty<int>("MaskedEdges"),
+      make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   std::vector<std::string> maskOptions;
   maskOptions.emplace_back("None");
@@ -518,35 +526,35 @@ void SetupHFIRReduction::init() {
                   boost::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");
   declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
-  setPropertySettings(
-      "AbsoluteScalingFactor",
-      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("AbsoluteScalingFactor",
+                      make_unique<VisibleWhenProperty>("AbsoluteScaleMethod",
+                                                       IS_EQUAL_TO, "Value"));
 
-  declareProperty(new API::FileProperty("AbsoluteScalingReferenceFilename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".xml"));
+  declareProperty(
+      make_unique<API::FileProperty>("AbsoluteScalingReferenceFilename", "",
+                                     API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("AbsoluteScalingReferenceFilename",
-                      new VisibleWhenProperty("AbsoluteScaleMethod",
-                                              IS_EQUAL_TO, "ReferenceData"));
+                      make_unique<VisibleWhenProperty>(
+                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty(
       "AbsoluteScalingBeamDiameter", 0.0,
       "Beamstop diameter for computing the absolute scale factor [mm]. "
       "Read from file if not supplied.");
   setPropertySettings("AbsoluteScalingBeamDiameter",
-                      new VisibleWhenProperty("AbsoluteScaleMethod",
-                                              IS_EQUAL_TO, "ReferenceData"));
+                      make_unique<VisibleWhenProperty>(
+                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty(
       "AbsoluteScalingAttenuatorTrans", 1.0,
       "Attenuator transmission value for computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingAttenuatorTrans",
-                      new VisibleWhenProperty("AbsoluteScaleMethod",
-                                              IS_EQUAL_TO, "ReferenceData"));
+                      make_unique<VisibleWhenProperty>(
+                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty("AbsoluteScalingApplySensitivity", false,
                   "Apply sensitivity correction to the reference data "
                   "when computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingApplySensitivity",
-                      new VisibleWhenProperty("AbsoluteScaleMethod",
-                                              IS_EQUAL_TO, "ReferenceData"));
+                      make_unique<VisibleWhenProperty>(
+                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
 
   setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
@@ -558,7 +566,7 @@ void SetupHFIRReduction::init() {
   // I(Q) calculation
   std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
       "IQBinning", boost::make_shared<RebinParamsValidator>(true)));
 
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
@@ -622,18 +630,20 @@ void SetupHFIRReduction::exec() {
                                                       reductionManager);
 
   // Store name of the instrument
-  reductionManager->declareProperty(
-      new PropertyWithValue<std::string>("InstrumentName", "HFIRSANS"));
+  reductionManager->declareProperty(make_unique<PropertyWithValue<std::string>>(
+      "InstrumentName", "HFIRSANS"));
 
   // Store additional (and optional) process information
   const std::string processInfo = getProperty("ProcessInfo");
   reductionManager->declareProperty(
-      new PropertyWithValue<std::string>("ProcessInfo", processInfo));
+      Kernel::make_unique<PropertyWithValue<std::string>>("ProcessInfo",
+                                                          processInfo));
 
   // Store the output directory
   const std::string outputDirectory = getProperty("OutputDirectory");
   reductionManager->declareProperty(
-      new PropertyWithValue<std::string>("OutputDirectory", outputDirectory));
+      Kernel::make_unique<PropertyWithValue<std::string>>("OutputDirectory",
+                                                          outputDirectory));
 
   // Load algorithm
   const double sdd = getProperty("SampleDetectorDistance");
@@ -650,9 +660,9 @@ void SetupHFIRReduction::exec() {
     loadAlg->setProperty("Wavelength", wavelength);
     loadAlg->setProperty("WavelengthSpread", wavelengthSpread);
   }
-  AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
-  algProp->setValue(loadAlg->toString());
-  reductionManager->declareProperty(algProp);
+  auto loadAlgProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+  loadAlgProp->setValue(loadAlg->toString());
+  reductionManager->declareProperty(std::move(loadAlgProp));
 
   // Beam center
   const double beamCenterX = getProperty("BeamCenterX");
@@ -662,10 +672,10 @@ void SetupHFIRReduction::exec() {
   // Beam center option for transmission data
   if (boost::iequals(centerMethod, "Value")) {
     if (!isEmpty(beamCenterX) && !isEmpty(beamCenterY)) {
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX));
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterX", beamCenterX));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterY", beamCenterY));
     }
   } else if (!boost::iequals(centerMethod, "None")) {
     bool useDirectBeamMethod = true;
@@ -682,9 +692,10 @@ void SetupHFIRReduction::exec() {
         ctrAlg->setProperty("BeamRadius", beamRadius);
       ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-      algProp = new AlgorithmProperty("SANSBeamFinderAlgorithm");
-      algProp->setValue(ctrAlg->toString());
-      reductionManager->declareProperty(algProp);
+      auto beamFinderAlgProp =
+          make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
+      beamFinderAlgProp->setValue(ctrAlg->toString());
+      reductionManager->declareProperty(std::move(beamFinderAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
                        " but no file was provided" << std::endl;
@@ -699,9 +710,9 @@ void SetupHFIRReduction::exec() {
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    algProp = new AlgorithmProperty("DarkCurrentAlgorithm");
-    algProp->setValue(darkAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto dcAlgProp = make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
+    dcAlgProp->setValue(darkAlg->toString());
+    reductionManager->declareProperty(std::move(dcAlgProp));
   }
 
   // Store default dark current algorithm
@@ -709,9 +720,10 @@ void SetupHFIRReduction::exec() {
       createChildAlgorithm("HFIRDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  algProp = new AlgorithmProperty("DefaultDarkCurrentAlgorithm");
-  algProp->setValue(darkDefaultAlg->toString());
-  reductionManager->declareProperty(algProp);
+  auto ddcAlgProp =
+      make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
+  ddcAlgProp->setValue(darkDefaultAlg->toString());
+  reductionManager->declareProperty(std::move(ddcAlgProp));
 
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
@@ -719,9 +731,10 @@ void SetupHFIRReduction::exec() {
   if (solidAngleCorrection) {
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", isTubeDetector);
-    algProp = new AlgorithmProperty("SANSSolidAngleCorrection");
-    algProp->setValue(solidAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto ssaAlgProp =
+        make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
+    ssaAlgProp->setValue(solidAlg->toString());
+    reductionManager->declareProperty(std::move(ssaAlgProp));
   }
 
   // Normalization
@@ -729,14 +742,16 @@ void SetupHFIRReduction::exec() {
   if (!boost::contains(normalization, "None")) {
     IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
     normAlg->setProperty("NormalisationType", normalization);
-    algProp = new AlgorithmProperty("NormaliseAlgorithm");
-    algProp->setValue(normAlg->toString());
-    reductionManager->declareProperty(algProp);
-    reductionManager->declareProperty(new PropertyWithValue<std::string>(
-        "TransmissionNormalisation", normalization));
+    auto normAlgProp = make_unique<AlgorithmProperty>("NormaliseAlgorithm");
+    normAlgProp->setValue(normAlg->toString());
+    reductionManager->declareProperty(std::move(normAlgProp));
+    reductionManager->declareProperty(
+        Kernel::make_unique<PropertyWithValue<std::string>>(
+            "TransmissionNormalisation", normalization));
   } else
-    reductionManager->declareProperty(new PropertyWithValue<std::string>(
-        "TransmissionNormalisation", "Timer"));
+    reductionManager->declareProperty(
+        make_unique<PropertyWithValue<std::string>>("TransmissionNormalisation",
+                                                    "Timer"));
 
   // Sensitivity correction, transmission and background
   setupSensitivity(reductionManager);
@@ -749,9 +764,9 @@ void SetupHFIRReduction::exec() {
     IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
     thickAlg->setProperty("SampleThickness", thickness);
 
-    algProp = new AlgorithmProperty("GeometryAlgorithm");
-    algProp->setValue(thickAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto thickAlgProp = make_unique<AlgorithmProperty>("GeometryAlgorithm");
+    thickAlgProp->setValue(thickAlg->toString());
+    reductionManager->declareProperty(std::move(thickAlgProp));
   }
 
   // Mask
@@ -765,9 +780,9 @@ void SetupHFIRReduction::exec() {
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);
-  algProp = new AlgorithmProperty("MaskAlgorithm");
-  algProp->setValue(maskAlg->toString());
-  reductionManager->declareProperty(algProp);
+  auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
+  maskAlgProp->setValue(maskAlg->toString());
+  reductionManager->declareProperty(std::move(maskAlgProp));
 
   // Absolute scaling
   const std::string absScaleMethod = getProperty("AbsoluteScaleMethod");
@@ -778,9 +793,10 @@ void SetupHFIRReduction::exec() {
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ScalingFactor", absScaleFactor);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
-    algProp->setValue(absAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto absScaleAlgProp =
+        make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
+    absScaleAlgProp->setValue(absAlg->toString());
+    reductionManager->declareProperty(std::move(absScaleAlgProp));
   } else if (boost::iequals(absScaleMethod, "ReferenceData")) {
     const std::string absRefFile =
         getPropertyValue("AbsoluteScalingReferenceFilename");
@@ -796,9 +812,10 @@ void SetupHFIRReduction::exec() {
     absAlg->setProperty("AttenuatorTransmission", attTrans);
     absAlg->setProperty("ApplySensitivity", applySensitivity);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
-    algProp->setValue(absAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto refScaleAlgProp =
+        make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
+    refScaleAlgProp->setValue(absAlg->toString());
+    reductionManager->declareProperty(std::move(refScaleAlgProp));
   }
 
   // Azimuthal averaging
@@ -828,9 +845,9 @@ void SetupHFIRReduction::exec() {
     iqAlg->setProperty("AlignWithDecades", align);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-    algProp = new AlgorithmProperty("IQAlgorithm");
-    algProp->setValue(iqAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto iqAlgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
+    iqAlgProp->setValue(iqAlg->toString());
+    reductionManager->declareProperty(std::move(iqAlgProp));
   }
 
   // 2D reduction
@@ -839,17 +856,17 @@ void SetupHFIRReduction::exec() {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
-    algProp = new AlgorithmProperty("IQXYAlgorithm");
-    algProp->setValue(iqAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto xyAlgProp = make_unique<AlgorithmProperty>("IQXYAlgorithm");
+    xyAlgProp->setValue(iqAlg->toString());
+    reductionManager->declareProperty(std::move(xyAlgProp));
   }
 
   setPropertyValue("OutputMessage", "HFIR reduction options set");
 
   // Save a string representation of this algorithm
-  algProp = new AlgorithmProperty("SetupAlgorithm");
-  algProp->setValue(toString());
-  reductionManager->declareProperty(algProp);
+  auto setupAlgProp = make_unique<AlgorithmProperty>("SetupAlgorithm");
+  setupAlgProp->setValue(toString());
+  reductionManager->declareProperty(std::move(setupAlgProp));
 }
 
 void SetupHFIRReduction::setupSensitivity(
@@ -900,10 +917,10 @@ void SetupHFIRReduction::setupSensitivity(
           ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        AlgorithmProperty *algProp =
-            new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
-        algProp->setValue(ctrAlg->toString());
-        reductionManager->declareProperty(algProp);
+        auto beamCentreAlgProp =
+            make_unique<AlgorithmProperty>("SensitivityBeamCenterAlgorithm");
+        beamCentreAlgProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(std::move(beamCentreAlgProp));
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
@@ -914,9 +931,9 @@ void SetupHFIRReduction::setupSensitivity(
     effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
     effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
-    algProp->setValue(effAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto effAlgProp = make_unique<AlgorithmProperty>("SensitivityAlgorithm");
+    effAlgProp->setValue(effAlg->toString());
+    reductionManager->declareProperty(std::move(effAlgProp));
   }
 }
 
@@ -927,7 +944,8 @@ void SetupHFIRReduction::setupBackground(
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
   if (backgroundFile.size() > 0)
     reductionManager->declareProperty(
-        new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile));
+        Kernel::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
+                                                            backgroundFile));
   else
     return;
 
@@ -946,10 +964,10 @@ void SetupHFIRReduction::setupBackground(
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
 
-      AlgorithmProperty *algProp =
-          new AlgorithmProperty("BckTransmissionAlgorithm");
-      algProp->setValue(transAlg->toString());
-      reductionManager->declareProperty(algProp);
+      auto backTransAlgProp =
+          make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
+      backTransAlgProp->setValue(transAlg->toString());
+      reductionManager->declareProperty(std::move(backTransAlgProp));
     } else {
       g_log.information(
           "SetupHFIRReduction [BckTransmissionAlgorithm]: "
@@ -989,10 +1007,10 @@ void SetupHFIRReduction::setupBackground(
         ctrAlg->setProperty("PersistentCorrection", false);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        AlgorithmProperty *algProp =
-            new AlgorithmProperty("BckTransmissionBeamCenterAlgorithm");
-        algProp->setValue(ctrAlg->toString());
-        reductionManager->declareProperty(algProp);
+        auto backBeamCentreAlgProp = make_unique<AlgorithmProperty>(
+            "BckTransmissionBeamCenterAlgorithm");
+        backBeamCentreAlgProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(std::move(backBeamCentreAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
                          " but no file was provided" << std::endl;
@@ -1000,10 +1018,9 @@ void SetupHFIRReduction::setupBackground(
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp =
-        new AlgorithmProperty("BckTransmissionAlgorithm");
-    algProp->setValue(transAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto btAlgProp = make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
+    btAlgProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(std::move(btAlgProp));
   }
   // Beam spreader method for transmission determination
   else if (boost::iequals(bckTransMethod, "BeamSpreader")) {
@@ -1030,10 +1047,10 @@ void SetupHFIRReduction::setupBackground(
     transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp =
-        new AlgorithmProperty("BckTransmissionAlgorithm");
-    algProp->setValue(transAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto btSpreaderAlgProp =
+        make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
+    btSpreaderAlgProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(std::move(btSpreaderAlgProp));
   }
 }
 
@@ -1058,10 +1075,10 @@ void SetupHFIRReduction::setupTransmission(
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", thetaDependentTrans);
 
-      AlgorithmProperty *algProp =
-          new AlgorithmProperty("TransmissionAlgorithm");
-      algProp->setValue(transAlg->toString());
-      reductionManager->declareProperty(algProp);
+      auto transAlgProp =
+          make_unique<AlgorithmProperty>("TransmissionAlgorithm");
+      transAlgProp->setValue(transAlg->toString());
+      reductionManager->declareProperty(std::move(transAlgProp));
     } else {
       g_log.information(
           "SetupHFIRReduction [TransmissionAlgorithm]:"
@@ -1103,10 +1120,10 @@ void SetupHFIRReduction::setupTransmission(
         ctrAlg->setProperty("PersistentCorrection", false);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        AlgorithmProperty *algProp =
-            new AlgorithmProperty("TransmissionBeamCenterAlgorithm");
-        algProp->setValue(ctrAlg->toString());
-        reductionManager->declareProperty(algProp);
+        auto tbcAlgProp =
+            make_unique<AlgorithmProperty>("TransmissionBeamCenterAlgorithm");
+        tbcAlgProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(std::move(tbcAlgProp));
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
@@ -1114,9 +1131,10 @@ void SetupHFIRReduction::setupTransmission(
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
-    algProp->setValue(transAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto thetaTransAlgProp =
+        make_unique<AlgorithmProperty>("TransmissionAlgorithm");
+    thetaTransAlgProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(std::move(thetaTransAlgProp));
   }
   // Direct beam method for transmission determination
   else if (boost::iequals(transMethod, "BeamSpreader")) {
@@ -1141,9 +1159,10 @@ void SetupHFIRReduction::setupTransmission(
     transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
-    algProp->setValue(transAlg->toString());
-    reductionManager->declareProperty(algProp);
+    auto directTransAlgProp =
+        make_unique<AlgorithmProperty>("TransmissionAlgorithm");
+    directTransAlgProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(std::move(directTransAlgProp));
   }
 }
 

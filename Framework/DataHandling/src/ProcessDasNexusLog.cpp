@@ -30,8 +30,8 @@ ProcessDasNexusLog::~ProcessDasNexusLog() {}
 
 void ProcessDasNexusLog::init() {
   this->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
-                                                       Direction::InOut),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::InOut),
       "The name of the [[EventWorkspace]] to filter events from.");
   this->declareProperty("LogToProcess", "",
                         boost::make_shared<MandatoryValidator<std::string>>(),
@@ -40,15 +40,16 @@ void ProcessDasNexusLog::init() {
       "ProcessedLog", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The name of the new sample log processed from DAS log.");
   this->declareProperty(
-      new API::FileProperty("OutputDirectory", "",
-                            API::FileProperty::Directory),
+      make_unique<API::FileProperty>("OutputDirectory", "",
+                                     API::FileProperty::Directory),
       "The directory for some other examination files to be written to.");
   this->declareProperty(
       "NumberOfOutputs", 4000,
       "Number of log entries to be written to a file for examination.");
-  this->declareProperty(new API::FileProperty("OutputLogFile", "",
-                                              API::FileProperty::OptionalSave),
-                        "The file name for the output data file. ");
+  this->declareProperty(
+      make_unique<API::FileProperty>("OutputLogFile", "",
+                                     API::FileProperty::OptionalSave),
+      "The file name for the output data file. ");
 
   return;
 }

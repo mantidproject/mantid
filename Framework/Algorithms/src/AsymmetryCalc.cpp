@@ -24,16 +24,17 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  declareProperty(new ArrayProperty<int>("ForwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The spectra numbers of the forward group");
-  declareProperty(new ArrayProperty<int>("BackwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The spectra numbers of the backward group");
   declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
                   Direction::Input);
@@ -113,7 +114,7 @@ void AsymmetryCalc::exec() {
     tmpWS = inputWS;
 
     // get workspace indices from spectra ids for forward and backward
-    std::vector<specid_t> specIDs(2);
+    std::vector<specnum_t> specIDs(2);
     specIDs[0] = forward;
     specIDs[1] = backward;
     std::vector<size_t> indices = tmpWS->getIndicesFromSpectra(specIDs);

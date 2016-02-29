@@ -38,32 +38,32 @@ void QueryAllRemoteJobs::init() {
   // array properties for different pieces of data.  Values from the same array
   // index are for
   // the same job.
-  declareProperty(
-      new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output),
-      "ID string for the job");
-  declareProperty(new ArrayProperty<std::string>(
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "JobId", nullValidator, Direction::Output),
+                  "ID string for the job");
+  declareProperty(make_unique<ArrayProperty<std::string>>(
                       "JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
                   "Complete, etc..)");
-  declareProperty(new ArrayProperty<std::string>("JobName", nullValidator,
-                                                 Direction::Output),
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "JobName", nullValidator, Direction::Output),
                   "Name of the job (specified when the job was submitted)");
-  declareProperty(new ArrayProperty<std::string>("ScriptName", nullValidator,
-                                                 Direction::Output),
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "ScriptName", nullValidator, Direction::Output),
                   "The name of the python script that was executed");
-  declareProperty(new ArrayProperty<std::string>("TransID", nullValidator,
-                                                 Direction::Output),
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "TransID", nullValidator, Direction::Output),
                   "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty(new ArrayProperty<std::string>("SubmitDate", nullValidator,
-                                                 Direction::Output),
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "SubmitDate", nullValidator, Direction::Output),
                   "The date & time the job was submitted");
-  declareProperty(new ArrayProperty<std::string>("StartDate", nullValidator,
-                                                 Direction::Output),
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "StartDate", nullValidator, Direction::Output),
                   "The date & time the job actually started executing");
-  declareProperty(new ArrayProperty<std::string>(
+  declareProperty(make_unique<ArrayProperty<std::string>>(
                       "CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 }

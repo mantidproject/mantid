@@ -61,9 +61,6 @@ public:
   /// a fit
   MDResolutionConvolution(const API::IFunctionMD &fittingFunction,
                           const std::string &fgModelName);
-  /// Virtual destructor for a base class
-  ~MDResolutionConvolution() override {}
-
   /// Function category
   const std::string category() const override { return "Quantification"; }
 

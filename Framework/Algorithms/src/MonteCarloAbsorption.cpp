@@ -70,13 +70,13 @@ void MonteCarloAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.  The input workspace must "
                   "have X units of wavelength.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,

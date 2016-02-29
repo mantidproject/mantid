@@ -45,10 +45,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL ICompAssembly : public virtual IComponent {
 public:
+  // Default constructor;
+  // Fixes warning C4436 on Windows.
+  ICompAssembly(){};
   /// String description of the type of component
   std::string type() const override { return "ICompAssembly"; }
-
-  ~ICompAssembly() override {}
   /// Make a clone of the present component
   IComponent *clone() const override = 0;
   /// Return the number of elements in the assembly
@@ -85,9 +86,12 @@ public:
   virtual void testIntersectionWithChildren(
       Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const = 0;
 
+protected:
+  /// Protected copy constructor
+  ICompAssembly(const ICompAssembly &) = default;
+
 private:
-  /// Private copy assignment operator
-  ICompAssembly &operator=(const ICompAssembly &);
+  ICompAssembly &operator=(const ICompAssembly &) = delete;
 };
 
 /// Shared pointer to a ICompAssembly

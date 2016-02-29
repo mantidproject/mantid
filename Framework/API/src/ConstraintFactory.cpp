@@ -15,8 +15,6 @@ ConstraintFactoryImpl::ConstraintFactoryImpl()
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-ConstraintFactoryImpl::~ConstraintFactoryImpl() {}
-
 /**Creates an instance of a Constraint initialized using an expression
  * @param fun :: The function
  * @param input :: The creation expression, format depends on the constraint

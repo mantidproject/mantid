@@ -61,7 +61,7 @@ public:
                  const std::vector<std::string> &workspacePropertyNames,
                  DomainType domainType = Simple);
   /// Virtual destructor
-  virtual ~IDomainCreator() {}
+  virtual ~IDomainCreator() = default;
   /// Initialize
   virtual void initialize(Kernel::IPropertyManager *, const std::string &,
                           DomainType) {}

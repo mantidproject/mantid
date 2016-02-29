@@ -46,22 +46,24 @@ const std::string TransformMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void TransformMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
-  declareProperty(new ArrayProperty<double>("Scaling", defaultScaling),
-                  "Scaling value multiplying each coordinate. Default "
-                  "1.\nEither a single value or a list for each dimension.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Scaling", defaultScaling),
+      "Scaling value multiplying each coordinate. Default "
+      "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
-  declareProperty(new ArrayProperty<double>("Offset", defaultOffset),
-                  "Offset value to add to each coordinate. Default 0.\nEither "
-                  "a single value or a list for each dimension.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Offset", defaultOffset),
+      "Offset value to add to each coordinate. Default 0.\nEither "
+      "a single value or a list for each dimension.");
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 }
 

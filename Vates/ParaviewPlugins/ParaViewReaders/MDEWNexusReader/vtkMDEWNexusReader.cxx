@@ -25,7 +25,7 @@
 
 vtkStandardNewMacro(vtkMDEWNexusReader)
 
-using namespace Mantid::VATES;
+    using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::IMDDimension_sptr;
 
@@ -37,52 +37,36 @@ vtkMDEWNexusReader::vtkMDEWNexusReader()
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkMDEWNexusReader::~vtkMDEWNexusReader()
-{
-  this->SetFileName(0);
-}
+vtkMDEWNexusReader::~vtkMDEWNexusReader() { this->SetFileName(0); }
 
-void vtkMDEWNexusReader::SetDepth(int depth)
-{
+void vtkMDEWNexusReader::SetDepth(int depth) {
   size_t temp = depth;
-  if(m_depth != temp)
-  {
-   this->m_depth = temp;
-   this->Modified();
+  if (m_depth != temp) {
+    this->m_depth = temp;
+    this->Modified();
   }
 }
 
-size_t vtkMDEWNexusReader::getRecursionDepth() const
-{
-  return this->m_depth;
-}
+size_t vtkMDEWNexusReader::getRecursionDepth() const { return this->m_depth; }
 
-bool vtkMDEWNexusReader::getLoadInMemory() const
-{
-  return m_loadInMemory;
-}
+bool vtkMDEWNexusReader::getLoadInMemory() const { return m_loadInMemory; }
 
-double vtkMDEWNexusReader::getTime() const
-{
-  return m_time;
-}
+double vtkMDEWNexusReader::getTime() const { return m_time; }
 
 /**
   Sets algorithm in-memory property. If this is changed, the file is reloaded.
   @param inMemory : true if the entire file should be loaded into memory.
 */
-void vtkMDEWNexusReader::SetInMemory(bool inMemory)
-{
-  if(m_loadInMemory != inMemory)
-  {
-    this->Modified(); 
+void vtkMDEWNexusReader::SetInMemory(bool inMemory) {
+  if (m_loadInMemory != inMemory) {
+    this->Modified();
   }
   m_loadInMemory = inMemory;
 }
 
-
 /**
-  Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
+  Gets the geometry xml from the workspace. Allows object panels to configure
+  themeselves.
   @return geometry xml const * char reference.
 */
 const char *vtkMDEWNexusReader::GetInputGeometryXML() {
@@ -99,28 +83,29 @@ const char *vtkMDEWNexusReader::GetInputGeometryXML() {
 /**
 @param option : Normalization option chosen by index.
 */
-void vtkMDEWNexusReader::SetNormalization(int option)
-{
+void vtkMDEWNexusReader::SetNormalization(int option) {
   m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
   this->Modified();
 }
 
-int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
-{
+int vtkMDEWNexusReader::RequestData(
+    vtkInformation *vtkNotUsed(request),
+    vtkInformationVector **vtkNotUsed(inputVector),
+    vtkInformationVector *outputVector) {
 
   using namespace Mantid::VATES;
-  //get the info objects
+  // get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
-  {
+  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())) {
     // usually only one actual step requested
-    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
+    m_time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
   }
 
-  FilterUpdateProgressAction<vtkMDEWNexusReader> loadingProgressAction(this, "Loading...");
-  FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(this, "Drawing...");
+  FilterUpdateProgressAction<vtkMDEWNexusReader> loadingProgressAction(
+      this, "Loading...");
+  FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(
+      this, "Drawing...");
 
   ThresholdRange_scptr thresholdRange =
       boost::make_shared<IgnoreZerosThresholdRange>();
@@ -136,7 +121,8 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   vtkDataSet *product = m_presenter->execute(
       hexahedronFactory.get(), loadingProgressAction, drawingProgressAction);
 
-  //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
+  //-------------------------------------------------------- Corrects problem
+  //whereby boundaries not set propertly in PV.
   vtkNew<vtkBox> box;
   box->SetBounds(product->GetBounds());
   vtkNew<vtkPVClipDataSet> clipper;
@@ -144,15 +130,15 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   clipper->SetClipFunction(box.GetPointer());
   clipper->SetInsideOut(true);
   clipper->Update();
-  vtkDataSet* clipperOutput = clipper->GetOutput();
-   //--------------------------------------------------------
+  vtkDataSet *clipperOutput = clipper->GetOutput();
+  //--------------------------------------------------------
 
   vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+      outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->ShallowCopy(clipperOutput);
 
   m_presenter->setAxisLabels(output);
-  
+
   return 1;
 }
 
@@ -172,13 +158,11 @@ int vtkMDEWNexusReader::RequestInformation(
   return 1;
 }
 
-void vtkMDEWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
-{
-  this->Superclass::PrintSelf(os,indent);
+void vtkMDEWNexusReader::PrintSelf(ostream &os, vtkIndent indent) {
+  this->Superclass::PrintSelf(os, indent);
 }
 
-int vtkMDEWNexusReader::CanReadFile(const char* fname)
-{
+int vtkMDEWNexusReader::CanReadFile(const char *fname) {
   std::unique_ptr<MDLoadingView> view =
       Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
           this);
@@ -186,18 +170,15 @@ int vtkMDEWNexusReader::CanReadFile(const char* fname)
   return temp.canReadFile();
 }
 
-unsigned long vtkMDEWNexusReader::GetMTime()
-{
-  return Superclass::GetMTime();
-}
+unsigned long vtkMDEWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.
   @param progress : progress increment.
   @param message : progress message.
 */
-void vtkMDEWNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
-{
+void vtkMDEWNexusReader::updateAlgorithmProgress(double progress,
+                                                 const std::string &message) {
   std::lock_guard<std::mutex> lock(progressMutex);
   this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
@@ -206,16 +187,14 @@ void vtkMDEWNexusReader::updateAlgorithmProgress(double progress, const std::str
 /** Helper function to setup the time range.
 @param outputVector : vector onto which the time range will be set.
 */
-void vtkMDEWNexusReader::setTimeRange(vtkInformationVector* outputVector)
-{
-  if(m_presenter->hasTDimensionAvailable())
-  {
+void vtkMDEWNexusReader::setTimeRange(vtkInformationVector *outputVector) {
+  if (m_presenter->hasTDimensionAvailable()) {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
-      static_cast<int> (timeStepValues.size()));
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
+                 &timeStepValues[0], static_cast<int>(timeStepValues.size()));
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
@@ -227,9 +206,8 @@ void vtkMDEWNexusReader::setTimeRange(vtkInformationVector* outputVector)
 /*
 Getter for the workspace type name.
 */
-char* vtkMDEWNexusReader::GetWorkspaceTypeName()
-{
-  //Forward request on to MVP presenter
+char *vtkMDEWNexusReader::GetWorkspaceTypeName() {
+  // Forward request on to MVP presenter
   typeName = m_presenter->getWorkspaceTypeName();
-  return const_cast<char*>(typeName.c_str());
+  return const_cast<char *>(typeName.c_str());
 }

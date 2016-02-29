@@ -24,9 +24,6 @@ LibraryManagerImpl::LibraryManagerImpl() {
   g_log.debug() << "LibraryManager created." << std::endl;
 }
 
-/// Destructor
-LibraryManagerImpl::~LibraryManagerImpl() {}
-
 /** Opens all suitable DLLs on a given path.
 *  @param filePath :: The filepath to the directory where the libraries are.
 *  @param isRecursive :: Whether to search subdirectories.

@@ -58,7 +58,7 @@ public:
   /// Gets the origin
   std::string origin() const;
   /// Destructor
-  virtual ~ReferenceFrame();
+  virtual ~ReferenceFrame() = default;
   /// Convert up axis into a 3D direction
   const Mantid::Kernel::V3D vecPointingUp() const;
   /// Convert along beam axis into a 3D direction

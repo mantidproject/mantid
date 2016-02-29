@@ -3,9 +3,6 @@
 
 namespace Mantid {
 namespace ICat {
-/// Constructor
-CErrorHandling::CErrorHandling() {}
-CErrorHandling::~CErrorHandling() {}
 
 /**This method throws the error string returned by gsoap to mantid upper layer
  *@param icat :: -ICat proxy object

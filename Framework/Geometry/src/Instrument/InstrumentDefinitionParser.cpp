@@ -136,10 +136,6 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
 }
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
