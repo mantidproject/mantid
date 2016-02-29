@@ -104,7 +104,8 @@ std::set<specnum_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
 const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(
     const specnum_t spectrumNo) const {
   if (!m_indexIsSpecNo)
-    throw std::runtime_error("Indices are in the spectrum detector map, not spectrum number.");
+    throw std::runtime_error(
+        "Indices are in the spectrum detector map, not spectrum number.");
   return m_mapping.at(spectrumNo);
 }
 
@@ -112,7 +113,8 @@ const std::set<detid_t> &
 SpectrumDetectorMapping::getDetectorIDsForSpectrumIndex(
     const size_t spectrumIndex) const {
   if (m_indexIsSpecNo)
-    throw std::runtime_error("Spectrum numbers are in the spectrum detector map, not index.");
+    throw std::runtime_error(
+        "Spectrum numbers are in the spectrum detector map, not index.");
   return m_mapping.at(static_cast<int>(spectrumIndex));
 }
 

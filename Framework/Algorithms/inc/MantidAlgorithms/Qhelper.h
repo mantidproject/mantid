@@ -55,7 +55,6 @@ public:
 
 private:
   /// the experimental workspace with counts across the detector
-  
 };
 
 } // namespace Algorithms

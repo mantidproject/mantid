@@ -287,8 +287,7 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
                         FILE *const outFile, const int wsIn) const {
-  check_and_copy_spectra(WS->readY(wsIn), WS->readE(wsIn), m_tSignal,
-                         m_tError);
+  check_and_copy_spectra(WS->readY(wsIn), WS->readE(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 

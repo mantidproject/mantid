@@ -588,8 +588,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
 
       specnum_t spec_num = static_cast<specnum_t>(*it);
       if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-        m_wsInd2specNum_map.insert(
-            std::pair<int64_t, specnum_t>(ic, spec_num));
+        m_wsInd2specNum_map.insert(std::pair<int64_t, specnum_t>(ic, spec_num));
         ic++;
       }
     }

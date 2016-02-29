@@ -164,8 +164,9 @@ void ConvertEmptyToTof::exec() {
 void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
   auto nHist = m_inputWS->getNumberHistograms();
   if (v.size() == 0) {
-    g_log.information("No spectrum number given. Using all spectra to calculate "
-                      "the elastic peak.");
+    g_log.information(
+        "No spectrum number given. Using all spectra to calculate "
+        "the elastic peak.");
     // use all spectra indices
     v.reserve(nHist);
     for (unsigned int i = 0; i < nHist; ++i)

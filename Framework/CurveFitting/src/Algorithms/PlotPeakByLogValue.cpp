@@ -590,9 +590,8 @@ PlotPeakByLogValue::makeNames() const {
  * @param wsIndex Index of spectrum being fitted
  * @return Formatted minimizer string
  */
-std::string
-PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
-                                       const std::string &wsIndex) {
+std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
+                                                   const std::string &wsIndex) {
   std::string format = getPropertyValue("Minimizer");
   std::string wsBaseName = wsName + "_" + wsIndex;
   boost::replace_all(format, "$wsname", wsName);

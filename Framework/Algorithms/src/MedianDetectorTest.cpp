@@ -100,7 +100,8 @@ void MedianDetectorTest::exec() {
 
   // 0. Correct for solid angle, if desired
   if (m_solidAngle) {
-    MatrixWorkspace_sptr solidAngle = getSolidAngles(m_minWsIndex, m_maxWsIndex);
+    MatrixWorkspace_sptr solidAngle =
+        getSolidAngles(m_minWsIndex, m_maxWsIndex);
     if (solidAngle != nullptr) {
       countsWS = countsWS / solidAngle;
     }

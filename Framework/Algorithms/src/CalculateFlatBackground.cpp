@@ -309,7 +309,7 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 * workspace
 */
 void CalculateFlatBackground::getWsInds(std::vector<int> &output,
-                                          const int workspaceTotal) {
+                                        const int workspaceTotal) {
   if (output.size() > 0) {
     return;
   }

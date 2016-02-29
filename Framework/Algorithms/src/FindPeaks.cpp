@@ -817,7 +817,7 @@ int FindPeaks::getVectorIndex(const MantidVec &vecX, double x) {
   * (This is not the CORE fit peak method)
   *
   *  @param input ::    The input workspace
-  *  @param wsIndex :: The workspace index of the peak 
+  *  @param wsIndex :: The workspace index of the peak
   *  @param center_guess :: A guess of the X-value of the center of the peak, in
   *whatever units of the X-axis of the workspace.
   *  @param fitWidth :: A guess of the full-width-half-max of the peak, in # of
@@ -888,7 +888,7 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
 /** Attempts to fit a candidate peak with a given window of where peak resides
   *
   *  @param input    The input workspace
-  *  @param wsIndex The workspace index of the peak 
+  *  @param wsIndex The workspace index of the peak
   *  @param centre_guess ::  Channel number of peak candidate i0 - the higher
   *side of the peak (right side)
   *  @param xmin    Minimum x value to find the peak

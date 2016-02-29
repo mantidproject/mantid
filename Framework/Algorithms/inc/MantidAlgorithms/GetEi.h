@@ -87,8 +87,8 @@ private:
                    specnum_t mon1Spec, double &monitor0Dist,
                    double &monitor1Dist) const;
   std::vector<size_t> getMonitorWsIndexs(API::MatrixWorkspace_const_sptr WS,
-                                           specnum_t specNum1,
-                                           specnum_t specNum2) const;
+                                         specnum_t specNum1,
+                                         specnum_t specNum2) const;
   double timeToFly(double s, double E_KE) const;
   double getPeakCentre(API::MatrixWorkspace_const_sptr WS,
                        const int64_t monitIn, const double peakTime);
