@@ -62,8 +62,7 @@ void MaxEnt::init() {
   declareProperty("ComplexData", false,
                   "Whether or not the input data are complex. If true, the "
                   "input workspace is expected to have an even number of "
-                  "histograms, with real and imaginary parts arranged in "
-                  "consecutive workspaces");
+                  "histograms.");
 
   declareProperty("PositiveImage", false, "If true, the reconstructed image "
                                           "must be positive. It can take "
@@ -209,10 +208,10 @@ void MaxEnt::exec() {
     std::vector<double> image(npoints, background);
 
     if (complex) {
-      auto dataRe = inWS->readY(2 * s);
-      auto dataIm = inWS->readY(2 * s + 1);
-      auto errorsRe = inWS->readE(2 * s);
-      auto errorsIm = inWS->readE(2 * s + 1);
+      auto dataRe = inWS->readY(s);
+      auto dataIm = inWS->readY(s + nspec);
+      auto errorsRe = inWS->readE(s);
+      auto errorsIm = inWS->readE(s + nspec);
       maxentData->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
                               background);
     } else {

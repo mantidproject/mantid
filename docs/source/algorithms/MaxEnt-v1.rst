@@ -57,17 +57,17 @@ Output Workspaces
 There are four output workspaces: *ReconstructedImage* and *ReconstructedData* contain the image and
 calculated data respectively, and *EvolChi* and *EvolAngle* record the algorithm's evolution.
 *ReconstructedData* can be used to check that the calculated data approaches the experimental,
-measured data. *ReconstructedImage* corresponds to its Fourier transform. If the input data are real it
-contains twice the original number of spectra, as the Fourier transform will be a complex signal
+measured data, and *ReconstructedImage* corresponds to its Fourier transform. If the input data are real they
+contain twice the original number of spectra, as the Fourier transform will be a complex signal
 in general. The real and imaginary parts are organized as follows (see Table 1): assuming your input workspace has
-:math:`M` spectra, the real part of the reconstructed image for spectrum :math:`s` corresponds to
-spectrum :math:`s` in *ReconstructedImage*, while the imaginary part can be found in spectrum :math:`s+M`.
+:math:`M` spectra, the real part of the reconstructed spectrum :math:`s` corresponds to
+spectrum :math:`s` in the output workspaces *ReconstructedImage* and *ReconstructedData*, while the imaginary part can be found in spectrum :math:`s+M`.
 
 When the input data are complex, the input workspace is expected to have :math:`2M` spectra, where
-real and imaginary parts of a specific signal are arranged in consecutive spectra, :math:`(2s, 2s+1)`.
-Both the *ReconstructedData* and *ReconstructedImage* will contain :math:`2M` spectra, where spectra
+real and imaginary parts of input :math:`s`, are arranged in spectra :math:`(s, s+M)` respectively. In other words,
+*ReconstructedData* and *ReconstructedImage* will contain :math:`2M` spectra, where spectra
 :math:`(s, s+M)` correspond to the real and imaginary parts reconstructed from the input signal at
-:math:`(2s, 2s+1)` in the input workspace (see Table 2 below).
+:math:`(s, s+M)` in the input workspace (see Table 2 below).
 
 The workspaces *EvolChi* and *EvolAngle* record the evolution of :math:`\chi^2` and the angle (or
 non-parallelism) between :math:`\nabla S` and :math:`\nabla \chi^2`. Note that the algorithm runs
@@ -86,17 +86,17 @@ whose values will be set to zero once the true maximum entropy solution is found
 
 .. table:: Table 1. Output workspaces for the case of real data (M histograms and N bins in the input workspace)
 
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                |
-    +===================+==============================+================+============================================================================================================================================================+
-    | EvolChi           | M                            | MaxIterations  | Evolution of :math:`\chi^2` until the solution is found. Then all values are set to zero.                                                                  |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | EvolAngle         | M                            | MaxIterations  | Evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found. Then all values are set to zero.                   |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedImage| 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)         |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedData | M                            | N              | For spectrum :math:`s` in the input workspace, the reconstructed data are stored in spectrum :math:`s` (only real part, as the input is real)              |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                                                                                                                                                                        |
+    +===================+==============================+================+====================================================================================================================================================================================================================================================================================================================+
+    | EvolChi           | M                            | MaxIterations  | Evolution of :math:`\chi^2` until the solution is found. Then all values are set to zero.                                                                                                                                                                                                                          |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | EvolAngle         | M                            | MaxIterations  | Evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found. Then all values are set to zero.                                                                                                                                                                           |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ReconstructedImage| 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)                                                                                                                                                                 |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ReconstructedData | 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed data are stored in spectrum :math:`s` (real part) and :math:`s+M` (imaginary part). Note that although the input is real, the imaginary part is recorded for debugging purposes, it should be zero for all data points.                           |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. table:: Table 2. Output workspaces for the case of complex input (2M histograms and N bins in the input workspace. Real and imaginary parts must be consecutive)
 
@@ -107,18 +107,10 @@ whose values will be set to zero once the true maximum entropy solution is found
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | EvolAngle         | M                            | MaxIterations  | Evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found. Then all values are set to zero.                   |
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedImage| 2M                           | :math:`N`      | For spectrum :math:`(2s, 2s+1)` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)|
+    | ReconstructedImage| 2M                           | :math:`N`      | For spectrum :math:`(s, s+M)` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)  |
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedData | 2M                           | :math:`N`      | For spectrum :math:`(2s, 2s+1)` in the input workspace, the reconstructed data are stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)|
+    | ReconstructedData | 2M                           | :math:`N`      | For spectrum :math:`(s, s+M)` in the input workspace, the reconstructed data are stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)  |
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-
-References
-----------
-
-[1] Anders Johannes Markvardsen, (2000). Polarised neutron diffraction measurements of PrBa2Cu3O6+x and the Bayesian statistical analysis of such data. DPhil. University of Oxford (http://ora.ox.ac.uk/objects/uuid:bef0c991-4e1c-4b07-952a-a0fe7e4943f7)
-
-[2] Skilling & Bryan, (1984). Maximum entropy image reconstruction: general algorithm. Mon. Not. R. astr. Soc. 211, 111-124.
 
 Usage
 -----
@@ -218,6 +210,52 @@ the original and reconstructed data (left), and the reconstructed image (right).
 
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
+
+Positive Images
+---------------
+
+The algorithm allows users to restrict the reconstructed image to positive values only. This behaviour can be
+selected by setting the input property *PositiveImage* to true. In this case, the entropy is defined by the
+alternative expression:
+
+.. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
+
+In addition, the algorithm explicitly protects against negative values by setting those to a fraction of the maximum entropy constant *A*.
+In the example below both modes are compared. As the input is a complex signal with expected Fourier transform :math:`F(\omega) = \delta\left(\omega-\omega_0\right)`,
+both modes should produce the same results (note that the maximum entropy constant *A* typically needs to be set to smaller values for positive
+image in order to obtain smooth results).
+
+.. code-block:: python
+
+   from math import pi, sin, cos
+   from random import random
+   # Create a test workspace
+   X = []
+   YRe = []
+   YIm = []
+   E = []
+   N = 200
+   w = 3
+   for i in range(0,N):
+       x = 2*pi*i/N
+       X.append(x)
+       YRe.append(cos(w*x)+(random()-0.5)*0.3)
+       YIm.append(sin(w*x)+(random()-0.5)*0.3)
+       E.append(0.1)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=1, PositiveImage=False)
+   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
+
+.. figure:: ../images/MaxEntPositiveImage.png
+   :align: center
+
+References
+----------
+
+[1] Anders Johannes Markvardsen, (2000). Polarised neutron diffraction measurements of PrBa2Cu3O6+x and the Bayesian statistical analysis of such data. DPhil. University of Oxford (http://ora.ox.ac.uk/objects/uuid:bef0c991-4e1c-4b07-952a-a0fe7e4943f7)
+
+[2] Skilling & Bryan, (1984). Maximum entropy image reconstruction: general algorithm. Mon. Not. R. astr. Soc. 211, 111-124.
+
+[3] Smith & Player, (1990). Deconvolution of bipolar ultrasonic signals using a modified maximum entropy method. J. Phys. D: Appl. Phys. 24, 1714-1721.
 
 .. categories::
 
