@@ -12,8 +12,8 @@ import time
 import h5py
 from abc import abstractmethod
 
-#pylint: disable=R0921
-#pylint: disable=too-many-instance-attributes
+# R0921 abstract class not referenced -- wrong, client references it.
+# pylint: disable=too-many-instance-attributes, R0921
 class ReductionWrapper(object):
     """ Abstract class provides interface to direct inelastic reduction
         allowing it to be run  from Mantid, web services, or system tests
@@ -334,8 +334,7 @@ class ReductionWrapper(object):
             return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
                         .format(TOLL)
         else:
-#pylint: disable=unused-variable
-            fname,ext = os.path.splitext(fileName)
+            fname,_ = os.path.splitext(fileName)
             filename = fname+'-mismatch.nxs'
             self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
                                       "   Saving new results to file {0}".format(filename),'warning')
@@ -370,7 +369,7 @@ class ReductionWrapper(object):
         """
 
         if not self._debug_wait_for_files_operation is None:
-# it is callable and the idea is that it is callable
+# it is callable and the main point of this method is that it is callable
 #pylint: disable=E1102
             self._debug_wait_for_files_operation()
         else:
@@ -384,9 +383,9 @@ class ReductionWrapper(object):
             2 minutes after it has been found.
         """
 
-        file_name,found_ext=os.path.splitext(input_file)
+        _,found_ext=os.path.splitext(input_file)
         if found_ext != '.nxs': # problem solution for nxs files only. Others are seems ok
-            return 
+            return
         ic=0
         #ok = os.access(input_file,os.R_OK) # does not work in this case
         try:
@@ -405,7 +404,7 @@ class ReductionWrapper(object):
                 except IOError:
                     ok = False
                     if ic>24:
-                        raise IOError
+                        raise IOError\
                         ("Can not get read access to input file: "+input_file+" after 4 min of trying")
         if ok:
             f.close()
@@ -419,7 +418,8 @@ class ReductionWrapper(object):
             reduction properties between script and web variables
         """
         if input_file:
-#pylint: disable=attribute-defined-outside-init
+# attribute-defined-outside-init -- wrong, it is not
+#pylint: disable=W0201
             self.reducer.sample_run = str(input_file)
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
@@ -436,8 +436,7 @@ class ReductionWrapper(object):
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
-#pylint: disable=unused-variable
-                    file_name,found_ext=os.path.splitext(input_file)
+                    _,found_ext=os.path.splitext(input_file)
                     if found_ext != fext:
                         wait_counter+=1
                         if wait_counter<2:
@@ -455,6 +454,7 @@ class ReductionWrapper(object):
             #endWhile
             # found but let's give it some time to finish possible IO operations
             self._check_access_granted(input_file)
+            #
             converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
@@ -522,8 +522,10 @@ class ReductionWrapper(object):
             data search path
         """
         try:
-            n,r = funcreturns.lhs_info('both')
+            _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+# no-exception-type(s) specified. Who knows what exception this internal procedure rises...
+#pylint: disable=W0702
         except:
             out_ws_name = None
 
@@ -636,6 +638,8 @@ def iliad(reduce):
         try:
             _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+# no-exception-type(s) specified. Who knows what exception this internal procedure rises...
+#pylint: disable=W0702
         except:
             out_ws_name = None
 
