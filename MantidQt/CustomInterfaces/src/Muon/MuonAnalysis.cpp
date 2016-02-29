@@ -1752,15 +1752,6 @@ int MuonAnalysis::getPairNumberFromRow(int row) {
 }
 
 /**
- * Return the pair which is in focus and -1 if none
- */
-int MuonAnalysis::pairInFocus() {
-  // plus some code here which double checks that pair
-  // table in focus actually sensible
-  return m_pairTableRowInFocus;
-}
-
-/**
  * Clear tables and front combo box
  */
 void MuonAnalysis::clearTablesAndCombo() {
@@ -2026,34 +2017,6 @@ int MuonAnalysis::numOfDetectors(const std::string &str) const {
   }
 
   return static_cast<int>(rangeSize);
-}
-
-/** Is input string a number?
- *
- *  @param s :: The input string
- *  @return True is input string is a number
- */
-bool MuonAnalysis::isNumber(const std::string &s) const {
-  if (s.empty()) {
-    return false;
-  }
-
-  const std::string allowed("0123456789");
-
-  for (unsigned int i = 0; i < s.size(); i++) {
-    if (allowed.find_first_of(s[i]) == std::string::npos) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
-* Return true if data are loaded
-*/
-bool MuonAnalysis::areDataLoaded() {
-  return AnalysisDataService::Instance().doesExist(m_workspace_name);
 }
 
 /**

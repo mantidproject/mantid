@@ -277,9 +277,6 @@ private:
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
 
-  /// Return the pair which is in focus and -1 if none
-  int pairInFocus();
-
   /// is grouping set
   bool isGroupingSet() const;
 
@@ -305,9 +302,6 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  /// is string a number?
-  bool isNumber(const std::string& s) const;
-
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
@@ -316,9 +310,6 @@ private:
 
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
-
-  ///Return true if data are loaded
-  bool areDataLoaded();
 
   /// Return number of pairs
   int numPairs();
