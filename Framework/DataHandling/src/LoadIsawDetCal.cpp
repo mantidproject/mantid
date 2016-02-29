@@ -246,7 +246,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
@@ -341,7 +340,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);

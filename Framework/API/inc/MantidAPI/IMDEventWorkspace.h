@@ -32,7 +32,6 @@ class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
                                          public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
-  ~IMDEventWorkspace() override {}
 
   /// Returns a clone of the workspace
   IMDEventWorkspace_uptr clone() const {
@@ -41,6 +40,7 @@ public:
 
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize() = 0;
+  IMDEventWorkspace &operator=(const IMDEventWorkspace &) = delete;
 
   /// Get the minimum extents that hold the data
   virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
@@ -98,9 +98,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDEventWorkspace(const IMDEventWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDEventWorkspace &operator=(const IMDEventWorkspace &other);
+  IMDEventWorkspace(const IMDEventWorkspace &) = default;
 
   const std::string toString() const override;
   /// Marker set to true when a file-backed workspace needs its back-end file

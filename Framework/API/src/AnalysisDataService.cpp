@@ -275,11 +275,6 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
           "AnalysisDataService"),
       m_illegalChars() {}
 
-/**
- * Destructor
- */
-AnalysisDataServiceImpl::~AnalysisDataServiceImpl() {}
-
 // The following is commented using /// rather than /** to stop the compiler
 // complaining
 // about the special characters in the comment fields.

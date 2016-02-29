@@ -41,9 +41,6 @@ class IFitFunction;
 */
 class MANTID_API_DLL IFuncMinimizer : public Kernel::PropertyManager {
 public:
-  /// Virtual destructor
-  ~IFuncMinimizer() override {}
-
   /// Initialize minimizer.
   /// @param function :: Function to minimize
   /// @param maxIterations :: Maximum number of iterations.

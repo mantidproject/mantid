@@ -16,16 +16,6 @@ IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
-//-----------------------------------------------------------------------------------------------
-/** Copy constructor */
-IMDWorkspace::IMDWorkspace(const IMDWorkspace &other)
-    : Workspace(other), Mantid::API::MDGeometry(other) {
-  m_convention = other.getConvention();
-}
-
-/// Destructor
-IMDWorkspace::~IMDWorkspace() {}
-
 /** Creates a single iterator and returns it.
  *
  * This calls createIterators(), a pure virtual method on IMDWorkspace which

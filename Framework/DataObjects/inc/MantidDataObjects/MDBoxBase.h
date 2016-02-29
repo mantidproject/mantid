@@ -57,8 +57,6 @@ public:
   MDBoxBase(const MDBoxBase<MDE, nd> &box,
             Mantid::API::BoxController *const otherBC);
 
-  /// Destructor
-  ~MDBoxBase() override {}
   ///@return the type of the event this box contains
   std::string getEventType() const override { return MDE::getTypeName(); }
   ///@return the length of the coordinates (in bytes), the events in the box

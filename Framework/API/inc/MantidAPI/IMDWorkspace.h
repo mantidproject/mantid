@@ -72,7 +72,7 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  ~IMDWorkspace() override;
+  IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   /**
    * Holds X, Y, E for a line plot
@@ -87,7 +87,6 @@ public:
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
   }
-
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
   /// workspace
@@ -166,9 +165,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDWorkspace(const IMDWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDWorkspace &operator=(const IMDWorkspace &other);
+  IMDWorkspace(const IMDWorkspace &) = default;
 
   const std::string toString() const override;
 

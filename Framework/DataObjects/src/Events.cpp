@@ -32,27 +32,8 @@ TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
 TofEvent::TofEvent(const double tof, const DateAndTime pulsetime)
     : m_tof(tof), m_pulsetime(pulsetime) {}
 
-/** Constructor, copy from another TofEvent object
- * @param rhs :: Other TofEvent to copy.
- */
-TofEvent::TofEvent(const TofEvent &rhs)
-    : m_tof(rhs.m_tof), m_pulsetime(rhs.m_pulsetime) {}
-
 /// Empty constructor
 TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}
-
-/// Destructor
-TofEvent::~TofEvent() {}
-
-/** Copy from another TofEvent object
- * @param rhs :: Other TofEvent to copy.
- * @return reference to this.
- */
-TofEvent &TofEvent::operator=(const TofEvent &rhs) {
-  this->m_tof = rhs.m_tof;
-  this->m_pulsetime = rhs.m_pulsetime;
-  return *this;
-}
 
 /** Comparison operator.
  * @param rhs: the other TofEvent to compare.
@@ -166,13 +147,6 @@ WeightedEvent::WeightedEvent(const TofEvent &rhs, float weight,
       m_errorSquared(errorSquared) {}
 
 /** Constructor, copy from another WeightedEvent object
- * @param rhs: source WeightedEvent
- */
-WeightedEvent::WeightedEvent(const WeightedEvent &rhs)
-    : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(rhs.m_weight),
-      m_errorSquared(rhs.m_errorSquared) {}
-
-/** Constructor, copy from another WeightedEvent object
  * @param rhs: source TofEvent
  */
 WeightedEvent::WeightedEvent(const TofEvent &rhs)
@@ -182,18 +156,6 @@ WeightedEvent::WeightedEvent(const TofEvent &rhs)
 /// Empty constructor
 WeightedEvent::WeightedEvent()
     : TofEvent(), m_weight(1.0), m_errorSquared(1.0) {}
-
-/// Destructor
-WeightedEvent::~WeightedEvent() {}
-
-/// Copy from another WeightedEvent object
-WeightedEvent &WeightedEvent::operator=(const WeightedEvent &rhs) {
-  this->m_tof = rhs.m_tof;
-  this->m_pulsetime = rhs.m_pulsetime;
-  this->m_weight = rhs.m_weight;
-  this->m_errorSquared = rhs.m_errorSquared;
-  return *this;
-}
 
 /** Comparison operator.
  * @param rhs :: event to which we are comparing.
@@ -318,13 +280,6 @@ WeightedEventNoTime::WeightedEventNoTime(const WeightedEvent &rhs)
     : m_tof(rhs.m_tof), m_weight(rhs.m_weight),
       m_errorSquared(rhs.m_errorSquared) {}
 
-/** Constructor, copy from another WeightedEventNoTime object
- * @param rhs: source WeightedEventNoTime
- */
-WeightedEventNoTime::WeightedEventNoTime(const WeightedEventNoTime &rhs)
-    : m_tof(rhs.m_tof), m_weight(rhs.m_weight),
-      m_errorSquared(rhs.m_errorSquared) {}
-
 /** Constructor, copy from another TofEvent object
  * @param rhs: source TofEvent
  */
@@ -334,18 +289,6 @@ WeightedEventNoTime::WeightedEventNoTime(const TofEvent &rhs)
 /// Empty constructor
 WeightedEventNoTime::WeightedEventNoTime()
     : m_tof(0.0), m_weight(1.0), m_errorSquared(1.0) {}
-
-/// Destructor
-WeightedEventNoTime::~WeightedEventNoTime() {}
-
-/// Copy from another WeightedEventNoTime object
-WeightedEventNoTime &WeightedEventNoTime::
-operator=(const WeightedEventNoTime &rhs) {
-  this->m_tof = rhs.m_tof;
-  this->m_weight = rhs.m_weight;
-  this->m_errorSquared = rhs.m_errorSquared;
-  return *this;
-}
 
 /** Comparison operator.
  * @param rhs :: event to which we are comparing.

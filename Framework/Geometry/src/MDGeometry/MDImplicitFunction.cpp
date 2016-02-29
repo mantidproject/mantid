@@ -10,18 +10,6 @@ namespace Geometry {
 MDImplicitFunction::MDImplicitFunction() : m_nd(0), m_numPlanes(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MDImplicitFunction::~MDImplicitFunction() {}
-
-/** Copy constructor
- * @param other :: copy this
- */
-MDImplicitFunction::MDImplicitFunction(const MDImplicitFunction &other)
-    : m_nd(other.m_nd), m_planes(other.m_planes),
-      m_numPlanes(other.m_numPlanes) {}
-
-//----------------------------------------------------------------------------------------------
 /** Add a bounded plane to this implicit function
  *
  * @param plane :: MDPlane to add.

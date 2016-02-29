@@ -208,9 +208,6 @@ Parser::Parser()
   }
 }
 
-/// Destructor.
-Parser::~Parser() {}
-
 /**
  * Takes the given multiFileName string, and calls other parts of the parser
  * to generate a corresponding vector of vectors of file names.

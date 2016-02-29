@@ -191,9 +191,6 @@ public:
     return new WorkspaceProperty<TYPE>(*this);
   }
 
-  /// Virtual destructor
-  ~WorkspaceProperty() override {}
-
   /** Get the name of the workspace
   *  @return The workspace's name
   */

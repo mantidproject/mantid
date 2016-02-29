@@ -247,7 +247,7 @@ private:
    * with box controller */
   MDGridBox(const MDGridBox<MDE, nd> &box);
   /**Private constructor as it does not work without box controller */
-  MDGridBox() {}
+  MDGridBox() = default;
   /// common part of MDGridBox contstructor;
   size_t initGridBox();
 };

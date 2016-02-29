@@ -60,14 +60,6 @@ Quat::Quat(const Kernel::DblMatrix &RotMat) { this->setQuat(RotMat); }
 Quat::Quat(const double _w, const double _a, const double _b, const double _c)
     : w(_w), a(_a), b(_b), c(_c) {}
 
-//! Copy constructor
-Quat::Quat(const Quat &_q) {
-  w = _q.w;
-  a = _q.a;
-  b = _q.b;
-  c = _q.c;
-}
-
 /** Constructor from an angle and axis.
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit
@@ -92,20 +84,6 @@ Quat::Quat(const double _deg, const V3D &_axis) { setAngleAxis(_deg, _axis); }
 Quat::Quat(const V3D &rX, const V3D &rY, const V3D &rZ) {
   // Call the operator to do the setting
   this->operator()(rX, rY, rZ);
-}
-
-/** Assignment Operator
- * @param q :: the Quat to copy
- * @returns a pointer to this
- */
-Quat &Quat::operator=(const Quat &q) {
-  if (this != &q) {
-    w = q.w;
-    a = q.a;
-    b = q.b;
-    c = q.c;
-  }
-  return *this;
 }
 
 /** Sets the quat values from four doubles
@@ -233,7 +211,6 @@ void Quat::operator()(const V3D &rX, const V3D &rY, const V3D &rZ) {
   // These are the original axes
   V3D oX = V3D(1., 0., 0.);
   V3D oY = V3D(0., 1., 0.);
-  V3D oZ = V3D(0., 0., 1.);
 
   // Axis that rotates X
   V3D ax1 = oX.cross_prod(rX);
@@ -257,9 +234,6 @@ void Quat::operator()(const V3D &rX, const V3D &rY, const V3D &rZ) {
   // Set it
   this->operator()(final);
 }
-
-//! Destructor
-Quat::~Quat() {}
 
 /** Re-initialise a quaternion to identity.
  */

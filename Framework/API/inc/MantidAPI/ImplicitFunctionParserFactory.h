@@ -44,9 +44,12 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionParserFactoryImpl
     : public Kernel::DynamicFactory<ImplicitFunctionParser> {
 public:
+  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &) =
+      delete;
+  ImplicitFunctionParserFactoryImpl &
+  operator=(const ImplicitFunctionParserFactoryImpl &) = delete;
   boost::shared_ptr<ImplicitFunctionParser>
   create(const std::string &xmlString) const override;
-
   ImplicitFunctionParser *
   createImplicitFunctionParserFromXML(const std::string &configXML) const;
 
@@ -58,14 +61,9 @@ private:
       ImplicitFunctionParserFactoryImpl>;
 
   /// Private Constructor for singleton class
-  ImplicitFunctionParserFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionParserFactoryImpl &
-  operator=(const ImplicitFunctionParserFactoryImpl &);
+  ImplicitFunctionParserFactoryImpl() = default;
   /// Private Destructor
-  ~ImplicitFunctionParserFactoryImpl() override;
+  ~ImplicitFunctionParserFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

@@ -9,8 +9,6 @@ namespace API {
 AlgorithmHasProperty::AlgorithmHasProperty(const std::string &propName)
     : m_propName(propName) {}
 
-AlgorithmHasProperty::~AlgorithmHasProperty() {}
-
 std::string AlgorithmHasProperty::checkValidity(
     const boost::shared_ptr<IAlgorithm> &value) const {
   std::string message("");

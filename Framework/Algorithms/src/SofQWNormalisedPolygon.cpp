@@ -235,7 +235,6 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   this->m_phiWidths = std::vector<double>(nhist, 0.0);
 
   auto inst = workspace->getInstrument();
-  const auto samplePos = inst->getSample()->getPos();
   const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
 
   for (size_t i = 0; i < nhist; ++i) // signed for OpenMP

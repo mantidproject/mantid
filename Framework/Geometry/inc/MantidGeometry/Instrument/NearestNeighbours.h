@@ -63,9 +63,6 @@ public:
                     const ISpectrumDetectorMapping &spectraMap,
                     bool ignoreMasked = true);
 
-  /// Default (empty) destructor
-  ~NearestNeighbours() override{};
-
   // Neighbouring spectra by radius
   std::map<specnum_t, Mantid::Kernel::V3D>
   neighboursInRadius(specnum_t spectrum, double radius = 0.0) const override;

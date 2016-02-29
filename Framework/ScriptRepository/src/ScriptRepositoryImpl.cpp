@@ -262,8 +262,6 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
   valid = true;
 }
 
-ScriptRepositoryImpl::~ScriptRepositoryImpl() throw() {}
-
 /**
  Check the connection with the server through the ::doDownloadFile method.
  @path server : The url that will be used to connect.

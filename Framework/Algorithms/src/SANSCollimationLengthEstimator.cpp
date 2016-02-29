@@ -32,10 +32,6 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 
-SANSCollimationLengthEstimator::SANSCollimationLengthEstimator() {}
-
-SANSCollimationLengthEstimator::~SANSCollimationLengthEstimator() {}
-
 /**
  * Provide the collimation length which is associated with the instrument
  * @param workspace: the input workspace

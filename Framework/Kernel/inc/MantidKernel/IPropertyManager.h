@@ -63,7 +63,7 @@ template <typename T> class Matrix;
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
   // IPropertyManager(){}
-  virtual ~IPropertyManager() {}
+  virtual ~IPropertyManager() = default;
 
   /// Function to declare properties (i.e. store them)
   virtual void declareProperty(std::unique_ptr<Property> p,

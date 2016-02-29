@@ -47,7 +47,7 @@ class MANTID_GEOMETRY_DLL BaseVisit {
 
 public:
   /// Destructor
-  virtual ~BaseVisit() {}
+  virtual ~BaseVisit() = default;
 
   virtual void Accept(const Surface &) = 0;  ///< Accept a surface
   virtual void Accept(const Plane &) = 0;    ///< Accept a plane

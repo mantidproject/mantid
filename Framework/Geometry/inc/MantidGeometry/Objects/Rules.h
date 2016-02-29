@@ -70,7 +70,7 @@ public:
   std::unique_ptr<Rule> clone() const {
     return std::unique_ptr<Rule>(doClone());
   }
-  virtual ~Rule();
+  virtual ~Rule() = default;
   virtual std::string className() const {
     return "Rule";
   } ///< Returns class name as string
@@ -142,7 +142,7 @@ protected:
   Intersection &operator=(const Intersection &);
 
 public:
-  Intersection();
+  Intersection() = default;
   explicit Intersection(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Intersection(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   std::unique_ptr<Intersection>
@@ -199,7 +199,7 @@ protected:
   Union &operator=(const Union &);
 
 public:
-  Union();
+  Union() = default;
   explicit Union(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Union(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
 
@@ -302,8 +302,8 @@ private:
   CompObj *doClone() const override;
 
 protected:
-  CompObj(const CompObj &);
-  CompObj &operator=(const CompObj &);
+  CompObj(const CompObj &) = default;
+  CompObj &operator=(const CompObj &) = default;
 
 public:
   CompObj();
@@ -362,7 +362,7 @@ protected:
   CompGrp &operator=(const CompGrp &);
 
 public:
-  CompGrp();
+  CompGrp() = default;
   explicit CompGrp(Rule *, std::unique_ptr<Rule>);
   std::unique_ptr<CompGrp> clone() const;
   std::string className() const override {
@@ -412,7 +412,7 @@ private:
   BoolValue *doClone() const override;
 
 protected:
-  BoolValue(const BoolValue &);
+  BoolValue(const BoolValue &) = default;
   BoolValue &operator=(const BoolValue &);
 
 public:
