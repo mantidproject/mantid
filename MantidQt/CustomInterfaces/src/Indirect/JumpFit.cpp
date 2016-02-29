@@ -471,8 +471,47 @@ void JumpFit::generatePlotGuess() {
 		return;
 	if (!m_uiForm.ckPlotGuess->isChecked()) {
 		m_uiForm.ppPlot->removeSpectrum("PlotGuess");
+		deletePlotGuessWorkspaces();
 		return;
 	}
+
+	// Fit function to use
+	const QString functionName = m_uiForm.cbFunction->currentText();
+	const auto functionString = generateFunctionName(functionName);
+
+	std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
+	int width = m_spectraList[widthText];
+	const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+	const auto startX = m_dblManager->value(m_properties["QMin"]);
+	const auto endX = m_dblManager->value(m_properties["QMax"]);
+
+	// Setup fit algorithm
+	auto plotGuess = AlgorithmManager::Instance().create("Fit");
+	plotGuess->initialize();
+
+	plotGuess->setProperty("Function", functionString);
+	plotGuess->setProperty("InputWorkspace", sample);
+	plotGuess->setProperty("WorkspaceIndex", width);
+	plotGuess->setProperty("IgnoreInvalidData", true);
+	plotGuess->setProperty("StartX", startX);
+	plotGuess->setProperty("EndX", endX);
+	plotGuess->setProperty("CreateOutput", true);
+	plotGuess->setProperty("Output", "__PlotGuessData");
+
+	m_batchAlgoRunner->addAlgorithm(plotGuess);
+	connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+		SLOT(plotGuess(bool)));
+	m_batchAlgoRunner->executeBatchAsync();
+
+}
+
+void JumpFit::plotGuess(bool error) {
+	if (error)
+		return;
+
+	disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+		SLOT(plotGuess(bool)));
+	m_uiForm.ppPlot->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1, Qt::green);
 }
 
 /**
@@ -495,7 +534,6 @@ std::string JumpFit::generateFunctionName(const QString &functionName) {
 	}
 	return functionString.toStdString();
 }
-
 
 } // namespace IDA
 } // namespace CustomInterfaces
