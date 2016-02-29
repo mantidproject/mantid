@@ -35,26 +35,26 @@ ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() {}
 //----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputMonitorWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores monitor "
                   "counts from a constant-wave powder diffraciton experiment.");
 
   declareProperty(
-      new ArrayProperty<double>("BinningParams"),
+      make_unique<ArrayProperty<double>>("BinningParams"),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
   std::vector<std::string> vecunits{"2theta", "dSpacing",
@@ -76,7 +76,7 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
-  declareProperty(new ArrayProperty<int>("ExcludedDetectorIDs"),
+  declareProperty(make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
                   "A comma separated list of integers to indicate the IDs of "
                   "the detectors that will be excluded from binning.");
 

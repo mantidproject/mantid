@@ -43,18 +43,17 @@ GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() {}
  */
 void GetTimeSeriesLogInformation::init() {
   declareProperty(
-      new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous",
-                                                  Direction::InOut),
+      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::InOut),
       "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "Dummy", Direction::Output),
                   "Name of the workspace of log delta T distribution. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "InformationWorkspace", "", Direction::Output);
   declareProperty(
-      tablewsprop,
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InformationWorkspace", "", Direction::Output),
       "Name of optional log statistic information output Tableworkspace.");
 
   declareProperty("LogName", "", "Log's name to filter events.");

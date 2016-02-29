@@ -26,10 +26,5 @@ ReflectometryTransformP::ReflectometryTransformP(
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryTransformP::~ReflectometryTransformP() {}
-
 } // namespace Mantid
 } // namespace MDAlgorithms

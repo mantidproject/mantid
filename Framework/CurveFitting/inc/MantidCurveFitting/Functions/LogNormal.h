@@ -41,8 +41,6 @@ class DLLExport LogNormal : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   LogNormal();
-  /// Destructor
-  ~LogNormal() override {}
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "LogNormal"; }

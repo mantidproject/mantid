@@ -80,8 +80,5 @@ void CoordTransformAffineParser::setSuccessor(
     CoordTransformAffineParser *other) {
   m_successor = SuccessorType_sptr(other);
 }
-
-/// Destructor
-CoordTransformAffineParser::~CoordTransformAffineParser() {}
 }
 }

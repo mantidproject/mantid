@@ -43,8 +43,6 @@ class MANTID_SINQ_DLL PoldiResidualCorrelationCore
     : public PoldiAutoCorrelationCore {
 public:
   PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight = 0.0);
-  ~PoldiResidualCorrelationCore() override {}
-
   double getWeight() const;
   void setWeight(double newWeight);
 

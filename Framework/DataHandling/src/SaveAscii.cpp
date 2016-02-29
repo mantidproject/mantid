@@ -28,11 +28,12 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".dat", ".txt", ".csv"}),
+  const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -41,7 +42,7 @@ void SaveAscii::init() {
                   "The starting workspace index.");
   declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeNonNegative,
                   "The ending workspace index.");
-  declareProperty(new ArrayProperty<int>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of workspace indices to save.");
   declareProperty("Precision", EMPTY_INT(), mustBeNonNegative,
                   "Precision of output double values.");
@@ -72,13 +73,13 @@ void SaveAscii::init() {
                   "Character(s) to put as separator between X, Y, E values.");
 
   declareProperty(
-      new PropertyWithValue<std::string>("CustomSeparator", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                  Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
-  setPropertySettings(
-      "CustomSeparator",
-      new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined"));
+  setPropertySettings("CustomSeparator",
+                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
+                                                       "UserDefined"));
 
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");

@@ -44,7 +44,9 @@ private:
     int version() const { return 1; }
     const std::string category() const { return "Dummy"; }
     const std::string summary() const { return "Test summary"; }
-    void init() { declareProperty(new AlgorithmProperty("CalculateStep")); }
+    void init() {
+      declareProperty(make_unique<AlgorithmProperty>("CalculateStep"));
+    }
     void exec() {}
   };
 
@@ -55,7 +57,7 @@ private:
     const std::string category() const { return "Dummy"; }
     const std::string summary() const { return "Test summary"; }
     void init() {
-      declareProperty(new AlgorithmProperty(
+      declareProperty(make_unique<AlgorithmProperty>(
           "CalculateStep",
           boost::make_shared<AlgorithmHasProperty>("Output1")));
     }

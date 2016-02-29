@@ -52,8 +52,8 @@ private:
   Cone *doClone() const override;
 
 protected:
-  Cone(const Cone &);
-  Cone &operator=(const Cone &);
+  Cone(const Cone &) = default;
+  Cone &operator=(const Cone &) = default;
 
 public:
   /// Public identifer

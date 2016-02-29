@@ -46,11 +46,6 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
- *  Destructor.
- */
-Integrate3DEvents::~Integrate3DEvents() {}
-
-/**
  * Add the specified event Q's to lists of events near peaks.  An event is
  * added to at most one list.  First the nearest h,k,l for that event Q vector
  * is calculated.  If a peak with that h,k,l was specified when this object

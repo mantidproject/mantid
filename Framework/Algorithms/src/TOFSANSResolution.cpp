@@ -32,16 +32,16 @@ TOFSANSResolution::TOFSANSResolution()
 
 void TOFSANSResolution::init() {
   declareProperty(
-      new WorkspaceProperty<>(
+      make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::InOut,
           boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(new WorkspaceProperty<>("ReducedWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
       "OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
@@ -96,14 +96,16 @@ void TOFSANSResolution::exec() {
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(new WorkspaceProperty<>("ThetaError", "", Direction::Output));
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
   thetaWS->setX(0, iqWS->readX(0));
   MantidVec &ThetaY = thetaWS->dataY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(new WorkspaceProperty<>("TOFError", "", Direction::Output));
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
   tofWS->setX(0, iqWS->readX(0));

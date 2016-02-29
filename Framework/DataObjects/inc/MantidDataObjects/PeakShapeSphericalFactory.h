@@ -37,10 +37,6 @@ namespace DataObjects {
 */
 class DLLExport PeakShapeSphericalFactory : public PeakShapeFactory {
 public:
-  /// Constructor
-  PeakShapeSphericalFactory();
-  /// Destructor
-  ~PeakShapeSphericalFactory() override;
   /// Make product
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;
   /// Set a successor should this factory be unsuitable

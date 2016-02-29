@@ -5,16 +5,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Geometry {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ComponentParser::ComponentParser() { m_current.clear(); }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ComponentParser::~ComponentParser() {}
-
 /** @return the top-level component created */
 Component *ComponentParser::getComponent() {
   if (m_current.size() > 0)

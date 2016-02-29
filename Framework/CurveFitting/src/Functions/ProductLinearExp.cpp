@@ -26,11 +26,6 @@ ProductLinearExp::ProductLinearExp() {
   declareParameter("Lifetime", 1.0);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ProductLinearExp::~ProductLinearExp() {}
-
 /**
 Calculate the 1D function derivatives.
 @param out : Jacobian to set derivates on.

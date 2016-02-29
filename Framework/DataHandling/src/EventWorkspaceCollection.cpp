@@ -44,11 +44,6 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EventWorkspaceCollection::~EventWorkspaceCollection() {}
-
 //-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace

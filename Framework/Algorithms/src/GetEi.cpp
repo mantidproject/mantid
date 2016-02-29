@@ -45,7 +45,8 @@ void GetEi::init() {
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       val),
       "The X units of this workspace must be time of flight with times in\n"
       "micro-seconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

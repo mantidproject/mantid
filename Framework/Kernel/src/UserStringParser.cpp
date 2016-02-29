@@ -6,10 +6,6 @@
 
 namespace Mantid {
 namespace Kernel {
-/// constructor
-UserStringParser::UserStringParser() {}
-/// Destructor
-UserStringParser::~UserStringParser() {}
 
 /**This method parses a given string of numbers and returns a vector of vector
   *of numbers.

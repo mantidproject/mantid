@@ -7,6 +7,9 @@ import math
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
     PEAK_TYPE = 'BackToBackExponential'
+    # Max limit on the estimated error of a center for it to be accepted as a good fit
+    # (in percentage of the center value)
+    CENTER_ERROR_LIMIT = 10
 
     def category(self):
         return "Diffraction\\Engineering"
@@ -92,7 +95,8 @@ class EnggFitPeaks(PythonAlgorithm):
                                "expected peaks. " + txt)
 
         peaks_table_name = self.getPropertyValue("OutFittedPeaksTable")
-        difc, zero, fitted_peaks = self._fit_all_peaks(in_wks, wks_index, (found_peaks, expected_peaks_dsp), peaks_table_name)
+        difc, zero, fitted_peaks = self._fit_all_peaks(in_wks, wks_index,
+                                                       (found_peaks, expected_peaks_dsp), peaks_table_name)
         self._produce_outputs(difc, zero, fitted_peaks)
 
     def _get_default_peaks(self):
@@ -139,17 +143,20 @@ class EnggFitPeaks(PythonAlgorithm):
         # Magic numbers, approx. represanting the shape/proportions of a B2BExponential peak
         COEF_LEFT = 2
         COEF_RIGHT = 3
-        MIN_RANGE_WIDTH = 175
+        # Current approach: don't force a minimum width. If the width initial guess is too
+        # narrow we might miss some peaks.
+        # To prevent that, the minimum could be set to for example the arbitrary '175' which
+        # seemed to have good effects overall, but that can lead to fitting the wrong
+        # (neighbor) peaks.
+        MIN_RANGE_WIDTH = 1
 
         startx = center - (width * COEF_LEFT)
         endx = center + (width * COEF_RIGHT)
-        # force startx-endx > 175, etc
         x_diff = endx-startx
-        min_width = MIN_RANGE_WIDTH
-        if x_diff < min_width:
-            inc = (min_width-x_diff)/2
-            endx = endx + inc
-            startx = startx - inc
+        if x_diff < MIN_RANGE_WIDTH:
+            inc = (min_width-x_diff)/5
+            endx = endx + 3*inc
+            startx = startx - 2*inc
 
         return (startx, endx)
 
@@ -196,18 +203,31 @@ class EnggFitPeaks(PythonAlgorithm):
                              ", width: %s, height: %s"%(initial_params[0], width, initial_params[1]))
                 self.log().notice('For workspace index ' + str(wks_index) + ', a peak that is in the list of '
                                   'expected peaks and was found by FindPeaks has not been fitted correctly. '
-                                  'It will be ignored. Details: ' + detailTxt)
+                                  'It will be ignored. ' + "Expected, dSpacing: {0}. Details: {1}".
+                                  format(peaks[1][i], detailTxt))
                 continue
 
-
-            param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
+            try:
+                param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
+            except StandardError:
+                self.log().warning("Problem found when trying to fit a peak centered at {0} (dSpacing), "
+                                   "for which the initial guess from FindPeaks is at {1} (ToF). Single "
+                                   "peak fitting failed. Skipping this peak."
+                                   .format(peaks[1][i], initial_params[0]))
+                continue
 
             fitted_params = {}
             fitted_params['dSpacing'] = peaks[1][i]
             fitted_params['Chi'] = chi_over_dof
             self._add_parameters_to_map(fitted_params, param_table)
-
-            fitted_peaks.addRow(fitted_params)
+            if self._peak_is_acceptable(fitted_params, in_wks, wks_index):
+                fitted_peaks.addRow(fitted_params)
+            else:
+                self.log().notice("Discarding peak found with wrong center and/or excessive or suspicious "
+                                  "error estimate in the center estimate: {0} (ToF) ({1}, dSpacing), "
+                                  "with error: {2}, for dSpacing {3}".
+                                  format(fitted_params['X0'], peaks[1][i],
+                                         fitted_params['X0_Err'], fitted_params['dSpacing']))
 
         # Check if we were able to really fit any peak
         if 0 == fitted_peaks.rowCount():
@@ -228,6 +248,8 @@ class EnggFitPeaks(PythonAlgorithm):
                                'appropriate for the workspace')
 
         difc, zero = self._fit_dSpacing_to_ToF(fitted_peaks)
+        self.log().information("Fitted {0} peaks in total. Difc: {1}, Tzero: {2}".
+                               format(fitted_peaks.rowCount(), difc, zero))
 
         return (difc, zero, fitted_peaks)
 
@@ -398,15 +420,16 @@ class EnggFitPeaks(PythonAlgorithm):
         goodExec = conv_alg.execute()
 
         if not goodExec:
-            raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for %d peaks: %s"
-                               % (len(expectedPeaks), expectedPeaks))
+            raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for {0} "
+                               "peaks. Details: {1}".format(len(expectedPeaks), expectedPeaks))
 
         wsTo = conv_alg.getProperty('OutputWorkspace').value
         peaks_ToF = wsTo.readX(0)
         if len(peaks_ToF) != len(expectedPeaks):
-            raise RuntimeError("Conversion of units went wrong. Converted %d peaks from the original "
-                               "list of %d peaks. The instrument definition might be incomplete for the "
-                               "original workspace / file."% (len(peaks_ToF), len(expectedPeaks)))
+            raise RuntimeError("Conversion of units went wrong. Converted {0} peaks from the "
+                               "original list of {1} peaks. The instrument definition might be "
+                               "incomplete for the original workspace / file.".
+                               format(len(peaks_ToF), len(expectedPeaks)))
 
         tof_values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
         # catch potential failures because of geometry issues, etc.
@@ -427,7 +450,7 @@ class EnggFitPeaks(PythonAlgorithm):
         @param ws workspace with the appropriate instrument / geometry definition
         @param wks_index index of the spectrum
 
-        Return:
+        Returns:
         input values converted from dSpacing to ToF
         """
         det = ws.getDetector(wks_index)
@@ -467,6 +490,84 @@ class EnggFitPeaks(PythonAlgorithm):
         table.addColumn('double', 'Chi')
 
         return table
+
+    def _peak_is_acceptable(self, fitted_params, wks, wks_index):
+        """
+        Decide whether a peak fitted looks acceptable, based on the values fitted for the
+        parameters of the peak and other metrics from Fit (Chi^2).
+
+        It applies for example a simple rule: if the peak center is
+        negative, it is obviously a fit failure. This is sometimes not so straightforward
+        from the error estimates and Chi^2 values returned from Fit, as there seem to be
+        a small percentage of cases with numberical issues (nan, zeros, etc.).
+
+        @param fitted_params :: parameters fitted from Fit algorithm
+        @param in_wks :: input workspace where a spectrum was fitted
+        @param wks_index :: workspace index of the spectrum that was fitted
+
+        Returns:
+            True if the peak function parameters and error estimates look acceptable
+            so the peak should be used.
+        """
+        spec_x_axis = wks.readX(wks_index)
+        center = self._find_peak_center_in_params(fitted_params)
+        intensity = self._find_peak_intensity_in_params(fitted_params)
+        return (center >= spec_x_axis.min() and center <= spec_x_axis.max() and
+                intensity > 0 and
+                fitted_params['Chi'] < 10 and self._b2bexp_is_acceptable(fitted_params))
+
+    def _find_peak_center_in_params(self, fitted_params):
+        """
+        Retrieve the fitted peak center/position from the set of parameters fitted.
+
+        Returns:
+            The peak center from the fitted parameters
+        """
+        if 'BackToBackExponential' == self.PEAK_TYPE:
+            return fitted_params['X0']
+        else:
+            raise ValueError('Inconsistency found. I do not know how to deal with centers of peaks '
+                             'of types other than {0}'.format(PEAK_TYPE))
+
+    def _find_peak_intensity_in_params(self, fitted_params):
+        """
+        Retrieve the fitted peak intensity/height/amplitude from the set of parameters fitted.
+
+        Returns:
+            The peak intensity from the fitted parameters
+        """
+        if 'BackToBackExponential' == self.PEAK_TYPE:
+            return fitted_params['I']
+        else:
+            raise ValueError('Inconsistency found. I do not know how to deal with intensities of '
+                             'peaks of types other than {0}'.format(PEAK_TYPE))
+
+    def _b2bexp_is_acceptable(self, fitted_params):
+        """
+        Checks specific to Back2BackExponential peak functions.
+
+        @param fitted_params :: parameters fitted, where it is assumed that the
+        standard Back2BackExponential parameter names are used
+
+        Returns:
+            True if the Bk2BkExponential parameters and error estimates look acceptable
+            so the peak should be used.
+        """
+        # Ban: negative centers, negative left (A) and right (B) exponential coefficient,
+        # and Gaussian spread (S).
+        # Also ban strange error estimates (nan, all zero error)
+        # And make sure that the error on the center (X0) is not too big in relative terms
+        return (fitted_params['X0'] > 0
+                and fitted_params['A'] > 0 and fitted_params['B'] > 0 and fitted_params['S'] > 0
+                and not math.isnan(fitted_params['X0_Err'])
+                and not math.isnan(fitted_params['A_Err'])
+                and not math.isnan(fitted_params['B_Err'])
+                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
+                and
+                (not 0 == fitted_params['X0_Err'] and not 0 == fitted_params['A_Err'] and
+                 not 0 == fitted_params['B_Err'] and not 0 == fitted_params['S_Err'] and
+                 not 0 == fitted_params['I_Err'])
+               )
 
     def _add_parameters_to_map(self, param_map, param_table):
         """

@@ -142,9 +142,6 @@ public:
       : Jacobian(), m_nValues(nValues), m_nParams(nParams),
         m_jacobian(nValues * nParams) {}
 
-  /// Destructor
-  ~LocalJacobian() override {}
-
   /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
   /// index.
   void set(size_t iY, size_t iP, double value) override {
@@ -240,7 +237,6 @@ class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
       public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
-  ~PoldiSpectrumDomainFunction() override {}
 
   std::string name() const override { return "PoldiSpectrumDomainFunction"; }
 

@@ -35,9 +35,6 @@ namespace Kernel {
 template <typename Factory, typename Product, typename Argument>
 class DLLExport ChainableFactory : public Chainable<Factory> {
 public:
-  /// Destructor
-  ~ChainableFactory() override {}
-
   /**
    * Factory method wrapper. Wraps results in smart pointer.
    * @param argument : creational arguments

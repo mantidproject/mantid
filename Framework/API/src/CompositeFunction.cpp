@@ -31,9 +31,6 @@ CompositeFunction::CompositeFunction()
   declareAttribute("NumDeriv", Attribute(false));
 }
 
-/// Destructor
-CompositeFunction::~CompositeFunction() {}
-
 /// Function initialization. Declare function parameters in this method.
 void CompositeFunction::init() {}
 

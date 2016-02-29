@@ -38,12 +38,14 @@ void LoadIDFFromNexus::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace in which to attach the imported instrument");
 
+  const std::vector<std::string> exts{".nxs", ".nxs.h5"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".nxs.h5"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name (including its full or relative path) of the Nexus file to "
       "attempt to load the instrument from.");
 

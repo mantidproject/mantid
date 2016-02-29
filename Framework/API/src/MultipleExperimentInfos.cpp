@@ -9,11 +9,6 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultipleExperimentInfos::MultipleExperimentInfos() {}
-
-//----------------------------------------------------------------------------------------------
 /** Copy constructor
  *
  * @param other :: other workspace to copy    */
@@ -21,11 +16,6 @@ MultipleExperimentInfos::MultipleExperimentInfos(
     const MultipleExperimentInfos &other) {
   this->copyExperimentInfos(other);
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultipleExperimentInfos::~MultipleExperimentInfos() {}
 
 //-----------------------------------------------------------------------------------------------
 /** Get the ExperimentInfo for the given run Index

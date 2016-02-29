@@ -76,17 +76,18 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Define input
   */
 void LoadPDFgetNFile::init() {
-  auto fileproperty =
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {".sq", ".sqa", ".sqb", ".gr", ".ain", ".braw", ".bsmo"},
-                       Kernel::Direction::Input);
-  this->declareProperty(fileproperty, "The input filename of the stored data");
+  const std::vector<std::string> exts{".sq",  ".sqa",  ".sqb", ".gr",
+                                      ".ain", ".braw", ".bsmo"};
+  auto fileproperty = Kernel::make_unique<FileProperty>(
+      "Filename", "", FileProperty::Load, exts, Kernel::Direction::Input);
+  this->declareProperty(std::move(fileproperty),
+                        "The input filename of the stored data");
 
   // auto wsproperty = new WorkspaceProperty<Workspace2D>("OutputWorkspace",
   // "Anonymous", Kernel::Direction::Output);
   // this->declareProperty(wsproperty, "Name of output workspace. ");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace name to load into.");
 }
 

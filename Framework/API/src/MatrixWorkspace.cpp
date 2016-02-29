@@ -1345,8 +1345,6 @@ public:
   }
   const Geometry::MDFrame &getMDFrame() const override { return *m_frame; }
 
-  ~MWDimension() override {}
-
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
@@ -1366,8 +1364,6 @@ public:
                                            m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
-
-  ~MWXDimension() override {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {

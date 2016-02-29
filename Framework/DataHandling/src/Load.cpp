@@ -259,10 +259,10 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
     if (loadProp->name() == m_filenamePropName)
       continue;
     try {
-      Property *propClone = loadProp->clone();
-      propClone->deleteSettings(); // Get rid of special settings because it
-                                   // does not work in custom GUI.
-      declareProperty(propClone, loadProp->documentation());
+      auto propClone = std::unique_ptr<Property>(loadProp->clone());
+      propClone->clearSettings(); // Get rid of special settings because it
+                                  // does not work in custom GUI.
+      declareProperty(std::move(propClone), loadProp->documentation());
     } catch (Exception::ExistsError &) {
       // Already exists as a static property
       continue;
@@ -290,13 +290,13 @@ void Load::init() {
   exts.emplace_back(".fits");
 
   declareProperty(
-      new MultipleFileProperty("Filename", exts),
+      Kernel::make_unique<MultipleFileProperty>("Filename", exts),
       "The name of the file(s) to read, including the full or relative "
       "path. (N.B. case sensitive if running on Linux). Multiple runs "
       "can be loaded and added together, e.g. INST10,11+12,13.ext");
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                        Direction::Output),
       "The name of the workspace that will be created, filled with the "
       "read-in data and stored in the Analysis Data Service. Some algorithms "
       "can created additional OutputWorkspace properties on the fly, e.g. "
@@ -457,7 +457,7 @@ void Load::loadMultipleFiles() {
       std::string outWsPropName =
           "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
       ++count;
-      declareProperty(new WorkspaceProperty<Workspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           outWsPropName, childWsName, Direction::Output));
       setProperty(outWsPropName, childWs);
     }
@@ -545,7 +545,7 @@ void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
         prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = getOutputWorkspace(name, loader);

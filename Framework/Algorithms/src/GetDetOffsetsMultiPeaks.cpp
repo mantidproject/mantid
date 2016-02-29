@@ -139,21 +139,21 @@ GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks() {}
 /** Initialisation method. Declares properties to be used in algorithm.
    */
 void GetDetOffsetsMultiPeaks::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
-  declareProperty(new ArrayProperty<double>("DReference"),
+  declareProperty(make_unique<ArrayProperty<double>>("DReference"),
                   "Enter a comma-separated list of the expected X-position of "
                   "the centre of the peaks. Only peaks near these positions "
                   "will be fitted.");
 
   declareProperty("FitWindowMaxWidth", 0.,
                   "Optional: The maximum width of the fitting window. If this "
-                  "is <=0 the windows is not specified to FindPeaks");
+                  "is <=0 the window is not specified to FindPeaks");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
                       "FitwindowTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the input Tableworkspace containing peak fit window "
@@ -173,20 +173,20 @@ void GetDetOffsetsMultiPeaks::init() {
 
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalSave, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "NumberPeaksWorkspace", "NumberPeaksFitted", Direction::Output),
       "An output workspace containing the offsets.");
-  declareProperty(
-      new WorkspaceProperty<>("MaskWorkspace", "Mask", Direction::Output),
-      "An output workspace containing the mask.");
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                   Direction::Output),
+                  "An output workspace containing the mask.");
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
   declareProperty(
@@ -207,27 +207,28 @@ void GetDetOffsetsMultiPeaks::init() {
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
 
-  auto inpreswsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputResolutionWorkspace", "", Direction::Input, PropertyMode::Optional);
   declareProperty(
-      inpreswsprop,
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputResolutionWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "Name of the optional input resolution (delta(d)/d) workspace. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output);
-  declareProperty(tablewsprop, "Name of the output table workspace containing "
-                               "spectra peak fit information.");
-
-  auto offsetwsprop = new WorkspaceProperty<TableWorkspace>(
-      "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output);
   declareProperty(
-      offsetwsprop,
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output),
+      "Name of the output table workspace containing "
+      "spectra peak fit information.");
+
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output),
       "Name of an output table workspace containing peaks' offset data.");
 
-  auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "FittedResolutionWorkspace", "ResolutionWS", Direction::Output);
-  declareProperty(ddodwsprop, "Name of the resolution workspace containing "
-                              "delta(d)/d for each unmasked spectrum. ");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "FittedResolutionWorkspace", "ResolutionWS", Direction::Output),
+      "Name of the resolution workspace containing "
+      "delta(d)/d for each unmasked spectrum. ");
 
   declareProperty("MinimumResolutionFactor", 0.1,
                   "Factor of the minimum allowed Delta(d)/d of any peak to its "

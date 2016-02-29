@@ -47,7 +47,6 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectraAxis : public Axis {
 public:
   explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
-  ~SpectraAxis() override {}
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
               const MatrixWorkspace *const parentWorkspace) override;

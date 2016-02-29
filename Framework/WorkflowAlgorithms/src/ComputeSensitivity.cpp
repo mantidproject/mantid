@@ -21,19 +21,19 @@ using namespace API;
 using namespace DataObjects;
 
 void ComputeSensitivity::init() {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        "_event.nxs"),
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, "_event.nxs"),
                   "Flood field or sensitivity file.");
-  declareProperty(new WorkspaceProperty<>("PatchWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("PatchWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "Workspace defining the area of the detector to be patched. "
                   "All masked pixels in this workspace will be patched.");
   declareProperty("ReductionProperties", "__eqsans_reduction_properties",
                   Direction::Input);
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace containing the sensitivity correction.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace containing the sensitivity correction.");
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -71,7 +71,7 @@ void ComputeSensitivity::exec() {
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
       reductionManager->declareProperty(
-          new AlgorithmProperty("SensitivityPatchAlgorithm"));
+          make_unique<AlgorithmProperty>("SensitivityPatchAlgorithm"));
     }
     reductionManager->setProperty("SensitivityPatchAlgorithm", patchAlg);
   }

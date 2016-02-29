@@ -192,8 +192,8 @@ IFunction_sptr PawleyFit::getCompositeFunction(
 
 /// Initialization of properties.
 void PawleyFit::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input workspace that contains the spectrum on which to "
                   "perform the Pawley fit.");
 
@@ -219,7 +219,8 @@ void PawleyFit::init() {
                   "alpha, beta, gamma'.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("PeakTable", "", Direction::Input),
+      make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "",
+                                                      Direction::Input),
       "Table with peak information. Can be used instead of "
       "supplying a list of indices for better starting parameters.");
 
@@ -245,19 +246,19 @@ void PawleyFit::init() {
                                             "the function is only evaluated "
                                             "and output is generated.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
                   "spectrum and difference curve.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("RefinedCellTable", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<ITableWorkspace>>("RefinedCellTable", "",
+                                                      Direction::Output),
       "TableWorkspace with refined lattice parameters, including errors.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("RefinedPeakParameterTable", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "RefinedPeakParameterTable", "", Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
 
   declareProperty("ReducedChiSquare", 0.0, "Outputs the reduced chi square "

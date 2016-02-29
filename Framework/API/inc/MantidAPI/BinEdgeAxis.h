@@ -37,7 +37,6 @@ class MANTID_API_DLL BinEdgeAxis : public NumericAxis {
 public:
   BinEdgeAxis(const std::size_t &length);
   BinEdgeAxis(const std::vector<double> &edges);
-  ~BinEdgeAxis() override {}
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,

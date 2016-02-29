@@ -67,6 +67,8 @@ class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
 public:
   AlgorithmProxy(Algorithm_sptr alg);
+  AlgorithmProxy(const AlgorithmProxy &) = delete;
+  AlgorithmProxy &operator=(const AlgorithmProxy &) = delete;
   ~AlgorithmProxy() override;
 
   /// The name of the algorithm
@@ -158,11 +160,6 @@ public:
   //@}
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  AlgorithmProxy(const AlgorithmProxy &);
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  AlgorithmProxy &operator=(const AlgorithmProxy &);
-
   void createConcreteAlg(bool initOnly = false);
   void stopped();
   void addObservers();

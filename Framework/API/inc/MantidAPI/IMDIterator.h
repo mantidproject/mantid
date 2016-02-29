@@ -48,7 +48,7 @@ class IMDWorkspace;
 class MANTID_API_DLL IMDIterator {
 public:
   IMDIterator();
-  virtual ~IMDIterator() {}
+  virtual ~IMDIterator() = default;
 
   void setNormalization(Mantid::API::MDNormalization normalization);
   Mantid::API::MDNormalization getNormalization() const;

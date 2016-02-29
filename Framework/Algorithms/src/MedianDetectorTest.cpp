@@ -24,12 +24,13 @@ const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 
 /// Declare algorithm properties
 void MedianDetectorTest::init() {
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<HistogramValidator>()),
+                  "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
-      "Name of the input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
       "a zero is also masked on the output");
 

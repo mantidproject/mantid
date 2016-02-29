@@ -23,7 +23,7 @@ template <typename T> class TimeSeriesProperty;
  set of properties.
 
  N.B. ONCE YOU HAVE DECLARED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS
- (I.E. DON'T DELETE IT!)
+ (declareProperty sinks the unique_ptr passed in.)
 
  Property values of any type except std::string can be extracted using
  getProperty().
@@ -71,7 +71,8 @@ public:
   ~PropertyManager() override;
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(Property *p, const std::string &doc = "") override;
+  void declareProperty(std::unique_ptr<Property> p,
+                       const std::string &doc = "") override;
 
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesJson,
@@ -128,7 +129,7 @@ private:
   const std::string createKey(const std::string &text) const;
 
   /// typedef for the map holding the properties
-  typedef std::map<std::string, Property *> PropertyMap;
+  typedef std::map<std::string, std::unique_ptr<Property>> PropertyMap;
   /// The properties under management
   PropertyMap m_properties;
   /// Stores the order in which the properties were declared.

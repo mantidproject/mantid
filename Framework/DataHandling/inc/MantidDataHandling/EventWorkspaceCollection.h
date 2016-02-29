@@ -49,14 +49,13 @@ private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
-  /// private copy constructor. Not implemented.
-  EventWorkspaceCollection(const EventWorkspaceCollection &other);
-  /// Private copy assignment operator. Assignment not implemented.
-  EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other);
 
 public:
   EventWorkspaceCollection();
-  virtual ~EventWorkspaceCollection();
+  EventWorkspaceCollection(const EventWorkspaceCollection &other) = delete;
+  EventWorkspaceCollection &
+  operator=(const EventWorkspaceCollection &other) = delete;
+  virtual ~EventWorkspaceCollection() = default;
 
   void setNPeriods(
       size_t nPeriods,

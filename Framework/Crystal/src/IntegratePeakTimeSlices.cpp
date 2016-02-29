@@ -142,17 +142,17 @@ double SQRT(double v) {
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] m_NeighborIDs; }
 
 void IntegratePeakTimeSlices::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "A 2D workspace with X values of time of flight");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output table workspace with Log info");
 
-  declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("Peaks", "", Direction::Input),
-      "Workspace of Peaks");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "Peaks", "", Direction::Input),
+                  "Workspace of Peaks");
 
   declareProperty("PeakIndex", 0,
                   "Index of peak in PeaksWorkspace to integrate");
@@ -328,10 +328,6 @@ void IntegratePeakTimeSlices::exec() {
           int NN = m_NeighborIDs[1];
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN, NN);
-
-          Kernel::V3D CentPos = m_center +
-                                m_yvec * (Centy - m_ROW) * m_cellHeight +
-                                m_xvec * (Centx - m_COL) * m_cellWidth;
 
           auto XXX = boost::make_shared<DataModeHandler>(
               R, R, Centy, Centx, m_cellWidth, m_cellHeight,
@@ -820,7 +816,6 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
 
-  V3D pos = peak.getDetPos();
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
   int chanCenter = find(X, time);

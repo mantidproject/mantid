@@ -17,11 +17,6 @@ RemoteJobManagerFactoryImpl::RemoteJobManagerFactoryImpl()
 }
 
 /**
- * Private destructor, prevent client code from using this.
- */
-RemoteJobManagerFactoryImpl::~RemoteJobManagerFactoryImpl() {}
-
-/**
  * Create a remote algorithm with the underlying mechanism that suits
  * the compute resource passed.
  *
