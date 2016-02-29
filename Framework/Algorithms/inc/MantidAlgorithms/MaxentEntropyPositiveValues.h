@@ -7,7 +7,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropyPositiveValues : TODO: DESCRIPTION
+/** MaxentEntropyPositiveValues : Class defining the entropy of a positive image
+  (i.e. a set of positive numbers). See J. Skilling and R. K Bryan, "Maximum
+  entropy image reconstruction: general algorithm".
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,12 +34,16 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentEntropyPositiveValues : public MaxentEntropy {
 public:
+  // Constructor
   MaxentEntropyPositiveValues() = default;
+  // Destructor
   virtual ~MaxentEntropyPositiveValues() = default;
-
+  // First derivative
   double getDerivative(double value) override;
-  double getSecondDerivative(double x) override;
-  double correctValue(double x, double y) override;
+  // Second derivative
+  double getSecondDerivative(double value) override;
+  // Correct negative values
+  double correctValue(double value, double newValue) override;
 };
 // Helper typedef for scoped pointer of this type.
 typedef boost::shared_ptr<MaxentEntropyPositiveValues>

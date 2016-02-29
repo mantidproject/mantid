@@ -7,7 +7,12 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropyNegativeValues : TODO: DESCRIPTION
+/** MaxentEntropyNegativeValues : Class defining the entropy of a 'PosNeg' image
+  (i.e. a set of real numbers). References:
+        1. A. J. Markvardsen, "Polarised neutron diffraction measurements of
+  PrBa2Cu3O6+x and the Bayesian statistical analysis of such data".
+        2. P. F. Smith and M. A. Player, "Deconvolution of bipolar ultrasonic
+  signals using a modified maximum entropy method"
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,12 +37,16 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentEntropyNegativeValues : public MaxentEntropy {
 public:
+  // Constructor
   MaxentEntropyNegativeValues() = default;
+  // Destructor
   virtual ~MaxentEntropyNegativeValues() = default;
-
-  double getDerivative(double x) override;
-  double getSecondDerivative(double x) override;
-  double correctValue(double x, double y) override;
+  // First derivative
+  double getDerivative(double value) override;
+  // Second derivative
+  double getSecondDerivative(double value) override;
+  // Correct negative values
+  double correctValue(double value, double newValue) override;
 };
 
 // Helper typedef for scoped pointer of this type.

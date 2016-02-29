@@ -161,7 +161,27 @@ public:
         .WillRepeatedly(Return(1.));
     TS_ASSERT_THROWS_NOTHING(maxentData->calculateQuadraticCoefficients());
 
-    // TODO: test angle, quadratic coefficients...
+    auto coeff = maxentData->getQuadraticCoefficients();
+    double angle = maxentData->getAngle();
+    double chisq = maxentData->getChisq();
+
+    TS_ASSERT_DELTA(angle, 0.5, 1E-6);
+    TS_ASSERT_DELTA(chisq, 50, 1E-6);
+    // s1, c1
+    TS_ASSERT_DELTA(coeff.s1[0][0], 1, 1E-6);
+    TS_ASSERT_DELTA(coeff.s1[1][0], 2, 1E-6);
+    TS_ASSERT_DELTA(coeff.c1[0][0], 4, 1E-6);
+    TS_ASSERT_DELTA(coeff.c1[1][0], 2, 1E-6);
+    // s2
+    TS_ASSERT_DELTA(coeff.s2[0][0], -10, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[1][0], -5, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[0][1], -5, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[1][1], -10, 1E-6);
+    // c2
+    TS_ASSERT_DELTA(coeff.c2[0][0], 2, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[1][0], 1, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[0][1], 1, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[1][1], 1, 1E-6);
   }
 };
 
