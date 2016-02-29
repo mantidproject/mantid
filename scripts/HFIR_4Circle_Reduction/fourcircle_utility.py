@@ -222,8 +222,13 @@ def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
     :param pt_number:
     :return:
     """
+    # check
     assert isinstance(instrument_name, str)
-    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
+    assert isinstance(exp_number, int), 'Experiment number must be an int but not %s.' % str(type(exp_number))
+    assert isinstance(scan_number, int), 'Scan number must be an int but not %s.' % str(type(scan_number))
+    assert isinstance(pt_number, int), 'Pt number must be an int but not %s.' % str(type(pt_number))
+
+    # get name
     xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
                                                     scan_number, pt_number)
 

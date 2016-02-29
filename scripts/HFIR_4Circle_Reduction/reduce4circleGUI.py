@@ -13,7 +13,12 @@ import random
 import numpy
 
 from PyQt4 import QtCore, QtGui
-from mantidqtpython import MantidQt
+try:
+    from mantidqtpython import MantidQt
+except ImportError as e:
+    NO_SCROLL = True
+else:
+    NO_SCROLL = False
 
 import reduce4circleControl as r4c
 import guiutility as gutil
@@ -45,8 +50,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         # Make UI scrollable
-        self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
-        self._scrollbars.setEnabled(True) # Must follow after setupUi(self)!
+        if NO_SCROLL is False:
+            self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
+            self._scrollbars.setEnabled(True) # Must follow after setupUi(self)!
 
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
@@ -311,13 +317,14 @@ class MainWindow(QtGui.QMainWindow):
             # merge scan and find peak
             if not self._myControl.has_merged_data(exp_number, scan_number):
                 # merge all Pts. in scan if necessary
-                pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+                stauts, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+                assert status
                 self._myControl.merge_pts_in_scan(exp_number, scan_number, pt_number_list,
                                                   'q-sample')
             # find peak
             self._myControl.find_peak(exp_number, scan_number)
         scan_peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        weighted_peak_center = scan_peak_info.getPeakCentre()
+        weighted_peak_center = scan_peak_info.get_peak_centre()
 
         # get peak radius
         status, peak_radius = gutil.parse_float_editors(self.ui.lineEdit_peakRadius)
@@ -1373,50 +1380,62 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_apply_setup(self):
         """
-        Apply set up ...
+        Purpose:
+         - Apply the setup to controller.
+        Requirements:
+         - data directory, working directory must be given; but not necessarily correct
+         - URL must be given; but not necessary to be correct
         :return:
         """
-        # Local data directory
-        local_data_dir = str(self.ui.lineEdit_localSpiceDir.text())
-        if os.path.exists(local_data_dir) is False:
+        # get data directory, working directory and data server URL from GUI
+        local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
+        working_dir = str(self.ui.lineEdit_workDir.text()).strip()
+        data_server = str(self.ui.lineEdit_url.text()).strip()
+
+        # set to my controller
+        self._myControl.set_local_data_dir(local_data_dir)
+        self._myControl.set_working_directory(working_dir)
+        self._myControl.set_server_url(data_server, check_link=False)
+
+        # check
+        error_message = ''
+
+        # local data dir
+        if local_data_dir == '':
+            error_message += 'Local data directory is not specified!\n'
+        elif os.path.exists(local_data_dir) is False:
             try:
                 os.mkdir(local_data_dir)
             except OSError as os_error:
-                self.pop_one_button_dialog('Unable to create local data directory %s due to %s.' % (
-                    local_data_dir, str(os_error)))
+                error_message += 'Unable to create local data directory %s due to %s.\n' % (
+                    local_data_dir, str(os_error))
                 self.ui.lineEdit_localSpiceDir.setStyleSheet("color: red;")
-                return
             else:
-                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: black;")
-        # END-IF
+                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
+        else:
+            self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
+        # END-IF-ELSE
 
-        # Working directory
-        working_dir = str(self.ui.lineEdit_workDir.text())
-        if os.path.exists(working_dir) is False:
+        # working directory
+        if working_dir == '':
+            error_message += 'Working directory is not specified!\n'
+        elif os.path.exists(working_dir) is False:
             try:
                 os.mkdir(working_dir)
+                self.ui.lineEdit_workDir.setStyleSheet("color: green;")
             except OSError as os_error:
-                self.pop_one_button_dialog('Unable to create working directory %s due to %s.' % (
-                    working_dir, str(os_error)))
+                error_message += 'Unable to create working directory %s due to %s.\n' % (
+                    working_dir, str(os_error))
                 self.ui.lineEdit_workDir.setStyleSheet("color: red;")
-                return
-            else:
-                self.ui.lineEdit_workDir.setStyleSheet("color: black;")
-        # END-IF
-
-        # Server URL
-        data_server = str(self.ui.lineEdit_url.text())
-        url_is_good = self.do_test_url()
-        if url_is_good is False:
-            self.ui.lineEdit_url.setStyleSheet("color: red;")
-            return
         else:
-            self.ui.lineEdit_url.setStyleSheet("color: black;")
+            self.ui.lineEdit_workDir.setStyleSheet("color: green;")
+        # END-IF-ELSE
 
-        # Set to control
-        self._myControl.set_local_data_dir(local_data_dir)
-        self._myControl.set_working_directory(working_dir)
-        self._myControl.set_server_url(data_server)
+        # Set the URL red as it is better not check at this stage. Leave it to user
+        self.ui.lineEdit_url.setStyleSheet("color: black;")
+
+        if len(error_message) > 0:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -1518,8 +1537,10 @@ class MainWindow(QtGui.QMainWindow):
         url_is_good, err_msg = fcutil.check_url(url)
         if url_is_good is True:
             self.pop_one_button_dialog("URL %s is valid." % url)
+            self.ui.lineEdit_url.setStyleSheet("color: green;")
         else:
             self.pop_one_button_dialog(err_msg)
+            self.ui.lineEdit_url.setStyleSheet("color: read;")
 
         return url_is_good
 
@@ -1717,7 +1738,6 @@ class MainWindow(QtGui.QMainWindow):
         # Experiment
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
         save_dict['lineEdit_scanNumber'] = self.ui.lineEdit_scanNumber.text()
-        save_dict['lineEdit_ptNumber'] = str(self.ui.lineEdit_ptNumber.text())
 
         # Lattice
         save_dict['lineEdit_a'] = str(self.ui.lineEdit_a.text())
@@ -1734,7 +1754,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # Save to csv file
         if filename is None:
-            filename = 'session_backup.csv'
+            # default
+            save_dir = os.path.expanduser('~/.mantid/')
+            if os.path.exists(save_dir) is False:
+                os.mkdir(save_dir)
+            filename = os.path.join(save_dir, 'session_backup.csv')
+        # END-IF
+
         ofile = open(filename, 'w')
         writer = csv.writer(ofile)
         for key, value in save_dict.items():
@@ -1751,12 +1777,13 @@ class MainWindow(QtGui.QMainWindow):
         """
         if filename is None:
             filename = 'session_backup.csv'
+            filename = os.path.join(os.path.expanduser('~/.mantid/'), filename)
 
         in_file = open(filename, 'r')
         reader = csv.reader(in_file)
         my_dict = dict(x for x in reader)
 
-        # ...
+        # set the data from saved file
         for key, value in my_dict.items():
             if key.startswith('lineEdit') is True:
                 self.ui.__getattribute__(key).setText(value)
@@ -1768,8 +1795,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog('Error! Widget name %s is not supported' % key)
         # END-FOR
 
-        # ...
+        # set the experiment
         self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
+        self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
+        self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
         return
 

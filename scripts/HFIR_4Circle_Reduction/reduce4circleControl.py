@@ -978,7 +978,7 @@ class CWSCDReductionControl(object):
         if exp_no is None:
             exp_no = self._expNumber
         assert isinstance(exp_no, int) and isinstance(scan_no, int)
-        assert isinstance(pt_num_list, list)
+        assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
         assert isinstance(target_frame, str)
 
         # Get list of Pt.
@@ -999,7 +999,7 @@ class CWSCDReductionControl(object):
         for pt in pt_num_list:
             # Download file
             try:
-                self.download_spice_xml_file(scan_no, pt, overwrite=False)
+                self.download_spice_xml_file(scan_no, pt, exp_no=exp_no, overwrite=False)
             except RuntimeError as e:
                 err_msg += 'Unable to download xml file for pt %d due to %s\n' % (pt, str(e))
                 continue
@@ -1056,7 +1056,7 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def set_server_url(self, server_url):
+    def set_server_url(self, server_url, check_link=True):
         """
         Set URL for server to download the data
         :param server_url:
@@ -1068,22 +1068,25 @@ class CWSCDReductionControl(object):
             self._myServerURL += '/'
 
         # Test URL valid or not
-        is_url_good = False
-        error_message = None
-        try:
-            result = urllib2.urlopen(self._myServerURL)
-        except urllib2.HTTPError, err:
-            error_message = str(err.code)
-        except urllib2.URLError, err:
-            error_message = str(err.args)
-        else:
-            is_url_good = True
-            result.close()
+        if check_link:
+            is_url_good = False
+            error_message = None
+            try:
+                result = urllib2.urlopen(self._myServerURL)
+            except urllib2.HTTPError, err:
+                error_message = str(err.code)
+            except urllib2.URLError, err:
+                error_message = str(err.args)
+            else:
+                is_url_good = True
+                result.close()
 
-        if error_message is None:
-            error_message = ''
+            if error_message is None:
+                error_message = ''
+            else:
+                error_message = 'Unable to open data server URL: %s due to %s.' % (server_url, error_message)
         else:
-            error_message = 'Unable to open data server URL: %s due to %s.' % (server_url, error_message)
+            is_url_good = True, error_message = ''
 
         return is_url_good, error_message
 
