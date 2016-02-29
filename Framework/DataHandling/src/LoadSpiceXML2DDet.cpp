@@ -222,6 +222,10 @@ void LoadSpiceXML2DDet::init() {
 
   declareProperty("PtNumber", 0,
                   "Pt. value for the row to get sample log from. ");
+
+  declareProperty("ShiftedDetectorDistance", 0.,
+                  "Amount of shift of the distance between source and detector centre."
+                  "It is used to apply instrument calibration.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -284,6 +288,14 @@ void LoadSpiceXML2DDet::exec() {
       g_log.warning("No 2theta is set up for loading instrument.");
     }
   }
+
+  // set up Sample-detetor distance calibration
+  Kernel::DateAndTime anytime(1000);
+  double sampledetdistance = 0.;
+  TimeSeriesProperty<double> *distproperty =
+      new TimeSeriesProperty<double>("diffr");
+  distproperty->addValue(anytime, sampledetdistance);
+  outws->mutableRun().addProperty(distproperty);
 
   if (loadinstrument) {
     loadInstrument(outws, idffilename);
@@ -553,10 +565,12 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
 
   bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {
+    // loop over the table workspace to find the row of the spcified pt number
     int localpt = spicetablews->cell<int>(ir, 0);
     if (localpt != ptnumber)
       continue;
 
+    // set the properties to matrix workspace including all columns
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
       std::string &logname = colnames[ic];

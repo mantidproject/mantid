@@ -361,6 +361,10 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /**
+   * @brief test_LoadHB3AXMLInstrumentNoTable
+   */
   void test_LoadHB3AXMLInstrumentNoTable() {
     // Test 2theta = 15 degree
     LoadSpiceXML2DDet loader;
@@ -436,6 +440,46 @@ public:
         detmid_sample.angle(sample_source) * 180. / 3.1415926;
     TS_ASSERT_DELTA(twotheta_middle, 42.70975, 0.02);
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test of loading HB3A data with calibrated distance
+   * @brief test_loadHB3ACalibratedDetDistance
+   */
+  void test_loadHB3ACalibratedDetDistance()
+  {
+    // Test 2theta = 15 degree
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", true);
+    // shift detector distance from 0.3518 to 0.3350
+    loader.setProperty("ShiftedDetectorDistance", 0.0);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    // Value
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+
+    // Instrument
+    TS_ASSERT(outws->getInstrument());
+  }
+
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_ */
