@@ -23,7 +23,6 @@ class DLLExport PeakColumn : public Mantid::API::Column {
 public:
   /// Construct a column with a reference to the peaks list, a name & type
   PeakColumn(std::vector<Peak> &peaks, const std::string &name);
-  ~PeakColumn() override;
 
   /// Number of individual elements in the column.
   size_t size() const override { return m_peaks.size(); }

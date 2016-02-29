@@ -42,9 +42,9 @@ const std::string Comment::summary() const {
 /** Initialize the algorithm's properties.
  */
 void Comment::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "An InOut workspace that will store the new history comment");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "An InOut workspace that will store the new history comment");
 
   declareProperty("Text", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),

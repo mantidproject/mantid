@@ -54,10 +54,10 @@ const std::string CalculateResolution::summary() const {
 /** Initialize the algorithm's properties.
 */
 void CalculateResolution::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to calculate the instrument resolution of.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to calculate the instrument resolution of.");
 
   declareProperty("TwoTheta", Mantid::EMPTY_DBL(),
                   "Two theta scattering angle in degrees.");

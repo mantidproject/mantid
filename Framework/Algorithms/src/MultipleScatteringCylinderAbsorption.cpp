@@ -88,10 +88,10 @@ void MultipleScatteringCylinderAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 

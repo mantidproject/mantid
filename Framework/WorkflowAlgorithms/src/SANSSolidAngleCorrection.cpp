@@ -26,42 +26,36 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
-/// Returns the angle between the projection of the sample-to-pixel vector on
-/// the plane defined by the beam (Z) axis and the Y-axis.
+/// Returns the angle between the sample-to-pixel vector and its
+/// projection on the X-Z plane.
 static double getYTubeAngle(IDetector_const_sptr det,
                             MatrixWorkspace_const_sptr workspace) {
-  Geometry::IComponent_const_sptr source =
-      workspace->getInstrument()->getSource();
+
+  // Get the sample position
   Geometry::IComponent_const_sptr sample =
       workspace->getInstrument()->getSample();
-  if (source == nullptr || sample == nullptr) {
-    throw std::invalid_argument("Instrument not sufficiently defined: failed "
-                                "to get source and/or sample");
-  }
+  const V3D samplePos = sample->getPos();
 
-  const Kernel::V3D samplePos = sample->getPos();
-  const Kernel::V3D beamLine = samplePos - source->getPos();
-
-  if (beamLine.nullVector()) {
-    throw std::invalid_argument("Source and sample are at same position!");
-  }
-
+  // Get the vector from the sample position to the detector pixel
   V3D sampleDetVec = det->getPos() - samplePos;
 
-  // We are only interested in the component long the detector tubes
-  sampleDetVec.setX(0.0);
+  // Get the projection of that vector on the X-Z plane
+  V3D inPlane = V3D(sampleDetVec);
+  inPlane.setY(0.0);
 
-  return sampleDetVec.angle(beamLine);
+  // This is the angle between the sample-to-detector vector
+  // and its project on the X-Z plane.
+  return sampleDetVec.angle(inPlane);
 }
 
 void SANSSolidAngleCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
   declareProperty("DetectorTubes", false, "If true, the algorithm will assume "
                                           "that the detectors are tubes in the "
                                           "Y direction.");
@@ -85,9 +79,9 @@ void SANSSolidAngleCorrection::exec() {
 
   // If the solid angle algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("SolidAngleAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("SolidAngleAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("SolidAngleAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");

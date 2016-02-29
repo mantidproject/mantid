@@ -38,9 +38,9 @@ const std::string ZERO("zero");
 const std::string SQRT("sqrt");
 
 void SetUncertainties::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
   std::vector<std::string> errorTypes;
   errorTypes.push_back(ZERO);

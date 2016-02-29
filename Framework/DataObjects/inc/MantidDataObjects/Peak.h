@@ -47,7 +47,6 @@ public:
   // Construct a peak from a reference to the interface
 
   explicit Peak(const Geometry::IPeak &ipeak);
-  ~Peak() override;
 
   void setDetectorID(int id) override;
   int getDetectorID() const override;

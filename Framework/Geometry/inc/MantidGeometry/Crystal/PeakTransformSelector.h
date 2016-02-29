@@ -15,8 +15,6 @@ class DLLExport PeakTransformSelector {
 public:
   /// Constructor
   PeakTransformSelector();
-  /// Destructor
-  ~PeakTransformSelector();
   /// Register a candidate factory
   void registerCandidate(PeakTransformFactory_sptr candidate);
   /// Make choice

@@ -52,45 +52,45 @@ void CreateTransmissionWorkspaceAuto::init() {
                   boost::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Second transmission run workspace in TOF.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output transmission workspace in wavelength.");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
       "SecondTransmission run is provided.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together");
 
   declareProperty(
-      new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(),
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
+                                             Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
 
   auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
   boundedIndex->setLower(0);
 
-  declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
-                                             Mantid::EMPTY_INT(), boundedIndex),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex),
                   "I0 monitor index");
 
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern on workspace indexes to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 

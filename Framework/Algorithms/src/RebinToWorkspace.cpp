@@ -18,14 +18,15 @@ DECLARE_ALGORITHM(RebinToWorkspace)
  */
 void RebinToWorkspace::init() {
   //  using namespace Mantid::DataObjects;
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "WorkspaceToRebin", "", Kernel::Direction::Input),
+                  "The workspace on which to perform the algorithm");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "WorkspaceToMatch", "", Kernel::Direction::Input),
+                  "The workspace to match the bin boundaries against");
   declareProperty(
-      new WorkspaceProperty<>("WorkspaceToRebin", "", Kernel::Direction::Input),
-      "The workspace on which to perform the algorithm");
-  declareProperty(
-      new WorkspaceProperty<>("WorkspaceToMatch", "", Kernel::Direction::Input),
-      "The workspace to match the bin boundaries against");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                               Kernel::Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "

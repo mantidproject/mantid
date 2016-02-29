@@ -13,16 +13,6 @@ namespace Functions {
 using namespace CurveFitting;
 DECLARE_FUNCTION(FlatBackground)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FlatBackground::FlatBackground() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FlatBackground::~FlatBackground() {}
-
 /// Name of the function
 std::string FlatBackground::name() const { return "FlatBackground"; }
 

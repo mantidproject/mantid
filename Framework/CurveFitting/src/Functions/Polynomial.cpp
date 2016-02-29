@@ -22,11 +22,6 @@ DECLARE_FUNCTION(Polynomial)
 Polynomial::Polynomial() : m_n(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Polynomial::~Polynomial() {}
-
-//----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial
  */
 void Polynomial::function1D(double *out, const double *xValues,

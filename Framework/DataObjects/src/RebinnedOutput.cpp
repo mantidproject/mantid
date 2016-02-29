@@ -13,13 +13,6 @@ Kernel::Logger g_log("RebinnedOutput");
 
 DECLARE_WORKSPACE(RebinnedOutput)
 
-RebinnedOutput::RebinnedOutput() : Workspace2D() {}
-
-RebinnedOutput::RebinnedOutput(const RebinnedOutput &other)
-    : Workspace2D(other), fracArea(other.fracArea) {}
-
-RebinnedOutput::~RebinnedOutput() {}
-
 /**
  * Gets the name of the workspace type.
  * @return Standard string name

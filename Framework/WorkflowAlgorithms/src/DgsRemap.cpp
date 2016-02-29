@@ -39,24 +39,24 @@ const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }
  */
 void DgsRemap::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace to mask and group.");
-  this->declareProperty(new WorkspaceProperty<>("MaskWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A workspace containing masking information.");
-  this->declareProperty(new WorkspaceProperty<>("GroupingWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A workspace containing grouping information");
   this->declareProperty(
-      new FileProperty("OldGroupingFile", "", FileProperty::OptionalLoad),
-      "Name of an old grouping format (not XML) file.");
+      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "A workspace containing masking information.");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>(
+          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A workspace containing grouping information");
+  this->declareProperty(make_unique<FileProperty>("OldGroupingFile", "",
+                                                  FileProperty::OptionalLoad),
+                        "Name of an old grouping format (not XML) file.");
   this->declareProperty("ExecuteOppositeOrder", false,
                         "Execute grouping before masking.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The resulting workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The resulting workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

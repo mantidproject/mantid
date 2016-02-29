@@ -6,6 +6,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
+#include <mutex>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -23,7 +24,7 @@ private:
 
   int notificationFlag; // A flag to help with testing notifications
   std::vector<int> vector;
-  Mutex m_vectorMutex;
+  std::mutex m_vectorMutex;
 
 public:
   static DataServiceTest *createSuite() { return new DataServiceTest(); }
@@ -39,7 +40,7 @@ public:
   // Handler for an observer, called each time an object is added
   void handleAddNotification(
       const Poco::AutoPtr<FakeDataService::AddNotification> &) {
-    Poco::ScopedLock<Mutex> _lock(m_vectorMutex);
+    std::lock_guard<std::mutex> _lock(m_vectorMutex);
     vector.push_back(123);
     ++notificationFlag;
   }

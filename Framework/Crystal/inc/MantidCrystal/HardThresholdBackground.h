@@ -38,12 +38,6 @@ public:
   HardThresholdBackground(const double thresholdSignal,
                           const Mantid::API::MDNormalization normalisation);
 
-  /// Copy constructor
-  HardThresholdBackground(const HardThresholdBackground &other);
-
-  /// Assignment operator
-  HardThresholdBackground &operator=(const HardThresholdBackground &other);
-
   /// Overriden isBackground
   bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
@@ -53,9 +47,6 @@ public:
 
   /// Virtual constructor
   HardThresholdBackground *clone() const override;
-
-  /// Destructor
-  ~HardThresholdBackground() override;
 
 private:
   /// Cutoff

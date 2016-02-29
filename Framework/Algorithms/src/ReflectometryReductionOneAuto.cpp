@@ -52,7 +52,7 @@ const std::string ReflectometryReductionOneAuto::summary() const {
 */
 void ReflectometryReductionOneAuto::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or Lambda");
 
@@ -62,7 +62,7 @@ void ReflectometryReductionOneAuto::init() {
       boost::make_shared<StringListValidator>(analysis_modes);
 
   declareProperty(
-      new ArrayProperty<int>("RegionOfDirectBeam", Direction::Input),
+      make_unique<ArrayProperty<int>>("RegionOfDirectBeam", Direction::Input),
       "Indices of the spectra a pair (lower, upper) that mark the ranges that "
       "correspond to the direct beam in multi-detector mode.");
 
@@ -70,25 +70,25 @@ void ReflectometryReductionOneAuto::init() {
                   "Analysis Mode to Choose", Direction::Input);
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
       "First transmission run workspace in TOF or Wavelength");
 
   auto tof_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, tof_validator),
                   "Second transmission run workspace in TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output workspace in wavelength q");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceWavelength", "", Direction::Output),
                   "Output workspace in wavelength");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
@@ -103,11 +103,11 @@ void ReflectometryReductionOneAuto::init() {
   auto index_bounds = boost::make_shared<BoundedValidator<int>>();
   index_bounds->setLower(0);
 
-  declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
-                                             Mantid::EMPTY_INT(), index_bounds),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), index_bounds),
                   "I0 monitor workspace index");
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of workspace indices to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
@@ -127,13 +127,13 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                   "Monitor integral max in angstroms", Direction::Input);
 
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
@@ -158,16 +158,16 @@ void ReflectometryReductionOneAuto::init() {
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
-  declareProperty(new ArrayProperty<double>("Polynomial"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
       "C0 value to be passed to the ExponentialCorrection algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
@@ -175,15 +175,16 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   // Polarization correction inputs --------------
   std::vector<std::string> propOptions;
@@ -197,18 +198,22 @@ void ReflectometryReductionOneAuto::init() {
                   "None: No correction\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA");
-  declareProperty(new ArrayProperty<double>(cppLabel(), Direction::Input),
-                  "Effective polarizing power of the polarizing system. "
-                  "Expressed as a ratio 0 < Pp < 1");
-  declareProperty(new ArrayProperty<double>(cApLabel(), Direction::Input),
-                  "Effective polarizing power of the analyzing system. "
-                  "Expressed as a ratio 0 < Ap < 1");
-  declareProperty(new ArrayProperty<double>(crhoLabel(), Direction::Input),
-                  "Ratio of efficiencies of polarizer spin-down to polarizer "
-                  "spin-up. This is characteristic of the polarizer flipper. "
-                  "Values are constants for each term in a polynomial "
-                  "expression.");
-  declareProperty(new ArrayProperty<double>(cAlphaLabel(), Direction::Input),
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cppLabel(), Direction::Input),
+      "Effective polarizing power of the polarizing system. "
+      "Expressed as a ratio 0 < Pp < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cApLabel(), Direction::Input),
+      "Effective polarizing power of the analyzing system. "
+      "Expressed as a ratio 0 < Ap < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(crhoLabel(), Direction::Input),
+      "Ratio of efficiencies of polarizer spin-down to polarizer "
+      "spin-up. This is characteristic of the polarizer flipper. "
+      "Values are constants for each term in a polynomial "
+      "expression.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(cAlphaLabel(),
+                                                             Direction::Input),
                   "Ratio of efficiencies of analyzer spin-down to analyzer "
                   "spin-up. This is characteristic of the analyzer flipper. "
                   "Values are factors for each term in a polynomial "
@@ -218,19 +223,22 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup(cApLabel(), "Polarization Corrections");
   setPropertyGroup(crhoLabel(), "Polarization Corrections");
   setPropertyGroup(cAlphaLabel(), "Polarization Corrections");
-  setPropertySettings(cppLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(cApLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(crhoLabel(), new Kernel::EnabledWhenProperty(
-                                       "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                       noPolarizationCorrectionMode()));
-  setPropertySettings(
-      cAlphaLabel(),
-      new Kernel::EnabledWhenProperty("PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
+  setPropertySettings(cppLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cApLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(crhoLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cAlphaLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
 }
 
 //----------------------------------------------------------------------------------------------

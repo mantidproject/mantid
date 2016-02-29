@@ -57,7 +57,6 @@ public:
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();
-  ~RectangularDetectorPixel() override;
 
   const Kernel::V3D getRelativePos() const override;
 

@@ -19,44 +19,47 @@ DECLARE_ALGORITHM(Stitch1DMany)
 void Stitch1DMany::init() {
 
   declareProperty(
-      new ArrayProperty<std::string>("InputWorkspaces", Direction::Input),
+      make_unique<ArrayProperty<std::string>>("InputWorkspaces",
+                                              Direction::Input),
       "Input Workspaces. List of histogram workspaces to stitch together.");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output stitched workspace.");
 
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>(true),
                       Direction::Input),
                   "Rebinning Parameters. See Rebin for format.");
 
-  declareProperty(new ArrayProperty<double>("StartOverlaps", Direction::Input),
-                  "Start overlaps for stitched workspaces.");
-
-  declareProperty(new ArrayProperty<double>("EndOverlaps", Direction::Input),
-                  "End overlaps for stitched workspaces.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
+      "Start overlaps for stitched workspaces.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ScaleRHSWorkspace", true, Direction::Input),
-      "Scaling either with respect to workspace 1 or workspace 2");
+      make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
+      "End overlaps for stitched workspaces.");
 
-  declareProperty(new PropertyWithValue<bool>("UseManualScaleFactor", false,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
+                                                       true, Direction::Input),
+                  "Scaling either with respect to workspace 1 or workspace 2");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
+                                                       false, Direction::Input),
                   "True to use a provided value for the scale factor.");
 
   auto manualScaleFactorValidator =
       boost::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
-  declareProperty(new PropertyWithValue<double>("ManualScaleFactor", 1.0,
-                                                manualScaleFactorValidator,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ManualScaleFactor", 1.0, manualScaleFactorValidator,
+                      Direction::Input),
                   "Provided value for the scale factor.");
 
   declareProperty(
-      new ArrayProperty<double>("OutScaleFactors", Direction::Output),
-      "The actual used values for the scaling factores at each stitch step.");
+      make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),
+      "The actual used values for the scaling factors at each stitch step.");
 }
 
 /** Load and validate the algorithm's properties.

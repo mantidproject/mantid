@@ -24,7 +24,7 @@ public:
   IEventList() {}
 
   /// Constructor
-  IEventList(specid_t specNo) : ISpectrum(specNo) {}
+  IEventList(specnum_t specNo) : ISpectrum(specNo) {}
 
   /// Return the current event type for the list
   virtual Mantid::API::EventType getEventType() const = 0;

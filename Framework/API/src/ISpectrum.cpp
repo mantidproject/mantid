@@ -13,15 +13,8 @@ ISpectrum::ISpectrum()
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
-ISpectrum::ISpectrum(const specid_t specNo)
+ISpectrum::ISpectrum(const specnum_t specNo)
     : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Copy constructor
- */
-ISpectrum::ISpectrum(const ISpectrum &other)
-    : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs),
-      refX(other.refX), refDx(other.refDx), m_hasDx(other.m_hasDx) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
@@ -34,10 +27,6 @@ void ISpectrum::copyInfoFrom(const ISpectrum &other) {
   detectorIDs = other.detectorIDs;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ISpectrum::~ISpectrum() {}
 /**
  * Return the min/max X values for this spectrum.
  * @returns A pair where the first is the minimum X value
@@ -212,11 +201,11 @@ std::set<detid_t> &ISpectrum::getDetectorIDs() { return this->detectorIDs; }
 
 // ---------------------------------------------------------
 /// @return the spectrum number of this spectrum
-specid_t ISpectrum::getSpectrumNo() const { return m_specNo; }
+specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
 /** Sets the the spectrum number of this spectrum
  * @param num :: the spectrum number of this spectrum */
-void ISpectrum::setSpectrumNo(specid_t num) { m_specNo = num; }
+void ISpectrum::setSpectrumNo(specnum_t num) { m_specNo = num; }
 
 // ---------------------------------------------------------
 /** Lock access to the data so that it does not get deleted while reading.

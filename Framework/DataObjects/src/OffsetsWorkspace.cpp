@@ -11,11 +11,6 @@ namespace DataObjects {
 DECLARE_WORKSPACE(OffsetsWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-OffsetsWorkspace::OffsetsWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace
@@ -23,11 +18,6 @@ OffsetsWorkspace::OffsetsWorkspace() {}
  */
 OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-OffsetsWorkspace::~OffsetsWorkspace() {}
 
 } // namespace Mantid
 } // namespace DataObjects

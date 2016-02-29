@@ -88,8 +88,6 @@ public:
   ScriptRepositoryImpl(const std::string &local_repository = std::string(),
                        const std::string &remote_url = std::string());
 
-  ~ScriptRepositoryImpl() throw() override;
-
   void connect(const std::string &server) override;
 
   void install(const std::string &local_path) override;

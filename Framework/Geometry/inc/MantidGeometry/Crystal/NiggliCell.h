@@ -37,8 +37,6 @@ class MANTID_GEOMETRY_DLL NiggliCell : public UnitCell {
 public:
   // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
   NiggliCell(const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
-  // Copy constructor
-  NiggliCell(const NiggliCell &other);
   // a,b,c constructor
   NiggliCell(const double _a, const double _b, const double _c,
              const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
@@ -50,12 +48,6 @@ public:
   // UnitCell constructor
   NiggliCell(const UnitCell &uc,
              const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
-  // UnitCell constructor
-  NiggliCell(const UnitCell *uc,
-             const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
-  // Destructor
-  ~NiggliCell() override;
-
   // Access private variables
   /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
   static bool HasNiggliAngles(const Kernel::V3D &a_dir,

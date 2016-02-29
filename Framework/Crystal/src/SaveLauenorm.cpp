@@ -39,11 +39,11 @@ SaveLauenorm::~SaveLauenorm() {}
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
       "Select the directory and base name for the output files.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

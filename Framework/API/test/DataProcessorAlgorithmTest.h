@@ -118,9 +118,9 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
     }
 
     void init() {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
       declareProperty("RecordHistory", true, Direction::Input);
     }

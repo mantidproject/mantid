@@ -37,10 +37,6 @@ namespace Kernel {
 class MANTID_KERNEL_DLL MDUnitFactory
     : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
-public:
-  /// Destructor
-  ~MDUnitFactory() override {}
-
 private:
   /// Create the product
   MDUnit *createRaw(const std::string &unitString) const override = 0;

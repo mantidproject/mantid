@@ -107,11 +107,6 @@ ReflectometryTransform::ReflectometryTransform(
 }
 
 /**
- * Destructor
- */
-ReflectometryTransform::~ReflectometryTransform() {}
-
-/**
  * Creates an MD workspace
  * @param a : pointer to the first dimension of the MDWorkspace
   *@param b : pointer to the second dimension of the MDWorkspace
@@ -462,7 +457,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   const size_t nBins = inputWS->blocksize();
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
   addColumnHeadings(vertexes, outputDimensions);

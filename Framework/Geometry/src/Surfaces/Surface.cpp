@@ -54,33 +54,6 @@ Surface::Surface()
 */
 {}
 
-Surface::Surface(const Surface &A)
-    : Name(A.Name)
-/**
-  Copy constructor
-  @param A :: Surface to copy
-*/
-{}
-
-Surface &Surface::operator=(const Surface &A)
-/**
-  Assignment operator
-  @param A :: Surface to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Name = A.Name;
-  }
-  return *this;
-}
-
-Surface::~Surface()
-/**
-  Destructor
-*/
-{}
-
 int Surface::side(const Kernel::V3D &) const
 /// Surface side : throw AbsObjMethod
 {

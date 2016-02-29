@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
-class FastMutex;
 class Logger;
 class NullOutputStream;
 }

@@ -10,7 +10,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 
@@ -102,7 +103,7 @@ protected:
   size_t m_numBins;
 
   /// Interval of chunk
-  specid_t m_spec_min, m_spec_max;
+  specnum_t m_spec_min, m_spec_max;
 
   /// Name of the 'data' field to load (depending on Signal)
   std::string m_dataField;
@@ -114,7 +115,7 @@ protected:
   std::string m_xUnits;
 
   /// Mutex to avoid simultaneous file access
-  Kernel::Mutex m_fileMutex;
+  std::mutex m_fileMutex;
 
   /// Flag for whether or not to assume the data is old SNS raw files;
   bool m_assumeOldFile;

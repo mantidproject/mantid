@@ -124,8 +124,6 @@ public:
   }
 
   // TableColumn();
-  /// Virtual destructor.
-  ~TableColumn() override {}
   /// Number of individual elements in the column.
   size_t size() const override { return m_data.size(); }
   /// Type id of the data in the column
