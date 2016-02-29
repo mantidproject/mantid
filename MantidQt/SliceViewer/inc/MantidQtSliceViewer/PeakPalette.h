@@ -33,9 +33,26 @@ private:
     ColourMapType m_backgroundMap;
     ColourMapType m_foregroundMap;
     typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
-                                                   const int index);
+                                                   const int index) {
+      typename ColourMapType::iterator it = map.find(index);
+      if (it == map.end()) {
+          std::stringstream stream;
+          stream << "Index " << index << " is out of range";
+          throw std::out_of_range(stream.str());
+      }
+      return it;
+    }
+
     typename ColourMapType::const_iterator
-    safeFetchPair(const ColourMapType &map, const int index) const;
+    safeFetchPair(const ColourMapType &map, const int index) const {
+          auto it = map.find(index);
+          if (it == map.end()) {
+              std::stringstream stream;
+              stream << "Index " << index << " is out of range";
+              throw std::out_of_range(stream.str());
+          }
+          return it;
+    }
 };
 
 template <typename C> PeakPalette<C>::PeakPalette() {}
@@ -62,33 +79,6 @@ PeakPalette<C> &PeakPalette<C>::operator=(const PeakPalette<C> &other)
 }
 
 template <typename C> PeakPalette<C>::~PeakPalette() {}
-
-template <typename C>
-typename PeakPalette<C>::ColourMapType::iterator
-PeakPalette<C>::safeFetchPair(typename PeakPalette::ColourMapType &map, const int index)
-{
-    typename ColourMapType::iterator it = map.find(index);
-    if (it == map.end()) {
-        std::stringstream stream;
-        stream << "Index " << index << " is out of range";
-        throw std::out_of_range(stream.str());
-    }
-    return it;
-}
-
-template <typename C>
-typename PeakPalette<C>::ColourMapType::const_iterator
-PeakPalette<C>::safeFetchPair(const typename PeakPalette<C>::ColourMapType &map,
-                              const int index) const
-{
-    auto it = map.find(index);
-    if (it == map.end()) {
-        std::stringstream stream;
-        stream << "Index " << index << " is out of range";
-        throw std::out_of_range(stream.str());
-    }
-    return it;
-}
 
 template <typename C>
 C PeakPalette<C>::foregroundIndexToColour(const int index) const

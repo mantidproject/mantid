@@ -405,10 +405,11 @@ createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
 
 /**
  * Check if a cut with the ellipsoid is possible at all
- * @param m: the ellipsoid matrix
+ * @param directions: the three ellipsoid directions
+ * @param radii: the ellipsoid radii
  * @param originEllipsoid: the origin of the ellipsoid
- * @param zVal: the cut z position
- * @return
+ * @param zPlane: the z plane value
+ * @return true if the a cut exists, else false
  */
 bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
                       const std::vector<double> &radii,

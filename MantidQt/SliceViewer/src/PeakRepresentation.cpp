@@ -10,7 +10,9 @@ namespace SliceViewer
 /**
  * Template method which draws a peaks representation
  * @param painter: a QPainter to draw peak information onto the screen
- * @paran viewInformation: information about the view into which the peak is
+ * @param foregroundColor: the color of the peak markers
+ * @param backgroundColor: the color of the background
+ * @param viewInformation: information about the view into which the peak is
  * drawn
  */
 void PeakRepresentation::draw(QPainter &painter, PeakViewColor &foregroundColor,

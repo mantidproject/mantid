@@ -8,6 +8,21 @@
 using namespace MantidQt::SliceViewer;
 using namespace testing;
 
+
+
+namespace {
+  // Check if the two angles are the same, note that angles which are shifted by 180 degrees
+  // are the same for an ellipsoid, ie one is free to have the major axis point in the
+  // + or - direction
+  bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
+                                            double actualAngle)
+  {
+      return Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle)
+             || Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI)
+             || Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
+  }
+}
+
 class PeakRepresentationEllipsoidExposeProtectedWrapper
     : public PeakRepresentationEllipsoid {
 public:
@@ -94,8 +109,8 @@ public:
     const double expectedAngle = angle;
     TS_ASSERT_DELTA(expectedOpacityAtDistance,
                     drawingInformationEllipse->peakOpacityAtDistance, delta);
-    TSM_ASSERT_DELTA("Should have an angle of 35.", expectedAngle,
-                     drawingInformationEllipse->angle, delta);
+    TSM_ASSERT("Should have an angle of 35.", isAngleEitherValueOr180DegreesRoated(expectedAngle,
+                     drawingInformationEllipse->angle));
   }
 
   void test_getBoundingBox() {

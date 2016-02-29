@@ -26,8 +26,8 @@ Constructor
 
 @param ws : Peaks Workspace (MODEL)
 @param coordinateSystem : Name of coordinate system used
-@param defaultForegroundColour : Default peak foreground colour
-@param defaultBackgroundColour : Default peak background colour
+@param defaultForegroundPeakViewColor : Default peak foreground colour
+@param defaultBackgroundPeakViewColor : Default peak background colour
 @param canAddPeaks : Flag to indicate that peaks can be added. False for no add mode.
 @param parent : parent widget
 */
