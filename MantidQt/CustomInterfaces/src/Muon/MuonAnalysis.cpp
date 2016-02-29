@@ -757,8 +757,15 @@ void MuonAnalysis::runGroupTablePlotButton() {
     return;
   }
 
-  if (getGroupNumberFromRow(m_groupTableRowInFocus) != -1) {
+  int groupNumber = getGroupNumberFromRow(m_groupTableRowInFocus);
+  if (groupNumber != -1) {
     PlotType plotType = parsePlotType(m_uiForm.groupTablePlotChoice);
+
+    // Update the combo box on the home tab
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(groupNumber);
+    m_uiForm.frontPlotFuncs->setCurrentIndex(
+        m_uiForm.groupTablePlotChoice->currentIndex());
+
     plotItem(Group, m_groupTableRowInFocus, plotType);
   }
 }
@@ -855,15 +862,7 @@ void MuonAnalysis::runPairTablePlotButton() {
 /**
  * Pair table vertical lable clicked (slot)
  */
-void MuonAnalysis::pairTableClicked(int row) {
-  m_pairTableRowInFocus = row;
-
-  // if something sensible in row then update front
-  int pNum = getPairNumberFromRow(row);
-  if (pNum >= 0) {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum + numGroups());
-  }
-}
+void MuonAnalysis::pairTableClicked(int row) { m_pairTableRowInFocus = row; }
 
 /**
  * Pair table clicked (slot)
@@ -886,17 +885,7 @@ void MuonAnalysis::groupTableClicked(int row, int column) {
 /**
 * Group table clicked (slot)
 */
-void MuonAnalysis::groupTableClicked(int row) {
-  m_groupTableRowInFocus = row;
-
-  // if something sensible in row then update front
-  int gNum = getGroupNumberFromRow(row);
-  if (gNum >= 0) {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
-    m_uiForm.frontPlotFuncs->setCurrentIndex(
-        m_uiForm.groupTablePlotChoice->currentIndex());
-  }
-}
+void MuonAnalysis::groupTableClicked(int row) { m_groupTableRowInFocus = row; }
 
 /**
 * Group table changed, e.g. if:         (slot)
