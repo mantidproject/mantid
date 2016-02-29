@@ -7,9 +7,12 @@
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -74,8 +77,8 @@ void CalculateMSVesuvio::init() {
   auto inputWSValidator = boost::make_shared<CompositeValidator>();
   inputWSValidator->add<WorkspaceUnitValidator>("TOF");
   inputWSValidator->add<SampleShapeValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, inputWSValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "Input workspace to be corrected, in units of TOF.");
 
   // -- Sample --
@@ -92,10 +95,11 @@ void CalculateMSVesuvio::init() {
 
   auto nonEmptyArray = boost::make_shared<ArrayLengthValidator<double>>();
   nonEmptyArray->setLengthMin(3);
-  declareProperty(new ArrayProperty<double>("AtomicProperties", nonEmptyArray),
-                  "Atomic properties of masses within the sample. "
-                  "The expected format is 3 consecutive values per mass: "
-                  "mass(amu), cross-section (barns) & s.d of Compton profile.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("AtomicProperties", nonEmptyArray),
+      "Atomic properties of masses within the sample. "
+      "The expected format is 3 consecutive values per mass: "
+      "mass(amu), cross-section (barns) & s.d of Compton profile.");
   setPropertyGroup("NoOfMasses", "Sample");
   setPropertyGroup("SampleDensity", "Sample");
   setPropertyGroup("AtomicProperties", "Sample");
@@ -119,11 +123,12 @@ void CalculateMSVesuvio::init() {
   setPropertyGroup("NumEventsPerRun", "Algorithm");
 
   // Outputs
+  declareProperty(make_unique<WorkspaceProperty<>>("TotalScatteringWS", "",
+                                                   Direction::Output),
+                  "Workspace to store the calculated total scattering counts");
   declareProperty(
-      new WorkspaceProperty<>("TotalScatteringWS", "", Direction::Output),
-      "Workspace to store the calculated total scattering counts");
-  declareProperty(
-      new WorkspaceProperty<>("MultipleScatteringWS", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("MultipleScatteringWS", "",
+                                       Direction::Output),
       "Workspace to store the calculated multiple scattering counts summed for "
       "all orders");
 }

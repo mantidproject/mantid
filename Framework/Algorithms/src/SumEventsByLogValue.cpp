@@ -1,10 +1,15 @@
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/Column.h"
+
 #include <numeric>
 
 namespace Mantid {
@@ -25,16 +30,16 @@ SumEventsByLogValue::~SumEventsByLogValue() {}
 
 void SumEventsByLogValue::init() {
   declareProperty(
-      new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "The input EventWorkspace. Must contain 'raw' (unweighted) events");
   declareProperty(
-      new WorkspaceProperty<DataObjects::EventWorkspace>(
+      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "MonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing the monitor counts relating to the input "
       "workspace");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm. The output workspace will be a "
                   "[[TableWorkspace]] in the case that a log holding integer "
@@ -46,8 +51,8 @@ void SumEventsByLogValue::init() {
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
-      new ArrayProperty<double>("OutputBinning", "",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
 }

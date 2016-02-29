@@ -62,10 +62,14 @@ namespace MantidQt
 		{
 		public:
 			ICompAssemblyActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Constructor
-			void getBoundingBox(Mantid::Kernel::V3D& minBound, Mantid::Kernel::V3D& maxBound)const;
+                        void getBoundingBox(
+                            Mantid::Kernel::V3D &minBound,
+                            Mantid::Kernel::V3D &maxBound) const override;
 
-			virtual std::string type()const { return "ICompAssemblyActor"; } ///< Type of the GL object
-			int getNumberOfDetectors() const { return mNumberOfDetectors; }
+                        std::string type() const override {
+                          return "ICompAssemblyActor";
+                        } ///< Type of the GL object
+                        int getNumberOfDetectors() const { return mNumberOfDetectors; }
 
 		protected:
 			int mNumberOfDetectors;

@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/StripPeaks.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,11 +22,11 @@ StripPeaks::StripPeaks() : API::Algorithm(), m_maxChiSq(0.) {}
 
 void StripPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
   min->setLower(1);
@@ -37,7 +40,7 @@ void StripPeaks::init() {
                                        "candidates,\n"
                                        "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(new ArrayProperty<double>("PeakPositions"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");

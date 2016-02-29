@@ -3,7 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -15,7 +18,7 @@ using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveILLCosmosAscii::extraProps() {
-  declareProperty(new ArrayProperty<std::string>("LogList"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");

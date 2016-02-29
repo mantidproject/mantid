@@ -46,13 +46,13 @@ public:
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
-  virtual double getParameter(size_t i) const;
+  double getParameter(size_t i) const override;
   /// Set i-th parameter
   /// @param i :: Index of a parameter
   /// @param value :: New value of the parameter
-  virtual void setParameter(size_t i, const double &value);
+  void setParameter(size_t i, const double &value) override;
   /// Number of parameters
-  virtual size_t nParams() const;
+  size_t nParams() const override;
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function,

@@ -56,29 +56,29 @@ class DLLExport FilterEvents : public API::Algorithm {
 
 public:
   FilterEvents();
-  virtual ~FilterEvents();
+  ~FilterEvents() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FilterEvents"; }
+  const std::string name() const override { return "FilterEvents"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Filter events from an EventWorkspace to one or multiple "
            "EventWorkspaces according to a series of splitters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Events\\EventFiltering";
   }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
+  void init() override;
   // Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process user input properties
   void processAlgorithmProperties();
@@ -124,7 +124,7 @@ private:
   /// Flag to use matrix splitters or table splitters
   bool m_useTableSplitters;
 
-  std::set<int> m_workGroupIndexes;
+  std::unordered_set<int> m_workGroupIndexes;
   Kernel::TimeSplitterType m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
   std::vector<std::string> m_wsNames;
@@ -139,9 +139,9 @@ private:
 
   double m_progress;
 
-  void getTimeSeriesLogNames(std::vector<std::string> &lognames);
+  std::vector<std::string> getTimeSeriesLogNames();
 
-  void generateSplitters(int wsindex, Kernel::TimeSplitterType &splitters);
+  Kernel::TimeSplitterType generateSplitters(int wsindex);
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);

@@ -60,11 +60,11 @@ public:
   /// Default constructor
   SumSpectra();
   /// Destructor
-  virtual ~SumSpectra(){};
+  ~SumSpectra() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SumSpectra"; }
+  const std::string name() const override { return "SumSpectra"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The SumSpectra algorithm adds the data values in each time bin "
            "across a range of spectra; the output workspace has a single "
            "spectrum. If the input is an EventWorkspace, the output is also an "
@@ -72,9 +72,9 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping"; }
+  const std::string category() const override { return "Transforms\\Grouping"; }
 
 private:
   /// Handle logic for RebinnedOutput workspaces
@@ -87,14 +87,14 @@ private:
                      size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
                  std::set<int> &indices);
-  specid_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
+  specnum_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
 
   /// The output spectrum id
-  specid_t m_outSpecId;
+  specnum_t m_outSpecId;
   /// The spectrum to start the integration from
   int m_minSpec;
   /// The spectrum to finish the integration at

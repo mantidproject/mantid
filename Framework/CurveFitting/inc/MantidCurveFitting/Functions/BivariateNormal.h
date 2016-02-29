@@ -89,27 +89,28 @@ class DLLExport BivariateNormal : public API::ParamFunction,
 public:
   BivariateNormal();
   /// Destructor
-  virtual ~BivariateNormal();
+  ~BivariateNormal() override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "BivariateNormal"; }
+  std::string name() const override { return "BivariateNormal"; }
 
-  virtual const std::string category() const { return "Peak"; }
+  const std::string category() const override { return "Peak"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
-  size_t nAttributes() const { return (size_t)1; }
+  size_t nAttributes() const override { return (size_t)1; }
 
-  std::vector<std::string> getAttributeNames() const {
+  std::vector<std::string> getAttributeNames() const override {
     std::vector<std::string> V;
     V.emplace_back("CalcVariances");
     return V;
   }
 
-  Attribute getAttribute(const std::string &attName) const {
+  Attribute getAttribute(const std::string &attName) const override {
     if (!hasAttribute(attName))
       throw std::invalid_argument("Not a valid attribute name");
 
@@ -119,7 +120,8 @@ public:
     return Attribute(CalcVariances);
   }
 
-  void setAttribute(const std::string &attName, const Attribute &value) {
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override {
 
     if (!hasAttribute(attName))
       throw std::invalid_argument("Not a valid attribute name");
@@ -137,17 +139,14 @@ public:
     }
   }
 
-  bool hasAttribute(const std::string &attName) const {
-    if (attName == std::string("CalcVariances"))
-      return true;
-
-    return false;
+  bool hasAttribute(const std::string &attName) const override {
+    return attName.compare("CalcVariances") == 0;
   }
 
   bool CalcVxx, CalcVyy, CalcVxy;
 
 protected:
-  void init();
+  void init() override;
 
   int NCells;
 

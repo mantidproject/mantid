@@ -78,25 +78,25 @@ public:
   RemoveLogs();
 
   /// Destructor
-  ~RemoveLogs() {}
+  ~RemoveLogs() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RemoveLogs"; };
+  const std::string name() const override { return "RemoveLogs"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Remove logs from a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 };
 
 } // namespace DataHandling

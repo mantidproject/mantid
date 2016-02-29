@@ -41,11 +41,6 @@ class Expression;
 */
 class MANTID_API_DLL IConstraint : public ParameterReference {
 public:
-  /// Default constructor
-  IConstraint() : ParameterReference() {}
-  /// Virtual destructor
-  virtual ~IConstraint() {}
-
   /// Initialize the constraint from an expression
   virtual void initialize(IFunction *fun, const Expression &expr,
                           bool isDefault = false) = 0;

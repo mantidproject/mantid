@@ -42,29 +42,27 @@ public:
   MDBoxSaveable(API::IMDNode *const);
 
   /// Save the data to the place, specified by the object
-  virtual void save() const;
+  void save() const override;
 
   /// Load the data which are not in memory yet and merge them with the data in
   /// memory;
-  virtual void load();
+  void load() override;
   /// Method to flush the data to disk and ensure it is written.
-  virtual void flushData() const;
+  void flushData() const override;
   /// remove objects data from memory but keep all averages
-  virtual void clearDataFromMemory() { m_MDNode->clearDataFromMemory(); }
+  void clearDataFromMemory() override { m_MDNode->clearDataFromMemory(); }
 
   /// @return the amount of memory that the object takes up in the MRU.
-  virtual uint64_t getTotalDataSize() const {
+  uint64_t getTotalDataSize() const override {
     return m_MDNode->getTotalDataSize();
   }
   /**@return the size of the event vector. ! Note that this is NOT necessarily
   the same as the number of points
   (because it might be cached to disk) or the size on disk (because you might
   have called AddEvents) */
-  virtual size_t getDataMemorySize() const {
+  size_t getDataMemorySize() const override {
     return m_MDNode->getDataInMemorySize();
   }
-
-  ~MDBoxSaveable() {}
 
 private:
   API::IMDNode *const m_MDNode;

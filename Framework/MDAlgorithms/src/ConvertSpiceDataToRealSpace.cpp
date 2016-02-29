@@ -3,18 +3,20 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -45,12 +47,12 @@ ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
-  declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("RunInfoWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "RunInfoWorkspace", "", Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
                   "It serves as parent workspace in the algorithm.");
@@ -84,18 +86,18 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty("DurationLogName", "time",
                   "Name of the sample log to record the duration of each run.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("DetectorEfficiencyTableWorkspace",
-                                            "", Direction::Input,
-                                            PropertyMode::Optional),
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorEfficiencyTableWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "Name of a table workspace containing the detectors' efficiency.");
 }
 
@@ -112,7 +114,7 @@ void ConvertSpiceDataToRealSpace::exec() {
       getProperty("DetectorEfficiencyTableWorkspace");
   std::map<detid_t, double> detEffMap; // map for detector efficiency
   if (detEffTableWS) {
-    parseDetectorEfficiencyTable(detEffTableWS, detEffMap);
+    detEffMap = parseDetectorEfficiencyTable(detEffTableWS);
   }
 
   // Check whether parent workspace has run start: order (1) parent ws, (2) user
@@ -742,14 +744,13 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
 //------------------------------------------------------------------------------------------------
 /** Parse detector efficiency from table workspace to map
  * @brief ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable
- * @param detefftablews
- * @param deteffmap
+ * @param detefftablews :: [input] detector efficiency table workspace
+ * @returns detector efficiency map
  */
-void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
-    DataObjects::TableWorkspace_sptr detefftablews,
-    std::map<detid_t, double> &deteffmap) {
-  // clear map
-  deteffmap.clear();
+std::map<detid_t, double>
+ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
+    DataObjects::TableWorkspace_sptr detefftablews) {
+  std::map<detid_t, double> deteffmap;
 
   // check table workspace
   size_t numcols = detefftablews->columnCount();
@@ -765,7 +766,7 @@ void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
     deteffmap.emplace(detid, deteff);
   }
 
-  return;
+  return deteffmap;
 }
 
 //------------------------------------------------------------------------------------------------

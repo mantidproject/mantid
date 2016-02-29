@@ -4,6 +4,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,8 +35,8 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
   for (size_t d = 0; d < other.getNumDims(); d++) {
     // Copy the dimension
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension(other.getDimension(d).get()));
+    auto dim =
+        boost::make_shared<MDHistoDimension>(other.getDimension(d).get());
     dimensions.push_back(dim);
   }
   this->initGeometry(dimensions);

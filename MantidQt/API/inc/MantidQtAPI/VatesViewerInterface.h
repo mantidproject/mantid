@@ -54,7 +54,7 @@ public:
    */
   VatesViewerInterface(QWidget *parent);
   /// Default destructor.
-  virtual ~VatesViewerInterface();
+  ~VatesViewerInterface() override;
   /**
    * Function to create the source from the given workspace.
    * @param workspaceName the name of the workspace to visualize

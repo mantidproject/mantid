@@ -78,7 +78,7 @@ namespace MantidQt
       void saveSettings() const;
 
       void addButtonsDisab(int row);
-      void closeEvent(QCloseEvent *event);
+      void closeEvent(QCloseEvent *event) override;
       QString saveList(const QList<QListWidgetItem*> & list, const QString & algorithm, QString fileBase, bool toAppend, QHash<QString, QString> workspaceMap);
       QHash<QString, QString> provideZeroFreeWorkspaces(const QListWidget * workspaces);
       void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);

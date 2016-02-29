@@ -83,7 +83,7 @@ ChebyshevPolyFit::ChebyshevPolyFit(const size_t n)
     : m_impl(new ChebyshevPolyFitImpl(n)) {}
 
 /// Destructor
-ChebyshevPolyFit::~ChebyshevPolyFit() {}
+ChebyshevPolyFit::~ChebyshevPolyFit() = default;
 
 /**
  * Find coefficients of polynomial that minimizes the sum

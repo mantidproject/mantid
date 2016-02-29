@@ -45,11 +45,11 @@ DECLARE_ALGORITHM(SpatialGrouping)
 * init() method implemented from Algorithm base class
 */
 void SpatialGrouping::init() {
-  declareProperty(new Mantid::API::WorkspaceProperty<>(
+  declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input),
                   "Name of the input workspace, which is used only as a means "
                   "of retrieving the instrument geometry.");
-  declareProperty(new Mantid::API::FileProperty(
+  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");
@@ -88,7 +88,7 @@ void SpatialGrouping::exec() {
     // The detector
     Mantid::Geometry::IDetector_const_sptr &det = detector.second;
     // The spectrum number of the detector
-    specid_t specNo = detector.first;
+    specnum_t specNo = detector.first;
 
     // We are not interested in Monitors and we don't want them to be included
     // in
@@ -127,7 +127,7 @@ void SpatialGrouping::exec() {
     group.push_back(specNo);
 
     // Add all the nearest neighbors
-    std::map<specid_t, Mantid::Kernel::V3D>::iterator nrsIt;
+    std::map<specnum_t, Mantid::Kernel::V3D>::iterator nrsIt;
     for (nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt) {
       m_included.insert(nrsIt->first);
       group.push_back(nrsIt->first);
@@ -200,20 +200,20 @@ void SpatialGrouping::exec() {
 * @return true if neighbours were found matching the parameters, false otherwise
 */
 bool SpatialGrouping::expandNet(
-    std::map<specid_t, Mantid::Kernel::V3D> &nearest, specid_t spec,
+    std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
     const size_t &noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
   const size_t incoming = nearest.size();
 
   Mantid::Geometry::IDetector_const_sptr det = m_detectors[spec];
 
-  std::map<specid_t, Mantid::Kernel::V3D> potentials;
+  std::map<specnum_t, Mantid::Kernel::V3D> potentials;
 
   // Special case for first run for this detector
   if (incoming == 0) {
     potentials = inputWorkspace->getNeighbours(det.get());
   } else {
     for (auto &nrsIt : nearest) {
-      std::map<specid_t, Mantid::Kernel::V3D> results;
+      std::map<specnum_t, Mantid::Kernel::V3D> results;
       results = inputWorkspace->getNeighbours(m_detectors[nrsIt.first].get());
       for (auto &result : results) {
         potentials[result.first] = result.second;

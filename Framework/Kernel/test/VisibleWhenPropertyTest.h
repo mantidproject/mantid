@@ -20,10 +20,10 @@ public:
 
     // Make a property with its validator. Will be Visible when that other one
     // is NOT the default
-    VisibleWhenProperty *val =
-        new VisibleWhenProperty("MyIntProp", IS_NOT_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
 
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
@@ -38,9 +38,10 @@ public:
     TSM_ASSERT("Becomes visible when another property has been changed",
                prop->getSettings()->isVisible(&alg));
 
-    IPropertySettings *val2 = val->clone();
     alg.declareProperty("MySecondValidatorProp", 456);
-    alg.setPropertySettings("MySecondValidatorProp", val2);
+    alg.setPropertySettings(
+        "MySecondValidatorProp",
+        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
     prop = alg.getPointerToProperty("MySecondValidatorProp");
     TSM_ASSERT("Starts off visible", prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 123);
@@ -53,9 +54,9 @@ public:
     alg.declareProperty("MyIntProp", 123);
     // Make a property with its validator. Will be Visible when that other one
     // is the default
-    VisibleWhenProperty *val = new VisibleWhenProperty("MyIntProp", IS_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings("MyValidatorProp", make_unique<VisibleWhenProperty>(
+                                                   "MyIntProp", IS_DEFAULT));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -69,10 +70,10 @@ public:
   void test_when_IS_EQUAL_TO() {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty *val =
-        new VisibleWhenProperty("MyIntProp", IS_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        make_unique<VisibleWhenProperty>("MyIntProp", IS_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -87,10 +88,10 @@ public:
   void test_when_IS_NOT_EQUAL_TO() {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty *val =
-        new VisibleWhenProperty("MyIntProp", IS_NOT_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)

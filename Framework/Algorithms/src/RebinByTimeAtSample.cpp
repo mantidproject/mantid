@@ -4,7 +4,9 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+
 #include <boost/make_shared.hpp>
+
 #include <algorithm>
 #include <cmath>
 

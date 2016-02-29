@@ -14,6 +14,7 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
+#include <mutex>
 
 namespace MantidTestHelpers {
 
@@ -50,38 +51,39 @@ public:
   BoxControllerDummyIO(const Mantid::API::BoxController *theBC);
 
   ///@return true if the file to write events is opened and false otherwise
-  virtual bool isOpened() const { return (m_isOpened); }
+  bool isOpened() const override { return (m_isOpened); }
   /// get the full file name of the file used for IO operations
-  virtual const std::string &getFileName() const { return m_fileName; }
+  const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
-  size_t getDataChunk() const { return 1; }
+  size_t getDataChunk() const override { return 1; }
 
-  virtual bool openFile(const std::string &fileName, const std::string &mode);
-  virtual void saveBlock(const std::vector<float> & /* DataBlock */,
-                         const uint64_t /*blockPosition*/) const;
-  virtual void saveBlock(const std::vector<double> & /* DataBlock */,
-                         const uint64_t /*blockPosition*/) const {
+  bool openFile(const std::string &fileName, const std::string &mode) override;
+  void saveBlock(const std::vector<float> & /* DataBlock */,
+                 const uint64_t /*blockPosition*/) const override;
+  void saveBlock(const std::vector<double> & /* DataBlock */,
+                 const uint64_t /*blockPosition*/) const override {
     throw Mantid::Kernel::Exception::NotImplementedError(
         "Saving double presision events blocks is not supported at the moment");
   }
-  virtual void loadBlock(std::vector<float> & /* Block */,
-                         const uint64_t /*blockPosition*/,
-                         const size_t /*BlockSize*/) const;
-  virtual void loadBlock(std::vector<double> & /* Block */,
-                         const uint64_t /*blockPosition*/,
-                         const size_t /*BlockSize*/) const {
+  void loadBlock(std::vector<float> & /* Block */,
+                 const uint64_t /*blockPosition*/,
+                 const size_t /*BlockSize*/) const override;
+  void loadBlock(std::vector<double> & /* Block */,
+                 const uint64_t /*blockPosition*/,
+                 const size_t /*BlockSize*/) const override {
     throw Mantid::Kernel::Exception::NotImplementedError(
         "Loading double presision events blocks is not supported at the "
         "moment");
   }
-  virtual void flushData() const {};
-  virtual void closeFile() { m_isOpened = false; }
+  void flushData() const override{};
+  void closeFile() override { m_isOpened = false; }
 
-  virtual ~BoxControllerDummyIO();
+  ~BoxControllerDummyIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  virtual void setDataType(const size_t coordSize, const std::string &typeName);
-  virtual void getDataType(size_t &coordSize, std::string &typeName) const;
+  void setDataType(const size_t coordSize,
+                   const std::string &typeName) override;
+  void getDataType(size_t &coordSize, std::string &typeName) const override;
 
   // Auxiliary functions (non-virtual, used at testing)
   int64_t getNDataColums() const { return 2; }
@@ -96,7 +98,7 @@ private:
   /// shared pointer to the box controller, which is repsoponsible for this IO
   const Mantid::API::BoxController *m_bc;
 
-  mutable Mantid::Kernel::Mutex m_fileMutex;
+  mutable std::mutex m_fileMutex;
   /// number of bytes in the event coorinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;

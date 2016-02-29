@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -109,12 +110,12 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(new FunctionProperty("Function"),
+  declareProperty(make_unique<FunctionProperty>("Function"),
                   "Fitting function containing peaks. Must have a covariance "
                   "matrix attached.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>(
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the TableWorkspace with the output values and errors.");
 }

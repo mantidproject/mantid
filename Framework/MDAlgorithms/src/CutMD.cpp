@@ -239,23 +239,28 @@ CutMD::~CutMD() {}
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("Projection", "", Direction::Input,
-                                             PropertyMode::Optional),
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "Projection", "", Direction::Input, PropertyMode::Optional),
       "Projection");
 
-  declareProperty(new ArrayProperty<double>("P1Bin"), "Projection 1 binning.");
-  declareProperty(new ArrayProperty<double>("P2Bin"), "Projection 2 binning.");
-  declareProperty(new ArrayProperty<double>("P3Bin"), "Projection 3 binning.");
-  declareProperty(new ArrayProperty<double>("P4Bin"), "Projection 4 binning.");
-  declareProperty(new ArrayProperty<double>("P5Bin"), "Projection 5 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P1Bin"),
+                  "Projection 1 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P2Bin"),
+                  "Projection 2 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P3Bin"),
+                  "Projection 3 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P4Bin"),
+                  "Projection 4 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P5Bin"),
+                  "Projection 5 binning.");
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output cut workspace");
   declareProperty("NoPix", false, "If False creates a full MDEventWorkspaces "
                                   "as output. True to create an "

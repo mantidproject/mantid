@@ -4,8 +4,10 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -225,11 +227,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
     this->m_detIDs = peak->m_detIDs;
   }
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Peak::~Peak() {}
 
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
@@ -606,7 +603,6 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
 bool Peak::findDetector() {
 
   // Scattered beam direction
-  V3D oldDetPos = detPos;
   V3D beam = detPos - samplePos;
   beam.normalize();
 

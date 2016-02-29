@@ -4,6 +4,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -48,8 +49,8 @@ void GetEi2::init()
   validator->add<InstrumentValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::InOut,
-                              validator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
+                                       validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -147,9 +148,9 @@ void GetEi2::exec() {
  *  @return The calculated incident energy
  */
 double GetEi2::calculateEi(const double initial_guess) {
-  const specid_t monitor1_spec = getProperty("Monitor1Spec");
-  const specid_t monitor2_spec = getProperty("Monitor2Spec");
-  specid_t mon1 = monitor1_spec, mon2 = monitor2_spec;
+  const specnum_t monitor1_spec = getProperty("Monitor1Spec");
+  const specnum_t monitor2_spec = getProperty("Monitor2Spec");
+  specnum_t mon1 = monitor1_spec, mon2 = monitor2_spec;
 
   const ParameterMap &pmap = m_input_ws->constInstrumentParameters();
   Instrument_const_sptr instrument = m_input_ws->getInstrument();
@@ -186,13 +187,13 @@ double GetEi2::calculateEi(const double initial_guess) {
   if (mon1 == EMPTY_INT()) {
     par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon1-spec");
     if (par) {
-      mon1 = boost::lexical_cast<specid_t>(par->asString());
+      mon1 = boost::lexical_cast<specnum_t>(par->asString());
     }
   }
   if (mon2 == EMPTY_INT()) {
     par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon2-spec");
     if (par) {
-      mon2 = boost::lexical_cast<specid_t>(par->asString());
+      mon2 = boost::lexical_cast<specnum_t>(par->asString());
     }
   }
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
@@ -200,12 +201,10 @@ double GetEi2::calculateEi(const double initial_guess) {
         "Could not determine spectrum number to use. Try to set it explicitly");
   }
   // Covert spectrum numbers to workspace indices
-  std::vector<specid_t> spec_nums(2, mon1);
+  std::vector<specnum_t> spec_nums(2, mon1);
   spec_nums[1] = mon2;
-  std::vector<size_t> mon_indices;
-  mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
-  m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);
+  auto mon_indices = m_input_ws->getIndicesFromSpectra(spec_nums);
 
   if (mon_indices.size() != 2) {
     g_log.error() << "Error retrieving monitor spectra from input workspace. "

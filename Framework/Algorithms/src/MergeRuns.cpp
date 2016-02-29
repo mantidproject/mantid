@@ -1,9 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MergeRuns.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -31,14 +35,14 @@ void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
   // moment
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input workspaces as a comma-separated list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
 
@@ -164,7 +168,7 @@ void MergeRuns::buildAdditionTables() {
     table->reserve(nhist);
     for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++) {
       // Get the set of detectors in the output
-      std::set<detid_t> &inDets = ews->getEventList(inWI).getDetectorIDs();
+      auto &inDets = ews->getEventList(inWI).getDetectorIDs();
 
       bool done = false;
 
@@ -173,7 +177,7 @@ void MergeRuns::buildAdditionTables() {
       int outWI = inWI;
       if (outWI < lhs_nhist) // don't go out of bounds
       {
-        std::set<detid_t> &outDets = lhs->getEventList(outWI).getDetectorIDs();
+        auto &outDets = lhs->getEventList(outWI).getDetectorIDs();
 
         // Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
@@ -260,15 +264,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
-  // You need to copy over the data as well.
-  outWS->copyDataFrom((*inputWS));
+  EventWorkspace_sptr outWS(inputWS->clone().release());
 
   int64_t n = m_inEventWS.size() - 1;
   m_progress = new Progress(this, 0.0, 1.0, n);

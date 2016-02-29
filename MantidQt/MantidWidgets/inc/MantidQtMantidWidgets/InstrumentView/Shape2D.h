@@ -164,23 +164,29 @@ namespace MantidQt
 		{
 		public:
 			Shape2DEllipse(const QPointF& center, double radius1, double radius2 = 0);
-			virtual Shape2D* clone()const { return new Shape2DEllipse(*this); }
-			virtual bool selectAt(const QPointF& p)const;
-			virtual bool contains(const QPointF& p)const;
-			virtual void addToPath(QPainterPath& path) const;
-			// double properties
-			virtual QStringList getDoubleNames()const;
-			virtual double getDouble(const QString& prop) const;
-			virtual void setDouble(const QString& prop, double value);
-			// QPointF properties
-			virtual QStringList getPointNames()const { return QStringList("center"); }
-			virtual QPointF getPoint(const QString& prop) const;
-			virtual void setPoint(const QString& prop, const QPointF& value);
+                        Shape2D *clone() const override {
+                          return new Shape2DEllipse(*this);
+                        }
+                        bool selectAt(const QPointF &p) const override;
+                        bool contains(const QPointF &p) const override;
+                        void addToPath(QPainterPath &path) const override;
+                        // double properties
+                        QStringList getDoubleNames() const override;
+                        double getDouble(const QString &prop) const override;
+                        void setDouble(const QString &prop,
+                                       double value) override;
+                        // QPointF properties
+                        QStringList getPointNames() const override {
+                          return QStringList("center");
+                        }
+                        QPointF getPoint(const QString &prop) const override;
+                        void setPoint(const QString &prop,
+                                      const QPointF &value) override;
 
-		protected:
-			virtual void drawShape(QPainter& painter) const;
-			virtual void refit() {}
-		};
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override {}
+                };
 
 		/**
 		* A axis aligned rectangle.
@@ -193,14 +199,19 @@ namespace MantidQt
 			Shape2DRectangle();
 			Shape2DRectangle(const QPointF& p0, const QPointF& p1);
 			Shape2DRectangle(const QPointF& p0, const QSizeF& size);
-			virtual Shape2D* clone()const { return new Shape2DRectangle(*this); }
-			virtual bool selectAt(const QPointF& p)const;
-			virtual bool contains(const QPointF& p)const { return m_boundingRect.contains(p); }
-			virtual void addToPath(QPainterPath& path) const;
-		protected:
-			virtual void drawShape(QPainter& painter) const;
-			virtual void refit() {}
-		};
+                        Shape2D *clone() const override {
+                          return new Shape2DRectangle(*this);
+                        }
+                        bool selectAt(const QPointF &p) const override;
+                        bool contains(const QPointF &p) const override {
+                          return m_boundingRect.contains(p);
+                        }
+                        void addToPath(QPainterPath &path) const override;
+
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override {}
+                };
 
 		/**
 		* A ring: area bounded by two curves of the same shape but different size.
@@ -214,28 +225,38 @@ namespace MantidQt
 		public:
 			Shape2DRing(Shape2D* shape, double xWidth = 0.000001, double yWidth = 0.000001);
 			Shape2DRing(const Shape2DRing& ring);
-			virtual Shape2D* clone()const { return new Shape2DRing(*this); }
-			virtual bool selectAt(const QPointF& p)const;
-			virtual bool contains(const QPointF& p)const;
-			// double properties
-			virtual QStringList getDoubleNames()const;
-			virtual double getDouble(const QString& prop) const;
-			virtual void setDouble(const QString& prop, double value);
-			// QPointF properties
-			virtual QStringList getPointNames()const { return QStringList("center"); }
-			virtual QPointF getPoint(const QString& prop) const;
-			virtual void setPoint(const QString& prop, const QPointF& value);
-			virtual void setColor(const QColor& color);
-			virtual QColor getColor()const { return m_outer_shape->getColor(); }
-		protected:
-			virtual void drawShape(QPainter& painter) const;
-			virtual void addToPath(QPainterPath&) const {}
-			virtual void refit();
-			virtual void resetBoundingRect();
-			virtual size_t getShapeNControlPoints() const { return 4; }
-			virtual QPointF getShapeControlPoint(size_t i) const;
-			virtual void setShapeControlPoint(size_t i, const QPointF& pos);
-			Shape2D* m_outer_shape;
+                        Shape2D *clone() const override {
+                          return new Shape2DRing(*this);
+                        }
+                        bool selectAt(const QPointF &p) const override;
+                        bool contains(const QPointF &p) const override;
+                        // double properties
+                        QStringList getDoubleNames() const override;
+                        double getDouble(const QString &prop) const override;
+                        void setDouble(const QString &prop,
+                                       double value) override;
+                        // QPointF properties
+                        QStringList getPointNames() const override {
+                          return QStringList("center");
+                        }
+                        QPointF getPoint(const QString &prop) const override;
+                        void setPoint(const QString &prop,
+                                      const QPointF &value) override;
+                        void setColor(const QColor &color) override;
+                        QColor getColor() const override {
+                          return m_outer_shape->getColor();
+                        }
+
+                protected:
+                  void drawShape(QPainter &painter) const override;
+                  void addToPath(QPainterPath &) const override {}
+                  void refit() override;
+                  void resetBoundingRect() override;
+                  size_t getShapeNControlPoints() const override { return 4; }
+                  QPointF getShapeControlPoint(size_t i) const override;
+                  void setShapeControlPoint(size_t i,
+                                            const QPointF &pos) override;
+                        Shape2D* m_outer_shape;
 			Shape2D* m_inner_shape;
 			double m_xWidth;
 			double m_yWidth;
@@ -251,17 +272,20 @@ namespace MantidQt
 		{
 		public:
 			explicit Shape2DFree(const QPointF &p);
-			virtual Shape2D* clone()const { return new Shape2DFree(*this); }
-			virtual bool selectAt(const QPointF& p)const;
-			virtual bool contains(const QPointF& p)const;
-			virtual void addToPath(QPainterPath& path) const;
-			void addPolygon(const QPolygonF& polygon);
+                        Shape2D *clone() const override {
+                          return new Shape2DFree(*this);
+                        }
+                        bool selectAt(const QPointF &p) const override;
+                        bool contains(const QPointF &p) const override;
+                        void addToPath(QPainterPath &path) const override;
+                        void addPolygon(const QPolygonF& polygon);
 			void subtractPolygon(const QPolygonF& polygon);
 		protected:
-			virtual void drawShape(QPainter& painter) const;
-			virtual void refit();
-			virtual void resetBoundingRect();
-		private:
+                  void drawShape(QPainter &painter) const override;
+                  void refit() override;
+                  void resetBoundingRect() override;
+
+                private:
 			RectF getPolygonBoundingRect() const;
 			QPolygonF m_polygon;    ///< Implements the shape.
 			QPainterPath m_outline; ///< Object to draw the shape's border.

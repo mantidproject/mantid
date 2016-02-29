@@ -1,19 +1,19 @@
 #ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidDataHandling/LoadAscii.h"
 
 #include <fstream>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -984,26 +984,22 @@ public:
     if (option != 4) {
       // Generate data
 
-      std::vector<double> vecX;
-      std::vector<double> vecY;
-      std::vector<double> vecE;
-
       // a) Generate data
       switch (option) {
       case 1:
-        generateSeparateTwoPeaksData2(vecX, vecY, vecE);
+        dataws = generateSeparateTwoPeaksData2();
         break;
 
       case 2:
-        generateTwinPeakData(vecX, vecY, vecE);
+        dataws = generateTwinPeakData();
         break;
 
       case 3:
-        generate1PeakDataPlusBackground(vecX, vecY, vecE);
+        dataws = generate1PeakDataPlusBackground();
         break;
 
       case 9:
-        generateArgSiPeak220(vecX, vecY, vecE);
+        dataws = generateArgSiPeak220();
         break;
 
       default:
@@ -1012,21 +1008,6 @@ public:
                << " to generate a data workspace is  not supported.";
         throw runtime_error(errmsg.str());
         break;
-      }
-
-      // b) Get workspace
-      size_t nHist = 1;
-      size_t nBins = vecX.size();
-
-      dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nHist, nBins,
-                                                   nBins));
-
-      // c) Input data
-      for (size_t i = 0; i < vecX.size(); ++i) {
-        dataws->dataX(0)[i] = vecX[i];
-        dataws->dataY(0)[i] = vecY[i];
-        dataws->dataE(0)[i] = vecE[i];
       }
 
     } else if (option == 4) {
@@ -1048,672 +1029,235 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a set of powder diffraction data with 2 peaks w/o background
    */
-  void generateSeparateTwoPeaksData2(vector<double> &vecX, vector<double> &vecY,
-                                     vector<double> &vecE) {
-    vecX.push_back(70931.750);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70943.609);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70955.477);
-    vecY.push_back(0.69562334);
-    vecX.push_back(70967.336);
-    vecY.push_back(0.99016321);
-    vecX.push_back(70979.203);
-    vecY.push_back(1.4097446);
-    vecX.push_back(70991.063);
-    vecY.push_back(2.0066566);
-    vecX.push_back(71002.930);
-    vecY.push_back(2.8569770);
-    vecX.push_back(71014.789);
-    vecY.push_back(4.0666742);
-    vecX.push_back(71026.656);
-    vecY.push_back(5.7899261);
-    vecX.push_back(71038.516);
-    vecY.push_back(8.2414885);
-    vecX.push_back(71050.383);
-    vecY.push_back(11.733817);
-    vecX.push_back(71062.242);
-    vecY.push_back(16.702133);
-    vecX.push_back(71074.109);
-    vecY.push_back(23.779659);
-    vecX.push_back(71085.969);
-    vecY.push_back(33.848408);
-    vecX.push_back(71097.836);
-    vecY.push_back(48.191662);
-    vecX.push_back(71109.695);
-    vecY.push_back(68.596909);
-    vecX.push_back(71121.563);
-    vecY.push_back(97.664757);
-    vecX.push_back(71133.430);
-    vecY.push_back(139.04889);
-    vecX.push_back(71145.289);
-    vecY.push_back(197.90808);
-    vecX.push_back(71157.156);
-    vecY.push_back(281.60803);
-    vecX.push_back(71169.016);
-    vecY.push_back(399.65021);
-    vecX.push_back(71180.883);
-    vecY.push_back(562.42670);
-    vecX.push_back(71192.742);
-    vecY.push_back(773.34192);
-    vecX.push_back(71204.609);
-    vecY.push_back(1015.2813);
-    vecX.push_back(71216.469);
-    vecY.push_back(1238.3613);
-    vecX.push_back(71228.336);
-    vecY.push_back(1374.9380);
-    vecX.push_back(71240.195);
-    vecY.push_back(1380.5173);
-    vecX.push_back(71252.063);
-    vecY.push_back(1266.3978);
-    vecX.push_back(71263.922);
-    vecY.push_back(1086.2141);
-    vecX.push_back(71275.789);
-    vecY.push_back(894.75891);
-    vecX.push_back(71287.648);
-    vecY.push_back(723.46112);
-    vecX.push_back(71299.516);
-    vecY.push_back(581.04535);
-    vecX.push_back(71311.375);
-    vecY.push_back(465.93588);
-    vecX.push_back(71323.242);
-    vecY.push_back(373.45383);
-    vecX.push_back(71335.102);
-    vecY.push_back(299.35800);
-    vecX.push_back(71346.969);
-    vecY.push_back(239.92720);
-    vecX.push_back(71358.836);
-    vecY.push_back(192.29497);
-    vecX.push_back(71370.695);
-    vecY.push_back(154.14153);
-    vecX.push_back(71382.563);
-    vecY.push_back(123.54013);
-    vecX.push_back(71394.422);
-    vecY.push_back(99.028404);
-    vecX.push_back(71406.289);
-    vecY.push_back(79.368507);
-    vecX.push_back(71418.148);
-    vecY.push_back(63.620914);
-    vecX.push_back(71430.016);
-    vecY.push_back(50.990391);
-    vecX.push_back(71441.875);
-    vecY.push_back(40.873333);
-    vecX.push_back(71453.742);
-    vecY.push_back(32.758839);
-    vecX.push_back(71465.602);
-    vecY.push_back(26.259121);
-    vecX.push_back(71477.469);
-    vecY.push_back(21.045954);
-    vecX.push_back(71489.328);
-    vecY.push_back(16.870203);
-    vecX.push_back(71501.195);
-    vecY.push_back(13.520998);
-    vecX.push_back(71513.055);
-    vecY.push_back(10.838282);
-    vecX.push_back(71524.922);
-    vecY.push_back(8.6865807);
-    vecX.push_back(71536.781);
-    vecY.push_back(6.9630671);
-    vecX.push_back(71548.648);
-    vecY.push_back(5.5807042);
-    vecX.push_back(71560.508);
-    vecY.push_back(4.4734306);
-    vecX.push_back(71572.375);
-    vecY.push_back(3.5853302);
-    vecX.push_back(71584.242);
-    vecY.push_back(2.8735423);
-    vecX.push_back(71596.102);
-    vecY.push_back(2.3033996);
-    vecX.push_back(71607.969);
-    vecY.push_back(1.8461106);
-    vecX.push_back(71619.828);
-    vecY.push_back(0.0000000);
-    vecX.push_back(86911.852);
-    vecY.push_back(0.28651541);
-    vecX.push_back(86923.719);
-    vecY.push_back(0.39156997);
-    vecX.push_back(86935.578);
-    vecY.push_back(0.53503412);
-    vecX.push_back(86947.445);
-    vecY.push_back(0.73121130);
-    vecX.push_back(86959.305);
-    vecY.push_back(0.99911392);
-    vecX.push_back(86971.172);
-    vecY.push_back(1.3654519);
-    vecX.push_back(86983.039);
-    vecY.push_back(1.8661126);
-    vecX.push_back(86994.898);
-    vecY.push_back(2.5498226);
-    vecX.push_back(87006.766);
-    vecY.push_back(3.4847479);
-    vecX.push_back(87018.625);
-    vecY.push_back(4.7614965);
-    vecX.push_back(87030.492);
-    vecY.push_back(6.5073609);
-    vecX.push_back(87042.352);
-    vecY.push_back(8.8915405);
-    vecX.push_back(87054.219);
-    vecY.push_back(12.151738);
-    vecX.push_back(87066.078);
-    vecY.push_back(16.603910);
-    vecX.push_back(87077.945);
-    vecY.push_back(22.691912);
-    vecX.push_back(87089.805);
-    vecY.push_back(31.005537);
-    vecX.push_back(87101.672);
-    vecY.push_back(42.372311);
-    vecX.push_back(87113.531);
-    vecY.push_back(57.886639);
-    vecX.push_back(87125.398);
-    vecY.push_back(79.062233);
-    vecX.push_back(87137.258);
-    vecY.push_back(107.82082);
-    vecX.push_back(87149.125);
-    vecY.push_back(146.58661);
-    vecX.push_back(87160.984);
-    vecY.push_back(197.83006);
-    vecX.push_back(87172.852);
-    vecY.push_back(263.46185);
-    vecX.push_back(87184.711);
-    vecY.push_back(343.08966);
-    vecX.push_back(87196.578);
-    vecY.push_back(432.57846);
-    vecX.push_back(87208.445);
-    vecY.push_back(522.64124);
-    vecX.push_back(87220.305);
-    vecY.push_back(600.01373);
-    vecX.push_back(87232.172);
-    vecY.push_back(651.22260);
-    vecX.push_back(87244.031);
-    vecY.push_back(667.17743);
-    vecX.push_back(87255.898);
-    vecY.push_back(646.90039);
-    vecX.push_back(87267.758);
-    vecY.push_back(597.38873);
-    vecX.push_back(87279.625);
-    vecY.push_back(530.12573);
-    vecX.push_back(87291.484);
-    vecY.push_back(456.83890);
-    vecX.push_back(87303.352);
-    vecY.push_back(386.05295);
-    vecX.push_back(87315.211);
-    vecY.push_back(322.58456);
-    vecX.push_back(87327.078);
-    vecY.push_back(267.96231);
-    vecX.push_back(87338.938);
-    vecY.push_back(222.04863);
-    vecX.push_back(87350.805);
-    vecY.push_back(183.80043);
-    vecX.push_back(87362.664);
-    vecY.push_back(152.11101);
-    vecX.push_back(87374.531);
-    vecY.push_back(125.85820);
-    vecX.push_back(87386.391);
-    vecY.push_back(104.14707);
-    vecX.push_back(87398.258);
-    vecY.push_back(86.170067);
-    vecX.push_back(87410.117);
-    vecY.push_back(71.304932);
-    vecX.push_back(87421.984);
-    vecY.push_back(58.996807);
-    vecX.push_back(87433.844);
-    vecY.push_back(48.819309);
-    vecX.push_back(87445.711);
-    vecY.push_back(40.392483);
-    vecX.push_back(87457.578);
-    vecY.push_back(33.420235);
-    vecX.push_back(87469.438);
-    vecY.push_back(27.654932);
-    vecX.push_back(87481.305);
-    vecY.push_back(22.881344);
-    vecX.push_back(87493.164);
-    vecY.push_back(18.934097);
-    vecX.push_back(87505.031);
-    vecY.push_back(15.665835);
-    vecX.push_back(87516.891);
-    vecY.push_back(12.963332);
-    vecX.push_back(87528.758);
-    vecY.push_back(10.725698);
-    vecX.push_back(87540.617);
-    vecY.push_back(8.8754158);
-    vecX.push_back(87552.484);
-    vecY.push_back(7.3434072);
-    vecX.push_back(87564.344);
-    vecY.push_back(6.0766010);
-    vecX.push_back(87576.211);
-    vecY.push_back(5.0277033);
-    vecX.push_back(87588.070);
-    vecY.push_back(4.1603775);
-    vecX.push_back(87599.938);
-    vecY.push_back(3.4422443);
-    vecX.push_back(87611.797);
-    vecY.push_back(2.8484249);
-    vecX.push_back(87623.664);
-    vecY.push_back(2.3567512);
-    vecX.push_back(87635.523);
-    vecY.push_back(1.9501896);
-    vecX.push_back(87647.391);
-    vecY.push_back(1.6135623);
-    vecX.push_back(87659.250);
-    vecY.push_back(1.3352078);
-    vecX.push_back(87671.117);
-    vecY.push_back(1.1047342);
-    vecX.push_back(87682.984);
-    vecY.push_back(0.91404319);
-    vecX.push_back(87694.844);
-    vecY.push_back(0.75636220);
-    vecX.push_back(87706.711);
-    vecY.push_back(0.0000000);
+  API::MatrixWorkspace_sptr generateSeparateTwoPeaksData2() {
 
-    for (size_t i = 0; i < vecY.size(); ++i) {
-      double e = 1.0;
-      if (vecY[i] > 1.0)
-        e = sqrt(vecY[i]);
-      vecE.push_back(e);
+    // a) Generate data
+    std::array<double, 127> vecX = {
+        {70931.750000, 70943.609000, 70955.477000, 70967.336000, 70979.203000,
+         70991.063000, 71002.930000, 71014.789000, 71026.656000, 71038.516000,
+         71050.383000, 71062.242000, 71074.109000, 71085.969000, 71097.836000,
+         71109.695000, 71121.563000, 71133.430000, 71145.289000, 71157.156000,
+         71169.016000, 71180.883000, 71192.742000, 71204.609000, 71216.469000,
+         71228.336000, 71240.195000, 71252.063000, 71263.922000, 71275.789000,
+         71287.648000, 71299.516000, 71311.375000, 71323.242000, 71335.102000,
+         71346.969000, 71358.836000, 71370.695000, 71382.563000, 71394.422000,
+         71406.289000, 71418.148000, 71430.016000, 71441.875000, 71453.742000,
+         71465.602000, 71477.469000, 71489.328000, 71501.195000, 71513.055000,
+         71524.922000, 71536.781000, 71548.648000, 71560.508000, 71572.375000,
+         71584.242000, 71596.102000, 71607.969000, 71619.828000, 86911.852000,
+         86923.719000, 86935.578000, 86947.445000, 86959.305000, 86971.172000,
+         86983.039000, 86994.898000, 87006.766000, 87018.625000, 87030.492000,
+         87042.352000, 87054.219000, 87066.078000, 87077.945000, 87089.805000,
+         87101.672000, 87113.531000, 87125.398000, 87137.258000, 87149.125000,
+         87160.984000, 87172.852000, 87184.711000, 87196.578000, 87208.445000,
+         87220.305000, 87232.172000, 87244.031000, 87255.898000, 87267.758000,
+         87279.625000, 87291.484000, 87303.352000, 87315.211000, 87327.078000,
+         87338.938000, 87350.805000, 87362.664000, 87374.531000, 87386.391000,
+         87398.258000, 87410.117000, 87421.984000, 87433.844000, 87445.711000,
+         87457.578000, 87469.438000, 87481.305000, 87493.164000, 87505.031000,
+         87516.891000, 87528.758000, 87540.617000, 87552.484000, 87564.344000,
+         87576.211000, 87588.070000, 87599.938000, 87611.797000, 87623.664000,
+         87635.523000, 87647.391000, 87659.250000, 87671.117000, 87682.984000,
+         87694.844000, 87706.711000}};
+    std::array<double, 127> vecY = {
+        {0.000000, 0.000000, 0.695623, 0.990163, 1.409745, 2.006657, 2.856977,
+         4.066674, 5.789926, 8.241489, 11.733817, 16.702133, 23.779659,
+         33.848408, 48.191662, 68.596909, 97.664757, 139.048890, 197.908080,
+         281.608030, 399.650210, 562.426700, 773.341920, 1015.281300,
+         1238.361300, 1374.938000, 1380.517300, 1266.397800, 1086.214100,
+         894.758910, 723.461120, 581.045350, 465.935880, 373.453830, 299.358000,
+         239.927200, 192.294970, 154.141530, 123.540130, 99.028404, 79.368507,
+         63.620914, 50.990391, 40.873333, 32.758839, 26.259121, 21.045954,
+         16.870203, 13.520998, 10.838282, 8.686581, 6.963067, 5.580704,
+         4.473431, 3.585330, 2.873542, 2.303400, 1.846111, 0.000000, 0.286515,
+         0.391570, 0.535034, 0.731211, 0.999114, 1.365452, 1.866113, 2.549823,
+         3.484748, 4.761496, 6.507361, 8.891540, 12.151738, 16.603910,
+         22.691912, 31.005537, 42.372311, 57.886639, 79.062233, 107.820820,
+         146.586610, 197.830060, 263.461850, 343.089660, 432.578460, 522.641240,
+         600.013730, 651.222600, 667.177430, 646.900390, 597.388730, 530.125730,
+         456.838900, 386.052950, 322.584560, 267.962310, 222.048630, 183.800430,
+         152.111010, 125.858200, 104.147070, 86.170067, 71.304932, 58.996807,
+         48.819309, 40.392483, 33.420235, 27.654932, 22.881344, 18.934097,
+         15.665835, 12.963332, 10.725698, 8.875416, 7.343407, 6.076601,
+         5.027703, 4.160378, 3.442244, 2.848425, 2.356751, 1.950190, 1.613562,
+         1.335208, 1.104734, 0.914043, 0.756362, 0.000000}};
+    std::array<double, 127> vecE = {
+        {1.000000, 1.000000, 1.000000, 1.000000, 1.187330, 1.416570, 1.690260,
+         2.016600, 2.406230, 2.870800, 3.425470, 4.086820, 4.876440, 5.817940,
+         6.942020, 8.282330, 9.882550, 11.791900, 14.068000, 16.781200,
+         19.991300, 23.715500, 27.809000, 31.863500, 35.190400, 37.080200,
+         37.155300, 35.586500, 32.957800, 29.912500, 26.897200, 24.104900,
+         21.585500, 19.325000, 17.302000, 15.489600, 13.867000, 12.415400,
+         11.114900, 9.951300, 8.908900, 7.976270, 7.140760, 6.393230, 5.723530,
+         5.124370, 4.587590, 4.107340, 3.677090, 3.292150, 2.947300, 2.638760,
+         2.362350, 2.115050, 1.893500, 1.695150, 1.517700, 1.358720, 1.000000,
+         1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.168530, 1.366060,
+         1.596820, 1.866750, 2.182090, 2.550950, 2.981870, 3.485930, 4.074790,
+         4.763600, 5.568260, 6.509400, 7.608330, 8.891690, 10.383700, 12.107300,
+         14.065200, 16.231500, 18.522700, 20.798500, 22.861300, 24.495200,
+         25.519100, 25.829800, 25.434200, 24.441500, 23.024500, 21.373800,
+         19.648200, 17.960600, 16.369600, 14.901300, 13.557300, 12.333300,
+         11.218700, 10.205200, 9.282780, 8.444220, 7.680940, 6.987080, 6.355510,
+         5.781020, 5.258800, 4.783440, 4.351330, 3.958010, 3.600460, 3.275010,
+         2.979160, 2.709870, 2.465080, 2.242250, 2.039700, 1.855330, 1.687730,
+         1.535170, 1.396490, 1.270260, 1.155510, 1.051060, 1.000000, 1.000000,
+         1.000000}};
+    const size_t size = vecX.size();
+
+    // b) Get workspace
+    auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+
+    // c) Input data
+    for (size_t i = 0; i < size; ++i) {
+      dataws->dataX(0)[i] = vecX[i];
+      dataws->dataY(0)[i] = vecY[i];
+      dataws->dataE(0)[i] = vecE[i];
     }
 
-    return;
+    return dataws;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Generate data (vectors) containg twin peak w/o background
    */
-  void generateTwinPeakData(std::vector<double> &vecX,
-                            std::vector<double> &vecY,
-                            std::vector<double> &vecE) {
-    // These data of reflection (932) and (852)
-    vecX.push_back(12646.470);
-    vecY.push_back(0.56916749);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12658.333);
-    vecY.push_back(0.35570398);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12670.196);
-    vecY.push_back(0.85166878);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12682.061);
-    vecY.push_back(4.6110063);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12693.924);
-    vecY.push_back(24.960907);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12705.787);
-    vecY.push_back(135.08231);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12717.650);
-    vecY.push_back(613.15887);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12729.514);
-    vecY.push_back(587.66174);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12741.378);
-    vecY.push_back(213.99724);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12753.241);
-    vecY.push_back(85.320320);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12765.104);
-    vecY.push_back(86.317253);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12776.968);
-    vecY.push_back(334.30905);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12788.831);
-    vecY.push_back(1171.0187);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12800.695);
-    vecY.push_back(732.47943);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12812.559);
-    vecY.push_back(258.37717);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12824.422);
-    vecY.push_back(90.549515);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12836.285);
-    vecY.push_back(31.733501);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12848.148);
-    vecY.push_back(11.121155);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12860.013);
-    vecY.push_back(3.9048645);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12871.876);
-    vecY.push_back(4.15836312E-02);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12883.739);
-    vecY.push_back(0.22341134);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12895.603);
-    vecY.push_back(1.2002950);
-    vecE.push_back(1000.0000);
-    vecX.push_back(12907.466);
-    vecY.push_back(6.4486742);
-    vecE.push_back(1000.0000);
+  API::MatrixWorkspace_sptr generateTwinPeakData() {
 
-    return;
+    // These data of reflection (932) and (852)
+    std::array<double, 23> vecX = {
+        {12646.470000, 12658.333000, 12670.196000, 12682.061000, 12693.924000,
+         12705.787000, 12717.650000, 12729.514000, 12741.378000, 12753.241000,
+         12765.104000, 12776.968000, 12788.831000, 12800.695000, 12812.559000,
+         12824.422000, 12836.285000, 12848.148000, 12860.013000, 12871.876000,
+         12883.739000, 12895.603000, 12907.466000}};
+    std::array<double, 23> vecY = {
+        {0.569167, 0.355704, 0.851669, 4.611006, 24.960907, 135.082310,
+         613.158870, 587.661740, 213.997240, 85.320320, 86.317253, 334.309050,
+         1171.018700, 732.479430, 258.377170, 90.549515, 31.733501, 11.121155,
+         3.904864, 0.041584, 0.223411, 1.200295, 6.448674}};
+    std::array<double, 23> vecE = {
+        {1000.000000, 1000.000000, 1000.000000, 1000.000000, 1000.000000,
+         1000.000000, 1000.000000, 1000.000000, 1000.000000, 1000.000000,
+         1000.000000, 1000.000000, 1000.000000, 1000.000000, 1000.000000,
+         1000.000000, 1000.000000, 1000.000000, 1000.000000, 1000.000000,
+         1000.000000, 1000.000000, 1000.000000}};
+
+    const size_t size = vecX.size();
+
+    // b) Get workspace
+    auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+
+    // c) Input data
+    for (size_t i = 0; i < size; ++i) {
+      dataws->dataX(0)[i] = vecX[i];
+      dataws->dataY(0)[i] = vecY[i];
+      dataws->dataE(0)[i] = vecE[i];
+    }
+
+    return dataws;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Generate data with background
     * The data comes from NOMAD 11848-4 (bank 4)
     */
-  void generate1PeakDataPlusBackground(vector<double> &vecX,
-                                       vector<double> &vecY,
-                                       vector<double> &vecE) {
-    vecX.push_back(15804.51508);
-    vecY.push_back(0.00093899);
-    vecE.push_back(0.00182963);
-    vecX.push_back(15819.15517);
-    vecY.push_back(0.00345301);
-    vecE.push_back(0.00182634);
-    vecX.push_back(15833.80882);
-    vecY.push_back(-0.00091186);
-    vecE.push_back(0.00183490);
-    vecX.push_back(15848.47604);
-    vecY.push_back(0.00188472);
-    vecE.push_back(0.00182437);
-    vecX.push_back(15863.15685);
-    vecY.push_back(0.00332765);
-    vecE.push_back(0.00185097);
-    vecX.push_back(15877.85126);
-    vecY.push_back(0.00364515);
-    vecE.push_back(0.00183573);
-    vecX.push_back(15892.55929);
-    vecY.push_back(0.00218618);
-    vecE.push_back(0.00184518);
-    vecX.push_back(15907.28093);
-    vecY.push_back(0.00181782);
-    vecE.push_back(0.00186918);
-    vecX.push_back(15922.01622);
-    vecY.push_back(0.00183030);
-    vecE.push_back(0.00188213);
-    vecX.push_back(15936.76515);
-    vecY.push_back(0.00261025);
-    vecE.push_back(0.00189781);
-    vecX.push_back(15951.52774);
-    vecY.push_back(0.00775414);
-    vecE.push_back(0.00191501);
-    vecX.push_back(15966.30401);
-    vecY.push_back(0.01119628);
-    vecE.push_back(0.00193190);
-    vecX.push_back(15981.09397);
-    vecY.push_back(0.02129512);
-    vecE.push_back(0.00196919);
-    vecX.push_back(15995.89763);
-    vecY.push_back(0.03490967);
-    vecE.push_back(0.00205366);
-    vecX.push_back(16010.71500);
-    vecY.push_back(0.06945186);
-    vecE.push_back(0.00222871);
-    vecX.push_back(16025.54610);
-    vecY.push_back(0.11997786);
-    vecE.push_back(0.00246872);
-    vecX.push_back(16040.39093);
-    vecY.push_back(0.21313078);
-    vecE.push_back(0.00283099);
-    vecX.push_back(16055.24952);
-    vecY.push_back(0.32872762);
-    vecE.push_back(0.00323105);
-    vecX.push_back(16070.12187);
-    vecY.push_back(0.46376577);
-    vecE.push_back(0.00366236);
-    vecX.push_back(16085.00799);
-    vecY.push_back(0.60672834);
-    vecE.push_back(0.00406101);
-    vecX.push_back(16099.90791);
-    vecY.push_back(0.70995429);
-    vecE.push_back(0.00433328);
-    vecX.push_back(16114.82163);
-    vecY.push_back(0.72737104);
-    vecE.push_back(0.00439982);
-    vecX.push_back(16129.74916);
-    vecY.push_back(0.68092272);
-    vecE.push_back(0.00430344);
-    vecX.push_back(16144.69052);
-    vecY.push_back(0.56167618);
-    vecE.push_back(0.00401318);
-    vecX.push_back(16159.64572);
-    vecY.push_back(0.42685691);
-    vecE.push_back(0.00363757);
-    vecX.push_back(16174.61478);
-    vecY.push_back(0.30260402);
-    vecE.push_back(0.00325554);
-    vecX.push_back(16189.59770);
-    vecY.push_back(0.20770640);
-    vecE.push_back(0.00292711);
-    vecX.push_back(16204.59450);
-    vecY.push_back(0.14654898);
-    vecE.push_back(0.00268130);
-    vecX.push_back(16219.60519);
-    vecY.push_back(0.09628758);
-    vecE.push_back(0.00247655);
-    vecX.push_back(16234.62979);
-    vecY.push_back(0.06952267);
-    vecE.push_back(0.00234315);
-    vecX.push_back(16249.66830);
-    vecY.push_back(0.04493752);
-    vecE.push_back(0.00227152);
-    vecX.push_back(16264.72074);
-    vecY.push_back(0.03126838);
-    vecE.push_back(0.00219436);
-    vecX.push_back(16279.78713);
-    vecY.push_back(0.02455495);
-    vecE.push_back(0.00216714);
-    vecX.push_back(16294.86748);
-    vecY.push_back(0.02071602);
-    vecE.push_back(0.00213767);
-    vecX.push_back(16309.96179);
-    vecY.push_back(0.01423849);
-    vecE.push_back(0.00210673);
-    vecX.push_back(16325.07009);
-    vecY.push_back(0.01083945);
-    vecE.push_back(0.00210373);
-    vecX.push_back(16340.19238);
-    vecY.push_back(0.00952175);
-    vecE.push_back(0.00209212);
-    vecX.push_back(16355.32868);
-    vecY.push_back(0.00666464);
-    vecE.push_back(0.00210106);
-    vecX.push_back(16370.47900);
-    vecY.push_back(0.00483277);
-    vecE.push_back(0.00210164);
-    vecX.push_back(16385.64335);
-    vecY.push_back(0.00606602);
-    vecE.push_back(0.00208481);
-    vecX.push_back(16400.82175);
-    vecY.push_back(0.00797912);
-    vecE.push_back(0.00211046);
-    vecX.push_back(16416.01421);
-    vecY.push_back(0.00337981);
-    vecE.push_back(0.00209148);
-    vecX.push_back(16431.22075);
-    vecY.push_back(0.00695986);
-    vecE.push_back(0.00209749);
-    vecX.push_back(16446.44137);
-    vecY.push_back(0.00076425);
-    vecE.push_back(0.00212240);
-    vecX.push_back(16461.67609);
-    vecY.push_back(-0.00174803);
-    vecE.push_back(0.00212156);
-    vecX.push_back(16476.92492);
-    vecY.push_back(0.00311692);
-    vecE.push_back(0.00211736);
-    vecX.push_back(16492.18788);
-    vecY.push_back(0.00267084);
-    vecE.push_back(0.00212599);
-    vecX.push_back(16507.46497);
-    vecY.push_back(0.00073160);
-    vecE.push_back(0.00217523);
-    vecX.push_back(16522.75622);
-    vecY.push_back(0.00181373);
-    vecE.push_back(0.00215910);
-    vecX.push_back(16538.06163);
-    vecY.push_back(-0.00060530);
-    vecE.push_back(0.00217643);
-    vecX.push_back(16553.38122);
-    vecY.push_back(-0.00347549);
-    vecE.push_back(0.00217984);
-    vecX.push_back(16568.71501);
-    vecY.push_back(0.00351226);
-    vecE.push_back(0.00218813);
-    vecX.push_back(16584.06299);
-    vecY.push_back(-0.00079566);
-    vecE.push_back(0.00220368);
-    vecX.push_back(16599.42519);
-    vecY.push_back(0.00651456);
-    vecE.push_back(0.00224274);
-    vecX.push_back(16614.80163);
-    vecY.push_back(0.01027626);
-    vecE.push_back(0.00222865);
-    vecX.push_back(16630.19230);
-    vecY.push_back(0.00498366);
-    vecE.push_back(0.00224692);
-    vecX.push_back(16645.59723);
-    vecY.push_back(0.00692367);
-    vecE.push_back(0.00223901);
-    vecX.push_back(16661.01644);
-    vecY.push_back(0.00772229);
-    vecE.push_back(0.00223212);
-    vecX.push_back(16676.44992);
-    vecY.push_back(0.00603627);
-    vecE.push_back(0.00228530);
-    vecX.push_back(16691.89770);
-    vecY.push_back(0.00332977);
-    vecE.push_back(0.00225513);
-    vecX.push_back(16707.35980);
-    vecY.push_back(0.00292870);
-    vecE.push_back(0.00231030);
-    vecX.push_back(16722.83621);
-    vecY.push_back(0.00736778);
-    vecE.push_back(0.00228117);
-    vecX.push_back(16738.32696);
-    vecY.push_back(0.00150402);
-    vecE.push_back(0.00232609);
-    vecX.push_back(16753.83206);
-    vecY.push_back(0.00240275);
-    vecE.push_back(0.00227347);
-    vecX.push_back(16769.35153);
-    vecY.push_back(0.00426276);
-    vecE.push_back(0.00231366);
-    vecX.push_back(16784.88537);
-    vecY.push_back(0.00186002);
-    vecE.push_back(0.00231086);
-    vecX.push_back(16800.43359);
-    vecY.push_back(0.00271200);
-    vecE.push_back(0.00231613);
-    vecX.push_back(16815.99622);
-    vecY.push_back(0.00157441);
-    vecE.push_back(0.00233310);
-    vecX.push_back(16831.57327);
-    vecY.push_back(-0.00180279);
-    vecE.push_back(0.00234767);
-    vecX.push_back(16847.16475);
-    vecY.push_back(0.00082487);
-    vecE.push_back(0.00233778);
-    vecX.push_back(16862.77067);
-    vecY.push_back(-0.00336791);
-    vecE.push_back(0.00234414);
-    vecX.push_back(16878.39104);
-    vecY.push_back(-0.00327705);
-    vecE.push_back(0.00234013);
-    vecX.push_back(16894.02589);
-    vecY.push_back(-0.00199679);
-    vecE.push_back(0.00234771);
+  API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
-    return;
+    std::array<double, 73> vecX = {
+        {15804.515080, 15819.155170, 15833.808820, 15848.476040, 15863.156850,
+         15877.851260, 15892.559290, 15907.280930, 15922.016220, 15936.765150,
+         15951.527740, 15966.304010, 15981.093970, 15995.897630, 16010.715000,
+         16025.546100, 16040.390930, 16055.249520, 16070.121870, 16085.007990,
+         16099.907910, 16114.821630, 16129.749160, 16144.690520, 16159.645720,
+         16174.614780, 16189.597700, 16204.594500, 16219.605190, 16234.629790,
+         16249.668300, 16264.720740, 16279.787130, 16294.867480, 16309.961790,
+         16325.070090, 16340.192380, 16355.328680, 16370.479000, 16385.643350,
+         16400.821750, 16416.014210, 16431.220750, 16446.441370, 16461.676090,
+         16476.924920, 16492.187880, 16507.464970, 16522.756220, 16538.061630,
+         16553.381220, 16568.715010, 16584.062990, 16599.425190, 16614.801630,
+         16630.192300, 16645.597230, 16661.016440, 16676.449920, 16691.897700,
+         16707.359800, 16722.836210, 16738.326960, 16753.832060, 16769.351530,
+         16784.885370, 16800.433590, 16815.996220, 16831.573270, 16847.164750,
+         16862.770670, 16878.391040, 16894.025890}};
+    std::array<double, 73> vecY = {
+        {0.000939, 0.003453, -0.000912, 0.001885, 0.003328, 0.003645, 0.002186,
+         0.001818, 0.001830, 0.002610, 0.007754, 0.011196, 0.021295, 0.034910,
+         0.069452, 0.119978, 0.213131, 0.328728, 0.463766, 0.606728, 0.709954,
+         0.727371, 0.680923, 0.561676, 0.426857, 0.302604, 0.207706, 0.146549,
+         0.096288, 0.069523, 0.044938, 0.031268, 0.024555, 0.020716, 0.014238,
+         0.010839, 0.009522, 0.006665, 0.004833, 0.006066, 0.007979, 0.003380,
+         0.006960, 0.000764, -0.001748, 0.003117, 0.002671, 0.000732, 0.001814,
+         -0.000605, -0.003475, 0.003512, -0.000796, 0.006515, 0.010276,
+         0.004984, 0.006924, 0.007722, 0.006036, 0.003330, 0.002929, 0.007368,
+         0.001504, 0.002403, 0.004263, 0.001860, 0.002712, 0.001574, -0.001803,
+         0.000825, -0.003368, -0.003277, -0.001997}};
+    std::array<double, 73> vecE = {
+        {0.001830, 0.001826, 0.001835, 0.001824, 0.001851, 0.001836, 0.001845,
+         0.001869, 0.001882, 0.001898, 0.001915, 0.001932, 0.001969, 0.002054,
+         0.002229, 0.002469, 0.002831, 0.003231, 0.003662, 0.004061, 0.004333,
+         0.004400, 0.004303, 0.004013, 0.003638, 0.003256, 0.002927, 0.002681,
+         0.002477, 0.002343, 0.002272, 0.002194, 0.002167, 0.002138, 0.002107,
+         0.002104, 0.002092, 0.002101, 0.002102, 0.002085, 0.002110, 0.002091,
+         0.002097, 0.002122, 0.002122, 0.002117, 0.002126, 0.002175, 0.002159,
+         0.002176, 0.002180, 0.002188, 0.002204, 0.002243, 0.002229, 0.002247,
+         0.002239, 0.002232, 0.002285, 0.002255, 0.002310, 0.002281, 0.002326,
+         0.002273, 0.002314, 0.002311, 0.002316, 0.002333, 0.002348, 0.002338,
+         0.002344, 0.002340, 0.002348}};
+
+    // b) Get workspace
+    const size_t size = vecX.size();
+    auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+
+    // c) Input data
+    for (size_t i = 0; i < size; ++i) {
+      dataws->dataX(0)[i] = vecX[i];
+      dataws->dataY(0)[i] = vecY[i];
+      dataws->dataE(0)[i] = vecE[i];
+    }
+
+    return dataws;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Generate backgroundless peak 220 from arg_si.dat (Fullprof example)
     */
-  void generateArgSiPeak220(std::vector<double> &vecx,
-                            std::vector<double> &vecy,
-                            std::vector<double> &vece) {
-    vecx.push_back(31019.30000);
-    vecy.push_back(0.02624178);
-    vece.push_back(0.00092672);
-    vecx.push_back(31050.40000);
-    vecy.push_back(0.02646138);
-    vece.push_back(0.00093232);
-    vecx.push_back(31081.40000);
-    vecy.push_back(0.02809566);
-    vece.push_back(0.00096305);
-    vecx.push_back(31112.50000);
-    vecy.push_back(0.02896440);
-    vece.push_back(0.00097980);
-    vecx.push_back(31143.60000);
-    vecy.push_back(0.02861105);
-    vece.push_back(0.00097545);
-    vecx.push_back(31174.80000);
-    vecy.push_back(0.03432836);
-    vece.push_back(0.00107344);
-    vecx.push_back(31205.90000);
-    vecy.push_back(0.03941826);
-    vece.push_back(0.00115486);
-    vecx.push_back(31237.10000);
-    vecy.push_back(0.05355697);
-    vece.push_back(0.00135755);
-    vecx.push_back(31268.40000);
-    vecy.push_back(0.09889440);
-    vece.push_back(0.00188719);
-    vecx.push_back(31299.60000);
-    vecy.push_back(0.20556772);
-    vece.push_back(0.00285447);
-    vecx.push_back(31330.90000);
-    vecy.push_back(0.43901506);
-    vece.push_back(0.00456425);
-    vecx.push_back(31362.30000);
-    vecy.push_back(0.81941730);
-    vece.push_back(0.00702201);
-    vecx.push_back(31393.60000);
-    vecy.push_back(1.33883897);
-    vece.push_back(0.01019324);
-    vecx.push_back(31425.00000);
-    vecy.push_back(1.74451085);
-    vece.push_back(0.01262540);
-    vecx.push_back(31456.50000);
-    vecy.push_back(1.83429503);
-    vece.push_back(0.01317582);
-    vecx.push_back(31487.90000);
-    vecy.push_back(1.53455479);
-    vece.push_back(0.01141480);
-    vecx.push_back(31519.40000);
-    vecy.push_back(1.03117425);
-    vece.push_back(0.00839135);
-    vecx.push_back(31550.90000);
-    vecy.push_back(0.52893114);
-    vece.push_back(0.00522327);
-    vecx.push_back(31582.50000);
-    vecy.push_back(0.23198354);
-    vece.push_back(0.00311024);
-    vecx.push_back(31614.10000);
-    vecy.push_back(0.10961397);
-    vece.push_back(0.00203244);
-    vecx.push_back(31645.70000);
-    vecy.push_back(0.06396058);
-    vece.push_back(0.00152266);
-    vecx.push_back(31677.30000);
-    vecy.push_back(0.04880334);
-    vece.push_back(0.00132322);
-    vecx.push_back(31709.00000);
-    vecy.push_back(0.03836045);
-    vece.push_back(0.00116918);
-    vecx.push_back(31740.70000);
-    vecy.push_back(0.03639256);
-    vece.push_back(0.00113951);
-    vecx.push_back(31772.50000);
-    vecy.push_back(0.03248324);
-    vece.push_back(0.00107658);
-    vecx.push_back(31804.20000);
-    vecy.push_back(0.03096179);
-    vece.push_back(0.00105191);
+  API::MatrixWorkspace_sptr generateArgSiPeak220() {
 
+    std::array<double, 26> vecx = {
+        {31019.300000, 31050.400000, 31081.400000, 31112.500000, 31143.600000,
+         31174.800000, 31205.900000, 31237.100000, 31268.400000, 31299.600000,
+         31330.900000, 31362.300000, 31393.600000, 31425.000000, 31456.500000,
+         31487.900000, 31519.400000, 31550.900000, 31582.500000, 31614.100000,
+         31645.700000, 31677.300000, 31709.000000, 31740.700000, 31772.500000,
+         31804.200000}};
+    std::array<double, 26> vecy = {
+        {0.026242, 0.026461, 0.028096, 0.028964, 0.028611, 0.034328, 0.039418,
+         0.053557, 0.098894, 0.205568, 0.439015, 0.819417, 1.338839, 1.744511,
+         1.834295, 1.534555, 1.031174, 0.528931, 0.231984, 0.109614, 0.063961,
+         0.048803, 0.038360, 0.036393, 0.032483, 0.030962}};
     for (size_t i = 0; i < vecy.size(); ++i)
       vecy[i] -= 0.02295189;
+    std::array<double, 26> vece = {
+        {0.000927, 0.000932, 0.000963, 0.000980, 0.000975, 0.001073, 0.001155,
+         0.001358, 0.001887, 0.002854, 0.004564, 0.007022, 0.010193, 0.012625,
+         0.013176, 0.011415, 0.008391, 0.005223, 0.003110, 0.002032, 0.001523,
+         0.001323, 0.001169, 0.001140, 0.001077, 0.001052}};
 
-    return;
+    // b) Get workspace
+    size_t size = vecx.size();
+    auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+
+    // c) Input data
+    for (size_t i = 0; i < size; ++i) {
+      dataws->dataX(0)[i] = vecx[i];
+      dataws->dataY(0)[i] = vecy[i];
+      dataws->dataE(0)[i] = vece[i];
+    }
+
+    return dataws;
   }
 
   //----------------------------------------------------------------------------------------------

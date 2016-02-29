@@ -91,8 +91,8 @@ namespace MantidQt
 				bool resetGeometry = true, bool autoscaling = true,
 				double scaleMin = 0.0, double scaleMax = 0.0,
 				bool setDefaultView = true);
-			~InstrumentWidget();
-			QString getWorkspaceName() const;
+                        ~InstrumentWidget() override;
+                        QString getWorkspaceName() const;
 			std::string getWorkspaceNameStdString() const;
 			void renameWorkspace(const std::string &workspace);
 			SurfaceType getSurfaceType() const { return m_surfaceType; }
@@ -150,15 +150,18 @@ namespace MantidQt
 			void integrationRangeChanged(double, double);
 			void glOptionChanged(bool);
 			void requestSelectComponent(const QString &);
+			void preDeletingHandle();
+			void clearingHandle();
 
 		protected:
 			/// Implements AlgorithmObserver's finish handler
-			void finishHandle(const Mantid::API::IAlgorithm *alg);
-			void dragEnterEvent(QDragEnterEvent *e);
-			void dropEvent(QDropEvent *e);
-			bool eventFilter(QObject *obj, QEvent *ev);
+                  void
+                  finishHandle(const Mantid::API::IAlgorithm *alg) override;
+                  void dragEnterEvent(QDragEnterEvent *e) override;
+                  void dropEvent(QDropEvent *e) override;
+                  bool eventFilter(QObject *obj, QEvent *ev) override;
 
-			public slots:
+                        public slots:
 			void tabChanged(int);
 			void componentSelected(Mantid::Geometry::ComponentID id);
 			void executeAlgorithm(const QString &, const QString &);
@@ -273,9 +276,22 @@ namespace MantidQt
 			bool m_blocked;
 			QList<int> m_selectedDetectors;
 			bool m_instrumentDisplayContextMenuOn;
-		};
+		private:
+			/// ADS notification handlers
+                  void preDeleteHandle(
+                      const std::string &ws_name,
+                      const boost::shared_ptr<Mantid::API::Workspace>
+                          workspace_ptr) override;
+                  void afterReplaceHandle(
+                      const std::string &wsName,
+                      const boost::shared_ptr<Mantid::API::Workspace>
+                          workspace_ptr) override;
+                  void renameHandle(const std::string &oldName,
+                                    const std::string &newName) override;
+                  void clearADSHandle() override;
+                };
 
-	}//MantidWidgets
+        }//MantidWidgets
 }//MantidQt
 
 #endif /*INSTRUMENTWIDGET_H_*/

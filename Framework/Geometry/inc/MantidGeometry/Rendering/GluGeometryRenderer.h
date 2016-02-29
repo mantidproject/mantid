@@ -40,8 +40,6 @@ class IObjComponent;
 */
 class MANTID_GEOMETRY_DLL GluGeometryRenderer {
 public:
-  GluGeometryRenderer();  ///< Constructor
-  ~GluGeometryRenderer(); ///< Destructor
   /// Renders an object component
   void Render(IObjComponent *ObjComp) const;
   /// Renders a Sphere from the input values

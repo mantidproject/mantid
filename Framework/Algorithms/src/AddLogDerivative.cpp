@@ -32,7 +32,7 @@ AddLogDerivative::~AddLogDerivative() {}
  */
 void AddLogDerivative::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut),
       "An input/output workspace. The new log will be added to it.");
   declareProperty(
       "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),

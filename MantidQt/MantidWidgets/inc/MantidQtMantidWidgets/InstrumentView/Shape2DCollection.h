@@ -38,11 +38,11 @@ namespace MantidQt
 			Q_OBJECT
 		public:
 			Shape2DCollection();
-			~Shape2DCollection();
-			Shape2D* clone()const { return NULL; }
-			void setWindow(const RectF& surface, const QRect& viewport) const;
-			virtual void draw(QPainter& painter) const;
-			virtual void addShape(Shape2D*, bool slct = false);
+                        ~Shape2DCollection() override;
+                        Shape2D *clone() const override { return NULL; }
+                        void setWindow(const RectF& surface, const QRect& viewport) const;
+                        void draw(QPainter &painter) const override;
+                        virtual void addShape(Shape2D*, bool slct = false);
 			virtual void removeShape(Shape2D*, bool sendSignal = true);
 			virtual void removeShapes(const QList<Shape2D*>&);
 			virtual void clear();
@@ -73,7 +73,7 @@ namespace MantidQt
 										// is a point in real space masked by any of the shapes
 			bool isMasked(double x, double y)const;
 			// collect all screen pixels that are masked by the shapes
-			void getMaskedPixels(QList<QPoint>& pixels)const;
+			QList<QPoint> getMaskedPixels()const;
 
 			// set the bounding rect of the current shape such that its real rect is given by the argument
 			void setCurrentBoundingRectReal(const QRectF& rect);
@@ -106,12 +106,12 @@ namespace MantidQt
 			void eraseFree(const QPolygonF& polygon);
 
 		protected:
-			virtual void drawShape(QPainter&) const {} // never called
-			virtual void addToPath(QPainterPath&) const {}
-			virtual void refit();
-			virtual void resetBoundingRect();
+                  void drawShape(QPainter &) const override {} // never called
+                  void addToPath(QPainterPath &) const override {}
+                  void refit() override;
+                  void resetBoundingRect() override;
 
-			Shape2D* createShape(const QString& type, int x, int y)const;
+                        Shape2D* createShape(const QString& type, int x, int y)const;
 			bool selectControlPointAt(int x, int y);
 			void deselectControlPoint();
 			bool isOverCurrentAt(int x, int y);

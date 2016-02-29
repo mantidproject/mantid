@@ -61,7 +61,7 @@ signals:
 	void options3(const QString&,double,double,double,double,double,int);
 
 private:
-    void closeEvent (QCloseEvent *);
+  void closeEvent(QCloseEvent *) override;
 
     Fit *fitter;
 	Graph *graph;

@@ -35,25 +35,25 @@ namespace MDAlgorithms {
 class MANTID_MDALGORITHMS_DLL FakeMDEventData : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "FakeMDEventData"; }
+  const std::string name() const override { return "FakeMDEventData"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Adds fake multi-dimensional event data to an existing "
            "MDEventWorkspace, for use in testing.\nYou can create a blank "
            "MDEventWorkspace with CreateMDWorkspace.";
   }
   /// Algorithm's verion for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Creation";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Mantid

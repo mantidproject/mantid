@@ -15,9 +15,12 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
+
 #include <boost/make_shared.hpp>
+
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -102,11 +105,8 @@ Object &Object::operator=(const Object &A) {
   return *this;
 }
 
-/**
-* Destructor
-* Deletes the rule
-*/
-Object::~Object() {}
+/// Destructor in .cpp so we can forward declare Rule class.
+Object::~Object() = default;
 
 /**
  * @param material The new Material that the object is composed from

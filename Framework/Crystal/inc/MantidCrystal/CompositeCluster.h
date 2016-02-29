@@ -34,52 +34,48 @@ namespace Crystal {
  */
 class DLLExport CompositeCluster : public ICluster {
 public:
-  CompositeCluster();
-  virtual ~CompositeCluster();
-
+  CompositeCluster() = default;
+  CompositeCluster(const CompositeCluster &) = delete;
+  CompositeCluster &operator=(const CompositeCluster &) = delete;
   /// integrate the cluster
   ICluster::ClusterIntegratedValues
-  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const;
+  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
+      const override;
 
   /// Apply labels to the workspace
-  void writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const;
+  void
+  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Original label
-  size_t getOriginalLabel() const;
+  size_t getOriginalLabel() const override;
 
   /// Get the cluster label
-  size_t getLabel() const;
+  size_t getLabel() const override;
 
   /// Number of indexes tracked
-  size_t size() const;
+  size_t size() const override;
 
   /// Track a linear IMDHistoWorkspace index that belongs to the cluster.
-  void addIndex(const size_t &index);
+  void addIndex(const size_t &index) override;
 
   /// Resolve the proper label for this cluster.
-  void toUniformMinimum(std::vector<DisjointElement> &disjointSet);
+  void toUniformMinimum(std::vector<DisjointElement> &disjointSet) override;
 
   /// Own.
   void add(boost::shared_ptr<ICluster> &toOwn);
 
   /// Set the root cluster
-  void setRootCluster(ICluster const *root);
+  void setRootCluster(ICluster const *root) override;
 
   /// Get a representative index of the cluster
-  size_t getRepresentitiveIndex() const;
+  size_t getRepresentitiveIndex() const override;
 
   /// Is a given label part of this cluster
-  bool containsLabel(const size_t &label) const;
+  bool containsLabel(const size_t &label) const override;
 
 private:
   /// Helper method to find the minimum label.
   void findMinimum() const;
-
-  /// Disabled copy construction
-  CompositeCluster(const CompositeCluster &);
-
-  /// Disabled assignement
-  CompositeCluster &operator=(const CompositeCluster &);
 
   // void validateNoRepeat(CompositeCluster*const other) const;
 

@@ -52,13 +52,20 @@ namespace MantidQt
 		{
 		public:
 			ObjComponentActor(const InstrumentActor& instrActor, Mantid::Geometry::ComponentID compID); ///< Default Constructor
-			~ObjComponentActor();								   ///< Destructor
-			virtual std::string type()const { return "ObjComponentActor"; } ///< Type of the GL object
-			virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-			virtual void getBoundingBox(Mantid::Kernel::V3D& minBound, Mantid::Kernel::V3D& maxBound)const;
-			virtual void setColors();
+                        ~ObjComponentActor() override; ///< Destructor
+                        std::string type() const override {
+                          return "ObjComponentActor";
+                        } ///< Type of the GL object
+                        void draw(bool picking = false)
+                            const override; ///< Method that defines
+                                            ///ObjComponent geometry. Calls
+                                            ///ObjComponent draw method
+                        void getBoundingBox(
+                            Mantid::Kernel::V3D &minBound,
+                            Mantid::Kernel::V3D &maxBound) const override;
+                        void setColors() override;
 
-			void setColor(const GLColor& c) { m_dataColor = c; }
+                        void setColor(const GLColor& c) { m_dataColor = c; }
 
 		private:
 			void setPickColor(const GLColor& c) { m_pickColor = c; }

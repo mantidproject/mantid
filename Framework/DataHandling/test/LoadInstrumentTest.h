@@ -3,6 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/Workspace.h"
@@ -16,10 +18,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -136,7 +138,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 257);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
-    std::set<detid_t> ids_from_map = output->getSpectrum(257)->getDetectorIDs();
+    auto ids_from_map = output->getSpectrum(257)->getDetectorIDs();
     IDetector_const_sptr det_from_ws = output->getDetector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);

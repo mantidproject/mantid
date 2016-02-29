@@ -26,6 +26,7 @@
 #include <Poco/DirectoryIterator.h>
 
 #include <set>
+#include <unordered_map>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -464,8 +465,8 @@ public:
 
     // Collect all IDF filenames and put them in a multimap where the instrument
     // identifier is the key
-    std::multimap<std::string, fromToEntry> idfFiles;
-    std::set<std::string> idfIdentifiers;
+    std::unordered_multimap<std::string, fromToEntry> idfFiles;
+    std::unordered_set<std::string> idfIdentifiers;
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
@@ -498,12 +499,11 @@ public:
     }
 
     // iterator to browse through the multimap: paramInfoFromIDF
-    std::multimap<std::string, fromToEntry>::const_iterator it1, it2;
-    std::pair<std::multimap<std::string, fromToEntry>::iterator,
-              std::multimap<std::string, fromToEntry>::iterator> ret;
+    std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
+    std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
+              std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    std::set<std::string>::iterator setIt;
-    for (setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
+    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
          setIt++) {
       ret = idfFiles.equal_range(*setIt);
       for (it1 = ret.first; it1 != ret.second; ++it1) {

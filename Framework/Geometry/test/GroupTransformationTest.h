@@ -8,6 +8,8 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
+#include <unordered_set>
+
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
@@ -47,7 +49,7 @@ public:
      *  3. 2-fold rotation || z
      *  4. Mirror plane perpendicular to z.
      */
-    std::set<std::string> elements;
+    std::unordered_set<std::string> elements;
     std::vector<SymmetryOperation> ops = transformed.getSymmetryOperations();
     for (auto op = ops.begin(); op != ops.end(); ++op) {
       SymmetryElement_sptr el =

@@ -9,6 +9,7 @@
 
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/PropertyWithValue.h"

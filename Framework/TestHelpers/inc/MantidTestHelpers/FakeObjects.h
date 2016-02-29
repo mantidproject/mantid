@@ -41,7 +41,7 @@ using namespace Mantid;
 class SpectrumTester : public ISpectrum {
 public:
   SpectrumTester() : ISpectrum() {}
-  SpectrumTester(const specid_t specNo) : ISpectrum(specNo) {}
+  SpectrumTester(const specnum_t specNo) : ISpectrum(specNo) {}
 
   virtual void setData(const MantidVec &Y) { data = Y; }
   virtual void setData(const MantidVec &Y, const MantidVec &E) {
@@ -109,7 +109,7 @@ public:
       vec[i].dataY().resize(k, 1.0);
       vec[i].dataE().resize(k, 1.0);
       vec[i].addDetectorID(detid_t(i));
-      vec[i].setSpectrumNo(specid_t(i + 1));
+      vec[i].setSpectrumNo(specnum_t(i + 1));
     }
 
     // Put an 'empty' axis in to test the getAxis method

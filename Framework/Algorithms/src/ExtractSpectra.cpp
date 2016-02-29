@@ -3,6 +3,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -60,11 +61,11 @@ const std::string ExtractSpectra::summary() const {
  */
 void ExtractSpectra::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name of the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(), "An X value that is within the first "
                                        "(lowest X value) bin that will be "
@@ -85,13 +86,13 @@ void ExtractSpectra::init() {
       "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A comma-separated list of individual workspace indices to "
                   "read.  Only used if\n"
                   "explicitly set. The WorkspaceIndexList is only used if the "
                   "DetectorList is empty.");
 
-  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "A comma-separated list of individual detector IDs to read.  "
                   "Only used if\n"
                   "explicitly set. When specifying the WorkspaceIndexList and "
@@ -420,8 +421,8 @@ void ExtractSpectra::checkProperties() {
   // 3. Start and stop index
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   if (!detectorList.empty()) {
-    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList,
-                                                m_workspaceIndexList);
+    m_workspaceIndexList =
+        m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
   } else {
     m_workspaceIndexList = getProperty("WorkspaceIndexList");
 

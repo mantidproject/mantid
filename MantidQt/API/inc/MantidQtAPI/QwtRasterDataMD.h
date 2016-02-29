@@ -30,15 +30,15 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_API QwtRasterDataMD : public QwtRasterData {
 public:
   QwtRasterDataMD();
-  virtual ~QwtRasterDataMD();
-  QwtRasterDataMD *copy() const;
+  ~QwtRasterDataMD() override;
+  QwtRasterDataMD *copy() const override;
 
   virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
   Mantid::API::IMDWorkspace_const_sptr getWorkspace() const;
 
   void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
-  QwtDoubleInterval range() const;
+  QwtDoubleInterval range() const override;
   void setRange(const QwtDoubleInterval &range);
 
   void setSliceParams(size_t dimX, size_t dimY,
@@ -46,9 +46,9 @@ public:
                       Mantid::Geometry::IMDDimension_const_sptr Y,
                       std::vector<Mantid::coord_t> &slicePoint);
 
-  double value(double x, double y) const;
+  double value(double x, double y) const override;
 
-  QSize rasterHint(const QwtDoubleRect &) const;
+  QSize rasterHint(const QwtDoubleRect &) const override;
 
   void setFastMode(bool fast);
 

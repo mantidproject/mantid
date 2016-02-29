@@ -18,8 +18,6 @@ public:
                       const std::string &generatorInformation,
                       const std::string &description);
 
-  ~PointGroupGenerator() {}
-
   inline std::string getHMSymbol() const { return m_hmSymbol; }
   inline std::string getGeneratorString() const { return m_generatorString; }
   inline std::string getDescription() const { return m_description; }

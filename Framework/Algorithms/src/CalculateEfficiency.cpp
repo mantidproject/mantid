@@ -2,8 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateEfficiency.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
@@ -23,10 +25,11 @@ using namespace DataObjects;
  */
 void CalculateEfficiency::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The workspace containing the flood data");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();

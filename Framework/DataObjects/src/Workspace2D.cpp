@@ -85,7 +85,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
     // Y,E arrays populated
     spec->setData(t2, t2);
     // Default spectrum number = starts at 1, for workspace index 0.
-    spec->setSpectrumNo(specid_t(i + 1));
+    spec->setSpectrumNo(specnum_t(i + 1));
     spec->setDetectorID(detid_t(i + 1));
   }
 

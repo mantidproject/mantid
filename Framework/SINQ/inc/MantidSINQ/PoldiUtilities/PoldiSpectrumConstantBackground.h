@@ -43,30 +43,32 @@ class MANTID_SINQ_DLL PoldiSpectrumConstantBackground
       public IPoldiFunction1D {
 public:
   PoldiSpectrumConstantBackground();
-  virtual ~PoldiSpectrumConstantBackground();
+  std::string name() const override {
+    return "PoldiSpectrumConstantBackground";
+  }
 
-  virtual std::string name() const { return "PoldiSpectrumConstantBackground"; }
-
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
-  virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
-  virtual void poldiFunction1D(const std::vector<int> &indices,
-                               const API::FunctionDomain1D &domain,
-                               API::FunctionValues &values) const;
+  void poldiFunction1D(const std::vector<int> &indices,
+                       const API::FunctionDomain1D &domain,
+                       API::FunctionValues &values) const override;
 
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true);
-  void setParameter(size_t i, const double &value, bool explicitlySet = true);
+                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
 
-  double getParameter(const std::string &name) const;
-  double getParameter(size_t i) const;
+  double getParameter(const std::string &name) const override;
+  double getParameter(size_t i) const override;
 
 protected:
-  void init();
+  void init() override;
 
   size_t m_timeBinCount;
   API::IFunction1D_sptr m_flatBackground;

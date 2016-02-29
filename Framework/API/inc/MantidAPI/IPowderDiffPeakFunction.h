@@ -44,8 +44,6 @@ public:
   /// Constructor and Destructor
   IPowderDiffPeakFunction();
 
-  virtual ~IPowderDiffPeakFunction();
-
   /// Overwrite IFunction base class methods
   // virtual const std::string name() = 0;
   /// Category of function
@@ -86,12 +84,12 @@ public:
   virtual bool isPhysical() { return m_parameterValid; }
 
   /// Override setting a new value to the i-th parameter
-  virtual void setParameter(size_t i, const double &value,
-                            bool explicitlySet = true);
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySe = true);
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySe = true) override;
 
   /// Check whether a parameter is a profile parameter
   virtual bool hasProfileParameter(std::string paramname);

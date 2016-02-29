@@ -50,7 +50,7 @@ public:
     mvalue = value;
   }
 
-  ~TimeValueUnit() {}
+  ~TimeValueUnit() = default;
 
   bool operator>(const TimeValueUnit &rhs) { return (mtime > rhs.mtime); }
 
@@ -113,24 +113,24 @@ public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
   /// Virtual destructor
-  virtual ~TimeSeriesProperty();
+  ~TimeSeriesProperty() override;
   /// "Virtual" copy constructor
-  TimeSeriesProperty<TYPE> *clone() const;
+  TimeSeriesProperty<TYPE> *clone() const override;
   //
   /// Return time series property, containing time derivative of current
   /// property
   std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
 
   /// "Virtual" copy constructor with a time shift in seconds
-  virtual Property *cloneWithTimeShift(const double timeShift) const;
+  Property *cloneWithTimeShift(const double timeShift) const override;
   /// Return the memory used by the property, in bytes
-  size_t getMemorySize() const;
+  size_t getMemorySize() const override;
   /// Merge the given property with this one
-  virtual TimeSeriesProperty<TYPE> &merge(Property *rhs);
+  TimeSeriesProperty<TYPE> &merge(Property *rhs) override;
 
   //--------------------------------------------------------------------------------------
   /// Add the value of another property
-  virtual TimeSeriesProperty &operator+=(Property const *right);
+  TimeSeriesProperty &operator+=(Property const *right) override;
   /// Deep comparison
   virtual bool operator==(const TimeSeriesProperty<TYPE> &right) const;
   /// Deep comparison (not equal).
@@ -145,23 +145,25 @@ public:
 
   /// Filter out a run by time.
   void filterByTime(const Kernel::DateAndTime &start,
-                    const Kernel::DateAndTime &stop);
+                    const Kernel::DateAndTime &stop) override;
   /// Filter by a range of times
   void filterByTimes(const std::vector<SplittingInterval> &splittervec);
 
   /// Split out a time series property by time intervals.
   void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<Property *> outputs, bool isPeriodic) const;
+                   std::vector<Property *> outputs,
+                   bool isPeriodic) const override;
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,
-                         bool centre = false) const;
+                         bool centre = false) const override;
   /// Make sure an existing filter covers the full time range given
   void expandFilterToRange(std::vector<SplittingInterval> &split, double min,
-                           double max, const TimeInterval &range) const;
+                           double max,
+                           const TimeInterval &range) const override;
   /// Calculate the time-weighted average of a property in a filtered range
-  double
-  averageValueInFilter(const std::vector<SplittingInterval> &filter) const;
+  double averageValueInFilter(
+      const std::vector<SplittingInterval> &filter) const override;
   /// Calculate the time-weighted average of a property
   double timeAverageValue() const;
 
@@ -175,7 +177,7 @@ public:
   std::multimap<DateAndTime, TYPE> valueAsMultiMap() const;
 
   /// Return the time series's times as a vector<DateAndTime>
-  std::vector<DateAndTime> timesAsVector() const;
+  std::vector<DateAndTime> timesAsVector() const override;
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
@@ -209,14 +211,14 @@ public:
   TYPE maxValue() const;
 
   /// Returns the number of values at UNIQUE time intervals in the time series
-  int size() const;
+  int size() const override;
   /// Returns the real size of the time series property map:
-  int realSize() const;
+  int realSize() const override;
 
   // ==== The following functions are specific to the odd mechanism of
   // FilterByLogValue =========
   /// Get the time series property as a string of 'time  value'
-  std::string value() const;
+  std::string value() const override;
   /// New method to return time series value pairs as std::vector<std::string>
   std::vector<std::string> time_tValue() const;
   /// Return the time series as a C++ map<DateAndTime, TYPE>
@@ -224,14 +226,14 @@ public:
   // ============================================================================================
 
   /// Set a property from a string
-  std::string setValue(const std::string &);
+  std::string setValue(const std::string &) override;
   /// Set a property from a DataItem
-  std::string setDataItem(const boost::shared_ptr<DataItem>);
+  std::string setDataItem(const boost::shared_ptr<DataItem>) override;
 
   /// Deletes the series of values in the property
-  void clear();
+  void clear() override;
   /// Deletes all but the 'last entry' in the property
-  void clearOutdated();
+  void clearOutdated() override;
   /// Clears and creates a TimeSeriesProperty from these parameters
   void create(const Kernel::DateAndTime &start_time,
               const std::vector<double> &time_sec,
@@ -265,11 +267,11 @@ public:
   static bool isTimeString(const std::string &str);
 
   /// This doesn't check anything -we assume these are always valid
-  std::string isValid() const;
+  std::string isValid() const override;
   /// Returns the default value
-  std::string getDefault() const;
+  std::string getDefault() const override;
   /// Returns if the value is at the default
-  bool isDefault() const;
+  bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
   TimeSeriesPropertyStatistics getStatistics() const;
@@ -299,7 +301,7 @@ private:
   /// the callers
   size_t findNthIndexFromQuickRef(int n) const;
   /// Set a value from another property
-  virtual std::string setValueFromProperty(const Property &right);
+  std::string setValueFromProperty(const Property &right) override;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;

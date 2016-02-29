@@ -324,6 +324,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
+   <instrument name="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
    <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
@@ -454,6 +458,10 @@
    <instrument name="VENUS">
       <technique>Imaging</technique>
       <technique>Tomography</technique>
+   </instrument>
+   
+   <instrument name="SWANS" shortname="SWANS" beamline="7">
+      <technique>Small Wide Angle Scattering</technique>
    </instrument>
 
    <livedata listener="SNSLiveEventDataListener"/>

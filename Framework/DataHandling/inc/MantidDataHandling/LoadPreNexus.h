@@ -38,24 +38,24 @@ namespace DataHandling {
 class DLLExport LoadPreNexus : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadPreNexus();
-  virtual ~LoadPreNexus();
+  ~LoadPreNexus() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a collection of PreNexus files.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
   void parseRuninfo(const std::string &runinfo, std::string &dataDir,
                     std::vector<std::string> &eventFilenames);
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir,
                         const double prog_start, const double prog_stop);
   void runLoadMonitors(const double prog_start, const double prog_stop);

@@ -1,11 +1,13 @@
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -64,7 +66,7 @@ const std::string ConvolutionFitSequential::summary() const {
  */
 void ConvolutionFitSequential::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace for the fit.");
 
   auto scv = boost::make_shared<StringContainsValidator>();
@@ -385,7 +387,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
-      if (isTwoL == true) {
+      if (isTwoL) {
         fitType = "2";
       } else {
         fitType = "1";
@@ -551,7 +553,8 @@ void ConvolutionFitSequential::calculateEISF(
     // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
     auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
     std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                   sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+                   sqrtESqOverYSq.begin(),
+                   static_cast<double (*)(double)>(sqrt));
     // eisfYSumRoot = eisfY * sqrtESqOverYSq
     auto eisfYSumRoot = cloneVector(eisfY);
     std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),

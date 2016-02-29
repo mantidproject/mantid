@@ -121,7 +121,7 @@ public:
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -199,7 +199,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -254,7 +254,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }

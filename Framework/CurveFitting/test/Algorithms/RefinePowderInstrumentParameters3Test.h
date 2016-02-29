@@ -5,10 +5,10 @@
 
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h"
 
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream>
 
@@ -409,93 +409,46 @@ public:
   /** Generate workspace holding peak positions
     */
   Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
-    // 1. Generate vectors
-    vector<double> vecDsp, vecTof, vecError;
 
-    if (bankid == 1) {
-      generateBank1PeakPositions(vecDsp, vecTof, vecError);
+    if (bankid != 1) {
+      throw runtime_error(
+          "generatePeakPositionWorkspace supports bank 1 only.");
       // string
       // filename("/home/wzz/Mantid/Code/debug/MyTestData/bank1peakpositions.dat");
       // importDataFromColumnFile(filename, vecDsp, vecTof, vecError);
-    } else {
-      throw runtime_error(
-          "generatePeakPositionWorkspace supports bank 1 only.");
     }
+
+    // 1. Generate vectors, bank 1's peak positions
+    const size_t size = 16;
+    std::array<double, size> vecDsp = {
+        {0.907108, 0.929509, 0.953656, 0.979788, 1.008190, 1.039220, 1.110980,
+         1.152910, 1.199990, 1.253350, 1.314520, 1.385630, 1.469680, 1.697040,
+         1.859020, 2.078440}};
+    std::array<double, size> vecTof = {
+        {20487.600000, 20994.700000, 21537.400000, 22128.800000, 22769.200000,
+         23469.400000, 25083.600000, 26048.100000, 27097.600000, 28272.200000,
+         29684.700000, 31291.500000, 33394.000000, 38326.300000, 41989.800000,
+         46921.700000}};
+    std::array<double, size> vecError = {
+        {0.350582, 0.597347, 0.644844, 0.879349, 0.417830, 0.481466, 0.527287,
+         0.554732, 0.363456, 0.614706, 0.468477, 0.785721, 0.555938, 0.728131,
+         0.390796, 0.997644}};
 
     // 2. Generate workspace
     Workspace2D_sptr dataws = boost::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, vecDsp.size(),
-                                            vecTof.size()));
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
     // 3. Put data
     MantidVec &vecX = dataws->dataX(0);
     MantidVec &vecY = dataws->dataY(0);
     MantidVec &vecE = dataws->dataE(0);
-    for (size_t i = 0; i < vecDsp.size(); ++i) {
+    for (size_t i = 0; i < size; ++i) {
       vecX[i] = vecDsp[i];
       vecY[i] = vecTof[i];
       vecE[i] = vecError[i];
     }
 
     return dataws;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Generate bank 1's peak positions
-    */
-  void generateBank1PeakPositions(vector<double> &vecX, vector<double> &vecY,
-                                  vector<double> &vecE) {
-    vecX.push_back(0.907108);
-    vecY.push_back(20487.6);
-    vecX.push_back(0.929509);
-    vecY.push_back(20994.7);
-    vecX.push_back(0.953656);
-    vecY.push_back(21537.4);
-    vecX.push_back(0.979788);
-    vecY.push_back(22128.8);
-    vecX.push_back(1.00819);
-    vecY.push_back(22769.2);
-    vecX.push_back(1.03922);
-    vecY.push_back(23469.4);
-    vecX.push_back(1.11098);
-    vecY.push_back(25083.6);
-    vecX.push_back(1.15291);
-    vecY.push_back(26048.1);
-    vecX.push_back(1.19999);
-    vecY.push_back(27097.6);
-    vecX.push_back(1.25335);
-    vecY.push_back(28272.2);
-    vecX.push_back(1.31452);
-    vecY.push_back(29684.7);
-    vecX.push_back(1.38563);
-    vecY.push_back(31291.5);
-    vecX.push_back(1.46968);
-    vecY.push_back(33394.0);
-    vecX.push_back(1.69704);
-    vecY.push_back(38326.3);
-    vecX.push_back(1.85902);
-    vecY.push_back(41989.8);
-    vecX.push_back(2.07844);
-    vecY.push_back(46921.7);
-
-    vecE.push_back(0.350582);
-    vecE.push_back(0.597347);
-    vecE.push_back(0.644844);
-    vecE.push_back(0.879349);
-    vecE.push_back(0.41783);
-    vecE.push_back(0.481466);
-    vecE.push_back(0.527287);
-    vecE.push_back(0.554732);
-    vecE.push_back(0.363456);
-    vecE.push_back(0.614706);
-    vecE.push_back(0.468477);
-    vecE.push_back(0.785721);
-    vecE.push_back(0.555938);
-    vecE.push_back(0.728131);
-    vecE.push_back(0.390796);
-    vecE.push_back(0.997644);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
