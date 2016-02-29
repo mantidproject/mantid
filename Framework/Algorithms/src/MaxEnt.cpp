@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/MaxentEntropyNegativeValues.h"
-#include "MantidAlgorithms/MaxentEntropyPositiveValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>

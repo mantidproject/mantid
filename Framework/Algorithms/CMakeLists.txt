@@ -155,10 +155,10 @@ set ( SRC_FILES
 	src/MaskDetectorsIf.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
+	src/MaxEnt/MaxentData.cpp
+	src/MaxEnt/MaxentEntropyNegativeValues.cpp
+	src/MaxEnt/MaxentEntropyPositiveValues.cpp
 	src/MaxMin.cpp
-	src/MaxentData.cpp
-	src/MaxentEntropyNegativeValues.cpp
-	src/MaxentEntropyPositiveValues.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
 	src/Min.cpp
@@ -438,11 +438,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
+	inc/MantidAlgorithms/MaxEnt/MaxentData.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropy.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h
+	inc/MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h
 	inc/MantidAlgorithms/MaxMin.h
-	inc/MantidAlgorithms/MaxentData.h
-	inc/MantidAlgorithms/MaxentEntropy.h
-	inc/MantidAlgorithms/MaxentEntropyNegativeValues.h
-	inc/MantidAlgorithms/MaxentEntropyPositiveValues.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
@@ -723,10 +723,10 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEntTest.h
+	MaxEnt/MaxentDataTest.h
+	MaxEnt/MaxentEntropyNegativeValuesTest.h
+	MaxEnt/MaxentEntropyPositiveValuesTest.h
 	MaxMinTest.h
-	MaxentDataTest.h
-	MaxentEntropyNegativeValuesTest.h
-	MaxentEntropyPositiveValuesTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h

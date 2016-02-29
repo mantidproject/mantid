@@ -1,15 +1,18 @@
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_
+#ifndef MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
+#define MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/MaxentEntropy.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropyPositiveValues : Class defining the entropy of a positive image
-  (i.e. a set of positive numbers). See J. Skilling and R. K Bryan, "Maximum
-  entropy image reconstruction: general algorithm".
+/** MaxentEntropyNegativeValues : Class defining the entropy of a 'PosNeg' image
+  (i.e. a set of real numbers). References:
+        1. A. J. Markvardsen, "Polarised neutron diffraction measurements of
+  PrBa2Cu3O6+x and the Bayesian statistical analysis of such data".
+        2. P. F. Smith and M. A. Player, "Deconvolution of bipolar ultrasonic
+  signals using a modified maximum entropy method"
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,12 +35,12 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxentEntropyPositiveValues : public MaxentEntropy {
+class MANTID_ALGORITHMS_DLL MaxentEntropyNegativeValues : public MaxentEntropy {
 public:
   // Constructor
-  MaxentEntropyPositiveValues() = default;
+  MaxentEntropyNegativeValues() = default;
   // Destructor
-  virtual ~MaxentEntropyPositiveValues() = default;
+  virtual ~MaxentEntropyNegativeValues() = default;
   // First derivative
   double getDerivative(double value) override;
   // Second derivative
@@ -45,11 +48,12 @@ public:
   // Correct negative values
   double correctValue(double value, double newValue) override;
 };
+
 // Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentEntropyPositiveValues>
-    MaxentEntropyPositiveValues_sptr;
+typedef boost::shared_ptr<MaxentEntropyNegativeValues>
+    MaxentEntropyNegativeValues_sptr;
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPYPOSITIVEVALUES_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_ */

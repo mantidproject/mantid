@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/MaxentEntropyPositiveValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 
 namespace Mantid {
 namespace Algorithms {

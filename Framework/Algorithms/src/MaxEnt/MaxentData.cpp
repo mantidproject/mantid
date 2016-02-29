@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/MaxentData.h"
+#include "MantidAlgorithms/MaxEnt/MaxentData.h"
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_fft_complex.h>
 

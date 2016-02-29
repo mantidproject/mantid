@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTDATA_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/MaxentEntropy.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidKernel/Matrix.h"
 #include <boost/shared_ptr.hpp>
 
