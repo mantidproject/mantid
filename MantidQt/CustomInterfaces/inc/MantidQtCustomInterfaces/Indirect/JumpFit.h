@@ -41,8 +41,6 @@ private slots:
   /// Add the plot guess to the mini plot
   void plotGuess(bool error);
 
-
-
 private:
   /// Gets a list of parameter names for a given fit function
   QStringList getFunctionParameters(const QString &functionName);
@@ -62,7 +60,7 @@ private:
   // Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
-  QtTreePropertyBrowser* m_jfTree;
+  QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 
