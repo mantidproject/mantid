@@ -15203,8 +15203,8 @@ void ApplicationWindow::addFolderListViewItem(Folder *f) {
 }
 
 void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
-                             bool folderNames, bool caseSensitive,
-                             bool partialMatch, bool subfolders) {
+                             bool , bool caseSensitive,
+                             bool partialMatch, bool) {
   if (windowNames || labels) {
     MdiSubWindow *w = currentFolder()->findWindow(s, windowNames, labels,
                                                   caseSensitive, partialMatch);
