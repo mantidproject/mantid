@@ -68,8 +68,8 @@ void JumpFit::setup() {
   connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
 	  SLOT(generatePlotGuess()));
 
-  /*connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-	  SLOT(generatePlotGuess()));*/
+  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+	  SLOT(generatePlotGuess()));
 }
 
 /**
@@ -187,17 +187,17 @@ void JumpFit::fitAlgDone(bool error) {
 
   // Find the fit and diff curves (data should already be plotted)
   for (unsigned int histIndex = 0;
-       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
-    QString specName = QString::fromStdString(axis->label(histIndex));
+  histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
+	  QString specName = QString::fromStdString(axis->label(histIndex));
 
-    // Fit curve is red
-    if (specName == "Calc")
-      m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
+	  // Fit curve is red
+	  if (specName == "Calc")
+		  m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
 
-    // Difference curve is green
-    if (specName == "Diff")
-      m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
-                                   Qt::blue);
+	  // Difference curve is green
+	  if (specName == "Diff")
+		  m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
+			  Qt::blue);
   }
 
   // plot result
@@ -205,16 +205,17 @@ void JumpFit::fitAlgDone(bool error) {
 	  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
 	  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
   }
-  // disconnect plotguess update on value change
-  /*disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-	  SLOT(generatePlotGuess(bool)));*/
+
   // Update parameters in UI
   std::string paramTableName = outName + "_Parameters";
 
   ITableWorkspace_sptr paramTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
           paramTableName);
-
+  const auto plotResult = m_uiForm.ckPlotGuess->isChecked();
+  if (plotResult) {
+	  m_uiForm.ckPlotGuess->setChecked(false);
+  }
   for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
     QString propName(it.key());
     if (propName.startsWith("parameter_")) {
@@ -225,13 +226,6 @@ void JumpFit::fitAlgDone(bool error) {
       m_dblManager->setValue(m_properties[propName], value);
     }
   }
-  // reconnect plot guess update on value change
- /* connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-	  SLOT(generatePlotGuess()));*/
-  if (m_uiForm.ppPlot->hasCurve("PlotGuess")) {
-	  m_uiForm.ppPlot->removeSpectrum("PlotGuess");
-  }
-
 }
 
 /**
