@@ -2552,13 +2552,13 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_dime_forward(struct soap *, unsigned char **,
 SOAP_FMAC1 int SOAP_FMAC2
 soap_pointer_lookup_id(struct soap *, void *p, int t, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2
-soap_pointer_lookup(struct soap *, const void *p, int t, struct soap_plist **);
+soap_pointer_lookup(struct soap *, const void *p, int type, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2 soap_pointer_enter(struct soap *, const void *p,
                                              const struct soap_array *a, int n,
-                                             int t, struct soap_plist **);
+                                             int type, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2
 soap_array_pointer_lookup(struct soap *, const void *p,
-                          const struct soap_array *a, int n, int t,
+                          const struct soap_array *a, int n, int type,
                           struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2 soap_embed(struct soap *soap, const void *p,
                                      const struct soap_array *a, int n,
@@ -2622,7 +2622,7 @@ SOAP_FMAC1 void *SOAP_FMAC2 soap_id_lookup(struct soap *, const char *id,
                                            void **p, int t, size_t n,
                                            unsigned int k);
 SOAP_FMAC1 void *SOAP_FMAC2
-soap_id_forward(struct soap *, const char *id, void *p, size_t len, int st,
+soap_id_forward(struct soap *, const char *href, void *p, size_t len, int st,
                 int tt, size_t n, unsigned int k,
                 void (*fcopy)(struct soap *, int, int, void *, size_t,
                               const void *, size_t));
@@ -2701,7 +2701,7 @@ soap_element_null(struct soap *, const char *tag, int id, const char *type);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_nil(struct soap *, const char *tag);
 SOAP_FMAC1 int SOAP_FMAC2
 soap_element_id(struct soap *, const char *tag, int id, const void *p,
-                const struct soap_array *a, int d, const char *type, int n);
+                const struct soap_array *a, int n, const char *type, int t);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_result(struct soap *, const char *tag);
 SOAP_FMAC1 void SOAP_FMAC2 soap_check_result(struct soap *, const char *tag);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_end_out(struct soap *, const char *tag);
@@ -2792,7 +2792,7 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_recv_header(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_response(struct soap *, int);
 
-SOAP_FMAC1 int SOAP_FMAC2 soap_send_empty_response(struct soap *, int status);
+SOAP_FMAC1 int SOAP_FMAC2 soap_send_empty_response(struct soap *, int httpstatuscode);
 SOAP_FMAC1 int SOAP_FMAC2 soap_recv_empty_response(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_send_fault(struct soap *);

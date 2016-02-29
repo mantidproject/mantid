@@ -85,7 +85,7 @@ protected:
 
   /// Loads and checks the values passed to the algorithm
   void retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1,
-                          API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
+                          API::MatrixWorkspace_sptr &whiteBeam2, double &variation,
                           int &minSpec, int &maxSpec);
   /// Apply the detector test criterion
   int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,

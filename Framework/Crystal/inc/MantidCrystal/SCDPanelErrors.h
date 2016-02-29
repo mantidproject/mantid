@@ -64,9 +64,9 @@ public:
      *
      *
      */
-  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string &BankNames,
-                 double a, double b, double c, double alpha, double beta,
-                 double gamma, double tolerance);
+  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string &Component_name,
+                 double ax, double bx, double cx, double alphax, double betax,
+                 double gammax, double tolerance1);
 
   ~SCDPanelErrors() override;
 

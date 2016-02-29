@@ -56,7 +56,7 @@ public:
   /// Convert to an IvsQ workspace. Performs detector positional corrections
   /// based on the component name and the theta value.
   Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr &toConvert,
-                                           const bool correctPosition,
+                                           const bool bCorrectPosition,
                                            OptionalDouble &thetaInDeg,
                                            const bool isPointDetector);
 
@@ -93,12 +93,12 @@ private:
       const MinMax &wavelengthMonitorIntegrationInterval,
       const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
-      const OptionalDouble &stitchingStartQ,
-      const OptionalDouble &stitchingDeltaQ,
-      const OptionalDouble &stitchingEndQ,
-      const OptionalDouble &stitchingStartOverlapQ,
-      const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep,
-      const std::string &processingCommands);
+      const OptionalDouble &stitchingStart,
+      const OptionalDouble &stitchingDelta,
+      const OptionalDouble &stitchingEnd,
+      const OptionalDouble &stitchingStartOverlap,
+      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep,
+      const std::string &numeratorProcessingCommands);
 
   /// Perform transmission correction using either PolynomialCorrection
   /// or ExponentialCorrection.

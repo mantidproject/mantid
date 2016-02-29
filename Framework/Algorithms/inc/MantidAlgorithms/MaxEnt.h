@@ -105,8 +105,8 @@ private:
                                              const std::vector<double> &image,
                                              double background);
   // Calculates chi-square by solving the matrix equation A*x = b
-  double calculateChi(const SearchDirections &coeffs, double a,
-                      std::vector<double> &beta);
+  double calculateChi(const SearchDirections &dirs, double a,
+                      std::vector<double> &b);
   // Calculates the SVD of the input matrix A
   std::vector<double> solveSVD(const Kernel::DblMatrix &A,
                                const Kernel::DblMatrix &B);

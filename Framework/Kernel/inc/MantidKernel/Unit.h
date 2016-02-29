@@ -93,8 +93,8 @@ public:
    *  @param delta ::    Not currently used
    */
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &l1, const double &l2, const double &twoTheta,
-             const int &emode, const double &efixed, const double &delta);
+             const double &_l1, const double &_l2, const double &_twoTheta,
+             const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -127,8 +127,8 @@ public:
    *  @param delta ::    Not currently used
    */
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &l1, const double &l2, const double &twoTheta,
-               const int &emode, const double &efixed, const double &delta);
+               const double &_l1, const double &_l2, const double &_twoTheta,
+               const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -498,7 +498,7 @@ public:
   const std::string caption() const override { return "Momentum"; }
   const UnitLabel label() const override;
 
-  double singleToTOF(const double x) const override;
+  double singleToTOF(const double ki) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
   Unit *clone() const override;

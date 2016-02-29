@@ -69,7 +69,7 @@ public:
   /// Put parameters into a matrix workspace
   static void putParametersIntoWorkspace(const API::Column_const_sptr,
                                          API::MatrixWorkspace_sptr ws,
-                                         int profNumber,
+                                         int nProf,
                                          std::string &parameterXMLString);
 
   /// Add an Ikeda-Carpenter PV ALFBE parameter
@@ -118,7 +118,7 @@ public:
   /// Create Bank to Workspace Correspondence
   static void createBankToWorkspaceMap(const std::vector<int> &banks,
                                        const std::vector<int> &workspaces,
-                                       std::map<int, size_t> &WorkpsaceOfBank);
+                                       std::map<int, size_t> &workspaceOfBank);
 
   /// Place to store the row numbers
   static std::map<std::string, size_t> m_rowNumbers;
@@ -137,15 +137,15 @@ private:
 
   /// Scan imported file for bank information
   void scanBanks(const std::vector<std::string> &lines,
-                 const bool useBankIDsInFile, std::vector<int> &banks,
+                 const bool useFileBankIDs, std::vector<int> &banks,
                  std::map<int, int> &bankstartindexmap,
                  std::map<int, int> &bankendindexmap);
 
   /// Parse .irf file to a map
   void parseResolutionStrings(std::map<std::string, double> &parammap,
                               const std::vector<std::string> &lines,
-                              const bool useBankIDsInFile, int bankid,
-                              int startlineindex, int endlineindex, int nProf);
+                              const bool useFileBankIDs, int bankid,
+                              int startlineindex, int endlineindex, int profNumber);
 
   void parseBankLine(std::string line, double &cwl, int &bankid);
 

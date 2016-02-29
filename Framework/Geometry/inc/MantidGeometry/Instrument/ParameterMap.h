@@ -149,7 +149,7 @@ public:
   }
   /// Method for adding a parameter providing shared pointer to it. The class
   /// stores share pointer and increment ref count to it
-  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &param,
+  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &par,
            const std::string *const pDescription = nullptr);
 
   /** @name Helper methods for adding and updating parameter types  */

@@ -51,7 +51,7 @@ public:
   /// list)
   const std::string transfID() const override; // {return "Q3D"; }
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s,
+  bool calcMatrixCoord(const double &x, std::vector<coord_t> &Coord, double &s,
                        double &err) const override;
   // constructor;
   MDTransfQ3D();
@@ -72,18 +72,18 @@ public:
      input workspace*/
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                       API::MatrixWorkspace_const_sptr Sptr =
+                       API::MatrixWorkspace_const_sptr inWS =
                            API::MatrixWorkspace_const_sptr()) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,
-               API::MatrixWorkspace_const_sptr Sptr =
+               API::MatrixWorkspace_const_sptr inWS =
                    API::MatrixWorkspace_const_sptr()) const override;
   /**the default dimID-s in Q3D mode are Q1,Q2,Q3 and dE if necessary */
   std::vector<std::string>
   getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                  API::MatrixWorkspace_const_sptr Sptr =
+                  API::MatrixWorkspace_const_sptr inWS =
                       API::MatrixWorkspace_const_sptr()) const override;
 
 protected:
@@ -107,11 +107,11 @@ protected:
 private:
   /// how to transform workspace data in elastic case
   inline bool calcMatrixCoord3DElastic(const double &k0,
-                                       std::vector<coord_t> &Coored, double &s,
-                                       double &err) const;
+                                       std::vector<coord_t> &Coord, double &signal,
+                                       double &errSq) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoord3DInelastic(const double &DeltaE,
-                                         std::vector<coord_t> &Coored) const;
+  inline bool calcMatrixCoord3DInelastic(const double &E_tr,
+                                         std::vector<coord_t> &Coord) const;
 };
 
 } // End MDAlgorighms namespace

@@ -69,10 +69,10 @@ public:
   integrateProtonCharge(const std::string &logname = "proton_charge") const;
 
   /// Store the given values as a set of histogram bin boundaries
-  void storeHistogramBinBoundaries(const std::vector<double> &energyBins);
+  void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
   /// Returns the bin boundaries for a given value
   std::pair<double, double>
-  histogramBinBoundaries(const double energyValue) const;
+  histogramBinBoundaries(const double value) const;
   /// Returns the vector of bin boundaries
   std::vector<double> getBinBoundaries() const;
 

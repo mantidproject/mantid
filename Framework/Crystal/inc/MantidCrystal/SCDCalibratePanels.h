@@ -116,7 +116,7 @@ public:
       Kernel::V3D const pos, Kernel::Quat const rot, double const DetWScale,
       double const DetHtScale,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
-      bool RotateCenters);
+      bool RotCenters);
 
   /**
    * *  Updates the ParameterMap for NewInstrument to reflect the position of

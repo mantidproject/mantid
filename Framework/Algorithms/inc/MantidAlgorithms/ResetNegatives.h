@@ -52,7 +52,7 @@ private:
   void pushMinimum(API::MatrixWorkspace_const_sptr minWS,
                    API::MatrixWorkspace_sptr wksp, API::Progress &prog);
   void changeNegatives(API::MatrixWorkspace_const_sptr minWS,
-                       const double value, API::MatrixWorkspace_sptr wksp,
+                       const double spectrumNegativeValues, API::MatrixWorkspace_sptr wksp,
                        API::Progress &prog);
 };
 

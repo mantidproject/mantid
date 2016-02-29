@@ -110,7 +110,7 @@ private:
 
   /// Fit peak confined in a given window (x-min, x-max)
   void fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
-                       const int spectrum, const double centre,
+                       const int spectrum, const double centre_guess,
                        const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
@@ -163,7 +163,7 @@ private:
   void estimatePeakRange(const MantidVec &vecX, size_t i_centre, size_t i_min,
                          size_t i_max, const double &leftfwhm,
                          const double &rightfwhm,
-                         std::vector<double> &vecpeakrang);
+                         std::vector<double> &vecpeakrange);
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(
@@ -183,7 +183,7 @@ private:
                      const API::IBackgroundFunction_sptr backgroundfunction,
                      const std::vector<double> &vec_fitwindow,
                      const std::vector<double> &vec_peakrange,
-                     int minGuessedFWHM, int maxGuessFWHM, int guessedFWHMStep,
+                     int minGuessFWHM, int maxGuessFWHM, int guessedFWHMStep,
                      int estBackResult = 0);
 
   std::vector<std::string> m_peakParameterNames;

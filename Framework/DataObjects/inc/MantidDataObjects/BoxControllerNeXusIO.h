@@ -41,7 +41,7 @@ namespace DataObjects {
 */
 class DLLExport BoxControllerNeXusIO : public API::IBoxControllerIO {
 public:
-  BoxControllerNeXusIO(API::BoxController *const theBC);
+  BoxControllerNeXusIO(API::BoxController *const bc);
 
   ///@return true if the file to write events is opened and false otherwise
   bool isOpened() const override { return m_File != nullptr; }
@@ -69,9 +69,9 @@ public:
   ~BoxControllerNeXusIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t coordSize,
+  void setDataType(const size_t blockSize,
                    const std::string &typeName) override;
-  void getDataType(size_t &coordSize, std::string &typeName) const override;
+  void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)
   int64_t getNDataColums() const { return m_BlockSize[1]; }
@@ -159,9 +159,9 @@ private:
   void saveGenericBlock(const std::vector<Type> &DataBlock,
                         const uint64_t blockPosition) const;
   template <typename Type>
-  void loadGenericBlock(std::vector<Type> &DataBlock,
+  void loadGenericBlock(std::vector<Type> &Block,
                         const uint64_t blockPosition,
-                        const size_t blockSize) const;
+                        const size_t nPoints) const;
 };
 }
 }

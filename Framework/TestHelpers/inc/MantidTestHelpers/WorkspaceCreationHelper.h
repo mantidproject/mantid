@@ -95,11 +95,11 @@ Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
 Mantid::DataObjects::Workspace2D_sptr
 Create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError);
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries);
 Mantid::DataObjects::Workspace2D_sptr
 Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(
-    int64_t nHist, int64_t nBin, bool isHist = false,
+    int64_t nHist, int64_t nBinsssssssssssss, bool isHist = false,
     const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(
     int64_t nHist, int64_t nBins, bool isHist = false,
@@ -121,7 +121,7 @@ Mantid::API::WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nHist, int nBins, double x0 = 0.0,
+Create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
@@ -129,7 +129,7 @@ Create2DWorkspaceBinned(int nHist, int nBins, double x0 = 0.0,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nHist, const int nBins, const double xBoundaries[]);
+Create2DWorkspaceBinned(int nhist, const int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries, const double xBoundaries[]);
 
 /**
  * Creates a 2D workspace from taking the function values from the input
@@ -184,7 +184,7 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
-    int nHist, int nBins, bool includeMonitors = false,
+    int nhist, int nbins, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
     const std::string &instrumentName = std::string("testInst"));
 
@@ -295,7 +295,7 @@ createProcessedWorkspaceWithCylComplexInstrument(
 
 // Create a workspace with all components needed for inelastic analysis;
 Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(
-    const std::vector<double> &L2, const std::vector<double> &ploar,
+    const std::vector<double> &L2, const std::vector<double> &polar,
     const std::vector<double> &azimutal, size_t numBins = 4, double Emin = -10,
     double Emax = 10, double Ei = 11);
 

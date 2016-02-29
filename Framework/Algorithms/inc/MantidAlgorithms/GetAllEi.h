@@ -67,7 +67,7 @@ private:
   void init() override;
   void exec() override;
   Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
-                                       const std::string &name);
+                                       const std::string &propertyName);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);
   // former lambda function exposed as not evry compiler support this yet
   bool peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
@@ -95,12 +95,12 @@ protected: // for testing, private otherwise.
   /**Get energy of monitor peak if one is present*/
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei,
                        const std::vector<size_t> &monsRangeMin,
-                       const std::vector<size_t> &monsRangeMax, double &energy,
-                       double &height, double &width);
+                       const std::vector<size_t> &monsRangeMax, double &position,
+                       double &height, double &twoSigma);
   /**Find indexes of each expected peak intervals */
   void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
-                     const std::vector<double> &guess_energies,
-                     double Eresolution, std::vector<size_t> &irangeMin,
+                     const std::vector<double> &guess_energy,
+                     double eResolution, std::vector<size_t> &irangeMin,
                      std::vector<size_t> &irangeMax,
                      std::vector<bool> &guessValid);
 

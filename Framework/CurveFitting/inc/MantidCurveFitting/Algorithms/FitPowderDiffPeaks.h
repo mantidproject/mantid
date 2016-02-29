@@ -100,7 +100,7 @@ private:
 
   /// Import instrument parameters from (input) table workspace
   void importInstrumentParameterFromTable(
-      DataObjects::TableWorkspace_sptr m_profileTable);
+      DataObjects::TableWorkspace_sptr parameterWS);
 
   /// Import Bragg peak table workspace
   void
@@ -125,7 +125,7 @@ private:
   bool
   fitSinglePeakRobust(Functions::BackToBackExponential_sptr peak,
                       Functions::BackgroundFunction_sptr backgroundfunction,
-                      double leftdev, double rightdev,
+                      double peakleftbound, double peakrightbound,
                       std::map<std::string, double> rightpeakparammap,
                       double &finalchi2);
 
@@ -287,13 +287,13 @@ private:
             double guessedfwhm);
 
   /// Fit background-removed peak by Gaussian
-  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, size_t m_wsIndex,
+  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, size_t workspaceindex,
                          double in_center, double leftfwhm, double rightfwhm,
                          double &center, double &sigma, double &height);
 
   /// Create a Workspace2D for fitted peaks (pattern)
   DataObjects::Workspace2D_sptr
-  genOutputFittedPatternWorkspace(std::vector<double> pattern, int m_wsIndex);
+  genOutputFittedPatternWorkspace(std::vector<double> pattern, int workspaceindex);
 
   /// Calcualte the value of a single peak in a given range.
   void calculate1PeakGroup(std::vector<size_t> peakindexes,

@@ -76,7 +76,7 @@ public:
                             const size_t nData, const size_t order) const;
 
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
+  virtual void functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                const size_t nData);
 
 protected:

@@ -36,9 +36,9 @@ class DLLExport PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
   PeakShapeEllipsoid(std::vector<Mantid::Kernel::V3D> directions,
-                     std::vector<double> abcRadius,
-                     std::vector<double> abcBackgroundInnerRadius,
-                     std::vector<double> abcBackgroundOuterRadius,
+                     std::vector<double> abcRadii,
+                     std::vector<double> abcRadiiBackgroundInner,
+                     std::vector<double> abcRadiiBackgroundOuter,
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);

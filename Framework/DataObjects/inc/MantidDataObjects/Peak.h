@@ -31,11 +31,11 @@ public:
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
        Mantid::Kernel::Matrix<double> goniometer,
        boost::optional<double> detectorDistance = boost::optional<double>());
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
        double m_Wavelength);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
        double m_Wavelength, Mantid::Kernel::V3D HKL);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
        double m_Wavelength, Mantid::Kernel::V3D HKL,
        Mantid::Kernel::Matrix<double> goniometer);
   Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
@@ -61,10 +61,10 @@ public:
   bool findDetector() override;
 
   int getRunNumber() const override;
-  void setRunNumber(int m_RunNumber) override;
+  void setRunNumber(int m_runNumber) override;
 
   double getMonitorCount() const override;
-  void setMonitorCount(double m_MonitorCount) override;
+  void setMonitorCount(double m_monitorCount) override;
 
   double getH() const override;
   double getK() const override;
@@ -73,7 +73,7 @@ public:
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
-  void setBankName(std::string m_BankName);
+  void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(Mantid::Kernel::V3D HKL) override;
   void resetHKL();
@@ -98,21 +98,21 @@ public:
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;
-  void setInitialEnergy(double m_InitialEnergy) override;
-  void setFinalEnergy(double m_FinalEnergy) override;
+  void setInitialEnergy(double m_initialEnergy) override;
+  void setFinalEnergy(double m_finalEnergy) override;
 
   double getIntensity() const override;
   double getSigmaIntensity() const override;
 
-  void setIntensity(double m_Intensity) override;
-  void setSigmaIntensity(double m_SigmaIntensity) override;
+  void setIntensity(double m_intensity) override;
+  void setSigmaIntensity(double m_sigmaIntensity) override;
 
   double getBinCount() const override;
-  void setBinCount(double m_BinCount) override;
+  void setBinCount(double m_binCount) override;
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
   void setGoniometerMatrix(
-      Mantid::Kernel::Matrix<double> m_GoniometerMatrix) override;
+      Mantid::Kernel::Matrix<double> goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;
@@ -122,7 +122,7 @@ public:
   double getL1() const override;
   double getL2() const override;
 
-  double getValueByColName(const std::string &name) const;
+  double getValueByColName(const std::string &name_in) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;

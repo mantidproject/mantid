@@ -98,7 +98,7 @@ private:
                                   const double first, const double width,
                                   const double end);
   /// Integrate the point data
-  void integrate(double &integral_value, double &integral_err,
+  void integrate(double &integral_val, double &integral_err,
                  const MantidVec &x, const MantidVec &s, const MantidVec &e,
                  const double xmin, const double xmax) const;
   /// Store the incident energy within the sample object

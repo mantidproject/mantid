@@ -92,7 +92,7 @@ private:
    * @param emodeStr the energy mode description
    */
   template <class T>
-  void correctKiKfEventHelper(std::vector<T> &events, double efixed,
+  void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
                               const std::string emodeStr);
 };
 
