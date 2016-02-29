@@ -144,6 +144,7 @@ void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel,
   gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
 #else
   gsl_matrix *J = gsl_matrix_alloc(gslContainer.n, gslContainer.p);
+  gsl_multifit_fdfsolver_jac(m_gslSolver, J);
   gsl_multifit_covar(J, epsrel, covar);
   gsl_matrix_free (J);
 #endif

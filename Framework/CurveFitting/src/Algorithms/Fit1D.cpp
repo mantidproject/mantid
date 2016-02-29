@@ -617,6 +617,7 @@ void Fit1D::exec() {
       gsl_multifit_covar(s->J, 0.0, covar);
 #else
       gsl_matrix *J = gsl_matrix_alloc(l_data.n, l_data.p);
+      gsl_multifit_fdfsolver_jac(s, J);
       gsl_multifit_covar(J, 0.0, covar);
       gsl_matrix_free (J);
 #endif
