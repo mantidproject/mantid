@@ -7,6 +7,7 @@ import numpy as np
 class IndirectNormSpectra(DataProcessorAlgorithm):
 
     _input_ws_name = None
+    _input_ws = None
     _output_ws_name = None
 
 
@@ -28,24 +29,26 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._setup()
-        input_ws = mtd[self._input_ws_name]
-        CloneWorkspace(InputWorkspace=input_ws,
+        CloneWorkspace(InputWorkspace=self._input_ws,
                        OutputWorkspace=self._output_ws_name)
 
-        num_hists = input_ws.getNumberHistograms()
+        num_hists = self._input_ws.getNumberHistograms()
         output_ws = mtd[self._output_ws_name]
 
         for idx in range(num_hists):
-            y_data = input_ws.readY(idx)
+            y_data = self._input_ws.readY(idx)
             ymax = np.amax(y_data)
             y_data = y_data/ymax
             output_ws.setY(idx, y_data)
-            e_data = input_ws.readE(idx)
+            e_data = self._input_ws.readE(idx)
             e_data = e_data/ymax
             output_ws.setE(idx, e_data)
 
-
         self.setProperty('OutputWorkspace', output_ws)
+
+#----------------------------------Helper Functions---------------------------------
+
+
 
 
     def _setup(self):
@@ -54,6 +57,7 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         """
 
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._input_ws = mtd[self._input_ws_name]
         self._output_ws_name= self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
