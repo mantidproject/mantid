@@ -1067,7 +1067,7 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
 * parallel critical section
 *  and so is thread safe
-*  @param spectrumNumber :: The spectrum number of the bin
+*  @param spectrumNum :: The spectrum number of the bin
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).

@@ -129,8 +129,8 @@ void DetectorEfficiencyVariation::exec() {
  * instrument to use for comparison
  * @param variation :: The maximum fractional variation above the median that is
  * allowed for god detectors
- * @param minSpec :: Index number of the first spectrum to use
- * @param maxSpec :: Index number of the last spectrum to use
+ * @param startWsIndex :: Index number of the first spectrum to use
+ * @param endWsIndex :: Index number of the last spectrum to use
  * @throw invalid_argument if there is an incapatible property value and so the
  * algorithm can't continue
  */
