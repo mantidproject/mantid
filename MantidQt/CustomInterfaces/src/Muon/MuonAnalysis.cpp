@@ -96,7 +96,10 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_fitDataTab(NULL),
       m_resultTableTab(NULL), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
-      m_currentLabel("NoLabelSet"), m_numPeriods(0) {}
+      m_currentLabel("NoLabelSet"), m_numPeriods(0) {
+  m_groupingHelper =
+      Kernel::make_unique<MuonGroupingHelper>(this, this->m_uiForm);
+}
 
 /**
  * Initialize local Python environmnet.
@@ -370,7 +373,7 @@ void MuonAnalysis::plotSelectedItem() {
   ItemType itemType;
   int tableRow;
 
-  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+  int index = getGroupOrPairToPlot();
 
   if (index < 0)
     return; // Nothing to plot
@@ -673,9 +676,10 @@ void MuonAnalysis::runSaveGroupButton() {
     groupingFile += ".xml";
 
   if (!groupingFile.isEmpty()) {
-    Mantid::API::Grouping groupingToSave;
-    parseGroupingTable(m_uiForm, groupingToSave);
-    saveGroupingToXML(groupingToSave, groupingFile.toStdString());
+    Mantid::API::Grouping groupingToSave =
+        m_groupingHelper->parseGroupingTable();
+    MuonGroupingHelper::saveGroupingToXML(groupingToSave,
+                                          groupingFile.toStdString());
 
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
@@ -724,7 +728,7 @@ void MuonAnalysis::runLoadGroupButton() {
   }
 
   clearTablesAndCombo();
-  fillGroupingTable(loadedGrouping, m_uiForm);
+  m_groupingHelper->fillGroupingTable(loadedGrouping);
 
   m_updating = false;
 
@@ -762,7 +766,7 @@ void MuonAnalysis::runGroupTablePlotButton() {
     PlotType plotType = parsePlotType(m_uiForm.groupTablePlotChoice);
 
     // Update the combo box on the home tab
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(groupNumber);
+    setGroupOrPairToPlot(groupNumber);
     m_uiForm.frontPlotFuncs->setCurrentIndex(
         m_uiForm.groupTablePlotChoice->currentIndex());
 
@@ -849,8 +853,7 @@ void MuonAnalysis::runPairTablePlotButton() {
 
   if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
     // Sync with selectors on the front
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(
-        numGroups() + m_pairTableRowInFocus);
+    setGroupOrPairToPlot(numGroups() + m_pairTableRowInFocus);
     m_uiForm.frontPlotFuncs->setCurrentIndex(
         m_uiForm.pairTablePlotChoice->currentIndex());
 
@@ -963,7 +966,7 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
     }
   }
 
-  m_groupToRow = whichGroupToWhichRow(m_uiForm);
+  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
   updatePairTable();
   updateFrontAndCombo();
 
@@ -1004,7 +1007,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
         return;
       }
     }
-    m_pairToRow = whichPairToWhichRow(m_uiForm);
+    m_pairToRow = m_groupingHelper->whichPairToWhichRow();
     updateFrontAndCombo();
   }
 
@@ -1036,7 +1039,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
       }
     }
 
-    m_pairToRow = whichPairToWhichRow(m_uiForm);
+    m_pairToRow = m_groupingHelper->whichPairToWhichRow();
     updateFrontAndCombo();
 
     // check to see if alpha is specified (if name!="") and if not
@@ -1296,15 +1299,16 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
-    groupingToUse = boost::make_shared<Mantid::API::Grouping>();
-    parseGroupingTable(m_uiForm, *groupingToUse);
+    groupingToUse = boost::make_shared<Mantid::API::Grouping>(
+        m_groupingHelper->parseGroupingTable());
   } else {
     // Need to load a new grouping
     result->usedExistGrouping = false;
 
-    try // to get grouping from IDF
-    {
-      Mantid::API::GroupingLoader loader(instr, loadResult->mainFieldDirection);
+    // Try to get grouping from IDF
+    // If fails, use grouping loaded from file or, if none, dummy grouping
+    Mantid::API::GroupingLoader loader(instr, loadResult->mainFieldDirection);
+    try {
       groupingToUse = loader.getGroupingFromIDF();
     } catch (std::runtime_error &e) {
       g_log.warning() << "Unable to apply grouping from the IDF: " << e.what()
@@ -1320,13 +1324,13 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
           groupingTable =
               boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
         }
-
-        groupingToUse = tableToGrouping(groupingTable);
+        groupingToUse =
+            boost::make_shared<Mantid::API::Grouping>(groupingTable);
         groupingToUse->description = "Grouping from Nexus file";
       } else {
         g_log.warning(
             "No grouping set in the Nexus file. Using dummy grouping");
-        groupingToUse = getDummyGrouping(instr);
+        groupingToUse = loader.getDummyGrouping();
       }
     }
   }
@@ -1372,8 +1376,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     // Get the grouping
     groupResult = getGrouping(loadResult);
-    ITableWorkspace_sptr groupingTable =
-        groupingToTable(groupResult->groupingUsed);
+    ITableWorkspace_sptr groupingTable = groupResult->groupingUsed->toTable();
 
     // Now apply DTC, if used, and grouping
     IAlgorithm_sptr alg =
@@ -1442,7 +1445,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   //      clear the grouping
   if (!groupResult->usedExistGrouping) {
     runClearGroupingButton();
-    fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
+    m_groupingHelper->fillGroupingTable(*(groupResult->groupingUsed));
   }
 
   // Populate instrument fields
@@ -1609,7 +1612,7 @@ void MuonAnalysis::guessAlphaClicked() {
  * @return number of groups
  */
 int MuonAnalysis::numGroups() {
-  m_groupToRow = whichGroupToWhichRow(m_uiForm);
+  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
   return static_cast<int>(m_groupToRow.size());
 }
 
@@ -1619,7 +1622,7 @@ int MuonAnalysis::numGroups() {
  * @return number of pairs
  */
 int MuonAnalysis::numPairs() {
-  m_pairToRow = whichPairToWhichRow(m_uiForm);
+  m_pairToRow = m_groupingHelper->whichPairToWhichRow();
   return static_cast<int>(m_pairToRow.size());
 }
 
@@ -1629,7 +1632,7 @@ int MuonAnalysis::numPairs() {
  */
 void MuonAnalysis::updateFront() {
   // get current index
-  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+  int index = getGroupOrPairToPlot();
 
   m_uiForm.frontPlotFuncs->clear();
 
@@ -1663,10 +1666,11 @@ void MuonAnalysis::updateFront() {
 void MuonAnalysis::updateFrontAndCombo() {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
-  // to complete reset this combo box
-  int currentI = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+  // to completely reset this combo box
+  int currentI = getGroupOrPairToPlot();
   if (currentI < 0) // in case this combobox has not been set yet
     currentI = 0;
+
   m_uiForm.frontGroupGroupPairComboBox->clear();
 
   int numG = numGroups();
@@ -1678,10 +1682,12 @@ void MuonAnalysis::updateFrontAndCombo() {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
 
-  if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count())
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
-  else
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
+  // If it doesn't match then reset
+  if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
+    currentI = 0;
+  }
+
+  setGroupOrPairToPlot(currentI);
 }
 
 /**
@@ -1716,7 +1722,7 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
  * @return Group number
  */
 int MuonAnalysis::getGroupNumberFromRow(int row) {
-  m_groupToRow = whichGroupToWhichRow(m_uiForm);
+  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
   for (unsigned int i = 0; i < m_groupToRow.size(); i++) {
     if (m_groupToRow[i] == row)
       return i;
@@ -1732,7 +1738,7 @@ int MuonAnalysis::getGroupNumberFromRow(int row) {
  * @return Pair number
  */
 int MuonAnalysis::getPairNumberFromRow(int row) {
-  m_pairToRow = whichPairToWhichRow(m_uiForm);
+  m_pairToRow = m_groupingHelper->whichPairToWhichRow();
   for (unsigned int i = 0; i < m_pairToRow.size(); i++) {
     if (m_pairToRow[i] == row)
       return i;
@@ -1985,7 +1991,7 @@ void MuonAnalysis::showAllPlotWindows() {
  * @return true if set
  */
 bool MuonAnalysis::isGroupingSet() const {
-  auto dummy = whichGroupToWhichRow(m_uiForm);
+  auto dummy = m_groupingHelper->whichGroupToWhichRow();
 
   return !dummy.empty();
 }
@@ -2619,7 +2625,7 @@ void MuonAnalysis::syncGroupTablePlotTypeWithHome() {
     // This is not the best solution, but I don't have anything brighter at the
     // moment and it
     // was working like that for some time without anybody complaining.
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+    setGroupOrPairToPlot(0);
   }
 
   m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
@@ -2839,9 +2845,8 @@ void MuonAnalysis::groupLoadedWorkspace() {
  * @return ITableWorkspace of the format returned by LoadMuonNexus
  */
 ITableWorkspace_sptr MuonAnalysis::parseGrouping() {
-  auto grouping = boost::make_shared<Mantid::API::Grouping>();
-  parseGroupingTable(m_uiForm, *grouping);
-  return groupingToTable(grouping);
+  auto grouping = m_groupingHelper->parseGroupingTable();
+  return grouping.toTable();
 }
 
 /**
@@ -3010,7 +3015,7 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm() {
 
   // -- Group/pair properties -------------------------------------------------
 
-  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+  int index = getGroupOrPairToPlot();
 
   if (index >= numGroups()) {
     loadAlg->setProperty("OutputType", "PairAsymmetry");
@@ -3075,6 +3080,27 @@ void MuonAnalysis::openDirectoryDialog() {
       new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/**
+ * Updates the current choice of which group or group pair to plot
+ * Also updates the UI on the front panel
+ * The point of using this function is so that the UI is never out of sync
+ * @param index :: [input] Index of which group/pair to plot
+ */
+void MuonAnalysis::setGroupOrPairToPlot(int index) {
+  m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+  // Replot, whichever tab we're currently on
+  if (m_loaded && isAutoUpdateEnabled()) {
+    runFrontPlotButton();
+  }
+}
+
+/**
+ * Current index of which group/pair to plot
+ */
+int MuonAnalysis::getGroupOrPairToPlot() const {
+  return m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 }
 
 } // namespace MantidQT

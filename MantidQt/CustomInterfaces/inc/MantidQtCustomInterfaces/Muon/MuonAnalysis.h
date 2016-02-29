@@ -31,6 +31,9 @@ using namespace Mantid::Geometry;
 
 namespace Muon
 {
+  // Forward declaration
+  class MuonGroupingHelper;
+
   // Tab classes
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
@@ -94,6 +97,12 @@ public:
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
+
+  /// Sets index of group or pair to plot
+  void setGroupOrPairToPlot(int index);
+
+  /// Gets current index of group or pair to plot
+  int getGroupOrPairToPlot() const;
 
 signals:
   /// Request to hide/show Mantid toolbars
@@ -504,8 +513,10 @@ private:
 
   /// Current number of periods
   size_t m_numPeriods;
-};
 
+  /// Grouping helper class
+  std::unique_ptr<MuonGroupingHelper> m_groupingHelper;
+};
 }
 }
 
