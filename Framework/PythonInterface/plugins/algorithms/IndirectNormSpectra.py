@@ -36,13 +36,13 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         output_ws = mtd[self._output_ws_name]
 
         for idx in range(num_hists):
-            y = input_ws.readY(idx)
-            ymax = np.amax(y)
-            y = y/ymax
-            output_ws.setY(idx, y)
-            e = input_ws.readE(idx)
-            e = e/ymax
-            output_ws.setE(idx, e)
+            y_data = input_ws.readY(idx)
+            ymax = np.amax(y_data)
+            y_data = y_data/ymax
+            output_ws.setY(idx, y_data)
+            e_data = input_ws.readE(idx)
+            e_data = e_data/ymax
+            output_ws.setE(idx, e_data)
 
 
         self.setProperty('OutputWorkspace', output_ws)
