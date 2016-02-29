@@ -1316,7 +1316,7 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeakWorkspace", "", Kernel::Direction::Input),
                   "Workspace of Indexed Peaks");
 
@@ -1378,9 +1378,9 @@ void SCDCalibratePanels::init() {
       boost::make_shared<Kernel::StringListValidator>(preProcessOptions),
       "Select PreProcessing info");
 
-  vector<string> exts2{".DetCal", ".xml"};
-  declareProperty(new FileProperty("PreProcFilename", "",
-                                   FileProperty::OptionalLoad, exts2),
+  const vector<string> exts2{".DetCal", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "PreProcFilename", "", FileProperty::OptionalLoad, exts2),
                   "Path to file with preprocessing information");
 
   declareProperty("InitialTimeOffset", 0.0,
@@ -1392,23 +1392,25 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("InitialTimeOffset", PREPROC);
 
   // ---------- outputs
-  declareProperty(new FileProperty("DetCalFilename", "",
-                                   FileProperty::OptionalSave,
-                                   {".DetCal", ".Det_Cal"}),
+  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
+  declareProperty(Kernel::make_unique<FileProperty>("DetCalFilename", "",
+                                                    FileProperty::OptionalSave,
+                                                    detcalExts),
                   "Path to an ISAW-style .detcal file to save.");
 
   declareProperty(
-      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
+      Kernel::make_unique<FileProperty>("XmlFilename", "",
+                                        FileProperty::OptionalSave, ".xml"),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "ResultWorkspace", "ResultWorkspace", Kernel::Direction::Output),
       "Workspace of Results");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "QErrorWorkspace", "QErrorWorkspace", Kernel::Direction::Output),
       "Workspace of Errors in Q");
 
@@ -1445,30 +1447,30 @@ void SCDCalibratePanels::init() {
                   Kernel::Direction::Output);
   declareProperty("DOF", -1, "Degrees of Freedom", Kernel::Direction::Output);
   setPropertySettings("PanelNamePrefix",
-                      new EnabledWhenProperty(
+                      Kernel::make_unique<EnabledWhenProperty>(
                           "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
-  setPropertySettings("Grouping", new EnabledWhenProperty("PanelGroups",
-                                                          Kernel::IS_EQUAL_TO,
-                                                          "SpecifyGroups"));
+  setPropertySettings("Grouping",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
   setPropertySettings("PreProcFilename",
-                      new EnabledWhenProperty("PreProcessInstrument",
-                                              Kernel::IS_NOT_EQUAL_TO,
-                                              "A)No PreProcessing"));
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO,
+                          "A)No PreProcessing"));
 
-  setPropertySettings(
-      "InitialTimeOffset",
-      new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_EQUAL_TO,
-                              "C)Apply a LoadParameter.xml type file"));
+  setPropertySettings("InitialTimeOffset",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_EQUAL_TO,
+                          "C)Apply a LoadParameter.xml type file"));
 
-  setPropertySettings(
-      "MaxSamplePositionChangeMeters",
-      new EnabledWhenProperty("AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxSamplePositionChangeMeters",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "MaxRotationChangeDegrees",
-      new EnabledWhenProperty("usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxRotationChangeDegrees",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /**

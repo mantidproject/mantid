@@ -45,17 +45,18 @@ SaveMD2::~SaveMD2() {}
 /** Initialize the algorithm's properties.
  */
 void SaveMD2::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", new EnabledWhenProperty("UpdateFileBackEnd",
-                                                          IS_EQUAL_TO, "0"));
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
       "UpdateFileBackEnd", false,
@@ -64,7 +65,7 @@ void SaveMD2::init() {
       "to reflect the current data structure. Filename parameter is ignored.");
   setPropertySettings(
       "UpdateFileBackEnd",
-      new EnabledWhenProperty("MakeFileBacked", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
@@ -72,7 +73,7 @@ void SaveMD2::init() {
                   "file-backed one.");
   setPropertySettings(
       "MakeFileBacked",
-      new EnabledWhenProperty("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------

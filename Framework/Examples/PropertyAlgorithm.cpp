@@ -33,9 +33,9 @@ void PropertyAlgorithm::init() {
   declareProperty("PositiveIntValue1", 0, mustBePositive);
 
   // A property can be an array of int, double, or std::string
-  declareProperty(new ArrayProperty<int>("IntArray"));
-  declareProperty(new ArrayProperty<double>("DoubleArray"));
-  declareProperty(new ArrayProperty<std::string>("StringArray"));
+  declareProperty(make_unique<ArrayProperty<int>>("IntArray"));
+  declareProperty(make_unique<ArrayProperty<double>>("DoubleArray"));
+  declareProperty(make_unique<ArrayProperty<std::string>>("StringArray"));
 }
 
 /** Executes the algorithm

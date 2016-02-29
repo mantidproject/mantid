@@ -50,11 +50,11 @@ SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
-      new API::WorkspaceProperty<DataObjects::GroupingWorkspace>(
+      make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
   declareProperty(
-      new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
+      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 

@@ -36,14 +36,14 @@ DECLARE_ALGORITHM(CatalogDownloadDataFiles)
 
 /// declaring algorithm properties
 void CatalogDownloadDataFiles::init() {
-  declareProperty(new ArrayProperty<int64_t>("FileIds"),
+  declareProperty(make_unique<ArrayProperty<int64_t>>("FileIds"),
                   "List of fileids to download from the data server");
-  declareProperty(new ArrayProperty<std::string>("FileNames"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("FileNames"),
                   "List of filenames to download from the data server");
   declareProperty("DownloadPath", "", "The path to save the downloaded files.");
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
-  declareProperty(new ArrayProperty<std::string>(
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
                       "FileLocations", std::vector<std::string>(),
                       boost::make_shared<NullValidator>(), Direction::Output),
                   "A list of file locations to the catalog datafiles.");

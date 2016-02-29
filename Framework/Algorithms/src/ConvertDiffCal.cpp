@@ -57,11 +57,11 @@ const std::string ConvertDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertDiffCal::init() {
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace",
-                                                          "", Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OffsetsWorkspace", "", Direction::Input),
                   "OffsetsWorkspace containing the calibration offsets.");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

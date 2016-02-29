@@ -47,28 +47,28 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
   validator->add(boost::make_shared<MandatoryValidator<int>>());
 
-  declareProperty(new PropertyWithValue<int>("Dimensionality", -1, validator,
-                                             Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "Dimensionality", -1, validator, Direction::Input),
                   "Dimensionality of the data in the file.");
 
-  declareProperty(new ArrayProperty<double>("Extents"),
+  declareProperty(make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(new ArrayProperty<int>("NumberOfBins"),
+  declareProperty(make_unique<ArrayProperty<int>>("NumberOfBins"),
                   "Number of bin in each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Names"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Units"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
   declareProperty(
-      new ArrayProperty<std::string>("Frames"),
+      make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."

@@ -54,13 +54,14 @@ const std::string SaveParameterFile::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveParameterFile::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to save the instrument parameters from.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to save the instrument parameters from.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, {".xml"}),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save,
+                                     ".xml"),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 

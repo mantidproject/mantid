@@ -676,7 +676,7 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
   // Now check if the version has changed since last time
   const QString version =
       QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
- 
+
   return (version != lastVersion);
 }
 
@@ -1858,7 +1858,8 @@ void ApplicationWindow::plotPie() {
 
   QStringList s = table->selectedColumns();
   if (s.count() > 0) {
-    multilayerPlot(table, s, Graph::Pie, table->topSelectedRow(), table->bottomSelectedRow());
+    multilayerPlot(table, s, Graph::Pie, table->topSelectedRow(),
+                   table->bottomSelectedRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"),
                          tr("Please select a column to plot!")); // Mantid
@@ -1893,7 +1894,8 @@ void ApplicationWindow::plotVectXYXY() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    multilayerPlot(table, s, Graph::VectXYXY, table->topSelectedRow(), table->bottomSelectedRow());
+    multilayerPlot(table, s, Graph::VectXYXY, table->topSelectedRow(),
+                   table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -1909,7 +1911,8 @@ void ApplicationWindow::plotVectXYAM() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    multilayerPlot(table, s, Graph::VectXYAM, table->topSelectedRow(), table->bottomSelectedRow());
+    multilayerPlot(table, s, Graph::VectXYAM, table->topSelectedRow(),
+                   table->bottomSelectedRow());
   } else
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
@@ -2028,8 +2031,9 @@ Note *ApplicationWindow::newStemPlot() {
   QStringList lst = t->selectedColumns();
   if (lst.isEmpty()) {
     for (int i = t->leftSelectedColumn(); i <= t->rightSelectedColumn(); i++)
-      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, t->topSelectedRow() + 1,
-                                      t->bottomSelectedRow() + 1) +
+      n->setText(n->text() +
+                 stemPlot(t, t->colName(i), 1001, t->topSelectedRow() + 1,
+                          t->bottomSelectedRow() + 1) +
                  "\n");
   } else {
     for (int i = 0; i < lst.count(); i++)
@@ -4818,7 +4822,7 @@ void ApplicationWindow::openProjectFolder(std::string lines,
             mantidUI->getInstrumentView(QString::fromStdString(wsName)));
         if (iw) {
           iw->loadFromProject(*it, this, fileVersion);
-		}
+        }
       }
     }
   }
@@ -16023,8 +16027,8 @@ MultiLayer *ApplicationWindow::generate2DGraph(Graph::CurveType type) {
     if (!validFor2DPlot(table))
       return 0;
 
-    return multilayerPlot(table, table->selectedColumns(), type, table->topSelectedRow(),
-                          table->bottomSelectedRow());
+    return multilayerPlot(table, table->selectedColumns(), type,
+                          table->topSelectedRow(), table->bottomSelectedRow());
   } else if (w->isA("Matrix")) {
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);

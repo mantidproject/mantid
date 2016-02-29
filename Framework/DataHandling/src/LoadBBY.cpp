@@ -128,23 +128,24 @@ void LoadBBY::init() {
   // file to load.
   exts.clear();
   exts.emplace_back(".tar");
-  declareProperty(
-      new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      FilenameStr, "", API::FileProperty::Load, exts),
+                  "The input filename of the stored data");
 
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  declareProperty(
-      new API::FileProperty(MaskStr, "", API::FileProperty::OptionalLoad, exts),
-      "The input filename of the mask data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      MaskStr, "", API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the mask data");
 
   // OutputWorkspace
-  declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
-      "OutputWorkspace", "", Kernel::Direction::Output));
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output));
 
   // FilterByTofMin
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMinStr, 0, Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -152,7 +153,7 @@ void LoadBBY::init() {
                   "blank to load all events.");
 
   // FilterByTofMax
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMaxStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -161,26 +162,26 @@ void LoadBBY::init() {
 
   // FilterByTimeStart
   declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTimeStartStr, 0.0,
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStartStr, 0.0, Kernel::Direction::Input),
       "Optional: To only include events after the provided start time, in "
       "seconds (relative to the start of the run).");
 
   // FilterByTimeStop
   declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTimeStopStr, EMPTY_DBL(),
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStopStr, EMPTY_DBL(), Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
   // period and phase
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PeriodMasterStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PeriodSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PhaseSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
 

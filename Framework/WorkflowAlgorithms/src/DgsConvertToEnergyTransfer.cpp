@@ -61,37 +61,38 @@ const std::string DgsConvertToEnergyTransfer::category() const {
  */
 void DgsConvertToEnergyTransfer::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "A sample data workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
   this->declareProperty(
       "IncidentEnergyGuess", EMPTY_DBL(),
       "This is the starting point for the incident energy calculation.");
-  this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium",
-                                                "", Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "IntegratedDetectorVanadium", "", Direction::Input,
+                            PropertyMode::Optional),
                         "A workspace containing the "
                         "integrated detector vanadium.");
   this->declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A mask workspace");
   this->declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A grouping workspace");
   this->declareProperty(
       "AlternateGroupingTag", "",
       "Allows modification to the OldGroupingFile property name");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name for the output workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputTibWorkspace", "", Direction::Output),
-      "The name for the output TIB workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The name for the output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputTibWorkspace",
+                                                         "", Direction::Output),
+                        "The name for the output TIB workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
 }

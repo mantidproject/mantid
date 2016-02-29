@@ -33,16 +33,17 @@ CloneMDWorkspace::~CloneMDWorkspace() {}
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace/MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace/MDHistoWorkspace.");
 
   std::vector<std::string> exts(1, ".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      Kernel::make_unique<FileProperty>("Filename", "",
+                                        FileProperty::OptionalSave, exts),
       "If the input workspace is file-backed, specify a file to which to save "
       "the cloned workspace.\n"
       "If the workspace is file-backed but this parameter is NOT specified, "
