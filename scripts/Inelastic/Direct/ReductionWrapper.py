@@ -9,7 +9,12 @@ from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
 import time
-import h5py
+try:
+    import h5py
+    h5py_installed = True
+except ImportError:
+    h5py_installed = False
+    pass
 from abc import abstractmethod
 
 # R0921 abstract class not referenced -- wrong, client references it.
@@ -386,6 +391,8 @@ class ReductionWrapper(object):
         _,found_ext=os.path.splitext(input_file)
         if found_ext != '.nxs': # problem solution for nxs files only. Others are seems ok
             return
+        if not h5py_installed: # well this check is not available. Sad, but it available on 
+            return             # all our working systems
         ic=0
         #ok = os.access(input_file,os.R_OK) # does not work in this case
         try:
