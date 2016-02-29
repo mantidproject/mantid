@@ -32,10 +32,10 @@ MDHistoToWorkspace2D::MDHistoToWorkspace2D()
     : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
 
 void MDHistoToWorkspace2D::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void MDHistoToWorkspace2D::exec() {
@@ -98,7 +98,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     }
     outWS->setX(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specid_t>(m_currentSpectra));
+        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper

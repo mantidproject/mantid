@@ -12,27 +12,8 @@ HardThresholdBackground::HardThresholdBackground(
     const Mantid::API::MDNormalization normalization)
     : m_thresholdSignal(thresholdSignal), m_normalization(normalization) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-HardThresholdBackground::~HardThresholdBackground() {}
-
-HardThresholdBackground::HardThresholdBackground(
-    const HardThresholdBackground &other)
-    : m_thresholdSignal(other.m_thresholdSignal),
-      m_normalization(other.m_normalization) {}
-
 HardThresholdBackground *HardThresholdBackground::clone() const {
   return new HardThresholdBackground(*this);
-}
-
-HardThresholdBackground &HardThresholdBackground::
-operator=(const HardThresholdBackground &other) {
-  if (&other != this) {
-    m_thresholdSignal = other.m_thresholdSignal;
-    m_normalization = other.m_normalization;
-  }
-  return *this;
 }
 
 void HardThresholdBackground::configureIterator(

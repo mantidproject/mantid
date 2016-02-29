@@ -52,7 +52,7 @@ namespace Geometry {
   */
 class MANTID_GEOMETRY_DLL SymmetryElement {
 public:
-  virtual ~SymmetryElement() {}
+  virtual ~SymmetryElement() = default;
 
   virtual boost::shared_ptr<SymmetryElement> clone() const = 0;
 
@@ -75,7 +75,6 @@ typedef boost::shared_ptr<SymmetryElement> SymmetryElement_sptr;
 class MANTID_GEOMETRY_DLL SymmetryElementIdentity : public SymmetryElement {
 public:
   SymmetryElementIdentity();
-  ~SymmetryElementIdentity() override {}
 
   SymmetryElement_sptr clone() const override;
 };
@@ -91,7 +90,6 @@ typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
   SymmetryElementInversion(const V3R &inversionPoint = V3R(0, 0, 0));
-  ~SymmetryElementInversion() override {}
 
   SymmetryElement_sptr clone() const override;
 
@@ -114,7 +112,6 @@ typedef boost::shared_ptr<SymmetryElementInversion>
 class MANTID_GEOMETRY_DLL SymmetryElementTranslation : public SymmetryElement {
 public:
   SymmetryElementTranslation(const V3R &translation);
-  ~SymmetryElementTranslation() override {}
 
   /// Returns the internally stored translation vector.
   V3R getTranslation() const { return m_translation; }
@@ -137,8 +134,6 @@ typedef boost::shared_ptr<SymmetryElementTranslation>
  */
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxis : public SymmetryElement {
 public:
-  ~SymmetryElementWithAxis() override {}
-
   /// Returns the internally stored axis.
   V3R getAxis() const { return m_axis; }
 
@@ -178,7 +173,6 @@ public:
   SymmetryElementRotation(const std::string &symbol, const V3R &axis,
                           const V3R &translation = V3R(0, 0, 0),
                           const RotationSense &rotationSense = Positive);
-  ~SymmetryElementRotation() override {}
 
   SymmetryElement_sptr clone() const override;
 
@@ -205,7 +199,6 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirror
 public:
   SymmetryElementMirror(const std::string &symbol, const V3R &axis,
                         const V3R &translation = V3R(0, 0, 0));
-  ~SymmetryElementMirror() override {}
 
   SymmetryElement_sptr clone() const override;
 };

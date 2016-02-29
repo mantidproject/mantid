@@ -48,14 +48,14 @@ const std::string NexusTester::category() const {
 void NexusTester::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(
-      new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),
-      "The name of the Nexus file to write.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "SaveFilename", "", FileProperty::OptionalSave, exts),
+                  "The name of the Nexus file to write.");
 
-  declareProperty(
-      new FileProperty("LoadFilename", "", FileProperty::OptionalLoad, exts),
-      "The name of the Nexus file to load (optional).\n"
-      "Must have been written by NexusTester algorithm.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "LoadFilename", "", FileProperty::OptionalLoad, exts),
+                  "The name of the Nexus file to load (optional).\n"
+                  "Must have been written by NexusTester algorithm.");
 
   declareProperty("ChunkSize", 10,
                   "Chunk size for writing/loading, in kb of data");

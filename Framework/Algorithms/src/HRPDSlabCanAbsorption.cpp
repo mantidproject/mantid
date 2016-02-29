@@ -22,9 +22,9 @@ using namespace Mantid::PhysicalConstants;
 
 void HRPDSlabCanAbsorption::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

@@ -37,13 +37,15 @@ LoadDetectorInfo::LoadDetectorInfo()
 
 void LoadDetectorInfo::init() {
 
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "The name of the workspace to that the detector information "
-                  "will be loaded into.");
-
   declareProperty(
-      new FileProperty("DataFilename", "", FileProperty::Load,
-                       {".dat", ".raw", ".sca", ".nxs"}),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "The name of the workspace to that the detector information "
+      "will be loaded into.");
+
+  const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
+  declareProperty(
+      Kernel::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
+                                        exts),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "

@@ -73,7 +73,7 @@ namespace MantidQt
 										// is a point in real space masked by any of the shapes
 			bool isMasked(double x, double y)const;
 			// collect all screen pixels that are masked by the shapes
-			void getMaskedPixels(QList<QPoint>& pixels)const;
+			QList<QPoint> getMaskedPixels()const;
 
 			// set the bounding rect of the current shape such that its real rect is given by the argument
 			void setCurrentBoundingRectReal(const QRectF& rect);

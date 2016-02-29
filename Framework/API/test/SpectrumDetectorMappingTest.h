@@ -43,7 +43,7 @@ public:
   }
 
   void test_vector_constructor_unequal_lengths() {
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(std::vector<specid_t>(2),
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(std::vector<specnum_t>(2),
                                              std::vector<detid_t>(1)),
                      std::invalid_argument);
   }
@@ -64,7 +64,7 @@ public:
 
   void test_vector_constructor_uses_all_spectra_by_default() {
     // Empty is fine for the input
-    std::vector<specid_t> specs;
+    std::vector<specnum_t> specs;
     std::vector<detid_t> detids;
     SpectrumDetectorMapping map(specs, detids);
     TS_ASSERT(map.getMapping().empty());
@@ -84,7 +84,7 @@ public:
 
   void test_vector_constructor_ignores_detectors_in_ignore_list() {
     const int ndets = 5;
-    std::vector<specid_t> specs(ndets, 0);
+    std::vector<specnum_t> specs(ndets, 0);
     std::vector<detid_t> detids(ndets, 0);
     for (int i = 0; i < ndets; ++i) {
       specs[i] = i + 1;
@@ -112,7 +112,7 @@ public:
   }
 
   void test_array_constructor_null_inputs() {
-    specid_t specs[2];
+    specnum_t specs[2];
     detid_t detids[2];
     TS_ASSERT_THROWS(SpectrumDetectorMapping(NULL, detids, 10),
                      std::invalid_argument);
@@ -121,7 +121,7 @@ public:
   }
 
   void test_array_constructor() {
-    specid_t specs[] = {1, 2, 2, 3};
+    specnum_t specs[] = {1, 2, 2, 3};
     detid_t detids[] = {10, 99, 20, 30};
 
     SpectrumDetectorMapping map(specs, detids, 4);
@@ -129,7 +129,7 @@ public:
   }
 
   void test_getSpectrumNumbers() {
-    specid_t specs[] = {5, 4, 4, 3};
+    specnum_t specs[] = {5, 4, 4, 3};
     detid_t detids[] = {10, 99, 20, 30};
 
     SpectrumDetectorMapping map(specs, detids, 4);

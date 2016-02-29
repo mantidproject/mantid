@@ -106,14 +106,14 @@ private:
     return extractor->getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specid_t specID,
+  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
                          const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     const Mantid::API::ISpectrum *spectrum(NULL);
     TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(0));
     if (spectrum) {
       TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), specID);
-      std::set<detid_t> detids = spectrum->getDetectorIDs();
+      auto detids = spectrum->getDetectorIDs();
       TS_ASSERT_EQUALS(detids.size(), 1);
       const detid_t id = *(detids.begin());
       TS_ASSERT_EQUALS(id, detID);

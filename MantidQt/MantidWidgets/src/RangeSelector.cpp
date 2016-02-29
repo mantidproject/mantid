@@ -9,37 +9,39 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot, SelectType type, bool visible, bool infoOnly)
-  : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0) ,m_max(0.0), m_lower(0.0),
-    m_higher(0.0), m_canvas(plot->canvas()), m_plot(plot), m_mrkMin(NULL), m_mrkMax(NULL),
-    m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
-    m_pen(NULL), m_movCursor()
-{
+RangeSelector::RangeSelector(QwtPlot *plot, SelectType type, bool visible,
+                             bool infoOnly)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0), m_max(0.0),
+      m_lower(0.0), m_higher(0.0), m_canvas(plot->canvas()), m_plot(plot),
+      m_mrkMin(NULL), m_mrkMax(NULL), m_minChanging(false),
+      m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
+      m_pen(NULL), m_movCursor() {
   init();
 }
 
-RangeSelector::RangeSelector(PreviewPlot* plot, SelectType type, bool visible, bool infoOnly)
-  : QwtPlotPicker(plot->m_uiForm.plot->canvas()), m_type(type), m_min(0.0) ,m_max(0.0), m_lower(0.0),
-    m_higher(0.0), m_canvas(plot->m_uiForm.plot->canvas()), m_plot(plot->m_uiForm.plot), m_mrkMin(NULL), m_mrkMax(NULL),
-    m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
-    m_pen(NULL), m_movCursor()
-{
+RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
+                             bool infoOnly)
+    : QwtPlotPicker(plot->m_uiForm.plot->canvas()), m_type(type), m_min(0.0),
+      m_max(0.0), m_lower(0.0), m_higher(0.0),
+      m_canvas(plot->m_uiForm.plot->canvas()), m_plot(plot->m_uiForm.plot),
+      m_mrkMin(NULL), m_mrkMax(NULL), m_minChanging(false),
+      m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
+      m_pen(NULL), m_movCursor() {
   init();
 }
 
-void RangeSelector::init()
-{
+void RangeSelector::init() {
   m_canvas->installEventFilter(this);
 
-  m_canvas->setCursor(Qt::PointingHandCursor); ///< @todo Make this an option at some point
+  m_canvas->setCursor(
+      Qt::PointingHandCursor); ///< @todo Make this an option at some point
 
   m_mrkMin = new QwtPlotMarker();
   m_mrkMax = new QwtPlotMarker();
 
   QwtPlotMarker::LineStyle lineStyle;
 
-  switch ( m_type )
-  {
+  switch (m_type) {
   case XMINMAX:
   case XSINGLE:
     lineStyle = QwtPlotMarker::VLine;
@@ -55,8 +57,7 @@ void RangeSelector::init()
     break;
   }
 
-  switch ( m_type )
-  {
+  switch (m_type) {
   case XMINMAX:
   case YMINMAX:
     m_mrkMax->setLineStyle(lineStyle);
@@ -86,169 +87,135 @@ void RangeSelector::init()
   m_mrkMax->setLinePen(*m_pen);
 }
 
-bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
-{
+bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
   Q_UNUSED(obj);
   // Do not handle the event if the widget is set to be invisible
-  if ( !m_visible || m_infoOnly )
-  {
+  if (!m_visible || m_infoOnly) {
     return false;
   }
 
-  switch ( evn->type() )
-  {
+  switch (evn->type()) {
   case QEvent::MouseButtonPress: // User has started moving something (perhaps)
-    {
-    QPoint p = ((QMouseEvent*)evn)->pos();
+  {
+    QPoint p = ((QMouseEvent *)evn)->pos();
     double x(0.0), dx(0.0);
-    switch ( m_type )
-    {
+    switch (m_type) {
     case XMINMAX:
     case XSINGLE:
       x = m_plot->invTransform(QwtPlot::xBottom, p.x());
-      dx = m_plot->invTransform(QwtPlot::xBottom, p.x()+3);
+      dx = m_plot->invTransform(QwtPlot::xBottom, p.x() + 3);
       break;
     case YMINMAX:
     case YSINGLE:
       x = m_plot->invTransform(QwtPlot::yLeft, p.y());
-      dx = m_plot->invTransform(QwtPlot::yLeft, p.y()+3);
+      dx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
       break;
     }
-    if ( inRange(x) )
-    {
-      if ( changingMin(x, dx) )
-      {
+    if (inRange(x)) {
+      if (changingMin(x, dx)) {
         m_minChanging = true;
         m_canvas->setCursor(m_movCursor);
         setMin(x);
         m_plot->replot();
         return true;
-      }
-      else if ( changingMax(x, dx) )
-      {
+      } else if (changingMax(x, dx)) {
         m_maxChanging = true;
         m_canvas->setCursor(m_movCursor);
         setMax(x);
         m_plot->replot();
         return true;
-      }
-      else
-      {
+      } else {
         return false;
       }
-    }
-    else
-    {
+    } else {
       return false;
     }
     break;
-    }
-  case QEvent::MouseMove: // User is in the process of moving something (perhaps)
-    {
-    if ( m_minChanging || m_maxChanging )
-    {
-    QPoint p = ((QMouseEvent*)evn)->pos();
-    double x(0.0);
-    switch ( m_type )
-    {
-    case XMINMAX:
-    case XSINGLE:
-      x = m_plot->invTransform(QwtPlot::xBottom, p.x());
-      break;
-    case YMINMAX:
-    case YSINGLE:
-      x = m_plot->invTransform(QwtPlot::yLeft, p.y());
-      break;
-    }
-    if ( inRange(x) )
-    {
-      if ( m_minChanging )
-      {
-        if ( x <= m_max )
-        {
+  }
+  case QEvent::MouseMove: // User is in the process of moving something
+                          // (perhaps)
+  {
+    if (m_minChanging || m_maxChanging) {
+      QPoint p = ((QMouseEvent *)evn)->pos();
+      double x(0.0);
+      switch (m_type) {
+      case XMINMAX:
+      case XSINGLE:
+        x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+        break;
+      case YMINMAX:
+      case YSINGLE:
+        x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+        break;
+      }
+      if (inRange(x)) {
+        if (m_minChanging) {
+          if (x <= m_max) {
             setMin(x);
-        }
-        else
-        {
+          } else {
             setMax(x);
             m_minChanging = false;
             m_maxChanging = true;
-        }
-      }
-      else
-      {
-        if ( x >= m_min )
-        {
+          }
+        } else {
+          if (x >= m_min) {
             setMax(x);
-        }
-        else
-        {
+          } else {
             setMin(x);
             m_minChanging = true;
             m_maxChanging = false;
+          }
         }
-      }
-    }
-    else
-    {
-      m_canvas->setCursor(Qt::PointingHandCursor);
-      m_minChanging = false;
-      m_maxChanging = false;
-      emit selectionChangedLazy(m_min, m_max);
-    }
-    m_plot->replot();
-    return true;
-    }
-    else
-    {
-    return false;
-    }
-    break;
-    }
-  case QEvent::MouseButtonRelease: // User has finished moving something (perhaps)
-    {
-      if ( m_minChanging || m_maxChanging )
-      {
+      } else {
         m_canvas->setCursor(Qt::PointingHandCursor);
         m_minChanging = false;
         m_maxChanging = false;
         emit selectionChangedLazy(m_min, m_max);
-        return true;
       }
-      else
-      {
-        return false;
-      }
-      break;
+      m_plot->replot();
+      return true;
+    } else {
+      return false;
     }
+    break;
+  }
+  case QEvent::MouseButtonRelease: // User has finished moving something
+                                   // (perhaps)
+  {
+    if (m_minChanging || m_maxChanging) {
+      m_canvas->setCursor(Qt::PointingHandCursor);
+      m_minChanging = false;
+      m_maxChanging = false;
+      emit selectionChangedLazy(m_min, m_max);
+      return true;
+    } else {
+      return false;
+    }
+    break;
+  }
   default:
     return false;
   }
 }
 
-std::pair<double, double> RangeSelector::getRange()
-{
-  std::pair<double,double> range(m_lower,m_higher);
+std::pair<double, double> RangeSelector::getRange() {
+  std::pair<double, double> range(m_lower, m_higher);
   return range;
 }
 
-void RangeSelector::setRange(double min, double max)
-{
-  m_lower = ( min < max ) ? min : max;
-  m_higher = ( min < max ) ? max : min;
+void RangeSelector::setRange(double min, double max) {
+  m_lower = (min < max) ? min : max;
+  m_higher = (min < max) ? max : min;
   verify();
   emit rangeChanged(min, max);
 }
 
-void RangeSelector::setRange(std::pair<double,double> range)
-{
+void RangeSelector::setRange(std::pair<double, double> range) {
   this->setRange(range.first, range.second);
 }
 
-void RangeSelector::setMinLinePos(double val)
-{
-  switch ( m_type )
-  {
+void RangeSelector::setMinLinePos(double val) {
+  switch (m_type) {
   case XMINMAX:
   case XSINGLE:
     m_mrkMin->setValue(val, 1.0);
@@ -261,10 +228,8 @@ void RangeSelector::setMinLinePos(double val)
   m_plot->replot();
 }
 
-void RangeSelector::setMaxLinePos(double val)
-{
-  switch ( m_type )
-  {
+void RangeSelector::setMaxLinePos(double val) {
+  switch (m_type) {
   case XMINMAX:
   case XSINGLE:
     m_mrkMax->setValue(val, 1.0);
@@ -277,33 +242,23 @@ void RangeSelector::setMaxLinePos(double val)
   m_plot->replot();
 }
 
-void RangeSelector::setMinimum(double val)
-{
-  setMin(val);
-}
+void RangeSelector::setMinimum(double val) { setMin(val); }
 
-void RangeSelector::setMaximum(double val)
-{
-  setMax(val);
-}
+void RangeSelector::setMaximum(double val) { setMax(val); }
 
-void RangeSelector::reapply()
-{
+void RangeSelector::reapply() {
   m_mrkMin->attach(m_plot);
   m_mrkMax->attach(m_plot);
 }
 
-void RangeSelector::detach()
-{
+void RangeSelector::detach() {
   m_mrkMin->attach(NULL);
   m_mrkMax->attach(NULL);
 }
 
-void RangeSelector::setColour(QColor colour)
-{
+void RangeSelector::setColour(QColor colour) {
   m_pen->setColor(colour);
-  switch ( m_type )
-  {
+  switch (m_type) {
   case XMINMAX:
   case YMINMAX:
     m_mrkMax->setLinePen(*m_pen);
@@ -314,20 +269,13 @@ void RangeSelector::setColour(QColor colour)
   }
 }
 
-void RangeSelector::setInfoOnly(bool state)
-{
-  m_infoOnly = state;
-}
+void RangeSelector::setInfoOnly(bool state) { m_infoOnly = state; }
 
-void RangeSelector::setVisible(bool state)
-{
-  if ( state )
-  {
+void RangeSelector::setVisible(bool state) {
+  if (state) {
     m_mrkMin->show();
     m_mrkMax->show();
-  }
-  else
-  {
+  } else {
     m_mrkMin->hide();
     m_mrkMax->hide();
   }
@@ -338,11 +286,10 @@ void RangeSelector::setVisible(bool state)
 *  @param min the start of the range
 *  @param max the end of the range
 */
-void RangeSelector::setMaxMin(const double min, const double max)
-{
-  if ( min == m_min && max == m_max )
-  {
-    //this is just to save work, the comparison above may fail if min or max are represented differently in the machine but that wont cause bad result
+void RangeSelector::setMaxMin(const double min, const double max) {
+  if (min == m_min && max == m_max) {
+    // this is just to save work, the comparison above may fail if min or max
+    // are represented differently in the machine but that wont cause bad result
     return;
   }
   m_min = min;
@@ -357,10 +304,8 @@ void RangeSelector::setMaxMin(const double min, const double max)
 *  must be valid
 *  @param val the start of the range
 */
-void RangeSelector::setMin(double val)
-{
-  if ( val != m_min )
-  {
+void RangeSelector::setMin(double val) {
+  if (val != m_min) {
     m_min = val;
     setMinLinePos(m_min);
     emit minValueChanged(val);
@@ -371,10 +316,8 @@ void RangeSelector::setMin(double val)
 *  must be valid
 *  @param val the end of the range
 */
-void RangeSelector::setMax(double val)
-{
-  if ( val != m_max )
-  {
+void RangeSelector::setMax(double val) {
+  if (val != m_max) {
     m_max = val;
     setMaxLinePos(m_max);
     emit maxValueChanged(val);
@@ -382,46 +325,30 @@ void RangeSelector::setMax(double val)
   }
 }
 
-bool RangeSelector::changingMin(double x, double dx)
-{
-  return ( fabs(x - m_min) <= fabs(dx-x) );
+bool RangeSelector::changingMin(double x, double dx) {
+  return (fabs(x - m_min) <= fabs(dx - x));
 }
 
-bool RangeSelector::changingMax(double x, double dx)
-{
-  return ( fabs(x - m_max) <= fabs(dx-x) );
+bool RangeSelector::changingMax(double x, double dx) {
+  return (fabs(x - m_max) <= fabs(dx - x));
 }
 
-void RangeSelector::verify()
-{
+void RangeSelector::verify() {
   double min(m_min);
   double max(m_max);
 
-  if ( min > max )
-  {
-    std::swap(min,max);
+  if (min > max) {
+    std::swap(min, max);
   }
 
-  if ( min < m_lower || min > m_higher )
-  {
+  if (min < m_lower || min > m_higher) {
     min = m_lower;
   }
-  if ( max < m_lower || max > m_higher )
-  {
+  if (max < m_lower || max > m_higher) {
     max = m_higher;
   }
 
   setMaxMin(min, max);
 }
 
-bool RangeSelector::inRange(double x)
-{
-  if ( x < m_lower || x > m_higher )
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
+bool RangeSelector::inRange(double x) { return (x < m_lower || x > m_higher); }

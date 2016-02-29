@@ -13,18 +13,17 @@ namespace DataObjects {
 class DLLExport MaskWorkspace : public SpecialWorkspace2D,
                                 public API::IMaskWorkspace {
 public:
-  MaskWorkspace();
+  MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);
   MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
                 const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
-  ~MaskWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {
     return std::unique_ptr<MaskWorkspace>(doClone());
   }
-
+  MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
@@ -43,10 +42,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  MaskWorkspace(const MaskWorkspace &other);
-
-  /// Protected copy assignment operator. Assignment not implemented.
-  MaskWorkspace &operator=(const MaskWorkspace &other);
+  MaskWorkspace(const MaskWorkspace &) = default;
 
   /// Return human-readable string
   const std::string toString() const override;

@@ -51,11 +51,11 @@ void LoadRaw3::init() {
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectrumList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if\n"
       "explicitly set.");
   declareProperty(
-      new ArrayProperty<int>("PeriodList"),
+      make_unique<ArrayProperty<int>>("PeriodList"),
       "A comma-separated list of individual periods to read.  Only used if\n"
       "explicitly set.");
 
@@ -157,9 +157,9 @@ void LoadRaw3::exec() {
   WorkspaceGroup_sptr ws_grp = createGroupWorkspace();
   WorkspaceGroup_sptr monitorws_grp;
   DataObjects::Workspace2D_sptr monitorWorkspace;
-  specid_t normalwsSpecs = 0;
-  specid_t monitorwsSpecs = 0;
-  std::vector<specid_t> monitorSpecList;
+  specnum_t normalwsSpecs = 0;
+  specnum_t monitorwsSpecs = 0;
+  std::vector<specnum_t> monitorSpecList;
 
   if (bincludeMonitors) {
     setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,
@@ -312,14 +312,14 @@ void LoadRaw3::exec() {
  *@param ws_sptr :: shared pointer to workspace
  */
 void LoadRaw3::excludeMonitors(FILE *file, const int &period,
-                               const std::vector<specid_t> &monitorList,
+                               const std::vector<specnum_t> &monitorList,
                                DataObjects::Workspace2D_sptr ws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through the spectra
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
-    specid_t histToRead = i + period * (m_numberOfSpectra + 1);
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
+    specnum_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
@@ -367,7 +367,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
   int64_t wsIndex = 0;
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through spectra
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&
@@ -407,7 +407,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
  */
 
 void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
-                                const std::vector<specid_t> &monitorList,
+                                const std::vector<specnum_t> &monitorList,
                                 DataObjects::Workspace2D_sptr ws_sptr,
                                 DataObjects::Workspace2D_sptr mws_sptr) {
   int64_t histCurrent = -1;
@@ -415,7 +415,7 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
   int64_t mwsIndex = 0;
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through spectra
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&
@@ -458,7 +458,7 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
  * @param period :: period number
  */
 void LoadRaw3::skipPeriod(FILE *file, const int64_t &period) {
-  for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+  for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     skipData(file, histToRead);
   }
@@ -548,10 +548,10 @@ void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors,
  *  @param spectrumNum ::  the requested spectrum number
  *  @return true if it's a monitor
  */
-bool LoadRaw3::isMonitor(const std::vector<specid_t> &monitorIndexes,
-                         specid_t spectrumNum) {
+bool LoadRaw3::isMonitor(const std::vector<specnum_t> &monitorIndexes,
+                         specnum_t spectrumNum) {
   bool bMonitor;
-  std::vector<specid_t>::const_iterator itr;
+  std::vector<specnum_t>::const_iterator itr;
   itr = find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum);
   (itr != monitorIndexes.end()) ? (bMonitor = true) : (bMonitor = false);
   return bMonitor;

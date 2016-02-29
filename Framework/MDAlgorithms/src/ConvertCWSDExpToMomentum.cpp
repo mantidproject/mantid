@@ -38,29 +38,29 @@ ConvertCWSDExpToMomentum::~ConvertCWSDExpToMomentum() {}
  */
 void ConvertCWSDExpToMomentum::init() {
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
-                                             Direction::Input),
+      make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
+                                                      Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "DetectorTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing all the detectors.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of MDEventWorkspace containing all experimental data.");
 
-  declareProperty(new ArrayProperty<double>("SourcePosition"),
+  declareProperty(make_unique<ArrayProperty<double>>("SourcePosition"),
                   "A vector of 3 doubles for position of source.");
 
-  declareProperty(new ArrayProperty<double>("SamplePosition"),
+  declareProperty(make_unique<ArrayProperty<double>>("SamplePosition"),
                   "A vector of 3 doubles for position of sample.");
 
-  declareProperty(new ArrayProperty<double>("PixelDimension"),
+  declareProperty(make_unique<ArrayProperty<double>>("PixelDimension"),
                   "A vector of 8 doubles to determine a cubic pixel's size.");
 
   declareProperty("IsBaseName", true, "It is specified as true if the data "
@@ -68,7 +68,8 @@ void ConvertCWSDExpToMomentum::init() {
                                       "base name without directory.");
 
   declareProperty(
-      new FileProperty("Directory", "", FileProperty::OptionalDirectory),
+      make_unique<FileProperty>("Directory", "",
+                                FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
 }

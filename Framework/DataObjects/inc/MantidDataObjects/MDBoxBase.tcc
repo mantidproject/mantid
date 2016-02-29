@@ -5,7 +5,7 @@
 #include <limits>
 #include <boost/make_shared.hpp>
 
-using NeXus::File;
+//using NeXus::File;
 
 namespace Mantid {
 namespace DataObjects {

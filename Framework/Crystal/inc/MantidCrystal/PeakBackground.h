@@ -61,12 +61,6 @@ public:
                  const Mantid::API::MDNormalization normalisation,
                  const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
-  /// Copy constructor
-  PeakBackground(const PeakBackground &other);
-
-  /// Assignment operator
-  PeakBackground &operator=(const PeakBackground &other);
-
   /// Overriden is background function
   bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
@@ -76,9 +70,6 @@ public:
 
   /// Virutal constructor
   PeakBackground *clone() const override;
-
-  /// Destructor
-  ~PeakBackground() override;
 };
 
 } // namespace Crystal

@@ -34,7 +34,7 @@ void ConvertToMDParent::init() {
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input Matrix Workspace (2DMatrix or Event workspace) ");
 
@@ -91,14 +91,15 @@ void ConvertToMDParent::init() {
       "depending on the target coordinate "
       "system, defined by the property **OutputDimensions**. ");
 
-  setPropertySettings("Q3DFrames", new Kernel::VisibleWhenProperty(
+  setPropertySettings("Q3DFrames", make_unique<Kernel::VisibleWhenProperty>(
                                        "QDimensions", IS_EQUAL_TO, "Q3D"));
-  setPropertySettings(
-      "QconversionScales",
-      new Kernel::VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("QconversionScales",
+                      make_unique<Kernel::VisibleWhenProperty>(
+                          "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
-      new ArrayProperty<std::string>("OtherDimensions", Direction::Input),
+      make_unique<ArrayProperty<std::string>>("OtherDimensions",
+                                              Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -111,7 +112,7 @@ void ConvertToMDParent::init() {
   // this property is mainly for ChildAlgorithms to set-up as they have to
   // identify if they use the same instrument.
   declareProperty(
-      new PropertyWithValue<std::string>(
+      make_unique<PropertyWithValue<std::string>>(
           "PreprocDetectorsWS", "PreprocessedDetectorsWS", Direction::Input),
       "The name of the table workspace where the part of the detectors "
       "transformation into reciprocal space, "
@@ -130,7 +131,8 @@ void ConvertToMDParent::init() {
       "invoked.*");
 
   declareProperty(
-      new PropertyWithValue<bool>("UpdateMasks", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("UpdateMasks", false,
+                                           Direction::Input),
       "if PreprocessDetectorWS is used to build the workspace with "
       "preprocessed detectors at first algorithm call,"
       "and the input workspaces instruments are different by just different "
@@ -143,14 +145,16 @@ void ConvertToMDParent::init() {
 
   // if one needs to use Lorentz corrections
   declareProperty(
-      new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("LorentzCorrection", false,
+                                           Direction::Input),
       "Correct the weights of events or signals and errors transformed into "
       "reciprocal space by multiplying them "
       "by the Lorentz multiplier:\n :math:`sin(\\theta)^2/\\lambda^4`. "
       "Currently works in Q3D Elastic case only "
       "and is ignored in any other case.");
   declareProperty(
-      new PropertyWithValue<bool>("IgnoreZeroSignals", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("IgnoreZeroSignals", false,
+                                           Direction::Input),
       "Enabling this property forces the algorithm to ignore bins with zero "
       "signal for an input matrix workspace. Input event workspaces are not "
       "affected. "
@@ -158,26 +162,26 @@ void ConvertToMDParent::init() {
       "calculations in situations when the normalization is not important "
       "(e.g. peak finding).");
 
-  declareProperty(new ArrayProperty<double>("Uproj"),
+  declareProperty(make_unique<ArrayProperty<double>>("Uproj"),
                   //"The functionality of this parameter set to non-default
                   // value is still not fully verified (see ticket #5982). "
                   "Defines the first projection vector of the target Q "
                   "coordinate system in **Q3D** mode - Default (1,0,0)");
 
-  declareProperty(new ArrayProperty<double>("Vproj"),
+  declareProperty(make_unique<ArrayProperty<double>>("Vproj"),
                   //"The functionality of this parameter set to non-default
                   // value is still not fully verified (see ticket #5982). "
                   "Defines the second projection vector of the target Q "
                   "coordinate system in **Q3D** mode - Default (0,1,0).");
 
-  declareProperty(new ArrayProperty<double>("Wproj"),
+  declareProperty(make_unique<ArrayProperty<double>>("Wproj"),
                   //"The functionality of this parameter set to non-default
                   // value is still not fully verified (see ticket #5982). "
                   "Defines the third projection vector of the target Q "
                   "coordinate system in **Q3D** mode. - Default (0,0,1)");
   // if one needs no events near the origin of Q
   declareProperty(
-      new PropertyWithValue<double>("AbsMinQ", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("AbsMinQ", 0.0, Direction::Input),
       "Do not add events to MD workspace that are closer to the origin "
       "in QSample radius than this value. Needed for 3D"
       "views to remove noise. ");

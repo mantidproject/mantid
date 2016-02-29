@@ -105,11 +105,8 @@ Object &Object::operator=(const Object &A) {
   return *this;
 }
 
-/**
-* Destructor
-* Deletes the rule
-*/
-Object::~Object() {}
+/// Destructor in .cpp so we can forward declare Rule class.
+Object::~Object() = default;
 
 /**
  * @param material The new Material that the object is composed from

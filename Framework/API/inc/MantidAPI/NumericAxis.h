@@ -50,7 +50,6 @@ public:
 
   NumericAxis(const std::size_t &length);
   NumericAxis(const std::vector<double> &centres);
-  ~NumericAxis() override {}
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,

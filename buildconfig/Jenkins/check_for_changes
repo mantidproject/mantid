@@ -9,25 +9,27 @@ BASE_BRANCH="origin/master"
 if [ $2 ]; then
     BASE_BRANCH=$2
 fi
+SHA=$(git rev-parse HEAD)
+echo "SHA=${SHA}"
 
 case "$TYPE" in
     py)
-        exit $(git diff --quiet ${BASE_BRANCH} -- \*\.py)
+        exit $(git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.py)
     ;;
     cpp)
-        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.h)
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.h)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.cpp)
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cpp)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.cxx)
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cxx)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} -- \*\.tcc)
+        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.tcc)
         then
             exit $FOUND
         fi

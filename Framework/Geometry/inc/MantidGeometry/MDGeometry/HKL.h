@@ -40,7 +40,6 @@ public:
   HKL &operator=(const HKL &other);
   HKL(std::unique_ptr<Kernel::MDUnit> &unit);
   HKL(Kernel::MDUnit *unit);
-  ~HKL() override;
   static const std::string HKLName;
 
   // MDFrame interface

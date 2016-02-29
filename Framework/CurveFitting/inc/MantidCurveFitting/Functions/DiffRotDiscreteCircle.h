@@ -45,9 +45,6 @@ public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();
 
-  /// Destructor
-  ~ElasticDiffRotDiscreteCircle() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "ElasticDiffRotDiscreteCircle"; }
 
@@ -68,9 +65,6 @@ class DLLExport InelasticDiffRotDiscreteCircle : public API::ParamFunction,
 public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();
-
-  /// Destructor
-  ~InelasticDiffRotDiscreteCircle() override {}
 
   std::string name() const override { return "InelasticDiffRotDiscreteCircle"; }
 
@@ -99,9 +93,6 @@ private:
  */
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
-  /// Destructor
-  ~DiffRotDiscreteCircle() override{};
-
   std::string name() const override { return "DiffRotDiscreteCircle"; }
 
   const std::string category() const override { return "QuasiElastic"; }

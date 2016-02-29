@@ -37,22 +37,23 @@ CentroidPeaksMD2::~CentroidPeaksMD2() {}
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD2::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
   declareProperty(
-      new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
+                                             Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }

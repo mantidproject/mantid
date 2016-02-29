@@ -535,7 +535,7 @@ DLL_API ANNpoint annCopyPt(int dim,          // dimension
 
 class DLL_API ANNpointSet {
 public:
-  virtual ~ANNpointSet() {} // virtual distructor
+  virtual ~ANNpointSet() = default; // virtual distructor
 
   virtual void annkSearch( // approx k near neighbor search
       ANNpoint q,          // query point
@@ -590,8 +590,6 @@ public:
       ANNpointArray pa, // point array
       int n,            // number of points
       int dd);          // dimension
-
-  ~ANNbruteForce() override; // destructor
 
   void annkSearch(                // approx k near neighbor search
       ANNpoint q,                 // query point

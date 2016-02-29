@@ -73,8 +73,6 @@ public:
   /** Close the file */
   virtual void closeFile() = 0;
 
-  ~IBoxControllerIO() override {}
-
   ///  the method which returns the size of data block used in IO operations
   virtual size_t getDataChunk() const = 0;
 

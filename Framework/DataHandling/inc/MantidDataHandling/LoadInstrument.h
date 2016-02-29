@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 
+#include <mutex>
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -119,7 +121,7 @@ private:
   std::string m_instName;
 
   /// Mutex to avoid simultaneous access
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

@@ -55,13 +55,13 @@ bool isConstantDelta(const MantidVec &xAxis) {
   */
 void SaveGSS::init() {
   // Data must be in TOF
-  declareProperty(new API::WorkspaceProperty<>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input,
                       boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
                   "The input workspace, which must be in time-of-flight");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save),
-      "The filename to use for the saved data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save),
+                  "The filename to use for the saved data");
   declareProperty("SplitFiles", true,
                   "Whether to save each spectrum into a separate file ('true') "
                   "or not ('false'). "

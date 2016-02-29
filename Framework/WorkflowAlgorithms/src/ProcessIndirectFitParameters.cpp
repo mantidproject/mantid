@@ -56,8 +56,8 @@ void ProcessIndirectFitParameters::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
@@ -73,8 +73,8 @@ void ProcessIndirectFitParameters::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 }
 

@@ -177,10 +177,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
 
-  std::set<std::string> items;
-  items = ads.getObjectNames();
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    const std::string name = *it;
+  auto items = ads.getObjectNames();
+  for (auto const &name : items) {
     Workspace_sptr ws = ads.retrieve(name);
 
     if (isValidModel(ws))

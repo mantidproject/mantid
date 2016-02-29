@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include <mutex>
 #include <set>
 
 namespace Mantid {
@@ -33,12 +34,11 @@ public:
   //-------------------------------------------------------------------------------
   void push(Task *newTask) override {
     // Cache the total cost
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
     m_cost += newTask->cost();
 
-    boost::shared_ptr<Mutex> mut = newTask->getMutex();
+    boost::shared_ptr<std::mutex> mut = newTask->getMutex();
     m_supermap[mut].emplace(newTask->cost(), newTask);
-    m_queueLock.unlock();
   }
 
   //-------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ public:
 
     Task *temp = nullptr;
 
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
     if (m_supermap.size() > 0) {
@@ -57,7 +57,7 @@ public:
       SuperMap::iterator it_end = m_supermap.end();
       for (; it != it_end; ++it) {
         // The key is the mutex associated with the inner map
-        boost::shared_ptr<Mutex> mapMutex = it->first;
+        boost::shared_ptr<std::mutex> mapMutex = it->first;
         if ((!mapMutex) || (m_mutexes.empty()) ||
             (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
@@ -96,12 +96,11 @@ public:
 
     // --- Add the mutex (if any) to the list of "busy" ones ---
     if (temp) {
-      boost::shared_ptr<Mutex> mut = temp->getMutex();
+      boost::shared_ptr<std::mutex> mut = temp->getMutex();
       if (mut)
         m_mutexes.insert(mut);
     }
 
-    m_queueLock.unlock();
     return temp;
   }
 
@@ -113,32 +112,30 @@ public:
    */
   void finished(Task *task, size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    boost::shared_ptr<Mutex> mut = task->getMutex();
+    boost::shared_ptr<std::mutex> mut = task->getMutex();
     if (mut) {
-      m_queueLock.lock();
+      std::lock_guard<std::mutex> lock(m_queueLock);
       // We take this mutex off the list of used ones.
       m_mutexes.erase(mut);
-      m_queueLock.unlock();
     }
   }
 
   //-------------------------------------------------------------------------------
   size_t size() override {
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
     // Add up the sizes of all contained maps.
     size_t total = 0;
     SuperMap::iterator it = m_supermap.begin();
     SuperMap::iterator it_end = m_supermap.end();
     for (; it != it_end; it++)
       total += it->second.size();
-    m_queueLock.unlock();
     return total;
   }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    std::lock_guard<std::mutex> lock(m_queueLock);
     SuperMap::iterator it = m_supermap.begin();
     SuperMap::iterator it_end = m_supermap.end();
     for (; it != it_end; it++)
@@ -149,7 +146,7 @@ public:
 
   //-------------------------------------------------------------------------------
   void clear() override {
-    m_queueLock.lock();
+    std::lock_guard<std::mutex> lock(m_queueLock);
 
     // Empty out the queue and delete the pointers!
     SuperMap::iterator it = m_supermap.begin();
@@ -165,21 +162,20 @@ public:
     m_supermap.clear();
     m_cost = 0;
     m_costExecuted = 0;
-    m_queueLock.unlock();
   }
 
 protected:
   /// Map to tasks, sorted by cost
   typedef std::multimap<double, Task *> InnerMap;
   /// Map to maps, sorted by Mutex*
-  typedef std::map<boost::shared_ptr<Mutex>, InnerMap> SuperMap;
+  typedef std::map<boost::shared_ptr<std::mutex>, InnerMap> SuperMap;
 
   /** A super map; first key = a Mutex *
    * Inside it: second key = the cost. */
   SuperMap m_supermap;
 
   /// Vector of currently used mutexes.
-  std::set<boost::shared_ptr<Mutex>> m_mutexes;
+  std::set<boost::shared_ptr<std::mutex>> m_mutexes;
 };
 
 } // namespace Mantid

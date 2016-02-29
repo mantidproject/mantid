@@ -53,12 +53,9 @@ public:
     convention = Kernel::ConfigService::Instance().getString("Q.convention");
   }
 
-  /// Destructor
-  ~IPeaksWorkspace() override;
-
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
-
+  IPeaksWorkspace &operator=(const IPeaksWorkspace &other) = delete;
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
    */
@@ -164,10 +161,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IPeaksWorkspace(const IPeaksWorkspace &other)
-      : ITableWorkspace(other), ExperimentInfo(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
+  IPeaksWorkspace(const IPeaksWorkspace &) = default;
 
   const std::string toString() const override;
 

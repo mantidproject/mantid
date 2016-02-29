@@ -39,7 +39,6 @@ namespace API {
 class MANTID_API_DLL LatticeDomain : public FunctionDomain {
 public:
   LatticeDomain(const std::vector<Kernel::V3D> &hkls);
-  ~LatticeDomain() override {}
 
   size_t size() const override;
 

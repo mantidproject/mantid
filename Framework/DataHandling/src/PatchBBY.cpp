@@ -74,22 +74,22 @@ void PatchBBY::init() {
   // file to load.
   exts.clear();
   exts.push_back(".tar");
-  declareProperty(
-      new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
-      "The filename of the stored data to be patched");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      FilenameStr, "", API::FileProperty::Load, exts),
+                  "The filename of the stored data to be patched");
 
   // patchable properties
   for (auto itr = std::begin(PatchableProperties);
        itr != std::end(PatchableProperties); ++itr) {
     switch (itr->Type) {
     case TYPE_INT:
-      declareProperty(new Kernel::PropertyWithValue<int>(
+      declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<int>>(
                           itr->Name, EMPTY_INT(), Kernel::Direction::Input),
                       "Optional");
       break;
 
     case TYPE_DBL:
-      declareProperty(new Kernel::PropertyWithValue<double>(
+      declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                           itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
                       "Optional");
       break;
@@ -98,8 +98,8 @@ void PatchBBY::init() {
     setPropertyGroup(itr->Name, itr->Group);
   }
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("Reset", false,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "Reset", false, Kernel::Direction::Input),
                   "Optional");
 }
 /**

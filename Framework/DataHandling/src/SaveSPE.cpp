@@ -91,11 +91,12 @@ void SaveSPE::init() {
   auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
-                                               Direction::Input, wsValidator),
+  declareProperty(make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace, which must be in Energy Transfer");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".spe"),
-                  "The filename to use for the saved data");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".spe"),
+      "The filename to use for the saved data");
 }
 
 /**

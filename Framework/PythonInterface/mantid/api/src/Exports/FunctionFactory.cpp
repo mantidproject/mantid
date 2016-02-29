@@ -6,6 +6,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <mutex>
 
 // Python frameobject. This is under the boost includes so that boost will have
 // done the
@@ -47,7 +48,7 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 //------------------------------------------------
 
 /// Python algorithm registration mutex in anonymous namespace (aka static)
-Poco::Mutex FUNCTION_REGISTER_MUTEX;
+std::recursive_mutex FUNCTION_REGISTER_MUTEX;
 
 /**
  * A free function to register a fit function from Python
@@ -56,7 +57,7 @@ Poco::Mutex FUNCTION_REGISTER_MUTEX;
  *              or an instance of a class type derived from IFunction
  */
 void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
-  Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
+  std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
   static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
 

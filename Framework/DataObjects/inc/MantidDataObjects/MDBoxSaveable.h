@@ -64,8 +64,6 @@ public:
     return m_MDNode->getDataInMemorySize();
   }
 
-  ~MDBoxSaveable() override {}
-
 private:
   API::IMDNode *const m_MDNode;
 };

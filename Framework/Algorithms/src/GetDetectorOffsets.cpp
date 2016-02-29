@@ -36,7 +36,7 @@ GetDetectorOffsets::~GetDetectorOffsets() {}
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
@@ -55,16 +55,16 @@ void GetDetectorOffsets::init() {
       "XMax", 0.0,
       "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalSave, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(
-      new WorkspaceProperty<>("MaskWorkspace", "Mask", Direction::Output),
-      "An output workspace containing the mask.");
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                   Direction::Output),
+                  "An output workspace containing the mask.");
   // Only keep peaks
   declareProperty(
       "PeakFunction", "Gaussian",
@@ -131,16 +131,15 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const std::set<detid_t> &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi)->getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.
     PARALLEL_CRITICAL(GetDetectorOffsets_setValue) {
       // Use the same offset for all detectors from this pixel
-      std::set<detid_t>::iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it) {
-        outputW->setValue(*it, offset);
-        const auto mapEntry = pixel_to_wi.find(*it);
+      for (const auto &det : dets) {
+        outputW->setValue(det, offset);
+        const auto mapEntry = pixel_to_wi.find(det);
         if (mapEntry == pixel_to_wi.end())
           continue;
         const size_t workspaceIndex = mapEntry->second;

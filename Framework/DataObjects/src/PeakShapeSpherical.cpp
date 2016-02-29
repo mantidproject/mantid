@@ -45,36 +45,6 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
   }
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeSpherical::~PeakShapeSpherical() {}
-
-/**
- * @brief Copy constructor from other PeakShapeSpherical
- * @param other : source of the copy
- */
-PeakShapeSpherical::PeakShapeSpherical(const PeakShapeSpherical &other)
-    : PeakShapeBase(other), m_radius(other.radius()),
-      m_backgroundInnerRadius(other.backgroundInnerRadius()),
-      m_backgroundOuterRadius(other.backgroundOuterRadius()) {}
-
-/**
- * @brief Assignment operator
- * @param other : source of the assignment
- * @return Ref to assigned object.
- */
-PeakShapeSpherical &PeakShapeSpherical::
-operator=(const PeakShapeSpherical &other) {
-  if (this != &other) {
-    PeakShapeBase::operator=(other);
-    m_radius = other.radius();
-    m_backgroundOuterRadius = other.backgroundOuterRadius();
-    m_backgroundInnerRadius = other.backgroundInnerRadius();
-  }
-  return *this;
-}
-
 /**
  * @brief Serialize to JSON object
  * @return JSON object as std::string

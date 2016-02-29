@@ -60,9 +60,6 @@ public:
         m_lowerExclusive(exclusive), m_upperExclusive(exclusive),
         m_lowerBound(lowerBound), m_upperBound(upperBound) {}
 
-  /// Destructor
-  ~BoundedValidator() override {}
-
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }
   /// Return if it has a lower bound

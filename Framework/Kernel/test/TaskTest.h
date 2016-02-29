@@ -30,7 +30,7 @@ public:
 
   void test_mutex() {
     MyTask t;
-    auto mut = boost::make_shared<Mutex>();
+    auto mut = boost::make_shared<std::mutex>();
     t.setMutex(mut);
     TS_ASSERT_EQUALS(mut, t.getMutex());
   }

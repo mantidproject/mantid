@@ -18,7 +18,8 @@ using namespace API;
 void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::Input));
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input));
 }
 
 /** Executes the algorithm
