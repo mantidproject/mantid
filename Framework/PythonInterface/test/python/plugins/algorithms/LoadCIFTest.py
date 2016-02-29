@@ -123,10 +123,10 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
     def test_getAtoms_correct(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
-                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_occupancy', [u'0.6', u'0.4(0)']),
                                    (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])]))
 
-        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 0.6 0.01;Al 0.34 0.56 0.23 0.4 0.02')
 
     def test_getAtoms_atom_type_symbol(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Fake1', u'Fake2']),
@@ -146,6 +146,12 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data),
                          'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0 0.0253302959106')
+
+    def test_getAtoms_no_occupancy(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])]))
+
+        self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
 
 
 class UBMatrixBuilderTest(unittest.TestCase):

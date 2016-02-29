@@ -135,6 +135,9 @@ class CrystalStructureBuilder(object):
 
         atomLists = [atomSymbols] + [cifData[x] for x in atomFields]
 
+        if not u'_atom_site_occupancy' in cifData.keys():
+            atomLists += [['1.0'] * len(atomSymbols)]
+
         try:
             isotropicUs = self._getIsotropicUs(cifData)
             atomLists += [isotropicUs]
