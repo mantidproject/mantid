@@ -85,14 +85,6 @@
 namespace
 {
 
-template <class T>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-almost_equal(T x, T y)
-{
-    return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y)
-           || std::abs(x - y) < std::numeric_limits<T>::min();
-}
-
 /**
  * Calcualtes the origin of the ellipse.  The originis defined by -A^(-1)*B/2.
  * @param AInverse: the inverse of the A matrix (see above)
@@ -285,8 +277,8 @@ bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
 bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(
     const Mantid::Kernel::Matrix<double> &m) const
 {
-    auto isM00EqualM11 = almost_equal(m[0][0], m[1][1]);
-    auto isM01Zero = almost_equal(m[0][1], 0.0);
+    auto isM00EqualM11 = Mantid::SliceViewer::almost_equal(m[0][0], m[1][1]);
+    auto isM01Zero = Mantid::SliceViewer::almost_equal(m[0][1], 0.0);
     return isM00EqualM11 && isM01Zero;
 }
 

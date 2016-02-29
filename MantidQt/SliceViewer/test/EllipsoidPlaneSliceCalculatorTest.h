@@ -11,18 +11,10 @@
 
 namespace
 {
-template <class T>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-almost_equal(T x, T y)
-{
-    return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y)
-           || std::abs(x - y) < std::numeric_limits<T>::min();
-}
-
 bool radiusIsInListOfRadii(double radius, const std::vector<double> &radii)
 {
     auto comparison =
-        [radius](double toCheck) { return almost_equal(radius, toCheck); };
+        [radius](double toCheck) { return Mantid::SliceViewer::almost_equal(radius, toCheck); };
     return std::any_of(radii.cbegin(), radii.cend(), comparison);
 }
 
@@ -32,9 +24,9 @@ bool radiusIsInListOfRadii(double radius, const std::vector<double> &radii)
 bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
                                           double actualAngle)
 {
-    return almost_equal(expectedAngle, actualAngle)
-           || almost_equal(expectedAngle, actualAngle + M_PI)
-           || almost_equal(expectedAngle, actualAngle - M_PI);
+    return Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle)
+           || Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI)
+           || Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
 }
 
 }

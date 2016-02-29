@@ -39,7 +39,12 @@ QPainterPath getTransformedPainterPath(double angle, double transX,
     QTransform transform;
     transform.translate(transX, transY);
     transform.scale(scaleX, scaleY);
-    transform.rotateRadians(angle);
+
+    // Important Note for the rotation: The rotation in Qt is done clock-wise, since
+    // the y axis is pointing downwards. The workspace plot does not reflect this though
+    // Hence we should be applying a counter-clockwise rotation which is achieved by
+    // prefixing with a minus sign.
+    transform.rotateRadians(-angle);
 
     return transform.map(painterPath);
 }
@@ -268,34 +273,6 @@ void PeakRepresentationEllipsoid::doDraw(
 
     // Add a pen with color, style and stroke, and a painter path
     auto foregroundColorEllipsoid = foregroundColor.colorEllipsoid;
-
-    auto DEBUG = true;
-    if (DEBUG) {
-      g_log.warning("===============================");
-      g_log.warning("Directions are:");
-      g_log.warning(std::to_string(m_directions[0][0]) + "  " + std::to_string(m_directions[0][1]) + "  " + std::to_string(m_directions[0][1]));
-      g_log.warning(std::to_string(m_directions[1][0]) + "  " + std::to_string(m_directions[1][1]) + "  " + std::to_string(m_directions[1][1]));
-      g_log.warning(std::to_string(m_directions[2][0]) + "  " + std::to_string(m_directions[2][1]) + "  " + std::to_string(m_directions[2][1]));
-
-      g_log.warning("The radii are:");
-      g_log.warning(std::to_string(m_peakRadii[0]));
-      g_log.warning(std::to_string(m_peakRadii[1]));
-      g_log.warning(std::to_string(m_peakRadii[2]));
-
-      g_log.warning("The angle is");
-      g_log.warning(std::to_string(drawingInformationEllipse->angle / M_PI * 180));
-      g_log.warning("--------------------------------");
-
-      g_log.warning("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-      g_log.warning("Parameters of the drawing ellipse");
-      g_log.warning("Origin " + std::to_string(drawingInformationEllipse->peakOrigin.X()) + " "
-        + std::to_string(drawingInformationEllipse->peakOrigin.Y()) + " "
-        + std::to_string(drawingInformationEllipse->peakOrigin.Z()));
-
-      g_log.warning("RadiiEllipse " + std::to_string(drawingInformationEllipse->peakInnerRadiusMajorAxis) + " "
-        + std::to_string(drawingInformationEllipse->peakInnerRadiusMinorAxis));
-      g_log.warning("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-    }
 
     const QPointF zeroPoint(0.0, 0.0);
     // Add the ellipse at the origin (in order to rotate)

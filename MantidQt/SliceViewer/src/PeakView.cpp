@@ -132,8 +132,6 @@ double PeakView::getOccupancyIntoView() const
 
 bool PeakView::positionOnly() const
 {
-    // TODO how to set this for differnt peak types, probably always false from
-    // now on
     return false;
 }
 

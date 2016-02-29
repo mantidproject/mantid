@@ -12,6 +12,14 @@ namespace Mantid
 namespace SliceViewer
 {
 
+template <class T>
+  typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+  EXPORT_OPT_MANTIDQT_SLICEVIEWER almost_equal(T x, T y)
+  {
+      return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y)
+             || std::abs(x - y) < std::numeric_limits<T>::min();
+  }
+
 Mantid::Kernel::Matrix<double> EXPORT_OPT_MANTIDQT_SLICEVIEWER
 createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
                                 std::vector<double> radii);
