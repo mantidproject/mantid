@@ -28,13 +28,13 @@ public:
   Grouping(const Grouping &existing) = default;
 
   /// Copy assignment operator
-  Grouping &Grouping::operator=(const Grouping &other) = default;
+  Grouping &operator=(const Grouping &other) = default;
 
   /// Move constructor
   Grouping(Grouping &&other) = default;
 
   /// Move assignment operator
-  Grouping &Grouping::operator=(Grouping &&other) = default;
+  Grouping &operator=(Grouping &&other) = default;
 
   /// Destructor
   virtual ~Grouping() = default;
