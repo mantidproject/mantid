@@ -1,12 +1,13 @@
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
-#include <sys/stat.h>
 #include <sstream>
+#include <sys/stat.h>
 
 using std::size_t;
 using std::vector;
@@ -26,7 +27,7 @@ using namespace Mantid::API;
 LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet()
     : m_delaytimefilename(""), m_pulseidfilename(""),
       m_delayfileinoldformat(false), m_numpulses(0), m_numchoppers(0),
-      m_delaytimes(NULL), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
+      m_delaytimes(nullptr), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -44,30 +45,33 @@ LoadLogsForSNSPulsedMagnet::~LoadLogsForSNSPulsedMagnet() {
  */
 void LoadLogsForSNSPulsedMagnet::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace in which to attach the pulsed "
                   "magnet log information.");
 
   declareProperty(
-      new FileProperty("DelayTimeFilename", "", FileProperty::Load, ".dat"),
+      make_unique<FileProperty>("DelayTimeFilename", "", FileProperty::Load,
+                                ".dat"),
       "The name (including its full or relative path) of the log file to\n"
       "attempt to load the pulsed magnet log. The file extension must either "
       "be\n"
       ".dat or .DAT");
 
   declareProperty(
-      new FileProperty("PulseIDFilename", "", FileProperty::Load, ".dat"),
+      make_unique<FileProperty>("PulseIDFilename", "", FileProperty::Load,
+                                ".dat"),
       "The name (including its full or relative path) of the log file to\n"
       "attempt to load the PulseID. The file extension must either be\n"
       ".dat or .DAT");
 
-  declareProperty(
-      new PropertyWithValue<bool>("OldFormat", false, Direction::Input),
-      "Delay time file have an old format");
+  declareProperty(make_unique<PropertyWithValue<bool>>("OldFormat", false,
+                                                       Direction::Input),
+                  "Delay time file have an old format");
 
   declareProperty(
-      new PropertyWithValue<int64_t>("NumberOfChoppers", 4, Direction::Input),
+      make_unique<PropertyWithValue<int64_t>>("NumberOfChoppers", 4,
+                                              Direction::Input),
       "Number of choppers used in data acquisition.  It is not required for "
       "new format Delay time file.");
 
@@ -210,9 +214,9 @@ void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile() {
   BinaryFile<Pulse> pulseFile(m_pulseidfilename);
   this->m_numpulses = pulseFile.getNumElements();
   pulses = pulseFile.loadAll();
-  for (auto it = pulses->begin(); it != pulses->end(); ++it) {
-    this->m_pulseidseconds.push_back(it->seconds);
-    this->m_pulseidnanoseconds.push_back(it->nanoseconds);
+  for (auto &pulse : *pulses) {
+    this->m_pulseidseconds.push_back(pulse.seconds);
+    this->m_pulseidnanoseconds.push_back(pulse.nanoseconds);
   }
   delete pulses;
 }

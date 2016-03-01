@@ -35,7 +35,7 @@ public:
   PoldiSpectrumDomainFunctionTest() {
     m_detector = boost::shared_ptr<ConfiguredHeliumDetector>(
         new ConfiguredHeliumDetector);
-    m_chopper = boost::shared_ptr<MockChopper>(new MockChopper);
+    m_chopper = boost::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 

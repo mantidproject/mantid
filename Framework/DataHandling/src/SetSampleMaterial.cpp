@@ -1,7 +1,6 @@
 //--------------------------------
 // Includes
 //--------------------------------
-#include <math.h>
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Workspace.h"
@@ -13,6 +12,10 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+
+#include <boost/scoped_ptr.hpp>
+
+#include <math.h>
 
 using namespace Mantid::PhysicalConstants;
 
@@ -40,9 +43,9 @@ using namespace Kernel;
 */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
-      "The workspace with which to associate the sample ");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::InOut),
+                  "The workspace with which to associate the sample ");
   declareProperty("ChemicalFormula", "",
                   "ChemicalFormula or AtomicNumber must be given.");
   declareProperty("AtomicNumber", 0,
@@ -91,18 +94,18 @@ void SetSampleMaterial::init() {
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
 
   // Extra property settings
-  setPropertySettings(
-      "AtomicNumber",
-      new Kernel::EnabledWhenProperty("ChemicalFormula", Kernel::IS_DEFAULT));
-  setPropertySettings("MassNumber", new Kernel::EnabledWhenProperty(
+  setPropertySettings("AtomicNumber",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "ChemicalFormula", Kernel::IS_DEFAULT));
+  setPropertySettings("MassNumber", make_unique<Kernel::EnabledWhenProperty>(
                                         "ChemicalFormula", Kernel::IS_DEFAULT));
 
   setPropertySettings("UnitCellVolume",
-                      new Kernel::EnabledWhenProperty("SampleNumberDensity",
-                                                      Kernel::IS_DEFAULT));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_DEFAULT));
   setPropertySettings("ZParameter",
-                      new Kernel::EnabledWhenProperty("SampleNumberDensity",
-                                                      Kernel::IS_DEFAULT));
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_DEFAULT));
 
   // output properties
   declareProperty(

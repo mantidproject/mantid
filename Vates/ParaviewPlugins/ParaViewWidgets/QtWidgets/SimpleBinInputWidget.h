@@ -17,11 +17,11 @@ public:
   /// Constructor
   SimpleBinInputWidget();
   /// Setter for the entry
-  virtual void setEntry(int nBins, double min, double max);
+  void setEntry(int nBins, double min, double max) override;
   /// Getter for the entry
-  virtual int getEntry(double, double) const;
+  int getEntry(double, double) const override;
   /// Destructor
-  ~SimpleBinInputWidget();
+  ~SimpleBinInputWidget() override;
 private slots:
   void nBinsListener();
 private:

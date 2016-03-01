@@ -57,23 +57,23 @@ public:
   /// default constructor
   LoadCanSAS1D();
   /// destructor
-  virtual ~LoadCanSAS1D();
+  ~LoadCanSAS1D() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadCanSAS1D"; }
+  const std::string name() const override { return "LoadCanSAS1D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a file written in the canSAS 1-D data format";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\XML;SANS\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 protected:
   /// If a workspace group is created this is set from empty to the root name of
@@ -85,9 +85,9 @@ protected:
   int m_groupNumber;
 
   /// Overwrites Algorithm method.
-  virtual void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// Loads an individual SASentry element into a new workspace
   virtual API::MatrixWorkspace_sptr

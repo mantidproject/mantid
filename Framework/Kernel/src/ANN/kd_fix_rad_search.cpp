@@ -78,9 +78,9 @@ int ANNkd_tree::annkFRSearch(
   root->ann_FR_search(annBoxDistance(q, bnd_box_lo, bnd_box_hi, dim));
 
   for (int i = 0; i < k; i++) { // extract the k-th closest points
-    if (dd != NULL)
+    if (dd != nullptr)
       dd[i] = ANNkdFRPointMK->ith_smallest_key(i);
-    if (nn_idx != NULL)
+    if (nn_idx != nullptr)
       nn_idx[i] = ANNkdFRPointMK->ith_smallest_info(i);
   }
 

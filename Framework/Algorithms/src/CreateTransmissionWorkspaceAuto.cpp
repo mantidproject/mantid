@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
@@ -46,49 +47,51 @@ const std::string CreateTransmissionWorkspaceAuto::summary() const {
  */
 void CreateTransmissionWorkspaceAuto::init() {
 
-  std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  std::vector<std::string> analysis_modes{"PointDetectorAnalysis",
+                                          "MultiDetectorAnalysis"};
   declareProperty("AnalysisMode", analysis_modes.at(0),
                   boost::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Second transmission run workspace in TOF.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output transmission workspace in wavelength.");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
       "SecondTransmission run is provided.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together");
 
   declareProperty(
-      new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(),
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
+                                             Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
 
-  declareProperty(
-      new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT()),
-      "I0 monitor index. Optional.");
+  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
+  boundedIndex->setLower(0);
 
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex),
+                  "I0 monitor index");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern on workspace indexes to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
@@ -98,22 +101,16 @@ void CreateTransmissionWorkspaceAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
-  declareProperty(
-      new PropertyWithValue<double>("MonitorBackgroundWavelengthMin",
-                                    Mantid::EMPTY_DBL(), Direction::Input),
-      "Monitor wavelength background min in angstroms");
-  declareProperty(
-      new PropertyWithValue<double>("MonitorBackgroundWavelengthMax",
-                                    Mantid::EMPTY_DBL(), Direction::Input),
-      "Monitor wavelength background max in angstroms");
-  declareProperty(
-      new PropertyWithValue<double>("MonitorIntegrationWavelengthMin",
-                                    Mantid::EMPTY_DBL(), Direction::Input),
-      "Monitor integral min in angstroms");
-  declareProperty(
-      new PropertyWithValue<double>("MonitorIntegrationWavelengthMax",
-                                    Mantid::EMPTY_DBL(), Direction::InOut),
-      "Monitor integral max in angstroms");
+  declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                  "Monitor wavelength background min in angstroms",
+                  Direction::Input);
+  declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                  "Monitor wavelength background max in angstroms",
+                  Direction::Input);
+  declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                  "Monitor integral min in angstroms", Direction::Input);
+  declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                  "Monitor integral max in angstroms", Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------

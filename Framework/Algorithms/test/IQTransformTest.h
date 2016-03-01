@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/IQTransform.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 
 class IQTransformTest : public CxxTest::TestSuite {

@@ -36,28 +36,28 @@ namespace DataHandling {
 class DLLExport SaveIsawDetCal : public API::Algorithm {
 public:
   SaveIsawDetCal();
-  ~SaveIsawDetCal();
+  ~SaveIsawDetCal() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveIsawDetCal"; };
+  const std::string name() const override { return "SaveIsawDetCal"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves an instrument with RectangularDetectors to an ISAW .DetCal "
            "file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// find position for rectangular and non-rectangular
   Kernel::V3D findPixelPos(std::string bankName, int col, int row);
   void sizeBanks(std::string bankName, int &NCOLS, int &NROWS, double &xsize,

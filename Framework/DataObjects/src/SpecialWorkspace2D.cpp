@@ -20,11 +20,6 @@ Kernel::Logger g_log("SpecialWorkspace2D");
 DECLARE_WORKSPACE(SpecialWorkspace2D)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecialWorkspace2D::SpecialWorkspace2D() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace
@@ -46,8 +41,8 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
@@ -66,19 +61,11 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
     set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
-
-SpecialWorkspace2D::SpecialWorkspace2D(const SpecialWorkspace2D &other)
-    : Workspace2D(other), detID_to_WI(other.detID_to_WI) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecialWorkspace2D::~SpecialWorkspace2D() {}
 
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero
@@ -186,8 +173,8 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
  */
 void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
                                   const double value, const double error) {
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    this->setValue(*detID, value, error);
+  for (auto detectorID : detectorIDs) {
+    this->setValue(detectorID, value, error);
   }
 }
 

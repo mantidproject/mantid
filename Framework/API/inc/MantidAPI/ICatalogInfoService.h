@@ -2,6 +2,7 @@
 #define MANTID_API_ICATLOGINFOSERVICE_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace API {
@@ -37,7 +38,7 @@ namespace API {
 class DLLExport ICatalogInfoService {
 public:
   // Virtual destructor
-  virtual ~ICatalogInfoService(){};
+  virtual ~ICatalogInfoService() = default;
   /// Obtain the datafile location string from the archives.
   virtual const std::string getFileLocation(const long long &) = 0;
   /// Obtain url to download a file from.

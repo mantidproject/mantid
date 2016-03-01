@@ -10,6 +10,7 @@
 #include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "DllOption.h"
 
 /**
@@ -100,6 +101,8 @@ signals:
 
 private:
   RefIVConnections() {}
+  void setColorScale(MantidQt::SpectrumView::ColorMaps::ColorScale positive,
+                     MantidQt::SpectrumView::ColorMaps::ColorScale negative);
 
 private:
 

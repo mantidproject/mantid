@@ -42,21 +42,21 @@ public:
 
   MedianAndBelowThresholdRange();
 
-  virtual void calculate();
+  void calculate() override;
 
-  virtual signal_t getMinimum() const;
+  signal_t getMinimum() const override;
 
-  virtual signal_t getMaximum() const;
+  signal_t getMaximum() const override;
 
-  ~MedianAndBelowThresholdRange();
+  ~MedianAndBelowThresholdRange() override;
 
-  virtual bool hasCalculated() const;
+  bool hasCalculated() const override;
 
-  virtual MedianAndBelowThresholdRange* clone() const;
+  MedianAndBelowThresholdRange *clone() const override;
 
-  virtual bool inRange(const signal_t& signal);
+  bool inRange(const signal_t &signal) override;
 
-  virtual void setWorkspace(Mantid::API::Workspace_sptr workspace);
+  void setWorkspace(Mantid::API::Workspace_sptr workspace) override;
 
 private:
   

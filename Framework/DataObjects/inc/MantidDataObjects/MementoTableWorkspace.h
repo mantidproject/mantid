@@ -36,9 +36,9 @@ namespace DataObjects {
 */
 class DLLExport MementoTableWorkspace : public TableWorkspace {
 public:
+  MementoTableWorkspace &operator=(const MementoTableWorkspace &) = delete;
   static bool isMementoWorkspace(const Mantid::API::ITableWorkspace &candidate);
   MementoTableWorkspace(int nRows = 0);
-  ~MementoTableWorkspace();
 
   /// Returns a clone of the workspace
   std::unique_ptr<MementoTableWorkspace> clone() const {
@@ -47,13 +47,10 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  MementoTableWorkspace(const MementoTableWorkspace &other)
-      : TableWorkspace(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
+  MementoTableWorkspace(const MementoTableWorkspace &) = default;
 
 private:
-  virtual MementoTableWorkspace *doClone() const {
+  MementoTableWorkspace *doClone() const override {
     return new MementoTableWorkspace(*this);
   }
 

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
@@ -171,7 +172,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
 
   // Link workspace with detector
   for (size_t i = 0; i < nhist; ++i) {
-    const Mantid::specid_t specID = static_cast<Mantid::specid_t>(id + i);
+    const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
     auto *spec = ws2d->getSpectrum(i);
     spec->setSpectrumNo(specID);
     spec->clearDetectorIDs();
@@ -193,11 +194,6 @@ public:
   }
 
   void test_that_correct_resolution_is_calculated_without_gravity() {
-    // Arrange
-    std::vector<double> xValues;
-    xValues.push_back(1);
-    xValues.push_back(2);
-    xValues.push_back(3);
 
     double collimationLengthCorrection = -1;
     double collimationLengthIncrement = -1;

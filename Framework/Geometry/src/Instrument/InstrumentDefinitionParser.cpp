@@ -29,7 +29,7 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -52,7 +52,7 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
  */
 InstrumentDefinitionParser::InstrumentDefinitionParser()
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -69,7 +69,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
     const std::string &filename, const std::string &instName,
     const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -89,7 +89,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
     const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
     const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -136,10 +136,6 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
 }
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -221,7 +217,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   // Get all the type and component element pointers.
   std::vector<Element *> typeElems;
   std::vector<Element *> compElems;
-  for (Node *pNode = pRootElem->firstChild(); pNode != 0;
+  for (Node *pNode = pRootElem->firstChild(); pNode != nullptr;
        pNode = pNode->nextSibling()) {
     auto pElem = dynamic_cast<Element *>(pNode);
     if (pElem) {
@@ -357,11 +353,10 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   if (prog)
     prog->resetNumSteps(compElems.size(), 0.0, 1.0);
 
-  for (size_t i = 0; i < compElems.size(); ++i) {
+  for (auto pElem : compElems) {
     if (prog)
       prog->report("Loading instrument Definition");
 
-    const Element *pElem = compElems[i];
     {
       IdList idList; // structure to possibly be populated with detector IDs
 
@@ -395,7 +390,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       // order they are listed in the IDF. The latter needed to get detector IDs
       // assigned
       // as expected
-      for (Node *pNode = pElem->firstChild(); pNode != 0;
+      for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
         if (!pChildElem)
@@ -571,7 +566,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   // Check if sub-elements <trans> or <rot> of present - for now ignore these if
   // m_deltaOffset = true
 
-  Element *pRecursive = NULL;
+  Element *pRecursive = nullptr;
   Element *tElem = pElem->getChildElement("trans");
   Element *rElem = pElem->getChildElement("rot");
   bool stillTransElement = true;
@@ -589,7 +584,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (tElem && rElem) {
       // if both a <trans> and <rot> child element present. Ignore <rot> element
-      rElem = NULL;
+      rElem = nullptr;
     }
 
     if (!tElem && !rElem) {
@@ -1024,7 +1019,7 @@ void InstrumentDefinitionParser::appendAssembly(
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
-      if (pFound == NULL) {
+      if (pFound == nullptr) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "No <idlist> with name idname=\"" + idlist +
                 "\" present in instrument definition file.",
@@ -1196,7 +1191,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
-      if (pFound == NULL) {
+      if (pFound == nullptr) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "No <idlist> with name idname=\"" + idlist +
                 "\" present in instrument definition file.",
@@ -1932,10 +1927,10 @@ void InstrumentDefinitionParser::setLogfile(
     std::string tie = "";
 
     if (type.compare("fitting") == 0) {
-      size_t found = paramName.find(":");
+      size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
-        size_t index = paramName.find(":", found + 1);
+        size_t index = paramName.find(':', found + 1);
         if (index != std::string::npos) {
           g_log.error()
               << "Fitting <parameter> in instrument definition file defined "
@@ -1990,7 +1985,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
 
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    boost::shared_ptr<Interpolation> interpolation =
+        boost::make_shared<Interpolation>();
 
     if (numberLookUp >= 1) {
       Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
@@ -2068,12 +2064,11 @@ void InstrumentDefinitionParser::setLogfile(
     }
 
     auto cacheKey = std::make_pair(paramName, comp);
-    auto cacheValue =
-        boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-            logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-            paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-            extractSingleValueAs, eq, comp, m_angleConvertConst, description));
-    auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
+    auto cacheValue = boost::make_shared<XMLInstrumentParameter>(
+        logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+        paramName, type, tie, constraint, penaltyFactor, fittingFunction,
+        extractSingleValueAs, eq, comp, m_angleConvertConst, description);
+    auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;
     }
@@ -2180,18 +2175,16 @@ void InstrumentDefinitionParser::setComponentLinks(
         }
       }
 
-      for (size_t i = 0; i < sharedIComp.size(); i++) {
+      for (auto &ptr : sharedIComp) {
         boost::shared_ptr<const Geometry::Component> sharedComp =
-            boost::dynamic_pointer_cast<const Geometry::Component>(
-                sharedIComp[i]);
+            boost::dynamic_pointer_cast<const Geometry::Component>(ptr);
         if (sharedComp) {
           // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem,
                        instrument->getLogfileCache());
           } else {
-            setLogfile(sharedIComp[i].get(), curElem,
-                       instrument->getLogfileCache());
+            setLogfile(ptr.get(), curElem, instrument->getLogfileCache());
           }
         }
       }
@@ -2294,7 +2287,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  Instrument_sptr physical(new Instrument(*m_instrument));
+  auto physical = boost::make_shared<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(physical);
 
@@ -2393,7 +2386,7 @@ void InstrumentDefinitionParser::adjust(
   // check if a <translate-rotate-combined-shape-to> is defined
   Poco::AutoPtr<NodeList> pNL_TransRot =
       pElem->getElementsByTagName("translate-rotate-combined-shape-to");
-  Element *pTransRot = 0;
+  Element *pTransRot = nullptr;
   if (pNL_TransRot->length() == 1) {
     pTransRot = static_cast<Element *>(pNL_TransRot->item(0));
   }
@@ -2402,7 +2395,8 @@ void InstrumentDefinitionParser::adjust(
   // added
   // to pElem, and these <component>'s are deleted after loop
 
-  std::set<Element *> allComponentInType;   // used to hold <component>'s found
+  std::unordered_set<Element *>
+      allComponentInType;                   // used to hold <component>'s found
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++) {
     Element *pLoc = static_cast<Element *>(pNL->item(i));
@@ -2428,8 +2422,8 @@ void InstrumentDefinitionParser::adjust(
     // create dummy component to hold coord. sys. of cuboid
     CompAssembly *baseCoor = new CompAssembly(
         "base"); // dummy assembly used to get to end assembly if nested
-    ICompAssembly *endComponent =
-        0; // end assembly, its purpose is to hold the shape coordinate system
+    ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
+                                           // hold the shape coordinate system
     // get shape coordinate system, returned as endComponent, as defined by pLoc
     // and nested <location> elements
     // of pLoc
@@ -2475,8 +2469,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  std::set<Element *>::iterator it;
-  for (it = allComponentInType.begin(); it != allComponentInType.end(); ++it)
+  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
+       ++it)
     pElem->removeChild(*it);
 }
 
@@ -2617,13 +2611,11 @@ InstrumentDefinitionParser::convertLocationsElement(
   }
 
   // A list of numeric attributes which are allowed to have corresponding -end
-  std::set<std::string> rangeAttrs =
-      boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
+  std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
   // Numeric attributes related to rotation. Doesn't make sense to have -end for
   // those
-  std::set<std::string> rotAttrs =
-      boost::assign::list_of("axis-x")("axis-y")("axis-z");
+  std::set<std::string> rotAttrs = {"axis-x", "axis-y", "axis-z"};
 
   // A set of all numeric attributes for convenience
   std::set<std::string> allAttrs;
@@ -2636,10 +2628,10 @@ InstrumentDefinitionParser::convertLocationsElement(
   std::map<std::string, double> attrValues;
 
   // Read all the set attribute values
-  for (auto it = allAttrs.begin(); it != allAttrs.end(); ++it) {
-    if (pElem->hasAttribute(*it)) {
-      attrValues[*it] =
-          boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(*it)));
+  for (const auto &attr : allAttrs) {
+    if (pElem->hasAttribute(attr)) {
+      attrValues[attr] = boost::lexical_cast<double>(
+          Strings::strip(pElem->getAttribute(attr)));
     }
   }
 
@@ -2647,19 +2639,20 @@ InstrumentDefinitionParser::convertLocationsElement(
   std::map<std::string, double> rangeAttrSteps;
 
   // Find *-end for range attributes and calculate steps
-  for (auto it = rangeAttrs.begin(); it != rangeAttrs.end(); ++it) {
-    std::string endAttr = *it + "-end";
+  for (const auto &rangeAttr : rangeAttrs) {
+    std::string endAttr = rangeAttr + "-end";
     if (pElem->hasAttribute(endAttr)) {
-      if (attrValues.find(*it) == attrValues.end()) {
+      if (attrValues.find(rangeAttr) == attrValues.end()) {
         throw Exception::InstrumentDefinitionError(
             "*-end attribute without corresponding * attribute.");
       }
 
-      double from = attrValues[*it];
+      double from = attrValues[rangeAttr];
       double to = boost::lexical_cast<double>(
           Strings::strip(pElem->getAttribute(endAttr)));
 
-      rangeAttrSteps[*it] = (to - from) / (static_cast<double>(nElements) - 1);
+      rangeAttrSteps[rangeAttr] =
+          (to - from) / (static_cast<double>(nElements) - 1);
     }
   }
 
@@ -2678,13 +2671,13 @@ InstrumentDefinitionParser::convertLocationsElement(
     }
 
     // Copy values of all the attributes set
-    for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
-      pLoc->setAttribute(it->first,
-                         boost::lexical_cast<std::string>(it->second));
+    for (auto &attrValue : attrValues) {
+      pLoc->setAttribute(attrValue.first,
+                         boost::lexical_cast<std::string>(attrValue.second));
 
       // If attribute has a step, increase the value by the step
-      if (rangeAttrSteps.find(it->first) != rangeAttrSteps.end()) {
-        it->second += rangeAttrSteps[it->first];
+      if (rangeAttrSteps.find(attrValue.first) != rangeAttrSteps.end()) {
+        attrValue.second += rangeAttrSteps[attrValue.first];
       }
     }
 

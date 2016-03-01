@@ -46,7 +46,7 @@ namespace API {
 class MANTID_API_DLL FunctionDomain1D : public FunctionDomain {
 public:
   /// Return the number of arguments in the domain
-  virtual size_t size() const { return m_n; }
+  size_t size() const override { return m_n; }
   /// Get an x value.
   /// @param i :: Index
   double operator[](size_t i) const { return m_data[i]; }

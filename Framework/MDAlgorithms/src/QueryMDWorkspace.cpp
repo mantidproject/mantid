@@ -70,26 +70,26 @@ QueryMDWorkspace::~QueryMDWorkspace() {}
 
 /// Initialise the properties
 void QueryMDWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The output Tableworkspace "
       "with columns containing key summary information about the MDWorkspace.");
 
   declareProperty("LimitRows", true,
                   "Limit the report output to a maximum number of rows");
 
-  declareProperty(
-      new PropertyWithValue<int>("MaximumRows", 100000,
-                                 boost::make_shared<BoundedValidator<int>>(),
-                                 Direction::Input),
-      "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings("MaximumRows",
-                      new EnabledWhenProperty("LimitRows", IS_DEFAULT));
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "MaximumRows", 100000,
+                      boost::make_shared<BoundedValidator<int>>(),
+                      Direction::Input),
+                  "The number of neighbours to utilise. Defaults to 100000.");
+  setPropertySettings(
+      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back(noNormalisationOption());
@@ -108,7 +108,7 @@ void QueryMDWorkspace::init() {
       "Output box coordinates in terms of original workspace coordinates");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "BoxDataTable", "", Direction::Output,
           Mantid::API::PropertyMode::Optional),
       "Optional output data table with MDEventWorkspace-specific box data.");
@@ -148,8 +148,8 @@ void QueryMDWorkspace::getBoxData(
 
   std::vector<API::IMDNode *> boxes;
   ws->getBox()->getBoxes(boxes, depth, true);
-  for (size_t i = 0; i < boxes.size(); i++) {
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
+  for (auto &boxe : boxes) {
+    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxe);
     if (!box)
       throw(std::runtime_error("Can not cast IMDNode to any type of boxes"));
     size_t d = box->getDepth();

@@ -113,6 +113,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/ReflectometryTransform.h
+	inc/MantidDataObjects/SkippingPolicy.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
@@ -139,7 +140,6 @@ set ( TEST_FILES
 	FakeMDTest.h
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
-	LibraryManagerTest.h
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxFlatTreeTest.h

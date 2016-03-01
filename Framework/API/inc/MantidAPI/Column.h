@@ -52,7 +52,7 @@ public:
   Column() : m_type("int"), m_plotType(-1000), m_isReadOnly(true){};
 
   /// Virtual destructor
-  virtual ~Column() {}
+  virtual ~Column() = default;
 
   /// Name (caption) of the column.
   const std::string &name() const { return m_name; }
@@ -209,7 +209,7 @@ struct MANTID_API_DLL Boolean {
   /// equal to operator
   bool operator==(const Boolean &b) const { return (this->value == b.value); }
   //
-  operator double(void) const { return double(this->value); }
+  operator bool() const { return this->value; }
   bool value; ///< boolean value
 };
 

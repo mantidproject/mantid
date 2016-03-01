@@ -39,17 +39,12 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.insert(
-      std::make_pair(ELWIN, new Elwin(m_uiForm.twIDATabs->widget(ELWIN))));
-  m_tabs.insert(
-      std::make_pair(MSD_FIT, new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT))));
-  m_tabs.insert(std::make_pair(IQT, new Iqt(m_uiForm.twIDATabs->widget(IQT))));
-  m_tabs.insert(
-      std::make_pair(IQT_FIT, new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT))));
-  m_tabs.insert(std::make_pair(
-      CONV_FIT, new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
-  m_tabs.insert(std::make_pair(
-      JUMP_FIT, new JumpFit(m_uiForm.twIDATabs->widget(JUMP_FIT))));
+  m_tabs.emplace(ELWIN, new Elwin(m_uiForm.twIDATabs->widget(ELWIN)));
+  m_tabs.emplace(MSD_FIT, new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT)));
+  m_tabs.emplace(IQT, new Iqt(m_uiForm.twIDATabs->widget(IQT)));
+  m_tabs.emplace(IQT_FIT, new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT)));
+  m_tabs.emplace(CONV_FIT, new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT)));
+  m_tabs.emplace(JUMP_FIT, new JumpFit(m_uiForm.twIDATabs->widget(JUMP_FIT)));
 }
 
 /**

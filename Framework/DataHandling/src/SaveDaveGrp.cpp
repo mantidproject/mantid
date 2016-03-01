@@ -1,6 +1,8 @@
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
 
@@ -30,12 +32,12 @@ SaveDaveGrp::~SaveDaveGrp() {}
  */
 void SaveDaveGrp::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".grp"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".grp"),
       "A DAVE grouped data format file that will be created");
-  this->declareProperty(new Kernel::PropertyWithValue<bool>(
+  this->declareProperty(make_unique<Kernel::PropertyWithValue<bool>>(
                             "ToMicroEV", false, Kernel::Direction::Input),
                         "Transform all energy units from milli eV to micro eV");
 }

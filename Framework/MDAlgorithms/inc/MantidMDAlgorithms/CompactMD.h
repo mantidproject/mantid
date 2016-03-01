@@ -39,22 +39,22 @@ namespace MDAlgorithms {
 class DLLExport CompactMD : public API::Algorithm {
 public:
   CompactMD(){};
-  ~CompactMD(){};
+  ~CompactMD() override{};
 
-  virtual void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
   /// Algorithm's name for identification
-  const std::string name() const { return "CompactMD"; }
+  const std::string name() const override { return "CompactMD"; }
   /// Summary of algorithms purpose
-  const std::string summary() const {
+  const std::string summary() const override {
     return "Crops an MDHistoWorkspace based on the first non-zero signals "
            "giving a more focussed area of interest.";
   }
-  const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Utility\\Workspaces";
   }
   /// Algorithm's version for identification
-  int version() const { return 1; }
+  int version() const override { return 1; }
   /// Finding the extents of the first non-zero signals.
   void
   findFirstNonZeroMinMaxExtents(Mantid::API::IMDHistoWorkspace_sptr inputWs,

@@ -33,23 +33,24 @@ SaveCalFile::~SaveCalFile() {}
  */
 void SaveCalFile::init() {
   declareProperty(
-      new WorkspaceProperty<GroupingWorkspace>(
+      make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An GroupingWorkspace workspace giving the grouping info.");
 
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace workspace giving the detector calibration "
       "values.");
 
   declareProperty(
-      new WorkspaceProperty<MaskWorkspace>(
+      make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".cal"),
-                  "Path to the .cal file that will be created.");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".cal"),
+      "Path to the .cal file that will be created.");
 
   auto offsetprecision = boost::make_shared<BoundedValidator<int>>();
   offsetprecision->setLower(7);

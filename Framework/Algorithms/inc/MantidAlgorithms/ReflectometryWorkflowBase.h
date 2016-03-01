@@ -53,7 +53,7 @@ public:
   using OptionalInteger = boost::optional<int>;
 
   ReflectometryWorkflowBase();
-  virtual ~ReflectometryWorkflowBase();
+  ~ReflectometryWorkflowBase() override;
 
   /// Convert the input workspace to wavelength, splitting according to the
   /// properties provided.

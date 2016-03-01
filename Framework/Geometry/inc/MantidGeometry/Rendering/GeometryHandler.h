@@ -84,9 +84,9 @@ public:
   /// get the number of points or vertices
   virtual int NumberOfPoints() { return 0; }
   /// Extract the vertices of the triangles
-  virtual double *getTriangleVertices() { return NULL; }
+  virtual double *getTriangleVertices() { return nullptr; }
   /// Extract the Faces of the triangles
-  virtual int *getTriangleFaces() { return NULL; }
+  virtual int *getTriangleFaces() { return nullptr; }
   /// Sets the geometry cache using the triangulation information provided
   virtual void setGeometryCache(int noPts, int noFaces, double *pts,
                                 int *faces) {

@@ -61,22 +61,22 @@ std::ostream &operator<<(std::ostream &strm, const DetectorPosition &p) {
 class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
-  virtual ~LoadILLSANS();
+  ~LoadILLSANS() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a ILL nexus files for SANS instruments.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPosition(const NeXus::NXEntry &,
                                        const std::string &);

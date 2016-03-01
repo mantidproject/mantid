@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <cmath>
 #include <climits>
 #include <MantidAPI/IEventWorkspace.h>
@@ -33,7 +34,7 @@ RingProfile::~RingProfile() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-    It configure the algorithm to accept the following inputs:
+    It configures the algorithm to accept the following inputs:
 
      - InputWorkspace
      - OutputWorkspace
@@ -45,26 +46,27 @@ RingProfile::~RingProfile() {}
      - Sense
  */
 void RingProfile::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "InputWorkspace", "", Kernel::Direction::Input),
-                  "An input workspace.");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Kernel::Direction::Input),
+      "An input workspace.");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "An output workspace.");
 
   auto twoOrThree =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(
-      new Kernel::ArrayProperty<double>("Centre", myInput, twoOrThree),
-      "Coordinate of the centre of the ring");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      "Centre", myInput, twoOrThree),
+                  "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
   declareProperty<double>("MinRadius", 0, nonNegative,
                           "Radius of the inner ring(m)");
   declareProperty(
-      new Kernel::PropertyWithValue<double>(
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
           "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
       "Radius of the outer ring(m)");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -184,7 +186,7 @@ void RingProfile::exec() {
 
   // the horizontal axis is configured as degrees and copy the values of X
   API::Axis *const horizontal = new API::NumericAxis(refX.size());
-  horizontal->unit() = boost::shared_ptr<Kernel::Unit>(new Kernel::Units::Phi);
+  horizontal->unit() = boost::make_shared<Kernel::Units::Phi>();
   horizontal->title() = "Ring Angle";
   for (size_t j = 0; j < refX.size(); j++)
     horizontal->setValue(j, refX[j]);

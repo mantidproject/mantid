@@ -65,10 +65,17 @@ The Mantid FFT algorithm returns the complex array :math:`\bar{F}_K` as
 Y values of two spectra in the output workspace, one for the real and
 the other for the imaginary part of the transform. The X values are set
 to the transform frequencies and have the range approximately equal to
-:math:`[-N/L,N/L]`. The actual limits depend sllightly on whether
+:math:`[-N/L,N/L]`. The actual limits depend slightly on whether
 :math:`N` is even or odd and whether the input spectra are histograms or
 point data. The variations are of the order of :math:`\Delta\xi`. The
 zero frequency is always in the bin with index :math:`k=int(N/2)`.
+
+The X values of the input data must be evenly spaced for the FFT algorithm
+to work (all bin widths must be the same). If they contain small rounding
+errors, this requirement can be relaxed by setting the *AcceptXRoundingErrors*
+property, which will continue to process the data even if the spacings between
+different X values are unequal. Large differences in the bin widths will still
+produce a warning.
 
 Example 1
 #########

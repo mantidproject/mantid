@@ -41,7 +41,7 @@ namespace MDAlgorithms {
 class DLLExport BoxControllerSettingsAlgorithm : public API::Algorithm {
 public:
   BoxControllerSettingsAlgorithm();
-  ~BoxControllerSettingsAlgorithm();
+  ~BoxControllerSettingsAlgorithm() override;
 
 protected:
   /// Initialise the properties

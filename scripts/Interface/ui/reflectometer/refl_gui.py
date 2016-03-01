@@ -138,7 +138,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
 
-        accept_btn = QtGui.QPushButton('Accept')
+        accept_btn = QtGui.QPushButton('Save')
         cancel_btn = QtGui.QPushButton('Cancel')
         discard_btn = QtGui.QPushButton('Discard')
 
@@ -172,7 +172,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.AcceptRole:
                 if saved:
-                    event.accept()
+                    self.mod_flag = False
+                event.accept()
+            elif ret == QtGui.QMessageBox.RejectRole:
+                event.ignore()
             elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
@@ -282,7 +285,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #first check if the table has been changed before clearing it
         if self.mod_flag:
             ret, _saved = self._save_check()
-            if ret == QtGui.QMessageBox.Cancel:
+            if ret == QtGui.QMessageBox.RejectRole:
                 return
         self.current_table = None
 
@@ -785,9 +788,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 overlapLow.append(qmin)
                             if self.tableMain.item(row, i * 5 + 4).text() == '':
                                 item = QtGui.QTableWidgetItem()
-                                if i == len(runno) - 1:
-                                # allow full high q-range for last angle
-                                    qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
                                 item.setText(str(qmax))
                                 self.tableMain.setItem(row, i * 5 + 4, item)
                                 overlapHigh.append(qmax)
@@ -918,7 +918,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 outputwksp = runno[0] + '_' + runno[2][3:]
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
-                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
+                _wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
                                          keep=True, scale_right=self.__scale_right)
 
             Qmin = min(getWorkspace(outputwksp).readX(0))
@@ -1049,12 +1049,12 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             inst = wq[0].getInstrument()
         else:
             inst = wq.getInstrument()
-        #NOTE: In the new Refl UI, these adjustments to lmin/lmax are NOT made. This has been
-        #noted in the parameter files for INTER/CRIST/POLREF/SURF.
-        lmin = inst.getNumberParameter('LambdaMin')[0] + 1
-        lmax = inst.getNumberParameter('LambdaMax')[0] - 2
+
+        lmin = inst.getNumberParameter('LambdaMin')[0]
+        lmax = inst.getNumberParameter('LambdaMax')[0]
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
+
         return th, qmin, qmax, wlam, wq
 
     def _save_table_contents(self, filename):
@@ -1146,7 +1146,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 #before loading make sure you give them a chance to save
                 if self.mod_flag:
                     ret, _saved = self._save_check()
-                    if ret == QtGui.QMessageBox.Cancel:
+                    if ret == QtGui.QMessageBox.RejectRole:
                         #if they hit cancel abort the load
                         self.loading = False
                         return

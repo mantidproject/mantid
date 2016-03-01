@@ -8,6 +8,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "WidgetDllOption.h"
 
 namespace MantidQt

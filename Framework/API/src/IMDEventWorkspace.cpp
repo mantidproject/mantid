@@ -14,12 +14,6 @@ IMDEventWorkspace::IMDEventWorkspace()
     : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
 
 //-----------------------------------------------------------------------------------------------
-/** Copy constructor */
-IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace &other)
-    : IMDWorkspace(other), MultipleExperimentInfos(other),
-      m_fileNeedsUpdating(other.m_fileNeedsUpdating) {}
-
-//-----------------------------------------------------------------------------------------------
 /** @return the marker set to true when a file-backed workspace needs its
  * back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
  */
@@ -55,8 +49,8 @@ const std::string IMDEventWorkspace::toString() const {
 
   // Now box controller details
   std::vector<std::string> stats = getBoxControllerStats();
-  for (size_t i = 0; i < stats.size(); i++) {
-    os << stats[i] << "\n";
+  for (auto &stat : stats) {
+    os << stat << "\n";
   }
 
   os << MultipleExperimentInfos::toString() << "\n";

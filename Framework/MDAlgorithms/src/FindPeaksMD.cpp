@@ -107,7 +107,7 @@ DECLARE_ALGORITHM(FindPeaksMD)
  */
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
-      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL), inst(),
+      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
       m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
@@ -121,32 +121,32 @@ FindPeaksMD::~FindPeaksMD() {}
 /** Initialize the algorithm's properties.
  */
 void FindPeaksMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace with at least "
                   "3 dimensions.");
 
   declareProperty(
-      new PropertyWithValue<double>("PeakDistanceThreshold", 0.1,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
+                                             Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(
-      new PropertyWithValue<int64_t>("MaxPeaks", 500, Direction::Input),
-      "Maximum number of peaks to find. Default: 500.");
+  declareProperty(make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
+                                                          Direction::Input),
+                  "Maximum number of peaks to find. Default: 500.");
 
-  declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 10.0,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
                   "to get a threshold signal density below which boxes are NOT "
                   "considered to be peaks. See the help.\n"
                   "Default: 10.0");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
 
   declareProperty("AppendPeaks", false,
@@ -341,13 +341,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); it3++) {
+      for (auto &peakBoxe : peakBoxes) {
 
 #ifndef MDBOX_TRACK_CENTROID
         coord_t otherCenter[nd];
         (*it3)->calculateCentroid(otherCenter);
 #else
-        const coord_t *otherCenter = (*it3)->getCentroid();
+        const coord_t *otherCenter = peakBoxe->getCentroid();
 #endif
 
         // Distance between this box and a box we already put in.
@@ -386,9 +386,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // --- Convert the "boxes" to peaks ----
-    for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); it3++) {
-      // The center of the box = Q in the lab frame
-      boxPtr box = *it3;
+    for (auto box : peakBoxes) {
+// The center of the box = Q in the lab frame
+
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
       box->calculateCentroid(boxCenter);
@@ -515,8 +515,8 @@ void FindPeaksMD::findPeaksHisto(
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); ++it3) {
-        VMD otherCenter = ws->getCenter(*it3);
+      for (auto &peakBoxe : peakBoxes) {
+        VMD otherCenter = ws->getCenter(peakBoxe);
 
         // Distance between this box and a box we already put in.
         coord_t distSquared = 0.0;
@@ -549,8 +549,7 @@ void FindPeaksMD::findPeaksHisto(
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); ++it3) {
-      size_t index = *it3;
+    for (auto index : peakBoxes) {
       // The center of the box = Q in the lab frame
       VMD boxCenter = ws->getCenter(index);
 

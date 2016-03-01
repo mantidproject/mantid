@@ -3,19 +3,22 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include <fstream>
+#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
 // String utilities
+#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,7 +31,7 @@ using namespace API;
 LoadAscii2::LoadAscii2()
     : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
       m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(),
-      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(NULL) {}
+      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -212,7 +215,7 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
           ->setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(static_cast<specid_t>(i) + 1);
+          ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
   }
 }
@@ -556,8 +559,7 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
                                  const std::list<std::string> &columns) const {
   values.resize(columns.size());
   int i = 0;
-  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
-    std::string value = *itr;
+  for (auto value : columns) {
     boost::trim(value);
     boost::to_lower(value);
     if (value == "nan" || value == "1.#qnan") // ignores nans (not a number) and
@@ -577,13 +579,14 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii2::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".dat", ".txt", ".csv", ""}),
+  const std::vector<std::string> exts{".dat", ".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, "
                   "filled with the read-in data and stored in the [[Analysis "
                   "Data Service]].");
@@ -597,10 +600,10 @@ void LoadAscii2::init() {
                                {"UserDefined", "UserDefined"}};
   // For the ListValidator
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 7; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
   declareProperty("Separator", "Automatic",
@@ -612,13 +615,13 @@ void LoadAscii2::init() {
                   " tab, space, semicolon or colon.).");
 
   declareProperty(
-      new PropertyWithValue<std::string>("CustomSeparator", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                  Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
-  setPropertySettings(
-      "CustomSeparator",
-      new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined"));
+  setPropertySettings("CustomSeparator",
+                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
+                                                       "UserDefined"));
 
   declareProperty("CommentIndicator", "#", "Character(s) found front of "
                                            "comment lines. Cannot contain "

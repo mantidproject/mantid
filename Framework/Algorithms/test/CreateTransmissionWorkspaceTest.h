@@ -10,9 +10,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
-#include <boost/assign.hpp>
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -64,10 +64,8 @@ public:
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
 
     FrameworkManager::Instance();
-    MantidVec xData =
-        boost::assign::list_of(0)(0)(0)(0).convert_to_container<MantidVec>();
-    MantidVec yData =
-        boost::assign::list_of(0)(0)(0).convert_to_container<MantidVec>();
+    MantidVec xData = {0, 0, 0, 0};
+    MantidVec yData = {0, 0, 0};
 
     auto createWorkspace =
         AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
@@ -105,8 +103,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params =
-        boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
+    MantidVec params = {0.0, 0.1, 1.0};
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);

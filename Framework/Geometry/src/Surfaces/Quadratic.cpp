@@ -38,28 +38,6 @@ Quadratic::Quadratic()
 */
 {}
 
-Quadratic::Quadratic(const Quadratic &A)
-    : Surface(A), BaseEqn(A.BaseEqn)
-/**
-  Copy constructor
-  @param A :: Quadratic to copy
-*/
-{}
-
-Quadratic &Quadratic::operator=(const Quadratic &A)
-/**
-  Assignment operator
-  @param A :: Quadratic to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Surface::operator=(A);
-    BaseEqn = A.BaseEqn;
-  }
-  return *this;
-}
-
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**
   Helper function to calcuate the value

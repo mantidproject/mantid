@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidKernel/System.h"
-#include <fstream>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,10 +19,11 @@ using namespace API;
 /// Initialisation method.
 void FindDeadDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
 
@@ -96,18 +98,17 @@ void FindDeadDetectors::exec() {
     } else {
       ++countSpec;
       y = deadValue;
-      const specid_t specNo = spec->getSpectrumNo();
+      const specnum_t specNo = spec->getSpectrumNo();
       // Write the spectrum number to file
       file << i << " " << specNo;
       // Get the list of detectors for this spectrum and iterate over
-      const std::set<detid_t> &dets = spec->getDetectorIDs();
-      std::set<detid_t>::const_iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it) {
+      const auto &dets = spec->getDetectorIDs();
+      for (const auto &det : dets) {
         // Write the detector ID to file, log & the FoundDead output property
-        file << " " << *it;
+        file << " " << det;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(*it);
+        deadDets.push_back(det);
         ++countDets;
       }
       file << std::endl;

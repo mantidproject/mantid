@@ -6,13 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Runnable.h>
+#include <mutex>
 
 namespace Mantid {
 namespace LiveData {
@@ -42,25 +42,25 @@ class TOPAZLiveEventDataListener : public API::ILiveListener,
                                    public Poco::Runnable {
 public:
   TOPAZLiveEventDataListener();
-  virtual ~TOPAZLiveEventDataListener();
+  ~TOPAZLiveEventDataListener() override;
 
-  std::string name() const { return "TOPAZLiveEventDataListener"; }
-  bool supportsHistory() const { return false; }
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "TOPAZLiveEventDataListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  ILiveListener::RunStatus runStatus();
+  ILiveListener::RunStatus runStatus() override;
   // Called by the MonitorLiveData algorithm.
 
-  int runNumber() const { return m_runNumber; };
+  int runNumber() const override { return m_runNumber; };
 
-  bool isConnected();
+  bool isConnected() override;
 
-  virtual void run(); // the background thread.  What gets executed when we
-                      // call POCO::Thread::start()
+  void run() override; // the background thread.  What gets executed when we
+                       // call POCO::Thread::start()
 protected:
 private:
   void initWorkspace();
@@ -110,7 +110,7 @@ private:
 
   int m_runNumber;
 
-  Poco::FastMutex m_mutex; // protects m_eventBuffer & m_status
+  std::mutex m_mutex; // protects m_eventBuffer & m_status
   Poco::Thread m_thread;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits

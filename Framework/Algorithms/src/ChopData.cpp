@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -18,11 +19,11 @@ void ChopData::init() {
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsVal),
-      "Name of the input workspace to be split.");
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, wsVal),
+                  "Name of the input workspace to be split.");
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created.");
 
   declareProperty("Step", 20000.0);
@@ -151,7 +152,8 @@ void ChopData::exec() {
     name << output << "_" << wsCounter;
     std::string wsname = name.str();
 
-    declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
     ++wsCounter;
 
@@ -161,10 +163,10 @@ void ChopData::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &workspace : workspaces) {
+    wsgroup->addWorkspace(workspace);
   }
   // set the output property
   setProperty("OutputWorkspace", wsgroup);

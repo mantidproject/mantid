@@ -1,13 +1,15 @@
 #include "MantidLiveData/LiveDataAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
+
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
+#include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -40,9 +42,9 @@ void LiveDataAlgorithm::initProps() {
   std::vector<std::string> instruments;
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
-  for (auto it = instrInfo.begin(); it != instrInfo.end(); ++it) {
-    if (!it->liveDataAddress().empty()) {
-      instruments.push_back(it->name());
+  for (const auto &instrument : instrInfo) {
+    if (!instrument.liveDataAddress().empty()) {
+      instruments.push_back(instrument.name());
     }
   }
 #ifndef NDEBUG
@@ -52,39 +54,36 @@ void LiveDataAlgorithm::initProps() {
       Mantid::API::LiveListenerFactory::Instance().getKeys();
   instruments.insert(instruments.end(), listeners.begin(), listeners.end());
 #endif
-  declareProperty(new PropertyWithValue<std::string>(
+  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
 
-  declareProperty(
-      new PropertyWithValue<std::string>("StartTime", "", Direction::Input),
-      "Absolute start time, if you selected FromTime.\n"
-      "Specify the date/time in UTC time, in ISO8601 format, e.g. "
-      "2010-09-14T04:20:12.95");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("StartTime", "",
+                                                              Direction::Input),
+                  "Absolute start time, if you selected FromTime.\n"
+                  "Specify the date/time in UTC time, in ISO8601 format, e.g. "
+                  "2010-09-14T04:20:12.95");
 
   declareProperty(
-      new PropertyWithValue<std::string>("ProcessingAlgorithm", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm", "",
+                                                  Direction::Input),
       "Name of the algorithm that will be run to process each chunk of data.\n"
       "Optional. If blank, no processing will occur.");
 
   declareProperty(
-      new PropertyWithValue<std::string>("ProcessingProperties", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("ProcessingProperties", "",
+                                                  Direction::Input),
       "The properties to pass to the ProcessingAlgorithm, as a single string.\n"
       "The format is propName=value;propName=value");
 
-  declareProperty(new PropertyWithValue<std::string>("ProcessingScript", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingScript", "", Direction::Input),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Add");
-  propOptions.push_back("Replace");
-  propOptions.push_back("Append");
+  std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(
       "AccumulationMethod", "Add",
       boost::make_shared<StringListValidator>(propOptions),
@@ -104,27 +103,24 @@ void LiveDataAlgorithm::initProps() {
       "events\n"
       "may cause significant slowdowns when the run becomes large!");
 
-  declareProperty(new PropertyWithValue<std::string>("PostProcessingAlgorithm",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "PostProcessingAlgorithm", "", Direction::Input),
                   "Name of the algorithm that will be run to process the "
                   "accumulated data.\n"
                   "Optional. If blank, no post-processing will occur.");
 
-  declareProperty(new PropertyWithValue<std::string>("PostProcessingProperties",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "PostProcessingProperties", "", Direction::Input),
                   "The properties to pass to the PostProcessingAlgorithm, as a "
                   "single string.\n"
                   "The format is propName=value;propName=value");
 
   declareProperty(
-      new PropertyWithValue<std::string>("PostProcessingScript", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("PostProcessingScript", "",
+                                                  Direction::Input),
       "A Python script that will be run to process the accumulated data.");
 
-  std::vector<std::string> runOptions;
-  runOptions.push_back("Restart");
-  runOptions.push_back("Stop");
-  runOptions.push_back("Rename");
+  std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
                   boost::make_shared<StringListValidator>(runOptions),
                   "What to do at run start/end boundaries?\n"
@@ -134,7 +130,7 @@ void LiveDataAlgorithm::initProps() {
                   "monitoring continues with cleared ones.");
 
   declareProperty(
-      new WorkspaceProperty<Workspace>(
+      make_unique<WorkspaceProperty<Workspace>>(
           "AccumulationWorkspace", "", Direction::Output,
           PropertyMode::Optional, LockMode::NoLock),
       "Optional, unless performing PostProcessing:\n"
@@ -142,13 +138,13 @@ void LiveDataAlgorithm::initProps() {
       " This is the workspace after accumulation but before post-processing "
       "steps.");
 
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output,
                       PropertyMode::Mandatory, LockMode::NoLock),
                   "Name of the processed output workspace.");
 
-  declareProperty(new PropertyWithValue<std::string>("LastTimeStamp", "",
-                                                     Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "LastTimeStamp", "", Direction::Output),
                   "The time stamp of the last event, frame or pulse recorded.\n"
                   "Date/time is in UTC time, in ISO8601 format, e.g. "
                   "2010-09-14T04:20:12.95");
@@ -161,8 +157,7 @@ void LiveDataAlgorithm::initProps() {
  */
 void LiveDataAlgorithm::copyPropertyValuesFrom(const LiveDataAlgorithm &other) {
   std::vector<Property *> props = this->getProperties();
-  for (size_t i = 0; i < props.size(); i++) {
-    Property *prop = props[i];
+  for (auto prop : props) {
     this->setPropertyValue(prop->name(), other.getPropertyValue(prop->name()));
   }
 }
@@ -247,7 +242,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
 
     // Skip some of the properties when setting
-    std::set<std::string> ignoreProps;
+    std::unordered_set<std::string> ignoreProps;
     ignoreProps.insert("InputWorkspace");
     ignoreProps.insert("OutputWorkspace");
 

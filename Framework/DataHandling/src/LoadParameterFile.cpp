@@ -2,10 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -15,7 +17,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -45,11 +46,12 @@ void LoadParameterFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace to load the instrument parameters into.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalLoad, ".xml"),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
       "The filename (including its full or relative path) of a parameter "
       "definition file. The file extension must either be .xml or .XML.");
   declareProperty("ParameterXML", "",

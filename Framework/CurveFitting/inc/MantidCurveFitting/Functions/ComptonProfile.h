@@ -51,13 +51,14 @@ public:
   /** @name Function evaluation */
   ///@{
   /// Calculate the function
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// Ensure the object is ready to be fitted
-  void setUpForFit();
+  void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
 
   /// Pre-calculate the Y-space values with specified resolution parameters
   void cacheYSpaceValues(const std::vector<double> &tseconds,
@@ -86,9 +87,9 @@ public:
 
 protected:
   /// Declare parameters that will never participate in the fit
-  void declareAttributes();
+  void declareAttributes() override;
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
 
   /// Access y-values cache
   inline const std::vector<double> &ySpace() const { return m_yspace; }

@@ -76,29 +76,29 @@ public:
   /// Constructor
   CalculateTransmissionBeamSpreader();
   /// Virtual destructor
-  virtual ~CalculateTransmissionBeamSpreader();
+  ~CalculateTransmissionBeamSpreader() override;
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "CalculateTransmissionBeamSpreader";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates the sample transmission using the beam spreader (aka "
            "glass carbon) method.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;CorrectionFunctions\\TransmissionCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
   API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS,

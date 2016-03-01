@@ -39,10 +39,13 @@ class EXPORT_OPT_MANTIDQT_API PowerScaleTransformation: public ScaleTransformati
 {
 public:
 	PowerScaleTransformation(const ScaleEngine *engine):ScaleTransformation(engine), nth_power(engine->nthPower()){};
-	virtual double xForm(double x, double, double, double p1, double p2) const;
-	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
-	QwtScaleTransformation* copy() const;
-  virtual ~PowerScaleTransformation();
+        double xForm(double x, double, double, double p1,
+                     double p2) const override;
+        double invXForm(double x, double s1, double s2, double p1,
+                        double p2) const override;
+        QwtScaleTransformation *copy() const override;
+        ~PowerScaleTransformation() override;
+
 private:
   double nth_power;
 };
@@ -54,16 +57,16 @@ private:
 class EXPORT_OPT_MANTIDQT_API PowerScaleEngine: public QwtScaleEngine
 {
 public:
-    virtual void autoScale(int maxSteps,
-        double &x1, double &x2, double &stepSize) const;
+  void autoScale(int maxSteps, double &x1, double &x2,
+                 double &stepSize) const override;
 
-    virtual QwtScaleDiv divideScale(double x1, double x2,
-        int numMajorSteps, int numMinorSteps,
-        double stepSize = 0.0) const;
+  QwtScaleDiv divideScale(double x1, double x2, int numMajorSteps,
+                          int numMinorSteps,
+                          double stepSize = 0.0) const override;
 
-    virtual QwtScaleTransformation *transformation() const;
+  QwtScaleTransformation *transformation() const override;
 
-    virtual ~PowerScaleEngine();
+  ~PowerScaleEngine() override;
 
 protected:
     QwtDoubleInterval align(const QwtDoubleInterval&,

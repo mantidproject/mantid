@@ -52,12 +52,13 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMcStas::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
-      "The name of the Nexus file to load");
+  const std::vector<std::string> exts{".h5", ".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
   declareProperty(
@@ -97,9 +98,9 @@ void LoadMcStas::exec() {
     std::map<std::string, std::string> histogramEntries;
 
     // populate eventEntries and histogramEntries
-    for (auto eit = dataEntries.begin(); eit != dataEntries.end(); ++eit) {
-      std::string dataName = eit->first;
-      std::string dataType = eit->second;
+    for (auto &dataEntry : dataEntries) {
+      std::string dataName = dataEntry.first;
+      std::string dataType = dataEntry.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue; // can be removed if sure no Nexus files contains
                   // "content_nxs"
@@ -116,19 +117,18 @@ void LoadMcStas::exec() {
 
       auto nxdataEntries = nxFile.getEntries();
 
-      for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end();
-           ++nit) {
-        if (nit->second == "NXparameters")
+      for (auto &nxdataEntry : nxdataEntries) {
+        if (nxdataEntry.second == "NXparameters")
           continue;
-        nxFile.openData(nit->first);
+        nxFile.openData(nxdataEntry.first);
         if (nxFile.hasAttr("long_name")) {
           std::string nameAttrValue;
           nxFile.getAttr("long_name", nameAttrValue);
 
           if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-            eventEntries[eit->first] = eit->second;
+            eventEntries[dataEntry.first] = dataEntry.second;
           } else {
-            histogramEntries[eit->first] = eit->second;
+            histogramEntries[dataEntry.first] = dataEntry.second;
           }
         }
         nxFile.closeData();
@@ -203,7 +203,7 @@ void LoadMcStas::readEventData(
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instrument = parser.parseXML(NULL);
+      instrument = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -247,9 +247,9 @@ void LoadMcStas::readEventData(
 
   const size_t numEventEntries = eventEntries.size();
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  for (auto eit = eventEntries.begin(); eit != eventEntries.end(); ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &eventEntry : eventEntries) {
+    const std::string &dataName = eventEntry.first;
+    const std::string &dataType = eventEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -284,7 +284,7 @@ void LoadMcStas::readEventData(
                     << std::endl;
       return;
     }
-    if (isAnyNeutrons == false && nNeutrons > 0)
+    if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
     std::vector<int64_t> start(2);
@@ -393,8 +393,8 @@ void LoadMcStas::readEventData(
   std::string extraProperty =
       "Outputworkspace_dummy_" +
       boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-  declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                   Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      extraProperty, nameUserSee, Direction::Output));
   setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
   m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                               // unique
@@ -416,10 +416,9 @@ void LoadMcStas::readHistogramData(
 
   std::string nameAttrValueYLABEL;
 
-  for (auto eit = histogramEntries.begin(); eit != histogramEntries.end();
-       ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &histogramEntry : histogramEntries) {
+    const std::string &dataName = histogramEntry.first;
+    const std::string &dataType = histogramEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -435,20 +434,20 @@ void LoadMcStas::readHistogramData(
     // Find the axis names
     auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end(); ++nit) {
-      if (nit->second == "NXparameters")
+    for (auto &nxdataEntry : nxdataEntries) {
+      if (nxdataEntry.second == "NXparameters")
         continue;
-      if (nit->first == "ncount")
+      if (nxdataEntry.first == "ncount")
         continue;
-      nxFile.openData(nit->first);
+      nxFile.openData(nxdataEntry.first);
 
       if (nxFile.hasAttr("axis")) {
         int axisNo(0);
         nxFile.getAttr("axis", axisNo);
         if (axisNo == 1)
-          axis1Name = nit->first;
+          axis1Name = nxdataEntry.first;
         else if (axisNo == 2)
-          axis2Name = nit->first;
+          axis2Name = nxdataEntry.first;
         else
           throw std::invalid_argument("Unknown axis number");
       }
@@ -490,14 +489,14 @@ void LoadMcStas::readHistogramData(
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
-    boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+    auto lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
     Axis *axis2 = new NumericAxis(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+    lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 
@@ -536,8 +535,8 @@ void LoadMcStas::readHistogramData(
     std::string extraProperty =
         "Outputworkspace_dummy_" +
         boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-    declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                     Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
     m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                                 // unique

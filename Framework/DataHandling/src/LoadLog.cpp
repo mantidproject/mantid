@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -43,28 +44,29 @@ void LoadLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace to which the log data will be added.");
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".txt", ".log"}),
-      "The filename (including its full or relative path) of a SNS "
-      "text log file (not cvinfo), "
-      "an ISIS log file, or an ISIS raw file. "
-      "If a raw file is specified all log files associated with "
-      "that raw file are loaded into the specified workspace. The "
-      "file extension must "
-      "either be .raw or .s when specifying a raw file");
+  const std::vector<std::string> exts{".txt", ".log"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The filename (including its full or relative path) of a SNS "
+                  "text log file (not cvinfo), "
+                  "an ISIS log file, or an ISIS raw file. "
+                  "If a raw file is specified all log files associated with "
+                  "that raw file are loaded into the specified workspace. The "
+                  "file extension must "
+                  "either be .raw or .s when specifying a raw file");
 
   declareProperty(
-      new ArrayProperty<std::string>("Names"),
+      make_unique<ArrayProperty<std::string>>("Names"),
       "For SNS-style log files only: the names of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file.");
 
   declareProperty(
-      new ArrayProperty<std::string>("Units"),
+      make_unique<ArrayProperty<std::string>>("Units"),
       "For SNS-style log files only: the units of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file. "
@@ -195,13 +197,10 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
                                      std::string logFileName, API::Run &run) {
   std::string str;
   std::string propname;
-  Mantid::Kernel::TimeSeriesProperty<double> *logd = 0;
-  Mantid::Kernel::TimeSeriesProperty<std::string> *logs = 0;
-  std::map<std::string, Kernel::TimeSeriesProperty<double> *> dMap;
-  std::map<std::string, Kernel::TimeSeriesProperty<std::string> *> sMap;
-  typedef std::pair<std::string, Kernel::TimeSeriesProperty<double> *> dpair;
-  typedef std::pair<std::string, Kernel::TimeSeriesProperty<std::string> *>
-      spair;
+  std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
+      dMap;
+  std::map<std::string,
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 
@@ -256,38 +255,36 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     if (isNumeric) {
       auto ditr = dMap.find(propname);
       if (ditr != dMap.end()) {
-        Kernel::TimeSeriesProperty<double> *prop = ditr->second;
+        auto prop = ditr->second.get();
         if (prop)
           prop->addValue(timecolumn, dvalue);
       } else {
-        logd = new Kernel::TimeSeriesProperty<double>(propname);
+        auto logd =
+            Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+                propname);
         logd->addValue(timecolumn, dvalue);
-        dMap.insert(dpair(propname, logd));
+        dMap.emplace(std::make_pair(propname, std::move(logd)));
       }
     } else {
       auto sitr = sMap.find(propname);
       if (sitr != sMap.end()) {
-        Kernel::TimeSeriesProperty<std::string> *prop = sitr->second;
+        auto prop = sitr->second.get();
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        logs = new Kernel::TimeSeriesProperty<std::string>(propname);
+        auto logs = Mantid::Kernel::make_unique<
+            Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
-        sMap.insert(spair(propname, logs));
+        sMap.emplace(std::make_pair(propname, std::move(logs)));
       }
     }
   }
   try {
-    std::map<std::string, Kernel::TimeSeriesProperty<double> *>::const_iterator
-        itr = dMap.begin();
-    for (; itr != dMap.end(); ++itr) {
-      run.addLogData(itr->second);
+    for (auto itr = dMap.begin(); itr != dMap.end(); ++itr) {
+      run.addLogData(itr->second.release());
     }
-    std::map<std::string,
-             Kernel::TimeSeriesProperty<std::string> *>::const_iterator sitr =
-        sMap.begin();
-    for (; sitr != sMap.end(); ++sitr) {
-      run.addLogData(sitr->second);
+    for (auto sitr = sMap.begin(); sitr != sMap.end(); ++sitr) {
+      run.addLogData(sitr->second.release());
     }
   } catch (std::invalid_argument &e) {
     g_log.warning() << e.what();
@@ -470,8 +467,8 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
   boost::split(strs, str, boost::is_any_of("\t "));
   double val;
   // Every column must evaluate to a double
-  for (size_t i = 0; i < strs.size(); i++) {
-    if (!Strings::convert<double>(strs[i], val))
+  for (auto &str : strs) {
+    if (!Strings::convert<double>(str, val))
       return false;
     else
       out.push_back(val);

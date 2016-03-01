@@ -1,10 +1,11 @@
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -47,37 +48,39 @@ const std::string DgsAbsoluteUnitsReduction::category() const {
  */
 void DgsAbsoluteUnitsReduction::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The absolute units sample workspace.");
-  this->declareProperty(new WorkspaceProperty<>("InputMonitorWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "InputMonitorWorkspace", "", Direction::Input,
+                            PropertyMode::Optional),
                         "A monitor workspace associated with the absolute "
                         "units sample workspace");
-  this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "DetectorVanadiumWorkspace", "", Direction::Input,
+                            PropertyMode::Optional),
                         "An absolute units detector vanadium workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("DetectorVanadiumMonitorWorkspace", "",
-                              Direction::Input, PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("DetectorVanadiumMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the absolute units detector "
       "vanadium workspace.");
-  this->declareProperty(new WorkspaceProperty<>("MaskWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A masking workspace to apply to the data.");
-  this->declareProperty(new WorkspaceProperty<>("GroupingWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A grouping workspace for the absolute units data.");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "A masking workspace to apply to the data.");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>(
+          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A grouping workspace for the absolute units data.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The integrated absolute units workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The integrated absolute units workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputMaskWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputMaskWorkspace", "",
+                                       Direction::Output),
       "The diagnostic mask from the absolute units workspace");
 }
 
@@ -160,10 +163,8 @@ void DgsAbsoluteUnitsReduction::exec() {
                                   "monovan-integr-min", outputWS);
   double eMax = getDblPropOrParam("AbsUnitsMaximumEnergy", reductionManager,
                                   "monovan-integr-max", outputWS);
-  std::vector<double> params;
-  params.push_back(eMin);
-  params.push_back(eMax - eMin);
-  params.push_back(eMax);
+
+  std::vector<double> params{eMin, eMax - eMin, eMax};
 
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);

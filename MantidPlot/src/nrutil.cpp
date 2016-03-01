@@ -249,10 +249,10 @@ for (i=1;i<=n;i++)
 	if (ii)
 		for (j=ii;j<=i-1;j++)
 			sum -= a[i][j]*b[j];
-	else if (sum)
-		ii=i;
+        else if (sum != 0.0)
+          ii = i;
 
-	b[i]=sum;
+        b[i]=sum;
 	}
 for (i=n;i>=1;i--)
 	{

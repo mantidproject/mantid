@@ -39,29 +39,29 @@ class DLLExport FindUBUsingMinMaxD : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:
   FindUBUsingMinMaxD();
-  ~FindUBUsingMinMaxD();
+  ~FindUBUsingMinMaxD() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version for identification
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the UB matrix from a peaks workspace, given min(a,b,c) "
            "and max(a,b,c).";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

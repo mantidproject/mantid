@@ -1,4 +1,5 @@
 #include "MantidKernel/Logger.h"
+#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -15,7 +16,7 @@ namespace {
 boost::shared_ptr<Logger> getLogger(const std::string &name) {
   PyErr_Warn(PyExc_DeprecationWarning, "Logger.get(\"name\") is deprecated. "
                                        "Simply use Logger(\"name\") instead");
-  return boost::shared_ptr<Logger>(new Logger(name));
+  return boost::make_shared<Logger>(name);
 }
 }
 

@@ -34,28 +34,28 @@ namespace Algorithms {
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
   EstimateResolutionDiffraction();
-  virtual ~EstimateResolutionDiffraction();
+  ~EstimateResolutionDiffraction() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// function to return any aliases to the algorithm
-  virtual const std::string alias() const;
+  const std::string alias() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Returns the wavelength from either the property or the input workspace
   double getWavelength();

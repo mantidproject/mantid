@@ -8,7 +8,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-GSLMatrix::GSLMatrix() : m_matrix(NULL) {}
+GSLMatrix::GSLMatrix() : m_matrix(nullptr) {}
 /// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
@@ -52,13 +52,13 @@ GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M) {
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(NULL) {
+GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(nullptr) {
   *this = mult2;
 }
 
 /// Create this matrix from a product of three other matrices
 /// @param mult3 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(NULL) {
+GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(nullptr) {
   *this = mult3;
 }
 
@@ -77,7 +77,7 @@ GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {
 }
 
 /// Is matrix empty
-bool GSLMatrix::isEmpty() const { return m_matrix == NULL; }
+bool GSLMatrix::isEmpty() const { return m_matrix == nullptr; }
 
 /// Resize the matrix
 /// @param nx :: New first dimension

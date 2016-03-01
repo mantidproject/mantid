@@ -15,6 +15,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -83,47 +84,48 @@ FitPowderDiffPeaks::~FitPowderDiffPeaks() {}
  */
 void FitPowderDiffPeaks::init() {
   // Input data workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
                   "Input workspace for data (diffraction pattern). ");
 
   // Output workspace
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "Anonymous2", Direction::Output),
                   "Output Workspace2D for the fitted peaks. ");
 
   // Input/output peaks table workspace
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("BraggPeakParameterWorkspace",
-                                            "AnonymousPeak", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "BraggPeakParameterWorkspace", "AnonymousPeak", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InstrumentParameterWorkspace", "AnonymousInstrument",
                       Direction::InOut),
                   "TableWorkspace containg instrument's parameters.");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("OutputBraggPeakParameterWorkspace",
-                                            "AnonymousOut2", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "OutputBraggPeakParameterWorkspace", "AnonymousOut2",
+          Direction::Output),
       "Output TableWorkspace containing the fitted peak parameters for each "
       "peak.");
 
   // Data workspace containing fitted peak parameters
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputBraggPeakParameterDataWorkspace", "ParameterData",
                       Direction::Output),
                   "Output Workspace2D containing fitted peak parameters for "
                   "further refinement.");
 
   // Zscore table workspace
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputZscoreWorkspace",
-                                                        "ZscoreTable",
-                                                        Direction::Output),
-                  "Output TableWorkspace containing the Zscore of the fitted "
-                  "peak parameters. ");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "OutputZscoreWorkspace", "ZscoreTable", Direction::Output),
+      "Output TableWorkspace containing the Zscore of the fitted "
+      "peak parameters. ");
 
   // Workspace index of the
   declareProperty("WorkspaceIndex", 0,
@@ -147,9 +149,7 @@ void FitPowderDiffPeaks::init() {
                   "BraggPeakParameterWorkspace."
                   "Otherwise, calculate each peak's centre from d-spacing.");
 
-  vector<string> genpeakoptions;
-  genpeakoptions.push_back("(HKL) & Calculation");
-  genpeakoptions.push_back("From Bragg Peak Table");
+  vector<string> genpeakoptions{"(HKL) & Calculation", "From Bragg Peak Table"};
   auto propvalidator = boost::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation",
                   propvalidator, "Choice of how to generate starting values of "
@@ -172,9 +172,10 @@ void FitPowderDiffPeaks::init() {
       "are correlated by an analytical function");
 
   // Option for peak's HKL for minimum d-spacing
-  auto arrayprop = new ArrayProperty<int>("MinimumHKL", "");
-  declareProperty(arrayprop, "Miller index of the left most peak (peak with "
-                             "minimum d-spacing) to be fitted. ");
+  auto arrayprop = Kernel::make_unique<ArrayProperty<int>>("MinimumHKL", "");
+  declareProperty(std::move(arrayprop),
+                  "Miller index of the left most peak (peak with "
+                  "minimum d-spacing) to be fitted. ");
 
   // Number of the peaks to fit left to peak with minimum HKL
   declareProperty("NumberPeaksToFitBelowLowLimit", 0,
@@ -182,8 +183,9 @@ void FitPowderDiffPeaks::init() {
                   "less than specified minimum. ");
 
   // Right most peak property
-  auto righthklprop = new ArrayProperty<int>("RightMostPeakHKL", "");
-  declareProperty(righthklprop,
+  auto righthklprop =
+      Kernel::make_unique<ArrayProperty<int>>("RightMostPeakHKL", "");
+  declareProperty(std::move(righthklprop),
                   "Miller index of the right most peak. "
                   "It is only required and used in RobustFit mode.");
 
@@ -435,8 +437,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
             "Failed to fit the right most peak.  Unable to process. ");
 
       stringstream robmsgss;
-      for (size_t i = 0; i < peakparnames.size(); ++i) {
-        string &parname = peakparnames[i];
+      for (auto &parname : peakparnames) {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << endl;
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
@@ -821,9 +822,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     peak->setParameter("I", height * fwhm);
     peak->setParameter("X0", tof_h);
 
-    vector<string> paramsinmc;
-    paramsinmc.push_back("A");
-    paramsinmc.push_back("B");
+    vector<string> paramsinmc{"A", "B"};
 
     fitSinglePeakSimulatedAnnealing(peak, paramsinmc);
   }
@@ -1048,9 +1047,9 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
       // i. Store parameters;
       map<string,double> parammap;
       for (size_t i = 0; i < peakparnames.size(); ++i)
-        parammap.insert(make_pair(peakparnames[i],
-  peak->getParameter(peakparnames[i])));
-      fitparammaps.push_back(make_pair(newchi2, parammap));
+        parammap.emplace(peakparnames[i],
+  peak->getParameter(peakparnames[i]));
+      fitparammaps.emplace_back(newchi2, parammap);
 
       // ii. sort
       sort(fitparammaps.begin(), fitparammaps.end());
@@ -1216,8 +1215,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
     } else {
       // Fit overlapped peaks
       vector<BackToBackExponential_sptr> peaksgroup;
-      for (size_t index = 0; index < indexpeakgroup.size(); ++index) {
-        size_t ipk = indexpeakgroup[index];
+      for (auto ipk : indexpeakgroup) {
         BackToBackExponential_sptr temppeak =
             m_vecPeakFunctions[ipk].second.second;
         peaksgroup.push_back(temppeak);
@@ -1340,7 +1338,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   fitparamvaluemaps.push_back(step1params);
   if (!goodfit1)
     chi2height = 1.0E20;
-  chi2indexvec.push_back(make_pair(chi2height, 0));
+  chi2indexvec.emplace_back(chi2height, 0);
 
   // Fix background
   vector<string> bkgdparnames = backgroundfunction->getParameterNames();
@@ -1360,7 +1358,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitA)
     chi2planA = 1.0E20;
   fitparamvaluemaps.push_back(planAparams);
-  chi2indexvec.push_back(make_pair(chi2planA, 1));
+  chi2indexvec.emplace_back(chi2planA, 1);
 
   // c) Plan B: fit parameters in two groups in 2 steps
   // i.   Restore step 1's result
@@ -1395,7 +1393,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitB)
     chi2planB = 1.0E20;
   fitparamvaluemaps.push_back(planBparams);
-  chi2indexvec.push_back(make_pair(chi2planB, 2));
+  chi2indexvec.emplace_back(chi2planB, 2);
 
   // d) Plan C: fit parameters in two groups in 2 steps in alternate order
   // i.   Restore step 1's result
@@ -1430,7 +1428,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   if (!goodfitC)
     chi2planC = 1.0E20;
   fitparamvaluemaps.push_back(planCparams);
-  chi2indexvec.push_back(make_pair(chi2planC, 3));
+  chi2indexvec.emplace_back(chi2planC, 3);
 
   // d) Summarize and compare result
   stringstream sumss;
@@ -1473,8 +1471,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   stringstream debugss;
   debugss << "DB1251 Single Peak Confident Fit Result:  Chi^2 = " << chi2
           << endl;
-  for (size_t i = 0; i < parnames.size(); ++i) {
-    string &parname = parnames[i];
+  for (auto &parname : parnames) {
     debugss << parname << "  =  " << peak->getParameter(parname) << endl;
   }
   g_log.notice(debugss.str());
@@ -1663,9 +1660,8 @@ void FitPowderDiffPeaks::storeFunctionParameters(
     IFunction_sptr function, std::map<string, double> &parammaps) {
   vector<string> paramnames = function->getParameterNames();
   parammaps.clear();
-  for (size_t i = 0; i < paramnames.size(); ++i)
-    parammaps.insert(
-        make_pair(paramnames[i], function->getParameter(paramnames[i])));
+  for (auto &paramname : paramnames)
+    parammaps.emplace(paramname, function->getParameter(paramname));
   return;
 }
 
@@ -1675,8 +1671,7 @@ void FitPowderDiffPeaks::storeFunctionParameters(
 void FitPowderDiffPeaks::restoreFunctionParameters(
     IFunction_sptr function, map<string, double> parammap) {
   vector<string> paramnames = function->getParameterNames();
-  for (size_t i = 0; i < paramnames.size(); ++i) {
-    string &parname = paramnames[i];
+  for (auto &parname : paramnames) {
     auto miter = parammap.find(parname);
     if (miter != parammap.end())
       function->setParameter(parname, miter->second);
@@ -1706,8 +1701,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
   dbss << peakfunction->asString() << endl;
   dbss << "Starting Value: ";
   vector<string> names = peakfunction->getParameterNames();
-  for (size_t i = 0; i < names.size(); ++i)
-    dbss << names[i] << "= " << peakfunction->getParameter(names[i]) << ", \t";
+  for (auto &name : names)
+    dbss << name << "= " << peakfunction->getParameter(name) << ", \t";
   for (size_t i = 0; i < dataws->readX(workspaceindex).size(); ++i)
     dbss << dataws->readX(workspaceindex)[i] << "\t\t"
          << dataws->readY(workspaceindex)[i] << "\t\t"
@@ -1988,8 +1983,8 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
   // 7. Set up the composite function
   CompositeFunction_sptr peaksfunction(new CompositeFunction());
-  for (size_t i = 0; i < peaks.size(); ++i)
-    peaksfunction->addFunction(peaks[i]);
+  for (auto &peak : peaks)
+    peaksfunction->addFunction(peak);
 
   // 8. Fit multiple peaks
   vector<double> chi2s;
@@ -2176,9 +2171,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     vector<BackToBackExponential_sptr> peaks) {
-  for (size_t ipk = 0; ipk < peaks.size(); ++ipk) {
-    BackToBackExponential_sptr thispeak = peaks[ipk];
-
+  for (auto thispeak : peaks) {
     // 1. Set constraint on X.
     double fwhm = thispeak->fwhm();
     double centre = thispeak->centre();
@@ -2204,8 +2197,8 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
   stringstream dbss0;
   dbss0 << "Starting Value: ";
   vector<string> names = peaksfunc->getParameterNames();
-  for (size_t i = 0; i < names.size(); ++i)
-    dbss0 << names[i] << "= " << peaksfunc->getParameter(names[i]) << ", \t";
+  for (auto &name : names)
+    dbss0 << name << "= " << peaksfunc->getParameter(name) << ", \t";
   g_log.information() << "DBx430 " << dbss0.str() << endl;
 
   // 2. Create fit
@@ -2230,8 +2223,8 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
   // 4. Output
   stringstream dbss;
   dbss << "Fit N-Peaks @ ";
-  for (size_t i = 0; i < peakfuncs.size(); ++i)
-    dbss << peakfuncs[i]->centre() << ", ";
+  for (auto &peakfunc : peakfuncs)
+    dbss << peakfunc->centre() << ", ";
 
   if (isexecute) {
     // Figure out result
@@ -2345,7 +2338,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
   for (size_t ir = 0; ir < numrows; ++ir) {
     API::TableRow trow = parameterWS->getRow(ir);
     trow >> parname >> value;
-    m_instrumentParmaeters.insert(std::make_pair(parname, value));
+    m_instrumentParmaeters.emplace(parname, value);
     g_log.notice() << "[DBx211] Import parameter " << parname << ": " << value
                    << endl;
   }
@@ -2383,11 +2376,11 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
       if (coltype.compare("int") == 0) {
         // Integer
         int temp = peakws->cell<int>(irow, icol);
-        intmap.insert(make_pair(colname, temp));
+        intmap.emplace(colname, temp);
       } else if (coltype.compare("double") == 0) {
         // Double
         double temp = peakws->cell<double>(irow, icol);
-        doublemap.insert(make_pair(colname, temp));
+        doublemap.emplace(colname, temp);
       }
 
     } // ENDFOR Column
@@ -2684,7 +2677,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
   BackToBackExponential tempeak;
   tempeak.initialize();
   mPeakParameterNames = tempeak.getParameterNames();
-  mPeakParameterNames.push_back("S2");
+  mPeakParameterNames.emplace_back("S2");
 
   // Parse TableWorkspace
   vector<map<std::string, double>> peakparametermaps;
@@ -2693,13 +2686,12 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
 
   // Create a map to convert the Bragg peak Table paramter name to Back to back
   // exponential+pseudo-voigt
-  map<string, string> bk2bk2braggmap;
-  bk2bk2braggmap.insert(make_pair("A", "Alpha"));
-  bk2bk2braggmap.insert(make_pair("B", "Beta"));
-  bk2bk2braggmap.insert(make_pair("X0", "TOF_h"));
-  bk2bk2braggmap.insert(make_pair("I", "Height"));
-  bk2bk2braggmap.insert(make_pair("S", "Sigma"));
-  bk2bk2braggmap.insert(make_pair("S2", "Sigma2"));
+  map<string, string> bk2bk2braggmap{{"A", "Alpha"},
+                                     {"B", "Beta"},
+                                     {"X0", "TOF_h"},
+                                     {"I", "Height"},
+                                     {"S", "Sigma"},
+                                     {"S2", "Sigma2"}};
 
   // Generate Peaks
   size_t numbadrows = 0;
@@ -2712,7 +2704,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
         peakhkls[ir], peakparametermaps[ir], bk2bk2braggmap, good, hkl, d_h);
 
     if (good) {
-      m_vecPeakFunctions.push_back(make_pair(d_h, make_pair(hkl, newpeak)));
+      m_vecPeakFunctions.emplace_back(d_h, make_pair(hkl, newpeak));
     } else {
       ++numbadrows;
     }
@@ -2917,8 +2909,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
 
       // Set peak parameters
       std::map<std::string, double>::iterator miter;
-      for (size_t ipn = 0; ipn < tnb2bfuncparnames.size(); ++ipn) {
-        string parname = tnb2bfuncparnames[ipn];
+      for (auto parname : tnb2bfuncparnames) {
         if (parname.compare("Height") != 0) {
           miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {

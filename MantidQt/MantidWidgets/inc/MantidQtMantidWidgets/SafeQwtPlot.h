@@ -52,9 +52,9 @@ namespace MantidWidgets
     explicit SafeQwtPlot(QWidget * parent = NULL);
     explicit SafeQwtPlot(const QwtText &title, QWidget *p = NULL);
 
-    virtual ~SafeQwtPlot();
-    
-    virtual void drawCanvas(QPainter * painter);
+    ~SafeQwtPlot() override;
+
+    void drawCanvas(QPainter *painter) override;
 
     void setWorkspace(Mantid::API::Workspace_sptr ws);
 

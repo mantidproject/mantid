@@ -1,7 +1,4 @@
 set ( SRC_FILES
-	#	src/Q1DTOF.cpp
-	# src/CountEventsInPulses.cpp
-	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddNote.cpp
@@ -278,9 +275,6 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-	#	inc/MantidAlgorithms/Q1DTOF.h
-	# inc/MantidAlgorithms/CountEventsInPulses.h
-	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h

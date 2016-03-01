@@ -56,8 +56,8 @@ public:
 
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
-      std::set<std::string> expectedAttrSet(expectedAttrs,
-                                            expectedAttrs + nattrs);
+      std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
+                                                      expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {

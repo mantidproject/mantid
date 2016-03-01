@@ -41,17 +41,17 @@ public:
   /// Constructor
   ReflectometryReductionOne();
   /// Destructor
-  virtual ~ReflectometryReductionOne();
+  ~ReflectometryReductionOne() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 "
            "workspace. Performs transmission corrections.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Convert to an IvsQ workspace. Performs detector positional corrections
   /// based on the component name and the theta value.
@@ -63,9 +63,9 @@ public:
 private:
   /** Overridden Algorithm methods **/
 
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
   /// Get the surface sample component
   Mantid::Geometry::IComponent_const_sptr

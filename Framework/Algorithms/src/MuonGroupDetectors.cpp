@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MuonGroupDetectors.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
@@ -40,17 +41,17 @@ const std::string MuonGroupDetectors::category() const { return "Muon"; }
 /** Initialize the algorithm's properties.
  */
 void MuonGroupDetectors::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Workspace to apply grouping to.");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable",
-                                                        "", Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "DetectorGroupingTable", "", Direction::Input),
                   "Table with detector grouping information. Check wiki page "
                   "for table format expected.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Workspace with detectors grouped.");
 }
 
@@ -97,8 +98,8 @@ void MuonGroupDetectors::exec() {
     std::vector<int> &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
 
     // Recieve detector IDs, but need workspace indices to group, so convert
-    std::vector<size_t> wsIndices;
-    inWS->getIndicesFromDetectorIDs(detectorIDs, wsIndices);
+    std::vector<size_t> wsIndices =
+        inWS->getIndicesFromDetectorIDs(detectorIDs);
 
     if (wsIndices.size() != detectorIDs.size())
       throw std::invalid_argument("Some of the detector IDs were not found");
@@ -106,27 +107,27 @@ void MuonGroupDetectors::exec() {
     // We will be setting them anew
     outWS->getSpectrum(groupIndex)->clearDetectorIDs();
 
-    for (auto detIt = wsIndices.begin(); detIt != wsIndices.end(); detIt++) {
+    for (auto &wsIndex : wsIndices) {
       for (size_t i = 0; i < inWS->blocksize(); ++i) {
         // Sum the y values
-        outWS->dataY(groupIndex)[i] += inWS->dataY(*detIt)[i];
+        outWS->dataY(groupIndex)[i] += inWS->dataY(wsIndex)[i];
 
         // Sum the errors in quadrature
         outWS->dataE(groupIndex)[i] = sqrt(pow(outWS->dataE(groupIndex)[i], 2) +
-                                           pow(inWS->dataE(*detIt)[i], 2));
+                                           pow(inWS->dataE(wsIndex)[i], 2));
       }
 
       // Detectors list of the group should contain all the detectors of it's
       // elements
       outWS->getSpectrum(groupIndex)
-          ->addDetectorIDs(inWS->getSpectrum(*detIt)->getDetectorIDs());
+          ->addDetectorIDs(inWS->getSpectrum(wsIndex)->getDetectorIDs());
     }
 
     // Using the first detector X values
     outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
     outWS->getSpectrum(groupIndex)
-        ->setSpectrumNo(static_cast<specid_t>(groupIndex + 1));
+        ->setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
   }
 
   setProperty("OutputWorkspace", outWS);

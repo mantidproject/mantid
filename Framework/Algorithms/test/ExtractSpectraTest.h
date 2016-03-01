@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ExtractSpectra.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"

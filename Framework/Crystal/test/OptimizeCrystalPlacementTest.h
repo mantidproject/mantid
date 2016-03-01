@@ -224,7 +224,6 @@ public:
     boost::shared_ptr<Geometry::ParameterMap> pmap =
         Inst->getParameterMap(); // check if parameterized.
     Geometry::IComponent_const_sptr sample = Inst->getSample();
-    Kernel::V3D oldSampPos = sample->getPos(); // Should reset Inst
 
     pmap->addPositionCoordinate(sample.get(), "x", SampPos.X());
     pmap->addPositionCoordinate(sample.get(), "y", SampPos.Y());

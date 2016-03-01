@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 
+#include <mutex>
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -79,11 +81,11 @@ public:
   LoadInstrument();
 
   /// Destructor
-  virtual ~LoadInstrument() {}
+  ~LoadInstrument() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadInstrument"; };
+  const std::string name() const override { return "LoadInstrument"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads an Instrument Definition File (IDF) into a workspace. After "
            "the IDF has been read this algorithm will attempt to run the Child "
            "Algorithm LoadParameterFile; where if IDF filename is of the form "
@@ -92,15 +94,15 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Run the Child Algorithm LoadParameters
   void runLoadParameterFile();
@@ -119,7 +121,7 @@ private:
   std::string m_instName;
 
   /// Mutex to avoid simultaneous access
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include <fstream>
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -138,21 +140,21 @@ class DetParameters;
 class DLLExport FindDetectorsPar : public API::Algorithm {
 public:
   FindDetectorsPar();
-  virtual ~FindDetectorsPar();
+  ~FindDetectorsPar() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindDetectorsPar"; };
+  const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The algorithm returns the angular parameters and second flight "
            "path for a workspace detectors (data, usually availble in par or "
            "phx file)";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
   /// the accessors, used to return algorithm results when called as Child
@@ -170,8 +172,8 @@ public:
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /**  the variable defines if algorithm needs to calculate linear ranges for
    * the detectors (dX,dY)
    *    instead of azimuthal_width and polar_width */

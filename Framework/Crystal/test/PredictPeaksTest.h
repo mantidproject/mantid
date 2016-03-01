@@ -101,8 +101,7 @@ public:
   }
 
   void test_exec_withInputHKLList() {
-    std::vector<V3D> hkls;
-    hkls.push_back(V3D(-6, -9, 1));
+    std::vector<V3D> hkls{{-6, -9, 1}};
     do_test_exec("Primitive", 1, hkls);
   }
 
@@ -138,10 +137,7 @@ public:
     WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
     DblMatrix ub = inWS->sample().getOrientedLattice().getUB();
-
-    std::vector<V3D> hkls;
-    hkls.push_back(V3D(-1, 0, 0));
-    PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 0);
+    PeaksWorkspace_sptr hklPW = getHKLpw(inst, {{-1, 0, 0}}, 0);
 
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

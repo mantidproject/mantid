@@ -3,12 +3,14 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include <qwt_double_interval.h>
 #include <vtkUnstructuredGrid.h>
+
 
 namespace Mantid {
 namespace VATES {
@@ -104,7 +106,12 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   this->extractMetadata(m_cachedVisualHistoWs);
 
   // Transposed workpace is temporary, outside the ADS, and does not have a name. so get it from pre-transposed.
-  this->appendMetadata(visualDataSet, histoWs->getName());
+  // If this fails, create a default name with a time stamp
+  auto name = histoWs->getName();
+  if (name.empty()) {
+    name = createTimeStampedName("HistoWS");
+  }
+  this->appendMetadata(visualDataSet, name);
   return visualDataSet;
 }
 

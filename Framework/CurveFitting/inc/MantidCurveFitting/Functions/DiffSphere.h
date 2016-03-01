@@ -46,19 +46,16 @@ public:
   /// Constructor
   ElasticDiffSphere();
 
-  /// Destructor
-  virtual ~ElasticDiffSphere(){};
-
   /// overwrite IFunction base class methods
-  virtual std::string name() const { return "ElasticDiffSphere"; }
+  std::string name() const override { return "ElasticDiffSphere"; }
 
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   /// A rescaling of the peak intensity
-  double HeightPrefactor() const;
+  double HeightPrefactor() const override;
 
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 };
 
 /// structure to hold info on Volino's coefficients
@@ -83,23 +80,21 @@ class DLLExport InelasticDiffSphere : public API::ParamFunction,
 public:
   InelasticDiffSphere();
 
-  virtual ~InelasticDiffSphere() {}
+  /// overwrite IFunction base class methods
+  void init() override;
 
   /// overwrite IFunction base class methods
-  virtual void init();
+  std::string name() const override { return "InelasticDiffSphere"; }
 
   /// overwrite IFunction base class methods
-  virtual std::string name() const { return "InelasticDiffSphere"; }
-
-  /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   /// Calculate the (2l+1)*A_{n,l} coefficients for each Lorentzian
   std::vector<double> LorentzianCoefficients(double a) const;
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
 private:
   /// initialize the Xnl coefficients
@@ -113,7 +108,7 @@ private:
   void initLinJlist();
 
   /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
 
   /// xnl coefficients
   std::vector<xnlc> m_xnl;
@@ -141,14 +136,11 @@ private:
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
-  /// Destructor
-  ~DiffSphere(){};
+  /// overwrite IFunction base class methods
+  std::string name() const override { return "DiffSphere"; }
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "DiffSphere"; }
-
-  /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   /// overwrite IFunction base class methods
   virtual int version() const { return 1; }
@@ -161,10 +153,10 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  virtual void setAttribute(const std::string &attName, const Attribute &att);
+  void setAttribute(const std::string &attName, const Attribute &att) override;
 
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
   boost::shared_ptr<ElasticDiffSphere>

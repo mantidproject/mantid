@@ -35,15 +35,15 @@ MaskPeaksWorkspace::~MaskPeaksWorkspace() {}
  */
 void MaskPeaksWorkspace::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
                   "detectors. Each spectrum needs to correspond to only one "
                   "pixelID (e.g. no grouping or previous calls to "
                   "SumNeighbours).");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "The name of the workspace that will be created. Can replace "
                   "the input workspace.");
   declareProperty(
@@ -96,7 +96,7 @@ void MaskPeaksWorkspace::exec() {
   PARALLEL_FOR3(m_inputW, peaksW, tablews)
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
     PARALLEL_START_INTERUPT_REGION
-    Peak peak = peaks[i];
+    const Peak &peak = peaks[i];
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();
@@ -106,7 +106,7 @@ void MaskPeaksWorkspace::exec() {
                   << " y=" << yPeak << "\n";
 
     // the detector component for the peak will have all pixels that we mask
-    const string bankName = peak.getBankName();
+    const string &bankName = peak.getBankName();
     if (bankName.compare("None") == 0)
       continue;
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);

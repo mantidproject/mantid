@@ -329,5 +329,21 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         self.assertTrue(CheckWorkspacesMatch(ref, wks), 'Success!')
 
 
+    def test_reduction_with_can_scale(self):
+        """
+        Sanity check tio ensure a reduction with can scale value completes.
+        """
+
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                         Instrument='IRIS',
+                                         Analyser='graphite',
+                                         Reflection='002',
+                                         SpectraRange=[3, 53],
+                                         ScaleFactor=0.5)
+
+        red_ws = wks.getItem(0)
+        self.assertEqual(red_ws.getNumberHistograms(), 51)
+
+
 if __name__ == '__main__':
     unittest.main()

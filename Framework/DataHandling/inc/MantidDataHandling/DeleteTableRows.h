@@ -41,22 +41,22 @@ public:
   /// Default constructor
   DeleteTableRows() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "DeleteTableRows"; }
+  const std::string name() const override { return "DeleteTableRows"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Deletes rows from a TableWorkspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Category
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
 private:
   /// Initialize the static base properties
-  void init();
+  void init() override;
   /// Execute
-  void exec();
+  void exec() override;
 };
 
 } // namespace DataHandling
