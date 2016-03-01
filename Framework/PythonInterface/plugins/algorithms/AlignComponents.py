@@ -262,42 +262,73 @@ class AlignComponents(PythonAlgorithm):
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
                                     OutputWorkspace=wks_name)
 
+        # Make a dictionary of what options are being refined.
+        for opt in self._optionsList:
+            self._optionsDict[opt] = self.getProperty(opt).value
+
         # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
             if self.getProperty("Fit"+component+"Position").value:
+                self._move = True
                 if component == "Sample":
-                    componentName = api.mtd[wks_name].getInstrument().getSample().getFullName()
-                    componentZ = api.mtd[wks_name].getInstrument().getSample().getPos().getZ()
+                    comp = api.mtd[wks_name].getInstrument().getSample()
                 else:
-                    componentName = api.mtd[wks_name].getInstrument().getSource().getFullName()
-                    componentZ = api.mtd[wks_name].getInstrument().getSource().getPos().getZ()
+                    comp = api.mtd[wks_name].getInstrument().getSource()
+                componentName = comp.getFullName()
                 logger.notice("Working on " + componentName +
-                              " Starting position is " + str(componentZ))
+                              " Starting position is " + str(comp.getPos()))
                 firstIndex = 0
                 lastIndex = len(difc)
                 if self._masking:
                     mask_out = mask[firstIndex:lastIndex + 1]
                 else:
                     mask_out = None
-                newZ = minimize(self._minimisation_func_L1, x0=componentZ,
-                                method='L-BFGS-B',
-                                args=(wks_name,
-                                      componentName,
-                                      firstIndex,
-                                      lastIndex,
-                                      difc[firstIndex:lastIndex + 1],
-                                      mask_out),
-                                bounds=[(componentZ-1,componentZ+1)])
-                api.MoveInstrumentComponent(wks_name, componentName, Z=newZ.x[0],
+
+                self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
+                                    None, None, None]
+
+                # Set up x0 and bounds lists
+                x0List = []
+                boundsList = []
+                if self._optionsDict["Xposition"]:
+                    x0List.append(self._initialPos[0])
+                    boundsList.append((self._initialPos[0] + self.getProperty("MinXposition").value,
+                                       self._initialPos[0] + self.getProperty("MaxXposition").value))
+                if self._optionsDict["Yposition"]:
+                    x0List.append(self._initialPos[1])
+                    boundsList.append((self._initialPos[1] + self.getProperty("MinYposition").value,
+                                       self._initialPos[1] + self.getProperty("MaxYposition").value))
+                if self._optionsDict["Zposition"]:
+                    x0List.append(self._initialPos[2])
+                    boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
+                                       self._initialPos[2] + self.getProperty("MaxZposition").value))
+
+                results = minimize(self._minimisation_func, x0=x0List,
+                                   method='L-BFGS-B',
+                                   args=(wks_name,
+                                         componentName,
+                                         firstIndex,
+                                         lastIndex,
+                                         difc[firstIndex:lastIndex + 1],
+                                         mask_out),
+                                   bounds=boundsList)
+
+                # Apply the results to the output workspace
+                xmap = self._mapOptions(results.x)
+
+                # Need to grab the component again, as things have changed
+                api.MoveInstrumentComponent(wks_name, componentName,
+                                            X=xmap[0],
+                                            Y=xmap[1],
+                                            Z=xmap[2],
                                             RelativePosition=False)
+                comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName +
-                              " Final position is " + str(newZ.x[0]))
+                              " Final position is " + str(comp.getPos()))
+                self._move = False
 
         # Now fit all the components if any
         components = self.getProperty("ComponentList").value
-
-        for opt in self._optionsList:
-            self._optionsDict[opt] = self.getProperty(opt).value
 
         if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
             self._move = True
@@ -410,20 +441,6 @@ class AlignComponents(PythonAlgorithm):
         api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
 
         difc_new = api.mtd[wks_name].extractY().flatten()[firstIndex:lastIndex + 1]
-
-        if self._masking:
-            difc_new = np.ma.masked_array(difc_new, mask)
-
-        return chisquare(f_obs=difc, f_exp=difc_new)[0]
-
-    def _minimisation_func_L1(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
-        """
-        Minimization function for moving component along Z only.
-        """
-        api.MoveInstrumentComponent(wks_name, component, Z=x_0[0], RelativePosition=False)
-        wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
-
-        difc_new = wks_new.extractY().flatten()[firstIndex:lastIndex + 1]
 
         if self._masking:
             difc_new = np.ma.masked_array(difc_new, mask)
