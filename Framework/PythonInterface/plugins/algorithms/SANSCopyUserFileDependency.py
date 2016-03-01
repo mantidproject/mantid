@@ -1,7 +1,6 @@
 ﻿#pylint: disable=no-init,invalid-name
 from mantid.api import *
-from mantid.kernel import Direction, FloatBoundedValidator
-import mantid.simpleapi
+from mantid.kernel import FloatBoundedValidator
 import os
 import re
 import shutil
@@ -58,11 +57,11 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         try:
             shutil.copyfile(src, trg)
         except IOError:
-                self._remove_copied_files(dependencies)
-                error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
+            self._remove_copied_files(dependencies)
+            error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
                              " the file " + src + " to " + trg + ". Attempted to remove all"
                              "copied files. Please make sure that you have write permissions.")
-                raise RuntimeError(error_msg)
+            raise RuntimeError(error_msg)
 
     def _get_user_file_target(self, user_file_full_path, target_directory):
         basename = os.path.basename(user_file_full_path)
@@ -164,10 +163,10 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         try:
             for copied_file in copied_files:
                 os.remove(copied_file)
-        except:
+        except OSError:
             pass
 
-
+#pylint: disable=too-few-public-methods
 class UserFileDependencyExtractor(object):
     '''
     Extracts all depenency file names from a user file
@@ -175,7 +174,7 @@ class UserFileDependencyExtractor(object):
     def __init__(self):
         super(UserFileDependencyExtractor, self).__init__()
         file_types = [".nxs", ".xml", ".txt"]
-        regexes_front = ["=[\s]*[\w]+", ",[\s]*[\w]+"]
+        regexes_front = [r"=[\s]*[\w]+", r",[\s]*[\w]+"]
         self.regex_collection = [front + back for front in regexes_front for back in file_types]
 
     def get_all_dependencies(self, file_path):
