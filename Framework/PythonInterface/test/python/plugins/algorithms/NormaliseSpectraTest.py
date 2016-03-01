@@ -3,7 +3,7 @@ import platform
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
-class IndirectNormSpectraTest(unittest.TestCase):
+class NormaliseSpectraTest(unittest.TestCase):
 
     _positive ='1,2,3,4,5'
     _negative ='-5,-4,-3,-2,-1'
@@ -14,22 +14,22 @@ class IndirectNormSpectraTest(unittest.TestCase):
 
     def test_with_MatrixWorkspace_one_hist_positive(self):
         in_ws = self._create_MatrixWorkspace(1, 'test', self._positive)
-        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
     def test_with_MatrixWorkspace_one_hist_negative(self):
         in_ws = self._create_MatrixWorkspace(1, 'test', self._negative)
-        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
     def test_with_MatrixWorkspace_one_hist_zeors(self):
         in_ws = self._create_MatrixWorkspace(1, 'test', self._zeros)
-        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
     def test_with_MatrixWorkspace_multi_hist_(self):
         in_ws = self._create_MatrixWorkspace(3, 'test', self._positive)
-        out_ws = IndirectNormSpectra(InputWorkspace=in_ws)
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
         self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
 
 #--------------------------------Validate results-----------------------------------------

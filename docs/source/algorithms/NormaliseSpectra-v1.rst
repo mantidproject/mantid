@@ -22,7 +22,7 @@ Usage
   ws = CreateWorkspace(DataX=data, DataY=data, DataE=data, Nspec=1)
   
   # Execute algorithm
-  out_ws = IndirectNormSpectra(InputWorkspace=ws)
+  out_ws = NormaliseSpectra(InputWorkspace=ws)
   
   # Print resulting y values
   print out_ws.readY(0)

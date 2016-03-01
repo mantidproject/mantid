@@ -4,7 +4,7 @@ from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, Algorit
 from mantid.simpleapi import *
 import numpy as np
 
-class IndirectNormSpectra(DataProcessorAlgorithm):
+class NormaliseSpectra(DataProcessorAlgorithm):
 
     _input_ws_name = None
     _input_ws = None
@@ -84,4 +84,4 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         self._output_ws_name= self.getPropertyValue('OutputWorkspace')
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectNormSpectra)
+AlgorithmFactory.subscribe(NormaliseSpectra)
