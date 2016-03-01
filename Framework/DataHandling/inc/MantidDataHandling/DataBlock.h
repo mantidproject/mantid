@@ -2,35 +2,44 @@
 #define MANTID_DATAHANDLING_DATABLOCK_H_
 
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-/** DataBlock : TODO: DESCRIPTION
+class DataBlockGenerator;
 
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+class DLLExport DataBlock {
+public:
+  DataBlock();
+  DataBlock(const Mantid::NeXus::NXInt &data);
 
-  This file is part of Mantid.
+  static const int64_t end;
 
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
+  int64_t getMinSpectrumID() const;
+  void setMinSpectrumID(int64_t minSpecID);
 
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  int64_t getMaxSpectrumID() const;
+  void setMaxSpectrumID(int64_t minSpecID);
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  size_t getNumberOfSpectra() const;
+  int getNumberOfPeriods() const;
+  size_t getNumberOfChannels() const;
 
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class MANTID_DATAHANDLING_DLL DataBlock {
-public:};
+  std::unique_ptr<DataBlockGenerator> getGenerator();
+  int64_t getNextSpectrumID(int64_t spectrumID) const;
+
+private:
+  int m_numberOfPeriods;
+  // The number of time channels per spectrum (N histogram bins -1)
+  std::size_t m_numberOfChannels;
+  // The number of spectra
+  size_t m_numberOfSpectra;
+  // minimal spectra Id (by default 1, undefined -- max_value)
+  int64_t m_minSpectraID;
+  // maximal spectra Id (by default 1, undefined  -- 0)
+  int64_t m_maxSpectraID;
+};
 
 } // namespace DataHandling
 } // namespace Mantid

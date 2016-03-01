@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
 	src/DataBlock.cpp
+	src/DataBlockGenerator.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -173,6 +174,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DataBlock.h
+	inc/MantidDataHandling/DataBlockGenerator.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
