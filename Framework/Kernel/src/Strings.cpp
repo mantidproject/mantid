@@ -331,7 +331,7 @@ int isEmpty(const std::string &A) {
 void stripComment(std::string &A) {
   std::string::size_type posA = A.find("$ ");
   std::string::size_type posB = A.find("# ");
-  std::string::size_type posC = A.find("!");
+  std::string::size_type posC = A.find('!');
   if (posA > posB)
     posA = posB;
   if (posA > posC)

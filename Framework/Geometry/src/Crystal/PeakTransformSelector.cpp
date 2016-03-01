@@ -104,8 +104,5 @@ bool PeakTransformSelector::hasFactoryForTransform(
   }
   return hasFactoryForTransform;
 }
-
-/// Destructor
-PeakTransformSelector::~PeakTransformSelector() {}
 }
 }

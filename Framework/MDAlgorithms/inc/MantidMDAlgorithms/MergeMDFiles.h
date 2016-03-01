@@ -7,6 +7,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include <nexus/NeXusFile.hpp>
+#include <mutex>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -102,10 +103,10 @@ protected:
   uint64_t totalLoaded;
 
   /// Mutex for file access
-  Kernel::Mutex fileMutex;
+  std::mutex fileMutex;
 
   /// Mutex for modifying stats
-  Kernel::Mutex statsMutex;
+  std::mutex statsMutex;
 
   /// Progress reporter
   Mantid::API::Progress *prog;

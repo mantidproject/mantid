@@ -45,9 +45,6 @@ class DLLExport BSpline : public BackgroundFunction {
 public:
   /// Constructor
   BSpline();
-  /// Destructor
-  ~BSpline() override;
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "BSpline"; }
   const std::string category() const override { return "Background"; }

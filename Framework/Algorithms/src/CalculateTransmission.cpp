@@ -47,9 +47,7 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  */
 size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
   const std::vector<detid_t> input = {detid};
-  std::vector<size_t> result;
-
-  ws->getIndicesFromDetectorIDs(input, result);
+  std::vector<size_t> result = ws->getIndicesFromDetectorIDs(input);
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
@@ -73,17 +71,18 @@ void CalculateTransmission::init() {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
 
-  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "SampleRunWorkspace", "", Direction::Input, wsValidator),
                   "The workspace containing the sample transmission run. Must "
                   "have common binning and be in units of wavelength.");
-  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "DirectRunWorkspace", "", Direction::Input, wsValidator),
                   "The workspace containing the direct beam (no sample) "
                   "transmission run. The units and binning must match those of "
                   "the SampleRunWorkspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace in which to store the fitted transmission "
       "fractions.");
 
@@ -95,7 +94,7 @@ void CalculateTransmission::init() {
   declareProperty("TransmissionMonitor", EMPTY_INT(), zeroOrMore,
                   "The UDET of the transmission monitor");
 
-  declareProperty(new ArrayProperty<double>("RebinParams"),
+  declareProperty(make_unique<ArrayProperty<double>>("RebinParams"),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
@@ -122,11 +121,11 @@ void CalculateTransmission::init() {
                   "[OutputWorkspace]_unfitted containing the unfitted "
                   "transmission correction.");
 
-  declareProperty(new ArrayProperty<detid_t>("TransmissionROI"),
+  declareProperty(make_unique<ArrayProperty<detid_t>>("TransmissionROI"),
                   "An optional ArrayProperty containing a list of detector "
                   "ID's.  These specify a region of interest "
                   "which is to be summed and then used instead of a "
-                  "tranmission monitor. This allow for a \"beam stop "
+                  "transmission monitor. This allows for a \"beam stop "
                   "out\" method of transmission calculation.");
 }
 
@@ -171,7 +170,7 @@ void CalculateTransmission::exec() {
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
-    sampleWS->getIndicesFromDetectorIDs(transDetList, transmissionIndices);
+    transmissionIndices = sampleWS->getIndicesFromDetectorIDs(transDetList);
   } else
     assert(false);
 
@@ -238,13 +237,13 @@ void CalculateTransmission::exec() {
     transmission = childAlg->getProperty("OutputWorkspace");
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(new WorkspaceProperty<>("UnfittedData", outputWSName,
-                                            Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "UnfittedData", outputWSName, Direction::Output));
     setProperty("UnfittedData", transmission);
   }
 
   // Check that there are more than a single bin in the transmission
-  // workspace. Skip the fit it there isn't.
+  // workspace. Skip the fit if there isn't.
   if (transmission->dataY(0).size() > 1) {
     transmission =
         fit(transmission, getProperty("RebinParams"), getProperty("FitMethod"));

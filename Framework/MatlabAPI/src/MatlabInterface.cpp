@@ -670,11 +670,11 @@ void CreateSimpleAPIHelper(const std::string &algName,
       mfile << "No";
     mfile << ", Direction: "
           << Mantid::Kernel::Direction::asText(prop->direction()); // << ", ";
-    std::set<std::string> allowed = prop->allowedValues();
+    auto allowed = prop->allowedValues();
     if (!allowed.empty()) {
       mfile << ", Allowed values: ";
-      std::set<std::string>::const_iterator sIter = allowed.begin();
-      std::set<std::string>::const_iterator sEnd = allowed.end();
+      auto sIter = allowed.begin();
+      auto sEnd = allowed.end();
       for (; sIter != sEnd;) {
         mfile << (*sIter);
         if (++sIter != sEnd)
@@ -778,13 +778,10 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray *prhs[]) {
   * @returns An integer indicating success/failure
   */
 int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-  std::set<std::string> wkspNames =
-      AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator sEnd = wkspNames.end();
+  auto wkspNames = AnalysisDataService::Instance().getObjectNames();
   // print the list of names using mexPrintf
-  for (std::set<std::string>::const_iterator sIter = wkspNames.begin();
-       sIter != sEnd; ++sIter) {
-    mexPrintf((*sIter).c_str());
+  for (auto const &wksp_name : wkspNames) {
+    mexPrintf(wksp_name.c_str());
     mexPrintf("\n");
   }
   return 0;

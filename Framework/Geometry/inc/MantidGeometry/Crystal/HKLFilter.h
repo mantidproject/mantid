@@ -80,7 +80,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL HKLFilter {
 public:
-  virtual ~HKLFilter() {}
+  virtual ~HKLFilter() = default;
 
   std::function<bool(const Kernel::V3D &)> fn() const;
 
@@ -94,7 +94,6 @@ typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
 public:
   HKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter);
-  ~HKLFilterUnaryLogicOperation() override {}
 
   /// Returns the operand of the function.
   const HKLFilter_const_sptr &getOperand() const { return m_operand; }
@@ -110,7 +109,6 @@ public:
   /// null pointer.
   HKLFilterNot(const HKLFilter_const_sptr &filter)
       : HKLFilterUnaryLogicOperation(filter) {}
-  ~HKLFilterNot() override {}
 
   std::string getDescription() const override;
   bool isAllowed(const Kernel::V3D &hkl) const override;
@@ -121,7 +119,6 @@ class MANTID_GEOMETRY_DLL HKLFilterBinaryLogicOperation : public HKLFilter {
 public:
   HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
                                 const HKLFilter_const_sptr &rhs);
-  ~HKLFilterBinaryLogicOperation() override {}
 
   /// Returns the left-hand side operand of the operation.
   const HKLFilter_const_sptr &getLHS() const { return m_lhs; }
@@ -141,7 +138,6 @@ public:
   /// the operands is null.
   HKLFilterAnd(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
-  ~HKLFilterAnd() override {}
 
   std::string getDescription() const override;
   bool isAllowed(const Kernel::V3D &hkl) const override;
@@ -154,7 +150,6 @@ public:
   /// the operands is null.
   HKLFilterOr(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
-  ~HKLFilterOr() override {}
 
   std::string getDescription() const override;
   bool isAllowed(const Kernel::V3D &hkl) const override;

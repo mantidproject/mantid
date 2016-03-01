@@ -27,12 +27,13 @@ void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace. If you use the default vanadium peak "
       "positions are used, the workspace must be in units of d-spacing.");
 
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the "
       "algorithm.\n"
       "If the input workspace is an EventWorkspace, then the output must be "

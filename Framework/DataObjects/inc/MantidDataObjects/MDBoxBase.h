@@ -13,6 +13,7 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include <mutex>
 
 /// Define to keep the centroid around as a field on each MDBoxBase.
 #define MDBOX_TRACK_CENTROID
@@ -56,8 +57,6 @@ public:
   MDBoxBase(const MDBoxBase<MDE, nd> &box,
             Mantid::API::BoxController *const otherBC);
 
-  /// Destructor
-  ~MDBoxBase() override {}
   ///@return the type of the event this box contains
   std::string getEventType() const override { return MDE::getTypeName(); }
   ///@return the length of the coordinates (in bytes), the events in the box
@@ -364,7 +363,7 @@ protected:
   /// boxes (e.g. on file). Calculated algorithmically
   size_t m_fileID;
   /// Mutex for modifying the event list or box averages
-  Mantid::Kernel::Mutex m_dataMutex;
+  std::mutex m_dataMutex;
 
 private:
   MDBoxBase(const MDBoxBase<MDE, nd> &box);

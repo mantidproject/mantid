@@ -31,9 +31,9 @@ FindDetectorsInShape::FindDetectorsInShape() {}
 FindDetectorsInShape::~FindDetectorsInShape() {}
 
 void FindDetectorsInShape::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "", Direction::Input),
-      "Name of the input workspace");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Workspace", "", Direction::Input),
+                  "Name of the input workspace");
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the shape");

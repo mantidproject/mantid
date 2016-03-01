@@ -136,6 +136,11 @@ void MuonAnalysis::initLayout() {
   if (userFacility != "ISIS")
     m_uiForm.loadCurrent->setDisabled(true);
 
+// Load current run only works on Windows
+#ifndef _WIN32
+  m_uiForm.loadCurrent->setDisabled(true);
+#endif
+
   // If facility if not supported by the interface - show a warning, but still
   // open it
   if (supportedFacilities.find(userFacility) == supportedFacilities.end()) {
@@ -764,34 +769,8 @@ void MuonAnalysis::runGroupTablePlotButton() {
 void MuonAnalysis::runLoadCurrent() {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-  // If Argus data then simple
-  if (instname == "ARGUS") {
-    QString argusDAE =
-        "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
-    Poco::File l_path(argusDAE.toStdString());
-    try {
-      if (!l_path.exists()) {
-        QMessageBox::warning(this, "Mantid - MuonAnalysis",
-                             QString("Can't load ARGUS Current data since\n") +
-                                 argusDAE + QString("\n") +
-                                 QString("does not seem to exist"));
-        return;
-      }
-    } catch (Poco::Exception &) {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
-                           "Can't read from the selected directory, either the "
-                           "computer you are trying"
-                           "\nto access is down or your computer is not "
-                           "currently connected to the network.");
-      return;
-    }
-    m_uiForm.mwRunFiles->setUserInput(argusDAE);
-    m_uiForm.mwRunFiles->setText("CURRENT RUN");
-    return;
-  }
-
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
-      instname == "CHRONUS") {
+      instname == "CHRONUS" || instname == "ARGUS") {
     QString instDirectory = instname;
     if (instname == "CHRONUS")
       instDirectory = "NDW1030";
@@ -994,7 +973,7 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
     }
   }
 
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   updatePairTable();
   updateFrontAndCombo();
 
@@ -1035,7 +1014,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
         return;
       }
     }
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
   }
 
@@ -1067,7 +1046,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
       }
     }
 
-    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    m_pairToRow = whichPairToWhichRow(m_uiForm);
     updateFrontAndCombo();
 
     // check to see if alpha is specified (if name!="") and if not
@@ -1640,7 +1619,7 @@ void MuonAnalysis::guessAlphaClicked() {
  * @return number of groups
  */
 int MuonAnalysis::numGroups() {
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   return static_cast<int>(m_groupToRow.size());
 }
 
@@ -1650,7 +1629,7 @@ int MuonAnalysis::numGroups() {
  * @return number of pairs
  */
 int MuonAnalysis::numPairs() {
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
   return static_cast<int>(m_pairToRow.size());
 }
 
@@ -1747,7 +1726,7 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
  * @return Group number
  */
 int MuonAnalysis::getGroupNumberFromRow(int row) {
-  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  m_groupToRow = whichGroupToWhichRow(m_uiForm);
   for (unsigned int i = 0; i < m_groupToRow.size(); i++) {
     if (m_groupToRow[i] == row)
       return i;
@@ -1763,7 +1742,7 @@ int MuonAnalysis::getGroupNumberFromRow(int row) {
  * @return Pair number
  */
 int MuonAnalysis::getPairNumberFromRow(int row) {
-  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  m_pairToRow = whichPairToWhichRow(m_uiForm);
   for (unsigned int i = 0; i < m_pairToRow.size(); i++) {
     if (m_pairToRow[i] == row)
       return i;
@@ -2025,13 +2004,9 @@ void MuonAnalysis::showAllPlotWindows() {
  * @return true if set
  */
 bool MuonAnalysis::isGroupingSet() const {
-  std::vector<int> dummy;
-  whichGroupToWhichRow(m_uiForm, dummy);
+  auto dummy = whichGroupToWhichRow(m_uiForm);
 
-  if (dummy.empty())
-    return false;
-  else
-    return true;
+  return !dummy.empty();
 }
 
 /**

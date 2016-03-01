@@ -56,16 +56,12 @@ private:
   int Tnum;              ///< True number (1 in Tval)
   int Znum;              ///< Zero number (0 in Tval)
   std::vector<int> Tval; ///< Truth values
-  std::set<int> MinTerm; ///< Minterms list
 
   void setCounters(); ///< Calculates Tnum and Znum
 
 public:
   BnId();
   BnId(const size_t, unsigned int);
-  BnId(const BnId &);
-  BnId &operator=(const BnId &);
-  ~BnId();
 
   int operator==(const BnId &) const; ///< Equals operator for tri-state object
   int operator<(const BnId &) const;  ///< operator> for tri-state object
@@ -75,14 +71,6 @@ public:
   int operator++();    ///< addition operator (returns !carry flag)
   int operator--(int); ///< subtraction operator (returns !carry flag)
   int operator--();    ///< subtraction operator (returns !carry flag)
-
-  // TODO: MinTerm are not implemented
-  /// Set a MinTerm
-  void setMinTerm(const int);
-  /// Add a min term
-  void addMinTerm(const BnId &);
-  /// has a min term
-  int hasMinTerm(const int) const;
 
   int equivalent(const BnId &) const; ///< Equal but - is assume to be ok
   void reverse();                     ///< Swap -1 to 1 adn leaver the zeros

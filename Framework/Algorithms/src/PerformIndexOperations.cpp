@@ -285,14 +285,14 @@ const std::string PerformIndexOperations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input to processes workspace.");
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Processing instructions. See full instruction list.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output processed workspace");
 }
 

@@ -44,9 +44,9 @@ public:
     size_t workspaceIndexToKeep1 = 1;
     const int monitorIndex = 0;
 
-    specid_t specId1 =
+    specnum_t specId1 =
         toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
-    specid_t monitorSpecId =
+    specnum_t monitorSpecId =
         toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
 
     // Define one spectra to keep

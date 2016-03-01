@@ -12,6 +12,7 @@
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -42,7 +43,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo();
+  virtual ~ExperimentInfo() = default;
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object
@@ -198,7 +199,7 @@ private:
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 };
 
 /// Shared pointer to ExperimentInfo

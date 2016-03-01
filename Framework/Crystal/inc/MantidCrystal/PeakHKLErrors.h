@@ -50,7 +50,6 @@ class DLLExport PeakHKLErrors : public API::ParamFunction,
                                 public API::IFunction1D {
 public:
   PeakHKLErrors();
-  ~PeakHKLErrors() override;
 
   std::string name() const override { return std::string("PeakHKLErrors"); };
 

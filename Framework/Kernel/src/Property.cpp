@@ -18,8 +18,7 @@ namespace Kernel {
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_settings(nullptr), m_group(""),
-      m_remember(true) {
+      m_direction(direction), m_units(""), m_group(""), m_remember(true) {
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
@@ -31,17 +30,14 @@ Property::Property(const std::string &name, const std::type_info &type,
 Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation),
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
-      m_units(right.m_units), m_settings(nullptr), m_group(right.m_group),
+      m_units(right.m_units), m_group(right.m_group),
       m_remember(right.m_remember) {
   if (right.m_settings)
-    m_settings = right.m_settings->clone();
+    m_settings.reset(right.m_settings->clone());
 }
 
 /// Virtual destructor
-Property::~Property() {
-  if (m_settings)
-    delete m_settings;
-}
+Property::~Property() {}
 
 /** Get the property's name
  *  @return The name of the property
@@ -85,25 +81,20 @@ std::string Property::isValid() const {
  * Takes ownership of the given object
  * @param settings A pointer to an object specifying the settings type
  */
-void Property::setSettings(IPropertySettings *settings) {
-  if (m_settings)
-    delete m_settings;
-  m_settings = settings;
+void Property::setSettings(std::unique_ptr<IPropertySettings> settings) {
+  m_settings = std::move(settings);
 }
 
 /**
  *
  * @return the PropertySettings for this property
  */
-IPropertySettings *Property::getSettings() { return m_settings; }
+IPropertySettings *Property::getSettings() { return m_settings.get(); }
 
 /**
  * Deletes the PropertySettings object contained
  */
-void Property::deleteSettings() {
-  delete m_settings;
-  m_settings = nullptr;
-}
+void Property::clearSettings() { m_settings.reset(nullptr); }
 
 /**
 * Whether to remember this property input

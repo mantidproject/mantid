@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 
 class IntegrationTest : public CxxTest::TestSuite {
 public:
@@ -240,12 +240,7 @@ public:
     integ.execute();
     TS_ASSERT(integ.isExecuted());
 
-    // No longer output an EventWorkspace, Rebin should be used instead
-    // EventWorkspace_sptr output;
-    // TS_ASSERT_THROWS_NOTHING(output =
-    // boost::dynamic_pointer_cast<EventWorkspace>(
-    // AnalysisDataService::Instance().retrieve(outName) ) );
-
+    // No longer output an EventWorkspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
@@ -269,7 +264,7 @@ public:
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);
       TS_ASSERT_DELTA(E[0], sqrt(20.0), 1e-6);
       // Correct spectra etc?
-      specid_t specNo = output2D->getSpectrum(i)->getSpectrumNo();
+      specnum_t specNo = output2D->getSpectrum(i)->getSpectrumNo();
       TS_ASSERT_EQUALS(specNo, StartWorkspaceIndex + i);
       TS_ASSERT(output2D->getSpectrum(i)->hasDetectorID(specNo));
     }

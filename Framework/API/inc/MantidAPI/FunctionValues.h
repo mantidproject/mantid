@@ -41,14 +41,9 @@ namespace API {
 class MANTID_API_DLL FunctionValues {
 public:
   /// Default constructor.
-  FunctionValues() {}
+  FunctionValues() = default;
   /// Constructor.
   FunctionValues(const FunctionDomain &domain);
-  /// Copy constructor.
-  FunctionValues(const FunctionValues &values);
-  /// Destructor
-  ~FunctionValues();
-
   /// Return the number of values
   size_t size() const { return m_calculated.size(); }
   /// Expand values to a new size, preserve stored values.

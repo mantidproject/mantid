@@ -34,9 +34,9 @@ using namespace Kernel;
 using namespace API;
 
 void AddSampleLog::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "Workspace to add the log entry to");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "Workspace to add the log entry to");
   declareProperty("LogName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");

@@ -95,10 +95,10 @@ public:
   }
   void testGetObjectNames() {
     PropertyManagerDataService::Instance().add("inst2", inst2);
-    std::set<std::string> names;
+    std::unordered_set<std::string> names;
     names.insert("inst1");
     names.insert("inst2");
-    std::set<std::string> result;
+    std::unordered_set<std::string> result;
     result = PropertyManagerDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(result, names);
     // Check with an empty store

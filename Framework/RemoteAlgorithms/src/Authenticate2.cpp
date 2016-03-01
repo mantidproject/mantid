@@ -35,8 +35,8 @@ void Authenticate2::init() {
                   "Name of the user to authenticate as", Direction::Input);
 
   // Password doesn't get echoed to the screen...
-  declareProperty(new MaskedProperty<std::string>("Password", "", requireValue,
-                                                  Direction::Input),
+  declareProperty(Kernel::make_unique<MaskedProperty<std::string>>(
+                      "Password", "", requireValue, Direction::Input),
                   "The password associated with the specified user");
 }
 

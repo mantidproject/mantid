@@ -40,9 +40,6 @@ public:
   /// Constructor
   Cluster(const size_t &label);
 
-  /// Destructor
-  ~Cluster() override;
-
   /// integrate the cluster
   ClusterIntegratedValues
   integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)

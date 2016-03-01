@@ -58,9 +58,6 @@ public:
     m_J.resize(ny, np);
   }
 
-  /// Destructor.
-  ~GSLJacobian() override {}
-
   GSLMatrix &matrix() { return m_J; }
 
   /// Get the pointer to the GSL's jacobian

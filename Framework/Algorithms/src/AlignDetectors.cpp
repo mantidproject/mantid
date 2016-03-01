@@ -172,28 +172,29 @@ void AlignDetectors::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<RawCountValidator>();
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A workspace with units of TOF");
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
+  const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(
-      new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad,
-                       {".h5", ".hd5", ".hdf", ".cal"}),
+      Kernel::make_unique<FileProperty>("CalibrationFile", "",
+                                        FileProperty::OptionalLoad, exts),
       "Optional: The .cal file containing the position correction factors. "
       "Either this or OffsetsWorkspace needs to be specified.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
 
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
       "this or CalibrationFile needs to be specified.");

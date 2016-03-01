@@ -12,7 +12,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-typedef std::map<specid_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
 
 /*
 Filters spectra detector list by radius.
@@ -41,7 +41,7 @@ public:
         unfiltered.begin(), unfiltered.end(),
         std::inserter(neighbSpectra, neighbSpectra.end()),
         [cutoff](
-            const std::pair<specid_t, Mantid::Kernel::V3D> &spectraDistance) {
+            const std::pair<specnum_t, Mantid::Kernel::V3D> &spectraDistance) {
           return spectraDistance.second.norm() <= cutoff;
         });
     return neighbSpectra;

@@ -40,9 +40,6 @@ ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
     : IObjComponent(), Component(name, parent), m_shape(shape),
       m_material(material) {}
 
-/// Destructor
-ObjComponent::~ObjComponent() {}
-
 /** Return the shape of the component
  */
 const Object_const_sptr ObjComponent::shape() const {

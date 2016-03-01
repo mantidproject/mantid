@@ -30,18 +30,18 @@ DetectorEfficiencyVariation::DetectorEfficiencyVariation()
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = boost::make_shared<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
-                                                         Direction::Input, val),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "WhiteBeamBase", "", Direction::Input, val),
                   "Name of a white beam vanadium workspace");
   // The histograms, the detectors in each histogram and their first and last
   // bin boundary must match
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare", "",
-                                             Direction::Input, val),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "",
+                                                      Direction::Input, val),
       "Name of a matching second white beam vanadium run from the same "
       "instrument");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A MaskWorkpace where each spectra that failed the test is "
                   "masked. Each histogram from the input workspace maps to a "
                   "histogram in this workspace with one value that indicates "

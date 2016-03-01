@@ -583,7 +583,7 @@ public:
       //But two detector IDs in each one
       for (int i=0; i<3; i++)
       {
-        std::set<detid_t>::const_iterator detIT = work_out->getSpectrum(i)->getDetectorIDs().begin();
+        auto detIT = work_out->getSpectrum(i)->getDetectorIDs().begin();
         TS_ASSERT_EQUALS( *detIT, 0+i );
         if (DO_PLUS)
         {

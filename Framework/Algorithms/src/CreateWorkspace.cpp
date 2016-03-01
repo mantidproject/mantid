@@ -33,18 +33,18 @@ void CreateWorkspace::init() {
   unitOptions.emplace_back("SpectraNumber");
   unitOptions.emplace_back("Text");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to be given to the created workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to be given to the created workspace.");
 
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
-  declareProperty(new ArrayProperty<double>("DataX", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataX", required),
                   "X-axis data values for workspace.");
-  declareProperty(new ArrayProperty<double>("DataY", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
-  declareProperty(new ArrayProperty<double>("DataE"),
+  declareProperty(make_unique<ArrayProperty<double>>("DataE"),
                   "Error values for workspace. Optional.");
-  declareProperty(new PropertyWithValue<int>("NSpec", 1),
+  declareProperty(make_unique<PropertyWithValue<int>>("NSpec", 1),
                   "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
 
@@ -52,19 +52,19 @@ void CreateWorkspace::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
-  declareProperty(new ArrayProperty<std::string>("VerticalAxisValues"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
                   "Values for the VerticalAxis.");
 
   declareProperty(
-      new PropertyWithValue<bool>("Distribution", false),
+      make_unique<PropertyWithValue<bool>>("Distribution", false),
       "Whether OutputWorkspace should be marked as a distribution.");
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
-  declareProperty(new WorkspaceProperty<>("ParentWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "Name of a parent workspace.");
 }
 

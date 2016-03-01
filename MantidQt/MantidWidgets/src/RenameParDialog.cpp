@@ -96,16 +96,17 @@ QString RenameParDialog::makeUniqueIndexedName(const QString& name)
 
 /**
  * Output the new names to a vector 
- * @param out :: Reference to a vector for output
+ * @returns :: new names in a vector
  */
-void RenameParDialog::setOutput(std::vector<std::string>& out)const
+std::vector<std::string> RenameParDialog::setOutput() const
 {
-  out.clear();
+  std::vector<std::string> out;
   QAbstractItemModel* model = m_uiForm.tableWidget->model();
   for(int row=0;row< m_uiForm.tableWidget->rowCount(); ++row)
   {
     out.push_back(model->data(model->index(row,1)).toString().toStdString());
   }
+  return out;
 }
 
 void RenameParDialog::uniqueIndexedNames(bool ok)

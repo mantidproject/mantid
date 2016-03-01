@@ -77,7 +77,7 @@ public:
   }
 
 private:
-  UncertainValueIO() {}
+  UncertainValueIO() = default;
 };
 }
 }

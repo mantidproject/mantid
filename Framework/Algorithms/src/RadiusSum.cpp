@@ -52,28 +52,28 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
+                  "An output workspace.");
 
   auto twoOrThreeElements =
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(
-      new ArrayProperty<double>("Centre", myInput, twoOrThreeElements),
-      "Coordinate of the centre of the ring");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Centre", myInput, twoOrThreeElements),
+                  "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
   declareProperty("MinRadius", 0.0, nonNegative,
-                  "Lenght of the inner ring. Default=0");
+                  "Length of the inner ring. Default=0");
   declareProperty(
-      new PropertyWithValue<double>(
+      make_unique<PropertyWithValue<double>>(
           "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
-      "Lenght of the outer ring. Default=ImageSize.");
+      "Length of the outer ring. Default=ImageSize.");
 
   auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
@@ -88,8 +88,8 @@ void RadiusSum::init() {
   declareProperty(normOrder, 1.0, "If 2, the normalization will be divided by "
                                   "the quadratic value of the ring for each "
                                   "radius.");
-  setPropertySettings(normOrder,
-                      new VisibleWhenProperty(normBy, IS_EQUAL_TO, "1"));
+  setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
+                                     normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";
   setPropertyGroup(normBy, groupNorm);

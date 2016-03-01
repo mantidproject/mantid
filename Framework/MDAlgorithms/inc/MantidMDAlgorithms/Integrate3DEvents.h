@@ -64,8 +64,6 @@ public:
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius);
 
-  ~Integrate3DEvents();
-
   /// Add event Q's to lists of events near peaks
   void
   addEvents(std::vector<std::pair<double, Mantid::Kernel::V3D>> const &event_qs,

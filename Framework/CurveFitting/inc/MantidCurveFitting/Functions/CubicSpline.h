@@ -49,8 +49,6 @@ class DLLExport CubicSpline : public BackgroundFunction {
 public:
   /// Constructor
   CubicSpline();
-  /// Destructor
-  ~CubicSpline() override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "CubicSpline"; }

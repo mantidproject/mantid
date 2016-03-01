@@ -24,16 +24,17 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
-  declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  declareProperty(new ArrayProperty<int>("ForwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The spectra numbers of the forward group");
-  declareProperty(new ArrayProperty<int>("BackwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The spectra numbers of the backward group");
   declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
                   Direction::Input);
@@ -46,24 +47,23 @@ std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
 
   std::map<std::string, std::string> result;
 
-  std::vector<size_t> list;
   std::vector<int> forwd = getProperty("ForwardSpectra");
   std::vector<int> backwd = getProperty("BackwardSpectra");
 
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  if (inputWS) {
+    auto list = inputWS->getIndicesFromSpectra(forwd);
+    if (forwd.size() != list.size()) {
+      result["ForwardSpectra"] =
+          "Some of the spectra can not be found in the input workspace";
+    }
 
-  inputWS->getIndicesFromSpectra(forwd, list);
-  if (forwd.size() != list.size()) {
-    result["ForwardSpectra"] =
-        "Some of the spectra can not be found in the input workspace";
+    list = inputWS->getIndicesFromSpectra(backwd);
+    if (backwd.size() != list.size()) {
+      result["BackwardSpectra"] =
+          "Some of the spectra can not be found in the input workspace";
+    }
   }
-
-  inputWS->getIndicesFromSpectra(backwd, list);
-  if (backwd.size() != list.size()) {
-    result["BackwardSpectra"] =
-        "Some of the spectra can not be found in the input workspace";
-  }
-
   return result;
 }
 
@@ -114,11 +114,10 @@ void AsymmetryCalc::exec() {
     tmpWS = inputWS;
 
     // get workspace indices from spectra ids for forward and backward
-    std::vector<specid_t> specIDs(2);
+    std::vector<specnum_t> specIDs(2);
     specIDs[0] = forward;
     specIDs[1] = backward;
-    std::vector<size_t> indices;
-    tmpWS->getIndicesFromSpectra(specIDs, indices);
+    std::vector<size_t> indices = tmpWS->getIndicesFromSpectra(specIDs);
 
     forward = static_cast<int>(indices[0]);
     backward = static_cast<int>(indices[1]);

@@ -327,7 +327,7 @@ void ResolutionConvolvedCrossSection::setupResolutionFunction(
 void ResolutionConvolvedCrossSection::storeCalculatedWithMutex(
     const size_t index, const double signal,
     API::FunctionValues &functionValues) const {
-  Poco::FastMutex::ScopedLock lock(m_valuesMutex);
+  std::lock_guard<std::mutex> lock(m_valuesMutex);
   functionValues.setCalculated(index, signal);
 }
 }

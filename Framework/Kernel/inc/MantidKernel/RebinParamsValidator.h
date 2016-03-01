@@ -39,7 +39,6 @@ class MANTID_KERNEL_DLL RebinParamsValidator
     : public TypedValidator<std::vector<double>> {
 public:
   RebinParamsValidator(bool allowEmpty = false);
-  ~RebinParamsValidator() override {}
   IValidator_sptr clone() const override {
     return boost::make_shared<RebinParamsValidator>(*this);
   }

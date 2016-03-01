@@ -1,8 +1,4 @@
 set ( SRC_FILES
-	#	src/CostFuncIgnorePosPeaks.cpp
-	#	src/SCDPanelErrors.cpp
-	# src/ChebyshevPolynomialBackground.cpp
-	#src/RefinePowderInstrumentParameters.cpp
 	src/Algorithms/CalculateChiSquared.cpp
 	src/Algorithms/CalculateGammaBackground.cpp
 	src/Algorithms/CalculateMSVesuvio.cpp
@@ -122,10 +118,6 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
-	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
-	#	inc/MantidCurveFitting/SCDPanelErrors.h
-	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
-	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
 	inc/MantidCurveFitting/Algorithms/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h

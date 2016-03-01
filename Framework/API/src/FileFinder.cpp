@@ -37,7 +37,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) {
-  return std::string::npos != ext.find("*");
+  return std::string::npos != ext.find('*');
 }
 }
 

@@ -163,7 +163,8 @@ public:
     TSM_ASSERT("Period log should be an int time series property", periodLog);
 
     std::vector<int> periodValues = periodLog->valuesAsVector();
-    std::set<int> uniquePeriods(periodValues.begin(), periodValues.end());
+    std::unordered_set<int> uniquePeriods(periodValues.begin(),
+                                          periodValues.end());
     TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
                       uniquePeriods.size());
   }

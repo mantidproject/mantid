@@ -10,6 +10,7 @@
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -22,9 +23,6 @@ Logger g_log("LibraryManager");
 LibraryManagerImpl::LibraryManagerImpl() {
   g_log.debug() << "LibraryManager created." << std::endl;
 }
-
-/// Destructor
-LibraryManagerImpl::~LibraryManagerImpl() {}
 
 /** Opens all suitable DLLs on a given path.
 *  @param filePath :: The filepath to the directory where the libraries are.
@@ -80,7 +78,7 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string &filePath,
  * @return True if the library should be skipped
  */
 bool LibraryManagerImpl::skip(const std::string &filename) {
-  static std::set<std::string> excludes;
+  static std::unordered_set<std::string> excludes;
   static bool initialized(false);
   if (!initialized) {
     std::string excludeStr =

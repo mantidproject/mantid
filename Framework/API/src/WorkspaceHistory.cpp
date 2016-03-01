@@ -392,18 +392,18 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   for (size_t index = static_cast<size_t>(PARAMS) + 1; index < nlines;
        ++index) {
     const std::string line = info[index];
-    std::string::size_type colon = line.find(":");
-    std::string::size_type comma = line.find(",");
+    std::string::size_type colon = line.find(':');
+    std::string::size_type comma = line.find(',');
     // Each colon has a space after it
     std::string prop_name = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
+    colon = line.find(':', comma);
     comma = line.find(", Default?", colon);
     std::string prop_value = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
+    colon = line.find(':', comma);
     comma = line.find(", Direction", colon);
     std::string is_def = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
-    comma = line.find(",", colon);
+    colon = line.find(':', comma);
+    comma = line.find(',', colon);
     std::string direction = line.substr(colon + 2, comma - colon - 2);
     unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
     alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);

@@ -6,7 +6,6 @@
 #include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidQtSpectrumViewer/SVConnections.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 namespace MantidQt
 {
@@ -156,11 +155,8 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_svUI->color_scale->setScaledContents(true);
   m_svUI->color_scale->setMinimumHeight(15);
   m_svUI->color_scale->setMinimumWidth(15);
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+  auto positive_color_table = ColorMaps::GetColorMap(ColorMaps::HEAT, 256);
+  auto negative_color_table = ColorMaps::GetColorMap(ColorMaps::GRAY, 256);
 
   showColorScale( positive_color_table, negative_color_table );
 
@@ -489,150 +485,77 @@ void SVConnections::intensitySliderMoved()
   }
 }
 
+/**
+ * Set the given color scale
+ * @param positive :: [input] positive color scale
+ * @param negative :: [input] negative color scale
+ */
+void SVConnections::setColorScale(ColorMaps::ColorScale positive,
+                                  ColorMaps::ColorScale negative) {
+  auto positiveTable = ColorMaps::GetColorMap(positive, 256);
+  auto negativeTable = ColorMaps::GetColorMap(negative, 256);
+  for (auto displ = m_spectrumDisplays.begin();
+       displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales(positiveTable, negativeTable);
+  }
+  showColorScale(positiveTable, negativeTable);
+}
 
 /**
  * Set the heat color scale.
  */
-void SVConnections::heatColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::heatColorScale() {
+  setColorScale(ColorMaps::HEAT, ColorMaps::GRAY);
 }
-
 
 /**
  * Set the gray color scale.
  */
-void SVConnections::grayColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::grayColorScale() {
+  setColorScale(ColorMaps::GRAY, ColorMaps::HEAT);
 }
-
 
 /**
  * Set the inverse gray color scale.
  */
-void SVConnections::negativeGrayColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::NEGATIVE_GRAY,256, positive_color_table);
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::negativeGrayColorScale() {
+  setColorScale(ColorMaps::NEGATIVE_GRAY, ColorMaps::HEAT);
 }
-
 
 /**
  * Set the green and yellow color scale.
  */
-void SVConnections::greenYellowColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GREEN_YELLOW, 256, positive_color_table);
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::greenYellowColorScale() {
+  setColorScale(ColorMaps::GREEN_YELLOW, ColorMaps::GRAY);
 }
-
 
 /**
  * Set the rainbow color scale.
  */
-void SVConnections::rainbowColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::RAINBOW, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::rainbowColorScale() {
+  setColorScale(ColorMaps::RAINBOW, ColorMaps::GRAY);
 }
-
 
 /**
  * Set the optimal color scale.
  */
-void SVConnections::optimalColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::OPTIMAL, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::optimalColorScale() {
+  setColorScale(ColorMaps::OPTIMAL, ColorMaps::GRAY);
 }
-
 
 /**
  * Set the multi color scale.
  */
-void SVConnections::multiColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::MULTI, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::multiColorScale() {
+  setColorScale(ColorMaps::MULTI, ColorMaps::GRAY);
 }
-
 
 /**
  * Set the spectrum color scale.
  */
-void SVConnections::spectrumColorScale()
-{
-  std::vector<QRgb> positive_color_table;
-  ColorMaps::GetColorMap( ColorMaps::SPECTRUM, 256, positive_color_table );
-
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
-
-  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales( positive_color_table, negative_color_table );
-  }
-  showColorScale( positive_color_table, negative_color_table );
+void SVConnections::spectrumColorScale() {
+  setColorScale(ColorMaps::SPECTRUM, ColorMaps::GRAY);
 }
-
 
 /**
  * Slot to handle loading a color map from file.
@@ -654,8 +577,7 @@ void SVConnections::loadColorMap()
 
   int n_colors = (int)positive_color_table.size();
 
-  std::vector<QRgb> negative_color_table;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, n_colors, negative_color_table );
+  auto negative_color_table = ColorMaps::GetColorMap(ColorMaps::GRAY, n_colors);
 
   for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
     (**displ).setColorScales( positive_color_table, negative_color_table );

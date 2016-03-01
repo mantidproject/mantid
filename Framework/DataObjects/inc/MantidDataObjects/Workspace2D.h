@@ -50,6 +50,7 @@ public:
   const std::string id() const override { return "Workspace2D"; }
 
   Workspace2D();
+  Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 
   /// Returns a clone of the workspace
@@ -79,7 +80,7 @@ public:
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<specid_t> &mList) { m_monitorList = mList; }
+  void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
   void setImageY(const API::MantidImage &image, size_t start = 0,
@@ -96,8 +97,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  Workspace2D &operator=(const Workspace2D &other);
 
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
@@ -107,7 +106,7 @@ protected:
   std::size_t m_noVectors;
 
   /// a vector holding workspace index of monitors in the workspace
-  std::vector<specid_t> m_monitorList;
+  std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
   std::vector<Mantid::API::ISpectrum *> data;

@@ -42,8 +42,6 @@ namespace API {
 
 class MANTID_API_DLL GridDomain : public API::FunctionDomain {
 public:
-  GridDomain(){};
-  ~GridDomain() override{};
   /// number of grid points
   size_t size() const override;
   /// number of dimensions in the grid

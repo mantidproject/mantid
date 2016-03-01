@@ -26,34 +26,6 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
     : m_startPoint(startPt), m_unitVector(unitVector) {}
 
 /**
- * Copy Constructor
- * @param other :: Track to initialise this copy with.
- */
-Track::Track(const Track &other)
-    : m_startPoint(other.m_startPoint), m_unitVector(other.m_unitVector),
-      m_links(other.m_links), m_surfPoints(other.m_surfPoints) {}
-
-/**
-* Assignment operator
-* @param other :: The track to copy from
-* @return *this
-*/
-Track &Track::operator=(const Track &other) {
-  if (this != &other) {
-    m_startPoint = other.m_startPoint;
-    m_unitVector = other.m_unitVector;
-    m_links = other.m_links;
-    m_surfPoints = other.m_surfPoints;
-  }
-  return *this;
-}
-
-/**
- * Destructor
- */
-Track::~Track() {}
-
-/**
  * Resets the track starting point and direction.
  * @param startPoint :: The new starting point
  * @param direction :: The new direction. Must be a unit vector!

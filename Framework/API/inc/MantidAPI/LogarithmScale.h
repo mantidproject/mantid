@@ -43,7 +43,6 @@ namespace API {
 class MANTID_API_DLL LogarithmScale : public ITransformScale {
 public:
   LogarithmScale() : m_base(M_E){};
-  ~LogarithmScale() override{};
   const std::string name() const override { return "LogarithmScale"; }
   void transform(std::vector<double> &gd) override;
   void setBase(double &base);

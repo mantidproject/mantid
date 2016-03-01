@@ -22,7 +22,8 @@ private:
 
     void init() {
       declareProperty(
-          new WorkspaceProperty<>("Workspace", "", Direction::InOut), "");
+          make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+          "");
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);

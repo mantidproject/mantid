@@ -162,17 +162,22 @@ FakeISISEventDAE::~FakeISISEventDAE() {
 * Declare the algorithm properties
 */
 void FakeISISEventDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("Rate", 20, Direction::Input),
-                  "Rate of sending the data: stream of NEvents events is sent "
-                  "every Rate milliseconds.");
-  declareProperty(new PropertyWithValue<int>("NEvents", 1000, Direction::Input),
-                  "Number of events in each packet.");
-  declareProperty(new PropertyWithValue<int>("Port", 59876, Direction::Input),
-                  "The port to broadcast on (default 59876, ISISDAE 10000).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
+      "Rate of sending the data: stream of NEvents events is sent "
+      "every Rate milliseconds.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NEvents", 1000, Direction::Input),
+      "Number of events in each packet.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
+      "The port to broadcast on (default 59876, ISISDAE 10000).");
 }
 
 /**
@@ -198,7 +203,7 @@ void FakeISISEventDAE::exec() {
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
   m_server = new Poco::Net::TCPServer(

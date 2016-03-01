@@ -48,7 +48,6 @@ class DLLExport FABADAMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   FABADAMinimizer();
-  ~FABADAMinimizer() override;
   /// Name of the minimizer.
   std::string name() const override { return "FABADA"; }
   /// Initialize minimizer, i.e. pass a function to minimize.

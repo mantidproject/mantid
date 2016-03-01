@@ -18,7 +18,7 @@ ParameterFactory::FactoryMap ParameterFactory::s_map;
    is returned.
 */
 std::string Parameter::getShortDescription() const {
-  size_t pos = m_description.find(".");
+  size_t pos = m_description.find('.');
   if (pos == std::string::npos) {
     return std::string(m_description);
   } else {

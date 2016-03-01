@@ -46,9 +46,6 @@ public:
   VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
-  /// Destructor
-  ~VisibleWhenProperty() override;
-
   //--------------------------------------------------------------------------------------------
   /// Return true always
   bool isEnabled(const IPropertyManager *) const override;

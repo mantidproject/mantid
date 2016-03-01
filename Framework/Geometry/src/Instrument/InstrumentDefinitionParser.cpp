@@ -29,6 +29,7 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -135,10 +136,6 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
 }
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -1930,10 +1927,10 @@ void InstrumentDefinitionParser::setLogfile(
     std::string tie = "";
 
     if (type.compare("fitting") == 0) {
-      size_t found = paramName.find(":");
+      size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
-        size_t index = paramName.find(":", found + 1);
+        size_t index = paramName.find(':', found + 1);
         if (index != std::string::npos) {
           g_log.error()
               << "Fitting <parameter> in instrument definition file defined "
@@ -2398,7 +2395,8 @@ void InstrumentDefinitionParser::adjust(
   // added
   // to pElem, and these <component>'s are deleted after loop
 
-  std::set<Element *> allComponentInType;   // used to hold <component>'s found
+  std::unordered_set<Element *>
+      allComponentInType;                   // used to hold <component>'s found
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++) {
     Element *pLoc = static_cast<Element *>(pNL->item(i));
@@ -2471,8 +2469,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  std::set<Element *>::iterator it;
-  for (it = allComponentInType.begin(); it != allComponentInType.end(); ++it)
+  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
+       ++it)
     pElem->removeChild(*it);
 }
 

@@ -44,9 +44,6 @@ public:
    *  @param message A description of the exceptional condition
    */
   explicit NotYet(const std::string &message) : std::runtime_error(message) {}
-
-  /// Destructor
-  ~NotYet() throw() override {}
 };
 
 } // namespace Exception

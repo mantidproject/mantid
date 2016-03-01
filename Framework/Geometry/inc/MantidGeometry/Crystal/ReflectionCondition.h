@@ -22,8 +22,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL ReflectionCondition {
 public:
-  ReflectionCondition() {}
-  virtual ~ReflectionCondition() {}
+  virtual ~ReflectionCondition() = default;
   /// Name of the reflection condition
   virtual std::string getName() = 0;
   /// Symbol of the associated lattice centering.
