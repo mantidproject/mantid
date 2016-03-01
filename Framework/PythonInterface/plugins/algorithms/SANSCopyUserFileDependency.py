@@ -1,6 +1,5 @@
 ﻿#pylint: disable=no-init,invalid-name
 from mantid.api import *
-from mantid.kernel import FloatBoundedValidator
 import os
 import re
 import shutil
