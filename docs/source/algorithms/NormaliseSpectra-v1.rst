@@ -13,9 +13,9 @@ Algorithm designed to normalise all the spectra in the input workspace so that t
 Usage
 -----
 
-**Example - ConvolutionFitSequential**
+**Example - NormaliseSpectra**
 
-.. testcode:: ConvolutionFitSequentialExample
+.. testcode:: NormaliseSpectraExample
 
   # Create Workspace
   data = '1,2,3,4,5'
@@ -29,7 +29,7 @@ Usage
 
 Output:  
   
-.. testoutput:: ConvolutionFitSequentialExample
+.. testoutput:: NormaliseSpectraExample
   :options: +NORMALIZE_WHITESPACE
   
   [ 0.2  0.4  0.6  0.8  1. ]
