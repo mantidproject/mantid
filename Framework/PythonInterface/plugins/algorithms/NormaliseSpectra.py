@@ -3,6 +3,7 @@ from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
 import numpy as np
+import math
 
 class NormaliseSpectra(DataProcessorAlgorithm):
 
@@ -50,6 +51,8 @@ class NormaliseSpectra(DataProcessorAlgorithm):
         # Delete cloned input workspace
         DeleteWorkspace('ws_in')
 
+        output_ws = self._replace_nan_with_zero(output_ws)
+
         self.setProperty('OutputWorkspace', output_ws)
 
 #----------------------------------Helper Functions---------------------------------
@@ -69,9 +72,16 @@ class NormaliseSpectra(DataProcessorAlgorithm):
             logger.warning(str(type(lowest_value)))
         if lowest_value <= 0.0:
             logger.warning('scaling Workspace to remove negative data')
-            scale_factor = 1-lowest_value
+            scale_factor = 0-lowest_value
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
                   Factor=scale_factor, Operation='Add')
+        return workspace
+
+    def _replace_nan_with_zero(self, workspace):
+        nhists = workspace.getNumberHistograms()
+        for hist in range(nhists):
+            y_data = workspace.readY(hist)
+            workspace.setY(hist, np.nan_to_num(y_data))
         return workspace
 
     def _setup(self):
