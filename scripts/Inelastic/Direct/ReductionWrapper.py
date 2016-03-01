@@ -391,8 +391,12 @@ class ReductionWrapper(object):
         _,found_ext=os.path.splitext(input_file)
         if found_ext != '.nxs': # problem solution for nxs files only. Others are seems ok
             return
-        if not h5py_installed: # well this check is not available. Sad, but it available on 
-            return             # all our working systems
+        if not h5py_installed: # well this check is not available. Sad, but it available on
+            # all our working systems. Inform user about the problem
+            self.reducer.prop_man.log \
+            ('*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode',\
+            'notice')
+            return
         ic=0
         #ok = os.access(input_file,os.R_OK) # does not work in this case
         try:
@@ -514,8 +518,16 @@ class ReductionWrapper(object):
             if n_found > 0:
                 # cash sum can be dropped now if it has not been done before
                 self.reducer.prop_man.cashe_sum_ws = False
-                for fil in found:
-                    self._check_access_granted(fil)
+                for run in found:
+                    # here we have run numbers. Let's get real file names
+                    prop_man = self.reducer.prop_man
+                    instr_name = prop_man.short_instr_name
+                    is_found,fname = PropertyManager.sample_run.find_file(prop_man,instr_name,run);
+                    if not is_found:
+                        raise RuntimeError("File has been found earlier but can not been retrieved now. Logical bug")
+                    else:
+                        # found but let's give it some time to finish possible IO operations
+                        self._check_access_granted(fname)
                 ws = self.reduce()
         else:
             ws = self.reduce()
