@@ -129,14 +129,13 @@ public:
     params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
     if (monitorNormalization) {
       params->addDouble(tinyInst.get(), "I0MonitorIndex", 1.0);
+      params->addDouble(tinyInst.get(), "MonitorBackgroundMin", 0.0);
+      params->addDouble(tinyInst.get(), "MonitorBackgroundMax", 0.0);
+      params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
+      params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
     }
     params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
     params->addDouble(tinyInst.get(), "LambdaMax", 10.0);
-    params->addDouble(tinyInst.get(), "MonitorBackgroundMin", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorBackgroundMax", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
-
     tinyWS->mutableRun().addLogData(
         new PropertyWithValue<double>("Theta", 0.1));
 

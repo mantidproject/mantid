@@ -518,12 +518,6 @@ void ReflectometryReductionOne::exec() {
       this->getMinMax("WavelengthMin", "WavelengthMax");
   const double wavelengthStep = getProperty("WavelengthStep");
 
-  const OptionalMinMax monitorBackgroundWavelengthInterval = getMinMax(
-      "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
-
-  const OptionalMinMax monitorIntegrationWavelengthInterval = getMinMax(
-      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
-
   const std::string processingCommands = getWorkspaceIndexList();
 
   OptionalWorkspaceIndexes directBeam;
@@ -534,6 +528,15 @@ void ReflectometryReductionOne::exec() {
 
   const OptionalInteger i0MonitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+
+  const OptionalMinMax monitorBackgroundWavelengthInterval = getOptionalMinMax(
+      this, "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      instrument, "MonitorBackgroundWavelengthMin",
+      "MonitorBackgroundWavelengthMax");
+  const OptionalMinMax monitorIntegrationWavelengthInterval = getOptionalMinMax(
+      this, "MonitorIntegrationWavelengthMin",
+      "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
@@ -587,10 +590,12 @@ void ReflectometryReductionOne::exec() {
       auto integrationAlg = this->createChildAlgorithm("Integration");
       integrationAlg->initialize();
       integrationAlg->setProperty("InputWorkspace", monitorWS);
-      integrationAlg->setProperty(
-          "RangeLower", monitorIntegrationWavelengthInterval.get().get<0>());
-      integrationAlg->setProperty(
-          "RangeUpper", monitorIntegrationWavelengthInterval.get().get<1>());
+      if (monitorIntegrationWavelengthInterval.is_initialized()) {
+        integrationAlg->setProperty(
+            "RangeLower", monitorIntegrationWavelengthInterval.get().get<0>());
+        integrationAlg->setProperty(
+            "RangeUpper", monitorIntegrationWavelengthInterval.get().get<1>());
+      }
       integrationAlg->execute();
       MatrixWorkspace_sptr integratedMonitor =
           integrationAlg->getProperty("OutputWorkspace");

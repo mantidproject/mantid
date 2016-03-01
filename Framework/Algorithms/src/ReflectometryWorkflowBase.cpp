@@ -37,17 +37,9 @@ ReflectometryWorkflowBase::~ReflectometryWorkflowBase() {}
  * Init index properties.
  */
 void ReflectometryWorkflowBase::initIndexInputs() {
-
-  boost::shared_ptr<CompositeValidator> mandatoryWorkspaceIndex =
-      boost::make_shared<CompositeValidator>();
-  mandatoryWorkspaceIndex->add(boost::make_shared<MandatoryValidator<int>>());
-  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
-  boundedIndex->setLower(0);
-  mandatoryWorkspaceIndex->add(boundedIndex);
-
   declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
                                                       Mantid::EMPTY_INT(),
-                                                      mandatoryWorkspaceIndex),
+                                                      PropertyMode::Optional),
                   "I0 monitor workspace index");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -80,28 +72,25 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
           boost::make_shared<MandatoryValidator<double>>(), Direction::Input),
       "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for "
       "rebinning intermediate workspaces converted into wavelength.");
-
+  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
+  boundedIndex->setLower(0);
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+                      PropertyMode::Optional),
                   "Wavelength minimum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+                      PropertyMode::Optional),
                   "Wavelength maximum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+                      PropertyMode::Optional),
                   "Wavelength minimum for integration in angstroms.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+                      PropertyMode::Optional),
                   "Wavelength maximum for integration in angstroms.");
 }
 

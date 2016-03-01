@@ -101,12 +101,10 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
 
-  auto index_bounds = boost::make_shared<BoundedValidator<int>>();
-  index_bounds->setLower(0);
-
-  declareProperty(make_unique<PropertyWithValue<int>>(
-                      "I0MonitorIndex", Mantid::EMPTY_INT(), index_bounds),
-                  "I0 monitor workspace index");
+  declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
+                                                      Mantid::EMPTY_INT(),
+                                                      PropertyMode::Optional),
+                  "I0 monitor workspace index. Optional.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of workspace indices to yield only the"

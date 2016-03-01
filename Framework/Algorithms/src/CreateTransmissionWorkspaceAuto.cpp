@@ -86,9 +86,10 @@ void CreateTransmissionWorkspaceAuto::init() {
   auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
   boundedIndex->setLower(0);
 
-  declareProperty(make_unique<PropertyWithValue<int>>(
-                      "I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex),
-                  "I0 monitor index");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("I0MonitorIndex", Mantid::EMPTY_INT(),
+                                          boundedIndex, PropertyMode::Optional),
+      "I0 monitor index");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
