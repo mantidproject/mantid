@@ -6,7 +6,8 @@ Description of work.
 
 Fixes #xxxx.
 
-[Release notes](/docs/source/release/): <!-- Replace with a link to the updated file or state "Does not need to be in the release notes." -->
+[Release notes](/docs/source/release/)
+<!-- Replace with a link above to the updated file or state "Does not need to be in the release notes." -->
 
 ---
 
