@@ -151,12 +151,6 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_index_positive() {
-    auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
-                     std::invalid_argument);
-  }
-
   void test_execute_one_tranmission() {
 
     IAlgorithm_sptr alg =

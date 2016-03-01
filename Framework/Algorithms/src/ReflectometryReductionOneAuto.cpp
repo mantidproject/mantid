@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -116,16 +117,22 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background min in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background max in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor integral min in angstroms", Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor integral max in angstroms", Direction::Input);
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background max in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor integral min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::InOut),
+                  "Monitor integral max in angstroms");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "DetectorComponentName", "", Direction::Input),
@@ -259,8 +266,8 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = static_cast<int>(
-      checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+  auto i0_monitor_index = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
@@ -310,19 +317,23 @@ void ReflectometryReductionOneAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min =
-      checkForDefault("WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max =
-      checkForDefault("WavelengthMax", instrument, "LambdaMax");
+  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMin", instrument, "LambdaMin");
+  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min = checkForDefault(
-      "MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-  double wavelength_back_max = checkForDefault(
-      "MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-  double wavelength_integration_min = checkForDefault(
-      "MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-  double wavelength_integration_max = checkForDefault(
-      "MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+  auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMin", instrument,
+      "MonitorBackgroundMin");
+  auto wavelength_back_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMax", instrument,
+      "MonitorBackgroundMax");
+  auto wavelength_integration_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMin", instrument,
+      "MonitorIntegralMin");
+  auto wavelength_integration_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegralMax");
 
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");
@@ -345,18 +356,25 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
     refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
-    refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
+
+    if (i0_monitor_index.is_initialized()) {
+      refRedOne->setProperty("I0MonitorIndex", i0_monitor_index.get());
+    }
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
     refRedOne->setProperty("WavelengthMax", wavelength_max);
-    refRedOne->setProperty("MonitorBackgroundWavelengthMin",
-                           wavelength_back_min);
-    refRedOne->setProperty("MonitorBackgroundWavelengthMax",
-                           wavelength_back_max);
-    refRedOne->setProperty("MonitorIntegrationWavelengthMin",
-                           wavelength_integration_min);
-    refRedOne->setProperty("MonitorIntegrationWavelengthMax",
-                           wavelength_integration_max);
+    if (wavelength_back_min.is_initialized())
+      refRedOne->setProperty("MonitorBackgroundWavelengthMin",
+                             wavelength_back_min.get());
+    if (wavelength_back_max.is_initialized())
+      refRedOne->setProperty("MonitorBackgroundWavelengthMax",
+                             wavelength_back_max.get());
+    if (wavelength_integration_min.is_initialized())
+      refRedOne->setProperty("MonitorIntegrationWavelengthMin",
+                             wavelength_integration_min.get());
+    if (wavelength_integration_max.is_initialized())
+      refRedOne->setProperty("MonitorIntegrationWavelengthMax",
+                             wavelength_integration_max.get());
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
     if (correction_algorithm == "PolynomialCorrection") {
@@ -492,23 +510,6 @@ ReflectometryReductionOneAuto::isSet(std::string propName) const {
   } else {
     T value = this->getProperty(propName);
     return boost::optional<T>(value);
-  }
-}
-
-double ReflectometryReductionOneAuto::checkForDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() == 0) {
-      throw std::runtime_error("No data could be retrieved from the parameters "
-                               "and argument wasn't provided: " +
-                               propName);
-    }
-    return defaults[0];
-  } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
   }
 }
 
