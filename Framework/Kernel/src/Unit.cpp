@@ -136,14 +136,6 @@ void Unit::initialize(const double &_l1, const double &_l2,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-@param xdata
-@param ydata
-@param _l1
-@param _l2
-@param _twoTheta
-@param _emode
-@param _efixed
-@param _delta
 */
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
@@ -175,14 +167,6 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-@param xdata
-@param ydata
-@param _l1
-@param _l2
-@param _twoTheta
-@param _emode
-@param _efixed
-@param _delta
 */
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
