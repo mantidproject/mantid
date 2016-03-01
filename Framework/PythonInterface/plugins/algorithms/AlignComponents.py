@@ -231,10 +231,16 @@ class AlignComponents(PythonAlgorithm):
                 self.getProperty("Zposition").value or
                 self.getProperty("AlphaRotation").value or
                 self.getProperty("BetaRotation").value or
-                self.getProperty("GammaRotation").value or
-                self.getProperty("FitSourcePosition").value or
-                self.getProperty("FitSamplePosition").value):
+                self.getProperty("GammaRotation").value):
             issues["Xposition"] = "You must calibrate at least one parameter."
+
+        # Check that a position refinement is selected for sample/source
+        if ((self.getProperty("FitSourcePosition").value or
+             self.getProperty("FitSamplePosition").value) and
+            not (self.getProperty("Xposition").value or
+                 self.getProperty("Yposition").value or
+                 self.getProperty("Zposition").value)):
+            issues["Xposition"] = "If fitting source or sample, you must calibrate at least one position parameter."
 
         return issues
 
@@ -262,9 +268,11 @@ class AlignComponents(PythonAlgorithm):
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
                                     OutputWorkspace=wks_name)
 
-        # Make a dictionary of what options are being refined.
-        for opt in self._optionsList:
+        # Make a dictionary of what options are being refined for sample/source. No rotation.
+        for opt in self._optionsList[:3]:
             self._optionsDict[opt] = self.getProperty(opt).value
+        for opt in self._optionsList[3:]:
+            self._optionsDict[opt] = False
 
         # First fit L1 if selected for Source and/or Sample
         for component in "Source", "Sample":
@@ -284,8 +292,10 @@ class AlignComponents(PythonAlgorithm):
                 else:
                     mask_out = None
 
-                self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
-                                    None, None, None]
+                self._initialPos = [comp.getPos().getX(),
+                                    comp.getPos().getY(),
+                                    comp.getPos().getZ(),
+                                    0, 0, 0]
 
                 # Set up x0 and bounds lists
                 x0List = []
@@ -329,6 +339,10 @@ class AlignComponents(PythonAlgorithm):
 
         # Now fit all the components if any
         components = self.getProperty("ComponentList").value
+
+        # Make a dictionary of what options are being refined.
+        for opt in self._optionsList:
+            self._optionsDict[opt] = self.getProperty(opt).value
 
         if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
             self._move = True
