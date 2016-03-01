@@ -29,12 +29,14 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._setup()
-        self._scale_negative_and_zero_data()
         CloneWorkspace(InputWorkspace=self._input_ws,
                        OutputWorkspace=self._output_ws_name)
+        # Clone input workspace to incase it requires scaling
+        ws_in = CloneWorkspace(InputWorkspace=self._input_ws)
 
         num_hists = self._input_ws.getNumberHistograms()
         output_ws = mtd[self._output_ws_name]
+        self._input_ws = self._scale_negative_and_zero_data(ws_in)
 
         for idx in range(num_hists):
             y_data = self._input_ws.readY(idx)
@@ -45,18 +47,21 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
             e_data = e_data/ymax
             output_ws.setE(idx, e_data)
 
+        # Delete cloned input workspace
+        DeleteWorkspace('ws_in')
+
         self.setProperty('OutputWorkspace', output_ws)
 
 #----------------------------------Helper Functions---------------------------------
 
-    def _scale_negative_and_zero_data(self):
+    def _scale_negative_and_zero_data(self, workspace):
         """
         Checks for negative data in workspace and scales workspace if data is negative
         """
-        num_hists = self._input_ws.getNumberHistograms()
+        num_hists = workspace.getNumberHistograms()
         lowest_value = 0.0
         for hist in range(num_hists):
-            y_data = self._input_ws.readY(hist)
+            y_data = workspace.readY(hist)
             ymin = np.amin(y_data)
             if ymin < lowest_value:
                 lowest_value = ymin
@@ -65,9 +70,9 @@ class IndirectNormSpectra(DataProcessorAlgorithm):
         if lowest_value <= 0.0:
             logger.warning('scaling Workspace to remove negative data')
             scale_factor = 1-lowest_value
-            Scale(InputWorkspace=self._input_ws, OutputWorkspace=self._input_ws,
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
                   Factor=scale_factor, Operation='Add')
-
+        return workspace
 
     def _setup(self):
         """
