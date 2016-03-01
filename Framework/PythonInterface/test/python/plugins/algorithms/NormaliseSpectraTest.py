@@ -8,42 +8,53 @@ class NormaliseSpectraTest(unittest.TestCase):
     _positive ='1,2,3,4,5'
     _negative ='-5,-4,-3,-2,-1'
     _zeros ='0,0,0,0,0'
+    _mixed ='-2,-1,0,1,2'
 
 
 #----------------------------------Algorithm tests----------------------------------------
 
-    def test_with_MatrixWorkspace_one_hist_positive(self):
-        in_ws = self._create_MatrixWorkspace(1, 'test', self._positive)
+    def test_one_hist_positive(self):
+        in_ws = self._create_workspace(1, 'test', self._positive)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws)
 
-    def test_with_MatrixWorkspace_one_hist_negative(self):
-        in_ws = self._create_MatrixWorkspace(1, 'test', self._negative)
+    def test_one_hist_negative(self):
+        in_ws = self._create_workspace(1, 'test', self._negative)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws)
 
-    def test_with_MatrixWorkspace_one_hist_zeors(self):
-        in_ws = self._create_MatrixWorkspace(1, 'test', self._zeros)
+    def test_one_hist_zeros(self):
+        in_ws = self._create_workspace(1, 'test', self._zeros)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws)
+
+    def test_one_hist_mixed(self):
+        in_ws = self._create_workspace(1, 'test', self._mixed)
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
+        self._check_workspace_is_within_boundaries(out_ws)
 
     def test_with_MatrixWorkspace_multi_hist_(self):
-        in_ws = self._create_MatrixWorkspace(3, 'test', self._positive)
+        in_ws = self._create_workspace(3, 'test', self._positive)
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
-        self._check_MatrixWorkspace_for_y_more_than_one(out_ws)
+        self._check_workspace_is_within_boundaries(out_ws)
 
 #--------------------------------Validate results-----------------------------------------
 
-    def _check_MatrixWorkspace_for_y_more_than_one(self, matrixWs):
+    def _check_workspace_is_within_boundaries(self, matrixWs):
         for i in range(matrixWs.getNumberHistograms()):
-            self._check_spectrum_for_y_more_than_one(matrixWs.readY(i))
+            self._check_spectrum_less_than(matrixWs.readY(i), 1)
+            self._check_spectrum_more_than(matrixWs.readY(i), 0)
 
-    def _check_spectrum_for_y_more_than_one(self, y_data):
+    def _check_spectrum_less_than(self, y_data, upper_boundary):
         for i in range(len(y_data)):
-            self.assertLessEqual(y_data[i], 1)
+            self.assertLessEqual(y_data[i], upper_boundary)
+
+    def _check_spectrum_more_than(self, y_data, lower_boundary):
+        for i in range(len(y_data)):
+            self.assertGreaterEqual(y_data[i], lower_boundary)
 
 #--------------------------------Helper Functions-----------------------------------------
-    def _create_MatrixWorkspace(self, nhists, out_name, data_string):
+    def _create_workspace(self, nhists, out_name, data_string):
         """
         Creates a basic Matrixworkspace
         """
