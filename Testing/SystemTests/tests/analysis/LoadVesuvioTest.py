@@ -4,6 +4,7 @@ import stresstesting
 from mantid.api import MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
+import math
 import unittest
 
 DIFF_PLACES = 12
@@ -17,38 +18,37 @@ class VesuvioTests(unittest.TestCase):
             mtd.remove(self.ws_name)
 
     #================== Success cases ================================
-    def test_load_with_back_scattering_spectra_produces_correct_workspace(self):
-        self._run_load("14188", "3-134", "DoubleDifference")
+    def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "3-134", diff_mode)
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.078968412230231877, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.12162310222873171, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.018091076761311387, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.063175962622448692, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13015715643321046, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.12122048601642356, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.017172642169849039, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.063124106780391834, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
-    def test_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
-        self._run_load("14188-14190", "3-134", "DoubleDifference")
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
+                                               diff_mode=diff_mode)
 
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.12812011879757312, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.07005709042418834, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.038491709460370394, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.036783617369284975, evs_raw.readE(131)[1188], places=DIFF_PLACES)
-
-    def test_non_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
-        self._run_load("14188,14190", "3-134", "DoubleDifference")
+    def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
+        diff_mode = "SingleDifference"
+        self._run_load("14188", "3-134", diff_mode)
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.17509520926405386, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.085651536076367191, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.027855932189430499, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.044991428219920804, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.16805529043135614, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13602628474190004, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.056426592449087654, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.070774572171486652, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
+                                               diff_mode=diff_mode)
 
     def test_load_with_forward_scattering_spectra_produces_correct_workspace(self):
-        self._run_load("14188", "135-198", "SingleDifference")
+        diff_mode = "SingleDifference"
+        self._run_load("14188", "135-198", diff_mode)
 
         # Check some data
         evs_raw = mtd[self.ws_name]
@@ -56,6 +56,29 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.23849110331150025, evs_raw.readE(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(-0.030129475930755989, evs_raw.readY(63)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.23849110331150025, evs_raw.readE(0)[1], places=DIFF_PLACES)
+
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=True,
+                                               diff_mode=diff_mode)
+
+    def test_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
+        self._run_load("14188-14190", "3-134", "DoubleDifference")
+
+        # Check some data
+        evs_raw = mtd[self.ws_name]
+        self.assertAlmostEqual(0.14595792251532602, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.069974931114835631, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.034269132557441905, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.036773635912201605, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+
+    def test_non_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
+        self._run_load("14188,14190", "3-134", "DoubleDifference")
+
+        # Check some data
+        evs_raw = mtd[self.ws_name]
+        self.assertAlmostEqual(0.17587447223331631, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.085647015119071523, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.031951030862195084, evs_raw.readY(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.044999174645580703, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
     def test_consecutive_runs_with_forward_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188-14190", "135-198", "SingleDifference")
@@ -77,16 +100,6 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.0013599866184859088, evs_raw.readY(63)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.16935354944452052, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-    def test_load_with_spectra_mixed_from_forward_backward_gives_expected_numbers(self):
-        self._run_load("14188", "134,135", "DoubleDifference")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.43816507168120111, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.23224859590051541, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.013611354662030284, evs_raw.readY(1)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.031506182465619419, evs_raw.readE(1)[1188], places=DIFF_PLACES)
-
     def test_foilout_mode_gives_expected_numbers(self):
         self._run_load("14188", "3", "FoilOut")
 
@@ -100,16 +113,6 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
-
-    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_difference_mode(self):
-        self._run_load("14188", "3", "SingleDifference", "IP0005.dat")
-
-        # Check some data
-        evs_raw = mtd[self.ws_name]
-        det0 = evs_raw.getDetector(0)
-        param = det0.getNumberParameter("t0")
-        self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0], places=4)
 
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
@@ -198,6 +201,42 @@ class VesuvioTests(unittest.TestCase):
         for expected_id, det_id in zip(expected_ids, det_ids):
             self.assertEqual(expected_id, det_id)
 
+    def _verify_correct_parameters_loaded(self, workspace, forward_scatter, diff_mode):
+        nhist = workspace.getNumberHistograms()
+        for i in range(nhist):
+            self._verify_correct_detector_parameters(workspace.getDetector(i),
+                                                     forward_scatter, diff_mode)
+
+    def _verify_correct_detector_parameters(self, detector, forward_scatter, diff_mode):
+        # resolution
+        tol = 1e-04
+        # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
+        tol_places = round(-math.log10(tol), ndigits=0)
+        sigma_l1 = detector.getNumberParameter("sigma_l1")[0]
+        sigma_l2 = detector.getNumberParameter("sigma_l2")[0]
+        sigma_tof = detector.getNumberParameter("sigma_tof")[0]
+        sigma_theta = detector.getNumberParameter("sigma_theta")[0]
+        sigma_gauss = detector.getNumberParameter("sigma_gauss")[0]
+        hwhm_lorentz = detector.getNumberParameter("hwhm_lorentz")[0]
+        self.assertAlmostEqual(sigma_l1, 0.021, places=tol_places)
+        self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
+        self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
+        if forward_scatter:
+            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
+            if diff_mode == "DoubleDifference":
+                raise ValueError("Double difference is not compataible with forward scattering spectra")
+            else:
+                self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
+        else:
+            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
+            if diff_mode == "DoubleDifference":
+                self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)
+            else:
+                self.assertAlmostEqual(sigma_gauss, 52.3, places=tol_places)
+                self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
+
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
                        SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
@@ -256,6 +295,17 @@ class VesuvioTests(unittest.TestCase):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, SpectrumList="1-2")
 
+    def test_load_with_spectra_mixed_from_forward_backward_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="135,134")
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="3,134,136,198")
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="SingleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="20-50,180-192")
+
     def test_load_with_invalid_difference_option_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="Unknown",SpectrumList="3-134")
@@ -263,6 +313,11 @@ class VesuvioTests(unittest.TestCase):
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
+
+    def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          Mode="DoubleDifference",
+                          OutputWorkspace=self.ws_name, SpectrumList="140-150")
 
     def test_raising_error_removes_temporary_raw_workspaces(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid

@@ -4,12 +4,15 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SampleEnvironment.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/random/uniform_int.hpp>
@@ -46,7 +49,7 @@ using namespace Kernel;
 MonteCarloAbsorption::MonteCarloAbsorption()
     : m_samplePos(), m_sourcePos(), m_numVolumeElements(0), m_blocks(),
       m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
-      m_sampleShape(NULL), m_sampleMaterial(NULL), m_container(NULL),
+      m_sampleShape(nullptr), m_sampleMaterial(nullptr), m_container(nullptr),
       m_numberOfPoints(0), m_xStepSize(0), m_numberOfEvents(300) {}
 
 /**
@@ -67,13 +70,13 @@ void MonteCarloAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.  The input workspace must "
                   "have X units of wavelength.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
@@ -205,7 +208,7 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;
   // Error is 1/sqrt(nevents)
-  error = 1. / sqrt((double)numDetected);
+  error = 1. / sqrt(static_cast<double>(numDetected));
 }
 
 /**
@@ -288,7 +291,7 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     return false;
   }
 
-  double length = beforeScatter.begin()->distInsideObject;
+  double length = beforeScatter.cbegin()->distInsideObject;
   factor *= attenuation(length, *m_sampleMaterial, lambda);
 
   beforeScatter.clearIntersectionResults();
@@ -296,14 +299,12 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(beforeScatter);
   }
   // Attenuation factor is product of factor for each material
-  Track::LType::const_iterator cend = beforeScatter.end();
-  for (Track::LType::const_iterator citr = beforeScatter.begin(); citr != cend;
-       ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : beforeScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
-  length = afterScatter.begin()->distInsideObject;
+  length = afterScatter.cbegin()->distInsideObject;
   factor *= attenuation(length, *m_sampleMaterial, lambda);
 
   afterScatter.clearIntersectionResults();
@@ -311,11 +312,9 @@ bool MonteCarloAbsorption::attenuationFactor(const V3D &startPos,
     m_container->interceptSurfaces(afterScatter);
   }
   // Attenuation factor is product of factor for each material
-  cend = afterScatter.end();
-  for (Track::LType::const_iterator citr = afterScatter.begin(); citr != cend;
-       ++citr) {
-    length = citr->distInsideObject;
-    factor *= attenuation(length, citr->object->material(), lambda);
+  for (const auto &citr : afterScatter) {
+    length = citr.distInsideObject;
+    factor *= attenuation(length, citr.object->material(), lambda);
   }
 
   return true;
@@ -363,7 +362,7 @@ void MonteCarloAbsorption::retrieveInput() {
   try {
     m_container = &(m_inputWS->sample().getEnvironment());
   } catch (std::runtime_error &) {
-    m_container = NULL;
+    m_container = nullptr;
     g_log.information()
         << "No environment has been defined, continuing with only sample.\n";
   }
@@ -502,19 +501,15 @@ boost::mt19937 &MonteCarloAbsorption::rgen() const {
 bool MonteCarloAbsorption::boxIntersectsSample(
     const double xmax, const double ymax, const double zmax, const double xmin,
     const double ymin, const double zmin) const {
-  // Check all 8 corners for intersection
-  if (ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
-      ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
-      ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
-      ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
-      ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
-      ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
-      ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
-      ptIntersectsSample(V3D(xmin, ymin, zmax)))   // right-back-bottom
-  {
-    return true;
-  } else
-    return false;
+
+  return ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
+         ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
+         ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
+         ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
+         ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
+         ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
+         ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
+         ptIntersectsSample(V3D(xmin, ymin, zmax));   // right-back-bottom;
 }
 
 /**

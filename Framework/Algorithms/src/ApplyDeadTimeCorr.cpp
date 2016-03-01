@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
+
 #include "boost/lexical_cast.hpp"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 #include <cmath>
 
@@ -26,17 +28,17 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
    */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace containing measured counts");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DeadTimeTable", "", Direction::Input),
                   "Name of the Dead Time Table");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-                                                       Direction::Output),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
 

@@ -3,19 +3,21 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <Poco/File.h>
+
 #include <fstream>
 
 using namespace Mantid::DataHandling;
@@ -48,19 +50,16 @@ int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
  * read from after the execution (output).
  */
 void LoadQKK::init() {
-  // Specify file extensions which can be associated with a QKK file.
-  std::vector<std::string> exts;
-  exts.push_back(".nx.hdf");
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".nx.hdf"),
+                  "The input filename of the stored data");
   // Declare the OutputWorkspace property. This sets the name of the workspace
   // to be filled with the data
   // from the file.
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output));
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+      "OutputWorkspace", "", Kernel::Direction::Output));
 }
 
 /**

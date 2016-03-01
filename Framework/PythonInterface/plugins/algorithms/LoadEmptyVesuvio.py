@@ -1,7 +1,6 @@
 #pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as ms
 
 import os
 
@@ -61,11 +60,13 @@ class LoadEmptyVesuvio(PythonAlgorithm):
         inst_file = os.path.join(inst_dir, "VESUVIO_Definition.xml")
 
         # Load the instrument
-        vesuvio_ws = ms.LoadEmptyInstrument(Filename=inst_file,
-                                            OutputWorkspace=self.getPropertyValue(WKSP_PROP),
-                                            EnableLogging=_LOGGING_)
+        load_empty = self.createChildAlgorithm("LoadEmptyInstrument")
+        load_empty.setLogging(_LOGGING_)
+        load_empty.setProperty("Filename", inst_file)
+        load_empty.setProperty("OutputWorkspace", self.getPropertyValue(WKSP_PROP))
+        load_empty.execute()
 
-        return vesuvio_ws
+        return load_empty.getProperty("OutputWorkspace").value
 
 #----------------------------------------------------------------------------------------
 

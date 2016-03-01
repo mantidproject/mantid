@@ -1,7 +1,11 @@
 #include "MantidCrystal/PeakIntensityVsRadius.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -44,12 +48,12 @@ const std::string PeakIntensityVsRadius::category() const {
 /** Initialize the algorithm's properties.
  */
 void PeakIntensityVsRadius::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace containing the SCD data.");
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                            Direction::Input),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
+                                                     Direction::Input),
       "The list of peaks to integrate, matching the InputWorkspace.");
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
@@ -87,12 +91,12 @@ void PeakIntensityVsRadius::init() {
   setPropertyGroup("BackgroundInnerRadius", "Fixed Background Shell");
   setPropertyGroup("BackgroundOuterRadius", "Fixed Background Shell");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace2D containing intensity vs radius.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace2",
-                                          "NumberPeaksIntegrated",
-                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace2D containing intensity vs radius.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace2",
+                                                   "NumberPeaksIntegrated",
+                                                   Direction::Output),
                   "An output workspace2D containing number of peaks at levels "
                   "of I/sigI vs radius.");
 }
@@ -139,7 +143,7 @@ void PeakIntensityVsRadius::exec() {
       "Workspace2D", peaksWS->getNumberPeaks(), NumSteps, NumSteps);
 
   // Create a text axis for axis(1), with H K L of each peak
-  TextAxis *ax = new TextAxis(outWS->getNumberHistograms());
+  auto ax = new TextAxis(outWS->getNumberHistograms());
   for (int i = 0; i < peaksWS->getNumberPeaks(); i++) {
     V3D hkl = peaksWS->getPeak(i).getHKL();
     hkl.round(); // Round HKL to make the string prettier
@@ -150,7 +154,7 @@ void PeakIntensityVsRadius::exec() {
   MatrixWorkspace_sptr outWS2 =
       WorkspaceFactory::Instance().create("Workspace2D", 4, NumSteps, NumSteps);
   // Create a text axis for axis(1), with H K L of each peak
-  TextAxis *ax2 = new TextAxis(outWS2->getNumberHistograms());
+  auto ax2 = new TextAxis(outWS2->getNumberHistograms());
   ax2->setLabel(0, "I/SigI=2");
   ax2->setLabel(1, "I/SigI=3");
   ax2->setLabel(2, "I/SigI=5");

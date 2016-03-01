@@ -98,9 +98,9 @@ signals:
 	void axisTitleDblClicked();
 	
 private:
-    bool eventFilter(QObject *, QEvent *);
+  bool eventFilter(QObject *, QEvent *) override;
 
-	void mouseDblClicked(const QwtScaleWidget *, const QPoint &);
+        void mouseDblClicked(const QwtScaleWidget *, const QPoint &);
 	void mouseClicked(const QwtScaleWidget *scale, const QPoint &pos) ;
 	void mouseRightClicked(const QwtScaleWidget *scale, const QPoint &pos);
 

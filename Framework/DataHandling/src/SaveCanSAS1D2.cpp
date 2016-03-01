@@ -1,14 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveCanSAS1D2.h"
-
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-
+#include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidGeometry/IComponent.h"
-
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -34,14 +33,14 @@ void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),

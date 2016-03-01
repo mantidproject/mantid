@@ -1,5 +1,3 @@
-#include "MantidQtAPI/PythonThreading.h"
-
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -51,7 +49,6 @@ namespace Mantid
                                    "set this variable.");
         }
 
-        ScopedPythonGIL gil;
         Q_ASSERT(pqApplicationCore::instance()==NULL);
 
         // Provide ParaView's application core with a path to the running executable

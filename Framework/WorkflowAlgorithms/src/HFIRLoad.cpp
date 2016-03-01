@@ -1,13 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <string>
+
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
-#include <MantidAPI/FileProperty.h>
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -22,12 +24,12 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void HFIRLoad::init() {
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the input file to load");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Then name of the output workspace");
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the input file to load");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Then name of the output workspace");
   declareProperty(
       "NoBeamCenter", false,
       "If true, the detector will not be moved according to the beam center");
@@ -40,7 +42,8 @@ void HFIRLoad::init() {
       "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
-                  "using the distance found in the meta data), in mm");
+                  "using the distance found in the meta data), in mm."
+                  "Not used when SampleDetectorDistance is provided.");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -119,9 +122,9 @@ void HFIRLoad::exec() {
 
   // If the load algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   const std::string fileName = getPropertyValue("Filename");
@@ -169,6 +172,9 @@ void HFIRLoad::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
+  // If SampleDetectorDistance is provided, use it!
+  // Otherwise get's "sample-detector-distance" from the data file
+  // And uses SampleDetectorDistanceOffset if given!
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
@@ -226,7 +232,7 @@ void HFIRLoad::exec() {
     output_message +=
         "   Could not compute SSD from number of guides, taking: " +
         Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
-  };
+  }
 
   const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);
@@ -279,13 +285,13 @@ void HFIRLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", center_x));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterX", center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", center_y));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterY", center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", center_y);
 

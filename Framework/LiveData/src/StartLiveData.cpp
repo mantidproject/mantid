@@ -47,28 +47,30 @@ int StartLiveData::version() const { return 1; }
  */
 void StartLiveData::init() {
   declareProperty(
-      new PropertyWithValue<bool>("FromNow", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("FromNow", true, Direction::Input),
       "Process live data starting from the current time only.");
 
   declareProperty(
-      new PropertyWithValue<bool>("FromStartOfRun", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("FromStartOfRun", false,
+                                           Direction::Input),
       "Record live data, but go back to the the start of the run and process "
       "all data since then.");
 
   declareProperty(
-      new PropertyWithValue<bool>("FromTime", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("FromTime", false, Direction::Input),
       "Record live data, but go back to a specific time and process all data "
       "since then.\n"
       "You must specify the StartTime property if this is checked.");
 
   declareProperty(
-      new PropertyWithValue<double>("UpdateEvery", 60.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+                                             Direction::Input),
       "Frequency of updates, in seconds. Default 60.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 
   // Properties used with ISISHistoDataListener
-  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
                   "available spectra will be loaded. Applied to ISIS histogram"
                   " data only.");
@@ -76,7 +78,7 @@ void StartLiveData::init() {
 
   auto validator = boost::make_shared<ArrayBoundedValidator<int>>();
   validator->setLower(1);
-  declareProperty(new ArrayProperty<int>("PeriodList", validator),
+  declareProperty(make_unique<ArrayProperty<int>>("PeriodList", validator),
                   "An optional list of periods to load. If blank, all "
                   "available periods will be loaded. Applied to ISIS histogram"
                   " data only.");
@@ -85,9 +87,9 @@ void StartLiveData::init() {
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
 
-  declareProperty(new AlgorithmProperty("MonitorLiveData",
-                                        boost::make_shared<NullValidator>(),
-                                        Direction::Output),
+  declareProperty(make_unique<AlgorithmProperty>(
+                      "MonitorLiveData", boost::make_shared<NullValidator>(),
+                      Direction::Output),
                   "A handle to the MonitorLiveData algorithm instance that "
                   "continues to read live data after this algorithm "
                   "completes.");

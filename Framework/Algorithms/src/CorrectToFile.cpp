@@ -2,7 +2,10 @@
 // Includes
 //----------------------------
 #include "MantidAlgorithms/CorrectToFile.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -16,28 +19,27 @@ DECLARE_ALGORITHM(CorrectToFile)
 const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init() {
-  declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect", "",
-                                               Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "WorkspaceToCorrect", "", Kernel::Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load),
-      "The file containing the correction factors");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load),
+                  "The file containing the correction factors");
 
   std::vector<std::string> propOptions =
       Kernel::UnitFactory::Instance().getKeys();
-  propOptions.push_back("SpectrumNumber");
+  propOptions.emplace_back("SpectrumNumber");
   declareProperty("FirstColumnValue", "Wavelength",
                   boost::make_shared<Kernel::StringListValidator>(propOptions),
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
-  std::vector<std::string> operations(1, std::string("Divide"));
-  operations.push_back("Multiply");
+  std::vector<std::string> operations{"Divide", "Multiply"};
   declareProperty("WorkspaceOperation", "Divide",
                   boost::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output workspace to store the results in");
 }
 
@@ -75,7 +77,7 @@ void CorrectToFile::exec() {
     const MantidVec &Ecor = rkhInput->readE(0);
 
     const bool histogramData = outputWS->isHistogramData();
-    const bool divide = (operation == "Divide") ? true : false;
+    const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
     const int64_t nOutSpec =
@@ -97,8 +99,7 @@ void CorrectToFile::exec() {
         const double currentX =
             histogramData ? (xIn[j] + xIn[j + 1]) / 2.0 : xIn[j];
         // Find out the index of the first correction point after this value
-        MantidVec::const_iterator pos =
-            std::lower_bound(Xcor.begin(), Xcor.end(), currentX);
+        auto pos = std::lower_bound(Xcor.cbegin(), Xcor.cend(), currentX);
         const size_t index = pos - Xcor.begin();
         if (index == Xcor.size()) {
           // If we're past the end of the correction factors vector, use the

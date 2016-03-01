@@ -9,16 +9,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
-splitByCommas(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
-findNamesInBrackets(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
 parseDimensionNames(const std::string &names_string);
-
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
-removeBracketedNames(const std::string &names_string);
 
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
   exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
@@ -50,21 +41,21 @@ removeBracketedNames(const std::string &names_string);
 class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
 public:
   MaskMD();
-  virtual ~MaskMD();
+  ~MaskMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Mask an MDWorkspace in-situ marking specified boxes as masked";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
-  virtual std::map<std::string, std::string> validateInputs();
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace MDAlgorithms

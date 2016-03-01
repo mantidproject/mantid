@@ -61,29 +61,29 @@ public:
   /// (Empty) Constructor
   StripVanadiumPeaks();
   /// Virtual destructor
-  virtual ~StripVanadiumPeaks() {}
+  ~StripVanadiumPeaks() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "StripVanadiumPeaks"; }
+  const std::string name() const override { return "StripVanadiumPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm removes peaks (at vanadium d-spacing positions by "
            "default) out of a background by linearly interpolating over the "
            "expected peak positions.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding;"
            "Diffraction\\Corrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

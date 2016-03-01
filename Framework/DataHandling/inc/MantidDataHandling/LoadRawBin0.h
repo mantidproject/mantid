@@ -69,27 +69,27 @@ public:
   /// Default constructor
   LoadRawBin0();
   /// Destructor
-  ~LoadRawBin0();
+  ~LoadRawBin0() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadRawBin0"; }
+  const std::string name() const override { return "LoadRawBin0"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads bin zero  from  ISIS  raw file and stores it in a 2D "
            "workspace (Workspace2D class).";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diagnostics\\Raw;DataHandling\\Raw";
   }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   ///
   void setOptionalProperties();
@@ -101,7 +101,7 @@ private:
   std::string m_filename;
 
   /// The number of spectra in the raw file
-  specid_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
   /// number of time regime
   int64_t m_noTimeRegimes;
 
@@ -118,7 +118,7 @@ private:
   boost::shared_ptr<Kernel::Property> m_perioids;
 
   /// total number of specs
-  specid_t m_total_specs;
+  specnum_t m_total_specs;
   /// time channel vector
   std::vector<boost::shared_ptr<MantidVec>> m_timeChannelsVec;
 };

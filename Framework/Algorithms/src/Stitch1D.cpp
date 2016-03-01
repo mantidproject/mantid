@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -125,42 +126,42 @@ void Stitch1D::init() {
       boost::make_shared<HistogramValidator>();
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "LHSWorkspace", "", Direction::Input, histogramValidator->clone()),
       "LHS input workspace.");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "RHSWorkspace", "", Direction::Input, histogramValidator->clone()),
       "RHS input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output stitched workspace.");
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start overlap x-value in units of x-axis. Optional.");
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End overlap x-value in units of x-axis. Optional.");
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>(true)),
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(
-      new PropertyWithValue<bool>("ScaleRHSWorkspace", true, Direction::Input),
-      "Scaling either with respect to workspace 1 or workspace 2");
-  declareProperty(new PropertyWithValue<bool>("UseManualScaleFactor", false,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
+                                                       true, Direction::Input),
+                  "Scaling either with respect to workspace 1 or workspace 2");
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
+                                                       false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   auto manualScaleFactorValidator =
       boost::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
-  declareProperty(new PropertyWithValue<double>("ManualScaleFactor", 1.0,
-                                                manualScaleFactorValidator,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ManualScaleFactor", 1.0, manualScaleFactorValidator,
+                      Direction::Input),
                   "Provided value for the scale factor. Optional.");
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
 }
@@ -638,20 +639,20 @@ void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
     // Copy over the data
     MantidVec &sourceY = ws->dataY(i);
 
-    for (size_t j = 0; j < m_nanYIndexes[i].size(); ++j) {
-      sourceY[m_nanYIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : m_nanYIndexes[i]) {
+      sourceY[j] = std::numeric_limits<double>::quiet_NaN();
     }
 
-    for (size_t j = 0; j < m_infYIndexes[i].size(); ++j) {
-      sourceY[m_infYIndexes[i][j]] = std::numeric_limits<double>::infinity();
+    for (auto j : m_infYIndexes[i]) {
+      sourceY[j] = std::numeric_limits<double>::infinity();
     }
 
-    for (size_t j = 0; j < m_nanEIndexes[i].size(); ++j) {
-      sourceY[m_nanEIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : m_nanEIndexes[i]) {
+      sourceY[j] = std::numeric_limits<double>::quiet_NaN();
     }
 
-    for (size_t j = 0; j < m_infEIndexes[i].size(); ++j) {
-      sourceY[m_infEIndexes[i][j]] = std::numeric_limits<double>::infinity();
+    for (auto j : m_infEIndexes[i]) {
+      sourceY[j] = std::numeric_limits<double>::infinity();
     }
 
     PARALLEL_END_INTERUPT_REGION

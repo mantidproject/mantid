@@ -48,7 +48,7 @@ Property *makeProperty(::NeXus::File *file, const std::string &name,
       return new ArrayProperty<NumT>(name, values);
     }
   } else {
-    TimeSeriesProperty<NumT> *prop = new TimeSeriesProperty<NumT>(name);
+    auto prop = new TimeSeriesProperty<NumT>(name);
     prop->addValues(times, values);
     return prop;
   }
@@ -71,7 +71,7 @@ Property *makeTimeSeriesBoolProperty(::NeXus::File *file,
   for (size_t i = 0; i < nvals; ++i) {
     realValues[i] = (savedValues[i] != 0);
   }
-  TimeSeriesProperty<bool> *prop = new TimeSeriesProperty<bool>(name);
+  auto prop = new TimeSeriesProperty<bool>(name);
   prop->addValues(times, realValues);
   return prop;
 }
@@ -95,8 +95,7 @@ Property *makeStringProperty(::NeXus::File *file, const std::string &name,
     for (int i = 0; i < numStrings; i++)
       values.push_back(std::string(data.get() + i * span));
 
-    TimeSeriesProperty<std::string> *prop =
-        new TimeSeriesProperty<std::string>(name);
+    auto prop = new TimeSeriesProperty<std::string>(name);
     prop->addValues(times, values);
     return prop;
   }
@@ -146,13 +145,13 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
     // Convert time in seconds to DateAndTime
     DateAndTime start(startStr);
     times.reserve(timeSec.size());
-    for (size_t i = 0; i < timeSec.size(); i++) {
-      times.push_back(start + timeSec[i]);
+    for (double time : timeSec) {
+      times.push_back(start + time);
     }
   }
 
   file->openData("value");
-  Property *retVal = NULL;
+  Property *retVal = nullptr;
   switch (file->getInfo().type) {
   case ::NeXus::FLOAT32:
     retVal = makeProperty<float>(file, group, times);
@@ -182,7 +181,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   case ::NeXus::INT8:
   case ::NeXus::INT16:
   case ::NeXus::UINT16:
-    retVal = NULL;
+    retVal = nullptr;
     break;
   }
 
@@ -287,13 +286,13 @@ void saveTimeSeriesPropertyString(::NeXus::File *file,
 
   // Find the max length of any string
   size_t maxlen = 0;
-  for (size_t i = 0; i < values.size(); i++)
-    if (values[i].size() > maxlen)
-      maxlen = values[i].size();
+  for (auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
   // Increment by 1 to have the 0 terminator
   maxlen++;
   // Copy into one array
-  char *strs = new char[values.size() * maxlen];
+  auto strs = new char[values.size() * maxlen];
   memset(strs, 0, values.size() * maxlen);
   for (size_t i = 0; i < values.size(); i++)
     strncpy(&strs[i * maxlen], values[i].c_str(), values[i].size());

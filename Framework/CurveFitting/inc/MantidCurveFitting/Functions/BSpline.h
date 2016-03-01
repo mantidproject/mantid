@@ -45,20 +45,18 @@ class DLLExport BSpline : public BackgroundFunction {
 public:
   /// Constructor
   BSpline();
-  /// Destructor
-  ~BSpline();
-
   /// overwrite IFunction base class methods
-  std::string name() const { return "BSpline"; }
-  virtual const std::string category() const { return "Background"; }
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  std::string name() const override { return "BSpline"; }
+  const std::string category() const override { return "Background"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   void derivative1D(double *out, const double *xValues, size_t nData,
-                    const size_t order) const;
+                    const size_t order) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
 
 private:
   /// Initialize the GSL objects.

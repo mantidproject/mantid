@@ -12,10 +12,6 @@ SplittingInterval::SplittingInterval(const DateAndTime &start,
                                      const DateAndTime &stop, const int index)
     : m_start(start), m_stop(stop), m_index(index) {}
 
-/// Copy Constructor
-SplittingInterval::SplittingInterval(const SplittingInterval &other)
-    : m_start(other.m_start), m_stop(other.m_stop), m_index(other.m_index) {}
-
 /// Return the start time
 DateAndTime SplittingInterval::start() const { return m_start; }
 
@@ -174,8 +170,8 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
   TimeSplitterType out;
 
   // Now we have to merge duplicate/overlapping intervals together
-  TimeSplitterType::const_iterator it = a.begin();
-  while (it != a.end()) {
+  auto it = a.cbegin();
+  while (it != a.cend()) {
     // All following intervals will start at or after this one
     DateAndTime start = it->start();
     DateAndTime stop = it->stop();

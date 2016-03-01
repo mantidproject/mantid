@@ -7,7 +7,6 @@ include( CommonVatesSetup )
 set( USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. " )
 
 # Paraview dependencies built if Paraview is found
-find_package( ParaView )
 if( ParaView_FOUND AND USE_PARAVIEW )
   message( STATUS "Using ParaView ${PARAVIEW_VERSION_FULL}" )
   include( ${PARAVIEW_USE_FILE} )

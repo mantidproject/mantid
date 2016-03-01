@@ -61,24 +61,24 @@ public:
   /// Default constructor
   SofQWPolygon();
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SofQWPolygon"; }
-  virtual const std::string alias() const { return "SofQW2"; }
+  const std::string name() const override { return "SofQWPolygon"; }
+  const std::string alias() const override { return "SofQW2"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the intensity as a function of momentum transfer and "
            "energy.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic\\SofQW"; }
+  const std::string category() const override { return "Inelastic\\SofQW"; }
 
 private:
   /// Initialize the algorithm
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Calculate the Q value for a direct instrument
   double calculateDirectQ(const double efixed, const double deltaE,
                           const double twoTheta, const double psi) const;

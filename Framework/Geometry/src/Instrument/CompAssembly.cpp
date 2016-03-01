@@ -16,14 +16,14 @@ using Kernel::Quat;
 /** Empty constructor
  */
 CompAssembly::CompAssembly()
-    : Component(), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Constructor for a parametrized CompAssembly
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
 CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_children(), m_cachedBoundingBox(NULL) {}
+    : Component(base, map), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Valued constructor
  *  @param n :: name of the assembly
@@ -35,7 +35,7 @@ CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
-    : Component(n, reference), m_children(), m_cachedBoundingBox(NULL) {
+    : Component(n, reference), m_children(), m_cachedBoundingBox(nullptr) {
   if (reference) {
     ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
     if (test) {
@@ -48,7 +48,7 @@ CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
  *  @param assem :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly &assem)
-    : Component(assem), m_children(assem.m_children),
+    : ICompAssembly(assem), Component(assem), m_children(assem.m_children),
       m_cachedBoundingBox(assem.m_cachedBoundingBox) {
   // Need to do a deep copy
   comp_it it;
@@ -65,8 +65,8 @@ CompAssembly::~CompAssembly() {
   if (m_cachedBoundingBox)
     delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
-  for (comp_it it = m_children.begin(); it != m_children.end(); ++it) {
-    delete *it;
+  for (auto &child : m_children) {
+    delete child;
   }
   m_children.clear();
 }
@@ -150,8 +150,7 @@ int CompAssembly::remove(IComponent *comp) {
         "CompAssembly::remove() called for a parameterized CompAssembly.");
 
   // Look for the passed in component in the list of children
-  std::vector<IComponent *>::iterator it =
-      std::find(m_children.begin(), m_children.end(), comp);
+  auto it = std::find(m_children.begin(), m_children.end(), comp);
   if (it != m_children.end()) {
     // If it's found, remove it from the list and then delete it
     m_children.erase(it);
@@ -288,9 +287,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   // are higher-level components
   // I found some useful info here
   // http://www.cs.bu.edu/teaching/c/tree/breadth-first/
-  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue;
-  // Need to be able to enter the while loop
-  nodeQueue.push_back(thisNode);
+  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
   const bool limitSearch(nlevels > 0);
   while (!nodeQueue.empty()) {
     // get the next node in the queue
@@ -372,11 +369,10 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (const_comp_it it = m_children.begin(); it != m_children.end();
-           ++it) {
+      for (auto child : m_children) {
         BoundingBox compBox;
-        if (*it) {
-          (*it)->getBoundingBox(compBox);
+        if (child) {
+          child->getBoundingBox(compBox);
           m_cachedBoundingBox->grow(compBox);
         }
       }

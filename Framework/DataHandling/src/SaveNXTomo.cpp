@@ -7,6 +7,7 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
@@ -42,24 +43,25 @@ void SaveNXTomo::init() {
   wsValidator->add<API::HistogramValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspaces", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspaces", "", Direction::Input,
+                                       wsValidator),
       "The name of the workspace(s) to save - this can be the name of a single "
       "Workspace2D or the name of a WorkspaceGroup in which case all the "
       "Workspace2Ds included in the group will be saved.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", FileProperty::Save,
-                            std::vector<std::string>(1, ".nxs")),
+      Kernel::make_unique<API::FileProperty>(
+          "Filename", "", FileProperty::Save,
+          std::vector<std::string>(1, ".nxs")),
       "The name of the NXTomo file to write, as a full or relative path");
 
   declareProperty(
-      new PropertyWithValue<bool>("OverwriteFile", false,
-                                  Kernel::Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OverwriteFile", false,
+                                           Kernel::Direction::Input),
       "Replace any existing file of the same name instead of appending data?");
 
-  declareProperty(new PropertyWithValue<bool>("IncludeError", false,
-                                              Kernel::Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "IncludeError", false, Kernel::Direction::Input),
                   "Write the error values to NXTomo file?");
 }
 
@@ -110,8 +112,8 @@ void SaveNXTomo::processAll() {
   m_includeError = getProperty("IncludeError");
   m_overwriteFile = getProperty("OverwriteFile");
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    const std::string workspaceID = (*it)->id();
+  for (auto &workspace : m_workspaces) {
+    const std::string workspaceID = workspace->id();
 
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         (workspaceID.find("RebinnedOutput") == std::string::npos))
@@ -119,7 +121,7 @@ void SaveNXTomo::processAll() {
           "SaveNXTomo passed invalid workspaces. Must be Workspace2D");
 
     // Do the full check for common binning
-    if (!WorkspaceHelpers::commonBoundaries(*it)) {
+    if (!WorkspaceHelpers::commonBoundaries(workspace)) {
       g_log.error("The input workspace must have common bins");
       throw std::invalid_argument("The input workspace must have common bins");
     }
@@ -156,8 +158,8 @@ void SaveNXTomo::processAll() {
   // Create a progress reporting object
   Progress progress(this, 0, 1, m_workspaces.size());
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    writeSingleWorkspace(*it, nxFile);
+  for (auto &workspace : m_workspaces) {
+    writeSingleWorkspace(workspace, nxFile);
     progress.report();
   }
 
@@ -333,7 +335,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   // Insert previous data.
   nxFile.openData("data");
 
-  double *dataArr = new double[m_spectraCount];
+  auto dataArr = new double[m_spectraCount];
 
   for (int64_t i = 0; i < m_dimensions[1]; ++i) {
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {
@@ -405,8 +407,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
   // value
   std::vector<Property *> logVals = workspace->run().getLogData();
 
-  for (auto it = logVals.begin(); it != logVals.end(); ++it) {
-    auto prop = *it;
+  for (auto prop : logVals) {
     if (prop->name() != "ImageKey" && prop->name() != "Rotation" &&
         prop->name() != "Intensity" && prop->name() != "Axis1" &&
         prop->name() != "Axis2") {
@@ -422,7 +423,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
 
       size_t strSize = prop->value().length();
 
-      char *val = new char[80]();
+      auto val = new char[80]();
 
       // If log value is from FITS file as it should be,
       // it won't be greater than this. Otherwise Shorten it

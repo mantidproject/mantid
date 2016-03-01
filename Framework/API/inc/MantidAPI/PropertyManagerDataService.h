@@ -30,19 +30,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL PropertyManagerDataServiceImpl
+class MANTID_API_DLL PropertyManagerDataServiceImpl final
     : public Mantid::Kernel::DataService<Mantid::Kernel::PropertyManager> {
+public:
+  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
+      delete;
+  PropertyManagerDataServiceImpl &
+  operator=(const PropertyManagerDataServiceImpl &) = delete;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PropertyManagerDataServiceImpl>;
   /// Constructor
   PropertyManagerDataServiceImpl();
-  /// Private, unimplemented copy constructor
-  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &);
-  /// Private, unimplemented copy assignment operator
-  PropertyManagerDataServiceImpl &
-  operator=(const PropertyManagerDataServiceImpl &);
-  /// Destructor
-  ~PropertyManagerDataServiceImpl();
+  ~PropertyManagerDataServiceImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

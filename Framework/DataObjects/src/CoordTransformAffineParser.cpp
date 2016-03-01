@@ -65,7 +65,7 @@ Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
       affineMatrixDimParser.createParameter(parameter));
 
   // Generate the coordinate transform with the matrix and return.
-  CoordTransformAffine *transform =
+  auto transform =
       new CoordTransformAffine(inDim->getValue(), outDim->getValue());
   transform->setMatrix(affineMatrix->getAffineMatrix());
   return transform;
@@ -80,8 +80,5 @@ void CoordTransformAffineParser::setSuccessor(
     CoordTransformAffineParser *other) {
   m_successor = SuccessorType_sptr(other);
 }
-
-/// Destructor
-CoordTransformAffineParser::~CoordTransformAffineParser() {}
 }
 }

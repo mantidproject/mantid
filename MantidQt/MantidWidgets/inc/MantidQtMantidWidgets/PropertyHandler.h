@@ -46,10 +46,10 @@ public:
                   QtBrowserItem* item = NULL);
 
   /// Destructor
-  ~PropertyHandler();
+  ~PropertyHandler() override;
 
   /// overrides virtual init() which is called from IFunction::setHandler(...)
-  void init();
+  void init() override;
 
   PropertyHandler* addFunction(const std::string& fnName);
   // Removes handled function from its parent function and 

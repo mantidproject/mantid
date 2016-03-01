@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -68,27 +69,27 @@ public:
   /// Default constructor
   InterpolatingRebin() : Rebin() {}
   /// Destructor
-  virtual ~InterpolatingRebin() {}
+  ~InterpolatingRebin() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "InterpolatingRebin"; }
+  const std::string name() const override { return "InterpolatingRebin"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates a workspace with different x-value bin boundaries where "
            "the new y-values are estimated using cubic splines.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Rebin"; }
+  const std::string category() const override { return "Transforms\\Rebin"; }
   /// Alias for the algorithm. Must override so it doesn't get parent class's
-  virtual const std::string alias() const { return ""; }
+  const std::string alias() const override { return ""; }
 
 protected:
-  const std::string workspaceMethodName() const { return ""; }
+  const std::string workspaceMethodName() const override { return ""; }
   // Overridden Algorithm methods
-  void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
 
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const MantidVecPtr &XValues_new,

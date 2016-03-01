@@ -58,13 +58,14 @@ class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
 public:
   /// Default constructor - normally used from the concrete view
   EnggDiffractionPresenter(IEnggDiffractionView *view);
-  virtual ~EnggDiffractionPresenter();
+  ~EnggDiffractionPresenter() override;
 
-  virtual void notify(IEnggDiffractionPresenter::Notification notif);
+  void notify(IEnggDiffractionPresenter::Notification notif) override;
 
   /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
-                        const std::string &vanNo, const std::string &ceriaNo);
+                        const std::string &vanNo, const std::string &ceriaNo,
+                        const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
   void doFocusRun(const std::string &dir, const std::string &runNo,
@@ -95,6 +96,7 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
+  void ProcessCropCalib();
   void processFocusBasic();
   void processFocusCropped();
   void processFocusTexture();
@@ -129,13 +131,16 @@ private:
   // this may need to be mocked up in tests
   virtual void startAsyncCalibWorker(const std::string &outFilename,
                                      const std::string &vanNo,
-                                     const std::string &ceriaNo);
+                                     const std::string &ceriaNo,
+                                     const std::string &specNos);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
-               const std::string &ceriaNo, const std::string &outFilename);
+               const std::string &ceriaNo, const std::string &outFilename,
+               const std::string &specNos);
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+
   //@}
 
   /// @name Focusing related private methods
@@ -169,6 +174,8 @@ private:
 
   std::string outputFocusCroppedFilename(const std::string &runNo);
 
+  std::vector<std::string> sumOfFilesLoadVec();
+
   std::vector<std::string>
   outputFocusTextureFilenames(const std::string &runNo,
                               const std::vector<size_t> &bankIDs);
@@ -192,11 +199,11 @@ private:
                                         std::string &preIntegFilename,
                                         std::string &preCurvesFilename,
                                         bool &found);
-  void
-  loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
-                                const std::string &preCurvesFilename,
-                                Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                                Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+
+  void loadVanadiumPrecalcWorkspaces(
+      const std::string &preIntegFilename, const std::string &preCurvesFilename,
+      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
@@ -225,6 +232,9 @@ private:
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
+  void plotCalibWorkspace(std::vector<double> difc, std::vector<double> tzero,
+                          std::string specNos);
+
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
@@ -239,6 +249,15 @@ private:
   // generates a directory if not found and handles the path
   Poco::Path outFilesDir(std::string addToDir);
 
+  // generates appropriate names for table workspaces
+  std::string outFitParamsTblNameGenerator(std::string specNos, size_t bank_i);
+
+  std::string DifcZeroWorkspaceFactory(const std::vector<double> &difc,
+                                       const std::vector<double> &tzero,
+                                       const std::string &specNo) const;
+
+  std::string plotDifcZeroWorkspace() const;
+
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
@@ -251,7 +270,14 @@ private:
   /// whether to break the thread
   static bool g_abortThread;
 
+  /// whether to run Sum Of Files & which focus run number to use
+  static std::string g_sumOfFilesFocus;
+
+  /// saves the last valid run number
   static std::string g_lastValidRun;
+
+  /// bank name use or specIds for cropped calibration
+  static std::string g_calibCropIdentifier;
 
   // name of the workspace with the vanadium integration (of spectra)
   static const std::string g_vanIntegrationWSName;

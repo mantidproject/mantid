@@ -28,14 +28,13 @@ SavePeaksFile::~SavePeaksFile() {}
 /** Initialize the algorithm's properties.
  */
 void SavePeaksFile::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input PeaksWorkspace.");
-  std::vector<std::string> exts;
-  exts.push_back(".peaks");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input PeaksWorkspace.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                  "Path to an ISAW-style .peaks filename.");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".peaks"),
+      "Path to an ISAW-style .peaks filename.");
 }
 
 //----------------------------------------------------------------------------------------------

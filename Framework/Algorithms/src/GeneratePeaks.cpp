@@ -49,9 +49,11 @@ GeneratePeaks::~GeneratePeaks() {}
 /** Define algorithm's properties
  */
 void GeneratePeaks::init() {
-  auto paramwsprop = new API::WorkspaceProperty<DataObjects::TableWorkspace>(
-      "PeakParametersWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(paramwsprop, "Input TableWorkspace for peak's parameters.");
+  declareProperty(
+      make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+          "PeakParametersWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
+      "Input TableWorkspace for peak's parameters.");
 
   // Peak function properties
   std::vector<std::string> peakNames =
@@ -64,29 +66,26 @@ void GeneratePeaks::init() {
   for (size_t i = 0; i < peakFullNames.size(); ++i)
     g_log.debug() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
 
-  declareProperty(new ArrayProperty<double>("PeakParameterValues"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakParameterValues"),
                   "List of peak parameter values.  They must have a 1-to-1 "
                   "mapping to PeakParameterNames list. ");
 
   // Background properties
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Auto");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Auto", "Flat (A0)", "Linear (A0, A1)",
+                                     "Quadratic (A0, A1, A2)", "Flat"
+                                                               "Linear",
+                                     "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
-  declareProperty(new ArrayProperty<double>("BackgroundParameterValues"),
-                  "List of background parameter values.  They must have a "
-                  "1-to-1 mapping to PeakParameterNames list. ");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
+      "List of background parameter values.  They must have a "
+      "1-to-1 mapping to PeakParameterNames list. ");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "InputWorkspace (optional) to take information for the instrument, and "
       "where to evaluate the x-axis.");
@@ -96,7 +95,7 @@ void GeneratePeaks::init() {
                   "It is only applied to the case by input parameter values in "
                   "vector format. ");
 
-  declareProperty(new Kernel::ArrayProperty<double>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "BinningParameters",
                       boost::make_shared<Kernel::RebinParamsValidator>(true)),
                   "A comma separated list of first bin boundary, width, last "
@@ -107,7 +106,7 @@ void GeneratePeaks::init() {
 
   declareProperty("NumberWidths", 2.,
                   "Number of peak width to evaluate each peak for. Default=2.");
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output Workspace to put the calculated data.");
 
@@ -157,14 +156,14 @@ void GeneratePeaks::exec() {
   setProperty("OutputWorkspace", outputWS);
 
   // Generate peaks
-  std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+  std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
       functionmap;
   if (m_useFuncParamWS)
     importPeaksFromTable(functionmap);
   else {
     std::vector<std::pair<double, API::IFunction_sptr>> vecpeakfunc;
     importPeakFromVector(vecpeakfunc);
-    functionmap.insert(std::make_pair(m_wsIndex, vecpeakfunc));
+    functionmap.emplace(m_wsIndex, vecpeakfunc);
   }
 
   generatePeaks(functionmap, outputWS);
@@ -232,8 +231,8 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
   // One and only one peak
   if (!m_useFuncParamWS) {
     m_wsIndex = getProperty("WorkspaceIndex");
-    m_spectraSet.insert(static_cast<specid_t>(m_wsIndex));
-    m_SpectrumMap.insert(std::make_pair(static_cast<specid_t>(m_wsIndex), 0));
+    m_spectraSet.insert(static_cast<specnum_t>(m_wsIndex));
+    m_SpectrumMap.emplace(static_cast<specnum_t>(m_wsIndex), 0);
   }
 
   return;
@@ -245,7 +244,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
  * spectrum
   */
 void GeneratePeaks::importPeaksFromTable(
-    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
+    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
         functionmap) {
   size_t numpeaks = m_funcParamWS->rowCount();
   size_t icolchi2 = m_funcParamWS->columnCount() - 1;
@@ -257,7 +256,7 @@ void GeneratePeaks::importPeaksFromTable(
     g_log.warning("There is no background function specified. ");
 
   // Create data structure for all peaks functions
-  std::map<specid_t,
+  std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::iterator
       mapiter;
 
@@ -330,15 +329,16 @@ void GeneratePeaks::importPeaksFromTable(
     mapiter = functionmap.find(wsindex);
     if (mapiter == functionmap.end()) {
       std::vector<std::pair<double, API::IFunction_sptr>> tempvector;
-      std::pair<std::map<specid_t, std::vector<std::pair<
-                                       double, API::IFunction_sptr>>>::iterator,
+      std::pair<std::map<specnum_t,
+                         std::vector<std::pair<double, API::IFunction_sptr>>>::
+                    iterator,
                 bool> ret;
-      ret = functionmap.insert(std::make_pair(wsindex, tempvector));
+      ret = functionmap.emplace(wsindex, tempvector);
       mapiter = ret.first;
     }
 
     // Generate peak function
-    mapiter->second.push_back(std::make_pair(centre, clonefunction));
+    mapiter->second.emplace_back(centre, clonefunction);
 
     g_log.information() << "Peak " << ipeak << ": Spec = " << wsindex
                         << " func: " << clonefunction->asString() << "\n";
@@ -420,8 +420,7 @@ void GeneratePeaks::importPeakFromVector(
   }
 
   // Set up function map
-  double centre = m_peakFunction->centre();
-  functionmap.push_back(std::make_pair(centre, compfunc));
+  functionmap.emplace_back(m_peakFunction->centre(), compfunc);
 
   return;
 }
@@ -433,18 +432,18 @@ void GeneratePeaks::importPeakFromVector(
   * @param dataWS :: output matrix workspace
   */
 void GeneratePeaks::generatePeaks(
-    const std::map<specid_t,
+    const std::map<specnum_t,
                    std::vector<std::pair<double, API::IFunction_sptr>>> &
         functionmap,
     API::MatrixWorkspace_sptr dataWS) {
   // Calcualte function
-  std::map<specid_t,
+  std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::const_iterator
       mapiter;
   for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter) {
     // Get spec id and translated to wsindex in the output workspace
-    specid_t specid = mapiter->first;
-    specid_t wsindex;
+    specnum_t specid = mapiter->first;
+    specnum_t wsindex;
     if (m_newWSFromParent)
       wsindex = specid;
     else
@@ -475,8 +474,7 @@ void GeneratePeaks::generatePeaks(
         if (leftbound < middle)
           leftbound = middle;
       }
-      std::vector<double>::const_iterator left =
-          std::lower_bound(X.begin(), X.end(), leftbound);
+      auto left = std::lower_bound(X.cbegin(), X.cend(), leftbound);
       if (left == X.end())
         left = X.begin();
 
@@ -489,8 +487,7 @@ void GeneratePeaks::generatePeaks(
         if (rightbound > middle)
           rightbound = middle;
       }
-      std::vector<double>::const_iterator right =
-          std::lower_bound(left + 1, X.end(), rightbound);
+      auto right = std::lower_bound(left + 1, X.cend(), rightbound);
 
       // Build domain & function
       API::FunctionDomain1DVector domain(left,
@@ -579,8 +576,8 @@ void GeneratePeaks::processTableColumnNames() {
               << " does not have paramter " << m_funcParameterNames[i] << "\n"
               << "Allowed function parameters are ";
         std::vector<std::string> parnames = m_peakFunction->getParameterNames();
-        for (size_t k = 0; k < parnames.size(); ++k)
-          errss << parnames[k] << ", ";
+        for (auto &parname : parnames)
+          errss << parname << ", ";
         throw std::runtime_error(errss.str());
       }
     }
@@ -646,7 +643,7 @@ void GeneratePeaks::getSpectraSet(
 
   for (size_t ipk = 0; ipk < numpeaks; ipk++) {
     // Spectrum
-    specid_t specid = static_cast<specid_t>((*col)[ipk]);
+    specnum_t specid = static_cast<specnum_t>((*col)[ipk]);
     m_spectraSet.insert(specid);
 
     std::stringstream outss;
@@ -654,10 +651,9 @@ void GeneratePeaks::getSpectraSet(
     g_log.debug(outss.str());
   }
 
-  std::set<specid_t>::iterator pit;
-  specid_t icount = 0;
-  for (pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
-    m_SpectrumMap.insert(std::make_pair(*pit, icount));
+  specnum_t icount = 0;
+  for (auto pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit) {
+    m_SpectrumMap.emplace(*pit, icount);
     ++icount;
   }
 
@@ -699,10 +695,7 @@ bool GeneratePeaks::hasParameter(API::IFunction_sptr function,
   std::vector<std::string> parnames = function->getParameterNames();
   std::vector<std::string>::iterator piter;
   piter = std::find(parnames.begin(), parnames.end(), paramname);
-  if (piter != parnames.end())
-    return true;
-
-  return false;
+  return piter != parnames.end();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -730,11 +723,11 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
         inputWS, inputWS->getNumberHistograms(), inputWS->dataX(0).size(),
         inputWS->dataY(0).size());
 
-    std::set<specid_t>::iterator siter;
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
-    for (siter = m_spectraSet.begin(); siter != m_spectraSet.end(); ++siter) {
-      specid_t iws = *siter;
+    for (auto siter = m_spectraSet.begin(); siter != m_spectraSet.end();
+         ++siter) {
+      specnum_t iws = *siter;
       std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
                 outputWS->dataX(iws).begin());
     }
@@ -802,11 +795,11 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
 
   // Set spectrum numbers
-  std::map<specid_t, specid_t>::iterator spiter;
+  std::map<specnum_t, specnum_t>::iterator spiter;
   for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();
        ++spiter) {
-    specid_t specid = spiter->first;
-    specid_t wsindex = spiter->second;
+    specnum_t specid = spiter->first;
+    specnum_t wsindex = spiter->second;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
                   << specid << "\n";
     ws->getSpectrum(wsindex)->setSpectrumNo(specid);
@@ -822,16 +815,16 @@ std::vector<std::string>
 GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
   std::vector<std::string> vec_funcparnames;
 
-  for (size_t i = 0; i < funcnames.size(); ++i) {
+  for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcnames[i]);
+    vec_funcparnames.push_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
-        FunctionFactory::Instance().createFunction(funcnames[i]);
+        FunctionFactory::Instance().createFunction(funcname);
 
     std::stringstream parnamess;
-    parnamess << funcnames[i] << " (";
+    parnamess << funcname << " (";
     std::vector<std::string> funcpars = tempfunc->getParameterNames();
     for (size_t j = 0; j < funcpars.size(); ++j) {
       parnamess << funcpars[j];

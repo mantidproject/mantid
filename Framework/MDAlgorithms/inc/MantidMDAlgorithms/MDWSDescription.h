@@ -93,6 +93,7 @@ public: // for the time being
 
   /**check if one needs to perform Lorentz corrections */
   bool isLorentsCorrections() const { return m_LorentzCorr; }
+  double absMin() const { return m_AbsMin; }
   void getMinMax(std::vector<double> &min, std::vector<double> &max) const;
   std::vector<double> getTransfMatrix() const { return m_RotMatrix; }
 
@@ -138,6 +139,7 @@ public: // for the time being
   void setDimUnit(unsigned int nDim, const std::string &Unit);
   /** do we need to perform Lorentz corrections */
   void setLorentsCorr(bool On = false) { m_LorentzCorr = On; }
+  void setAbsMin(double absMin) { m_AbsMin = absMin; }
   // static helper functions:
   /// helper function checks if min values are less them max values and are
   /// consistent between each other
@@ -177,6 +179,8 @@ protected: // until MDWSDesctiptionDepricatedExist
   Kernel::DeltaEMode::Type m_Emode;
   /// if one needs to calculate Lorentz corrections
   bool m_LorentzCorr;
+  /// hole near origin of Q
+  double m_AbsMin;
   /// the vector of MD coordinates, which are obtained from workspace
   /// properties.
   std::vector<coord_t> m_AddCoord;

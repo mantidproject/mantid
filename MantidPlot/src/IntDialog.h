@@ -48,7 +48,7 @@ public:
     IntDialog(QWidget* parent = 0, Graph *g = 0, Qt::WFlags fl = 0 );
 
 public slots:
-	void accept();
+  void accept() override;
 
 private:
 	Graph *d_graph;

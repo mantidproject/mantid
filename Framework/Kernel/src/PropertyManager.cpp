@@ -27,10 +27,10 @@ PropertyManager::PropertyManager(const PropertyManager &other)
     : m_properties(), m_orderedProperties(other.m_orderedProperties.size()) {
   // We need to do a deep copy of the property pointers here
   for (unsigned int i = 0; i < m_orderedProperties.size(); ++i) {
-    Property *p = other.m_orderedProperties[i]->clone();
-    this->m_orderedProperties[i] = p;
+    auto p = std::unique_ptr<Property>(other.m_orderedProperties[i]->clone());
+    this->m_orderedProperties[i] = p.get();
     const std::string key = createKey(p->name());
-    this->m_properties[key] = p;
+    this->m_properties[key] = std::move(p);
   }
 }
 
@@ -41,17 +41,13 @@ PropertyManager::PropertyManager(const PropertyManager &other)
 PropertyManager &PropertyManager::operator=(const PropertyManager &other) {
   // We need to do a deep copy here
   if (this != &other) {
-    for (PropertyMap::iterator it = m_properties.begin();
-         it != m_properties.end(); ++it) {
-      delete it->second;
-    }
     this->m_properties.clear();
     this->m_orderedProperties.resize(other.m_orderedProperties.size());
     for (unsigned int i = 0; i < m_orderedProperties.size(); ++i) {
-      Property *p = other.m_orderedProperties[i]->clone();
-      this->m_orderedProperties[i] = p;
+      auto p = std::unique_ptr<Property>(other.m_orderedProperties[i]->clone());
+      this->m_orderedProperties[i] = p.get();
       const std::string key = createKey(p->name());
-      this->m_properties[key] = p;
+      this->m_properties[key] = std::move(p);
     }
   }
   return *this;
@@ -76,16 +72,14 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
     try {
       Property *lhs_prop = this->getPointerToProperty(rhs_name);
       // Use the property's += operator to add THAT. Isn't abstraction fun?!
-      (*lhs_prop) += it->second;
+      (*lhs_prop) += it->second.get();
     } catch (Exception::NotFoundError &) {
       // The property isnt on the lhs.
       // Let's copy it
-      Property *copy = it->second->clone();
+      auto copy = std::unique_ptr<Property>(it->second->clone());
       // And we add a copy of that property to *this
-      this->declareProperty(copy, "");
+      this->declareProperty(std::move(copy), "");
     }
-
-    //(*it->second) +=
   }
 
   return *this;
@@ -108,7 +102,7 @@ void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
     // Filter out the property
-    Property *prop = it->second;
+    auto prop = it->second.get();
     prop->filterByTime(start, stop);
   }
 }
@@ -131,7 +125,7 @@ void PropertyManager::splitByTime(
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
     // Filter out the property
-    Property *prop = it->second;
+    Property *prop = it->second.get();
 
     // Make a vector of the output properties contained in the other property
     // managers.
@@ -142,7 +136,7 @@ void PropertyManager::splitByTime(
         output_properties.push_back(
             outputs[i]->getPointerToPropertyOrNull(prop->name()));
       else
-        output_properties.push_back(NULL);
+        output_properties.push_back(nullptr);
     }
 
     // Now the property does the splitting.
@@ -161,49 +155,50 @@ void PropertyManager::splitByTime(
  */
 void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter) {
-  const bool transferOwnership(
-      true); // Make the new FilteredProperty own the original time series
-  for (auto iter = m_orderedProperties.begin();
-       iter != m_orderedProperties.end(); ++iter) {
-    Property *currentProp = *iter;
+  constexpr bool transferOwnership(
+      false); // New FilteredProperty should not own the original time series
+  for (auto &orderedProperty : m_orderedProperties) {
+    Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      auto filtered = new FilteredTimeSeriesProperty<double>(
-          doubleSeries, filter, transferOwnership);
+      std::unique_ptr<Property> filtered =
+          make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter,
+                                                          transferOwnership);
       // Replace the property in the ordered properties list
-      (*iter) = filtered;
+      orderedProperty = filtered.get();
       // Now replace in the map
       const std::string key = createKey(currentProp->name());
-      this->m_properties[key] = filtered;
+      this->m_properties[key] = std::move(filtered);
     }
   }
 }
 
 //-----------------------------------------------------------------------------------------------
 /** Add a property to the list of managed properties
- *  @param p :: The property object to add
+ *  @param p :: The property object to add (sinks the unique_ptr)
  *  @param doc :: A description of the property that may be displayed to users
  *  @throw Exception::ExistsError if a property with the given name already
  * exists
  *  @throw std::invalid_argument  if the property declared has an empty name.
  */
-void PropertyManager::declareProperty(Property *p, const std::string &doc) {
+void PropertyManager::declareProperty(std::unique_ptr<Property> p,
+                                      const std::string &doc) {
   if (p->name().empty()) {
-    delete p;
     throw std::invalid_argument("An empty property name is not permitted");
   }
-
-  const std::string key = createKey(p->name());
-  if (m_properties.insert(PropertyMap::value_type(key, p)).second) {
-    m_orderedProperties.push_back(p);
-  } else {
-    // Don't delete if this is actually the same property object!!!
-    if (m_properties.find(key)->second != p)
-      delete p;
-    throw Exception::ExistsError("Property with given name already exists",
-                                 key);
-  }
   p->setDocumentation(doc);
+  const std::string key = createKey(p->name());
+  auto existing = m_properties.find(key);
+  if (existing == m_properties.end()) {
+    m_orderedProperties.push_back(p.get());
+    m_properties[key] = std::move(p);
+  } else {
+    // Don't error if this is actually the same property object!
+    if (existing->second != p) {
+      throw Exception::ExistsError("Property with given name already exists",
+                                   key);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -219,7 +214,7 @@ void PropertyManager::declareProperty(Property *p, const std::string &doc) {
  */
 void PropertyManager::setProperties(
     const std::string &propertiesJson,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   setProperties(propertiesJson, this, ignoreProperties);
 }
 //-----------------------------------------------------------------------------------------------
@@ -237,7 +232,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value jsonValue;
 
@@ -256,7 +251,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   setProperties(jsonValue, this, ignoreProperties);
 }
 
@@ -271,7 +266,7 @@ void PropertyManager::setProperties(
  */
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   if (jsonValue.type() == ::Json::ValueType::objectValue) {
 
     // Some algorithms require Filename to be set first do that here
@@ -304,7 +299,7 @@ void PropertyManager::setProperties(
 */
 void PropertyManager::setPropertiesWithSimpleString(
     const std::string &propertiesString,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
@@ -403,13 +398,12 @@ bool PropertyManager::existsProperty(const std::string &name) const {
  */
 bool PropertyManager::validateProperties() const {
   bool allValid = true;
-  for (PropertyMap::const_iterator it = m_properties.begin();
-       it != m_properties.end(); ++it) {
+  for (const auto &property : m_properties) {
     // check for errors in each property
-    std::string error = it->second->isValid();
+    std::string error = property.second->isValid();
     //"" means no error
     if (!error.empty()) {
-      g_log.error() << "Property \"" << it->first
+      g_log.error() << "Property \"" << property.first
                     << "\" is not set to a valid value: \"" << error << "\"."
                     << std::endl;
       allValid = false;
@@ -483,9 +477,9 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
  */
 Property *PropertyManager::getPointerToProperty(const std::string &name) const {
   const std::string key = createKey(name);
-  PropertyMap::const_iterator it = m_properties.find(key);
+  auto it = m_properties.find(key);
   if (it != m_properties.end()) {
-    return it->second;
+    return it->second.get();
   }
   throw Exception::NotFoundError("Unknown property", name);
 }
@@ -498,11 +492,11 @@ Property *PropertyManager::getPointerToProperty(const std::string &name) const {
 Property *
 PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
   const std::string key = createKey(name);
-  PropertyMap::const_iterator it = m_properties.find(key);
+  auto it = m_properties.find(key);
   if (it != m_properties.end()) {
-    return it->second;
+    return it->second.get();
   }
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -565,9 +559,7 @@ void PropertyManager::removeProperty(const std::string &name,
     std::vector<Property *>::iterator itr;
     itr = find(m_orderedProperties.begin(), m_orderedProperties.end(), prop);
     m_orderedProperties.erase(itr);
-    if (delproperty) {
-      delete prop;
-    }
+    (void)delproperty; // not used
   }
 }
 
@@ -577,10 +569,6 @@ void PropertyManager::removeProperty(const std::string &name,
  */
 void PropertyManager::clear() {
   m_orderedProperties.clear();
-  for (PropertyMap::iterator it = m_properties.begin();
-       it != m_properties.end(); ++it) {
-    delete it->second;
-  }
   m_properties.clear();
 }
 

@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -88,19 +90,19 @@ void SpecularReflectionPositionCorrect::init() {
   thetaValidator->add(boost::make_shared<MandatoryValidator<double>>());
   thetaValidator->add(
       boost::make_shared<BoundedValidator<double>>(0, 90, true));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
   declareProperty(
-      new PropertyWithValue<double>("TwoThetaIn", Mantid::EMPTY_DBL(),
-                                    thetaValidator, Direction::Input),
+      make_unique<PropertyWithValue<double>>("TwoThetaIn", Mantid::EMPTY_DBL(),
+                                             thetaValidator, Direction::Input),
       "Input two theta angle in degrees.");
 
   this->initCommonProperties();
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -163,8 +165,8 @@ void SpecularReflectionPositionCorrect::moveDetectors(
       /*
        * We have to move individual components.
        */
-      for (size_t i = 0; i < detectors.size(); ++i) {
-        moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset,
+      for (const auto &detector : detectors) {
+        moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
                       detectorPosition); // Recursive call
       }
     }

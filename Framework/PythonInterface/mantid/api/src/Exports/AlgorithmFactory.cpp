@@ -7,7 +7,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
-#include <Poco/ScopedLock.h>
+#include <mutex>
 
 // Python frameobject. This is under the boost includes so that boost will have
 // done the
@@ -60,7 +60,7 @@ PyObject *getRegisteredAlgorithms(AlgorithmFactoryImpl &self,
 //------------------------------------------------
 
 // Python algorithm registration mutex in anonymous namespace (aka static)
-Poco::Mutex PYALG_REGISTER_MUTEX;
+std::recursive_mutex PYALG_REGISTER_MUTEX;
 
 // clang-format off
 GCC_DIAG_OFF(cast-qual)
@@ -73,13 +73,13 @@ GCC_DIAG_OFF(cast-qual)
  *              or an instance of a class type derived from PythonAlgorithm
  */
 void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
-  Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
+  std::lock_guard<std::recursive_mutex> lock(PYALG_REGISTER_MUTEX);
 
   static PyObject *const pyAlgClass =
       (PyObject *)
           converter::registered<Algorithm>::converters.to_python_target_type();
   // obj could be or instance/class, check instance first
-  PyObject *classObject(NULL);
+  PyObject *classObject(nullptr);
   if (PyObject_IsInstance(obj.ptr(), pyAlgClass)) {
     classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
   } else if (PyObject_IsSubclass(obj.ptr(), pyAlgClass)) {

@@ -6,6 +6,7 @@
 #include <vtkDataSet.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
+#include <vtkNew.h>
 
 using namespace Mantid::VATES;
 
@@ -37,22 +38,21 @@ public:
 
   void testExecution()
   {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    vtkDataSetToWsLocation extractor(ds);
+    vtkDataSetToWsLocation extractor(ds.GetPointer());
     TS_ASSERT_EQUALS("WS_LOCATION", extractor.execute());
-    ds->Delete();
   }
 
   void testStaticUsage()
   {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
+    vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    TS_ASSERT_EQUALS("WS_LOCATION", vtkDataSetToWsLocation::exec(ds));
+    TS_ASSERT_EQUALS("WS_LOCATION",
+                     vtkDataSetToWsLocation::exec(ds.GetPointer()));
   }
-
 };
 
 #endif

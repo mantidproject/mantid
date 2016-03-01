@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
@@ -38,7 +39,7 @@ DECLARE_ALGORITHM(FindPeaks)
   */
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
-      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL), m_dataWS(),
+      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(nullptr), m_dataWS(),
       m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
@@ -55,7 +56,7 @@ FindPeaks::FindPeaks()
    */
 void FindPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -77,12 +78,12 @@ void FindPeaks::init() {
                                        "candidates,\n"
                                        "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(new ArrayProperty<double>("PeakPositions"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
 
-  declareProperty(new ArrayProperty<double>("FitWindows"),
+  declareProperty(make_unique<ArrayProperty<double>>("FitWindows"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of windows to fit. The number of values must be "
                   "exactly double the number of specified peaks.");
@@ -92,10 +93,7 @@ void FindPeaks::init() {
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames));
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -124,7 +122,7 @@ void FindPeaks::init() {
                   "option is turned off.");
 
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PeaksList", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of peaks found");
@@ -146,8 +144,8 @@ void FindPeaks::init() {
       "integer counts.");
 
   std::vector<std::string> costFuncOptions;
-  costFuncOptions.push_back("Chi-Square");
-  costFuncOptions.push_back("Rwp");
+  costFuncOptions.emplace_back("Chi-Square");
+  costFuncOptions.emplace_back("Rwp");
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
@@ -1559,6 +1557,7 @@ FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
   bool fitwithsteppedfwhm = (guessedFWHMStep > 0);
 
   FitOneSinglePeak fitpeak;
+  fitpeak.setChild(true);
   fitpeak.setWorskpace(dataws, wsindex);
   fitpeak.setFitWindow(vec_fitwindow[0], vec_fitwindow[1]);
   fitpeak.setFittingMethod(m_minimizer, m_costFunction);

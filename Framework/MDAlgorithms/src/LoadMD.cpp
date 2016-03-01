@@ -1,6 +1,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
@@ -22,15 +23,12 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidKernel/ConfigService.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
-#else
-typedef std::auto_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
-#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -82,33 +80,34 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 */
 void LoadMD::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "The name of the Nexus file to load, as a full or relative path");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
-                  "Load Box structure and other metadata without events. The "
-                  "loaded workspace will be empty and not file-backed.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+      "Load Box structure and other metadata without events. The "
+      "loaded workspace will be empty and not file-backed.");
 
   declareProperty(
-      new Kernel::PropertyWithValue<bool>("BoxStructureOnly", false),
+      make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly", false),
       "Load partial information about the boxes and events. Redundant property "
-      "currently equivalent to  MetadataOnly");
+      "currently equivalent to MetadataOnly");
 
-  declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
+  declareProperty(make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
                   "Set to true to load the data only on demand.");
-  setPropertySettings(
-      "FileBackEnd", new EnabledWhenProperty("MetadataOnly", IS_EQUAL_TO, "0"));
+  setPropertySettings("FileBackEnd", make_unique<EnabledWhenProperty>(
+                                         "MetadataOnly", IS_EQUAL_TO, "0"));
 
   declareProperty(
-      new PropertyWithValue<double>("Memory", -1),
+      make_unique<PropertyWithValue<double>>("Memory", -1),
       "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
       "in-memory cache.\n"
       "If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory",
-                      new EnabledWhenProperty("FileBackEnd", IS_EQUAL_TO, "1"));
+  setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
+                                    "FileBackEnd", IS_EQUAL_TO, "1"));
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
 
@@ -117,7 +116,7 @@ void LoadMD::init() {
 */
 void LoadMD::exec() {
   m_filename = getPropertyValue("Filename");
-
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // Start loading
   bool fileBacked = this->getProperty("FileBackEnd");
 
@@ -186,6 +185,9 @@ void LoadMD::exec() {
   // Coordinate system
   this->loadCoordinateSystem();
 
+  // QConvention (Inelastic or Crystallography)
+  this->loadQConvention();
+
   // Display normalization settting
   if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY,
@@ -225,6 +227,25 @@ void LoadMD::exec() {
     checkForRequiredLegacyFixup(ws);
     if (m_requiresMDFrameCorrection) {
       setMDFrameOnWorkspaceFromLegacyFile(ws);
+    }
+    // Write out the Qconvention
+    // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+    std::string pref_QConvention =
+        Kernel::ConfigService::Instance().getString("Q.convention");
+    g_log.information() << "Convention for Q in Preferences is "
+                        << pref_QConvention
+                        << "; Convention of Q in NeXus file is "
+                        << m_QConvention << std::endl;
+
+    if (pref_QConvention != m_QConvention) {
+      g_log.information() << "Transforming Q" << std::endl;
+      Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
+      transform_alg->setProperty("InputWorkspace",
+                                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->executeAsChildAlg();
+      IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
+      ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
     }
     // Save to output
     setProperty("OutputWorkspace",
@@ -312,6 +333,26 @@ void LoadMD::loadHisto() {
   checkForRequiredLegacyFixup(ws);
   if (m_requiresMDFrameCorrection) {
     setMDFrameOnWorkspaceFromLegacyFile(ws);
+  }
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string pref_QConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  g_log.information() << "Convention for Q in Preferences is "
+                      << pref_QConvention
+                      << "; Convention of Q in NeXus file is " << m_QConvention
+                      << std::endl;
+
+  if (pref_QConvention != m_QConvention) {
+    g_log.information() << "Transforming Q" << std::endl;
+    Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
+    transform_alg->setProperty("InputWorkspace",
+                               boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->executeAsChildAlg();
+    IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
+    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   }
 
   // Save to output
@@ -420,6 +461,15 @@ void LoadMD::loadCoordinateSystem() {
   }
 }
 
+/** Load the convention for Q  **/
+void LoadMD::loadQConvention() {
+  try {
+    m_file->getAttr("QConvention", m_QConvention);
+  } catch (std::exception &) {
+    m_QConvention = "Inelastic";
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Do the loading.
 *
@@ -439,7 +489,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  Progress *prog = new Progress(this, 0.0, 1.0, 100);
+  auto prog = new Progress(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;
@@ -603,9 +653,9 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   inD--;
   outD--;
   Matrix<coord_t> mat(vec);
-  CoordTransform *transform = NULL;
+  CoordTransform *transform = nullptr;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
-    CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
+    auto affine = new CoordTransformAffine(inD, outD);
     affine->setMatrix(mat);
     transform = affine;
   } else {
@@ -666,10 +716,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Set the MDFrames for each axes
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = framesToSet.begin(); frame != framesToSet.end();
-         ++frame) {
+    for (auto &frame : framesToSet) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", frame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();
@@ -680,9 +729,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = oldFrames.begin(); frame != oldFrames.end(); ++frame) {
+    for (auto &oldFrame : oldFrames) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", oldFrame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();

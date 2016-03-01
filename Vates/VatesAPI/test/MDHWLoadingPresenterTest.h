@@ -10,6 +10,7 @@
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MockObjects.h"
 
@@ -34,20 +35,19 @@ private:
   private:
     typedef MDHWLoadingPresenter BaseClass;
   public:
-    ConcreteMDHWLoadingPresenter(MockMDLoadingView* view) : MDHWLoadingPresenter(view)
-    {
-    }
+    ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
+        : MDHWLoadingPresenter(std::move(view)) {}
 
     virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs)
     {
       MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
-    virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&,  ProgressAction&)
-    {
-      return vtkUnstructuredGrid::New(); 
+    virtual vtkSmartPointer<vtkDataSet>
+    execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) {
+      return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
-    
+
     virtual void executeLoadMetadata()
     {
     }
@@ -71,104 +71,105 @@ public:
 
 void testShouldLoadFirstTimeRound()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(0);
-  EXPECT_CALL(view, getLoadInMemory()).Times(2); 
-  EXPECT_CALL(view, getTime()).Times(2).WillRepeatedly(Return(0));
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  auto view = new MockMDLoadingView();
+  EXPECT_CALL(*view, getRecursionDepth()).Times(0);
+  EXPECT_CALL(*view, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*view, getTime()).Times(2).WillRepeatedly(Return(0));
+  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDHWLoadingPresenter presenter(&view);
+  std::unique_ptr<MDLoadingView> uniqueView(
+      dynamic_cast<MDLoadingView *>(view));
+  ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
   TSM_ASSERT("Should NOT request load on second usage. Should have it's state syncrhonised with view and the view hasn't changed!", !presenter.shouldLoad());
   
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(view));
 }
 
 void testTimeChanged()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(0);
-  EXPECT_CALL(view, getLoadInMemory()).Times(2); 
-  EXPECT_CALL(view, getTime()).Times(2)
-    .WillOnce(Return(0)) 
-    .WillOnce(Return(1));// Time has changed on 2nd call
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  auto view = new MockMDLoadingView();
+  EXPECT_CALL(*view, getRecursionDepth()).Times(0);
+  EXPECT_CALL(*view, getLoadInMemory()).Times(2);
+  EXPECT_CALL(*view, getTime())
+      .Times(2)
+      .WillOnce(Return(0))
+      .WillOnce(Return(1)); // Time has changed on 2nd call
+  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDHWLoadingPresenter presenter(&view);
+  std::unique_ptr<MDLoadingView> uniqueView(
+      dynamic_cast<MDLoadingView *>(view));
+  ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-  TSM_ASSERT("Time has changed, but that shouldn't trigger load", !presenter.shouldLoad());
-  
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("Time has changed, but that shouldn't trigger load",
+             !presenter.shouldLoad());
+
+  TSM_ASSERT("View not used as expected.",
+             Mock::VerifyAndClearExpectations(view));
 }
 
 void testLoadInMemoryChanged()
 {
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(0);
-  EXPECT_CALL(view, getLoadInMemory()).Times(2)
-    .WillOnce(Return(true)) 
-    .WillOnce(Return(false)); // Load in memory changed
-  EXPECT_CALL(view, getTime()).Times(2).WillRepeatedly(Return(0));
-  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
+  auto view = new MockMDLoadingView();
+  EXPECT_CALL(*view, getRecursionDepth()).Times(0);
+  EXPECT_CALL(*view, getLoadInMemory())
+      .Times(2)
+      .WillOnce(Return(true))
+      .WillOnce(Return(false)); // Load in memory changed
+  EXPECT_CALL(*view, getTime()).Times(2).WillRepeatedly(Return(0));
+  EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-  ConcreteMDHWLoadingPresenter presenter(&view);
+  std::unique_ptr<MDLoadingView> uniqueView(
+      dynamic_cast<MDLoadingView *>(view));
+  ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-  TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load", presenter.shouldLoad());
-  
-  TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+  TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load",
+             presenter.shouldLoad());
+
+  TSM_ASSERT("View not used as expected.",
+             Mock::VerifyAndClearExpectations(view));
 }
 
 void testhasTDimensionWhenIntegrated()
 {
-  //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
-
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false); //Integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
-  delete view;
 }
 
 void testHasTDimensionWhenNotIntegrated()
 {
-  //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
-
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
 
   //Test that it does work when setup. 
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
-  delete view;
 }
 
 void testHasTimeLabelWithTDimension()
 {
-  //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
-
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)", presenter.getTimeStepLabel());
-  delete view;
 }
 
 void testCanSetAxisLabelsFrom3DData()
 {
-  //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
-
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
@@ -181,15 +182,12 @@ void testCanSetAxisLabelsFrom3DData()
                     getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
-  delete view;
 }
 
 void testCanSetAxisLabelsFrom4DData()
 {
-  //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
-
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
@@ -203,7 +201,6 @@ void testCanSetAxisLabelsFrom4DData()
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
 
-  delete view;
 }
 
 Mantid::API::IMDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape){

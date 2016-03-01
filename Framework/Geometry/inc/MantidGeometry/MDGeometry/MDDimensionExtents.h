@@ -58,6 +58,12 @@ public:
     min = static_cast<T>(min * scaling + offset);
     max = static_cast<T>(max * scaling + offset);
     m_size = static_cast<T>(m_size * scaling);
+    if (max < min) {
+      T tmp = max;
+      max = min;
+      min = tmp;
+      m_size = std::fabs(m_size);
+    }
   }
   // it looks like this loses accuracy?
   void expand(MDDimensionExtents &other) {

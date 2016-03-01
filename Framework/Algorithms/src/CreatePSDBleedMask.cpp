@@ -42,11 +42,12 @@ void CreatePSDBleedMask::init() {
   using Kernel::Direction;
   using Kernel::BoundedValidator;
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "The name of the input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                               Direction::Output),
       "The name of the output MaskWorkspace which will contain the result "
       "masks.");
   auto mustBePosDbl = boost::make_shared<BoundedValidator<double>>();
@@ -143,8 +144,7 @@ void CreatePSDBleedMask::exec() {
     }
     // New tube
     else {
-      tubeMap.insert(std::pair<TubeIndex::key_type, TubeIndex::mapped_type>(
-          parentID, TubeIndex::mapped_type(1, i)));
+      tubeMap.emplace(parentID, TubeIndex::mapped_type(1, i));
     }
 
     progress.report();
@@ -162,7 +162,7 @@ void CreatePSDBleedMask::exec() {
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    TubeIndex::iterator current = tubeMap.begin();
+    auto current = tubeMap.begin();
     std::advance(current, i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
@@ -269,11 +269,8 @@ bool CreatePSDBleedMask::performBleedTest(
 void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
                                   API::MatrixWorkspace_sptr workspace) {
   const double deadValue(1.0); // delete the data
-
-  std::vector<int>::const_iterator cend = tubeIndices.end();
-  for (std::vector<int>::const_iterator citr = tubeIndices.begin();
-       citr != cend; ++citr) {
-    workspace->dataY(*citr)[0] = deadValue;
+  for (auto tubeIndice : tubeIndices) {
+    workspace->dataY(tubeIndice)[0] = deadValue;
   }
 }
 }

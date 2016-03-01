@@ -2,8 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
-
-#include <Poco/Mutex.h>
+#include "MantidKernel/Exception.h"
 
 #include <boost/variant/get.hpp>
 
@@ -36,23 +35,23 @@ const std::string typeFromName(const std::string &name) {
       if (TYPE_INDEX.empty()) // check again inside the critical block
       {
         // Assume double if not in this map
-        TYPE_INDEX.insert(std::make_pair("DetID", "int"));
-        TYPE_INDEX.insert(std::make_pair("RunNumber", "int"));
-        TYPE_INDEX.insert(std::make_pair("h", "double"));
-        TYPE_INDEX.insert(std::make_pair("k", "double"));
-        TYPE_INDEX.insert(std::make_pair("l", "double"));
-        TYPE_INDEX.insert(std::make_pair("Wavelength", "double"));
-        TYPE_INDEX.insert(std::make_pair("Energy", "double"));
-        TYPE_INDEX.insert(std::make_pair("TOF", "double"));
-        TYPE_INDEX.insert(std::make_pair("DSpacing", "double"));
-        TYPE_INDEX.insert(std::make_pair("Intens", "double"));
-        TYPE_INDEX.insert(std::make_pair("SigInt", "double"));
-        TYPE_INDEX.insert(std::make_pair("BinCount", "double"));
-        TYPE_INDEX.insert(std::make_pair("BankName", "str"));
-        TYPE_INDEX.insert(std::make_pair("Row", "double"));
-        TYPE_INDEX.insert(std::make_pair("Col", "double"));
-        TYPE_INDEX.insert(std::make_pair("QLab", "V3D"));
-        TYPE_INDEX.insert(std::make_pair("QSample", "V3D"));
+        TYPE_INDEX.emplace("DetID", "int");
+        TYPE_INDEX.emplace("RunNumber", "int");
+        TYPE_INDEX.emplace("h", "double");
+        TYPE_INDEX.emplace("k", "double");
+        TYPE_INDEX.emplace("l", "double");
+        TYPE_INDEX.emplace("Wavelength", "double");
+        TYPE_INDEX.emplace("Energy", "double");
+        TYPE_INDEX.emplace("TOF", "double");
+        TYPE_INDEX.emplace("DSpacing", "double");
+        TYPE_INDEX.emplace("Intens", "double");
+        TYPE_INDEX.emplace("SigInt", "double");
+        TYPE_INDEX.emplace("BinCount", "double");
+        TYPE_INDEX.emplace("BankName", "str");
+        TYPE_INDEX.emplace("Row", "double");
+        TYPE_INDEX.emplace("Col", "double");
+        TYPE_INDEX.emplace("QLab", "V3D");
+        TYPE_INDEX.emplace("QSample", "V3D");
         // If adding an entry, be sure to increment the size comparizon in the
         // first line
       }
@@ -88,11 +87,6 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakColumn::~PeakColumn() {}
 
 /// Returns typeid for the data in the column
 const std::type_info &PeakColumn::get_type_info() const {
@@ -205,12 +199,8 @@ void PeakColumn::read(size_t index, const std::string &text) {
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {
-  if ((m_name == "h") || (m_name == "k") || (m_name == "l") ||
-      (m_name == "RunNumber"))
-    return false;
-  else
-    // Default to true for most columns
-    return true;
+  return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
+           (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------
@@ -316,7 +306,7 @@ const void *PeakColumn::void_pointer(size_t index) const {
 }
 
 PeakColumn *PeakColumn::clone() const {
-  PeakColumn *temp = new PeakColumn(this->m_peaks, this->m_name);
+  auto temp = new PeakColumn(this->m_peaks, this->m_name);
   return temp;
 }
 

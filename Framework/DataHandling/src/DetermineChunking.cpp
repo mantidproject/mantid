@@ -1,5 +1,22 @@
-#include <exception>
-#include <fstream>
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/DetermineChunking.h"
+#include "MantidDataHandling/LoadPreNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "LoadRaw/isisraw.h"
+#include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/DOM/DOMParser.h>
@@ -10,24 +27,10 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/SAX/InputSource.h>
+
+#include <exception>
+#include <fstream>
 #include <set>
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/DetermineChunking.h"
-#include "MantidDataHandling/LoadPreNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "LoadRaw/isisraw.h"
-#include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/BoundedValidator.h"
-#ifdef MPI_BUILD
-#include <boost/mpi.hpp>
-namespace mpi = boost::mpi;
-#endif
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
@@ -89,7 +92,8 @@ void DetermineChunking::init() {
   exts_set.insert(RAW_EXT, RAW_EXT + NUM_EXT_RAW);
   std::vector<std::string> exts(exts_set.begin(), exts_set.end());
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the event nexus, runinfo.xml, raw, or histo nexus file to "
       "read, including its full or relative path. The Event NeXus file name is "
       "typically of the form INST_####_event.nxs (N.B. case sensitive if "
@@ -101,7 +105,7 @@ void DetermineChunking::init() {
                   "Get chunking strategy for chunks with this number of "
                   "Gbytes. File will not be loaded if this option is set.");
 
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -148,8 +152,8 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
-    for (size_t i = 0; i < eventFilenames.size(); i++) {
-      BinaryFile<DasEvent> eventfile(dataDir + eventFilenames[i]);
+    for (auto &eventFilename : eventFilenames) {
+      BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
       // Factor of 2 for compression
       filesize += static_cast<double>(eventfile.getNumElements()) * 48.0 /
                   (1024.0 * 1024.0 * 1024.0);
@@ -242,7 +246,7 @@ void DetermineChunking::exec() {
   }
 
   int numChunks = 0;
-  if (maxChunk) // protect from divide by zero
+  if (maxChunk != 0.0) // protect from divide by zero
   {
     numChunks = static_cast<int>(filesize / maxChunk);
   }
@@ -326,8 +330,8 @@ std::string DetermineChunking::setTopEntryName(std::string filename) {
  */
 FileType DetermineChunking::getFileType(const string &filename) {
   // check for prenexus
-  for (int i = 0; i < NUM_EXT_PRENEXUS; ++i) {
-    if (filename.find(PRENEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : PRENEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is a prenexus file\n";
       return PRENEXUS_FILE;
@@ -335,8 +339,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for histogram nexus
-  for (int i = 0; i < NUM_EXT_HISTO_NEXUS; ++i) {
-    if (filename.find(HISTO_NEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : HISTO_NEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is a  histogram nexus file\n";
       return HISTO_NEXUS_FILE;
@@ -344,8 +348,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for event nexus - must be last because a valid extension is ".nxs"
-  for (int i = 0; i < NUM_EXT_EVENT_NEXUS; ++i) {
-    if (filename.find(EVENT_NEXUS_EXT[i]) != std::string::npos) {
+  for (const auto &extension : EVENT_NEXUS_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is an event nexus file\n";
       return EVENT_NEXUS_FILE;
@@ -353,8 +357,8 @@ FileType DetermineChunking::getFileType(const string &filename) {
   }
 
   // check for isis raw files
-  for (int i = 0; i < NUM_EXT_RAW; ++i) {
-    if (filename.find(RAW_EXT[i]) != std::string::npos) {
+  for (const auto &extension : RAW_EXT) {
+    if (filename.find(extension) != std::string::npos) {
       g_log.information() << "Determined \'" << filename
                           << "\' is an ISIS raw file\n";
       return RAW_FILE;

@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
@@ -30,10 +31,6 @@ namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
-
-SANSCollimationLengthEstimator::SANSCollimationLengthEstimator() {}
-
-SANSCollimationLengthEstimator::~SANSCollimationLengthEstimator() {}
 
 /**
  * Provide the collimation length which is associated with the instrument

@@ -227,14 +227,12 @@ bool FileProperty::extsMatchRunFiles() {
     Kernel::FacilityInfo facilityInfo =
         Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
-    std::vector<std::string>::const_iterator facilityExtsBegin =
-        facilityExts.begin();
-    std::vector<std::string>::const_iterator facilityExtsEnd =
-        facilityExts.end();
+    auto facilityExtsBegin = facilityExts.cbegin();
+    auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
 
-    for (auto it = allowedExts.begin(); it != allowedExts.end(); ++it) {
-      if (std::find(facilityExtsBegin, facilityExtsEnd, *it) !=
+    for (const auto &ext : allowedExts) {
+      if (std::find(facilityExtsBegin, facilityExtsEnd, ext) !=
           facilityExtsEnd) {
         match = true;
         break;
@@ -281,12 +279,12 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
                        toupper);
         addExtension(upper, exts);
       }
-      for (auto it = allowedExts.begin(); it != allowedExts.end(); ++it) {
-        std::string lower(*it);
-        std::string upper(*it);
-        std::transform(it->begin(), it->end(), lower.begin(), tolower);
-        std::transform(it->begin(), it->end(), upper.begin(), toupper);
-        addExtension(*it, exts);
+      for (auto &ext : allowedExts) {
+        std::string lower(ext);
+        std::string upper(ext);
+        std::transform(ext.begin(), ext.end(), lower.begin(), tolower);
+        std::transform(ext.begin(), ext.end(), upper.begin(), toupper);
+        addExtension(ext, exts);
         addExtension(lower, exts);
         addExtension(upper, exts);
       }

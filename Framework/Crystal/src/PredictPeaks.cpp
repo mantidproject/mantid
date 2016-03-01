@@ -1,13 +1,13 @@
 #include "MantidCrystal/PredictPeaks.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-
-#include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
-#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -41,34 +41,36 @@ PredictPeaks::~PredictPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
-      "PeaksWorkspace) containing:\n"
-      "  - The relevant Instrument (calibrated as needed).\n"
-      "  - A sample with a UB matrix.\n"
-      "  - The goniometer rotation matrix.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
+                  "PeaksWorkspace) containing:\n"
+                  "  - The relevant Instrument (calibrated as needed).\n"
+                  "  - A sample with a UB matrix.\n"
+                  "  - The goniometer rotation matrix.");
 
   declareProperty(
-      new PropertyWithValue<double>("WavelengthMin", 0.1, Direction::Input),
+      make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
+                                             Direction::Input),
       "Minimum wavelength limit at which to start looking for single-crystal "
       "peaks.");
   declareProperty(
-      new PropertyWithValue<double>("WavelengthMax", 100.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
+                                             Direction::Input),
       "Maximum wavelength limit at which to stop looking for single-crystal "
       "peaks.");
 
-  declareProperty(
-      new PropertyWithValue<double>("MinDSpacing", 1.0, Direction::Input),
-      "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(
-      new PropertyWithValue<double>("MaxDSpacing", 100.0, Direction::Input),
-      "Maximum d-spacing of peaks to consider.");
+  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 1.0,
+                                                         Direction::Input),
+                  "Minimum d-spacing of peaks to consider. Default = 1.0");
+  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
+                                                         Direction::Input),
+                  "Maximum d-spacing of peaks to consider.");
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    propOptions.push_back(m_refConds[i]->getName());
+  for (auto &refCond : m_refConds)
+    propOptions.push_back(refCond->getName());
   declareProperty("ReflectionCondition", "Primitive",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
@@ -79,33 +81,36 @@ void PredictPeaks::init() {
                   "option only works if the sample of the input workspace has "
                   "a crystal structure assigned.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional: An input PeaksWorkspace with the HKL of the peaks "
-                  "that we should predict. \n"
-                  "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
-                  "unused if this is specified.");
+  declareProperty(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "HKLPeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional: An input PeaksWorkspace with the HKL of the peaks "
+      "that we should predict. \n"
+      "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
+      "unused if this is specified.");
 
   declareProperty("RoundHKL", true,
                   "When using HKLPeaksWorkspace, this will round the HKL "
                   "values in the HKLPeaksWorkspace to the nearest integers if "
                   "checked.\n"
                   "Keep unchecked to use the original values");
-  setPropertySettings(
-      "RoundHKL", new EnabledWhenProperty("HKLPeaksWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
+                                      "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
   // Disable some props when using HKLPeaksWorkspace
-  IPropertySettings *set =
-      new EnabledWhenProperty("HKLPeaksWorkspace", IS_DEFAULT);
-  setPropertySettings("WavelengthMin", set);
-  setPropertySettings("WavelengthMax", set->clone());
-  setPropertySettings("MinDSpacing", set->clone());
-  setPropertySettings("MaxDSpacing", set->clone());
-  setPropertySettings("ReflectionCondition", set->clone());
+  auto makeSet = [] {
+    std::unique_ptr<IPropertySettings> set =
+        make_unique<EnabledWhenProperty>("HKLPeaksWorkspace", IS_DEFAULT);
+    return set;
+  };
+  setPropertySettings("WavelengthMin", makeSet());
+  setPropertySettings("WavelengthMax", makeSet());
+  setPropertySettings("MinDSpacing", makeSet());
+  setPropertySettings("MaxDSpacing", makeSet());
+  setPropertySettings("ReflectionCondition", makeSet());
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 }
 
@@ -234,10 +239,9 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  for (auto goniometerMatrix = gonioVec.begin();
-       goniometerMatrix != gonioVec.end(); ++goniometerMatrix) {
+  for (auto &goniometerMatrix : gonioVec) {
     // Final transformation matrix (HKL to Q in lab frame)
-    DblMatrix orientedUB = (*goniometerMatrix) * ub;
+    DblMatrix orientedUB = goniometerMatrix * ub;
 
     /* Because of the additional filtering step it's better to keep track of the
      * allowed peaks with a counter. */
@@ -245,10 +249,10 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
-    for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
-      if (lambdaFilter.isAllowed(*hkl)) {
+    for (auto &possibleHKL : possibleHKLs) {
+      if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
-        calculateQAndAddToOutput(*hkl, orientedUB, *goniometerMatrix);
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
       }
       prog.report();
     }
@@ -307,12 +311,13 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
 
   // --- Reflection condition ----
   // Use the primitive by default
-  ReflectionCondition_sptr refCond(new ReflectionConditionPrimitive());
+  ReflectionCondition_sptr refCond =
+      boost::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
   std::string refCondName = getPropertyValue("ReflectionCondition");
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    if (m_refConds[i]->getName() == refCondName)
-      refCond = m_refConds[i];
+  for (const auto &m_refCond : m_refConds)
+    if (m_refCond->getName() == refCondName)
+      refCond = m_refCond;
 
   HKLGenerator gen(orientedLattice, dMin);
   auto filter =

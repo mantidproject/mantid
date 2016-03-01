@@ -12,30 +12,39 @@ class EnggCalibrate(PythonAlgorithm):
         return "EnggCalibrate"
 
     def summary(self):
-        return "Calibrates a detector bank (or group of detectors) by performing a single peak fitting."
+        return ("Calibrates one or more detector banks (or group(s) of detectors) by performing single peak "
+                "fitting.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-                             "Workspace with the calibration run to use.")
+                             doc="Workspace with the calibration run to use.")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
-    		"A list of dSpacing values where peaks are expected.")
+        import EnggUtils
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks",
+                                                values=EnggUtils.default_ceria_expected_peaks(),
+                                                direction=Direction.Input),
+                             doc="A list of dSpacing values where peaks are expected.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             doc="Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        peaks_grp = 'Peaks to fit'
+        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
+        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+
+
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
-                             'Workspace with the Vanadium (correction and calibration) run. '
+                             doc='Workspace with the Vanadium (correction and calibration) run. '
                              'Alternatively, when the Vanadium run has been already processed, '
                              'the properties can be used')
 
         self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
                                                      Direction.Input, PropertyMode.Optional),
-                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
@@ -48,7 +57,11 @@ class EnggCalibrate(PythonAlgorithm):
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
                              'workspace is generated.')
 
-        import EnggUtils
+        vana_grp = 'Vanadium (open beam) properties'
+        self.setPropertyGroup('VanadiumWorkspace', vana_grp)
+        self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
+        self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
+
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
@@ -61,9 +74,14 @@ class EnggCalibrate(PythonAlgorithm):
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
-                Direction.Input, PropertyMode.Optional),\
-    		"Calibrated detector positions. If not specified, default ones are used.")
+        banks_grp = 'Banks / spectra'
+        self.setPropertyGroup('Bank', banks_grp)
+        self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
+
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             "Calibrated detector positions. If not specified, default ones (from the "
+                             "current instrument definition) are used.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the calibration parameters calculated '
@@ -77,54 +95,75 @@ class EnggCalibrate(PythonAlgorithm):
         self.declareProperty("Zero", 0.0, direction = Direction.Output,
                              doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
+        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+                             doc = "Information on fitted peaks as produced by the (child) algorithm "
+                             "EnggFitPeaks.")
+
+        out_grp = 'Outputs'
+        self.setPropertyGroup('DetectorPositions', out_grp)
+        self.setPropertyGroup('OutputParametersTableName', out_grp)
+        self.setPropertyGroup('Difc', out_grp)
+        self.setPropertyGroup('Zero', out_grp)
+        self.setPropertyGroup('FittedPeaks', out_grp)
+
     def PyExec(self):
 
         import EnggUtils
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
+        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                          self.getProperty('ExpectedPeaks').value)
 
         prog = Progress(self, start=0, end=1, nreports=2)
 
         prog.report('Focusing the input workspace')
-        focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
-                                     self.getProperty("VanadiumWorkspace").value,
-                                     self.getProperty('Bank').value,
-                                     self.getProperty(self.INDICES_PROP_NAME).value)
+        focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
+                                      self.getProperty("VanadiumWorkspace").value,
+                                      self.getProperty('Bank').value,
+                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Fitting parameters for the focused run')
-        difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
+        difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
 
-        self._produceOutputs(difc, zero)
+        self.log().information("Fitted {0} peaks. Resulting difc: {1}, tzero: {2}".
+                               format(fitted_peaks.rowCount(), difc, zero))
+        self.log().information("Peaks fitted: {0}, centers in ToF: {1}".
+                               format(fitted_peaks.column("dSpacing"),
+                                      fitted_peaks.column("X0")))
 
-    def _fitParams(self, focusedWS, expectedPeaksD):
+        self._produce_outputs(difc, zero, fitted_peaks)
+
+    def _fit_params(self, focused_ws, expected_peaks_d):
         """
-        Fit the GSAS parameters that this algorithm produces: difc and zero
+        Fit the GSAS parameters that this algorithm produces: difc and zero. Fits a
+        number of peaks starting from the expected peak positions. Then it fits a line
+        on the peak positions to produce the DIFC and TZERO as used in GSAS.
 
-        @param focusedWS :: focused workspace to do the fitting on
-        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param focused_ws :: focused workspace to do the fitting on
+        @param expected_peaks_d :: expected peaks, used as intial peak positions for the
+        fitting, in d-spacing units
 
-        @returns a pair of parameters: difc and zero
+        @returns a tuple of parameters: difc, zero, and a list of peak centers as fitted
         """
 
-        fitPeaksAlg = self.createChildAlgorithm('EnggFitPeaks')
-        fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
-        fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
-        fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
+        fit_alg = self.createChildAlgorithm('EnggFitPeaks')
+        fit_alg.setProperty('InputWorkspace', focused_ws)
+        fit_alg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
+        fit_alg.setProperty('ExpectedPeaks', expected_peaks_d)
         # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
         # EnggFitPaks, but better to check inputs early, before this
-        fitPeaksAlg.execute()
+        fit_alg.execute()
 
-        difc = fitPeaksAlg.getProperty('Difc').value
-        zero = fitPeaksAlg.getProperty('Zero').value
+        difc = fit_alg.getProperty('Difc').value
+        zero = fit_alg.getProperty('Zero').value
+        fitted_peaks = fit_alg.getProperty('FittedPeaks').value
 
-        return difc, zero
+        return difc, zero, fitted_peaks
 
-    def _focusRun(self, ws, vanWS, bank, indices):
+    def _focus_run(self, ws, vanWS, bank, indices):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.
@@ -162,18 +201,20 @@ class EnggCalibrate(PythonAlgorithm):
 
         return alg.getProperty('OutputWorkspace').value
 
-    def _produceOutputs(self, difc, zero):
+    def _produce_outputs(self, difc, zero, fitted_peaks):
         """
         Just fills in the output properties as requested
 
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
+        @param fitted_peaks :: table workspace with peak parameters (one peak per row)
         """
 
         import EnggUtils
 
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
+        self.setProperty('FittedPeaks', fitted_peaks)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")

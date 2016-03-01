@@ -2,16 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AlignDetectors.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -91,10 +95,10 @@ public:
     double difc = 0.;
     double difa = 0.;
     double tzero = 0.;
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
-      difc += m_difcCol->toDouble(*row);
-      difa += m_difaCol->toDouble(*row);
-      tzero += m_tzeroCol->toDouble(*row);
+    for (auto row : rows) {
+      difc += m_difcCol->toDouble(row);
+      difa += m_difaCol->toDouble(row);
+      tzero += m_tzeroCol->toDouble(row);
     }
     if (rows.size() > 1) {
       double norm = 1. / static_cast<double>(rows.size());
@@ -125,8 +129,8 @@ private:
 
   std::set<size_t> getRow(const std::set<detid_t> &detIds) {
     std::set<size_t> rows;
-    for (auto detId = detIds.begin(); detId != detIds.end(); ++detId) {
-      auto rowIter = m_detidToRow.find(*detId);
+    for (auto detId : detIds) {
+      auto rowIter = m_detidToRow.find(detId);
       if (rowIter != m_detidToRow.end()) { // skip if not found
         rows.insert(rowIter->second);
       }
@@ -156,45 +160,41 @@ const std::string AlignDetectors::summary() const {
 
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = NULL;
+  this->tofToDmap = nullptr;
 }
 
 /// Destructor
 AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
 
-//-----------------------------------------------------------------------
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   // Workspace unit must be TOF.
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<RawCountValidator>();
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A workspace with units of TOF");
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
+  const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(
-      new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
+      Kernel::make_unique<FileProperty>("CalibrationFile", "",
+                                        FileProperty::OptionalLoad, exts),
       "Optional: The .cal file containing the position correction factors. "
       "Either this or OffsetsWorkspace needs to be specified.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
 
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
       "this or CalibrationFile needs to be specified.");
@@ -285,7 +285,6 @@ void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::FileError If the calibration file cannot be opened and
  * read successfully
@@ -304,7 +303,7 @@ void AlignDetectors::exec() {
   // Check if its an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }
@@ -360,42 +359,22 @@ void AlignDetectors::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-//-----------------------------------------------------------------------
 /**
  * Execute the align detectors algorithm for an event workspace.
  */
 void AlignDetectors::execEvent() {
-  // g_log.information("Processing event workspace");
-
   // the calibration information is already read in at this point
 
-  // convert the input workspace into the event workspace we already know it is
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+      getProperty("InputWorkspace");
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Set the final unit that our output workspace will have
   setXAxisUnits(outputWS);
@@ -409,7 +388,7 @@ void AlignDetectors::execEvent() {
     PARALLEL_START_INTERUPT_REGION
 
     auto toDspacing = converter.getConversionFunc(
-        inputWS->getSpectrum(size_t(i))->getDetectorIDs());
+        outputWS->getSpectrum(size_t(i))->getDetectorIDs());
     outputWS->getEventList(i).convertTof(toDspacing);
 
     progress.report();

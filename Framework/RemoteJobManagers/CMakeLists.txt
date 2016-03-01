@@ -48,7 +48,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET RemoteJobManagers PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+target_include_directories ( RemoteJobManagers PUBLIC inc )
+target_include_directories ( RemoteJobManagers PRIVATE ${OPENSSL_INCLUDE_DIR} )
 
 target_link_libraries ( RemoteJobManagers LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} )
 

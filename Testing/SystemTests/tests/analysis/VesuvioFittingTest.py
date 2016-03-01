@@ -59,13 +59,8 @@ def tolerance():
     # Not too happy about this but the gsl seems to behave slightly differently on Windows/Mac but the reference result is from Linux
     # The results however are still acceptable
     system = platform.system()
-    if system == "Windows":
-        if platform.architecture()[0] == "64bit":
-            return 1e-2 # Other fitting tests seem to require this level too.
-        else:
-            return 1e-1
-    elif system == "Darwin":
-        return 1e-1 # Other fitting tests seem to require this level too.
+    if system == "Windows" or system == "Darwin":
+        return 1e-2
     else:
         return 1e-6
 
@@ -83,7 +78,7 @@ class VesuvioFittingTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = tolerance()
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingTest_V2.nxs"
+        return "fit_Workspace","VesuvioFittingTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
 
@@ -99,7 +94,7 @@ class VesuvioFittingWithKFreeTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = tolerance()
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingWithKFreeTest_V2.nxs"
+        return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
 
@@ -113,6 +108,6 @@ class VesuvioFittingWithQuadraticBackgroundTest(stresstesting.MantidStressTest):
         self.assertTrue(WS_PREFIX + "_NormalisedCovarianceMatrix" in mtd, "Expected covariance workspace in ADS")
 
     def validate(self):
-        self.tolerance = tolerance()
+        self.tolerance = 1.0e-2 # 1e-2 for all systems as some Linuxes also require larger tolerance
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest_V3.nxs"
+        return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"

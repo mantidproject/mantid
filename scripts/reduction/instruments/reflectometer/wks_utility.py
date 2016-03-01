@@ -1,8 +1,6 @@
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name
+#pylint: disable=too-many-lines,invalid-name,too-many-arguments, too-many-locals, unused-argument
 from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
-# from MantidFramework import *
 import math
 import os.path
 
@@ -288,7 +286,7 @@ def createIntegratedWorkspace(mt1,
 
     _tof_axis = mt1.readX(0)[:]
     nbr_tof = len(_tof_axis)
-    t_range = arange(nbr_tof-1)
+    _t_range = arange(nbr_tof-1)
 
     _fromXpixel = min([fromXpixel, toXpixel])
     _toXpixel = max([fromXpixel, toXpixel])
@@ -507,7 +505,7 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
     if from_units == to_units:
         return value
 
-    from_factor = 1
+    from_factor = 1.0
     #convert everything into rad
     if from_units == 'degree':
         from_factor = 1.745329252e-2
@@ -531,8 +529,8 @@ def convertToThetaVsLambda(_tof_axis,
     to theta/lambda
 
     """
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    # h = 6.626e-34 #m^2 kg s^-1
+    # m = 1.675e-27 #kg
 
     #convert tof_axis into seconds
     _tof_axis = _tof_axis * 1e-6
@@ -548,7 +546,7 @@ def convertToThetaVsLambda(_tof_axis,
 
     return dico
 
-def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, cpix=None):
+def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1.0, tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -557,14 +555,14 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             theta: angle of detector
     """
 
-    h = 6.626e-34 #m^2 kg s^-1
-    m = 1.675e-27 #kg
+    # h = 6.626e-34 #m^2 kg s^-1
+    # m = 1.675e-27 #kg
 
     sample = mt.getInstrument().getSample()
     source = mt.getInstrument().getSource()
     dSM = sample.getDistance(source)
 
-    maxX = 304
+    _maxX = 304
     maxY = 256
 
     dPS_array = zeros(maxY)
@@ -573,7 +571,7 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
         dPS_array[y] = sample.getDistance(detector)
 
     #array of distances pixel->source
-    dMP_array = dPS_array + dSM
+    _dMP_array = dPS_array + dSM
     #distance sample->center of detector
     dSD = dPS_array[maxY / 2]
 
@@ -596,7 +594,6 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
-#            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
             q_array[y, t] = _Q * 1e-10
 
     return q_array
@@ -933,11 +930,7 @@ def _applySFtoArray(workspace, a, b, a_error, b_error):
                     Nspec=1,
                     UnitX="TOF")
 
-    mt_before = mtd[workspace]
-
     Divide(workspace, 'sfWorkspace', workspace)
-
-    mt_after = mtd[workspace]
 
     return workspace
 
@@ -1043,7 +1036,7 @@ def integrateOverLowResRange(mt1,\
 
     print '--> integrated over low res range of ', type
     _tof_axis = mt1.readX(0)[:].copy()
-    nbr_tof = len(_tof_axis)
+    _nbr_tof = len(_tof_axis)
 #     t_range = arange(nbr_tof-1)
 
     # -1 to work with index directly
@@ -1052,10 +1045,10 @@ def integrateOverLowResRange(mt1,\
 
     if is_nexus_detector_rotated_flag:
         sz_y_axis = 304
-        sz_x_axis = 256
+        _sz_x_axis = 256
     else:
         sz_y_axis = 256
-        sz_x_axis = 304
+        _sz_x_axis = 304
 
     _y_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
     _y_error_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
@@ -1112,10 +1105,10 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     szPeak = peakMax - peakMin + 1
 
     # init arrays
-    minBack = []
-    minBackError = []
-    maxBack = []
-    maxBackError = []
+    _minBack = []
+    _minBackError = []
+    _maxBack = []
+    _maxBackError = []
 
     final_y_axis = zeros((szPeak, nbrTof))
     final_y_error_axis = zeros((szPeak, nbrTof))
@@ -1265,7 +1258,7 @@ def divideDataByNormalization(data_y_axis,
     for t in range(nbr_tof):
         for x in range(nbr_pixel):
 
-            if (not av_norm[t] == 0) and (not data_y_axis[x,t] == 0) :
+            if (av_norm[t] != 0) and (data_y_axis[x, t] != 0):
 
                 tmp_value = float(data_y_axis[x,t]) / float(av_norm[t])
 
@@ -1297,7 +1290,7 @@ def sumWithError(value, error):
 def integratedOverPixelDim(data_y_axis, data_y_error_axis):
 
     size = data_y_axis.shape
-    nbr_pixel = size[0]
+    _nbr_pixel = size[0]
     nbr_tof = size[1]
 
     final_data = zeros(nbr_tof)
@@ -1311,7 +1304,7 @@ def integratedOverPixelDim(data_y_axis, data_y_error_axis):
 
 def fullSumWithError(data_y_axis, data_y_error_axis):
     size = data_y_axis.shape
-    nbr_pixel = size[0]
+    _nbr_pixel = size[0]
     nbr_tof = size[1]
 
     final_data = zeros(nbr_tof)
@@ -1338,7 +1331,7 @@ def ouput_ascii_file(file_name,
     for i in range(sz_x_axis-1):
         f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n")
 
-    f.close
+    f.close()
 
 def ouput_big_ascii_file(file_name,
                          x_axis,
@@ -1359,7 +1352,7 @@ def ouput_big_ascii_file(file_name,
         _tmp_str += '\n'
         f.write(_tmp_str)
 
-    f.close
+    f.close()
 
 
 
@@ -1381,7 +1374,7 @@ def ouput_big_Q_ascii_file(file_name,\
         _tmp_str += '\n'
         f.write(_tmp_str)
 
-    f.close
+    f.close()
 
 
 def divideData1DbyNormalization(inte_data_y_axis,
@@ -1397,7 +1390,7 @@ def divideData1DbyNormalization(inte_data_y_axis,
     final_data_error = zeros(nbrPixel)
 
     for x in range(nbrPixel[0]):
-        if not av_norm[x] == 0:
+        if av_norm[x] != 0:
 
             final_data[x] = inte_data_y_axis[x] / av_norm[x]
 
@@ -1661,7 +1654,7 @@ def getDistances(ws_event_data):
             dPS_array[y, x] = sample.getDistance(detector)
 
     # Array of distances pixel->source
-    dMP_array = dPS_array + dSM
+    _dMP_array = dPS_array + dSM
     # Distance sample->center of detector
     dSD = dPS_array[256./2.,304./2.]
     # Distance source->center of detector
@@ -1770,7 +1763,7 @@ def convertToQ(tof_axis,
 
         # get the q_axis of the given peak pixel
         _tmp_q_axis = _q_axis[_y_index]
-        q_axis = _tmp_q_axis[::-1] #reverse the axis (now in increasing order)
+        _q_axis = _tmp_q_axis[::-1] #reverse the axis (now in increasing order)
 
         _tmp_peak_pixel = y_range[_y_index]
         _y_axis_tmp = y_axis[_y_index,:]
@@ -1852,7 +1845,7 @@ def getQaxis(dMD, dSD, theta,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-    tmp_q_axis = zeros(sz_tof)
+    _tmp_q_axis = zeros(sz_tof)
     q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
@@ -1932,7 +1925,7 @@ def createQworkspace(q_axis, y_axis, y_error_axis):
 
     sz = q_axis.shape
     nbr_pixel = sz[0]
-    nbr_tof = sz[1]
+    _nbr_tof = sz[1]
 
     q_axis_1d = q_axis.flatten()
     y_axis_1d = y_axis.flatten()
@@ -2097,11 +2090,3 @@ def isNexusTakeAfterRefDate(nexus_date):
         return True
     else:
         return False
-
-
-
-
-
-
-
-

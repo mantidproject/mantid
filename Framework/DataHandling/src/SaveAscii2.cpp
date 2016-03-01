@@ -1,15 +1,18 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveAscii2.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include <set>
 #include <fstream>
+
+#include "MantidDataHandling/SaveAscii2.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 
@@ -29,12 +32,13 @@ SaveAscii2::SaveAscii2()
 /// Initialisation method.
 void SaveAscii2::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".dat", ".txt", ".csv"}),
+  const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -45,7 +49,7 @@ void SaveAscii2::init() {
                   "The starting workspace index.");
   declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeZeroGreater,
                   "The ending workspace index.");
-  declareProperty(new ArrayProperty<int>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of workspace indices to save.");
   declareProperty("Precision", EMPTY_INT(), mustBePositive,
                   "Precision of output double values.");
@@ -71,10 +75,10 @@ void SaveAscii2::init() {
                                {"SemiColon", ";"},
                                {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 6; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
 
@@ -85,13 +89,13 @@ void SaveAscii2::init() {
                   "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
 
   declareProperty(
-      new PropertyWithValue<std::string>("CustomSeparator", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                  Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
-  setPropertySettings(
-      "CustomSeparator",
-      new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined"));
+  setPropertySettings("CustomSeparator",
+                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
+                                                       "UserDefined"));
 
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");
@@ -135,8 +139,7 @@ void SaveAscii2::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     m_sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.
@@ -182,11 +185,11 @@ void SaveAscii2::exec() {
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
-    for (size_t i = 0; i < spec_list.size(); i++) {
-      if (spec_list[i] >= nSpectra) {
+    for (auto &spec : spec_list) {
+      if (spec >= nSpectra) {
         throw std::invalid_argument("Inconsistent spectra list");
       } else {
-        idx.insert(spec_list[i]);
+        idx.insert(spec);
       }
     }
   }
@@ -230,7 +233,7 @@ void SaveAscii2::exec() {
     }
   } else {
     Progress progress(this, 0, 1, idx.size());
-    for (std::set<int>::const_iterator i = idx.begin(); i != idx.end(); ++i) {
+    for (auto i = idx.begin(); i != idx.end(); ++i) {
       writeSpectra(i, file);
       progress.report();
     }

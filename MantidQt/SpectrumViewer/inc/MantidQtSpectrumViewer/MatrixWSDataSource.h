@@ -92,10 +92,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     void setEModeHandler( EModeHandler* emodeHandler );
 
     /// Get a list containing pairs of strings with information about x,y
-    void getInfoList( double x,
-                      double y,
-                      std::vector<std::string> &list );
-
+    std::vector<std::string> getInfoList(double x, double y) override;
 
   private:
     Mantid::API::MatrixWorkspace_const_sptr m_matWs;

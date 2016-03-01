@@ -7,12 +7,11 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
@@ -46,19 +45,19 @@ public:
     Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
     Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
   }
-  ~OrEnabledWhenProperties() // responsible for deleting all supplied
-                             // EnabledWhenProperites
+  ~OrEnabledWhenProperties() override // responsible for deleting all supplied
+                                      // EnabledWhenProperites
   {
     delete Prop1;
     delete Prop2;
   }
 
-  IPropertySettings *clone() {
+  IPropertySettings *clone() override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
                                        Criteria2, value2);
   }
 
-  bool isEnabled(const IPropertyManager *algo) const {
+  bool isEnabled(const IPropertyManager *algo) const override {
     return Prop1->isEnabled(algo) && Prop2->isEnabled(algo);
   }
 
@@ -73,20 +72,20 @@ OptimizeCrystalPlacement::OptimizeCrystalPlacement() : Algorithm() {}
 OptimizeCrystalPlacement::~OptimizeCrystalPlacement() {}
 
 void OptimizeCrystalPlacement::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
-  declareProperty(new ArrayProperty<int>(std::string("KeepGoniometerFixedfor"),
-                                         Direction::Input),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      std::string("KeepGoniometerFixedfor"), Direction::Input),
                   "List of run Numbers for which the goniometer settings will "
                   "NOT be changed");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("ModifiedPeaksWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("ModifiedPeaksWorkspace",
+                                                     "", Direction::Output),
       "Output Workspace of Peaks with optimized sample Orientations");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "FitInfoTable", "FitInfoTable", Direction::Output),
                   "Workspace of Results");
 
@@ -127,12 +126,12 @@ void OptimizeCrystalPlacement::init() {
   setPropertyGroup("MaxHKLPeaks2Use", "Tolerance settings");
   setPropertyGroup("MaxIndexingError", "Tolerance settings");
 
-  setPropertySettings(
-      "MaxSamplePositionChangeMeters",
-      new EnabledWhenProperty("AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxSamplePositionChangeMeters",
+                      make_unique<EnabledWhenProperty>(
+                          "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings("KeepGoniometerFixedfor",
-                      new OrEnabledWhenProperties(
+                      make_unique<OrEnabledWhenProperties>(
                           "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "0",
                           "OptimizeGoniometerTilt", Kernel::IS_EQUAL_TO, "0"));
 }
@@ -179,7 +178,7 @@ void OptimizeCrystalPlacement::exec() {
   for (int i = 0; i < Peaks->getNumberPeaks(); i++) {
     IPeak &peak = Peaks->getPeak(i);
     int runNum = peak.getRunNumber();
-    std::vector<int>::iterator it = RunNumList.begin();
+    auto it = RunNumList.begin();
     for (; it != RunNumList.end() && *it != runNum; ++it) {
     }
 
@@ -207,13 +206,13 @@ void OptimizeCrystalPlacement::exec() {
     if (use) // add to lists for workspace
     {
       nPeaksUsed++;
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
-      xRef.push_back((double)i);
+      xRef.push_back(static_cast<double>(i));
       yvalB.push_back(0.0);
       errB.push_back(1.0);
     }
@@ -230,7 +229,8 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
-  mwkspc = WorkspaceFactory::Instance().create("Workspace2D", (size_t)1, N, N);
+  mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
+                                               static_cast<size_t>(1), N, N);
   mwkspc->setX(0, pX);
   mwkspc->setData(0, yvals, errs);
 
@@ -243,11 +243,8 @@ void OptimizeCrystalPlacement::exec() {
   //---------------
   std::vector<std::string> ChRunNumList;
   std::string predChar = "";
-  for (std::vector<int>::iterator it = RunNumList.begin();
-       it != RunNumList.end(); ++it) {
-    int runNum = *it;
-
-    std::vector<int>::iterator it1 = NOoptimizeRuns.begin();
+  for (auto runNum : RunNumList) {
+    auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
     }
 
@@ -397,7 +394,7 @@ void OptimizeCrystalPlacement::exec() {
   g_log.notice() << "Output Status=" << OutputStatus << std::endl;
 
   //------------------ Fix up Covariance output --------------------
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
                       Direction::Output),
                   "The name of the TableWorkspace in which to store the final "
@@ -413,7 +410,7 @@ void OptimizeCrystalPlacement::exec() {
 
   //------------- Fix up Result workspace values ----------------------------
   std::map<std::string, double> Results;
-  for (int prm = 0; prm < (int)RRes->rowCount(); ++prm) {
+  for (int prm = 0; prm < static_cast<int>(RRes->rowCount()); ++prm) {
     std::string namee = RRes->getRef<std::string>("Name", prm);
 
     std::string start = namee.substr(0, 3);
@@ -439,12 +436,11 @@ void OptimizeCrystalPlacement::exec() {
   boost::shared_ptr<const Instrument> OldInstrument = peak.getInstrument();
   boost::shared_ptr<const ParameterMap> pmap_old =
       OldInstrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap_new(new ParameterMap());
+  auto pmap_new = boost::make_shared<ParameterMap>();
 
   PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
 
   double L0 = peak.getL1();
-  V3D oldSampPos = OldInstrument->getSample()->getPos();
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 
@@ -453,8 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   if (OldInstrument->isParametrized())
     Inst = OldInstrument->baseInstrument();
 
-  boost::shared_ptr<const Instrument> NewInstrument(
-      new Geometry::Instrument(Inst, pmap_new));
+  auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
 
   SCDCalibratePanels::FixUpSourceParameterMap(NewInstrument, L0, newSampPos,
                                               pmap_old);

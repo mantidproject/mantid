@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -48,6 +49,15 @@ void ConvFit::setup() {
                                << "EDS"
                                << "EDC"
                                << "SFT";
+  // All Parameters in tree that should be defaulting to 1
+  m_defaultParams = QStringList() << "Amplitude"
+                                  << "Beta"
+                                  << "Decay"
+                                  << "Diffusion"
+                                  << "Height"
+                                  << "Intensity"
+                                  << "Radius"
+                                  << "Tau";
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -187,6 +197,11 @@ void ConvFit::setup() {
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
 
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(extendResolutionWorkspace()));
+  connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(extendResolutionWorkspace()));
+
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
@@ -196,8 +211,7 @@ void ConvFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), this,
           SLOT(bgTypeSelection(int)));
-  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this,
-          SLOT(singleFitExtension()));
+  connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
   // Context menu
   m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -219,64 +233,11 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
-
   if (m_cfInputWS == NULL) {
     g_log.error("No workspace loaded");
     return;
   }
-  extendResolutionWorkspace(true);
-}
 
-/**
-* Create a resolution workspace with the same number of histograms as in the
-* sample.
-*
-* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
-* they need
-* to have the WorkspaceIndex attribute set.
-* @param run :: if the call is from running the algorithm or single fit (true =
-* algorithm)
-*/
-void ConvFit::extendResolutionWorkspace(const bool &run) {
-  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
-    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
-
-    size_t numHist = m_cfInputWS->getNumberHistograms();
-    for (size_t i = 0; i < numHist; i++) {
-      IAlgorithm_sptr appendAlg =
-          AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->initialize();
-      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-
-      if (i == 0) {
-        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
-        m_batchAlgoRunner->addAlgorithm(appendAlg);
-      } else {
-        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
-      }
-    }
-    if (run) {
-      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-              SLOT(extensionComplete(bool)));
-    } else {
-      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-              SLOT(singleFit(bool)));
-    }
-    m_batchAlgoRunner->executeBatchAsync();
-  }
-}
-
-void ConvFit::extensionComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(extensionComplete(bool)));
-
-  if (error)
-    return;
-
-  // Run Convolution Fit Sequetial algorithm
   QString fitType = fitTypeString();
   QString bgType = backgroundString();
 
@@ -530,6 +491,40 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
   updatePlot();
+}
+
+/**
+* Create a resolution workspace with the same number of histograms as in the
+* sample.
+*
+* Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
+* they need
+* to have the WorkspaceIndex attribute set.
+*/
+void ConvFit::extendResolutionWorkspace() {
+  if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
+    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+    size_t numHist = m_cfInputWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; i++) {
+      IAlgorithm_sptr appendAlg =
+          AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->initialize();
+      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+      if (i == 0) {
+        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+        m_batchAlgoRunner->addAlgorithm(appendAlg);
+      } else {
+        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+      }
+    }
+
+    m_batchAlgoRunner->executeBatchAsync();
+  }
 }
 
 namespace {
@@ -883,7 +878,7 @@ void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
     } else {
       std::string propName = props[i]->propertyName().toStdString();
       double propValue = props[i]->valueText().toDouble();
-      if (propValue) {
+      if (propValue != 0.0) {
         if (func->hasAttribute(propName))
           func->setAttributeValue(propName, propValue);
         else
@@ -1045,8 +1040,9 @@ void ConvFit::updatePlot() {
     m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
   }
 
-  // If there is a result plot then plot it
-  std::string groupName = m_baseName.toStdString() + "_Workspaces";
+  // If there is a result workspace plot then plot it
+  const auto groupName = m_baseName.toStdString() + "_Workspaces";
+
   if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
@@ -1135,31 +1131,17 @@ void ConvFit::plotGuess() {
 }
 
 /**
-* Runs the extension of the resolution workspace before the singlefit takes
-* place
-*/
-void ConvFit::singleFitExtension() {
-  if (!validate())
-    return;
-
-  updatePlot();
-
-  extendResolutionWorkspace(false);
-}
-
-/**
- * Runs the single fit algorithm after the workspace has been extended
- * @param error :: if the resolution extension algorithm was successful
+ * Runs the single fit algorithm
  */
-void ConvFit::singleFit(const bool &error) {
+void ConvFit::singleFit() {
+  // Validate tab before running a single fit
+  if (!validate()) {
+    return;
+  }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFit(bool)));
   // ensure algorithm was successful
-  if (error) {
-    showMessageBox("Workspace extension failed.");
-    return;
-  }
   m_uiForm.ckPlotGuess->setChecked(false);
 
   CompositeFunction_sptr function =
@@ -1227,8 +1209,9 @@ void ConvFit::singleFitComplete(bool error) {
 
   // Plot the line on the mini plot
   m_uiForm.ppPlot->removeSpectrum("Guess");
-  m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName + "_Workspace", 1,
-                               Qt::red);
+  const auto resultName = m_singleFitOutputName + "_Workspace";
+  m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
+  m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 
   IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
@@ -1240,7 +1223,7 @@ void ConvFit::singleFitComplete(bool error) {
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
-
+  params.reserve(static_cast<int>(parNames.size()));
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 
@@ -1407,7 +1390,7 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 
   if (prop == m_properties["UseDeltaFunc"]) {
     updatePlotOptions();
-    if (checked == true) {
+    if (checked) {
       m_properties["DeltaFunction"]->addSubProperty(
           m_properties["DeltaHeight"]);
       m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
@@ -1607,37 +1590,47 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         if (count == 3) {
           propName = "Lorentzian 2";
         }
-        QString name = propName + "." + *it;
-        m_properties[name] = m_dblManager->addProperty(*it);
+        const QString paramName = QString(*it);
+        const QString fullPropName = propName + "." + *it;
+        m_properties[fullPropName] = m_dblManager->addProperty(*it);
 
-        if (QString(*it).compare("FWHM") == 0) {
-          double resolution = getInstrumentResolution(m_cfInputWS->getName());
-          if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[2]);
-          } else {
-            m_dblManager->setValue(m_properties[name], resolution);
+        if (paramName.compare("FWHM") == 0) {
+          double resolution = 0.0;
+          if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
+            resolution = getInstrumentResolution(m_cfInputWS->getName());
           }
-        } else if (QString(*it).compare("Amplitude") == 0) {
           if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[0]);
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[2]);
           } else {
-            m_dblManager->setValue(m_properties[name], 1.0);
+            m_dblManager->setValue(m_properties[fullPropName], resolution);
           }
-        } else if (QString(*it).compare("PeakCentre") == 0) {
+        } else if (paramName.compare("Amplitude") == 0) {
           if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[name], oneLValues[1]);
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[0]);
           } else {
-            m_dblManager->setValue(m_properties[name], 0.0);
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
+          }
+        } else if (paramName.compare("PeakCentre") == 0) {
+          if (previouslyOneL && count < 3) {
+            m_dblManager->setValue(m_properties[fullPropName], oneLValues[1]);
+          } else {
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
           }
         } else {
-          m_dblManager->setValue(m_properties[name], 0.0);
+          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
+          } else {
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
+          }
         }
 
-        m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
+        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
         if (count < 3) {
-          m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
+          m_properties["FitFunction1"]->addSubProperty(
+              m_properties[fullPropName]);
         } else {
-          m_properties["FitFunction2"]->addSubProperty(m_properties[name]);
+          m_properties["FitFunction2"]->addSubProperty(
+              m_properties[fullPropName]);
         }
         count++;
       }
@@ -1648,21 +1641,29 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         propName = functionName;
       }
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        QString name = propName + "." + *it;
-        m_properties[name] = m_dblManager->addProperty(*it);
-
-        if (QString(*it).compare("FWHM") == 0) {
-          double resolution = getInstrumentResolution(m_cfInputWS->getName());
-          m_dblManager->setValue(m_properties[name], resolution);
+        const QString paramName = QString(*it);
+        const QString fullPropName = propName + "." + *it;
+        m_properties[fullPropName] = m_dblManager->addProperty(*it);
+        if (paramName.compare("FWHM") == 0) {
+          double resolution = 0.0;
+          if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
+            resolution = getInstrumentResolution(m_cfInputWS->getName());
+          }
+          m_dblManager->setValue(m_properties[fullPropName], resolution);
         } else if (QString(*it).compare("Amplitude") == 0 ||
                    QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
+          m_dblManager->setValue(m_properties[fullPropName], 1.0);
         } else {
-          m_dblManager->setValue(m_properties[name], 0.0);
+          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
+            m_dblManager->setValue(m_properties[fullPropName], 1.0);
+          } else {
+            m_dblManager->setValue(m_properties[fullPropName], 0.0);
+          }
         }
 
-        m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
-        m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
+        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
+        m_properties["FitFunction1"]->addSubProperty(
+            m_properties[fullPropName]);
       }
     }
   }

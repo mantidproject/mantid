@@ -75,16 +75,17 @@ public:
   TabulatedFunction();
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "TabulatedFunction"; }
-  virtual const std::string category() const { return "General"; }
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  std::string name() const override { return "TabulatedFunction"; }
+  const std::string category() const override { return "General"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   ///  function derivatives
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value);
+                    const IFunction::Attribute &value) override;
 
 private:
   /// Call the appropriate load function

@@ -28,23 +28,19 @@ BinaryOperateMasks::~BinaryOperateMasks() {
 
 void BinaryOperateMasks::init() {
 
-  std::vector<std::string> operators;
-  operators.push_back("AND");
-  operators.push_back("OR");
-  operators.push_back("XOR");
-  operators.push_back("NOT");
+  std::vector<std::string> operators{"AND", "OR", "XOR", "NOT"};
 
-  declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                       "InputWorkspace1", "", Direction::Input),
                   "MaskWorkspace 1 for binary operation");
   declareProperty(
-      new WorkspaceProperty<DataObjects::MaskWorkspace>(
+      make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
       "Optional MaskWorkspace 2 for binary operation");
   declareProperty("OperationType", "AND",
                   boost::make_shared<StringListValidator>(operators),
                   "Operator for Workspace1 and Workspace2");
-  declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output MaskWorkspace as result of binary operation");
 
@@ -85,11 +81,14 @@ void BinaryOperateMasks::exec() {
 
     unsigned int binop;
     if (op == "AND") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::AND);
     } else if (op == "OR") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::OR);
     } else if (op == "XOR") {
-      binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
+      binop =
+          static_cast<unsigned int>(Mantid::DataObjects::BinaryOperator::XOR);
     } else {
       binop = 1000;
     }

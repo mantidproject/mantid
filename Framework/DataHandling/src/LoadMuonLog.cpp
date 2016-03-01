@@ -33,10 +33,10 @@ void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace to which the log data will be added.");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load),
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load),
                   "The filename (including its full or relative path) of the "
                   "Muon Nexus file.");
 }
@@ -70,10 +70,8 @@ void LoadMuonLog::exec() {
   Progress prog(this, 0.0, 1.0, nxload.numberOfLogs());
   for (int i = 0; i < nxload.numberOfLogs(); i++) {
     std::string logName = nxload.getLogName(i);
-    TimeSeriesProperty<double> *l_PropertyDouble =
-        new TimeSeriesProperty<double>(logName);
-    TimeSeriesProperty<std::string> *l_PropertyString =
-        new TimeSeriesProperty<std::string>(logName);
+    auto l_PropertyDouble = new TimeSeriesProperty<double>(logName);
+    auto l_PropertyString = new TimeSeriesProperty<std::string>(logName);
 
     // Read log file into Property which is then stored in Sample object
     if (!nxload.logTypeNumeric(i)) {
@@ -112,9 +110,8 @@ void LoadMuonLog::exec() {
 * @returns The string but with all characters in lower case
 */
 std::string LoadMuonLog::stringToLower(std::string strToConvert) {
-  for (unsigned int i = 0; i < strToConvert.length(); i++) {
-    strToConvert[i] = static_cast<char>(tolower(strToConvert[i]));
-  }
+  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(),
+                 ::tolower);
   return strToConvert; // return the converted string
 }
 

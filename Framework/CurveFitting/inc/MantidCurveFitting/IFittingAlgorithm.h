@@ -50,19 +50,19 @@ namespace CurveFitting {
 class DLLExport IFittingAlgorithm : public API::Algorithm {
 public:
   IFittingAlgorithm();
-  virtual ~IFittingAlgorithm();
+  ~IFittingAlgorithm() override;
 
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Child classes declare their properties here.
   virtual void initConcrete() = 0;
   /// Child classes implement the algorithm logic here.
   virtual void execConcrete() = 0;
 
-  virtual void afterPropertySet(const std::string &propName);
+  void afterPropertySet(const std::string &propName) override;
   void addWorkspace(const std::string &workspaceNameProperty,
                     bool addProperties = true);
   /// Read domain type property and cache the value

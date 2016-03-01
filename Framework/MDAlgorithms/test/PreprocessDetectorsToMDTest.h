@@ -32,7 +32,7 @@ public:
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of
 // ConvertToMD algorithm.
 class PreprocessDetectorsToMDTest : public CxxTest::TestSuite {
-  std::auto_ptr<PrepcocessDetectorsToMDTestHelper> pAlg;
+  std::unique_ptr<PrepcocessDetectorsToMDTestHelper> pAlg;
   API::MatrixWorkspace_sptr ws2D;
   boost::shared_ptr<DataObjects::TableWorkspace> tws;
 
@@ -134,8 +134,8 @@ public:
   }
 
   void testTheAlg() {
-    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(
-        new PrepcocessDetectorsToMDTestHelper());
+    auto pAlg =
+        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -177,8 +177,8 @@ public:
   }
 
   void testCreateWSWithEfixed() {
-    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(
-        new PrepcocessDetectorsToMDTestHelper());
+    auto pAlg =
+        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -204,8 +204,8 @@ public:
   }
 
   void testUpdateMasks() {
-    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(
-        new PrepcocessDetectorsToMDTestHelper());
+    auto pAlg =
+        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -292,8 +292,8 @@ public:
     API::AnalysisDataService::Instance().remove("PreprocDetectorsWSMasks");
   }
   void testNoMasksColumnTrhows() {
-    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(
-        new PrepcocessDetectorsToMDTestHelper());
+    auto pAlg =
+        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -321,8 +321,7 @@ public:
   }
 
   PreprocessDetectorsToMDTest() {
-    pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(
-        new PrepcocessDetectorsToMDTestHelper());
+    pAlg = Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);

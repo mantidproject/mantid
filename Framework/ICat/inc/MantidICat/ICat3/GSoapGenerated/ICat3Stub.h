@@ -276,7 +276,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__anyType() { xsd__anyType::soap_default(NULL); }
-  virtual ~xsd__anyType() {}
+  virtual ~xsd__anyType() = default;
 };
 #endif
 
@@ -298,7 +298,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__boolean() { xsd__boolean::soap_default(NULL); }
-  virtual ~xsd__boolean() {}
+  virtual ~xsd__boolean() = default;
 };
 #endif
 
@@ -320,7 +320,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__dateTime() { xsd__dateTime::soap_default(NULL); }
-  virtual ~xsd__dateTime() {}
+  virtual ~xsd__dateTime() = default;
 };
 #endif
 
@@ -342,7 +342,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__double() { xsd__double::soap_default(NULL); }
-  virtual ~xsd__double() {}
+  virtual ~xsd__double() = default;
 };
 #endif
 
@@ -364,7 +364,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__float() { xsd__float::soap_default(NULL); }
-  virtual ~xsd__float() {}
+  virtual ~xsd__float() = default;
 };
 #endif
 
@@ -386,7 +386,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__int() { xsd__int::soap_default(NULL); }
-  virtual ~xsd__int() {}
+  virtual ~xsd__int() = default;
 };
 #endif
 
@@ -408,7 +408,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__long() { xsd__long::soap_default(NULL); }
-  virtual ~xsd__long() {}
+  virtual ~xsd__long() = default;
 };
 #endif
 
@@ -434,7 +434,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   xsd__string() { xsd__string::soap_default(NULL); }
-  virtual ~xsd__string() {}
+  virtual ~xsd__string() = default;
 };
 #endif
 
@@ -456,7 +456,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__logicalOperator_() { ns1__logicalOperator_::soap_default(NULL); }
-  virtual ~ns1__logicalOperator_() {}
+  virtual ~ns1__logicalOperator_() = default;
 };
 #endif
 
@@ -478,7 +478,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafileInclude_() { ns1__datafileInclude_::soap_default(NULL); }
-  virtual ~ns1__datafileInclude_() {}
+  virtual ~ns1__datafileInclude_() = default;
 };
 #endif
 
@@ -500,7 +500,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datasetInclude_() { ns1__datasetInclude_::soap_default(NULL); }
-  virtual ~ns1__datasetInclude_() {}
+  virtual ~ns1__datasetInclude_() = default;
 };
 #endif
 
@@ -524,7 +524,7 @@ public:
   ns1__investigationInclude_() {
     ns1__investigationInclude_::soap_default(NULL);
   }
-  virtual ~ns1__investigationInclude_() {}
+  virtual ~ns1__investigationInclude_() = default;
 };
 #endif
 
@@ -548,7 +548,7 @@ public:
   ns1__restrictionAttributes_() {
     ns1__restrictionAttributes_::soap_default(NULL);
   }
-  virtual ~ns1__restrictionAttributes_() {}
+  virtual ~ns1__restrictionAttributes_() = default;
 };
 #endif
 
@@ -570,7 +570,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__sampleInclude_() { ns1__sampleInclude_::soap_default(NULL); }
-  virtual ~ns1__sampleInclude_() {}
+  virtual ~ns1__sampleInclude_() = default;
 };
 #endif
 
@@ -592,7 +592,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameterValueType_() { ns1__parameterValueType_::soap_default(NULL); }
-  virtual ~ns1__parameterValueType_() {}
+  virtual ~ns1__parameterValueType_() = default;
 };
 #endif
 
@@ -614,7 +614,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__comparisonOperator_() { ns1__comparisonOperator_::soap_default(NULL); }
-  virtual ~ns1__comparisonOperator_() {}
+  virtual ~ns1__comparisonOperator_() = default;
 };
 #endif
 
@@ -636,7 +636,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__keywordType_() { ns1__keywordType_::soap_default(NULL); }
-  virtual ~ns1__keywordType_() {}
+  virtual ~ns1__keywordType_() = default;
 };
 #endif
 
@@ -658,7 +658,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameterType_() { ns1__parameterType_::soap_default(NULL); }
-  virtual ~ns1__parameterType_() {}
+  virtual ~ns1__parameterType_() = default;
 };
 #endif
 
@@ -680,7 +680,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__elementType_() { ns1__elementType_::soap_default(NULL); }
-  virtual ~ns1__elementType_() {}
+  virtual ~ns1__elementType_() = default;
 };
 #endif
 
@@ -706,7 +706,7 @@ public:
   ns1__searchDatasetByRestrictionLogical() {
     ns1__searchDatasetByRestrictionLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestrictionLogical() {}
+  virtual ~ns1__searchDatasetByRestrictionLogical() = default;
 };
 #endif
 
@@ -728,7 +728,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__condition() { ns1__condition::soap_default(NULL); }
-  virtual ~ns1__condition() {}
+  virtual ~ns1__condition() = default;
 };
 #endif
 
@@ -758,7 +758,7 @@ public:
   ns1__searchDatasetByRestrictionLogicalResponse() {
     ns1__searchDatasetByRestrictionLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestrictionLogicalResponse() {}
+  virtual ~ns1__searchDatasetByRestrictionLogicalResponse() = default;
 };
 #endif
 
@@ -785,7 +785,7 @@ public:
   ns1__searchDatasetByParameterRestriction() {
     ns1__searchDatasetByParameterRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterRestriction() {}
+  virtual ~ns1__searchDatasetByParameterRestriction() = default;
 };
 #endif
 
@@ -815,7 +815,7 @@ public:
   ns1__searchDatasetByParameterRestrictionResponse() {
     ns1__searchDatasetByParameterRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterRestrictionResponse() {}
+  virtual ~ns1__searchDatasetByParameterRestrictionResponse() = default;
 };
 #endif
 
@@ -836,7 +836,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listDatasetTypes() { ns1__listDatasetTypes::soap_default(NULL); }
-  virtual ~ns1__listDatasetTypes() {}
+  virtual ~ns1__listDatasetTypes() = default;
 };
 #endif
 
@@ -864,7 +864,7 @@ public:
   ns1__listDatasetTypesResponse() {
     ns1__listDatasetTypesResponse::soap_default(NULL);
   }
-  virtual ~ns1__listDatasetTypesResponse() {}
+  virtual ~ns1__listDatasetTypesResponse() = default;
 };
 #endif
 
@@ -889,7 +889,7 @@ public:
   ns1__searchFacilityUserByRestriction() {
     ns1__searchFacilityUserByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchFacilityUserByRestriction() {}
+  virtual ~ns1__searchFacilityUserByRestriction() = default;
 };
 #endif
 
@@ -919,7 +919,7 @@ public:
   ns1__searchFacilityUserByRestrictionResponse() {
     ns1__searchFacilityUserByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchFacilityUserByRestrictionResponse() {}
+  virtual ~ns1__searchFacilityUserByRestrictionResponse() = default;
 };
 #endif
 
@@ -943,7 +943,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__entityBaseBean() { ns1__entityBaseBean::soap_default(NULL); }
-  virtual ~ns1__entityBaseBean() {}
+  virtual ~ns1__entityBaseBean() = default;
 };
 #endif
 
@@ -967,7 +967,7 @@ public:
   ns1__searchSamplesBySampleName() {
     ns1__searchSamplesBySampleName::soap_default(NULL);
   }
-  virtual ~ns1__searchSamplesBySampleName() {}
+  virtual ~ns1__searchSamplesBySampleName() = default;
 };
 #endif
 
@@ -995,7 +995,7 @@ public:
   ns1__searchSamplesBySampleNameResponse() {
     ns1__searchSamplesBySampleNameResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSamplesBySampleNameResponse() {}
+  virtual ~ns1__searchSamplesBySampleNameResponse() = default;
 };
 #endif
 
@@ -1016,7 +1016,7 @@ public:
   ns1__entityPrimaryKeyBaseBean() {
     ns1__entityPrimaryKeyBaseBean::soap_default(NULL);
   }
-  virtual ~ns1__entityPrimaryKeyBaseBean() {}
+  virtual ~ns1__entityPrimaryKeyBaseBean() = default;
 };
 #endif
 
@@ -1042,7 +1042,7 @@ public:
   ns1__searchSampleByRestrictionComparison() {
     ns1__searchSampleByRestrictionComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestrictionComparison() {}
+  virtual ~ns1__searchSampleByRestrictionComparison() = default;
 };
 #endif
 
@@ -1072,7 +1072,7 @@ public:
   ns1__searchSampleByRestrictionComparisonResponse() {
     ns1__searchSampleByRestrictionComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestrictionComparisonResponse() {}
+  virtual ~ns1__searchSampleByRestrictionComparisonResponse() = default;
 };
 #endif
 
@@ -1097,7 +1097,7 @@ public:
   ns1__searchDatafileByRestriction() {
     ns1__searchDatafileByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestriction() {}
+  virtual ~ns1__searchDatafileByRestriction() = default;
 };
 #endif
 
@@ -1125,7 +1125,7 @@ public:
   ns1__searchDatafileByRestrictionResponse() {
     ns1__searchDatafileByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestrictionResponse() {}
+  virtual ~ns1__searchDatafileByRestrictionResponse() = default;
 };
 #endif
 
@@ -1146,7 +1146,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listInstruments() { ns1__listInstruments::soap_default(NULL); }
-  virtual ~ns1__listInstruments() {}
+  virtual ~ns1__listInstruments() = default;
 };
 #endif
 
@@ -1174,7 +1174,7 @@ public:
   ns1__listInstrumentsResponse() {
     ns1__listInstrumentsResponse::soap_default(NULL);
   }
-  virtual ~ns1__listInstrumentsResponse() {}
+  virtual ~ns1__listInstrumentsResponse() = default;
 };
 #endif
 
@@ -1196,7 +1196,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeSample() { ns1__removeSample::soap_default(NULL); }
-  virtual ~ns1__removeSample() {}
+  virtual ~ns1__removeSample() = default;
 };
 #endif
 
@@ -1215,7 +1215,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeSampleResponse() { ns1__removeSampleResponse::soap_default(NULL); }
-  virtual ~ns1__removeSampleResponse() {}
+  virtual ~ns1__removeSampleResponse() = default;
 };
 #endif
 
@@ -1240,7 +1240,7 @@ public:
   ns1__InsufficientPrivilegesException() {
     ns1__InsufficientPrivilegesException::soap_default(NULL);
   }
-  virtual ~ns1__InsufficientPrivilegesException() {}
+  virtual ~ns1__InsufficientPrivilegesException() = default;
 };
 #endif
 
@@ -1263,7 +1263,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__createDataFile() { ns1__createDataFile::soap_default(NULL); }
-  virtual ~ns1__createDataFile() {}
+  virtual ~ns1__createDataFile() = default;
 };
 #endif
 
@@ -1291,7 +1291,7 @@ public:
   ns1__createDataFileResponse() {
     ns1__createDataFileResponse::soap_default(NULL);
   }
-  virtual ~ns1__createDataFileResponse() {}
+  virtual ~ns1__createDataFileResponse() = default;
 };
 #endif
 
@@ -1313,7 +1313,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifySample() { ns1__modifySample::soap_default(NULL); }
-  virtual ~ns1__modifySample() {}
+  virtual ~ns1__modifySample() = default;
 };
 #endif
 
@@ -1332,7 +1332,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifySampleResponse() { ns1__modifySampleResponse::soap_default(NULL); }
-  virtual ~ns1__modifySampleResponse() {}
+  virtual ~ns1__modifySampleResponse() = default;
 };
 #endif
 
@@ -1359,7 +1359,7 @@ public:
   ns1__searchInvestigationByParameterLogical() {
     ns1__searchInvestigationByParameterLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterLogical() {}
+  virtual ~ns1__searchInvestigationByParameterLogical() = default;
 };
 #endif
 
@@ -1389,7 +1389,7 @@ public:
   ns1__searchInvestigationByParameterLogicalResponse() {
     ns1__searchInvestigationByParameterLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterLogicalResponse() {}
+  virtual ~ns1__searchInvestigationByParameterLogicalResponse() = default;
 };
 #endif
 
@@ -1414,7 +1414,7 @@ public:
   ns1__getParameterByNameUnits() {
     ns1__getParameterByNameUnits::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByNameUnits() {}
+  virtual ~ns1__getParameterByNameUnits() = default;
 };
 #endif
 
@@ -1442,7 +1442,7 @@ public:
   ns1__getParameterByNameUnitsResponse() {
     ns1__getParameterByNameUnitsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByNameUnitsResponse() {}
+  virtual ~ns1__getParameterByNameUnitsResponse() = default;
 };
 #endif
 
@@ -1464,7 +1464,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeDataFile() { ns1__removeDataFile::soap_default(NULL); }
-  virtual ~ns1__removeDataFile() {}
+  virtual ~ns1__removeDataFile() = default;
 };
 #endif
 
@@ -1485,7 +1485,7 @@ public:
   ns1__removeDataFileResponse() {
     ns1__removeDataFileResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeDataFileResponse() {}
+  virtual ~ns1__removeDataFileResponse() = default;
 };
 #endif
 
@@ -1507,7 +1507,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeAuthorisation() { ns1__removeAuthorisation::soap_default(NULL); }
-  virtual ~ns1__removeAuthorisation() {}
+  virtual ~ns1__removeAuthorisation() = default;
 };
 #endif
 
@@ -1528,7 +1528,7 @@ public:
   ns1__removeAuthorisationResponse() {
     ns1__removeAuthorisationResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeAuthorisationResponse() {}
+  virtual ~ns1__removeAuthorisationResponse() = default;
 };
 #endif
 
@@ -1549,7 +1549,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listFacilityCycles() { ns1__listFacilityCycles::soap_default(NULL); }
-  virtual ~ns1__listFacilityCycles() {}
+  virtual ~ns1__listFacilityCycles() = default;
 };
 #endif
 
@@ -1577,7 +1577,7 @@ public:
   ns1__listFacilityCyclesResponse() {
     ns1__listFacilityCyclesResponse::soap_default(NULL);
   }
-  virtual ~ns1__listFacilityCyclesResponse() {}
+  virtual ~ns1__listFacilityCyclesResponse() = default;
 };
 #endif
 
@@ -1603,7 +1603,7 @@ public:
   ns1__addDataFileParameters() {
     ns1__addDataFileParameters::soap_default(NULL);
   }
-  virtual ~ns1__addDataFileParameters() {}
+  virtual ~ns1__addDataFileParameters() = default;
 };
 #endif
 
@@ -1631,7 +1631,7 @@ public:
   ns1__addDataFileParametersResponse() {
     ns1__addDataFileParametersResponse::soap_default(NULL);
   }
-  virtual ~ns1__addDataFileParametersResponse() {}
+  virtual ~ns1__addDataFileParametersResponse() = default;
 };
 #endif
 
@@ -1652,7 +1652,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__logout() { ns1__logout::soap_default(NULL); }
-  virtual ~ns1__logout() {}
+  virtual ~ns1__logout() = default;
 };
 #endif
 
@@ -1678,7 +1678,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__logoutResponse() { ns1__logoutResponse::soap_default(NULL); }
-  virtual ~ns1__logoutResponse() {}
+  virtual ~ns1__logoutResponse() = default;
 };
 #endif
 
@@ -1701,7 +1701,7 @@ public:
   ns1__getInstrumentsWithData() {
     ns1__getInstrumentsWithData::soap_default(NULL);
   }
-  virtual ~ns1__getInstrumentsWithData() {}
+  virtual ~ns1__getInstrumentsWithData() = default;
 };
 #endif
 
@@ -1729,7 +1729,7 @@ public:
   ns1__getInstrumentsWithDataResponse() {
     ns1__getInstrumentsWithDataResponse::soap_default(NULL);
   }
-  virtual ~ns1__getInstrumentsWithDataResponse() {}
+  virtual ~ns1__getInstrumentsWithDataResponse() = default;
 };
 #endif
 
@@ -1751,7 +1751,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__downloadDataset() { ns1__downloadDataset::soap_default(NULL); }
-  virtual ~ns1__downloadDataset() {}
+  virtual ~ns1__downloadDataset() = default;
 };
 #endif
 
@@ -1779,7 +1779,7 @@ public:
   ns1__downloadDatasetResponse() {
     ns1__downloadDatasetResponse::soap_default(NULL);
   }
-  virtual ~ns1__downloadDatasetResponse() {}
+  virtual ~ns1__downloadDatasetResponse() = default;
 };
 #endif
 
@@ -1803,7 +1803,7 @@ public:
   ns1__getFacilityUserByFederalId() {
     ns1__getFacilityUserByFederalId::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityUserByFederalId() {}
+  virtual ~ns1__getFacilityUserByFederalId() = default;
 };
 #endif
 
@@ -1831,7 +1831,7 @@ public:
   ns1__getFacilityUserByFederalIdResponse() {
     ns1__getFacilityUserByFederalIdResponse::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityUserByFederalIdResponse() {}
+  virtual ~ns1__getFacilityUserByFederalIdResponse() = default;
 };
 #endif
 
@@ -1853,7 +1853,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeInvestigation() { ns1__removeInvestigation::soap_default(NULL); }
-  virtual ~ns1__removeInvestigation() {}
+  virtual ~ns1__removeInvestigation() = default;
 };
 #endif
 
@@ -1874,7 +1874,7 @@ public:
   ns1__removeInvestigationResponse() {
     ns1__removeInvestigationResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeInvestigationResponse() {}
+  virtual ~ns1__removeInvestigationResponse() = default;
 };
 #endif
 
@@ -1897,7 +1897,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeInvestigator() { ns1__removeInvestigator::soap_default(NULL); }
-  virtual ~ns1__removeInvestigator() {}
+  virtual ~ns1__removeInvestigator() = default;
 };
 #endif
 
@@ -1918,7 +1918,7 @@ public:
   ns1__removeInvestigatorResponse() {
     ns1__removeInvestigatorResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeInvestigatorResponse() {}
+  virtual ~ns1__removeInvestigatorResponse() = default;
 };
 #endif
 
@@ -1943,7 +1943,7 @@ public:
   ns1__getParameterByRestriction() {
     ns1__getParameterByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByRestriction() {}
+  virtual ~ns1__getParameterByRestriction() = default;
 };
 #endif
 
@@ -1971,7 +1971,7 @@ public:
   ns1__getParameterByRestrictionResponse() {
     ns1__getParameterByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByRestrictionResponse() {}
+  virtual ~ns1__getParameterByRestrictionResponse() = default;
 };
 #endif
 
@@ -1993,7 +1993,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeKeyword() { ns1__removeKeyword::soap_default(NULL); }
-  virtual ~ns1__removeKeyword() {}
+  virtual ~ns1__removeKeyword() = default;
 };
 #endif
 
@@ -2014,7 +2014,7 @@ public:
   ns1__removeKeywordResponse() {
     ns1__removeKeywordResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeKeywordResponse() {}
+  virtual ~ns1__removeKeywordResponse() = default;
 };
 #endif
 
@@ -2036,7 +2036,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteInvestigation() { ns1__deleteInvestigation::soap_default(NULL); }
-  virtual ~ns1__deleteInvestigation() {}
+  virtual ~ns1__deleteInvestigation() = default;
 };
 #endif
 
@@ -2057,7 +2057,7 @@ public:
   ns1__deleteInvestigationResponse() {
     ns1__deleteInvestigationResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteInvestigationResponse() {}
+  virtual ~ns1__deleteInvestigationResponse() = default;
 };
 #endif
 
@@ -2081,7 +2081,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__createDataSets() { ns1__createDataSets::soap_default(NULL); }
-  virtual ~ns1__createDataSets() {}
+  virtual ~ns1__createDataSets() = default;
 };
 #endif
 
@@ -2109,7 +2109,7 @@ public:
   ns1__createDataSetsResponse() {
     ns1__createDataSetsResponse::soap_default(NULL);
   }
-  virtual ~ns1__createDataSetsResponse() {}
+  virtual ~ns1__createDataSetsResponse() = default;
 };
 #endif
 
@@ -2131,7 +2131,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removePublication() { ns1__removePublication::soap_default(NULL); }
-  virtual ~ns1__removePublication() {}
+  virtual ~ns1__removePublication() = default;
 };
 #endif
 
@@ -2152,7 +2152,7 @@ public:
   ns1__removePublicationResponse() {
     ns1__removePublicationResponse::soap_default(NULL);
   }
-  virtual ~ns1__removePublicationResponse() {}
+  virtual ~ns1__removePublicationResponse() = default;
 };
 #endif
 
@@ -2174,7 +2174,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getAllKeywords() { ns1__getAllKeywords::soap_default(NULL); }
-  virtual ~ns1__getAllKeywords() {}
+  virtual ~ns1__getAllKeywords() = default;
 };
 #endif
 
@@ -2202,7 +2202,7 @@ public:
   ns1__getAllKeywordsResponse() {
     ns1__getAllKeywordsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getAllKeywordsResponse() {}
+  virtual ~ns1__getAllKeywordsResponse() = default;
 };
 #endif
 
@@ -2229,7 +2229,7 @@ public:
   ns1__searchDatafileByRestrictionComparison() {
     ns1__searchDatafileByRestrictionComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestrictionComparison() {}
+  virtual ~ns1__searchDatafileByRestrictionComparison() = default;
 };
 #endif
 
@@ -2259,7 +2259,7 @@ public:
   ns1__searchDatafileByRestrictionComparisonResponse() {
     ns1__searchDatafileByRestrictionComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestrictionComparisonResponse() {}
+  virtual ~ns1__searchDatafileByRestrictionComparisonResponse() = default;
 };
 #endif
 
@@ -2288,7 +2288,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__userDetails() { ns1__userDetails::soap_default(NULL); }
-  virtual ~ns1__userDetails() {}
+  virtual ~ns1__userDetails() = default;
 };
 #endif
 
@@ -2313,7 +2313,7 @@ public:
   ns1__searchDatafileByParameter() {
     ns1__searchDatafileByParameter::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameter() {}
+  virtual ~ns1__searchDatafileByParameter() = default;
 };
 #endif
 
@@ -2341,7 +2341,7 @@ public:
   ns1__searchDatafileByParameterResponse() {
     ns1__searchDatafileByParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterResponse() {}
+  virtual ~ns1__searchDatafileByParameterResponse() = default;
 };
 #endif
 
@@ -2368,7 +2368,7 @@ public:
   ns1__searchInvestigationByParameterCondition() {
     ns1__searchInvestigationByParameterCondition::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterCondition() {}
+  virtual ~ns1__searchInvestigationByParameterCondition() = default;
 };
 #endif
 
@@ -2399,7 +2399,7 @@ public:
   ns1__searchInvestigationByParameterConditionResponse() {
     ns1__searchInvestigationByParameterConditionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterConditionResponse() {}
+  virtual ~ns1__searchInvestigationByParameterConditionResponse() = default;
 };
 #endif
 
@@ -2421,7 +2421,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__downloadDatafiles() { ns1__downloadDatafiles::soap_default(NULL); }
-  virtual ~ns1__downloadDatafiles() {}
+  virtual ~ns1__downloadDatafiles() = default;
 };
 #endif
 
@@ -2449,7 +2449,7 @@ public:
   ns1__downloadDatafilesResponse() {
     ns1__downloadDatafilesResponse::soap_default(NULL);
   }
-  virtual ~ns1__downloadDatafilesResponse() {}
+  virtual ~ns1__downloadDatafilesResponse() = default;
 };
 #endif
 
@@ -2474,7 +2474,7 @@ public:
   ns1__searchSampleByRestriction() {
     ns1__searchSampleByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestriction() {}
+  virtual ~ns1__searchSampleByRestriction() = default;
 };
 #endif
 
@@ -2502,7 +2502,7 @@ public:
   ns1__searchSampleByRestrictionResponse() {
     ns1__searchSampleByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestrictionResponse() {}
+  virtual ~ns1__searchSampleByRestrictionResponse() = default;
 };
 #endif
 
@@ -2528,7 +2528,7 @@ public:
   ns1__searchDatasetByParameterComparison() {
     ns1__searchDatasetByParameterComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterComparison() {}
+  virtual ~ns1__searchDatasetByParameterComparison() = default;
 };
 #endif
 
@@ -2558,7 +2558,7 @@ public:
   ns1__searchDatasetByParameterComparisonResponse() {
     ns1__searchDatasetByParameterComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterComparisonResponse() {}
+  virtual ~ns1__searchDatasetByParameterComparisonResponse() = default;
 };
 #endif
 
@@ -2580,7 +2580,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifyDataSet() { ns1__modifyDataSet::soap_default(NULL); }
-  virtual ~ns1__modifyDataSet() {}
+  virtual ~ns1__modifyDataSet() = default;
 };
 #endif
 
@@ -2601,7 +2601,7 @@ public:
   ns1__modifyDataSetResponse() {
     ns1__modifyDataSetResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataSetResponse() {}
+  virtual ~ns1__modifyDataSetResponse() = default;
 };
 #endif
 
@@ -2625,7 +2625,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addSampleParameter() { ns1__addSampleParameter::soap_default(NULL); }
-  virtual ~ns1__addSampleParameter() {}
+  virtual ~ns1__addSampleParameter() = default;
 };
 #endif
 
@@ -2653,7 +2653,7 @@ public:
   ns1__addSampleParameterResponse() {
     ns1__addSampleParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__addSampleParameterResponse() {}
+  virtual ~ns1__addSampleParameterResponse() = default;
 };
 #endif
 
@@ -2679,7 +2679,7 @@ public:
   ns1__getFacilityCyclesWithDataForInstrument() {
     ns1__getFacilityCyclesWithDataForInstrument::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityCyclesWithDataForInstrument() {}
+  virtual ~ns1__getFacilityCyclesWithDataForInstrument() = default;
 };
 #endif
 
@@ -2710,7 +2710,7 @@ public:
   ns1__getFacilityCyclesWithDataForInstrumentResponse() {
     ns1__getFacilityCyclesWithDataForInstrumentResponse::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityCyclesWithDataForInstrumentResponse() {}
+  virtual ~ns1__getFacilityCyclesWithDataForInstrumentResponse() = default;
 };
 #endif
 
@@ -2734,7 +2734,7 @@ public:
   ns1__getFacilityUserByFacilityUserId() {
     ns1__getFacilityUserByFacilityUserId::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityUserByFacilityUserId() {}
+  virtual ~ns1__getFacilityUserByFacilityUserId() = default;
 };
 #endif
 
@@ -2764,7 +2764,7 @@ public:
   ns1__getFacilityUserByFacilityUserIdResponse() {
     ns1__getFacilityUserByFacilityUserIdResponse::soap_default(NULL);
   }
-  virtual ~ns1__getFacilityUserByFacilityUserIdResponse() {}
+  virtual ~ns1__getFacilityUserByFacilityUserIdResponse() = default;
 };
 #endif
 
@@ -2788,7 +2788,7 @@ public:
   ns1__checkDatafileDownloadAccess() {
     ns1__checkDatafileDownloadAccess::soap_default(NULL);
   }
-  virtual ~ns1__checkDatafileDownloadAccess() {}
+  virtual ~ns1__checkDatafileDownloadAccess() = default;
 };
 #endif
 
@@ -2816,7 +2816,7 @@ public:
   ns1__checkDatafileDownloadAccessResponse() {
     ns1__checkDatafileDownloadAccessResponse::soap_default(NULL);
   }
-  virtual ~ns1__checkDatafileDownloadAccessResponse() {}
+  virtual ~ns1__checkDatafileDownloadAccessResponse() = default;
 };
 #endif
 
@@ -2842,7 +2842,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__downloadInfo() { ns1__downloadInfo::soap_default(NULL); }
-  virtual ~ns1__downloadInfo() {}
+  virtual ~ns1__downloadInfo() = default;
 };
 #endif
 
@@ -2864,7 +2864,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteDataFile() { ns1__deleteDataFile::soap_default(NULL); }
-  virtual ~ns1__deleteDataFile() {}
+  virtual ~ns1__deleteDataFile() = default;
 };
 #endif
 
@@ -2885,7 +2885,7 @@ public:
   ns1__deleteDataFileResponse() {
     ns1__deleteDataFileResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataFileResponse() {}
+  virtual ~ns1__deleteDataFileResponse() = default;
 };
 #endif
 
@@ -2907,7 +2907,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByUserSurname() { ns1__searchByUserSurname::soap_default(NULL); }
-  virtual ~ns1__searchByUserSurname() {}
+  virtual ~ns1__searchByUserSurname() = default;
 };
 #endif
 
@@ -2935,7 +2935,7 @@ public:
   ns1__searchByUserSurnameResponse() {
     ns1__searchByUserSurnameResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserSurnameResponse() {}
+  virtual ~ns1__searchByUserSurnameResponse() = default;
 };
 #endif
 
@@ -2961,7 +2961,7 @@ public:
   ns1__searchByUserSurnamePagination() {
     ns1__searchByUserSurnamePagination::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserSurnamePagination() {}
+  virtual ~ns1__searchByUserSurnamePagination() = default;
 };
 #endif
 
@@ -2990,7 +2990,7 @@ public:
   ns1__searchByUserSurnamePaginationResponse() {
     ns1__searchByUserSurnamePaginationResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserSurnamePaginationResponse() {}
+  virtual ~ns1__searchByUserSurnamePaginationResponse() = default;
 };
 #endif
 
@@ -3015,7 +3015,7 @@ public:
   ns1__searchDatafileByParameterCondition() {
     ns1__searchDatafileByParameterCondition::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterCondition() {}
+  virtual ~ns1__searchDatafileByParameterCondition() = default;
 };
 #endif
 
@@ -3045,7 +3045,7 @@ public:
   ns1__searchDatafileByParameterConditionResponse() {
     ns1__searchDatafileByParameterConditionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterConditionResponse() {}
+  virtual ~ns1__searchDatafileByParameterConditionResponse() = default;
 };
 #endif
 
@@ -3069,7 +3069,7 @@ public:
   ns1__checkDatasetDownloadAccess() {
     ns1__checkDatasetDownloadAccess::soap_default(NULL);
   }
-  virtual ~ns1__checkDatasetDownloadAccess() {}
+  virtual ~ns1__checkDatasetDownloadAccess() = default;
 };
 #endif
 
@@ -3097,7 +3097,7 @@ public:
   ns1__checkDatasetDownloadAccessResponse() {
     ns1__checkDatasetDownloadAccessResponse::soap_default(NULL);
   }
-  virtual ~ns1__checkDatasetDownloadAccessResponse() {}
+  virtual ~ns1__checkDatasetDownloadAccessResponse() = default;
 };
 #endif
 
@@ -3119,7 +3119,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByKeywords() { ns1__searchByKeywords::soap_default(NULL); }
-  virtual ~ns1__searchByKeywords() {}
+  virtual ~ns1__searchByKeywords() = default;
 };
 #endif
 
@@ -3147,7 +3147,7 @@ public:
   ns1__searchByKeywordsResponse() {
     ns1__searchByKeywordsResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByKeywordsResponse() {}
+  virtual ~ns1__searchByKeywordsResponse() = default;
 };
 #endif
 
@@ -3172,7 +3172,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByKeywordsAll() { ns1__searchByKeywordsAll::soap_default(NULL); }
-  virtual ~ns1__searchByKeywordsAll() {}
+  virtual ~ns1__searchByKeywordsAll() = default;
 };
 #endif
 
@@ -3197,7 +3197,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__keywordDetails() { ns1__keywordDetails::soap_default(NULL); }
-  virtual ~ns1__keywordDetails() {}
+  virtual ~ns1__keywordDetails() = default;
 };
 #endif
 
@@ -3225,7 +3225,7 @@ public:
   ns1__searchByKeywordsAllResponse() {
     ns1__searchByKeywordsAllResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByKeywordsAllResponse() {}
+  virtual ~ns1__searchByKeywordsAllResponse() = default;
 };
 #endif
 
@@ -3246,7 +3246,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getAllInstruments() { ns1__getAllInstruments::soap_default(NULL); }
-  virtual ~ns1__getAllInstruments() {}
+  virtual ~ns1__getAllInstruments() = default;
 };
 #endif
 
@@ -3274,7 +3274,7 @@ public:
   ns1__getAllInstrumentsResponse() {
     ns1__getAllInstrumentsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getAllInstrumentsResponse() {}
+  virtual ~ns1__getAllInstrumentsResponse() = default;
 };
 #endif
 
@@ -3300,7 +3300,7 @@ public:
   ns1__searchDatafileByRestrictionLogical() {
     ns1__searchDatafileByRestrictionLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestrictionLogical() {}
+  virtual ~ns1__searchDatafileByRestrictionLogical() = default;
 };
 #endif
 
@@ -3330,7 +3330,7 @@ public:
   ns1__searchDatafileByRestrictionLogicalResponse() {
     ns1__searchDatafileByRestrictionLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByRestrictionLogicalResponse() {}
+  virtual ~ns1__searchDatafileByRestrictionLogicalResponse() = default;
 };
 #endif
 
@@ -3351,7 +3351,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getMyInvestigations() { ns1__getMyInvestigations::soap_default(NULL); }
-  virtual ~ns1__getMyInvestigations() {}
+  virtual ~ns1__getMyInvestigations() = default;
 };
 #endif
 
@@ -3379,7 +3379,7 @@ public:
   ns1__getMyInvestigationsResponse() {
     ns1__getMyInvestigationsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getMyInvestigationsResponse() {}
+  virtual ~ns1__getMyInvestigationsResponse() = default;
 };
 #endif
 
@@ -3405,7 +3405,7 @@ public:
   ns1__getMyInvestigationsIncludes() {
     ns1__getMyInvestigationsIncludes::soap_default(NULL);
   }
-  virtual ~ns1__getMyInvestigationsIncludes() {}
+  virtual ~ns1__getMyInvestigationsIncludes() = default;
 };
 #endif
 
@@ -3433,7 +3433,7 @@ public:
   ns1__getMyInvestigationsIncludesResponse() {
     ns1__getMyInvestigationsIncludesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getMyInvestigationsIncludesResponse() {}
+  virtual ~ns1__getMyInvestigationsIncludesResponse() = default;
 };
 #endif
 
@@ -3462,7 +3462,7 @@ public:
   ns1__getMyInvestigationsIncludesPagination() {
     ns1__getMyInvestigationsIncludesPagination::soap_default(NULL);
   }
-  virtual ~ns1__getMyInvestigationsIncludesPagination() {}
+  virtual ~ns1__getMyInvestigationsIncludesPagination() = default;
 };
 #endif
 
@@ -3492,7 +3492,7 @@ public:
   ns1__getMyInvestigationsIncludesPaginationResponse() {
     ns1__getMyInvestigationsIncludesPaginationResponse::soap_default(NULL);
   }
-  virtual ~ns1__getMyInvestigationsIncludesPaginationResponse() {}
+  virtual ~ns1__getMyInvestigationsIncludesPaginationResponse() = default;
 };
 #endif
 
@@ -3519,7 +3519,7 @@ public:
   ns1__searchSampleByParameterRestriction() {
     ns1__searchSampleByParameterRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterRestriction() {}
+  virtual ~ns1__searchSampleByParameterRestriction() = default;
 };
 #endif
 
@@ -3549,7 +3549,7 @@ public:
   ns1__searchSampleByParameterRestrictionResponse() {
     ns1__searchSampleByParameterRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterRestrictionResponse() {}
+  virtual ~ns1__searchSampleByParameterRestrictionResponse() = default;
 };
 #endif
 
@@ -3574,7 +3574,7 @@ public:
   ns1__removeDataSetParameter() {
     ns1__removeDataSetParameter::soap_default(NULL);
   }
-  virtual ~ns1__removeDataSetParameter() {}
+  virtual ~ns1__removeDataSetParameter() = default;
 };
 #endif
 
@@ -3595,7 +3595,7 @@ public:
   ns1__removeDataSetParameterResponse() {
     ns1__removeDataSetParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeDataSetParameterResponse() {}
+  virtual ~ns1__removeDataSetParameterResponse() = default;
 };
 #endif
 
@@ -3620,7 +3620,7 @@ public:
   ns1__searchSampleByParameterCondition() {
     ns1__searchSampleByParameterCondition::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterCondition() {}
+  virtual ~ns1__searchSampleByParameterCondition() = default;
 };
 #endif
 
@@ -3650,7 +3650,7 @@ public:
   ns1__searchSampleByParameterConditionResponse() {
     ns1__searchSampleByParameterConditionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterConditionResponse() {}
+  virtual ~ns1__searchSampleByParameterConditionResponse() = default;
 };
 #endif
 
@@ -3679,7 +3679,7 @@ public:
   ns1__searchInvestigationByParameterRestriction() {
     ns1__searchInvestigationByParameterRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterRestriction() {}
+  virtual ~ns1__searchInvestigationByParameterRestriction() = default;
 };
 #endif
 
@@ -3710,7 +3710,7 @@ public:
   ns1__searchInvestigationByParameterRestrictionResponse() {
     ns1__searchInvestigationByParameterRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterRestrictionResponse() {}
+  virtual ~ns1__searchInvestigationByParameterRestrictionResponse() = default;
 };
 #endif
 
@@ -3733,7 +3733,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifyPublication() { ns1__modifyPublication::soap_default(NULL); }
-  virtual ~ns1__modifyPublication() {}
+  virtual ~ns1__modifyPublication() = default;
 };
 #endif
 
@@ -3754,7 +3754,7 @@ public:
   ns1__modifyPublicationResponse() {
     ns1__modifyPublicationResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyPublicationResponse() {}
+  virtual ~ns1__modifyPublicationResponse() = default;
 };
 #endif
 
@@ -3776,7 +3776,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByUserID() { ns1__searchByUserID::soap_default(NULL); }
-  virtual ~ns1__searchByUserID() {}
+  virtual ~ns1__searchByUserID() = default;
 };
 #endif
 
@@ -3804,7 +3804,7 @@ public:
   ns1__searchByUserIDResponse() {
     ns1__searchByUserIDResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserIDResponse() {}
+  virtual ~ns1__searchByUserIDResponse() = default;
 };
 #endif
 
@@ -3830,7 +3830,7 @@ public:
   ns1__searchByUserIDPagination() {
     ns1__searchByUserIDPagination::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserIDPagination() {}
+  virtual ~ns1__searchByUserIDPagination() = default;
 };
 #endif
 
@@ -3858,7 +3858,7 @@ public:
   ns1__searchByUserIDPaginationResponse() {
     ns1__searchByUserIDPaginationResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByUserIDPaginationResponse() {}
+  virtual ~ns1__searchByUserIDPaginationResponse() = default;
 };
 #endif
 
@@ -3884,7 +3884,7 @@ public:
   ns1__searchDatasetByParameterLogical() {
     ns1__searchDatasetByParameterLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterLogical() {}
+  virtual ~ns1__searchDatasetByParameterLogical() = default;
 };
 #endif
 
@@ -3914,7 +3914,7 @@ public:
   ns1__searchDatasetByParameterLogicalResponse() {
     ns1__searchDatasetByParameterLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterLogicalResponse() {}
+  virtual ~ns1__searchDatasetByParameterLogicalResponse() = default;
 };
 #endif
 
@@ -3940,7 +3940,7 @@ public:
   ns1__removeDataFileParameter() {
     ns1__removeDataFileParameter::soap_default(NULL);
   }
-  virtual ~ns1__removeDataFileParameter() {}
+  virtual ~ns1__removeDataFileParameter() = default;
 };
 #endif
 
@@ -3961,7 +3961,7 @@ public:
   ns1__removeDataFileParameterResponse() {
     ns1__removeDataFileParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeDataFileParameterResponse() {}
+  virtual ~ns1__removeDataFileParameterResponse() = default;
 };
 #endif
 
@@ -3986,7 +3986,7 @@ public:
   ns1__searchDatasetByParameterCondition() {
     ns1__searchDatasetByParameterCondition::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterCondition() {}
+  virtual ~ns1__searchDatasetByParameterCondition() = default;
 };
 #endif
 
@@ -4016,7 +4016,7 @@ public:
   ns1__searchDatasetByParameterConditionResponse() {
     ns1__searchDatasetByParameterConditionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterConditionResponse() {}
+  virtual ~ns1__searchDatasetByParameterConditionResponse() = default;
 };
 #endif
 
@@ -4041,7 +4041,7 @@ public:
   ns1__searchSampleByParameter() {
     ns1__searchSampleByParameter::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameter() {}
+  virtual ~ns1__searchSampleByParameter() = default;
 };
 #endif
 
@@ -4069,7 +4069,7 @@ public:
   ns1__searchSampleByParameterResponse() {
     ns1__searchSampleByParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterResponse() {}
+  virtual ~ns1__searchSampleByParameterResponse() = default;
 };
 #endif
 
@@ -4096,7 +4096,7 @@ public:
   ns1__getInvestigationsIncludes() {
     ns1__getInvestigationsIncludes::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationsIncludes() {}
+  virtual ~ns1__getInvestigationsIncludes() = default;
 };
 #endif
 
@@ -4124,7 +4124,7 @@ public:
   ns1__getInvestigationsIncludesResponse() {
     ns1__getInvestigationsIncludesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationsIncludesResponse() {}
+  virtual ~ns1__getInvestigationsIncludesResponse() = default;
 };
 #endif
 
@@ -4146,7 +4146,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getInvestigations() { ns1__getInvestigations::soap_default(NULL); }
-  virtual ~ns1__getInvestigations() {}
+  virtual ~ns1__getInvestigations() = default;
 };
 #endif
 
@@ -4174,7 +4174,7 @@ public:
   ns1__getInvestigationsResponse() {
     ns1__getInvestigationsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationsResponse() {}
+  virtual ~ns1__getInvestigationsResponse() = default;
 };
 #endif
 
@@ -4196,7 +4196,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteDataSet() { ns1__deleteDataSet::soap_default(NULL); }
-  virtual ~ns1__deleteDataSet() {}
+  virtual ~ns1__deleteDataSet() = default;
 };
 #endif
 
@@ -4217,7 +4217,7 @@ public:
   ns1__deleteDataSetResponse() {
     ns1__deleteDataSetResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataSetResponse() {}
+  virtual ~ns1__deleteDataSetResponse() = default;
 };
 #endif
 
@@ -4245,7 +4245,7 @@ public:
   ns1__searchInvestigationByParameterComparison() {
     ns1__searchInvestigationByParameterComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterComparison() {}
+  virtual ~ns1__searchInvestigationByParameterComparison() = default;
 };
 #endif
 
@@ -4276,7 +4276,7 @@ public:
   ns1__searchInvestigationByParameterComparisonResponse() {
     ns1__searchInvestigationByParameterComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterComparisonResponse() {}
+  virtual ~ns1__searchInvestigationByParameterComparisonResponse() = default;
 };
 #endif
 
@@ -4297,7 +4297,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__isSessionValid() { ns1__isSessionValid::soap_default(NULL); }
-  virtual ~ns1__isSessionValid() {}
+  virtual ~ns1__isSessionValid() = default;
 };
 #endif
 
@@ -4325,7 +4325,7 @@ public:
   ns1__isSessionValidResponse() {
     ns1__isSessionValidResponse::soap_default(NULL);
   }
-  virtual ~ns1__isSessionValidResponse() {}
+  virtual ~ns1__isSessionValidResponse() = default;
 };
 #endif
 
@@ -4347,7 +4347,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatafiles() { ns1__getDatafiles::soap_default(NULL); }
-  virtual ~ns1__getDatafiles() {}
+  virtual ~ns1__getDatafiles() = default;
 };
 #endif
 
@@ -4373,7 +4373,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatafilesResponse() { ns1__getDatafilesResponse::soap_default(NULL); }
-  virtual ~ns1__getDatafilesResponse() {}
+  virtual ~ns1__getDatafilesResponse() = default;
 };
 #endif
 
@@ -4394,7 +4394,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getICATAPIVersion() { ns1__getICATAPIVersion::soap_default(NULL); }
-  virtual ~ns1__getICATAPIVersion() {}
+  virtual ~ns1__getICATAPIVersion() = default;
 };
 #endif
 
@@ -4422,7 +4422,7 @@ public:
   ns1__getICATAPIVersionResponse() {
     ns1__getICATAPIVersionResponse::soap_default(NULL);
   }
-  virtual ~ns1__getICATAPIVersionResponse() {}
+  virtual ~ns1__getICATAPIVersionResponse() = default;
 };
 #endif
 
@@ -4447,7 +4447,7 @@ public:
   ns1__searchInvestigationByRestriction() {
     ns1__searchInvestigationByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByRestriction() {}
+  virtual ~ns1__searchInvestigationByRestriction() = default;
 };
 #endif
 
@@ -4477,7 +4477,7 @@ public:
   ns1__searchInvestigationByRestrictionResponse() {
     ns1__searchInvestigationByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByRestrictionResponse() {}
+  virtual ~ns1__searchInvestigationByRestrictionResponse() = default;
 };
 #endif
 
@@ -4500,7 +4500,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteInvestigator() { ns1__deleteInvestigator::soap_default(NULL); }
-  virtual ~ns1__deleteInvestigator() {}
+  virtual ~ns1__deleteInvestigator() = default;
 };
 #endif
 
@@ -4521,7 +4521,7 @@ public:
   ns1__deleteInvestigatorResponse() {
     ns1__deleteInvestigatorResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteInvestigatorResponse() {}
+  virtual ~ns1__deleteInvestigatorResponse() = default;
 };
 #endif
 
@@ -4545,7 +4545,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addInvestigator() { ns1__addInvestigator::soap_default(NULL); }
-  virtual ~ns1__addInvestigator() {}
+  virtual ~ns1__addInvestigator() = default;
 };
 #endif
 
@@ -4573,7 +4573,7 @@ public:
   ns1__addInvestigatorResponse() {
     ns1__addInvestigatorResponse::soap_default(NULL);
   }
-  virtual ~ns1__addInvestigatorResponse() {}
+  virtual ~ns1__addInvestigatorResponse() = default;
 };
 #endif
 
@@ -4599,7 +4599,7 @@ public:
   ns1__searchDatafileByParameterLogical() {
     ns1__searchDatafileByParameterLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterLogical() {}
+  virtual ~ns1__searchDatafileByParameterLogical() = default;
 };
 #endif
 
@@ -4629,7 +4629,7 @@ public:
   ns1__searchDatafileByParameterLogicalResponse() {
     ns1__searchDatafileByParameterLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterLogicalResponse() {}
+  virtual ~ns1__searchDatafileByParameterLogicalResponse() = default;
 };
 #endif
 
@@ -4652,7 +4652,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__createDataSet() { ns1__createDataSet::soap_default(NULL); }
-  virtual ~ns1__createDataSet() {}
+  virtual ~ns1__createDataSet() = default;
 };
 #endif
 
@@ -4680,7 +4680,7 @@ public:
   ns1__createDataSetResponse() {
     ns1__createDataSetResponse::soap_default(NULL);
   }
-  virtual ~ns1__createDataSetResponse() {}
+  virtual ~ns1__createDataSetResponse() = default;
 };
 #endif
 
@@ -4708,7 +4708,7 @@ public:
   ns1__searchDatafileByParameterRestriction() {
     ns1__searchDatafileByParameterRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterRestriction() {}
+  virtual ~ns1__searchDatafileByParameterRestriction() = default;
 };
 #endif
 
@@ -4738,7 +4738,7 @@ public:
   ns1__searchDatafileByParameterRestrictionResponse() {
     ns1__searchDatafileByParameterRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterRestrictionResponse() {}
+  virtual ~ns1__searchDatafileByParameterRestrictionResponse() = default;
 };
 #endif
 
@@ -4766,7 +4766,7 @@ public:
   ns1__searchInvestigationByRestrictionLogical() {
     ns1__searchInvestigationByRestrictionLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByRestrictionLogical() {}
+  virtual ~ns1__searchInvestigationByRestrictionLogical() = default;
 };
 #endif
 
@@ -4797,7 +4797,7 @@ public:
   ns1__searchInvestigationByRestrictionLogicalResponse() {
     ns1__searchInvestigationByRestrictionLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByRestrictionLogicalResponse() {}
+  virtual ~ns1__searchInvestigationByRestrictionLogicalResponse() = default;
 };
 #endif
 
@@ -4822,7 +4822,7 @@ public:
   ns1__removeSampleParameter() {
     ns1__removeSampleParameter::soap_default(NULL);
   }
-  virtual ~ns1__removeSampleParameter() {}
+  virtual ~ns1__removeSampleParameter() = default;
 };
 #endif
 
@@ -4843,7 +4843,7 @@ public:
   ns1__removeSampleParameterResponse() {
     ns1__removeSampleParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeSampleParameterResponse() {}
+  virtual ~ns1__removeSampleParameterResponse() = default;
 };
 #endif
 
@@ -4868,7 +4868,7 @@ public:
   ns1__deleteDataSetParameter() {
     ns1__deleteDataSetParameter::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataSetParameter() {}
+  virtual ~ns1__deleteDataSetParameter() = default;
 };
 #endif
 
@@ -4889,7 +4889,7 @@ public:
   ns1__deleteDataSetParameterResponse() {
     ns1__deleteDataSetParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataSetParameterResponse() {}
+  virtual ~ns1__deleteDataSetParameterResponse() = default;
 };
 #endif
 
@@ -4912,7 +4912,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__setDataSetSample() { ns1__setDataSetSample::soap_default(NULL); }
-  virtual ~ns1__setDataSetSample() {}
+  virtual ~ns1__setDataSetSample() = default;
 };
 #endif
 
@@ -4933,7 +4933,7 @@ public:
   ns1__setDataSetSampleResponse() {
     ns1__setDataSetSampleResponse::soap_default(NULL);
   }
-  virtual ~ns1__setDataSetSampleResponse() {}
+  virtual ~ns1__setDataSetSampleResponse() = default;
 };
 #endif
 
@@ -4955,7 +4955,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__downloadDatafile() { ns1__downloadDatafile::soap_default(NULL); }
-  virtual ~ns1__downloadDatafile() {}
+  virtual ~ns1__downloadDatafile() = default;
 };
 #endif
 
@@ -4983,7 +4983,7 @@ public:
   ns1__downloadDatafileResponse() {
     ns1__downloadDatafileResponse::soap_default(NULL);
   }
-  virtual ~ns1__downloadDatafileResponse() {}
+  virtual ~ns1__downloadDatafileResponse() = default;
 };
 #endif
 
@@ -5005,7 +5005,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getParameterByName() { ns1__getParameterByName::soap_default(NULL); }
-  virtual ~ns1__getParameterByName() {}
+  virtual ~ns1__getParameterByName() = default;
 };
 #endif
 
@@ -5033,7 +5033,7 @@ public:
   ns1__getParameterByNameResponse() {
     ns1__getParameterByNameResponse::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByNameResponse() {}
+  virtual ~ns1__getParameterByNameResponse() = default;
 };
 #endif
 
@@ -5058,7 +5058,7 @@ public:
   ns1__getKeywordsForUserType() {
     ns1__getKeywordsForUserType::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserType() {}
+  virtual ~ns1__getKeywordsForUserType() = default;
 };
 #endif
 
@@ -5086,7 +5086,7 @@ public:
   ns1__getKeywordsForUserTypeResponse() {
     ns1__getKeywordsForUserTypeResponse::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserTypeResponse() {}
+  virtual ~ns1__getKeywordsForUserTypeResponse() = default;
 };
 #endif
 
@@ -5110,7 +5110,7 @@ public:
   ns1__getKeywordsForUserMax() {
     ns1__getKeywordsForUserMax::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserMax() {}
+  virtual ~ns1__getKeywordsForUserMax() = default;
 };
 #endif
 
@@ -5138,7 +5138,7 @@ public:
   ns1__getKeywordsForUserMaxResponse() {
     ns1__getKeywordsForUserMaxResponse::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserMaxResponse() {}
+  virtual ~ns1__getKeywordsForUserMaxResponse() = default;
 };
 #endif
 
@@ -5163,7 +5163,7 @@ public:
   ns1__getKeywordsForUserStartWithMax() {
     ns1__getKeywordsForUserStartWithMax::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserStartWithMax() {}
+  virtual ~ns1__getKeywordsForUserStartWithMax() = default;
 };
 #endif
 
@@ -5193,7 +5193,7 @@ public:
   ns1__getKeywordsForUserStartWithMaxResponse() {
     ns1__getKeywordsForUserStartWithMaxResponse::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserStartWithMaxResponse() {}
+  virtual ~ns1__getKeywordsForUserStartWithMaxResponse() = default;
 };
 #endif
 
@@ -5214,7 +5214,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getKeywordsForUser() { ns1__getKeywordsForUser::soap_default(NULL); }
-  virtual ~ns1__getKeywordsForUser() {}
+  virtual ~ns1__getKeywordsForUser() = default;
 };
 #endif
 
@@ -5242,7 +5242,7 @@ public:
   ns1__getKeywordsForUserResponse() {
     ns1__getKeywordsForUserResponse::soap_default(NULL);
   }
-  virtual ~ns1__getKeywordsForUserResponse() {}
+  virtual ~ns1__getKeywordsForUserResponse() = default;
 };
 #endif
 
@@ -5265,7 +5265,7 @@ public:
   ns1__listInvestigationTypes() {
     ns1__listInvestigationTypes::soap_default(NULL);
   }
-  virtual ~ns1__listInvestigationTypes() {}
+  virtual ~ns1__listInvestigationTypes() = default;
 };
 #endif
 
@@ -5293,7 +5293,7 @@ public:
   ns1__listInvestigationTypesResponse() {
     ns1__listInvestigationTypesResponse::soap_default(NULL);
   }
-  virtual ~ns1__listInvestigationTypesResponse() {}
+  virtual ~ns1__listInvestigationTypesResponse() = default;
 };
 #endif
 
@@ -5318,7 +5318,7 @@ public:
   ns1__modifyDataSetParameter() {
     ns1__modifyDataSetParameter::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataSetParameter() {}
+  virtual ~ns1__modifyDataSetParameter() = default;
 };
 #endif
 
@@ -5339,7 +5339,7 @@ public:
   ns1__modifyDataSetParameterResponse() {
     ns1__modifyDataSetParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataSetParameterResponse() {}
+  virtual ~ns1__modifyDataSetParameterResponse() = default;
 };
 #endif
 
@@ -5361,7 +5361,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__removeDataSet() { ns1__removeDataSet::soap_default(NULL); }
-  virtual ~ns1__removeDataSet() {}
+  virtual ~ns1__removeDataSet() = default;
 };
 #endif
 
@@ -5382,7 +5382,7 @@ public:
   ns1__removeDataSetResponse() {
     ns1__removeDataSetResponse::soap_default(NULL);
   }
-  virtual ~ns1__removeDataSetResponse() {}
+  virtual ~ns1__removeDataSetResponse() = default;
 };
 #endif
 
@@ -5408,7 +5408,7 @@ public:
   ns1__searchSampleByParameterLogical() {
     ns1__searchSampleByParameterLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterLogical() {}
+  virtual ~ns1__searchSampleByParameterLogical() = default;
 };
 #endif
 
@@ -5438,7 +5438,7 @@ public:
   ns1__searchSampleByParameterLogicalResponse() {
     ns1__searchSampleByParameterLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterLogicalResponse() {}
+  virtual ~ns1__searchSampleByParameterLogicalResponse() = default;
 };
 #endif
 
@@ -5465,7 +5465,7 @@ public:
   ns1__searchDatasetByRestrictionComparison() {
     ns1__searchDatasetByRestrictionComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestrictionComparison() {}
+  virtual ~ns1__searchDatasetByRestrictionComparison() = default;
 };
 #endif
 
@@ -5495,7 +5495,7 @@ public:
   ns1__searchDatasetByRestrictionComparisonResponse() {
     ns1__searchDatasetByRestrictionComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestrictionComparisonResponse() {}
+  virtual ~ns1__searchDatasetByRestrictionComparisonResponse() = default;
 };
 #endif
 
@@ -5518,7 +5518,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addKeyword() { ns1__addKeyword::soap_default(NULL); }
-  virtual ~ns1__addKeyword() {}
+  virtual ~ns1__addKeyword() = default;
 };
 #endif
 
@@ -5544,7 +5544,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addKeywordResponse() { ns1__addKeywordResponse::soap_default(NULL); }
-  virtual ~ns1__addKeywordResponse() {}
+  virtual ~ns1__addKeywordResponse() = default;
 };
 #endif
 
@@ -5568,7 +5568,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getAuthorisations() { ns1__getAuthorisations::soap_default(NULL); }
-  virtual ~ns1__getAuthorisations() {}
+  virtual ~ns1__getAuthorisations() = default;
 };
 #endif
 
@@ -5596,7 +5596,7 @@ public:
   ns1__getAuthorisationsResponse() {
     ns1__getAuthorisationsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getAuthorisationsResponse() {}
+  virtual ~ns1__getAuthorisationsResponse() = default;
 };
 #endif
 
@@ -5619,7 +5619,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifyInvestigation() { ns1__modifyInvestigation::soap_default(NULL); }
-  virtual ~ns1__modifyInvestigation() {}
+  virtual ~ns1__modifyInvestigation() = default;
 };
 #endif
 
@@ -5640,7 +5640,7 @@ public:
   ns1__modifyInvestigationResponse() {
     ns1__modifyInvestigationResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyInvestigationResponse() {}
+  virtual ~ns1__modifyInvestigationResponse() = default;
 };
 #endif
 
@@ -5661,7 +5661,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listDatasetStatus() { ns1__listDatasetStatus::soap_default(NULL); }
-  virtual ~ns1__listDatasetStatus() {}
+  virtual ~ns1__listDatasetStatus() = default;
 };
 #endif
 
@@ -5689,7 +5689,7 @@ public:
   ns1__listDatasetStatusResponse() {
     ns1__listDatasetStatusResponse::soap_default(NULL);
   }
-  virtual ~ns1__listDatasetStatusResponse() {}
+  virtual ~ns1__listDatasetStatusResponse() = default;
 };
 #endif
 
@@ -5711,7 +5711,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteSample() { ns1__deleteSample::soap_default(NULL); }
-  virtual ~ns1__deleteSample() {}
+  virtual ~ns1__deleteSample() = default;
 };
 #endif
 
@@ -5730,7 +5730,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteSampleResponse() { ns1__deleteSampleResponse::soap_default(NULL); }
-  virtual ~ns1__deleteSampleResponse() {}
+  virtual ~ns1__deleteSampleResponse() = default;
 };
 #endif
 
@@ -5755,7 +5755,7 @@ public:
   ns1__searchDatasetByParameter() {
     ns1__searchDatasetByParameter::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameter() {}
+  virtual ~ns1__searchDatasetByParameter() = default;
 };
 #endif
 
@@ -5783,7 +5783,7 @@ public:
   ns1__searchDatasetByParameterResponse() {
     ns1__searchDatasetByParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByParameterResponse() {}
+  virtual ~ns1__searchDatasetByParameterResponse() = default;
 };
 #endif
 
@@ -5805,7 +5805,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteKeyword() { ns1__deleteKeyword::soap_default(NULL); }
-  virtual ~ns1__deleteKeyword() {}
+  virtual ~ns1__deleteKeyword() = default;
 };
 #endif
 
@@ -5826,7 +5826,7 @@ public:
   ns1__deleteKeywordResponse() {
     ns1__deleteKeywordResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteKeywordResponse() {}
+  virtual ~ns1__deleteKeywordResponse() = default;
 };
 #endif
 
@@ -5850,7 +5850,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addDataSetParameters() { ns1__addDataSetParameters::soap_default(NULL); }
-  virtual ~ns1__addDataSetParameters() {}
+  virtual ~ns1__addDataSetParameters() = default;
 };
 #endif
 
@@ -5878,7 +5878,7 @@ public:
   ns1__addDataSetParametersResponse() {
     ns1__addDataSetParametersResponse::soap_default(NULL);
   }
-  virtual ~ns1__addDataSetParametersResponse() {}
+  virtual ~ns1__addDataSetParametersResponse() = default;
 };
 #endif
 
@@ -5907,7 +5907,7 @@ public:
   ns1__searchByRunNumberPagination() {
     ns1__searchByRunNumberPagination::soap_default(NULL);
   }
-  virtual ~ns1__searchByRunNumberPagination() {}
+  virtual ~ns1__searchByRunNumberPagination() = default;
 };
 #endif
 
@@ -5935,7 +5935,7 @@ public:
   ns1__searchByRunNumberPaginationResponse() {
     ns1__searchByRunNumberPaginationResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByRunNumberPaginationResponse() {}
+  virtual ~ns1__searchByRunNumberPaginationResponse() = default;
 };
 #endif
 
@@ -5960,7 +5960,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByRunNumber() { ns1__searchByRunNumber::soap_default(NULL); }
-  virtual ~ns1__searchByRunNumber() {}
+  virtual ~ns1__searchByRunNumber() = default;
 };
 #endif
 
@@ -5988,7 +5988,7 @@ public:
   ns1__searchByRunNumberResponse() {
     ns1__searchByRunNumberResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByRunNumberResponse() {}
+  virtual ~ns1__searchByRunNumberResponse() = default;
 };
 #endif
 
@@ -6014,7 +6014,7 @@ public:
   ns1__searchDatafileByParameterComparison() {
     ns1__searchDatafileByParameterComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterComparison() {}
+  virtual ~ns1__searchDatafileByParameterComparison() = default;
 };
 #endif
 
@@ -6044,7 +6044,7 @@ public:
   ns1__searchDatafileByParameterComparisonResponse() {
     ns1__searchDatafileByParameterComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatafileByParameterComparisonResponse() {}
+  virtual ~ns1__searchDatafileByParameterComparisonResponse() = default;
 };
 #endif
 
@@ -6072,7 +6072,7 @@ public:
   ns1__searchByAdvancedPagination() {
     ns1__searchByAdvancedPagination::soap_default(NULL);
   }
-  virtual ~ns1__searchByAdvancedPagination() {}
+  virtual ~ns1__searchByAdvancedPagination() = default;
 };
 #endif
 
@@ -6117,7 +6117,7 @@ public:
   ns1__advancedSearchDetails() {
     ns1__advancedSearchDetails::soap_default(NULL);
   }
-  virtual ~ns1__advancedSearchDetails() {}
+  virtual ~ns1__advancedSearchDetails() = default;
 };
 #endif
 
@@ -6145,7 +6145,7 @@ public:
   ns1__searchByAdvancedPaginationResponse() {
     ns1__searchByAdvancedPaginationResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByAdvancedPaginationResponse() {}
+  virtual ~ns1__searchByAdvancedPaginationResponse() = default;
 };
 #endif
 
@@ -6169,7 +6169,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__searchByAdvanced() { ns1__searchByAdvanced::soap_default(NULL); }
-  virtual ~ns1__searchByAdvanced() {}
+  virtual ~ns1__searchByAdvanced() = default;
 };
 #endif
 
@@ -6197,7 +6197,7 @@ public:
   ns1__searchByAdvancedResponse() {
     ns1__searchByAdvancedResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchByAdvancedResponse() {}
+  virtual ~ns1__searchByAdvancedResponse() = default;
 };
 #endif
 
@@ -6222,7 +6222,7 @@ public:
   ns1__searchInvestigationByParameter() {
     ns1__searchInvestigationByParameter::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameter() {}
+  virtual ~ns1__searchInvestigationByParameter() = default;
 };
 #endif
 
@@ -6252,7 +6252,7 @@ public:
   ns1__searchInvestigationByParameterResponse() {
     ns1__searchInvestigationByParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByParameterResponse() {}
+  virtual ~ns1__searchInvestigationByParameterResponse() = default;
 };
 #endif
 
@@ -6273,7 +6273,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listDatafileFormats() { ns1__listDatafileFormats::soap_default(NULL); }
-  virtual ~ns1__listDatafileFormats() {}
+  virtual ~ns1__listDatafileFormats() = default;
 };
 #endif
 
@@ -6301,7 +6301,7 @@ public:
   ns1__listDatafileFormatsResponse() {
     ns1__listDatafileFormatsResponse::soap_default(NULL);
   }
-  virtual ~ns1__listDatafileFormatsResponse() {}
+  virtual ~ns1__listDatafileFormatsResponse() = default;
 };
 #endif
 
@@ -6326,7 +6326,7 @@ public:
   ns1__modifySampleParameter() {
     ns1__modifySampleParameter::soap_default(NULL);
   }
-  virtual ~ns1__modifySampleParameter() {}
+  virtual ~ns1__modifySampleParameter() = default;
 };
 #endif
 
@@ -6347,7 +6347,7 @@ public:
   ns1__modifySampleParameterResponse() {
     ns1__modifySampleParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifySampleParameterResponse() {}
+  virtual ~ns1__modifySampleParameterResponse() = default;
 };
 #endif
 
@@ -6370,7 +6370,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifyInvestigator() { ns1__modifyInvestigator::soap_default(NULL); }
-  virtual ~ns1__modifyInvestigator() {}
+  virtual ~ns1__modifyInvestigator() = default;
 };
 #endif
 
@@ -6391,7 +6391,7 @@ public:
   ns1__modifyInvestigatorResponse() {
     ns1__modifyInvestigatorResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyInvestigatorResponse() {}
+  virtual ~ns1__modifyInvestigatorResponse() = default;
 };
 #endif
 
@@ -6415,7 +6415,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addDataSetParameter() { ns1__addDataSetParameter::soap_default(NULL); }
-  virtual ~ns1__addDataSetParameter() {}
+  virtual ~ns1__addDataSetParameter() = default;
 };
 #endif
 
@@ -6443,7 +6443,7 @@ public:
   ns1__addDataSetParameterResponse() {
     ns1__addDataSetParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__addDataSetParameterResponse() {}
+  virtual ~ns1__addDataSetParameterResponse() = default;
 };
 #endif
 
@@ -6467,7 +6467,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__createDataFiles() { ns1__createDataFiles::soap_default(NULL); }
-  virtual ~ns1__createDataFiles() {}
+  virtual ~ns1__createDataFiles() = default;
 };
 #endif
 
@@ -6495,7 +6495,7 @@ public:
   ns1__createDataFilesResponse() {
     ns1__createDataFilesResponse::soap_default(NULL);
   }
-  virtual ~ns1__createDataFilesResponse() {}
+  virtual ~ns1__createDataFilesResponse() = default;
 };
 #endif
 
@@ -6521,7 +6521,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addAuthorisation() { ns1__addAuthorisation::soap_default(NULL); }
-  virtual ~ns1__addAuthorisation() {}
+  virtual ~ns1__addAuthorisation() = default;
 };
 #endif
 
@@ -6549,7 +6549,7 @@ public:
   ns1__addAuthorisationResponse() {
     ns1__addAuthorisationResponse::soap_default(NULL);
   }
-  virtual ~ns1__addAuthorisationResponse() {}
+  virtual ~ns1__addAuthorisationResponse() = default;
 };
 #endif
 
@@ -6572,7 +6572,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addSample() { ns1__addSample::soap_default(NULL); }
-  virtual ~ns1__addSample() {}
+  virtual ~ns1__addSample() = default;
 };
 #endif
 
@@ -6598,7 +6598,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addSampleResponse() { ns1__addSampleResponse::soap_default(NULL); }
-  virtual ~ns1__addSampleResponse() {}
+  virtual ~ns1__addSampleResponse() = default;
 };
 #endif
 
@@ -6620,7 +6620,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getParameterByUnits() { ns1__getParameterByUnits::soap_default(NULL); }
-  virtual ~ns1__getParameterByUnits() {}
+  virtual ~ns1__getParameterByUnits() = default;
 };
 #endif
 
@@ -6648,7 +6648,7 @@ public:
   ns1__getParameterByUnitsResponse() {
     ns1__getParameterByUnitsResponse::soap_default(NULL);
   }
-  virtual ~ns1__getParameterByUnitsResponse() {}
+  virtual ~ns1__getParameterByUnitsResponse() = default;
 };
 #endif
 
@@ -6671,7 +6671,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__loginLifetime() { ns1__loginLifetime::soap_default(NULL); }
-  virtual ~ns1__loginLifetime() {}
+  virtual ~ns1__loginLifetime() = default;
 };
 #endif
 
@@ -6699,7 +6699,7 @@ public:
   ns1__loginLifetimeResponse() {
     ns1__loginLifetimeResponse::soap_default(NULL);
   }
-  virtual ~ns1__loginLifetimeResponse() {}
+  virtual ~ns1__loginLifetimeResponse() = default;
 };
 #endif
 
@@ -6721,7 +6721,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__login() { ns1__login::soap_default(NULL); }
-  virtual ~ns1__login() {}
+  virtual ~ns1__login() = default;
 };
 #endif
 
@@ -6747,7 +6747,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__loginResponse() { ns1__loginResponse::soap_default(NULL); }
-  virtual ~ns1__loginResponse() {}
+  virtual ~ns1__loginResponse() = default;
 };
 #endif
 
@@ -6769,7 +6769,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deletePublication() { ns1__deletePublication::soap_default(NULL); }
-  virtual ~ns1__deletePublication() {}
+  virtual ~ns1__deletePublication() = default;
 };
 #endif
 
@@ -6790,7 +6790,7 @@ public:
   ns1__deletePublicationResponse() {
     ns1__deletePublicationResponse::soap_default(NULL);
   }
-  virtual ~ns1__deletePublicationResponse() {}
+  virtual ~ns1__deletePublicationResponse() = default;
 };
 #endif
 
@@ -6812,7 +6812,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__deleteAuthorisation() { ns1__deleteAuthorisation::soap_default(NULL); }
-  virtual ~ns1__deleteAuthorisation() {}
+  virtual ~ns1__deleteAuthorisation() = default;
 };
 #endif
 
@@ -6833,7 +6833,7 @@ public:
   ns1__deleteAuthorisationResponse() {
     ns1__deleteAuthorisationResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteAuthorisationResponse() {}
+  virtual ~ns1__deleteAuthorisationResponse() = default;
 };
 #endif
 
@@ -6855,7 +6855,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDataset() { ns1__getDataset::soap_default(NULL); }
-  virtual ~ns1__getDataset() {}
+  virtual ~ns1__getDataset() = default;
 };
 #endif
 
@@ -6881,7 +6881,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatasetResponse() { ns1__getDatasetResponse::soap_default(NULL); }
-  virtual ~ns1__getDatasetResponse() {}
+  virtual ~ns1__getDatasetResponse() = default;
 };
 #endif
 
@@ -6905,7 +6905,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatasetIncludes() { ns1__getDatasetIncludes::soap_default(NULL); }
-  virtual ~ns1__getDatasetIncludes() {}
+  virtual ~ns1__getDatasetIncludes() = default;
 };
 #endif
 
@@ -6933,7 +6933,7 @@ public:
   ns1__getDatasetIncludesResponse() {
     ns1__getDatasetIncludesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getDatasetIncludesResponse() {}
+  virtual ~ns1__getDatasetIncludesResponse() = default;
 };
 #endif
 
@@ -6956,7 +6956,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__updateAuthorisation() { ns1__updateAuthorisation::soap_default(NULL); }
-  virtual ~ns1__updateAuthorisation() {}
+  virtual ~ns1__updateAuthorisation() = default;
 };
 #endif
 
@@ -6977,7 +6977,7 @@ public:
   ns1__updateAuthorisationResponse() {
     ns1__updateAuthorisationResponse::soap_default(NULL);
   }
-  virtual ~ns1__updateAuthorisationResponse() {}
+  virtual ~ns1__updateAuthorisationResponse() = default;
 };
 #endif
 
@@ -6998,7 +6998,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listRoles() { ns1__listRoles::soap_default(NULL); }
-  virtual ~ns1__listRoles() {}
+  virtual ~ns1__listRoles() = default;
 };
 #endif
 
@@ -7024,7 +7024,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listRolesResponse() { ns1__listRolesResponse::soap_default(NULL); }
-  virtual ~ns1__listRolesResponse() {}
+  virtual ~ns1__listRolesResponse() = default;
 };
 #endif
 
@@ -7049,7 +7049,7 @@ public:
   ns1__searchDatasetByRestriction() {
     ns1__searchDatasetByRestriction::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestriction() {}
+  virtual ~ns1__searchDatasetByRestriction() = default;
 };
 #endif
 
@@ -7077,7 +7077,7 @@ public:
   ns1__searchDatasetByRestrictionResponse() {
     ns1__searchDatasetByRestrictionResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetByRestrictionResponse() {}
+  virtual ~ns1__searchDatasetByRestrictionResponse() = default;
 };
 #endif
 
@@ -7099,7 +7099,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__ingestMetadata() { ns1__ingestMetadata::soap_default(NULL); }
-  virtual ~ns1__ingestMetadata() {}
+  virtual ~ns1__ingestMetadata() = default;
 };
 #endif
 
@@ -7127,7 +7127,7 @@ public:
   ns1__ingestMetadataResponse() {
     ns1__ingestMetadataResponse::soap_default(NULL);
   }
-  virtual ~ns1__ingestMetadataResponse() {}
+  virtual ~ns1__ingestMetadataResponse() = default;
 };
 #endif
 
@@ -7150,7 +7150,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__ICATAPIException() { ns1__ICATAPIException::soap_default(NULL); }
-  virtual ~ns1__ICATAPIException() {}
+  virtual ~ns1__ICATAPIException() = default;
 };
 #endif
 
@@ -7172,7 +7172,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatafile() { ns1__getDatafile::soap_default(NULL); }
-  virtual ~ns1__getDatafile() {}
+  virtual ~ns1__getDatafile() = default;
 };
 #endif
 
@@ -7198,7 +7198,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatafileResponse() { ns1__getDatafileResponse::soap_default(NULL); }
-  virtual ~ns1__getDatafileResponse() {}
+  virtual ~ns1__getDatafileResponse() = default;
 };
 #endif
 
@@ -7220,7 +7220,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__modifyDataFile() { ns1__modifyDataFile::soap_default(NULL); }
-  virtual ~ns1__modifyDataFile() {}
+  virtual ~ns1__modifyDataFile() = default;
 };
 #endif
 
@@ -7241,7 +7241,7 @@ public:
   ns1__modifyDataFileResponse() {
     ns1__modifyDataFileResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataFileResponse() {}
+  virtual ~ns1__modifyDataFileResponse() = default;
 };
 #endif
 
@@ -7268,7 +7268,7 @@ public:
   ns1__getInvestigationIncludes() {
     ns1__getInvestigationIncludes::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationIncludes() {}
+  virtual ~ns1__getInvestigationIncludes() = default;
 };
 #endif
 
@@ -7296,7 +7296,7 @@ public:
   ns1__getInvestigationIncludesResponse() {
     ns1__getInvestigationIncludesResponse::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationIncludesResponse() {}
+  virtual ~ns1__getInvestigationIncludesResponse() = default;
 };
 #endif
 
@@ -7318,7 +7318,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getInvestigation() { ns1__getInvestigation::soap_default(NULL); }
-  virtual ~ns1__getInvestigation() {}
+  virtual ~ns1__getInvestigation() = default;
 };
 #endif
 
@@ -7346,7 +7346,7 @@ public:
   ns1__getInvestigationResponse() {
     ns1__getInvestigationResponse::soap_default(NULL);
   }
-  virtual ~ns1__getInvestigationResponse() {}
+  virtual ~ns1__getInvestigationResponse() = default;
 };
 #endif
 
@@ -7371,7 +7371,7 @@ public:
   ns1__deleteDataFileParameter() {
     ns1__deleteDataFileParameter::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataFileParameter() {}
+  virtual ~ns1__deleteDataFileParameter() = default;
 };
 #endif
 
@@ -7392,7 +7392,7 @@ public:
   ns1__deleteDataFileParameterResponse() {
     ns1__deleteDataFileParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteDataFileParameterResponse() {}
+  virtual ~ns1__deleteDataFileParameterResponse() = default;
 };
 #endif
 
@@ -7415,7 +7415,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addPublication() { ns1__addPublication::soap_default(NULL); }
-  virtual ~ns1__addPublication() {}
+  virtual ~ns1__addPublication() = default;
 };
 #endif
 
@@ -7443,7 +7443,7 @@ public:
   ns1__addPublicationResponse() {
     ns1__addPublicationResponse::soap_default(NULL);
   }
-  virtual ~ns1__addPublicationResponse() {}
+  virtual ~ns1__addPublicationResponse() = default;
 };
 #endif
 
@@ -7466,7 +7466,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__createInvestigation() { ns1__createInvestigation::soap_default(NULL); }
-  virtual ~ns1__createInvestigation() {}
+  virtual ~ns1__createInvestigation() = default;
 };
 #endif
 
@@ -7494,7 +7494,7 @@ public:
   ns1__createInvestigationResponse() {
     ns1__createInvestigationResponse::soap_default(NULL);
   }
-  virtual ~ns1__createInvestigationResponse() {}
+  virtual ~ns1__createInvestigationResponse() = default;
 };
 #endif
 
@@ -7518,7 +7518,7 @@ public:
   ns1__searchDatasetsBySample() {
     ns1__searchDatasetsBySample::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetsBySample() {}
+  virtual ~ns1__searchDatasetsBySample() = default;
 };
 #endif
 
@@ -7546,7 +7546,7 @@ public:
   ns1__searchDatasetsBySampleResponse() {
     ns1__searchDatasetsBySampleResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchDatasetsBySampleResponse() {}
+  virtual ~ns1__searchDatasetsBySampleResponse() = default;
 };
 #endif
 
@@ -7570,7 +7570,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__addDataFileParameter() { ns1__addDataFileParameter::soap_default(NULL); }
-  virtual ~ns1__addDataFileParameter() {}
+  virtual ~ns1__addDataFileParameter() = default;
 };
 #endif
 
@@ -7598,7 +7598,7 @@ public:
   ns1__addDataFileParameterResponse() {
     ns1__addDataFileParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__addDataFileParameterResponse() {}
+  virtual ~ns1__addDataFileParameterResponse() = default;
 };
 #endif
 
@@ -7624,7 +7624,7 @@ public:
   ns1__searchSampleByRestrictionLogical() {
     ns1__searchSampleByRestrictionLogical::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestrictionLogical() {}
+  virtual ~ns1__searchSampleByRestrictionLogical() = default;
 };
 #endif
 
@@ -7654,7 +7654,7 @@ public:
   ns1__searchSampleByRestrictionLogicalResponse() {
     ns1__searchSampleByRestrictionLogicalResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByRestrictionLogicalResponse() {}
+  virtual ~ns1__searchSampleByRestrictionLogicalResponse() = default;
 };
 #endif
 
@@ -7679,7 +7679,7 @@ public:
   ns1__deleteSampleParameter() {
     ns1__deleteSampleParameter::soap_default(NULL);
   }
-  virtual ~ns1__deleteSampleParameter() {}
+  virtual ~ns1__deleteSampleParameter() = default;
 };
 #endif
 
@@ -7700,7 +7700,7 @@ public:
   ns1__deleteSampleParameterResponse() {
     ns1__deleteSampleParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__deleteSampleParameterResponse() {}
+  virtual ~ns1__deleteSampleParameterResponse() = default;
 };
 #endif
 
@@ -7726,7 +7726,7 @@ public:
   ns1__searchSampleByParameterComparison() {
     ns1__searchSampleByParameterComparison::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterComparison() {}
+  virtual ~ns1__searchSampleByParameterComparison() = default;
 };
 #endif
 
@@ -7756,7 +7756,7 @@ public:
   ns1__searchSampleByParameterComparisonResponse() {
     ns1__searchSampleByParameterComparisonResponse::soap_default(NULL);
   }
-  virtual ~ns1__searchSampleByParameterComparisonResponse() {}
+  virtual ~ns1__searchSampleByParameterComparisonResponse() = default;
 };
 #endif
 
@@ -7777,7 +7777,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__listParameters() { ns1__listParameters::soap_default(NULL); }
-  virtual ~ns1__listParameters() {}
+  virtual ~ns1__listParameters() = default;
 };
 #endif
 
@@ -7805,7 +7805,7 @@ public:
   ns1__listParametersResponse() {
     ns1__listParametersResponse::soap_default(NULL);
   }
-  virtual ~ns1__listParametersResponse() {}
+  virtual ~ns1__listParametersResponse() = default;
 };
 #endif
 
@@ -7830,7 +7830,7 @@ public:
   ns1__modifyDataFileParameter() {
     ns1__modifyDataFileParameter::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataFileParameter() {}
+  virtual ~ns1__modifyDataFileParameter() = default;
 };
 #endif
 
@@ -7851,7 +7851,7 @@ public:
   ns1__modifyDataFileParameterResponse() {
     ns1__modifyDataFileParameterResponse::soap_default(NULL);
   }
-  virtual ~ns1__modifyDataFileParameterResponse() {}
+  virtual ~ns1__modifyDataFileParameterResponse() = default;
 };
 #endif
 
@@ -7873,7 +7873,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatasets() { ns1__getDatasets::soap_default(NULL); }
-  virtual ~ns1__getDatasets() {}
+  virtual ~ns1__getDatasets() = default;
 };
 #endif
 
@@ -7899,7 +7899,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__getDatasetsResponse() { ns1__getDatasetsResponse::soap_default(NULL); }
-  virtual ~ns1__getDatasetsResponse() {}
+  virtual ~ns1__getDatasetsResponse() = default;
 };
 #endif
 
@@ -7927,7 +7927,7 @@ public:
   ns1__searchInvestigationByRestrictionComparasion() {
     ns1__searchInvestigationByRestrictionComparasion::soap_default(NULL);
   }
-  virtual ~ns1__searchInvestigationByRestrictionComparasion() {}
+  virtual ~ns1__searchInvestigationByRestrictionComparasion() = default;
 };
 #endif
 
@@ -7960,7 +7960,7 @@ public:
     ns1__searchInvestigationByRestrictionComparasionResponse::soap_default(
         NULL);
   }
-  virtual ~ns1__searchInvestigationByRestrictionComparasionResponse() {}
+  virtual ~ns1__searchInvestigationByRestrictionComparasionResponse() = default;
 };
 #endif
 
@@ -7983,7 +7983,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns3__SessionException() { ns3__SessionException::soap_default(NULL); }
-  virtual ~ns3__SessionException() {}
+  virtual ~ns3__SessionException() = default;
 };
 #endif
 
@@ -8008,7 +8008,7 @@ public:
   ns3__NoSuchObjectFoundException() {
     ns3__NoSuchObjectFoundException::soap_default(NULL);
   }
-  virtual ~ns3__NoSuchObjectFoundException() {}
+  virtual ~ns3__NoSuchObjectFoundException() = default;
 };
 #endif
 
@@ -8031,7 +8031,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns3__ValidationException() { ns3__ValidationException::soap_default(NULL); }
-  virtual ~ns3__ValidationException() {}
+  virtual ~ns3__ValidationException() = default;
 };
 #endif
 
@@ -8053,7 +8053,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns3__getUserDetails() { ns3__getUserDetails::soap_default(NULL); }
-  virtual ~ns3__getUserDetails() {}
+  virtual ~ns3__getUserDetails() = default;
 };
 #endif
 
@@ -8081,7 +8081,7 @@ public:
   ns3__getUserDetailsResponse() {
     ns3__getUserDetailsResponse::soap_default(NULL);
   }
-  virtual ~ns3__getUserDetailsResponse() {}
+  virtual ~ns3__getUserDetailsResponse() = default;
 };
 #endif
 
@@ -8104,7 +8104,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns3__NoSuchUserException() { ns3__NoSuchUserException::soap_default(NULL); }
-  virtual ~ns3__NoSuchUserException() {}
+  virtual ~ns3__NoSuchUserException() = default;
 };
 #endif
 
@@ -8139,7 +8139,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__restrictionCondition() { ns1__restrictionCondition::soap_default(NULL); }
-  virtual ~ns1__restrictionCondition() {}
+  virtual ~ns1__restrictionCondition() = default;
 };
 #endif
 
@@ -8158,7 +8158,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameterCondition() { ns1__parameterCondition::soap_default(NULL); }
-  virtual ~ns1__parameterCondition() {}
+  virtual ~ns1__parameterCondition() = default;
 };
 #endif
 
@@ -8185,7 +8185,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__facilityUser() { ns1__facilityUser::soap_default(NULL); }
-  virtual ~ns1__facilityUser() {}
+  virtual ~ns1__facilityUser() = default;
 };
 #endif
 
@@ -8216,7 +8216,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__icatRole() { ns1__icatRole::soap_default(NULL); }
-  virtual ~ns1__icatRole() {}
+  virtual ~ns1__icatRole() = default;
 };
 #endif
 
@@ -8245,7 +8245,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__sample() { ns1__sample::soap_default(NULL); }
-  virtual ~ns1__sample() {}
+  virtual ~ns1__sample() = default;
 };
 #endif
 
@@ -8276,7 +8276,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__sampleParameter() { ns1__sampleParameter::soap_default(NULL); }
-  virtual ~ns1__sampleParameter() {}
+  virtual ~ns1__sampleParameter() = default;
 };
 #endif
 
@@ -8299,7 +8299,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__sampleParameterPK() { ns1__sampleParameterPK::soap_default(NULL); }
-  virtual ~ns1__sampleParameterPK() {}
+  virtual ~ns1__sampleParameterPK() = default;
 };
 #endif
 
@@ -8345,7 +8345,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafile() { ns1__datafile::soap_default(NULL); }
-  virtual ~ns1__datafile() {}
+  virtual ~ns1__datafile() = default;
 };
 #endif
 
@@ -8369,7 +8369,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafileFormat() { ns1__datafileFormat::soap_default(NULL); }
-  virtual ~ns1__datafileFormat() {}
+  virtual ~ns1__datafileFormat() = default;
 };
 #endif
 
@@ -8391,7 +8391,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafileFormatPK() { ns1__datafileFormatPK::soap_default(NULL); }
-  virtual ~ns1__datafileFormatPK() {}
+  virtual ~ns1__datafileFormatPK() = default;
 };
 #endif
 
@@ -8422,7 +8422,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafileParameter() { ns1__datafileParameter::soap_default(NULL); }
-  virtual ~ns1__datafileParameter() {}
+  virtual ~ns1__datafileParameter() = default;
 };
 #endif
 
@@ -8446,7 +8446,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datafileParameterPK() { ns1__datafileParameterPK::soap_default(NULL); }
-  virtual ~ns1__datafileParameterPK() {}
+  virtual ~ns1__datafileParameterPK() = default;
 };
 #endif
 
@@ -8469,7 +8469,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__relatedDatafiles() { ns1__relatedDatafiles::soap_default(NULL); }
-  virtual ~ns1__relatedDatafiles() {}
+  virtual ~ns1__relatedDatafiles() = default;
 };
 #endif
 
@@ -8491,7 +8491,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__relatedDatafilesPK() { ns1__relatedDatafilesPK::soap_default(NULL); }
-  virtual ~ns1__relatedDatafilesPK() {}
+  virtual ~ns1__relatedDatafilesPK() = default;
 };
 #endif
 
@@ -8523,7 +8523,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameter() { ns1__parameter::soap_default(NULL); }
-  virtual ~ns1__parameter() {}
+  virtual ~ns1__parameter() = default;
 };
 #endif
 
@@ -8545,7 +8545,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameterPK() { ns1__parameterPK::soap_default(NULL); }
-  virtual ~ns1__parameterPK() {}
+  virtual ~ns1__parameterPK() = default;
 };
 #endif
 
@@ -8569,7 +8569,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__facilityCycle() { ns1__facilityCycle::soap_default(NULL); }
-  virtual ~ns1__facilityCycle() {}
+  virtual ~ns1__facilityCycle() = default;
 };
 #endif
 
@@ -8593,7 +8593,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__instrument() { ns1__instrument::soap_default(NULL); }
-  virtual ~ns1__instrument() {}
+  virtual ~ns1__instrument() = default;
 };
 #endif
 
@@ -8615,7 +8615,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__investigatorPK() { ns1__investigatorPK::soap_default(NULL); }
-  virtual ~ns1__investigatorPK() {}
+  virtual ~ns1__investigatorPK() = default;
 };
 #endif
 
@@ -8637,7 +8637,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__keywordPK() { ns1__keywordPK::soap_default(NULL); }
-  virtual ~ns1__keywordPK() {}
+  virtual ~ns1__keywordPK() = default;
 };
 #endif
 
@@ -8670,7 +8670,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__dataset() { ns1__dataset::soap_default(NULL); }
-  virtual ~ns1__dataset() {}
+  virtual ~ns1__dataset() = default;
 };
 #endif
 
@@ -8702,7 +8702,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datasetParameter() { ns1__datasetParameter::soap_default(NULL); }
-  virtual ~ns1__datasetParameter() {}
+  virtual ~ns1__datasetParameter() = default;
 };
 #endif
 
@@ -8725,7 +8725,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__datasetParameterPK() { ns1__datasetParameterPK::soap_default(NULL); }
-  virtual ~ns1__datasetParameterPK() {}
+  virtual ~ns1__datasetParameterPK() = default;
 };
 #endif
 
@@ -8775,7 +8775,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__investigation() { ns1__investigation::soap_default(NULL); }
-  virtual ~ns1__investigation() {}
+  virtual ~ns1__investigation() = default;
 };
 #endif
 
@@ -8800,7 +8800,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__investigator() { ns1__investigator::soap_default(NULL); }
-  virtual ~ns1__investigator() {}
+  virtual ~ns1__investigator() = default;
 };
 #endif
 
@@ -8821,7 +8821,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__keyword() { ns1__keyword::soap_default(NULL); }
-  virtual ~ns1__keyword() {}
+  virtual ~ns1__keyword() = default;
 };
 #endif
 
@@ -8846,7 +8846,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__publication() { ns1__publication::soap_default(NULL); }
-  virtual ~ns1__publication() {}
+  virtual ~ns1__publication() = default;
 };
 #endif
 
@@ -8868,7 +8868,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__shift() { ns1__shift::soap_default(NULL); }
-  virtual ~ns1__shift() {}
+  virtual ~ns1__shift() = default;
 };
 #endif
 
@@ -8891,7 +8891,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__shiftPK() { ns1__shiftPK::soap_default(NULL); }
-  virtual ~ns1__shiftPK() {}
+  virtual ~ns1__shiftPK() = default;
 };
 #endif
 
@@ -8918,7 +8918,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__icatAuthorisation() { ns1__icatAuthorisation::soap_default(NULL); }
-  virtual ~ns1__icatAuthorisation() {}
+  virtual ~ns1__icatAuthorisation() = default;
 };
 #endif
 
@@ -8945,7 +8945,7 @@ public:
   ns1__restrictionLogicalCondition() {
     ns1__restrictionLogicalCondition::soap_default(NULL);
   }
-  virtual ~ns1__restrictionLogicalCondition() {}
+  virtual ~ns1__restrictionLogicalCondition() = default;
 };
 #endif
 
@@ -8975,7 +8975,7 @@ public:
   ns1__restrictionComparisonCondition() {
     ns1__restrictionComparisonCondition::soap_default(NULL);
   }
-  virtual ~ns1__restrictionComparisonCondition() {}
+  virtual ~ns1__restrictionComparisonCondition() = default;
 };
 #endif
 
@@ -9002,7 +9002,7 @@ public:
   ns1__parameterLogicalCondition() {
     ns1__parameterLogicalCondition::soap_default(NULL);
   }
-  virtual ~ns1__parameterLogicalCondition() {}
+  virtual ~ns1__parameterLogicalCondition() = default;
 };
 #endif
 
@@ -9025,7 +9025,7 @@ public:
   virtual void *soap_get(struct soap *, const char *, const char *);
   virtual void *soap_in(struct soap *, const char *, const char *);
   ns1__parameterSearch() { ns1__parameterSearch::soap_default(NULL); }
-  virtual ~ns1__parameterSearch() {}
+  virtual ~ns1__parameterSearch() = default;
 };
 #endif
 
@@ -9054,7 +9054,7 @@ public:
   ns1__parameterComparisonCondition() {
     ns1__parameterComparisonCondition::soap_default(NULL);
   }
-  virtual ~ns1__parameterComparisonCondition() {}
+  virtual ~ns1__parameterComparisonCondition() = default;
 };
 #endif
 

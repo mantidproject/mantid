@@ -37,25 +37,25 @@ public:
   /// (Empty) Constructor
   ComputeSensitivity() : API::DataProcessorAlgorithm() {}
   /// Virtual destructor
-  virtual ~ComputeSensitivity() {}
+  ~ComputeSensitivity() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ComputeSensitivity"; }
+  const std::string name() const override { return "ComputeSensitivity"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Workflow to calculate EQSANS sensitivity correction.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

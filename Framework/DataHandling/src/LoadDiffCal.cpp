@@ -69,30 +69,29 @@ void LoadDiffCal::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  std::vector<std::string> exts;
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".hdf");
-  exts.push_back(".cal");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to the .h5 file.");
 
-  declareProperty(new PropertyWithValue<bool>("MakeGroupingWorkspace", true,
-                                              Direction::Input),
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "MakeGroupingWorkspace", true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(
-      new PropertyWithValue<bool>("MakeCalWorkspace", true, Direction::Input),
-      "Set to true to create a CalibrationWorkspace with called "
-      "WorkspaceName_cal.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+                      "MakeCalWorkspace", true, Direction::Input),
+                  "Set to true to create a CalibrationWorkspace with called "
+                  "WorkspaceName_cal.");
 
   declareProperty(
-      new PropertyWithValue<bool>("MakeMaskWorkspace", true, Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
+                                                   Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
-      new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
+      Kernel::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                          Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_mask' appended to them.");
 
@@ -138,8 +137,8 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset,
   } else if (PredType::NATIVE_FLOAT == dataType) {
     std::vector<float> temp(dataSpace.getSelectNpoints());
     dataset.read(&temp[0], dataType, dataSpace);
-    for (auto it = temp.begin(); it != temp.end(); ++it)
-      result.push_back(static_cast<NumT>(*it));
+    for (float value : temp)
+      result.push_back(static_cast<NumT>(value));
   } else {
     throw DataTypeIException();
   }
@@ -159,7 +158,7 @@ bool endswith(const std::string &str, const std::string &ending) {
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
                         GroupingWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<DataObjects::GroupingWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
       "Set the the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
@@ -168,7 +167,7 @@ void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
                        MaskWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<DataObjects::MaskWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
       "Set the the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
@@ -177,7 +176,7 @@ void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
                       ITableWorkspace_sptr wksp) {
   alg->declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "OutputCalWorkspace", prefix + "_cal", Direction::Output),
       "Set the output Diffraction Calibration workspace, if any.");
   alg->setProperty("OutputCalWorkspace", wksp);
@@ -201,11 +200,11 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
                         << "\n";
   }
 
-  for (size_t i = 0; i < result.size(); ++i) {
-    if (std::abs(result[i]) < 1.e-10) {
-      result[i] = 0.;
-    } else if (result[i] != result[i]) { // check for NaN
-      result[i] = 0.;
+  for (double &value : result) {
+    if (std::abs(value) < 1.e-10) {
+      value = 0.;
+    } else if (value != value) { // check for NaN
+      value = 0.;
     }
   }
 

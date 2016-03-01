@@ -38,12 +38,17 @@ namespace Mantid
     class DLLExport MDEWEventNexusLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      MDEWEventNexusLoadingPresenter(MDLoadingView* view, const std::string fileName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
-      virtual void executeLoadMetadata();
-      virtual ~MDEWEventNexusLoadingPresenter();
-      virtual bool canReadFile() const;
-      virtual std::string getWorkspaceTypeName();
+      MDEWEventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                     const std::string fileName);
+      vtkSmartPointer<vtkDataSet>
+      execute(vtkDataSetFactory *factory,
+              ProgressAction &rebinningProgressUpdate,
+              ProgressAction &drawingProgressUpdate) override;
+      void executeLoadMetadata() override;
+      ~MDEWEventNexusLoadingPresenter() override;
+      bool canReadFile() const override;
+      std::string getWorkspaceTypeName() override;
+
     private:
       const std::string m_filename;
       std::string m_wsTypeName;

@@ -12,7 +12,7 @@
 #include "Poco/Net/StreamSocket.h"
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
-
+#include <mutex>
 #include <map>
 
 // Time we'll wait on a receive call (in seconds)
@@ -59,18 +59,18 @@ public:
   /// Constructor.
   ISISLiveEventDataListener();
   /// Destructor. Should handle termination of any socket connections.
-  virtual ~ISISLiveEventDataListener();
+  ~ISISLiveEventDataListener() override;
 
   //----------------------------------------------------------------------
   // Static properties
   //----------------------------------------------------------------------
 
   /// The name of this listener
-  std::string name() const { return "ISISLiveEventDataListener"; }
+  std::string name() const override { return "ISISLiveEventDataListener"; }
   /// Does this listener support requests for (recent) past data
-  virtual bool supportsHistory() const { return false; }
+  bool supportsHistory() const override { return false; }
   /// Does this listener buffer events (true) or histogram data (false)
-  virtual bool buffersEvents() const { return true; }
+  bool buffersEvents() const override { return true; }
 
   //----------------------------------------------------------------------
   // Actions
@@ -80,7 +80,7 @@ public:
    *  @param address   The IP address and port to contact
    *  @return True if the connection was successfully established
    */
-  bool connect(const Poco::Net::SocketAddress &address);
+  bool connect(const Poco::Net::SocketAddress &address) override;
 
   /** Commence the collection of data from the DAS. Must be called before
    * extractData().
@@ -95,7 +95,7 @@ public:
    *                   The value of 'now' is zero for compatibility with the SNS
    * live stream.
    */
-  virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).
@@ -112,7 +112,7 @@ public:
    *    will call extractData() again a short while later. Any other exception
    *    will stop the calling algorithm.
    */
-  virtual boost::shared_ptr<API::Workspace> extractData();
+  boost::shared_ptr<API::Workspace> extractData() override;
 
   //----------------------------------------------------------------------
   // State flags
@@ -121,26 +121,26 @@ public:
   /** Has the connection to the DAS been established?
    *  Could also be used to check for a continued connection.
    */
-  bool isConnected();
+  bool isConnected() override;
 
   /** Gets the current run status of the listened-to data stream
    *  @return A value of the RunStatus enumeration indicating the present status
    */
-  virtual ILiveListener::RunStatus runStatus();
+  ILiveListener::RunStatus runStatus() override;
 
-  int runNumber() const;
+  int runNumber() const override;
 
   /** Sets a list of spectra to be extracted. Default is reading all available
    * spectra.
    * @param specList :: A vector with spectra indices.
    */
-  virtual void setSpectra(const std::vector<specid_t> &specList) {
+  void setSpectra(const std::vector<specnum_t> &specList) override {
     (void)specList;
   }
 
   /// the background thread.  What gets executed when we call
   /// POCO::Thread::start()
-  virtual void run();
+  void run() override;
 
 protected:
   // Initialize the event buffer
@@ -198,7 +198,7 @@ protected:
   /// Used to buffer events between calls to extractData()
   std::vector<DataObjects::EventWorkspace_sptr> m_eventBuffer;
   /// Protects m_eventBuffer
-  Poco::FastMutex m_mutex;
+  std::mutex m_mutex;
   /// Run start time
   Kernel::DateAndTime m_startTime;
   /// Run number

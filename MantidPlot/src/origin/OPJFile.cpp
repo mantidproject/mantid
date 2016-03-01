@@ -51,7 +51,7 @@ const char *colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define ERROR_MSG                                                              \
   "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"
 
-#define SwapBytes(x) ByteSwap((unsigned char *)&x, sizeof(x))
+#define SwapBytes(x) ByteSwap((unsigned char *) & x, sizeof(x))
 
 int strcmp_i(const char *s1,
              const char *s2) { // compare two strings ignoring case
@@ -155,13 +155,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
     for (unsigned int i = 0; i < SPREADSHEET[spread].column.size(); i++)
       if (SPREADSHEET[spread].column[i].index == index) {
         str.push_back(SPREADSHEET[spread].column[i].name);
-        str.push_back("T_" + SPREADSHEET[spread].name);
+        str.emplace_back("T_" + SPREADSHEET[spread].name);
         return str;
       }
   for (unsigned int i = 0; i < MATRIX.size(); i++)
     if (MATRIX[i].index == index) {
       str.push_back(MATRIX[i].name);
-      str.push_back("M_" + MATRIX[i].name);
+      str.emplace_back("M_" + MATRIX[i].name);
       return str;
     }
   for (unsigned int i = 0; i < EXCEL.size(); i++)
@@ -169,13 +169,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
       for (unsigned int k = 0; k < EXCEL[i].sheet[j].column.size(); k++)
         if (EXCEL[i].sheet[j].column[k].index == index) {
           str.push_back(EXCEL[i].sheet[j].column[k].name);
-          str.push_back("E_" + EXCEL[i].name);
+          str.emplace_back("E_" + EXCEL[i].name);
           return str;
         }
   for (unsigned int i = 0; i < FUNCTION.size(); i++)
     if (FUNCTION[i].index == index) {
       str.push_back(FUNCTION[i].name);
-      str.push_back("F_" + FUNCTION[i].name);
+      str.emplace_back("F_" + FUNCTION[i].name);
       return str;
     }
   return str;
@@ -2545,7 +2545,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
 
         CHECKED_FSEEK(debug, f, LAYER + 0x1C, SEEK_SET);
         CHECKED_FREAD(debug, &h, 1, 1, f);
-        curve.fillarea = (h == 2 ? true : false);
+        curve.fillarea = (h == 2);
 
         CHECKED_FSEEK(debug, f, LAYER + 0x1E, SEEK_SET);
         CHECKED_FREAD(debug, &h, 1, 1, f);
@@ -3392,8 +3392,6 @@ void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug,
 }
 bool OPJFile::IsBigEndian() {
   short word = 0x4321;
-  if ((*(char *)&word) != 0x21)
-    return true;
-  else
-    return false;
+
+  return ((*(char *)&word) != 0x21);
 }

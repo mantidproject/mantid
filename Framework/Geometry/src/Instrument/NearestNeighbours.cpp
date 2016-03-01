@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
 namespace Mantid {
@@ -52,8 +53,8 @@ NearestNeighbours::NearestNeighbours(
  * @param spectrum :: Spectrum ID of the central pixel
  * @return map of Detector ID's to distance
  */
-std::map<specid_t, V3D>
-NearestNeighbours::neighbours(const specid_t spectrum) const {
+std::map<specnum_t, V3D>
+NearestNeighbours::neighbours(const specnum_t spectrum) const {
   return defaultNeighbours(spectrum);
 }
 
@@ -65,8 +66,8 @@ NearestNeighbours::neighbours(const specid_t spectrum) const {
  * @return map of Detector ID's to distance
  * @throw NotFoundError if component is not recognised as a detector
  */
-std::map<specid_t, V3D>
-NearestNeighbours::neighboursInRadius(const specid_t spectrum,
+std::map<specnum_t, V3D>
+NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
                                       const double radius) const {
   // If the radius is stupid then don't let it continue as well be stuck forever
   if (radius < 0.0 || radius > 10.0) {
@@ -74,7 +75,7 @@ NearestNeighbours::neighboursInRadius(const specid_t spectrum,
         "NearestNeighbours::neighbours - Invalid radius parameter.");
   }
 
-  std::map<specid_t, V3D> result;
+  std::map<specnum_t, V3D> result;
   if (radius == 0.0) {
     const int eightNearest = 8;
     if (m_noNeighbours != eightNearest) {
@@ -103,7 +104,7 @@ NearestNeighbours::neighboursInRadius(const specid_t spectrum,
   m_radius = radius;
 
   std::map<detid_t, V3D> nearest = defaultNeighbours(spectrum);
-  for (std::map<specid_t, V3D>::const_iterator cit = nearest.begin();
+  for (std::map<specnum_t, V3D>::const_iterator cit = nearest.begin();
        cit != nearest.end(); ++cit) {
     if (cit->second.norm() <= radius) {
       result[cit->first] = cit->second;
@@ -121,7 +122,7 @@ NearestNeighbours::neighboursInRadius(const specid_t spectrum,
  * the graph
  */
 void NearestNeighbours::build(const int noNeighbours) {
-  std::map<specid_t, IDetector_const_sptr> spectraDets =
+  std::map<specnum_t, IDetector_const_sptr> spectraDets =
       getSpectraDetectors(m_instrument, m_spectraMap);
   if (spectraDets.empty()) {
     throw std::runtime_error(
@@ -148,11 +149,11 @@ void NearestNeighbours::build(const int noNeighbours) {
   ANNpointArray dataPoints = annAllocPts(nspectra, 3);
   MapIV pointNoToVertex;
 
-  std::map<specid_t, IDetector_const_sptr>::const_iterator detIt;
+  std::map<specnum_t, IDetector_const_sptr>::const_iterator detIt;
   int pointNo = 0;
   for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
     IDetector_const_sptr detector = detIt->second;
-    const specid_t spectrum = detIt->first;
+    const specnum_t spectrum = detIt->first;
     V3D pos = detector->getPos() / (*m_scale);
     dataPoints[pointNo][0] = pos.X();
     dataPoints[pointNo][1] = pos.Y();
@@ -163,11 +164,11 @@ void NearestNeighbours::build(const int noNeighbours) {
     ++pointNo;
   }
 
-  ANNkd_tree *annTree = new ANNkd_tree(dataPoints, nspectra, 3);
+  auto annTree = new ANNkd_tree(dataPoints, nspectra, 3);
   pointNo = 0;
   // Run the nearest neighbour search on each detector, reusing the arrays
-  ANNidxArray nnIndexList = new ANNidx[m_noNeighbours];
-  ANNdistArray nnDistList = new ANNdist[m_noNeighbours];
+  auto nnIndexList = new ANNidx[m_noNeighbours];
+  auto nnDistList = new ANNdist[m_noNeighbours];
 
   for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
     ANNpoint scaledPos = dataPoints[pointNo];
@@ -214,18 +215,18 @@ void NearestNeighbours::build(const int noNeighbours) {
  * @return map of detID to distance
  * @throw NotFoundError if detector ID is not recognised
  */
-std::map<specid_t, V3D>
-NearestNeighbours::defaultNeighbours(const specid_t spectrum) const {
-  MapIV::const_iterator vertex = m_specToVertex.find(spectrum);
+std::map<specnum_t, V3D>
+NearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
+  auto vertex = m_specToVertex.find(spectrum);
 
   if (vertex != m_specToVertex.end()) {
-    std::map<specid_t, V3D> result;
+    std::map<specnum_t, V3D> result;
     std::pair<Graph::adjacency_iterator, Graph::adjacency_iterator> adjacent =
         boost::adjacent_vertices(vertex->second, m_graph);
     Graph::adjacency_iterator adjIt;
     for (adjIt = adjacent.first; adjIt != adjacent.second; adjIt++) {
       Vertex nearest = (*adjIt);
-      specid_t nrSpec = specid_t(m_vertexID[nearest]);
+      specnum_t nrSpec = specnum_t(m_vertexID[nearest]);
       std::pair<Graph::edge_descriptor, bool> nrEd =
           boost::edge(vertex->second, nearest, m_graph);
       result[nrSpec] = m_edgeLength[nrEd.first];
@@ -243,21 +244,21 @@ NearestNeighbours::defaultNeighbours(const specid_t spectrum) const {
  * @param spectraMap :: A reference to the spectra map
  * @returns A map of spectra number to detector pointer
  */
-std::map<specid_t, IDetector_const_sptr> NearestNeighbours::getSpectraDetectors(
+std::map<specnum_t, IDetector_const_sptr>
+NearestNeighbours::getSpectraDetectors(
     boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap) {
-  std::map<specid_t, IDetector_const_sptr> spectra;
+  std::map<specnum_t, IDetector_const_sptr> spectra;
   if (spectraMap.empty())
     return spectra;
-  ISpectrumDetectorMapping::const_iterator cend = spectraMap.cend();
-  for (ISpectrumDetectorMapping::const_iterator citr = spectraMap.cbegin();
-       citr != cend; ++citr) {
+  auto cend = spectraMap.cend();
+  for (auto citr = spectraMap.cbegin(); citr != cend; ++citr) {
     const std::vector<detid_t> detIDs(citr->second.begin(), citr->second.end());
     IDetector_const_sptr det = instrument->getDetectorG(detIDs);
     // Always ignore monitors and ignore masked detectors if requested.
     bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
     if (!det->isMonitor() && !heedMasking) {
-      spectra.insert(std::make_pair(citr->first, det));
+      spectra.emplace(citr->first, det);
     }
   }
   return spectra;

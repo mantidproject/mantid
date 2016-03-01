@@ -23,11 +23,11 @@ public:
   ComplexOpTest() : Algorithm() {}
   virtual ~ComplexOpTest() {}
   void init() {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "InputWorkspace_1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "InputWorkspace_2", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() {

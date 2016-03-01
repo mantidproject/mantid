@@ -41,35 +41,6 @@ Kernel::Logger g_log("Run");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-Run::Run() : m_goniometer(), m_histoBins() {}
-
-/**
- * Destructor
- */
-Run::~Run() {}
-
-/**
- * Copy constructor
- * @param copy :: The object to initialize the copy from
- */
-Run::Run(const Run &copy) : LogManager(copy), m_goniometer(copy.m_goniometer) {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const Run &Run::operator=(const Run &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  m_goniometer = rhs.m_goniometer;
-  return *this;
-}
 
 //-----------------------------------------------------------------------------------------------
 /**
@@ -102,19 +73,20 @@ Run &Run::operator+=(const Run &rhs) {
   mergeMergables(m_manager, rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
-  for (int i = 0; i < ADDABLES; ++i) {
-    if (rhs.m_manager.existsProperty(ADDABLE[i])) {
+  for (const auto &name : ADDABLE) {
+    if (rhs.m_manager.existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager.getProperty(ADDABLE[i]);
+      Property *right = rhs.m_manager.getProperty(name);
 
       // now deal with the left-hand side
-      if (m_manager.existsProperty(ADDABLE[i])) {
-        Property *left = m_manager.getProperty(ADDABLE[i]);
+      if (m_manager.existsProperty(name)) {
+        Property *left = m_manager.getProperty(name);
         left->operator+=(right);
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
-        m_manager.declareProperty(right->clone(), "");
+        m_manager.declareProperty(std::unique_ptr<Property>(right->clone()),
+                                  "");
     }
   }
   return *this;
@@ -135,11 +107,10 @@ void Run::splitByTime(TimeSplitterType &splitter,
   // std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
   LogManager::splitByTime(splitter, outputs);
 
-  size_t n = outputs.size();
   // Re-integrate proton charge of all outputs
-  for (size_t i = 0; i < n; i++) {
-    if (outputs[i]) {
-      auto run = dynamic_cast<Run *>(outputs[i]);
+  for (auto output : outputs) {
+    if (output) {
+      auto run = dynamic_cast<Run *>(output);
       if (run)
         run->integrateProtonCharge();
     }
@@ -398,11 +369,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  std::map<std::string, std::string>::iterator it = entries.begin();
-  std::map<std::string, std::string>::iterator it_end = entries.end();
-  for (; it != it_end; ++it) {
-    // Get the name/class pair
-    const std::pair<std::string, std::string> &name_class = *it;
+  for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
       m_goniometer.loadNexus(file, name_class.first);
@@ -508,19 +475,17 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   // get pointers to all the properties on the right-handside and prepare to
   // loop through them
   const std::vector<Property *> inc = toAdd.getProperties();
-  std::vector<Property *>::const_iterator end = inc.end();
-  for (std::vector<Property *>::const_iterator it = inc.begin(); it != end;
-       ++it) {
-    const std::string rhs_name = (*it)->name();
+  for (auto ptr : inc) {
+    const std::string &rhs_name = ptr->name();
     try {
       // now get pointers to the same properties on the left-handside
       Property *lhs_prop(sum.getProperty(rhs_name));
-      lhs_prop->merge(*it);
+      lhs_prop->merge(ptr);
     } catch (Exception::NotFoundError &) {
       // copy any properties that aren't already on the left hand side
-      Property *copy = (*it)->clone();
+      auto copy = std::unique_ptr<Property>(ptr->clone());
       // And we add a copy of that property to *this
-      sum.declareProperty(copy, "");
+      sum.declareProperty(std::move(copy), "");
     }
   }
 }

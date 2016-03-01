@@ -5,6 +5,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -27,11 +28,12 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".dat", ".txt", ".csv"}),
+  const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -40,7 +42,7 @@ void SaveAscii::init() {
                   "The starting workspace index.");
   declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeNonNegative,
                   "The ending workspace index.");
-  declareProperty(new ArrayProperty<int>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of workspace indices to save.");
   declareProperty("Precision", EMPTY_INT(), mustBeNonNegative,
                   "Precision of output double values.");
@@ -59,10 +61,10 @@ void SaveAscii::init() {
                                {"SemiColon", ";"},
                                {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
-  for (size_t i = 0; i < 6; ++i) {
-    std::string option = spacers[i][0];
+  for (auto &spacer : spacers) {
+    std::string option = spacer[0];
     m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacers[i][1]));
+        std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.push_back(option);
   }
 
@@ -71,13 +73,13 @@ void SaveAscii::init() {
                   "Character(s) to put as separator between X, Y, E values.");
 
   declareProperty(
-      new PropertyWithValue<std::string>("CustomSeparator", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                  Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
-  setPropertySettings(
-      "CustomSeparator",
-      new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined"));
+  setPropertySettings("CustomSeparator",
+                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
+                                                       "UserDefined"));
 
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");
@@ -113,8 +115,7 @@ void SaveAscii::exec() {
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
   else if (choice != "UserDefined") {
-    std::map<std::string, std::string>::iterator it =
-        m_separatorIndex.find(choice);
+    auto it = m_separatorIndex.find(choice);
     sep = it->second;
   }
   // If we still have nothing, then we are forced to use a default.
@@ -151,11 +152,11 @@ void SaveAscii::exec() {
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
-    for (size_t i = 0; i < spec_list.size(); i++) {
-      if (spec_list[i] >= nSpectra)
+    for (auto &spec : spec_list) {
+      if (spec >= nSpectra)
         throw std::invalid_argument("Inconsistent spectra list");
       else
-        idx.insert(spec_list[i]);
+        idx.insert(spec);
     }
   }
   if (!idx.empty())
@@ -182,11 +183,10 @@ void SaveAscii::exec() {
           file << " , DX" << spec;
       }
     else
-      for (std::set<int>::const_iterator spec = idx.begin(); spec != idx.end();
-           ++spec) {
-        file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
+      for (auto spec : idx) {
+        file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
         if (write_dx)
-          file << " , DX" << *spec;
+          file << " , DX" << spec;
       }
     file << std::endl;
   }
@@ -216,12 +216,11 @@ void SaveAscii::exec() {
         file << ws->readE(spec)[bin];
       }
     else
-      for (std::set<int>::const_iterator spec = idx.begin(); spec != idx.end();
-           ++spec) {
+      for (auto spec : idx) {
         file << sep;
-        file << ws->readY(*spec)[bin];
+        file << ws->readY(spec)[bin];
         file << sep;
-        file << ws->readE(*spec)[bin];
+        file << ws->readE(spec)[bin];
       }
 
     if (write_dx) {

@@ -37,16 +37,16 @@ namespace Algorithms {
 class DLLExport ProcessIndirectFitParameters : public API::Algorithm {
 public:
   ProcessIndirectFitParameters();
-  virtual ~ProcessIndirectFitParameters();
+  ~ProcessIndirectFitParameters() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   std::vector<std::string> listToVector(std::string &);
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);

@@ -50,13 +50,14 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
             "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-    setPropertySettings(
-        propName, new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "1"));
+    setPropertySettings(propName, make_unique<VisibleWhenProperty>(
+                                      "AxisAligned", IS_EQUAL_TO, "1"));
     setPropertyGroup(propName, "Axis-Aligned Binning");
   }
 
@@ -64,14 +65,18 @@ void SlicingAlgorithm::initSlicingProps() {
   // ---------------------------------------
   std::string grpName = "Non-Aligned Binning";
 
-  IPropertySettings *ps =
-      new VisibleWhenProperty("AxisAligned", IS_EQUAL_TO, "0");
+  auto ps = [] {
+    std::unique_ptr<IPropertySettings> settings =
+        make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "0");
+    return settings;
+  };
   for (size_t i = 0; i < dimChars.size(); i++) {
     std::string dim(" ");
     dim[0] = dimChars[i];
     std::string propName = "BasisVector" + dim;
     declareProperty(
-        new PropertyWithValue<std::string>(propName, "", Direction::Input),
+        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                            Direction::Input),
         "Description of the basis vector of the " + Strings::toString(i) +
             "th output dimension."
             "Format: 'name, units, x,y,z,..'.\n"
@@ -80,25 +85,27 @@ void SlicingAlgorithm::initSlicingProps() {
             "  x,y,z,...: vector definining the basis in the input dimensions "
             "space.\n"
             "Leave blank for NONE.");
-    setPropertySettings(propName, ps->clone());
+    setPropertySettings(propName, ps());
     setPropertyGroup(propName, grpName);
   }
-  declareProperty(new ArrayProperty<double>("Translation", Direction::Input),
-                  "Coordinates in the INPUT workspace that corresponds to "
-                  "(0,0,0) in the OUTPUT workspace.\n"
-                  "Enter as a comma-separated string.\n"
-                  "Default: 0 in all dimensions (no translation).");
-
-  declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
-                  "The minimum, maximum edges of space of each dimension of "
-                  "the OUTPUT workspace, as a comma-separated list");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("Translation", Direction::Input),
+      "Coordinates in the INPUT workspace that corresponds to "
+      "(0,0,0) in the OUTPUT workspace.\n"
+      "Enter as a comma-separated string.\n"
+      "Default: 0 in all dimensions (no translation).");
 
   declareProperty(
-      new ArrayProperty<int>("OutputBins", Direction::Input),
+      make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
+      "The minimum, maximum edges of space of each dimension of "
+      "the OUTPUT workspace, as a comma-separated list");
+
+  declareProperty(
+      make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
       "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(new PropertyWithValue<bool>("NormalizeBasisVectors", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors",
+                                                       true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
@@ -106,7 +113,8 @@ void SlicingAlgorithm::initSlicingProps() {
                   "INPUT dimension = 1 in the OUTPUT dimensions.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
+                                           Direction::Input),
       "Force the input basis vectors to form an orthogonal coordinate system. "
       "Only works in 3 dimension!");
 
@@ -116,11 +124,11 @@ void SlicingAlgorithm::initSlicingProps() {
   setPropertyGroup("OutputBins", grpName);
   setPropertyGroup("NormalizeBasisVectors", grpName);
   setPropertyGroup("ForceOrthogonal", grpName);
-  setPropertySettings("Translation", ps->clone());
-  setPropertySettings("OutputExtents", ps->clone());
-  setPropertySettings("OutputBins", ps->clone());
-  setPropertySettings("NormalizeBasisVectors", ps->clone());
-  setPropertySettings("ForceOrthogonal", ps);
+  setPropertySettings("Translation", ps());
+  setPropertySettings("OutputExtents", ps());
+  setPropertySettings("OutputBins", ps());
+  setPropertySettings("NormalizeBasisVectors", ps());
+  setPropertySettings("ForceOrthogonal", ps());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -152,19 +160,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // Special case: accept dimension names [x,y,z]
   if (input[0] == '[') {
     // Find the name at the closing []
-    size_t n = input.find_first_of("]", 1);
+    size_t n = input.find_first_of(']', 1);
     if (n == std::string::npos)
       throw std::invalid_argument(
           "No closing ] character in the dimension name of : " + str);
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",", n);
+    n_first_comma = input.find_first_of(',', n);
     if (n_first_comma == std::string::npos)
       throw std::invalid_argument(
           "No comma after the closing ] character in the dimension string: " +
           str);
   } else
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",");
+    n_first_comma = input.find_first_of(',');
 
   if (n_first_comma == std::string::npos)
     throw std::invalid_argument("No comma in the dimension string: " + str);
@@ -275,9 +283,9 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   // Count the number of output dimensions
   m_outD = 0;
   std::string dimChars = this->getDimensionChars();
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
-    propName[11] = dimChars[i];
+    propName[11] = dimChar;
     if (!Strings::strip(this->getPropertyValue(propName)).empty())
       m_outD++;
   }
@@ -306,9 +314,9 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_transformScaling.clear();
 
   // Create the dimensions based on the strings from the user
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
-    propName[11] = dimChars[i];
+    propName[11] = dimChar;
     try {
       makeBasisVectorFromString(getPropertyValue(propName));
     } catch (std::exception &e) {
@@ -373,8 +381,8 @@ void SlicingAlgorithm::createGeneralTransform() {
     ortho.resize(m_bases.size(), VMD(3));
     m_bases = ortho;
     g_log.information() << "Basis vectors forced to be orthogonal: ";
-    for (size_t i = 0; i < m_bases.size(); i++)
-      g_log.information() << m_bases[i].toString(",") << "; ";
+    for (auto &base : m_bases)
+      g_log.information() << base.toString(",") << "; ";
     g_log.information() << std::endl;
   }
 
@@ -393,8 +401,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   // std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
-  DataObjects::CoordTransformAffine *ct =
-      new DataObjects::CoordTransformAffine(inD, m_outD);
+  auto ct = new DataObjects::CoordTransformAffine(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
   // ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
   //                    VMD(this->m_binningScaling));
@@ -403,8 +410,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   this->m_transform = ct;
 
   // Transformation original->binned
-  DataObjects::CoordTransformAffine *ctFrom =
-      new DataObjects::CoordTransformAffine(inD, m_outD);
+  auto ctFrom = new DataObjects::CoordTransformAffine(inD, m_outD);
   // ctFrom->buildOrthogonal(m_translation, this->m_bases,
   //                        VMD(m_transformScaling));
   ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
@@ -424,11 +430,10 @@ void SlicingAlgorithm::createGeneralTransform() {
         "the OutDimX, etc. properties.");
 
   // Now the reverse transformation
-  m_transformToOriginal = NULL;
+  m_transformToOriginal = nullptr;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
-    DataObjects::CoordTransformAffine *ctTo =
-        new DataObjects::CoordTransformAffine(inD, m_outD);
+    auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
     Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
     Matrix<coord_t> toMatrix = fromMatrix;
     // Invert the affine matrix to get the reverse transformation
@@ -459,7 +464,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Find the 3rd comma from the end
     size_t n = std::string::npos;
     for (size_t i = 0; i < 3; i++) {
-      n = input.find_last_of(",", n);
+      n = input.find_last_of(',', n);
       if (n == std::string::npos)
         throw std::invalid_argument("Wrong number of values (4 are expected) "
                                     "in the dimensions string: " +
@@ -532,9 +537,9 @@ void SlicingAlgorithm::createAlignedTransform() {
   // Validate inputs
   bool previousWasEmpty = false;
   size_t numDims = 0;
-  for (size_t i = 0; i < dimChars.size(); i++) {
+  for (char dimChar : dimChars) {
     std::string propName = "AlignedDim0";
-    propName[10] = dimChars[i];
+    propName[10] = dimChar;
     std::string prop = Strings::strip(getPropertyValue(propName));
     if (!prop.empty())
       numDims++;
@@ -596,16 +601,16 @@ void SlicingAlgorithm::createAlignedTransform() {
     // dimension index is that?
     Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
     mat.Invert();
-    DataObjects::CoordTransformAffine *tmp =
-        new DataObjects::CoordTransformAffine(inD, m_outD);
+    auto tmp = new DataObjects::CoordTransformAffine(inD, m_outD);
     tmp->setMatrix(mat);
     m_transformToOriginal = tmp;
   } else {
     // Changed # of dimensions - can't reverse the transform
-    m_transformToOriginal = NULL;
-    g_log.warning("SlicingAlgorithm: Your slice will cause the output "
-                  "workspace to have less dimensions than the input. This will "
-                  "affect your ability to create subsequent slices.");
+    m_transformToOriginal = nullptr;
+    g_log.warning(
+        "SlicingAlgorithm: Your slice will cause the output "
+        "workspace to have fewer dimensions than the input. This will "
+        "affect your ability to create subsequent slices.");
   }
 }
 
@@ -688,7 +693,7 @@ void SlicingAlgorithm::createTransform() {
   }
 
   // Create the coordinate transformation
-  m_transform = NULL;
+  m_transform = nullptr;
   if (m_axisAligned)
     this->createAlignedTransform();
   else
@@ -809,7 +814,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
   size_t nd = m_inWS->getNumDims();
 
   // General implicit function
-  MDImplicitFunction *func = new MDImplicitFunction;
+  auto func = new MDImplicitFunction;
 
   // First origin = min of each basis vector
   VMD o1 = m_translation;
@@ -823,9 +828,9 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     double xMin = m_binDimensions[d]->getMinimum();
     double xMax = m_binDimensions[d]->getMaximum();
     // Move the position if you're using a chunk
-    if (chunkMin != NULL)
+    if (chunkMin != nullptr)
       xMin = m_binDimensions[d]->getX(chunkMin[d]);
-    if (chunkMax != NULL)
+    if (chunkMax != nullptr)
       xMax = m_binDimensions[d]->getX(chunkMax[d]);
     // Offset the origin by the position along the basis vector
     o1 += (m_bases[d] * xMin);
@@ -951,11 +956,11 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
     // Assumes orthogonality!
-    for (size_t i = 0; i < bases.size(); i++) {
+    for (auto &base : bases) {
       // For each basis vector, make two planes, perpendicular to it and facing
       // inwards
-      func->addPlane(MDPlane(bases[i], o1));
-      func->addPlane(MDPlane(bases[i] * -1.0, o2));
+      func->addPlane(MDPlane(base, o1));
+      func->addPlane(MDPlane(base * -1.0, o2));
     }
   }
 
@@ -997,8 +1002,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
         function_max[d] =
             m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
     }
-    MDBoxImplicitFunction *function =
-        new MDBoxImplicitFunction(function_min, function_max);
+    auto function = new MDBoxImplicitFunction(function_min, function_max);
     return function;
   } else {
     // General implicit function
@@ -1085,9 +1089,8 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   const auto &referenceMDFrame =
       m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
 
-  for (auto it = indicesWithProjection.begin();
-       it != indicesWithProjection.end(); ++it) {
-    const auto &toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
+  for (auto &index : indicesWithProjection) {
+    const auto &toCheckMDFrame = m_inWS->getDimension(index)->getMDFrame();
     if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
       g_log.warning() << "Slicing Algorithm: New basis vector tries to "
                          "mix un-mixable MDFrame types.";

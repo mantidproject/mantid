@@ -154,7 +154,7 @@ public:
   // Constructor
   NXDataSet(const NXClass &parent, const std::string &name);
   /// NX class name. Returns "SDS"
-  std::string NX_class() const { return "SDS"; }
+  std::string NX_class() const override { return "SDS"; }
   /// Opens the data set. Does not read in any data. Call load(...) to load the
   /// data
   void open();
@@ -294,7 +294,7 @@ public:
   *            The rank of the data must be 4
   */
   void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,
-            int l = -1) {
+            int l = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
@@ -502,7 +502,7 @@ public:
   */
   NXClass(const NXClass &parent, const std::string &name);
   /// The NX class identifier
-  std::string NX_class() const { return "NXClass"; }
+  std::string NX_class() const override { return "NXClass"; }
   /**  Returns the class information about the next entry (class or dataset) in
    * this class.
   */
@@ -651,7 +651,7 @@ public:
   NXLog(const NXClass &parent, const std::string &name)
       : NXClass(parent, name) {}
   /// Nexus class id
-  std::string NX_class() const { return "NXlog"; }
+  std::string NX_class() const override { return "NXlog"; }
   /// Creates a property wrapper around the log
   Kernel::Property *createProperty();
   /// Creates a TimeSeriesProperty and returns a pointer to it
@@ -674,10 +674,10 @@ private:
     Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
-      return NULL;
+      return nullptr;
 
     if (vinfo.dims[0] != times.dim0())
-      return NULL;
+      return nullptr;
 
     if (vinfo.type == NX_CHAR) {
       Kernel::TimeSeriesProperty<std::string> *logv =
@@ -721,7 +721,7 @@ private:
       NXInt value(*this, "value");
       return loadValues<NXInt, TYPE>(logName, value, start_t, times);
     }
-    return NULL;
+    return nullptr;
   }
 
   /// Loads the values in the log into the workspace
@@ -761,7 +761,7 @@ public:
   NXNote(const NXClass &parent, const std::string &name)
       : NXClass(parent, name), m_author_ok(), m_data_ok(), m_description_ok() {}
   /// Nexus class id
-  std::string NX_class() const { return "NXnote"; }
+  std::string NX_class() const override { return "NXnote"; }
   /// Returns the note's author
   std::string author();
   /// Returns the note's content
@@ -834,7 +834,7 @@ public:
   */
   NXData(const NXClass &parent, const std::string &name);
   /// Nexus class id
-  std::string NX_class() const { return "NXdata"; }
+  std::string NX_class() const override { return "NXdata"; }
   /**  Opens the dataset within this NXData with signal=1 attribute.
   */
   template <typename T> NXDataSetTyped<T> openData() {
@@ -874,7 +874,7 @@ public:
   NXDetector(const NXClass &parent, const std::string &name)
       : NXMainClass(parent, name) {}
   /// Nexus class id
-  std::string NX_class() const { return "NXdetector"; }
+  std::string NX_class() const override { return "NXdetector"; }
   /// Opens the dataset containing pixel distances
   NXFloat openDistance() { return openNXFloat("distance"); }
   /// Opens the dataset containing pixel azimuthal angles
@@ -895,7 +895,7 @@ public:
   NXDiskChopper(const NXClass &parent, const std::string &name)
       : NXMainClass(parent, name) {}
   /// Nexus class id
-  std::string NX_class() const { return "NXdisk_chopper"; }
+  std::string NX_class() const override { return "NXdisk_chopper"; }
   /// Opens the dataset containing pixel distances
   NXFloat openRotationSpeed() { return openNXFloat("rotation_speed"); }
 };
@@ -912,7 +912,7 @@ public:
   NXInstrument(const NXClass &parent, const std::string &name)
       : NXMainClass(parent, name) {}
   /// Nexus class id
-  std::string NX_class() const { return "NXinstrument"; }
+  std::string NX_class() const override { return "NXinstrument"; }
   /**  Opens a NXDetector
   *   @param name :: The name of the class
   *   @return The detector
@@ -942,7 +942,7 @@ public:
   NXEntry(const NXClass &parent, const std::string &name)
       : NXMainClass(parent, name) {}
   /// Nexus class id
-  std::string NX_class() const { return "NXentry"; }
+  std::string NX_class() const override { return "NXentry"; }
   /**  Opens a NXData
   *   @param name :: The name of the class
   *   @return the nxdata entry
@@ -968,9 +968,9 @@ public:
   // Constructor
   NXRoot(const std::string &fname, const std::string &entry);
   /// Destructor
-  virtual ~NXRoot();
+  ~NXRoot() override;
   /// Return the NX class for a class (HDF group) or "SDS" for a data set;
-  std::string NX_class() const { return "NXroot"; }
+  std::string NX_class() const override { return "NXroot"; }
   /// True if complies with our understanding of the www.nexusformat.org
   /// definition.
   bool isStandard() const;

@@ -40,27 +40,27 @@ public:
   /// Default constructor
   MDHistoToWorkspace2D();
   /// Virtual destructor
-  virtual ~MDHistoToWorkspace2D() {}
+  ~MDHistoToWorkspace2D() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "MDHistoToWorkspace2D"; }
+  const std::string name() const override { return "MDHistoToWorkspace2D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Flattens a n dimensional MDHistoWorkspace into a Workspace2D with "
            "many spectra";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Transforms";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   size_t m_rank;
   size_t m_currentSpectra;

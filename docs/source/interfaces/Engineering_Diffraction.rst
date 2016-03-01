@@ -50,6 +50,21 @@ It is possible to load an existing calibration (as a CSV file) and to
 generate a new calibration file (which becomes the new current
 calibration).
 
+With the help of Cropped Calibration user can also calibrate according
+to bank or by setting the SpectrumIDs once the Cropped Calibration group
+box has been enabled.
+
+The plot Calibrated Workspace check-box will enable user to plot
+vanadium curves and Ceria peaks. For Ceria peaks there will be two
+workspace generated and plotted, one for each bank, whereas for
+cropped calibration there will only be only one workspace generate
+and plotted, depending on the selected bank or provided Spectrum
+IDs. The workspace contains difc and tzero data which is then
+utilised to plot the Ceria peaks per bank, the graph will plot Peaks
+Fitted and Difc/TZero Straight Line for comparison. More information
+regarding the fit peaks can be found on the
+:ref:`EnggFitPeaks<algm-EnggFitPeaks>` documentation.
+
 Parameters
 ^^^^^^^^^^
 
@@ -62,6 +77,26 @@ Vanadium #
 Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
+
+Bank Name:
+  This parameter is only required when Cropped Calibration is being
+  carried out. The bank name can be selected from a drop down list with
+  option of North and South, which are equivalently to 1 and 2
+  respectively. The Bank Name drop down list is set to `Enable Spectrum-IDs`
+  by default. This option cannot be used together with Spectrum IDs,
+  as they overlap.
+
+SpectrumIDs:
+  This parameter is only required when Cropped Calibration is being
+  carried out, the parameter will set the spectrum numbers of the
+  detectors, that should be considered in the calibration while all
+  others will be ignored. This option cannot be used together with
+  Bank Name, as they overlap. You may also give multiple ranges, for
+  example: "0-100", or "0-9", "150-750".
+
+The calibration process depends on several additional parameters and
+settings which can be modified in the *Settings* section (tab), see
+below for details.
 
 Focus
 -----
@@ -167,6 +202,13 @@ in Mantid. These files can be found with appropriate name at location:
 C:\EnginX_Mantid\User\236516\Focus on Windows, the
 EnginX_Mantid folder can be found on Desktop/Home on other platforms.
 
+The Multiple Runs Focus Mode combo-box enables two alternative
+focus mode. `Focus Individual Run Files Separately` is the default
+option set, which allows user to run focus with multi-run files.
+Whereas the `Focus Sum Of Files` option merges all the multi-run
+number files together and applies the Focus Process to the merged
+file.
+
 Pre-processing
 --------------
 
@@ -221,16 +263,21 @@ Calibration Parameters
 The calibration settings are organized in three blocks:
 
 1. Input directories
-2. Pixel calibration
+2. Pixel (full) calibration
 3. Advanced settings
 
 The input directories will be used when looking for run files
 (Vanadium and Ceria). They effectively become part of the search path
 of Mantid when using this interface.
 
-The pixel calibration file contains the calibration of every pixel of
-all banks, as produced by the algorithm :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`.
+The pixel (full) calibration file contains the calibration details of
+every pixel of all banks, as produced by the algorithm
+:ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`. A default pixel
+calibration file is provided with Mantid packages. This calibration
+has been produced for the Vanadium and calibration sample (Ceria) runs
+indicated in the name of the calibration file. Note that this
+calibration is currently subject to changes, as the fitting of peaks
+is being refined.
 
 The Following advanced settings are available to customize the
 behavior of this interface:

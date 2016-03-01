@@ -23,7 +23,7 @@ Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
 
 void Merge2WorkspaceLogs::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "Workspace to have logs merged");
   declareProperty("LogName1", "", "The name of the first log to be merged.");
@@ -85,8 +85,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   std::vector<Kernel::DateAndTime> times1 = p1->timesAsVector();
   std::vector<Kernel::DateAndTime> times2 = p2->timesAsVector();
 
-  Kernel::TimeSeriesProperty<double> *rp =
-      new Kernel::TimeSeriesProperty<double>(ologname);
+  auto rp = new Kernel::TimeSeriesProperty<double>(ologname);
 
   // 2. Merge
   size_t index1 = 0;
@@ -108,11 +107,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
 
     // i. Determine which log to work on
     if (!nocomparison) {
-      if (times1[index1] < times2[index2]) {
-        launch1 = true;
-      } else {
-        launch1 = false;
-      }
+      launch1 = times1[index1] < times2[index2];
     }
 
     // ii. Retrieve data from source log

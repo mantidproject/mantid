@@ -48,14 +48,14 @@ const std::string NexusTester::category() const {
 void NexusTester::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(
-      new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),
-      "The name of the Nexus file to write.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "SaveFilename", "", FileProperty::OptionalSave, exts),
+                  "The name of the Nexus file to write.");
 
-  declareProperty(
-      new FileProperty("LoadFilename", "", FileProperty::OptionalLoad, exts),
-      "The name of the Nexus file to load (optional).\n"
-      "Must have been written by NexusTester algorithm.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "LoadFilename", "", FileProperty::OptionalLoad, exts),
+                  "The name of the Nexus file to load (optional).\n"
+                  "Must have been written by NexusTester algorithm.");
 
   declareProperty("ChunkSize", 10,
                   "Chunk size for writing/loading, in kb of data");
@@ -67,10 +67,8 @@ void NexusTester::init() {
       "Clear the linux disk cache before loading.\n"
       "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
-  std::vector<std::string> types;
-  types.push_back("Zeros");
-  types.push_back("Incrementing Numbers");
-  types.push_back("Random Numbers");
+  std::vector<std::string> types{"Zeros", "Incrementing Numbers",
+                                 "Random Numbers"};
   declareProperty("FakeData", "Incrementing Numbers",
                   boost::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
@@ -106,7 +104,7 @@ void NexusTester::exec() {
   // Size of the chunk in number of integers
   size_t chunkSize = ChunkSizeKb * 1024 / sizeof(uint32_t);
   // ----------- Generate the fake data -----------------------------
-  uint32_t *fakeData = new uint32_t[chunkSize];
+  auto fakeData = new uint32_t[chunkSize];
   if (FakeDataType == "Zeros") {
     for (size_t i = 0; i < chunkSize; i++)
       fakeData[i] = 0;

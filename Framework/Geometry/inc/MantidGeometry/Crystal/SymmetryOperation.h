@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidGeometry/Crystal/MatrixVectorPair.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -74,8 +75,8 @@ namespace Geometry {
         SymmetryOperation inversion("-x,-y,-z");
         SymmetryOperation identity = inversion * inversion;
 
-    Please note that the components of the vector are wrapped to
-    the interval (0, 1] when two symmetry operations are combined.
+    In context of Group, the vector of SymmetryOperation is wrapped onto the
+    interval (0, 1] using the getUnitCellIntervalOperation-function.
 
     Constructing a SymmetryOperation object from a string is heavy, because the
     string has to be parsed every time. It's preferable to use
@@ -121,11 +122,8 @@ class MANTID_GEOMETRY_DLL SymmetryOperation {
 public:
   SymmetryOperation();
   SymmetryOperation(const std::string &identifier);
-
-  SymmetryOperation(const SymmetryOperation &other);
-  SymmetryOperation &operator=(const SymmetryOperation &other);
-
-  ~SymmetryOperation() {}
+  SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+  SymmetryOperation(const Kernel::DblMatrix &matrix, const V3R &vector);
 
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
@@ -139,11 +137,7 @@ public:
 
   /// Returns the transformed vector.
   template <typename T> T operator*(const T &operand) const {
-    if (!hasTranslation()) {
-      return m_matrix * operand;
-    }
-
-    return (m_matrix * operand) + m_vector;
+    return m_matrixVectorPair * operand;
   }
 
   Kernel::V3D transformHKL(const Kernel::V3D &hkl) const;
@@ -158,20 +152,18 @@ public:
   bool operator<(const SymmetryOperation &other) const;
 
 protected:
-  SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
-
-  void init(const Kernel::IntMatrix &matrix, const V3R &vector);
+  void init(const MatrixVectorPair<int, V3R> &matrixVectorPair);
 
   size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
   V3R getReducedVector(const Kernel::IntMatrix &matrix,
                        const V3R &vector) const;
 
   size_t m_order;
-  Kernel::IntMatrix m_matrix;
-  Kernel::IntMatrix m_inverseMatrix;
-  V3R m_vector;
+  Kernel::IntMatrix m_transposedInverseMatrix;
   V3R m_reducedVector;
   std::string m_identifier;
+
+  MatrixVectorPair<int, V3R> m_matrixVectorPair;
 };
 
 MANTID_GEOMETRY_DLL std::ostream &
@@ -181,6 +173,22 @@ MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
+
+MANTID_GEOMETRY_DLL SymmetryOperation
+getUnitCellIntervalOperation(const SymmetryOperation &symOp);
+
+template <typename T, typename U>
+Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {
+  Kernel::Matrix<T> converted(matrix.numRows(), matrix.numCols());
+
+  for (size_t i = 0; i < converted.numRows(); ++i) {
+    for (size_t j = 0; j < converted.numCols(); ++j) {
+      converted[i][j] = static_cast<int>(matrix[i][j]);
+    }
+  }
+
+  return converted;
+}
 
 } // namespace Geometry
 } // namespace Mantid

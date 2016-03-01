@@ -65,28 +65,27 @@ FABADAMinimizer::FABADAMinimizer()
       "Variance in Cost Function for considering convergence reached.");
   declareProperty("JumpAcceptanceRate", 0.6666666,
                   "Desired jumping acceptance rate");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "PDF", "PDF", Kernel::Direction::Output),
+                  "The name to give the output workspace");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "Chains", "", Kernel::Direction::Output),
+                  "The name to give the output workspace");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "ConvergedChain", "", Kernel::Direction::Output,
+                      API::PropertyMode::Optional),
+                  "The name to give the output workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("PDF", "PDF", Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "CostFunctionTable", "", Kernel::Direction::Output),
       "The name to give the output workspace");
   declareProperty(
-      new API::WorkspaceProperty<>("Chains", "", Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "Parameters", "", Kernel::Direction::Output),
       "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<>("ConvergedChain", "",
-                                               Kernel::Direction::Output,
-                                               API::PropertyMode::Optional),
-                  "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "CostFunctionTable", "", Kernel::Direction::Output),
-                  "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "Parameters", "", Kernel::Direction::Output),
-                  "The name to give the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
-
-/// Destructor
-FABADAMinimizer::~FABADAMinimizer() {}
 
 /// Initialize minimizer. Set initial values for all private members.
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
@@ -516,8 +515,7 @@ void FABADAMinimizer::finalize() {
     Y[i - 1] = pdf_y[i - 1] / (double(conv_length) * bin);
   }
 
-  std::vector<double>::iterator pos_MPchi2 =
-      std::max_element(pdf_y.begin(), pdf_y.end());
+  auto pos_MPchi2 = std::max_element(pdf_y.begin(), pdf_y.end());
 
   if (pos_MPchi2 - pdf_y.begin() == 0) {
     // mostPchi2 = X[pos_MPchi2-pdf_y.begin()];
@@ -548,8 +546,7 @@ void FABADAMinimizer::finalize() {
     }
 
     // Calculate the most probable value, from the PDF.
-    std::vector<double>::iterator pos_MP =
-        std::max_element(pdf_y.begin(), pdf_y.end());
+    auto pos_MP = std::max_element(pdf_y.begin(), pdf_y.end());
     double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
     m_leastSquares->setParameter(j, mostP);
   }

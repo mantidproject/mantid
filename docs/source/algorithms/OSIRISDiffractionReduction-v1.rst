@@ -16,6 +16,12 @@ The dRanges are numbered as per the `OSIRIS manual
 <http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
 Otherwise the dRange is determined based on the table provided in the manual.
 
+Workflow
+--------
+
+.. diagram:: OSIRISDiffractionReduction-v1_wkflw.dot
+
+
 Usage
 -----
 

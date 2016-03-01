@@ -4,12 +4,13 @@
 #include "MantidDataHandling/LoadReflTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
 
@@ -165,7 +166,7 @@ void LoadReflTBL::csvParse(
       if (lastComma + 1 < line.length()) {
         cols.push_back(line.substr(lastComma + 1));
       } else {
-        cols.push_back("");
+        cols.emplace_back("");
       }
     }
   }
@@ -224,14 +225,12 @@ size_t LoadReflTBL::getCells(std::string line,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadReflTBL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".tbl");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, ".tbl"),
                   "The name of the table file to read, including its full or "
                   "relative path. The file extension must be .tbl");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created.");
 }
 

@@ -19,7 +19,7 @@ public:
 
   // released automatically when it goes out of scope
   boost::shared_ptr<RadiusSum> algInstance() {
-    boost::shared_ptr<RadiusSum> alg(new RadiusSum());
+    boost::shared_ptr<RadiusSum> alg = boost::make_shared<RadiusSum>();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     return alg;

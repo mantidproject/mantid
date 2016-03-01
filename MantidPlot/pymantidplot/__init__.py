@@ -1,4 +1,4 @@
-"""
+﻿"""
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
@@ -16,15 +16,16 @@ from PyQt4.QtCore import Qt
 import os
 import time
 import mantid.api
+import mantidqtpython
+from mantidqtpython import GraphOptions
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
-from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker,
-                  GraphOptions, InstrumentWindow, InstrumentWindowRenderTab, InstrumentWindowPickTab,
-                  InstrumentWindowMaskTab)
-
+from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
+				  
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
+
 
 # Alias threadsafe_call so users have a more understandable name
 gui_cmd = threadsafe_call
@@ -217,7 +218,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
 
 # ----------------------------------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
+def plotSpectrum(source, indices, distribution = mantidqtpython.MantidQt.DistributionDefault, error_bars=False, type=-1, window=None,
                  clearWindow=False, waterfall=False):
     """Open a 1D Plot of a spectrum in a workspace.
 
@@ -256,7 +257,7 @@ def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, True, error_bars,
+                                          workspace_names, index_list, True, distribution, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -439,7 +440,7 @@ def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
-                                          workspace_names, index_list, False, error_bars,
+                                          workspace_names, index_list, False, mantidqtpython.MantidQt.DistributionDefault, error_bars,
                                           type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -676,13 +677,19 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
+	
+InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
+InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetRenderTab
+InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
+InstrumentWidgetMaskTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentWidgetTreeTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetTreeTab
 
-def getInstrumentView(name, tab=InstrumentWindow.RENDER):
+def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
 
     Args:
         name: The name of the workspace.
-        tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
+        tab: The index of the tab to display initially, (default=InstrumentWidget.RENDER)
 
     Returns:
         A handle to the created instrument view widget.
@@ -690,8 +697,7 @@ def getInstrumentView(name, tab=InstrumentWindow.RENDER):
     ads = _get_analysis_data_service()
     if name not in ads:
         raise ValueError("Workspace '%s' does not exist" % name)
-    return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
-
+    return new_proxy(proxies.InstrumentView, _qti.app.mantidUI.getInstrumentView, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -849,13 +855,17 @@ for name in MantidUIImports:
 
 # Set some aliases for Layer enumerations so that old code will still work
 Layer = _qti.Layer
-Layer.Log10 = _qti.GraphOptions.Log10
-Layer.Linear = _qti.GraphOptions.Linear
-Layer.Left = _qti.GraphOptions.Left
-Layer.Right = _qti.GraphOptions.Right
-Layer.Bottom = _qti.GraphOptions.Bottom
-Layer.Top = _qti.GraphOptions.Top
+Layer.Log10 = mantidqtpython.GraphOptions.Log10
+Layer.Linear = mantidqtpython.GraphOptions.Linear
+Layer.Left = mantidqtpython.GraphOptions.Left
+Layer.Right = mantidqtpython.GraphOptions.Right
+Layer.Bottom = mantidqtpython.GraphOptions.Bottom
+Layer.Top = mantidqtpython.GraphOptions.Top
 
+DistrFlag = mantidqtpython.MantidQt.DistributionFlag
+DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
+DistrFlag.DistrTrue = mantidqtpython.MantidQt.DistributionTrue
+DistrFlag.DistrFalse = mantidqtpython.MantidQt.DistributionFalse
 
 # -----------------------------------------------------------------------------
 # --------------------------- "Private" functions -----------------------------

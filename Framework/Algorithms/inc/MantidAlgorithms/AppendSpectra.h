@@ -45,19 +45,19 @@ namespace Algorithms {
 class DLLExport AppendSpectra : public WorkspaceJoiners {
 public:
   AppendSpectra();
-  virtual ~AppendSpectra();
+  ~AppendSpectra() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
+  const std::string name() const override;
+  int version() const override;
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
-  virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2,
-                                  API::MatrixWorkspace_sptr output);
+  void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
+                          API::MatrixWorkspace_const_sptr ws2,
+                          API::MatrixWorkspace_sptr output) override;
   void combineLogs(const API::Run &lhs, const API::Run &rhs, API::Run &ans);
 };
 

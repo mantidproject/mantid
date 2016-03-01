@@ -37,11 +37,11 @@ class MANTID_API_DLL SampleShapeValidator
     : public Kernel::TypedValidator<boost::shared_ptr<ExperimentInfo>> {
 public:
   std::string getType() const;
-  Kernel::IValidator_sptr clone() const;
+  Kernel::IValidator_sptr clone() const override;
 
 private:
   std::string
-  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const;
+  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const override;
 };
 
 } // namespace API

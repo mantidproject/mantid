@@ -28,10 +28,10 @@ SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}
 */
 void SaveVTK::init() {
   // Declare mandatory properties
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The workspace name to use as input");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save),
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The name to use when writing the file");
   // Declare optional properties
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -98,7 +98,7 @@ void SaveVTK::exec() {
         std::vector<double> xValue, yValue, errors;
         std::vector<double>::size_type nVals(
             localWorkspace->dataY(hNum).size());
-        for (int i = 0; i < (int)nVals; ++i) {
+        for (int i = 0; i < static_cast<int>(nVals); ++i) {
           if (xMin && localWorkspace->dataX(hNum)[i] < m_Xmin)
             continue;
           if (xMax && localWorkspace->dataX(hNum)[i + 1] > m_Xmax) {
@@ -106,7 +106,7 @@ void SaveVTK::exec() {
             break;
           }
           xValue.push_back(localWorkspace->dataX(hNum)[i]);
-          if (i == (int)nVals - 1) {
+          if (i == static_cast<int>(nVals) - 1) {
             xValue.push_back(localWorkspace->dataX(hNum)[i + 1]);
           }
           yValue.push_back(localWorkspace->dataY(hNum)[i]);

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
@@ -18,7 +19,7 @@
 #include <Poco/LoggingFactory.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -69,27 +70,25 @@ Logger g_log("ConfigService");
  * Split the supplied string on semicolons.
  *
  * @param path The path to split.
- * @param splitted vector to put the splitted path into.
+ * @returns vector containing the splitted path.
  */
-void splitPath(const std::string &path, std::vector<std::string> &splitted) {
-  if (path.find(";") == std::string::npos) { // don't bother tokenizing
+std::vector<std::string> splitPath(const std::string &path) {
+  std::vector<std::string> splitted;
+
+  if (path.find(';') == std::string::npos) { // don't bother tokenizing
     splitted.push_back(path);
-    return;
-  }
-
-  int options =
-      Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-
-  splitted.clear();
-  Poco::StringTokenizer tokenizer(path, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
-  splitted.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend;
-       ++itr) {
-    if (!itr->empty()) {
-      splitted.push_back(*itr);
+  } else {
+    int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
+                  Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+    Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
+    auto iend = tokenizer.end();
+    for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
+      if (!itr->empty()) {
+        splitted.push_back(*itr);
+      }
     }
   }
+  return splitted;
 }
 
 } // end of anonymous namespace
@@ -116,9 +115,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Virtual destructor
-  virtual ~WrappedObject() {}
-
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
@@ -141,12 +137,12 @@ private:
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(), m_ConfigPaths(),
-      m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
-      m_properties_file_name("Mantid.properties"),
+    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
+      m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""),
+      m_PropertyString(""), m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same filesystem
+      // confusion if both are used on the same file system
       m_user_properties_file_name("Mantid-mpi.user.properties"),
 #else
       m_user_properties_file_name("Mantid.user.properties"),
@@ -155,7 +151,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
-  m_pConf = 0;
+  m_pConf = nullptr;
 
   // Register the FilterChannel with the Poco logging factory
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
@@ -191,25 +187,22 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
-  m_ConfigPaths.insert(
-      std::make_pair("mantidqt.python_interfaces_directory", true));
-  m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
-  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("instrumentDefinition.vtpDirectory", true));
-  m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
-  m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
-  m_ConfigPaths.insert(
-      std::make_pair("requiredpythonscript.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
-  m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
-  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
-  m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
+  m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
+  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("pvplugins.directory", true);
+  m_ConfigPaths.emplace("mantidqt.plugins.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.directory", true);
+  m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
+  m_ConfigPaths.emplace("groupingFiles.directory", true);
+  m_ConfigPaths.emplace("maskFiles.directory", true);
+  m_ConfigPaths.emplace("colormaps.directory", true);
+  m_ConfigPaths.emplace("requiredpythonscript.directories", true);
+  m_ConfigPaths.emplace("pythonscripts.directory", true);
+  m_ConfigPaths.emplace("pythonscripts.directories", true);
+  m_ConfigPaths.emplace("python.plugins.directories", true);
+  m_ConfigPaths.emplace("user.python.plugins.directories", true);
+  m_ConfigPaths.emplace("datasearch.directories", true);
+  m_ConfigPaths.emplace("icatDownload.directory", true);
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
@@ -244,6 +237,9 @@ ConfigServiceImpl::ConfigServiceImpl()
                 << getPropertiesDir() << std::endl;
   g_log.information() << "This is Mantid version " << MantidVersion::version()
                       << " revision " << MantidVersion::revision() << std::endl;
+  g_log.information() << "running on " << getComputerName() << " starting "
+                      << DateAndTime::getCurrentTime().toFormattedString(
+                             "%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << std::endl;
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
@@ -402,7 +398,7 @@ void ConfigServiceImpl::configureLogging() {
 
         // Try to create or append to the file. If it fails, use the default
         FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == NULL) {
+        if (fp == nullptr) {
           std::cerr
               << "Error writing to log file path given in properties file: \""
               << m_logFilePath << "\". Will use a default path instead."
@@ -486,7 +482,7 @@ void ConfigServiceImpl::convertRelativeToAbsolute() {
 
     std::string value(m_pConf->getString(key));
     value = makeAbsolute(value, key);
-    m_AbsolutePaths.insert(std::make_pair(key, value));
+    m_AbsolutePaths.emplace(key, value);
   }
 }
 
@@ -506,11 +502,9 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   std::string converted;
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos) {
-    std::vector<std::string> splitted;
-    splitPath(dir, splitted);
-    std::vector<std::string>::const_iterator iend = splitted.end();
-    for (std::vector<std::string>::const_iterator itr = splitted.begin();
-         itr != iend;) {
+    auto splitted = splitPath(dir);
+    auto iend = splitted.cend();
+    for (auto itr = splitted.begin(); itr != iend;) {
       std::string absolute = makeAbsolute(*itr, key);
       if (absolute.empty()) {
         ++itr;
@@ -551,7 +545,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
 
   // C++ doesn't have a const version of operator[] for maps so I can't call
   // that here
-  std::map<std::string, bool>::const_iterator it = m_ConfigPaths.find(key);
+  auto it = m_ConfigPaths.find(key);
   bool required = false;
   if (it != m_ConfigPaths.end()) {
     required = it->second;
@@ -581,12 +575,12 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
  * The value of the key should be a semi-colon separated list of directories
  */
 void ConfigServiceImpl::cacheDataSearchPaths() {
-  m_DataSearchDirs.clear();
   std::string paths = getString("datasearch.directories");
-  // Nothing to do
-  if (paths.empty())
-    return;
-  splitPath(paths, m_DataSearchDirs);
+  if (paths.empty()) {
+    m_DataSearchDirs.clear();
+  } else {
+    m_DataSearchDirs = splitPath(paths);
+  }
 }
 
 /**
@@ -597,10 +591,11 @@ void ConfigServiceImpl::cacheDataSearchPaths() {
 void ConfigServiceImpl::cacheUserSearchPaths() {
   m_UserSearchDirs.clear();
   std::string paths = getString("usersearch.directories");
-  // Nothing to do
-  if (paths.empty())
-    return;
-  splitPath(paths, m_UserSearchDirs);
+  if (paths.empty()) {
+    m_UserSearchDirs.clear();
+  } else {
+    m_UserSearchDirs = splitPath(paths);
+  }
 }
 
 /**
@@ -615,8 +610,8 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   std::string correctedPath = path;
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
-  std::vector<std::string>::const_iterator it =
-      std::find_if(m_DataSearchDirs.begin(), m_DataSearchDirs.end(),
+  auto it =
+      std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
                    std::bind2nd(std::equal_to<std::string>(), correctedPath));
   return (it != m_DataSearchDirs.end());
 }
@@ -669,10 +664,15 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
     filestr << "default.facility=" << std::endl;
     filestr << std::endl;
-    filestr << "## Stes the default instrument" << std::endl;
+    filestr << "## Sets the default instrument" << std::endl;
     filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
     filestr << "default.instrument=" << std::endl;
     filestr << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the Q.convention" << std::endl;
+    filestr << "## Set to Crystallography for kf-ki instead of default "
+               "Inelastic which is ki-kf" << std::endl;
+    filestr << "#Q.convention=Crystallography" << std::endl;
     filestr << "##" << std::endl;
     filestr << "## DIRECTORIES" << std::endl;
     filestr << "##" << std::endl;
@@ -909,9 +909,8 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   // current user properties so append them
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
-    std::set<std::string>::iterator key_end = m_changed_keys.end();
-    for (std::set<std::string>::iterator key_itr = m_changed_keys.begin();
-         key_itr != key_end;) {
+    auto key_end = m_changed_keys.end();
+    for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
@@ -952,8 +951,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
 std::string ConfigServiceImpl::getString(const std::string &keyName,
                                          bool use_cache) const {
   if (use_cache) {
-    std::map<std::string, std::string>::const_iterator mitr =
-        m_AbsolutePaths.find(keyName);
+    auto mitr = m_AbsolutePaths.find(keyName);
     if (mitr != m_AbsolutePaths.end()) {
       return (*mitr).second;
     }
@@ -997,12 +995,12 @@ void ConfigServiceImpl::getKeysRecursive(
   if (rootKeys.empty())
     allKeys.push_back(root);
 
-  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+  for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = *rkIt;
+      searchString = rootKey;
     } else {
-      searchString = root + "." + *rkIt;
+      searchString = root + "." + rootKey;
     }
 
     getKeysRecursive(searchString, allKeys);
@@ -1060,10 +1058,7 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
     Poco::File tempFile = Poco::File(expTarget);
 
     if (tempFile.exists()) {
-      if (tempFile.canExecute())
-        return true;
-      else
-        return false;
+      return tempFile.canExecute();
     } else
       return false;
   } catch (Poco::Exception &) {
@@ -1228,7 +1223,7 @@ std::string getValueFromStdOut(const std::string &orig,
   }
   start += key.size();
 
-  size_t stop = orig.find("\n", start);
+  size_t stop = orig.find('\n', start);
   if (stop == std::string::npos) {
     return std::string();
   }
@@ -1299,18 +1294,18 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
 #ifdef __APPLE__
   cmd = "sw_vers"; // mac
 #elif _WIN32
-  cmd = "wmic";              // windows
-  args.push_back("os");      // windows
-  args.push_back("get");     // windows
-  args.push_back("Caption"); // windows
-  args.push_back("/value");  // windows
+  cmd = "wmic";                 // windows
+  args.emplace_back("os");      // windows
+  args.emplace_back("get");     // windows
+  args.emplace_back("Caption"); // windows
+  args.emplace_back("/value");  // windows
 #endif
 
   if (!cmd.empty()) {
     try {
       Poco::Pipe outPipe, errorPipe;
       Poco::ProcessHandle ph =
-          Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
+          Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
       const int rc = ph.wait();
       // Only if the command returned successfully.
       if (rc == 0) {
@@ -1772,8 +1767,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 /// Empty the list of facilities, deleting the FacilityInfo objects in the
 /// process
 void ConfigServiceImpl::clearFacilities() {
-  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it) {
-    delete *it;
+  for (auto &facility : m_facilities) {
+    delete facility;
   }
   m_facilities.clear();
 }
@@ -1802,12 +1797,11 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   }
 
   // Now let's look through the other facilities
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
+  for (auto facility : m_facilities) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
-                    << (**it).name() << "." << std::endl;
-      return (**it).instrument(instrumentName);
+                    << (*facility).name() << "." << std::endl;
+      return (*facility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
       // Move along, there's nothing to see here...
@@ -1863,10 +1857,9 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
-    if ((**it).name() == facilityName) {
-      return **it;
+  for (auto facility : m_facilities) {
+    if ((*facility).name() == facilityName) {
+      return *facility;
     }
   }
 
@@ -1890,7 +1883,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
       setString("default.facility", facilityName);
     }
   }
-  if (found == false) {
+  if (!found) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
     throw Exception::NotFoundError("Facilities", facilityName);
@@ -1979,7 +1972,7 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 */
 void ConfigServiceImpl::setFilterChannelLogLevel(
     const std::string &filterChannelName, int logLevel) {
-  Poco::Channel *channel = NULL;
+  Poco::Channel *channel = nullptr;
   try {
     channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
         filterChannelName);

@@ -49,20 +49,20 @@ class DLLExport MDTransfQ3D : public MDTransfModQ {
 public:
   /// the name, this ChildAlgorithm is known to users (will appear in selection
   /// list)
-  const std::string transfID() const; // {return "Q3D"; }
-  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i);
+  const std::string transfID() const override; // {return "Q3D"; }
+  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
   bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s,
-                       double &err) const;
+                       double &err) const override;
   // constructor;
   MDTransfQ3D();
   /* clone method allowing to provide the copy of the particular class */
-  MDTransfInterface *clone() const { return new MDTransfQ3D(*this); }
+  MDTransfInterface *clone() const override { return new MDTransfQ3D(*this); }
   //
-  void initialize(const MDWSDescription &ConvParams);
+  void initialize(const MDWSDescription &ConvParams) override;
 
   /** */
-  virtual std::vector<double>
-  getExtremumPoints(const double xMin, const double xMax, size_t det_num) const;
+  std::vector<double> getExtremumPoints(const double xMin, const double xMax,
+                                        size_t det_num) const override;
 
   // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS (THEY ARE VIRTUAL STATIC METHODS)
@@ -73,18 +73,18 @@ public:
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr Sptr =
-                           API::MatrixWorkspace_const_sptr()) const;
+                           API::MatrixWorkspace_const_sptr()) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,
                API::MatrixWorkspace_const_sptr Sptr =
-                   API::MatrixWorkspace_const_sptr()) const;
+                   API::MatrixWorkspace_const_sptr()) const override;
   /**the default dimID-s in Q3D mode are Q1,Q2,Q3 and dE if necessary */
   std::vector<std::string>
   getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
                   API::MatrixWorkspace_const_sptr Sptr =
-                      API::MatrixWorkspace_const_sptr()) const;
+                      API::MatrixWorkspace_const_sptr()) const override;
 
 protected:
   // the variable which verifies if Lorentz corrections have to be calculated in
@@ -98,7 +98,12 @@ protected:
   // current value of Sin(Theta)^2 corresponding to the current detector value
   // and used to calculate Lorentz corrections
   double m_SinThetaSq;
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
   // all other variables are the same as in ModQ
+  // hole near origin of Q
+  double m_AbsMin;
+
 private:
   /// how to transform workspace data in elastic case
   inline bool calcMatrixCoord3DElastic(const double &k0,

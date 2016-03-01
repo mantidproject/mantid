@@ -20,24 +20,9 @@ IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(
     const unsigned int domainType) const {
   auto creator = this->createUnwrapped(id);
   creator->initialize(pm, workspacePropertyName,
-                      (IDomainCreator::DomainType)domainType);
+                      static_cast<IDomainCreator::DomainType>(domainType));
   return creator;
 }
-
-//----------------------------------------------------------------------------------------------
-// Private methods
-//----------------------------------------------------------------------------------------------
-
-/**
- * Constructor
- */
-DomainCreatorFactoryImpl::DomainCreatorFactoryImpl()
-    : Kernel::DynamicFactory<IDomainCreator>() {}
-
-/**
- * Destructor
- */
-DomainCreatorFactoryImpl::~DomainCreatorFactoryImpl() {}
 
 } // namespace API
 } // namespace Mantid

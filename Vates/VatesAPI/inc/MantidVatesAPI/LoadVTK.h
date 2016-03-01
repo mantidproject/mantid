@@ -20,17 +20,20 @@ namespace Mantid
     class DLLExport LoadVTK : public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
-      virtual const std::string name() const;
+      const std::string name() const override;
 
-      virtual int version() const;
+      int version() const override;
 
-      virtual const std::string category() const;
+      const std::string category() const override;
 
       /// Summary of algorithms purpose
-      virtual const std::string summary() const {return "Loads a legacy binary format VTK uniform structured image as an MDWorkspace.";}
+      const std::string summary() const override {
+        return "Loads a legacy binary format VTK uniform structured image as "
+               "an MDWorkspace.";
+      }
 
       /// Returns a confidence value that this algorithm can load a file
-      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+      int confidence(Kernel::FileDescriptor &descriptor) const override;
 
     private:
 
@@ -38,9 +41,9 @@ namespace Mantid
 
       void execMDEvent(vtkDataSet* readDataset,vtkUnsignedShortArray* signals, vtkUnsignedShortArray* errorsSQ, Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY, Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::API::Progress& prog, const int64_t nPoints, const int64_t frequency);
 
-      virtual void init();
+      void init() override;
 
-      virtual void exec();
+      void exec() override;
     };
   }
 }

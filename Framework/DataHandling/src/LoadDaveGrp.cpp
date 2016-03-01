@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -50,9 +51,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Third line is a comment: #
   std::getline(descriptor.data(), curline);
-  if (curline.substr(0, 1) == "#") {
-    daveGrp = daveGrp && true;
-  } else
+  if (curline.substr(0, 1) != "#")
     return 0;
 
   // Fourth line is an integer
@@ -70,17 +69,13 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 void LoadDaveGrp::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".grp");
-  exts.push_back(".sqe");
-  exts.push_back(".txt");
-  exts.push_back(".dat");
+  std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  this->declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "A DAVE grouped ASCII file");
-  this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                                     Kernel::Direction::Output),
+  this->declareProperty(Kernel::make_unique<API::FileProperty>(
+                            "Filename", "", API::FileProperty::Load, exts),
+                        "A DAVE grouped ASCII file");
+  this->declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Kernel::Direction::Output),
                         "The name of the workspace that will be created.");
 
   // Extract the current contents of the UnitFactory to be the allowed values
@@ -97,12 +92,12 @@ void LoadDaveGrp::init() {
                         "The name of the units for the Y-Axis (must be one of "
                         "those registered in "
                         "the Unit Factory)");
-  this->declareProperty(new Kernel::PropertyWithValue<bool>(
+  this->declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
                             "IsMicroEV", false, Kernel::Direction::Input),
                         "Original file is in units of micro-eV for DeltaE");
   this->declareProperty(
-      new Kernel::PropertyWithValue<bool>("ConvertToHistogram", false,
-                                          Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+          "ConvertToHistogram", false, Kernel::Direction::Input),
       "Convert output workspace to histogram data.");
 }
 
@@ -111,8 +106,8 @@ void LoadDaveGrp::exec() {
 
   int yLength = 0;
 
-  MantidVec *xAxis = new MantidVec();
-  MantidVec *yAxis = new MantidVec();
+  auto xAxis = new MantidVec();
+  auto yAxis = new MantidVec();
 
   std::vector<MantidVec *> data;
   std::vector<MantidVec *> errors;
@@ -235,8 +230,8 @@ void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
     // Skip the group comment line
     this->readLine();
     // Read the data block
-    MantidVec *d = new MantidVec();
-    MantidVec *e = new MantidVec();
+    auto d = new MantidVec();
+    auto e = new MantidVec();
     for (std::size_t k = 0; k < static_cast<std::size_t>(this->xLength); k++) {
       this->readLine();
       std::istringstream is(this->line);

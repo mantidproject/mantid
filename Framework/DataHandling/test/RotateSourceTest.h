@@ -34,7 +34,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -73,7 +73,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -112,7 +112,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Right, "")));
+        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -151,7 +151,7 @@ public:
     // The instrument
     Instrument_sptr instr = boost::make_shared<Instrument>();
     instr->setReferenceFrame(
-        boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Right, "")));
+        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");

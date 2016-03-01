@@ -23,8 +23,8 @@ PyObject *getListFiles(ScriptRepository &self) {
   std::vector<std::string> files = self.listFiles();
 
   PyObject *registered = PyList_New(0);
-  for (auto file = files.begin(); file != files.end(); ++file) {
-    PyObject *value = PyString_FromString(file->c_str());
+  for (auto &file : files) {
+    PyObject *value = PyString_FromString(file.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

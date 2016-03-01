@@ -124,10 +124,12 @@ public:
     TS_ASSERT_EQUALS(inst.liveListener(), "AListener");
     TS_ASSERT_EQUALS(inst.liveDataAddress(), "myinst.facility.gov:99");
     auto techniques = inst.techniques();
-    auto tech_it = techniques.begin();
+    auto tech_it_end = techniques.end();
     TS_ASSERT_EQUALS(techniques.size(), 2);
-    TS_ASSERT_EQUALS(*tech_it, "Doing Stuff");
-    TS_ASSERT_EQUALS(*++tech_it, "Measuring Stuff");
+    TSM_ASSERT_DIFFERS("Techniques should contain 'Doing Stuff'",
+                       techniques.find("Doing Stuff"), tech_it_end)
+    TSM_ASSERT_DIFFERS("Techniques should contain 'Measuring Stuff'",
+                       techniques.find("Measuring Stuff"), tech_it_end)
     TS_ASSERT_EQUALS(&inst.facility(), fac);
 
     std::stringstream ss;

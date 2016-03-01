@@ -120,7 +120,7 @@ public:
     //--------------------------------
     int nn = 3; // sample offsets used
 
-    boost::shared_ptr<Jacob> Jac(new Jacob(10 + nn, N));
+    boost::shared_ptr<Jacob> Jac = boost::make_shared<Jacob>(10 + nn, N);
     calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t)N);
     calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t)N);
 

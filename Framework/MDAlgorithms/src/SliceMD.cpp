@@ -37,30 +37,28 @@ SliceMD::~SliceMD() {}
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave,
-                       {".nxs"}),
+      make_unique<FileProperty>("OutputFilename", "",
+                                FileProperty::OptionalSave, ".nxs"),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
   declareProperty(
-      new PropertyWithValue<int>("Memory", -1),
+      make_unique<PropertyWithValue<int>>("Memory", -1),
       "If OutputFilename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  // setPropertySettings("Memory", new EnabledWhenProperty("OutputFilename",
-  // IS_NOT_DEFAULT));
 
   declareProperty("TakeMaxRecursionDepthFromInput", true,
                   "Copy the maximum recursion depth from the input workspace.");
@@ -72,8 +70,8 @@ void SliceMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
   setPropertySettings("MaxRecursionDepth",
-                      new EnabledWhenProperty("TakeMaxRecursionDepthFromInput",
-                                              IS_EQUAL_TO, "0"));
+                      make_unique<EnabledWhenProperty>(
+                          "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
 
   setPropertyGroup("OutputFilename", "File Back-End");
   setPropertyGroup("Memory", "File Back-End");
@@ -121,8 +119,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++) {
-    outWS->addDimension(m_binDimensions[od]);
+  for (auto &binDimension : m_binDimensions) {
+    outWS->addDimension(binDimension);
   }
   outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();
@@ -185,7 +183,8 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Function defining which events (in the input dimensions) to place in the
   // output
-  MDImplicitFunction *function = this->getImplicitFunctionForChunk(NULL, NULL);
+  MDImplicitFunction *function =
+      this->getImplicitFunctionForChunk(nullptr, nullptr);
 
   std::vector<API::IMDNode *> boxes;
   // Leaf-only; no depth limit; with the implicit function passed to it.
@@ -196,7 +195,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  Progress *prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -216,9 +215,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       const std::vector<MDE> &events = box->getConstEvents();
 
-      typename std::vector<MDE>::const_iterator it = events.begin();
-      typename std::vector<MDE>::const_iterator it_end = events.end();
-      for (; it != it_end; it++) {
+      for (auto it = events.cbegin(); it != events.cend(); ++it) {
         // Cache the center of the event (again for speed)
         const coord_t *inCenter = it->getCenter();
 
@@ -264,7 +261,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } // for each box in the vector
   prog->report();
 
-  outWS->splitAllIfNeeded(NULL);
+  outWS->splitAllIfNeeded(nullptr);
   // Refresh all cache.
   outWS->refreshCache();
 

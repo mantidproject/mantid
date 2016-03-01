@@ -1,12 +1,12 @@
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name,unused-import
+#pylint: disable=too-many-lines,invalid-name,unused-import,bare-except,too-many-arguments
+
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
 import time
 import sys
-from numpy import NAN
+import numpy as np
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 #from launch_peak_back_selection_1d import DesignerMainWindow
@@ -22,7 +22,7 @@ try:
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
-except:
+except ImportError:
     pass
 
 class BaseRefWidget(BaseWidget):
@@ -211,11 +211,11 @@ class BaseRefWidget(BaseWidget):
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
 
-    def getMetadata(self,file):
+    def getMetadata(self,filename):
         """
-        This retrieve the metadata from the data event NeXus file
+        This retrieve the metadata from the data event NeXus filename
         """
-        _full_file_name = file
+        _full_file_name = filename
         tmpWks = LoadEventNexus(Filename=_full_file_name,MetaDataOnly='1')
 
         isSi = False
@@ -261,7 +261,6 @@ class BaseRefWidget(BaseWidget):
 
         try:
             _file = FileFinder.findRuns("REF_L%d"%int(run_number))[0]
-            lambdaRequest = ''
 
             metadata= self.getMetadata(_file)
 
@@ -502,8 +501,8 @@ class BaseRefWidget(BaseWidget):
             for j in range(len(data_y)):
 #                print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
                 if data_y[j] < 1e-12:
-                    data_y[j] = NAN
-                    data_e[j] = NAN
+                    data_y[j] = np.nan
+                    data_e[j] = np.nan
 
             file_number = file_number + 1
 
@@ -758,9 +757,9 @@ class BaseRefWidget(BaseWidget):
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
         content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
-        script += "import mantid\n"
-        script += "from mantid.simpleapi import *\n"
-        script += "from mantid.kernel import ConfigService\n"
+        content += "import mantid\n"
+        content += "from mantid.simpleapi import *\n"
+        content += "from mantid.kernel import ConfigService\n"
 
         content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
@@ -1077,12 +1076,11 @@ class BaseRefWidget(BaseWidget):
         file_path = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 
         basename = os.path.basename(file_path)
-        ws_base = "__%s" % basename
 
-        if self.instrument_name == 'REF_L':
-            ws_output_base = "Pixel Y vs TOF" + " - " + basename
-        else:
-            ws_output_base = "Pixel X vs TOF" + " - " + basename
+#         if self.instrument_name == 'REF_L':
+#             ws_output_base = "Pixel Y vs TOF" + " - " + basename
+#         else:
+#             ws_output_base = "Pixel X vs TOF" + " - " + basename
 
 #        if (self.instrument_name == 'REF_L'):
 #            if isPeak:
@@ -1101,8 +1099,8 @@ class BaseRefWidget(BaseWidget):
 #                ws_output_base = "Counts vs X pixel - %s" % basename
 #                x_title = "X pixel"
 
-        range_min = int(self._summary.data_from_tof.text())
-        range_max = int(self._summary.data_to_tof.text())
+#         range_min = int(self._summary.data_from_tof.text())
+#         range_max = int(self._summary.data_to_tof.text())
 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
 #        if mtd.workspaceExists(ws_output_base):
@@ -1370,7 +1368,7 @@ class BaseRefWidget(BaseWidget):
 
                 state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
 
-             #incident medium
+            #incident medium
             _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
                                      for j in range(self._summary.incident_medium_combobox.count())]
             _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()

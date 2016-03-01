@@ -43,19 +43,23 @@ General properties
 Facility and instrument properties
 **********************************
 
-+------------------------------+---------------------------------------------------+-------------+
-|Property                      |Description                                        |Example value|
-+==============================+===================================================+=============+
-|default.facility              |The name of the default facility. The facility must| ISIS        |
-|                              |be defined within the facilites.xml file to be     |             |
-|                              |considered valid. The file is described here.      |             |
-|                              |:ref:`here <Facilities file>`.                     |             |
-+------------------------------+---------------------------------------------------+-------------+
-|default.instrument            |The name of the default instrument. The instrument | WISH        |
-|                              |must be defined within the facilities.xml file to  |             |
-|                              |be valid. The file is described                    |             |
-|                              |:ref:`here <Facilities file>`.                     |             |
-+------------------------------+---------------------------------------------------+-------------+
++------------------------------+---------------------------------------------------+-----------------+
+|Property                      |Description                                        |Example value    |
++==============================+===================================================+=================+
+|default.facility              |The name of the default facility. The facility must| ISIS            |
+|                              |be defined within the facilites.xml file to be     |                 |
+|                              |considered valid. The file is described here.      |                 |
+|                              |:ref:`here <Facilities file>`.                     |                 |
++------------------------------+---------------------------------------------------+-----------------+
+|default.instrument            |The name of the default instrument. The instrument | WISH            |
+|                              |must be defined within the facilities.xml file to  |                 |
+|                              |be valid. The file is described                    |                 |
+|                              |:ref:`here <Facilities file>`.                     |                 |
++------------------------------+---------------------------------------------------+-----------------+
+|Q.convention                  |The convention for converting to Q. For inelastic  | Crystallography |
+|                              |the convention is ki-kf.  For Crystallography the  |                 |
+|                              |convention is kf-ki.                               |                 |
++------------------------------+---------------------------------------------------+-----------------+
 
 Directory Properties
 ********************

@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"

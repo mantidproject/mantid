@@ -1,21 +1,22 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
+#include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <fstream>
 
@@ -53,41 +54,42 @@ LoadFullprofResolution::~LoadFullprofResolution() {}
  */
 void LoadFullprofResolution::init() {
   // Input file name
-  vector<std::string> exts;
-  exts.push_back(".irf");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, ".irf"),
                   "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
-  auto wsprop = new WorkspaceProperty<API::ITableWorkspace>(
+  auto wsprop = Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
       "OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
-  declareProperty(wsprop, "Name of the output TableWorkspace containing "
-                          "profile parameters or bank information. ");
+  declareProperty(std::move(wsprop),
+                  "Name of the output TableWorkspace containing "
+                  "profile parameters or bank information. ");
 
   // Use bank numbers as given in file
   declareProperty(
-      new PropertyWithValue<bool>("UseBankIDsInFile", true, Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
+                                                   Direction::Input),
       "Use bank IDs as given in file rather than ordinal number of bank."
       "If the bank IDs in the file are not unique, it is advised to set this "
       "to false.");
 
   // Bank to import
-  declareProperty(new ArrayProperty<int>("Banks"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("Banks"),
                   "ID(s) of specified bank(s) to load, "
                   "The IDs are as specified by UseBankIDsInFile."
                   "Default is all banks contained in input .irf file.");
 
   // Workspace to put parameters into. It must be a workspace group with one
   // workpace per bank from the IRF file
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace", "",
-                                                        Direction::InOut,
-                                                        PropertyMode::Optional),
-                  "A workspace group with the instrument to which we add the "
-                  "parameters from the Fullprof .irf file with one workspace "
-                  "for each bank of the .irf file");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+          "Workspace", "", Direction::InOut, PropertyMode::Optional),
+      "A workspace group with the instrument to which we add the "
+      "parameters from the Fullprof .irf file with one workspace "
+      "for each bank of the .irf file");
 
   // Workspaces for each bank
-  declareProperty(new ArrayProperty<int>("WorkspacesForBanks"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("WorkspacesForBanks"),
                   "For each Fullprof bank,"
                   " the ID of the corresponding workspace in same order as the "
                   "Fullprof banks are specified. "
@@ -126,8 +128,8 @@ void LoadFullprofResolution::exec() {
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-  for (size_t i = 0; i < vec_bankinirf.size(); ++i)
-    g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
+  for (auto bank : vec_bankinirf)
+    g_log.debug() << "Irf containing bank " << bank << ".\n";
 
   // Bank-workspace correspondence
   map<int, size_t> workspaceOfBank;
@@ -149,15 +151,14 @@ void LoadFullprofResolution::exec() {
 
     // Deal with banks
     sort(outputbankids.begin(), outputbankids.end());
-    for (size_t i = 0; i < outputbankids.size(); ++i) {
-      int outputbankid = outputbankids[i];
+    for (auto outputbankid : outputbankids) {
       if (outputbankid < 0) {
         g_log.warning() << "Input bank ID (" << outputbankid
                         << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        vector<int>::iterator fiter = lower_bound(
-            vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
+                                 outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;
@@ -192,7 +193,7 @@ void LoadFullprofResolution::exec() {
     parseResolutionStrings(parammap, lines, useBankIDsInFile, bankid,
                            bankstartindexmap[bankid], bankendindexmap[bankid],
                            nProf);
-    bankparammap.insert(make_pair(bankid, parammap));
+    bankparammap.emplace(bankid, parammap);
   }
 
   // Generate output table workspace
@@ -290,9 +291,9 @@ int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
   if (lines[1].find("NPROF") != string::npos) {
     // Split line to get the NPROF number
     size_t nStart = lines[1].find("NPROF");
-    size_t nEq = lines[1].find("=", nStart);
+    size_t nEq = lines[1].find('=', nStart);
     size_t nEnd = lines[1].find(
-        " ", nStart); // Assume the NRPOF number is followed by space
+        ' ', nStart); // Assume the NRPOF number is followed by space
     if (nEq == string::npos || nEnd == string::npos)
       return (-1);
     size_t nNumber = nEq + 1;
@@ -329,8 +330,8 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
         // Previous line is in a bank range.  Then finish the previous bank
         // range
         endindex = static_cast<int>(i) - 1;
-        bankstartindexmap.insert(make_pair(banks.back(), startindex));
-        bankendindexmap.insert(make_pair(banks.back(), endindex));
+        bankstartindexmap.emplace(banks.back(), startindex);
+        bankendindexmap.emplace(banks.back(), endindex);
       }
 
       // Start the new pair
@@ -354,16 +355,15 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
   if (startindex >= 0) {
     endindex = static_cast<int>(lines.size()) - 1;
-    bankstartindexmap.insert(make_pair(banks.back(), startindex));
-    bankendindexmap.insert(make_pair(banks.back(), endindex));
+    bankstartindexmap.emplace(banks.back(), startindex);
+    bankendindexmap.emplace(banks.back(), endindex);
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << endl;
-  for (size_t i = 0; i < banks.size(); ++i) {
-    g_log.debug() << "Bank " << banks[i] << " From line "
-                  << bankstartindexmap[banks[i]] << " to "
-                  << bankendindexmap[banks[i]] << endl;
+  for (auto &bank : banks) {
+    g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
+                  << " to " << bankendindexmap[bank] << endl;
   }
 
   return;
@@ -694,7 +694,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   if (numbanks == 0)
     throw runtime_error("Unable to generate a table from an empty map!");
 
-  map<int, map<string, double>>::iterator bankmapiter = bankparammap.begin();
+  auto bankmapiter = bankparammap.begin();
   size_t numparams = bankmapiter->second.size();
 
   // vector of all parameter name
@@ -719,7 +719,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.
@@ -788,11 +788,11 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
     std::map<int, size_t> &workspaceOfBank) {
   if (workspaces.size() == 0) {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], i + 1));
+      workspaceOfBank.emplace(banks[i], i + 1);
     }
   } else {
     for (size_t i = 0; i < banks.size(); i++) {
-      workspaceOfBank.insert(std::pair<int, size_t>(banks[i], workspaces[i]));
+      workspaceOfBank.emplace(banks[i], workspaces[i]);
     }
   }
 }
@@ -1061,7 +1061,7 @@ void LoadFullprofResolution::getTableRowNumbers(
     TableRow row = tablews->getRow(i);
     std::string name;
     row >> name;
-    parammap.insert(std::make_pair(name, i));
+    parammap.emplace(name, i);
   }
 
   return;

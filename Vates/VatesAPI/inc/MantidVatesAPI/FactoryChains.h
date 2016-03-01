@@ -1,0 +1,44 @@
+#ifndef MANTID_VATES_FACTORY_CHAINS_H
+#define MANTID_VATES_FACTORY_CHAINS_H
+
+#include "MantidKernel/System.h"
+
+#include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
+
+#include <vtkPVClipDataSet.h>
+
+namespace Mantid
+{
+namespace VATES
+{
+
+// Forward Decalaration
+class MDLoadingPresenter;
+
+/// Creates a facotry chain for MDHisto workspaces
+std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>> DLLExport createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
+                                    VisualNormalization normalization,
+                                    double time);
+
+/// Creates a factory chain for MDEvent workspaces
+std::unique_ptr<vtkMDHexFactory> DLLExport createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
+                                    VisualNormalization normalization,
+                                    double time);
+
+/// Function to apply the Change-of-Basis-Matrix
+void DLLExport applyCOBMatrixSettingsToVtkDataSet(MDLoadingPresenter *presenter, vtkDataSet *dataSet,
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
+
+/// Function to get clipped data sets.
+vtkSmartPointer<vtkPVClipDataSet> DLLExport getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
+
+/// Create name with timestamp attached.
+std::string DLLExport createTimeStampedName(std::string name);
+}
+}
+
+#endif

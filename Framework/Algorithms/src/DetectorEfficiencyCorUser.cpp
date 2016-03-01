@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -52,12 +54,12 @@ void DetectorEfficiencyCorUser::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
-      "The workspace to correct for detector efficiency");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the result.");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, val),
+                  "The workspace to correct for detector efficiency");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace in which to store the result.");
   auto checkEi = boost::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
@@ -201,8 +203,8 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
         std::min(std::abs(*std::min_element(xIn.begin(), xIn.end())), m_Ei) <
         m_Ei;
 
-    MantidVec::const_iterator xIn_it = xIn.begin(); // DeltaE
-    MantidVec::iterator effOut_it = effOut.begin();
+    auto xIn_it = xIn.cbegin(); // DeltaE
+    auto effOut_it = effOut.begin();
     for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
       if (conditionForEnergy) {
         // cppcheck cannot see that this is used by reference by muparser

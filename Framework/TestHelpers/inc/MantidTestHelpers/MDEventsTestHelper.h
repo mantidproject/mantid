@@ -344,7 +344,7 @@ makeMDEWFull(size_t splitInto, coord_t min, coord_t max,
 
 /** Generate an empty MDBox */
 MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto = 10,
-                                     API::BoxController *splitter = NULL);
+                                     API::BoxController *splitter = nullptr);
 
 /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
 MDBox<MDLeanEvent<3>, 3> *makeMDBox3();

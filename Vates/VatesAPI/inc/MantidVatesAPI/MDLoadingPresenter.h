@@ -52,14 +52,18 @@ namespace Mantid
     class DLLExport MDLoadingPresenter
     {
       public:
-        virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate) = 0;
+        virtual vtkSmartPointer<vtkDataSet>
+        execute(vtkDataSetFactory *factory,
+                ProgressAction &rebinningProgressUpdate,
+                ProgressAction &drawingProgressUpdate) = 0;
         virtual void executeLoadMetadata() = 0;
         virtual bool hasTDimensionAvailable() const = 0;
         virtual std::vector<double> getTimeStepValues() const = 0;
         virtual std::string getTimeStepLabel() const = 0;
         virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
         virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet);
-        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
+        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet,
+                                       std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
         virtual bool canReadFile() const = 0;
         virtual const std::string& getGeometryXML() const = 0;
         virtual ~MDLoadingPresenter(){}

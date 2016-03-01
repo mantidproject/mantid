@@ -76,7 +76,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   t2.access().resize(YLength);
   for (size_t i = 0; i < m_noVectors; i++) {
     // Create the spectrum upon init
-    Histogram1D *spec = new Histogram1D();
+    auto spec = new Histogram1D();
     data[i] = spec;
     // Set the data and X
     spec->setX(t1);
@@ -85,7 +85,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
     // Y,E arrays populated
     spec->setData(t2, t2);
     // Default spectrum number = starts at 1, for workspace index 0.
-    spec->setSpectrumNo(specid_t(i + 1));
+    spec->setSpectrumNo(specnum_t(i + 1));
     spec->setDetectorID(detid_t(i + 1));
   }
 

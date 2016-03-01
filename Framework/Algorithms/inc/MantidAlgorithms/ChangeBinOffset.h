@@ -48,26 +48,26 @@ public:
   /// Default constructor
   ChangeBinOffset();
   /// Destructor
-  virtual ~ChangeBinOffset();
+  ~ChangeBinOffset() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ChangeBinOffset"; }
+  const std::string name() const override { return "ChangeBinOffset"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Adjusts all the time bin values in a workspace by a specified "
            "amount.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Axes"; }
+  const std::string category() const override { return "Transforms\\Axes"; }
   /// Algorithm's Alternate Name
-  virtual const std::string alias() const { return "OffsetX"; }
+  const std::string alias() const override { return "OffsetX"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Execute algorithm for EventWorkspaces
   void execEvent();

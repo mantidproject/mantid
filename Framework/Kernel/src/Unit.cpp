@@ -20,35 +20,6 @@ Unit::Unit()
     : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0),
       delta(0) {}
 
-/**
- */
-Unit::~Unit() {}
-
-/**
- * @param other The unit that initializes this
- */
-Unit::Unit(const Unit &other) {
-  // call assignment operator for everything else
-  *this = other;
-}
-
-/**
- * @param rhs A unit object whose state is copied to this
- * @return A reference to this object
- */
-Unit &Unit::operator=(const Unit &rhs) {
-  if (this != &rhs) {
-    initialized = rhs.initialized;
-    l1 = rhs.l1;
-    l2 = rhs.l2;
-    twoTheta = rhs.twoTheta;
-    emode = rhs.emode;
-    efixed = rhs.efixed;
-    delta = rhs.delta;
-  }
-  return *this;
-}
-
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
 bool Unit::operator!=(const Unit &u) const { return !(*this == u); }
@@ -100,7 +71,7 @@ bool Unit::quickConversion(std::string destUnitName, double &factor,
   // See if there's a conversion listed for the requested destination unit
   std::transform(destUnitName.begin(), destUnitName.end(), destUnitName.begin(),
                  toupper);
-  UnitConversions::const_iterator iter = it->second.find(destUnitName);
+  auto iter = it->second.find(destUnitName);
   // If not, return false
   if (iter == it->second.end())
     return false;

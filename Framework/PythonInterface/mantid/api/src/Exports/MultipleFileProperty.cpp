@@ -30,16 +30,13 @@ boost::python::object valueAsPyObject(MultipleFileProperty &self) {
   } else {
     // Build a list of lists to mimic the behaviour of MultipleFileProperty
     boost::python::list fileList;
-    for (auto outerItr = propValue.begin(); outerItr != propValue.end();
-         ++outerItr) {
-      const std::vector<std::string> &filenames = *outerItr;
+    for (const auto &filenames : propValue) {
       if (filenames.size() == 1) {
         fileList.append(filenames.front());
       } else {
         boost::python::list groupList;
-        for (auto innerItr = filenames.begin(); innerItr != filenames.end();
-             ++innerItr) {
-          groupList.append(*innerItr);
+        for (const auto &filename : filenames) {
+          groupList.append(filename);
         }
         fileList.append(groupList);
       }

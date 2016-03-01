@@ -46,28 +46,28 @@ public:
   /// Constructor
   LoadSPE() : API::IFileLoader<Kernel::FileDescriptor>() {}
   /// Virtual destructor
-  virtual ~LoadSPE() {}
+  ~LoadSPE() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadSPE"; }
+  const std::string name() const override { return "LoadSPE"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a file written in the spe format.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\SPE;Inelastic\\DataHandling";
   }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   // Initialisation code
-  void init();
+  void init() override;
   // Execution code
-  void exec();
+  void exec() override;
 
   void readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
                      size_t index);

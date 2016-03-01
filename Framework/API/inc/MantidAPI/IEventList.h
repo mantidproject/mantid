@@ -24,7 +24,7 @@ public:
   IEventList() {}
 
   /// Constructor
-  IEventList(specid_t specNo) : ISpectrum(specNo) {}
+  IEventList(specnum_t specNo) : ISpectrum(specNo) {}
 
   /// Return the current event type for the list
   virtual Mantid::API::EventType getEventType() const = 0;
@@ -39,7 +39,7 @@ public:
   /// Get the number of events from the list
   virtual std::size_t getNumberEvents() const = 0;
   /// Get memory size of event list
-  virtual size_t getMemorySize() const = 0;
+  size_t getMemorySize() const override = 0;
   /// Get copy of counts and errors, rebinned using on the given X values
   virtual void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
                                  bool skipError = false) const = 0;

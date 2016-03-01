@@ -5,22 +5,12 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Geometry {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ComponentParser::ComponentParser() { m_current.clear(); }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ComponentParser::~ComponentParser() {}
-
 /** @return the top-level component created */
 Component *ComponentParser::getComponent() {
   if (m_current.size() > 0)
     return m_current[0];
   else
-    return NULL;
+    return nullptr;
 }
 
 void ComponentParser::characters(const Poco::XML::XMLChar ch[], int start,
@@ -35,7 +25,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString &,
                                    const Poco::XML::XMLString &,
                                    const Poco::XML::Attributes &attr) {
   // Find the parent of this new component.
-  Component *current = NULL;
+  Component *current = nullptr;
   if (!m_current.empty())
     current = m_current.back();
 
@@ -45,7 +35,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString &,
   // Find the name in the attributes
   std::string name = attr.getValue("", "name");
 
-  Component *newComp = NULL;
+  Component *newComp = nullptr;
   if (localName == "Component")
     newComp = new Component(name, current);
   else {
@@ -66,7 +56,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString &,
 void ComponentParser::endElement(const Poco::XML::XMLString &,
                                  const Poco::XML::XMLString &localName,
                                  const Poco::XML::XMLString &) {
-  Component *current = NULL;
+  Component *current = nullptr;
   if (!m_current.empty())
     current = m_current.back();
 

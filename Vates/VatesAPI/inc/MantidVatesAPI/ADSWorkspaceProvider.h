@@ -39,12 +39,14 @@ namespace Mantid
     {
     public:
       ADSWorkspaceProvider();
-      ~ADSWorkspaceProvider();
+      ~ADSWorkspaceProvider() override;
 
       //-------WorkspaceProivder Implementations ------------
-      bool canProvideWorkspace(std::string wsName) const;
-      Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const;
-      void disposeWorkspace(std::string wsName) const;
+      bool canProvideWorkspace(std::string wsName) const override;
+      Mantid::API::Workspace_sptr
+      fetchWorkspace(std::string wsName) const override;
+      void disposeWorkspace(std::string wsName) const override;
+
     private:
       ADSWorkspaceProvider& operator=(const ADSWorkspaceProvider&);
       ADSWorkspaceProvider(const ADSWorkspaceProvider&);

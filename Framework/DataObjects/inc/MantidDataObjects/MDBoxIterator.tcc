@@ -3,10 +3,6 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -26,7 +22,7 @@ namespace DataObjects {
 TMDE(MDBoxIterator)::MDBoxIterator(
     API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
     Mantid::Geometry::MDImplicitFunction *function)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this)) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
 }
@@ -49,7 +45,7 @@ TMDE(MDBoxIterator)::MDBoxIterator(
     API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
     SkippingPolicy *skippingPolicy,
     Mantid::Geometry::MDImplicitFunction *function)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(skippingPolicy) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
 }
@@ -101,7 +97,7 @@ TMDE(void MDBoxIterator)::commonConstruct(
  */
 TMDE(MDBoxIterator)::MDBoxIterator(std::vector<API::IMDNode *> &boxes,
                                    size_t begin, size_t end)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL),
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this))
 
 {
@@ -157,7 +153,7 @@ TMDE(void MDBoxIterator)::jumpTo(size_t index) {
 
 //----------------------------------------------------------------------------------------------
 /// @return true if the iterator is currently valid
-TMDE(bool MDBoxIterator)::valid() const { return (m_current != NULL); }
+TMDE(bool MDBoxIterator)::valid() const { return m_current != nullptr; }
 
 //----------------------------------------------------------------------------------------------
 /// Advance to the next cell. If the current cell is the last one in the
@@ -215,8 +211,8 @@ TMDE(void MDBoxIterator)::getEvents() const {
 TMDE(void MDBoxIterator)::releaseEvents() const {
   if (m_events) {
     m_currentMDBox->releaseEvents();
-    m_events = NULL;
-    m_currentMDBox = NULL;
+    m_events = nullptr;
+    m_currentMDBox = nullptr;
   }
 }
 
@@ -229,11 +225,11 @@ TMDE(size_t MDBoxIterator)::getDataSize() const { return m_max; }
 TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const {
   // What is our normalization factor?
   switch (m_normalization) {
-  case NoNormalization:
+  case API::NoNormalization:
     return m_current->getSignal();
-  case VolumeNormalization:
+  case API::VolumeNormalization:
     return m_current->getSignal() * m_current->getInverseVolume();
-  case NumEventsNormalization:
+  case API::NumEventsNormalization:
     return m_current->getSignal() / double(m_current->getNPoints());
   }
   return std::numeric_limits<signal_t>::quiet_NaN();
@@ -243,29 +239,12 @@ TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const {
 TMDE(signal_t MDBoxIterator)::getNormalizedError() const {
   // What is our normalization factor?
   switch (m_normalization) {
-  case NoNormalization:
+  case API::NoNormalization:
     return m_current->getError();
-  case VolumeNormalization:
+  case API::VolumeNormalization:
     return m_current->getError() * m_current->getInverseVolume();
-  case NumEventsNormalization:
+  case API::NumEventsNormalization:
     return m_current->getError() / double(m_current->getNPoints());
-  }
-  return std::numeric_limits<signal_t>::quiet_NaN();
-}
-
-/// Returns the normalized signal for this box
-TMDE(signal_t MDBoxIterator)::getNormalizedSignalWithMask() const {
-  if (this->getIsMasked()) {
-    return MDMaskValue;
-  }
-  // What is our normalization factor?
-  switch (m_normalization) {
-  case NoNormalization:
-    return m_current->getSignal();
-  case VolumeNormalization:
-    return m_current->getSignal() * m_current->getInverseVolume();
-  case NumEventsNormalization:
-    return m_current->getSignal() / double(m_current->getNPoints());
   }
   return std::numeric_limits<signal_t>::quiet_NaN();
 }

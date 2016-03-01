@@ -93,12 +93,12 @@ public:
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
 
-  virtual void getLinePlot(const Mantid::Kernel::VMD &,
-                           const Mantid::Kernel::VMD &,
-                           Mantid::API::MDNormalization,
-                           std::vector<Mantid::coord_t> &,
-                           std::vector<Mantid::signal_t> &,
-                           std::vector<Mantid::signal_t> &) const {}
+  virtual Mantid::API::IMDWorkspace::LinePlot
+  getLinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
+              Mantid::API::MDNormalization) const {
+    LinePlot line;
+    return line;
+  }
 
   virtual std::vector<Mantid::API::IMDIterator *>
       createIterators(size_t = 1,
@@ -132,11 +132,17 @@ private:
 /// Mock to allow the behaviour of the chain of responsibility to be tested.
 class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
 public:
-  MOCK_CONST_METHOD1(create, vtkDataSet *(Mantid::VATES::ProgressAction &));
+  /// This is necessary as Google Mock can't mock functions that take
+  /// non-copyable params.
+  virtual void SetSuccessor(std::unique_ptr<vtkDataSetFactory> successor) {
+    setSuccessorProxy(successor.get());
+  }
+  MOCK_CONST_METHOD1(
+      create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
   MOCK_CONST_METHOD0(createMeshOnly, vtkDataSet *());
   MOCK_CONST_METHOD0(createScalarArray, vtkFloatArray *());
   MOCK_METHOD1(initialize, void(Mantid::API::Workspace_sptr));
-  MOCK_METHOD1(SetSuccessor, void(vtkDataSetFactory *pSuccessor));
+  MOCK_METHOD1(setSuccessorProxy, void(vtkDataSetFactory *));
   MOCK_CONST_METHOD0(hasSuccessor, bool());
   MOCK_CONST_METHOD0(validate, void());
   MOCK_CONST_METHOD0(getFactoryTypeName, std::string());

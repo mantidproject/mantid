@@ -45,9 +45,9 @@ class DLLExport InvalidParameterParser
 public:
   InvalidParameterParser();
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
+  createParameter(Poco::XML::Element *parameterElement) override;
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 
 protected:
   ImplicitFunctionParameterParser::SuccessorType m_successor;

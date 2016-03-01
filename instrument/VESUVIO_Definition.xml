@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="VESUVIO" valid-from   ="2006-08-11 00:00:00"
@@ -13,34 +13,34 @@
     <length unit="meter"/>
     <angle unit="degree"/>
     <reference-frame>
-      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
            y-axis points up and the coordinate system is right handed. -->
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
 </defaults>
-  
+
   <!--  SOURCE AND SAMPLE POSITION -->
-  
+
   <component type="moderator">
     <location z="-11.005" />
   </component>
-  
+
   <type name="moderator" is="Source" />
-  
+
   <component type="sample-position">
     <location />
   </component>
-  
+
   <type name="sample-position" is="SamplePos">
   </type>
 
   <!-- MONITORS -->
-  
+
   <component type="monitor" idlist="monitors">
     <location z="-2.4594" name="Monitor 1"/>
-    <location z="2.38" name="Monitor 2"/>    
+    <location z="2.38" name="Monitor 2"/>
   </component>
 
   <type name="monitor" is="monitor">
@@ -52,27 +52,6 @@
    </cuboid>
   </type>
 
-  <!-- FOILS  -->
-
-  <!-- midpoint positions 
-       phi is simply set to put them all in the scattering plane
-  -->
-  <component name="foil-pos0" type="foil">
-   <!-- position 0 -->
-   <location t="-42" r="0.225" p="0"/>
-   <location t="-64" r="0.225" p="0"/>
-   <location t="35" r="0.225" p="0"/>
-   <location t="55" r="0.225" p="0"/>
-  </component>
-
-  <component name="foil-pos1" type="foil">
-   <!-- position 1 -->
-   <location t="-31" r="0.225" p="0"/>
-   <location t="-50" r="0.225" p="0"/>
-   <location t="46" r="0.225" p="0"/>
-   <location t="67" r="0.225" p="0"/>
-  </component>
-
   <!-- The foil shape is currently set to give the correct dTheta as seen
        from the sample position -->
   <type name="foil">
@@ -83,14 +62,14 @@
       <right-front-bottom-point x="0.02000121679" y="0.001" z="-0.001" />
     </cuboid>
   </type>
-  
+
   <!-- FOIL CHANGER -->
-  <!-- The shape & location are made up to provide inputs for the 
+  <!-- The shape & location are made up to provide inputs for the
        CalculateGammaBackground algorithm -->
   <component type="foil-changer">
   <location x="0" y ="0" z="0"/>
   </component>
-  
+
   <!-- Important quantity currently is the height. It defines the Z range
        for the integration of the foil positions  (-0.2,0.2)-->
   <type name="foil-changer">
@@ -101,21 +80,42 @@
     <height val="0.4" />
     </cylinder>
   </type>
-  
-  
+
+
   <!-- DETECTORS -->
-  
-  <component type="forward" idlist="forward">  
+
+  <component type="forward" idlist="forward">
     <location />
   </component>
- 
-  
-  <component type="back" idlist="back">  
+
+
+  <component type="back" idlist="back">
     <location />
-  </component>  
-   
+  </component>
+
   <type name="forward">
-    <component type="pixel forward" > 
+    <!-- FOILS  -->
+
+    <!-- midpoint positions
+	 phi is simply set to put them all in the scattering plane
+    -->
+    <component name="foil-pos0" type="foil">
+      <!-- position 0 -->
+      <location t="-42" r="0.225" p="0"/>
+      <location t="-64" r="0.225" p="0"/>
+      <location t="35" r="0.225" p="0"/>
+      <location t="55" r="0.225" p="0"/>
+    </component>
+
+    <component name="foil-pos1" type="foil">
+      <!-- position 1 -->
+      <location t="-31" r="0.225" p="0"/>
+      <location t="-50" r="0.225" p="0"/>
+      <location t="46" r="0.225" p="0"/>
+      <location t="67" r="0.225" p="0"/>
+    </component>
+
+    <component type="pixel forward" >
       <location t="-6.6563E+01" r="5.5370E-01" p="-4.1391E+01"/>
       <location t="-6.4196E+01" r="5.3790E-01" p="-3.2529E+01"/>
       <location t="-6.2328E+01" r="5.3380E-01" p="-2.3037E+01"/>
@@ -180,12 +180,12 @@
       <location t="-7.0732E+01" r="5.4150E-01" p="-2.1106E+02"/>
       <location t="-6.8832E+01" r="5.3860E-01" p="-2.0201E+02"/>
       <location t="-6.7880E+01" r="5.4500E-01" p="-1.9290E+02"/>
-    </component> 
+    </component>
   </type>
 
   <type name="back">
-    <component type="pixel back" > 
-      <location t="130.4672" r="0.6747705" p="-56" name="S3"/>  
+    <component type="pixel back" >
+      <location t="130.4672" r="0.6747705" p="-56" name="S3"/>
       <location t="131.9338" r="0.6716131" p="-45" name="S4"/>
       <location t="133.0579" r="0.6588817" p="-35" name="S5"/>
       <location t="132.8050" r="0.6642183" p="-25" name="S6"/>
@@ -272,8 +272,8 @@
       <location t="154.6256" r="0.5099765" p="-76" name="S87"/>
       <location t="157.3379" r="0.4983869" p="-77" name="S88"/>
       <location t="160.3500" r="0.4863183" p="-90" name="S89"/>
-      <location t="163.1410" r="0.4784183" p="-90" name="S90"/>    
-      <location t="131.1180" r="0.6301287" p="-176" name="S91"/> 
+      <location t="163.1410" r="0.4784183" p="-90" name="S90"/>
+      <location t="131.1180" r="0.6301287" p="-176" name="S91"/>
       <location t="132.8132" r="0.6030974" p="-165" name="S92"/>
       <location t="133.4570" r="0.6007869" p="-155" name="S93"/>
       <location t="133.4908" r="0.6006713" p="-145" name="S94"/>
@@ -316,10 +316,10 @@
       <location t="154.7799" r="0.4562817" p="-136" name="S131"/>
       <location t="157.3462" r="0.4479922" p="-137" name="S132"/>
       <location t="160.8082" r="0.4342974" p="-150" name="S133"/>
-      <location t="163.5115" r="0.4271026" p="-150" name="S134"/>      
-    </component> 
-  </type>    
-  
+      <location t="163.5115" r="0.4271026" p="-150" name="S134"/>
+    </component>
+  </type>
+
   <type name="pixel forward" is="detector">
     <cuboid id="shape">
       <left-front-bottom-point x="0.0125" y="-0.0395" z= "0.0045" />
@@ -328,7 +328,7 @@
       <right-front-bottom-point x="-0.0125" y="-0.0395" z= "0.0045" />
     </cuboid>
     <algebra val="shape" />
-  </type>  
+  </type>
 
   <type name="pixel back" is="detector">
     <cuboid id="shape" >
@@ -338,23 +338,23 @@
       <right-front-bottom-point x="-0.0125" y="-0.04" z= "0.0045" />
     </cuboid>
   <algebra val="shape" />
-  </type>  
-  
+  </type>
+
   <!-- DETECTOR ID LISTS -->
 
   <idlist idname="back">
     <id start="2101" end="2144" />
-    <id start="2201" end="2244" />  
-    <id start="2301" end="2344" />  
-  </idlist>  
+    <id start="2201" end="2244" />
+    <id start="2301" end="2344" />
+  </idlist>
 
   <idlist idname="monitors">
     <id start="1101" end="1102" />
   </idlist>
-  
+
   <idlist idname="forward">
     <id start="3101" end="3132" />
-    <id start="3201" end="3232" />    
-  </idlist>  
-  
+    <id start="3201" end="3232" />
+  </idlist>
+
 </instrument>

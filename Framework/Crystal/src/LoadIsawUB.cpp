@@ -35,15 +35,13 @@ LoadIsawUB::~LoadIsawUB() {}
  */
 void LoadIsawUB::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                Direction::InOut),
       "An input workspace to which to add the lattice information.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".mat");
-  exts.push_back(".ub");
-  exts.push_back(".txt");
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  const std::vector<std::string> exts{".mat", ".ub", ".txt"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to an ISAW-style UB matrix text file.");
 
   declareProperty("CheckUMatrix", true, "If True (default) then a check is "
@@ -61,7 +59,7 @@ void LoadIsawUB::exec() {
   ExperimentInfo_sptr ws;
   IMDEventWorkspace_sptr MDWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
-  if (MDWS != NULL) {
+  if (MDWS != nullptr) {
     ws = MDWS->getExperimentInfo(0);
   } else {
     ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
@@ -94,12 +92,12 @@ void LoadIsawUB::exec() {
 
   readToEndOfLine(in, true);
   double latVals[6];
-  for (size_t col = 0; col < 6; col++) {
+  for (double &latVal : latVals) {
     s = getWord(in, true);
     if (!convert(s, val))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");
-    latVals[col] = val;
+    latVal = val;
   }
 
   // Adjust the UB by transposing
@@ -130,7 +128,7 @@ void LoadIsawUB::exec() {
   ws->mutableSample().setOrientedLattice(latt);
 
   // Save it to every experiment info in MD workspaces
-  if ((MDWS != NULL) && (MDWS->getNumExperimentInfo() > 1)) {
+  if ((MDWS != nullptr) && (MDWS->getNumExperimentInfo() > 1)) {
     for (uint16_t i = 1; i < MDWS->getNumExperimentInfo(); i++) {
       ws = MDWS->getExperimentInfo(i);
       ws->mutableSample().setOrientedLattice(latt);

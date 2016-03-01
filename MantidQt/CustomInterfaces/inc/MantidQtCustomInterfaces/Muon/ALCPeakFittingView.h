@@ -55,25 +55,31 @@ namespace CustomInterfaces
 
     // -- IALCPeakFitting interface ----------------------------------------------------------------
 
-    IFunction_const_sptr function(QString index) const;
-    boost::optional<QString> currentFunctionIndex() const;
-    IPeakFunction_const_sptr peakPicker() const;
+    IFunction_const_sptr function(QString index) const override;
+    boost::optional<QString> currentFunctionIndex() const override;
+    IPeakFunction_const_sptr peakPicker() const override;
     void emitFitRequested();
+
+  public:
+    /// Clear guess when a fit is ready
+    void clearGuess() override;
 
   public slots:
 
-    void initialize();
-    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
-    void setFittedCurve(const QwtData& data);
-    void setFunction(const IFunction_const_sptr& newFunction);
-    void setParameter(const QString& funcIndex, const QString& paramName, double value);
-    void setPeakPickerEnabled(bool enabled);
-    void setPeakPicker(const IPeakFunction_const_sptr& peak);
-    void displayError(const QString& message);
-    void help();
+    void initialize() override;
+    void setDataCurve(const QwtData &data,
+                      const std::vector<double> &errors) override;
+    void setFittedCurve(const QwtData &data) override;
+    void setFunction(const IFunction_const_sptr &newFunction) override;
+    void setParameter(const QString &funcIndex, const QString &paramName,
+                      double value) override;
+    void setPeakPickerEnabled(bool enabled) override;
+    void setPeakPicker(const IPeakFunction_const_sptr &peak) override;
+    void displayError(const QString &message) override;
+    void help() override;
+    void plotGuess() override;
 
     // -- End of IALCPeakFitting interface ---------------------------------------------------------
-
   private:
     /// The widget used
     QWidget* const m_widget;
@@ -89,6 +95,9 @@ namespace CustomInterfaces
 
     /// Peak picker tool - only one on the plot at any given moment
     MantidWidgets::PeakPicker* m_peakPicker;
+
+    /// Whether the guess is currently plotted on the graph
+    bool m_guessPlotted;
   };
 
 

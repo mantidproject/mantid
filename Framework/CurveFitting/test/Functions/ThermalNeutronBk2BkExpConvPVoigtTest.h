@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <fstream>
+#include <array>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 
@@ -52,10 +52,7 @@ public:
    */
   void test_CalculatePeakParameters() {
     // 0. Mock data
-    std::vector<double> vecX;
-    std::vector<double> vecY;
-    std::vector<double> vecE;
-    generateData(vecX, vecY, vecE);
+    auto vecX = generateData();
 
     // 1. Create peak
     ThermalNeutronBk2BkExpConvPVoigt peak;
@@ -131,10 +128,7 @@ public:
     */
   void test_E1() {
     // 0. Mock data
-    std::vector<double> vecX;
-    std::vector<double> vecY;
-    std::vector<double> vecE;
-    generateData(vecX, vecY, vecE);
+    auto vecX = generateData();
 
     // 1. Create peak
     ThermalNeutronBk2BkExpConvPVoigt peak;
@@ -210,9 +204,8 @@ public:
   void test_CalculatePeakParameters2() {
     // 1. Mock data
     std::vector<double> vecX;
-    std::vector<double> dataY;
     std::vector<double> modelY;
-    generateData2(vecX, dataY, modelY);
+    generateData2(vecX, modelY);
 
     // 3. Create peak
     ThermalNeutronBk2BkExpConvPVoigt peak;
@@ -305,271 +298,36 @@ public:
 
   /** Generate a set of powder diffraction data with 2 peaks (110 and 111)
    */
-  void generateData(std::vector<double> &vecX, std::vector<double> &vecY,
-                    std::vector<double> &vecE) {
-    vecX.push_back(70931.750);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70943.609);
-    vecY.push_back(0.0000000);
-    vecX.push_back(70955.477);
-    vecY.push_back(0.69562334);
-    vecX.push_back(70967.336);
-    vecY.push_back(0.99016321);
-    vecX.push_back(70979.203);
-    vecY.push_back(1.4097446);
-    vecX.push_back(70991.063);
-    vecY.push_back(2.0066566);
-    vecX.push_back(71002.930);
-    vecY.push_back(2.8569770);
-    vecX.push_back(71014.789);
-    vecY.push_back(4.0666742);
-    vecX.push_back(71026.656);
-    vecY.push_back(5.7899261);
-    vecX.push_back(71038.516);
-    vecY.push_back(8.2414885);
-    vecX.push_back(71050.383);
-    vecY.push_back(11.733817);
-    vecX.push_back(71062.242);
-    vecY.push_back(16.702133);
-    vecX.push_back(71074.109);
-    vecY.push_back(23.779659);
-    vecX.push_back(71085.969);
-    vecY.push_back(33.848408);
-    vecX.push_back(71097.836);
-    vecY.push_back(48.191662);
-    vecX.push_back(71109.695);
-    vecY.push_back(68.596909);
-    vecX.push_back(71121.563);
-    vecY.push_back(97.664757);
-    vecX.push_back(71133.430);
-    vecY.push_back(139.04889);
-    vecX.push_back(71145.289);
-    vecY.push_back(197.90808);
-    vecX.push_back(71157.156);
-    vecY.push_back(281.60803);
-    vecX.push_back(71169.016);
-    vecY.push_back(399.65021);
-    vecX.push_back(71180.883);
-    vecY.push_back(562.42670);
-    vecX.push_back(71192.742);
-    vecY.push_back(773.34192);
-    vecX.push_back(71204.609);
-    vecY.push_back(1015.2813);
-    vecX.push_back(71216.469);
-    vecY.push_back(1238.3613);
-    vecX.push_back(71228.336);
-    vecY.push_back(1374.9380);
-    vecX.push_back(71240.195);
-    vecY.push_back(1380.5173);
-    vecX.push_back(71252.063);
-    vecY.push_back(1266.3978);
-    vecX.push_back(71263.922);
-    vecY.push_back(1086.2141);
-    vecX.push_back(71275.789);
-    vecY.push_back(894.75891);
-    vecX.push_back(71287.648);
-    vecY.push_back(723.46112);
-    vecX.push_back(71299.516);
-    vecY.push_back(581.04535);
-    vecX.push_back(71311.375);
-    vecY.push_back(465.93588);
-    vecX.push_back(71323.242);
-    vecY.push_back(373.45383);
-    vecX.push_back(71335.102);
-    vecY.push_back(299.35800);
-    vecX.push_back(71346.969);
-    vecY.push_back(239.92720);
-    vecX.push_back(71358.836);
-    vecY.push_back(192.29497);
-    vecX.push_back(71370.695);
-    vecY.push_back(154.14153);
-    vecX.push_back(71382.563);
-    vecY.push_back(123.54013);
-    vecX.push_back(71394.422);
-    vecY.push_back(99.028404);
-    vecX.push_back(71406.289);
-    vecY.push_back(79.368507);
-    vecX.push_back(71418.148);
-    vecY.push_back(63.620914);
-    vecX.push_back(71430.016);
-    vecY.push_back(50.990391);
-    vecX.push_back(71441.875);
-    vecY.push_back(40.873333);
-    vecX.push_back(71453.742);
-    vecY.push_back(32.758839);
-    vecX.push_back(71465.602);
-    vecY.push_back(26.259121);
-    vecX.push_back(71477.469);
-    vecY.push_back(21.045954);
-    vecX.push_back(71489.328);
-    vecY.push_back(16.870203);
-    vecX.push_back(71501.195);
-    vecY.push_back(13.520998);
-    vecX.push_back(71513.055);
-    vecY.push_back(10.838282);
-    vecX.push_back(71524.922);
-    vecY.push_back(8.6865807);
-    vecX.push_back(71536.781);
-    vecY.push_back(6.9630671);
-    vecX.push_back(71548.648);
-    vecY.push_back(5.5807042);
-    vecX.push_back(71560.508);
-    vecY.push_back(4.4734306);
-    vecX.push_back(71572.375);
-    vecY.push_back(3.5853302);
-    vecX.push_back(71584.242);
-    vecY.push_back(2.8735423);
-    vecX.push_back(71596.102);
-    vecY.push_back(2.3033996);
-    vecX.push_back(71607.969);
-    vecY.push_back(1.8461106);
-    vecX.push_back(71619.828);
-    vecY.push_back(0.0000000);
-    vecX.push_back(86911.852);
-    vecY.push_back(0.28651541);
-    vecX.push_back(86923.719);
-    vecY.push_back(0.39156997);
-    vecX.push_back(86935.578);
-    vecY.push_back(0.53503412);
-    vecX.push_back(86947.445);
-    vecY.push_back(0.73121130);
-    vecX.push_back(86959.305);
-    vecY.push_back(0.99911392);
-    vecX.push_back(86971.172);
-    vecY.push_back(1.3654519);
-    vecX.push_back(86983.039);
-    vecY.push_back(1.8661126);
-    vecX.push_back(86994.898);
-    vecY.push_back(2.5498226);
-    vecX.push_back(87006.766);
-    vecY.push_back(3.4847479);
-    vecX.push_back(87018.625);
-    vecY.push_back(4.7614965);
-    vecX.push_back(87030.492);
-    vecY.push_back(6.5073609);
-    vecX.push_back(87042.352);
-    vecY.push_back(8.8915405);
-    vecX.push_back(87054.219);
-    vecY.push_back(12.151738);
-    vecX.push_back(87066.078);
-    vecY.push_back(16.603910);
-    vecX.push_back(87077.945);
-    vecY.push_back(22.691912);
-    vecX.push_back(87089.805);
-    vecY.push_back(31.005537);
-    vecX.push_back(87101.672);
-    vecY.push_back(42.372311);
-    vecX.push_back(87113.531);
-    vecY.push_back(57.886639);
-    vecX.push_back(87125.398);
-    vecY.push_back(79.062233);
-    vecX.push_back(87137.258);
-    vecY.push_back(107.82082);
-    vecX.push_back(87149.125);
-    vecY.push_back(146.58661);
-    vecX.push_back(87160.984);
-    vecY.push_back(197.83006);
-    vecX.push_back(87172.852);
-    vecY.push_back(263.46185);
-    vecX.push_back(87184.711);
-    vecY.push_back(343.08966);
-    vecX.push_back(87196.578);
-    vecY.push_back(432.57846);
-    vecX.push_back(87208.445);
-    vecY.push_back(522.64124);
-    vecX.push_back(87220.305);
-    vecY.push_back(600.01373);
-    vecX.push_back(87232.172);
-    vecY.push_back(651.22260);
-    vecX.push_back(87244.031);
-    vecY.push_back(667.17743);
-    vecX.push_back(87255.898);
-    vecY.push_back(646.90039);
-    vecX.push_back(87267.758);
-    vecY.push_back(597.38873);
-    vecX.push_back(87279.625);
-    vecY.push_back(530.12573);
-    vecX.push_back(87291.484);
-    vecY.push_back(456.83890);
-    vecX.push_back(87303.352);
-    vecY.push_back(386.05295);
-    vecX.push_back(87315.211);
-    vecY.push_back(322.58456);
-    vecX.push_back(87327.078);
-    vecY.push_back(267.96231);
-    vecX.push_back(87338.938);
-    vecY.push_back(222.04863);
-    vecX.push_back(87350.805);
-    vecY.push_back(183.80043);
-    vecX.push_back(87362.664);
-    vecY.push_back(152.11101);
-    vecX.push_back(87374.531);
-    vecY.push_back(125.85820);
-    vecX.push_back(87386.391);
-    vecY.push_back(104.14707);
-    vecX.push_back(87398.258);
-    vecY.push_back(86.170067);
-    vecX.push_back(87410.117);
-    vecY.push_back(71.304932);
-    vecX.push_back(87421.984);
-    vecY.push_back(58.996807);
-    vecX.push_back(87433.844);
-    vecY.push_back(48.819309);
-    vecX.push_back(87445.711);
-    vecY.push_back(40.392483);
-    vecX.push_back(87457.578);
-    vecY.push_back(33.420235);
-    vecX.push_back(87469.438);
-    vecY.push_back(27.654932);
-    vecX.push_back(87481.305);
-    vecY.push_back(22.881344);
-    vecX.push_back(87493.164);
-    vecY.push_back(18.934097);
-    vecX.push_back(87505.031);
-    vecY.push_back(15.665835);
-    vecX.push_back(87516.891);
-    vecY.push_back(12.963332);
-    vecX.push_back(87528.758);
-    vecY.push_back(10.725698);
-    vecX.push_back(87540.617);
-    vecY.push_back(8.8754158);
-    vecX.push_back(87552.484);
-    vecY.push_back(7.3434072);
-    vecX.push_back(87564.344);
-    vecY.push_back(6.0766010);
-    vecX.push_back(87576.211);
-    vecY.push_back(5.0277033);
-    vecX.push_back(87588.070);
-    vecY.push_back(4.1603775);
-    vecX.push_back(87599.938);
-    vecY.push_back(3.4422443);
-    vecX.push_back(87611.797);
-    vecY.push_back(2.8484249);
-    vecX.push_back(87623.664);
-    vecY.push_back(2.3567512);
-    vecX.push_back(87635.523);
-    vecY.push_back(1.9501896);
-    vecX.push_back(87647.391);
-    vecY.push_back(1.6135623);
-    vecX.push_back(87659.250);
-    vecY.push_back(1.3352078);
-    vecX.push_back(87671.117);
-    vecY.push_back(1.1047342);
-    vecX.push_back(87682.984);
-    vecY.push_back(0.91404319);
-    vecX.push_back(87694.844);
-    vecY.push_back(0.75636220);
-    vecX.push_back(87706.711);
-    vecY.push_back(0.0000000);
+  std::array<double, 127> generateData() {
+    std::array<double, 127> vecX = {
+        {70931.750000, 70943.609000, 70955.477000, 70967.336000, 70979.203000,
+         70991.063000, 71002.930000, 71014.789000, 71026.656000, 71038.516000,
+         71050.383000, 71062.242000, 71074.109000, 71085.969000, 71097.836000,
+         71109.695000, 71121.563000, 71133.430000, 71145.289000, 71157.156000,
+         71169.016000, 71180.883000, 71192.742000, 71204.609000, 71216.469000,
+         71228.336000, 71240.195000, 71252.063000, 71263.922000, 71275.789000,
+         71287.648000, 71299.516000, 71311.375000, 71323.242000, 71335.102000,
+         71346.969000, 71358.836000, 71370.695000, 71382.563000, 71394.422000,
+         71406.289000, 71418.148000, 71430.016000, 71441.875000, 71453.742000,
+         71465.602000, 71477.469000, 71489.328000, 71501.195000, 71513.055000,
+         71524.922000, 71536.781000, 71548.648000, 71560.508000, 71572.375000,
+         71584.242000, 71596.102000, 71607.969000, 71619.828000, 86911.852000,
+         86923.719000, 86935.578000, 86947.445000, 86959.305000, 86971.172000,
+         86983.039000, 86994.898000, 87006.766000, 87018.625000, 87030.492000,
+         87042.352000, 87054.219000, 87066.078000, 87077.945000, 87089.805000,
+         87101.672000, 87113.531000, 87125.398000, 87137.258000, 87149.125000,
+         87160.984000, 87172.852000, 87184.711000, 87196.578000, 87208.445000,
+         87220.305000, 87232.172000, 87244.031000, 87255.898000, 87267.758000,
+         87279.625000, 87291.484000, 87303.352000, 87315.211000, 87327.078000,
+         87338.938000, 87350.805000, 87362.664000, 87374.531000, 87386.391000,
+         87398.258000, 87410.117000, 87421.984000, 87433.844000, 87445.711000,
+         87457.578000, 87469.438000, 87481.305000, 87493.164000, 87505.031000,
+         87516.891000, 87528.758000, 87540.617000, 87552.484000, 87564.344000,
+         87576.211000, 87588.070000, 87599.938000, 87611.797000, 87623.664000,
+         87635.523000, 87647.391000, 87659.250000, 87671.117000, 87682.984000,
+         87694.844000, 87706.711000}};
 
-    for (size_t i = 0; i < vecY.size(); ++i) {
-      double e = 1.0;
-      if (vecY[i] > 1.0)
-        e = sqrt(vecY[i]);
-      vecE.push_back(e);
-    }
-
-    return;
+    return vecX;
   }
 
   /** Generate data from PG3_11485 Jason refined .prf file
@@ -577,312 +335,47 @@ public:
     * @param dataY:  experimental y-values
     * @param modelY: calculated y-values
     */
-  void generateData2(std::vector<double> &vecX, std::vector<double> &dataY,
-                     std::vector<double> &modelY) {
+  void generateData2(std::vector<double> &vecX, std::vector<double> &modelY) {
     vecX.clear();
-    dataY.clear();
     modelY.clear();
 
-    vecX.push_back(46129.1562);
-    dataY.push_back(0.1069);
-    modelY.push_back(0.1185);
-    vecX.push_back(46147.6094);
-    dataY.push_back(0.1143);
-    modelY.push_back(0.1185);
-    vecX.push_back(46166.0664);
-    dataY.push_back(0.1562);
-    modelY.push_back(0.1186);
-    vecX.push_back(46184.5352);
-    dataY.push_back(0.0627);
-    modelY.push_back(0.1186);
-    vecX.push_back(46203.0078);
-    dataY.push_back(0.1230);
-    modelY.push_back(0.1187);
-    vecX.push_back(46221.4883);
-    dataY.push_back(0.1411);
-    modelY.push_back(0.1188);
-    vecX.push_back(46239.9766);
-    dataY.push_back(0.1920);
-    modelY.push_back(0.1189);
-    vecX.push_back(46258.4727);
-    dataY.push_back(0.0745);
-    modelY.push_back(0.1190);
-    vecX.push_back(46276.9766);
-    dataY.push_back(0.0897);
-    modelY.push_back(0.1191);
-    vecX.push_back(46295.4883);
-    dataY.push_back(0.1671);
-    modelY.push_back(0.1193);
-    vecX.push_back(46314.0039);
-    dataY.push_back(0.2592);
-    modelY.push_back(0.1194);
-    vecX.push_back(46332.5312);
-    dataY.push_back(0.0952);
-    modelY.push_back(0.1196);
-    vecX.push_back(46351.0625);
-    dataY.push_back(0.1850);
-    modelY.push_back(0.1198);
-    vecX.push_back(46369.6055);
-    dataY.push_back(0.1046);
-    modelY.push_back(0.1201);
-    vecX.push_back(46388.1523);
-    dataY.push_back(0.2446);
-    modelY.push_back(0.1203);
-    vecX.push_back(46406.7070);
-    dataY.push_back(0.1852);
-    modelY.push_back(0.1206);
-    vecX.push_back(46425.2695);
-    dataY.push_back(0.0756);
-    modelY.push_back(0.1210);
-    vecX.push_back(46443.8398);
-    dataY.push_back(0.1530);
-    modelY.push_back(0.1214);
-    vecX.push_back(46462.4180);
-    dataY.push_back(0.1813);
-    modelY.push_back(0.1218);
-    vecX.push_back(46481.0039);
-    dataY.push_back(0.1589);
-    modelY.push_back(0.1223);
-    vecX.push_back(46499.5938);
-    dataY.push_back(0.1438);
-    modelY.push_back(0.1229);
-    vecX.push_back(46518.1953);
-    dataY.push_back(0.0546);
-    modelY.push_back(0.1236);
-    vecX.push_back(46536.8008);
-    dataY.push_back(0.1724);
-    modelY.push_back(0.1244);
-    vecX.push_back(46555.4180);
-    dataY.push_back(0.1375);
-    modelY.push_back(0.1253);
-    vecX.push_back(46574.0391);
-    dataY.push_back(0.1136);
-    modelY.push_back(0.1265);
-    vecX.push_back(46592.6680);
-    dataY.push_back(0.1106);
-    modelY.push_back(0.1280);
-    vecX.push_back(46611.3047);
-    dataY.push_back(0.2025);
-    modelY.push_back(0.1301);
-    vecX.push_back(46629.9492);
-    dataY.push_back(0.2148);
-    modelY.push_back(0.1330);
-    vecX.push_back(46648.6016);
-    dataY.push_back(0.2909);
-    modelY.push_back(0.1374);
-    vecX.push_back(46667.2617);
-    dataY.push_back(0.1954);
-    modelY.push_back(0.1443);
-    vecX.push_back(46685.9297);
-    dataY.push_back(0.1355);
-    modelY.push_back(0.1555);
-    vecX.push_back(46704.6016);
-    dataY.push_back(0.1439);
-    modelY.push_back(0.1738);
-    vecX.push_back(46723.2852);
-    dataY.push_back(0.3487);
-    modelY.push_back(0.2038);
-    vecX.push_back(46741.9727);
-    dataY.push_back(0.3768);
-    modelY.push_back(0.2520);
-    vecX.push_back(46760.6719);
-    dataY.push_back(0.3047);
-    modelY.push_back(0.3278);
-    vecX.push_back(46779.3750);
-    dataY.push_back(0.4374);
-    modelY.push_back(0.4427);
-    vecX.push_back(46798.0859);
-    dataY.push_back(0.5702);
-    modelY.push_back(0.6098);
-    vecX.push_back(46816.8047);
-    dataY.push_back(0.7676);
-    modelY.push_back(0.8414);
-    vecX.push_back(46835.5312);
-    dataY.push_back(0.9643);
-    modelY.push_back(1.1458);
-    vecX.push_back(46854.2656);
-    dataY.push_back(1.2149);
-    modelY.push_back(1.5224);
-    vecX.push_back(46873.0078);
-    dataY.push_back(1.6902);
-    modelY.push_back(1.9583);
-    vecX.push_back(46891.7578);
-    dataY.push_back(2.3170);
-    modelY.push_back(2.4254);
-    vecX.push_back(46910.5156);
-    dataY.push_back(2.5934);
-    modelY.push_back(2.8814);
-    vecX.push_back(46929.2773);
-    dataY.push_back(2.5473);
-    modelY.push_back(3.2753);
-    vecX.push_back(46948.0508);
-    dataY.push_back(2.6097);
-    modelY.push_back(3.5563);
-    vecX.push_back(46966.8281);
-    dataY.push_back(2.7768);
-    modelY.push_back(3.6847);
-    vecX.push_back(46985.6172);
-    dataY.push_back(2.7972);
-    modelY.push_back(3.6430);
-    vecX.push_back(47004.4102);
-    dataY.push_back(2.5713);
-    modelY.push_back(3.4396);
-    vecX.push_back(47023.2109);
-    dataY.push_back(2.2840);
-    modelY.push_back(3.1064);
-    vecX.push_back(47042.0234);
-    dataY.push_back(1.9929);
-    modelY.push_back(2.6894);
-    vecX.push_back(47060.8398);
-    dataY.push_back(1.6574);
-    modelY.push_back(2.2389);
-    vecX.push_back(47079.6641);
-    dataY.push_back(1.4395);
-    modelY.push_back(1.7989);
-    vecX.push_back(47098.4961);
-    dataY.push_back(1.1935);
-    modelY.push_back(1.4020);
-    vecX.push_back(47117.3359);
-    dataY.push_back(0.7205);
-    modelY.push_back(1.0667);
-    vecX.push_back(47136.1797);
-    dataY.push_back(0.7175);
-    modelY.push_back(0.7990);
-    vecX.push_back(47155.0352);
-    dataY.push_back(0.4870);
-    modelY.push_back(0.5951);
-    vecX.push_back(47173.8984);
-    dataY.push_back(0.5124);
-    modelY.push_back(0.4461);
-    vecX.push_back(47192.7656);
-    dataY.push_back(0.3997);
-    modelY.push_back(0.3407);
-    vecX.push_back(47211.6445);
-    dataY.push_back(0.1794);
-    modelY.push_back(0.2681);
-    vecX.push_back(47230.5273);
-    dataY.push_back(0.2254);
-    modelY.push_back(0.2191);
-    vecX.push_back(47249.4219);
-    dataY.push_back(0.1645);
-    modelY.push_back(0.1863);
-    vecX.push_back(47268.3203);
-    dataY.push_back(0.1823);
-    modelY.push_back(0.1645);
-    vecX.push_back(47287.2266);
-    dataY.push_back(0.1327);
-    modelY.push_back(0.1500);
-    vecX.push_back(47306.1445);
-    dataY.push_back(0.1759);
-    modelY.push_back(0.1402);
-    vecX.push_back(47325.0664);
-    dataY.push_back(0.1218);
-    modelY.push_back(0.1335);
-    vecX.push_back(47343.9961);
-    dataY.push_back(0.0547);
-    modelY.push_back(0.1287);
-    vecX.push_back(47362.9336);
-    dataY.push_back(0.0376);
-    modelY.push_back(0.1254);
-    vecX.push_back(47381.8789);
-    dataY.push_back(0.0775);
-    modelY.push_back(0.1228);
-    vecX.push_back(47400.8320);
-    dataY.push_back(0.0823);
-    modelY.push_back(0.1209);
-    vecX.push_back(47419.7930);
-    dataY.push_back(0.2909);
-    modelY.push_back(0.1194);
-    vecX.push_back(47438.7578);
-    dataY.push_back(0.2262);
-    modelY.push_back(0.1181);
-    vecX.push_back(47457.7344);
-    dataY.push_back(0.0936);
-    modelY.push_back(0.1171);
-    vecX.push_back(47476.7188);
-    dataY.push_back(0.1618);
-    modelY.push_back(0.1162);
-    vecX.push_back(47495.7070);
-    dataY.push_back(0.0723);
-    modelY.push_back(0.1154);
-    vecX.push_back(47514.7070);
-    dataY.push_back(0.1148);
-    modelY.push_back(0.1147);
-    vecX.push_back(47533.7148);
-    dataY.push_back(0.1758);
-    modelY.push_back(0.1141);
-    vecX.push_back(47552.7266);
-    dataY.push_back(0.0785);
-    modelY.push_back(0.1135);
-    vecX.push_back(47571.7461);
-    dataY.push_back(0.1451);
-    modelY.push_back(0.1129);
-    vecX.push_back(47590.7773);
-    dataY.push_back(0.0517);
-    modelY.push_back(0.1124);
-    vecX.push_back(47609.8125);
-    dataY.push_back(0.2045);
-    modelY.push_back(0.1120);
-    vecX.push_back(47628.8555);
-    dataY.push_back(0.0000);
-    modelY.push_back(0.1115);
-    vecX.push_back(47647.9062);
-    dataY.push_back(0.0473);
-    modelY.push_back(0.1111);
-    vecX.push_back(47666.9688);
-    dataY.push_back(0.1876);
-    modelY.push_back(0.1107);
-    vecX.push_back(47686.0352);
-    dataY.push_back(0.1830);
-    modelY.push_back(0.1104);
-    vecX.push_back(47705.1094);
-    dataY.push_back(0.1113);
-    modelY.push_back(0.1100);
-    vecX.push_back(47724.1914);
-    dataY.push_back(0.1162);
-    modelY.push_back(0.1097);
-    vecX.push_back(47743.2812);
-    dataY.push_back(0.1065);
-    modelY.push_back(0.1093);
-    vecX.push_back(47762.3789);
-    dataY.push_back(0.1699);
-    modelY.push_back(0.1090);
-    vecX.push_back(47781.4844);
-    dataY.push_back(0.1461);
-    modelY.push_back(0.1087);
-    vecX.push_back(47800.5938);
-    dataY.push_back(0.0922);
-    modelY.push_back(0.1084);
-    vecX.push_back(47819.7148);
-    dataY.push_back(0.0729);
-    modelY.push_back(0.1081);
-    vecX.push_back(47838.8438);
-    dataY.push_back(0.1270);
-    modelY.push_back(0.1079);
-    vecX.push_back(47857.9805);
-    dataY.push_back(0.0582);
-    modelY.push_back(0.1076);
-    vecX.push_back(47877.1211);
-    dataY.push_back(0.1710);
-    modelY.push_back(0.1073);
-    vecX.push_back(47896.2734);
-    dataY.push_back(0.1609);
-    modelY.push_back(0.1071);
-    vecX.push_back(47915.4297);
-    dataY.push_back(0.1067);
-    modelY.push_back(0.1068);
-    vecX.push_back(47934.5977);
-    dataY.push_back(0.0627);
-    modelY.push_back(0.1066);
-    vecX.push_back(47953.7695);
-    dataY.push_back(0.0678);
-    modelY.push_back(0.1063);
-    vecX.push_back(47972.9531);
-    dataY.push_back(0.0723);
-    modelY.push_back(0.1061);
-    vecX.push_back(47992.1406);
-    dataY.push_back(0.0769);
-    modelY.push_back(0.1058);
+    vecX = {
+        46129.156200, 46147.609400, 46166.066400, 46184.535200, 46203.007800,
+        46221.488300, 46239.976600, 46258.472700, 46276.976600, 46295.488300,
+        46314.003900, 46332.531200, 46351.062500, 46369.605500, 46388.152300,
+        46406.707000, 46425.269500, 46443.839800, 46462.418000, 46481.003900,
+        46499.593800, 46518.195300, 46536.800800, 46555.418000, 46574.039100,
+        46592.668000, 46611.304700, 46629.949200, 46648.601600, 46667.261700,
+        46685.929700, 46704.601600, 46723.285200, 46741.972700, 46760.671900,
+        46779.375000, 46798.085900, 46816.804700, 46835.531200, 46854.265600,
+        46873.007800, 46891.757800, 46910.515600, 46929.277300, 46948.050800,
+        46966.828100, 46985.617200, 47004.410200, 47023.210900, 47042.023400,
+        47060.839800, 47079.664100, 47098.496100, 47117.335900, 47136.179700,
+        47155.035200, 47173.898400, 47192.765600, 47211.644500, 47230.527300,
+        47249.421900, 47268.320300, 47287.226600, 47306.144500, 47325.066400,
+        47343.996100, 47362.933600, 47381.878900, 47400.832000, 47419.793000,
+        47438.757800, 47457.734400, 47476.718800, 47495.707000, 47514.707000,
+        47533.714800, 47552.726600, 47571.746100, 47590.777300, 47609.812500,
+        47628.855500, 47647.906200, 47666.968800, 47686.035200, 47705.109400,
+        47724.191400, 47743.281200, 47762.378900, 47781.484400, 47800.593800,
+        47819.714800, 47838.843800, 47857.980500, 47877.121100, 47896.273400,
+        47915.429700, 47934.597700, 47953.769500, 47972.953100, 47992.140600};
+    modelY = {
+        0.118500, 0.118500, 0.118600, 0.118600, 0.118700, 0.118800, 0.118900,
+        0.119000, 0.119100, 0.119300, 0.119400, 0.119600, 0.119800, 0.120100,
+        0.120300, 0.120600, 0.121000, 0.121400, 0.121800, 0.122300, 0.122900,
+        0.123600, 0.124400, 0.125300, 0.126500, 0.128000, 0.130100, 0.133000,
+        0.137400, 0.144300, 0.155500, 0.173800, 0.203800, 0.252000, 0.327800,
+        0.442700, 0.609800, 0.841400, 1.145800, 1.522400, 1.958300, 2.425400,
+        2.881400, 3.275300, 3.556300, 3.684700, 3.643000, 3.439600, 3.106400,
+        2.689400, 2.238900, 1.798900, 1.402000, 1.066700, 0.799000, 0.595100,
+        0.446100, 0.340700, 0.268100, 0.219100, 0.186300, 0.164500, 0.150000,
+        0.140200, 0.133500, 0.128700, 0.125400, 0.122800, 0.120900, 0.119400,
+        0.118100, 0.117100, 0.116200, 0.115400, 0.114700, 0.114100, 0.113500,
+        0.112900, 0.112400, 0.112000, 0.111500, 0.111100, 0.110700, 0.110400,
+        0.110000, 0.109700, 0.109300, 0.109000, 0.108700, 0.108400, 0.108100,
+        0.107900, 0.107600, 0.107300, 0.107100, 0.106800, 0.106600, 0.106300,
+        0.106100, 0.105800};
   }
 };
 

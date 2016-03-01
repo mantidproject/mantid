@@ -31,21 +31,21 @@ ExtractMaskToTable::~ExtractMaskToTable() {}
 /** Declare properties
   */
 void ExtractMaskToTable::init() {
-  auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input);
   declareProperty(
-      inwsprop,
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                      Direction::Input),
       "A workspace whose masking is to be extracted or a MaskWorkspace. ");
 
-  auto intblprop = new WorkspaceProperty<TableWorkspace>(
-      "MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(intblprop, "A mask table workspace containing 3 columns: "
-                             "XMin, XMax and DetectorIDsList. ");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A mask table workspace containing 3 columns: "
+      "XMin, XMax and DetectorIDsList. ");
 
-  auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output);
-  declareProperty(outwsprop, "A comma separated list or array containing a "
-                             "list of masked detector ID's ");
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "A comma separated list or array containing a "
+                  "list of masked detector ID's ");
 
   declareProperty("Xmin", EMPTY_DBL(), "Minimum of X-value.");
 
@@ -81,7 +81,7 @@ void ExtractMaskToTable::exec() {
         "XMin or XMax cannot be empty.  XMin must be less than XMax.");
 
   // Create and set up output workspace
-  TableWorkspace_sptr outws(new TableWorkspace());
+  auto outws = boost::make_shared<TableWorkspace>();
   outws->addColumn("double", "XMin");
   outws->addColumn("double", "XMax");
   outws->addColumn("str", "DetectorIDsList");
@@ -91,7 +91,7 @@ void ExtractMaskToTable::exec() {
   vector<detid_t> prevmaskeddetids;
   if (m_inputTableWS) {
     g_log.notice("Parse input masking table workspace.");
-    parseMaskTable(m_inputTableWS, prevmaskeddetids);
+    prevmaskeddetids = parseMaskTable(m_inputTableWS);
   } else {
     g_log.notice("No input workspace to parse.");
   }
@@ -99,9 +99,9 @@ void ExtractMaskToTable::exec() {
   // Extract mask
   vector<detid_t> maskeddetids;
   if (m_inputIsMask)
-    extractMaskFromMaskWorkspace(maskeddetids);
+    maskeddetids = extractMaskFromMaskWorkspace();
   else
-    extractMaskFromMatrixWorkspace(maskeddetids);
+    maskeddetids = extractMaskFromMatrixWorkspace();
   g_log.debug() << "[DB] Number of masked detectors = " << maskeddetids.size()
                 << ".\n";
 
@@ -126,19 +126,18 @@ void ExtractMaskToTable::exec() {
 /** Parse input TableWorkspace to get a list of detectors IDs of which detector
  * are already masked
   * @param masktablews :: TableWorkspace containing masking information
-  * @param maskeddetectorids :: (output) vector of detector IDs that are masked
+  * @returns :: vector of detector IDs that are masked
   */
-void ExtractMaskToTable::parseMaskTable(
-    DataObjects::TableWorkspace_sptr masktablews,
-    std::vector<detid_t> &maskeddetectorids) {
-  // Clear input
-  maskeddetectorids.clear();
+std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
+    DataObjects::TableWorkspace_sptr masktablews) {
+  // Output vector
+  std::vector<detid_t> maskeddetectorids;
 
   // Check format of mask table workspace
   if (masktablews->columnCount() != 3) {
     g_log.error("Mask table workspace must have more than 3 columns.  First 3 "
                 "must be Xmin, Xmax and Spectrum List.");
-    return;
+    return maskeddetectorids;
   } else {
     vector<string> colnames = masktablews->getColumnNames();
     vector<string> chkcolumans(3);
@@ -152,7 +151,7 @@ void ExtractMaskToTable::parseMaskTable(
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
-        return;
+        return maskeddetectorids;
       }
     }
   }
@@ -165,24 +164,23 @@ void ExtractMaskToTable::parseMaskTable(
     TableRow tmprow = masktablews->getRow(i);
     tmprow >> xmin >> xmax >> specliststr;
 
-    vector<detid_t> tmpdetidvec;
-    parseStringToVector(specliststr, tmpdetidvec);
+    vector<detid_t> tmpdetidvec = parseStringToVector(specliststr);
     maskeddetectorids.insert(maskeddetectorids.end(), tmpdetidvec.begin(),
                              tmpdetidvec.end());
   }
 
-  return;
+  return maskeddetectorids;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
  * of detid_t
   * @param liststr :: string containing list to parse
-  * @param detidvec :: vector genrated from input string containing the list
+  * @returns :: vector genrated from input string containing the list
   */
-void ExtractMaskToTable::parseStringToVector(std::string liststr,
-                                             vector<detid_t> &detidvec) {
-  detidvec.clear();
+std::vector<detid_t>
+ExtractMaskToTable::parseStringToVector(std::string liststr) {
+  std::vector<detid_t> detidvec;
 
   // Use ArrayProperty to parse the list
   ArrayProperty<int> detlist("i", liststr);
@@ -204,17 +202,16 @@ void ExtractMaskToTable::parseStringToVector(std::string liststr,
     g_log.debug() << "[DB] Add detector ID: " << tmpid << ".\n";
   }
 
-  return;
+  return detidvec;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Extract mask information from a workspace containing instrument
-  * @param maskeddetids :: vector of detector IDs of detectors that are masked
+  * @return vector of detector IDs of detectors that are masked
   */
-void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
-    std::vector<detid_t> &maskeddetids) {
+std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Clear input
-  maskeddetids.clear();
+  std::vector<detid_t> maskeddetids;
 
   // Get on hold of instrument
   Instrument_const_sptr instrument = m_dataWS->getInstrument();
@@ -232,7 +229,7 @@ void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
     if (masked) {
       maskeddetids.push_back(tmpdetid);
     }
-    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
+    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << tmpdetid
                   << ", Masked = " << masked << ".\n";
   }
 
@@ -241,18 +238,17 @@ void ExtractMaskToTable::extractMaskFromMatrixWorkspace(
                     " are masked."
                  << ".\n";
 
-  return;
+  return maskeddetids;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Extract masked detectors from a MaskWorkspace
-  * @param maskeddetids :: vector of detector IDs of the detectors that are
- * masked
+  * @return vector of detector IDs of the detectors that are
+  * masked
   */
-void ExtractMaskToTable::extractMaskFromMaskWorkspace(
-    std::vector<detid_t> &maskeddetids) {
-  // Clear input
-  maskeddetids.clear();
+std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
+  // output vector
+  std::vector<detid_t> maskeddetids;
 
   // Go through all spectra to find masked workspace
   MaskWorkspace_const_sptr maskws =
@@ -270,14 +266,10 @@ void ExtractMaskToTable::extractMaskFromMaskWorkspace(
           "Unable to get spectrum reference from mask workspace.");
 
     const set<detid_t> detidset = spec->getDetectorIDs();
-    for (set<detid_t>::const_iterator sit = detidset.begin();
-         sit != detidset.end(); ++sit) {
-      detid_t tmpdetid = *sit;
-      maskeddetids.push_back(tmpdetid);
-    }
+    std::copy(detidset.cbegin(), detidset.cend(),
+              std::inserter(maskeddetids, maskeddetids.end()));
   }
-
-  return;
+  return maskeddetids;
 }
 
 //----------------------------------------------------------------------------------------------

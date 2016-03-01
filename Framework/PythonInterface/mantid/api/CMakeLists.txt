@@ -22,8 +22,8 @@ set ( EXPORT_FILES
   src/Exports/FileProperty.cpp
   src/Exports/MultipleFileProperty.cpp
   src/Exports/FrameworkManager.cpp
-  src/Exports/IEventList.cpp
   src/Exports/ISpectrum.cpp
+  src/Exports/IEventList.cpp
   src/Exports/WorkspaceHistory.cpp
   src/Exports/ExperimentInfo.cpp
   src/Exports/MultipleExperimentInfos.cpp

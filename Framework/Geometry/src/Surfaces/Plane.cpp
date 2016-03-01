@@ -48,14 +48,6 @@ Plane::Plane()
   setBaseEqn();
 }
 
-Plane::Plane(const Plane &A)
-    : Quadratic(A), NormV(A.NormV), Dist(A.Dist)
-/**
-  Copy Constructor
-  @param A :: Plane to copy
-*/
-{}
-
 Plane *Plane::doClone() const
 /**
   Makes a clone (implicit virtual copy constructor)
@@ -72,21 +64,6 @@ std::unique_ptr<Plane> Plane::clone() const
  */
 {
   return std::unique_ptr<Plane>(doClone());
-}
-
-Plane &Plane::operator=(const Plane &A)
-/**
-  Assignment operator
-  @param A :: Plane to copy
-  @return *this
-*/
-{
-  if (&A != this) {
-    this->Quadratic::operator=(A);
-    NormV = A.NormV;
-    Dist = A.Dist;
-  }
-  return *this;
 }
 
 int Plane::setSurface(const std::string &Pstr)

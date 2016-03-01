@@ -3,12 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -34,34 +37,36 @@ void Q1D2::init() {
   dataVal->add<HistogramValidator>();
   dataVal->add<InstrumentValidator>();
   dataVal->add<CommonBinsValidator>();
-  declareProperty(new WorkspaceProperty<>("DetBankWorkspace", "",
-                                          Direction::Input, dataVal),
+  declareProperty(make_unique<WorkspaceProperty<>>("DetBankWorkspace", "",
+                                                   Direction::Input, dataVal),
                   "Particle counts as a function of wavelength");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "Name of the workspace that will contain the result of the calculation");
   declareProperty(
-      new ArrayProperty<double>("OutputBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
-  declareProperty(new WorkspaceProperty<>("PixelAdj", "", Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "Scaling to apply to each spectrum. Must have\n"
                   "the same number of spectra as the DetBankWorkspace");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input,
-                                          PropertyMode::Optional, wavVal),
-                  "Scaling to apply to each bin.\n"
-                  "Must have the same number of bins as the DetBankWorkspace");
   declareProperty(
-      new WorkspaceProperty<>("WavePixelAdj", "", Direction::Input,
-                              PropertyMode::Optional, dataVal),
+      make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
+                                       PropertyMode::Optional, wavVal),
+      "Scaling to apply to each bin.\n"
+      "Must have the same number of bins as the DetBankWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("WavePixelAdj", "", Direction::Input,
+                                       PropertyMode::Optional, dataVal),
       "Scaling that depends on both pixel and wavelength together.\n"
       "Must have the same number of bins and spectra as the DetBankWorkspace.");
   declareProperty("AccountForGravity", false,
@@ -89,9 +94,10 @@ void Q1D2::init() {
   declareProperty("ExtraLength", 0.0, mustBePositive,
                   "Additional length for gravity correction.");
 
-  declareProperty(new WorkspaceProperty<>("QResolution", "", Direction::Input,
-                                          PropertyMode::Optional, dataVal),
-                  "Workspace to calculate the Q resolution.\n");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("QResolution", "", Direction::Input,
+                                       PropertyMode::Optional, dataVal),
+      "Workspace to calculate the Q resolution.\n");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -112,15 +118,15 @@ void Q1D2::exec() {
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
-  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
+  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : nullptr;
   // error on the wavelength normalization
-  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : NULL;
+  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : nullptr;
 
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
   // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
+  auto useQResolution = static_cast<bool>(qResolution);
 
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =
@@ -186,12 +192,12 @@ void Q1D2::exec() {
     // three "arrays" is via iterators
     MantidVec _noDirectUseStorage_(3 * numWavbins);
     // normalization term
-    MantidVec::iterator norms = _noDirectUseStorage_.begin();
+    auto norms = _noDirectUseStorage_.begin();
     // the error on these weights, it contributes to the error calculation on
     // the output workspace
-    MantidVec::iterator normETo2s = norms + numWavbins;
+    auto normETo2s = norms + numWavbins;
     // the Q values calculated from input wavelength workspace
-    MantidVec::iterator QIn = normETo2s + numWavbins;
+    auto QIn = normETo2s + numWavbins;
 
     // the weighting for this input spectrum that is added to the normalization
     calculateNormalization(wavStart, i, pixelAdj, wavePixelAdj, binNorms,
@@ -201,8 +207,8 @@ void Q1D2::exec() {
     convertWavetoQ(i, doGravity, wavStart, QIn, getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
-    MantidVec::const_iterator YIn = m_dataWS->readY(i).begin() + wavStart;
-    MantidVec::const_iterator EIn = m_dataWS->readE(i).begin() + wavStart;
+    auto YIn = m_dataWS->readY(i).cbegin() + wavStart;
+    auto EIn = m_dataWS->readE(i).cbegin() + wavStart;
 
     // Pointers to the QResolution data. Note that the xdata was initially the
     // same, hence
@@ -210,15 +216,15 @@ void Q1D2::exec() {
     // If we want to use it set it to the correct value, else to YIN, although
     // that does not matter, as
     // we won't use it
-    MantidVec::const_iterator QResIn =
-        useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
+    auto QResIn =
+        useQResolution ? (qResolution->readY(i).cbegin() + wavStart) : YIn;
 
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
-    MantidVec::const_iterator loc = QOut.end();
+    auto loc = QOut.cend();
     // sum the Q contributions from each individual spectrum into the output
     // array
-    const MantidVec::const_iterator end = m_dataWS->readY(i).end();
+    const auto end = m_dataWS->readY(i).cend();
     for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
@@ -267,8 +273,8 @@ void Q1D2::exec() {
     // The number of Q (x)_ values is N, while the number of DeltaQ values is
     // N-1,
     // Richard Heenan suggested to duplicate the last entry of DeltaQ
-    Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
-    Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
+    auto countsIterator = YOut.cbegin();
+    auto qResolutionIterator = qResolutionOut.begin();
     for (; countsIterator != YOut.end();
          ++countsIterator, ++qResolutionIterator) {
       // Divide by the counts of the Qbin, if the counts are 0, the the
@@ -570,7 +576,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
   IDetector_const_sptr det = m_dataWS->getDetector(specInd);
 
   // wavelengths (lamda) to be converted to Q
-  MantidVec::const_iterator waves = m_dataWS->readX(specInd).begin() + offset;
+  auto waves = m_dataWS->readX(specInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
   const MantidVec::const_iterator end = m_dataWS->readX(specInd).end() - 1;
   if (doGravity) {

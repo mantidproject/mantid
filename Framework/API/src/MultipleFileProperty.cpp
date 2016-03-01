@@ -29,9 +29,7 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
  * a "*" wild card in the file extension string passed to it.
  */
 bool doesNotContainWildCard(const std::string &ext) {
-  if (std::string::npos != ext.find("*"))
-    return false;
-  return true;
+  return std::string::npos == ext.find('*');
 }
 } // anonymous namespace
 
@@ -57,15 +55,10 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   else
     m_multiFileLoadingEnabled = false;
 
-  for (auto ext = exts.begin(); ext != exts.end(); ++ext)
-    if (doesNotContainWildCard(*ext))
-      m_exts.push_back(*ext);
+  for (const auto &ext : exts)
+    if (doesNotContainWildCard(ext))
+      m_exts.push_back(ext);
 }
-
-/**
- * Destructor
- */
-MultipleFileProperty::~MultipleFileProperty() {}
 
 /**
  * Convert the given propValue into a comma and plus separated list of full
@@ -154,10 +147,9 @@ std::vector<std::string> MultipleFileProperty::flattenFileNames(
     const std::vector<std::vector<std::string>> &fileNames) {
   std::vector<std::string> flattenedFileNames;
 
-  std::vector<std::vector<std::string>>::const_iterator it = fileNames.begin();
-
-  for (; it != fileNames.end(); ++it) {
-    flattenedFileNames.insert(flattenedFileNames.end(), it->begin(), it->end());
+  for (const auto &fileName : fileNames) {
+    flattenedFileNames.insert(flattenedFileNames.end(), fileName.begin(),
+                              fileName.end());
   }
 
   return flattenedFileNames;
@@ -338,19 +330,14 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
     std::vector<std::string> fullFileNames;
 
-    for (auto unresolvedFileName = unresolvedFileNames->begin();
-         unresolvedFileName != unresolvedFileNames->end();
-         ++unresolvedFileName) {
+    for (auto &unresolvedFileName : *unresolvedFileNames) {
       bool useDefaultExt;
 
       try {
         // Check for an extension.
-        Poco::Path path(*unresolvedFileName);
+        Poco::Path path(unresolvedFileName);
 
-        if (path.getExtension().empty())
-          useDefaultExt = true;
-        else
-          useDefaultExt = false;
+        useDefaultExt = path.getExtension().empty();
       } catch (Poco::Exception &) {
         // Just shove the problematic filename straight into FileProperty and
         // see
@@ -363,7 +350,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
                                    Direction::Input);
-        std::string error = slaveFileProp.setValue(*unresolvedFileName);
+        std::string error = slaveFileProp.setValue(unresolvedFileName);
 
         // If an error was returned then pass it along.
         if (!error.empty()) {
@@ -375,15 +362,15 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         // If a default ext has been specified/found, then use it.
         if (!defaultExt.empty()) {
           fullyResolvedFile = FileFinder::Instance().findRun(
-              *unresolvedFileName, std::vector<std::string>(1, defaultExt));
+              unresolvedFileName, std::vector<std::string>(1, defaultExt));
         } else {
           fullyResolvedFile =
-              FileFinder::Instance().findRun(*unresolvedFileName, m_exts);
+              FileFinder::Instance().findRun(unresolvedFileName, m_exts);
         }
         if (fullyResolvedFile.empty())
           throw std::runtime_error(
               "Unable to find file matching the string \"" +
-              *unresolvedFileName +
+              unresolvedFileName +
               "\", even after appending suggested file extensions.");
       }
 

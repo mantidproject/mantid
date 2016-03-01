@@ -34,8 +34,7 @@ namespace {
  */
 bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
   if (fileNames.size() == 1) {
-    std::vector<std::vector<std::string>>::const_iterator first =
-        fileNames.begin();
+    auto first = fileNames.cbegin();
     if (first->size() == 1)
       return true;
   }
@@ -54,11 +53,11 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
 std::string generateWsNameFromFileNames(std::vector<std::string> filenames) {
   std::string wsName("");
 
-  for (size_t i = 0; i < filenames.size(); ++i) {
+  for (auto &filename : filenames) {
     if (!wsName.empty())
       wsName += "_";
 
-    Poco::Path path(filenames[i]);
+    Poco::Path path(filename);
     wsName += path.getBaseName();
   }
 
@@ -89,7 +88,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(Load)
 
 // The mutex
-Poco::Mutex Load::m_mutex;
+std::recursive_mutex Load::m_mutex;
 
 using namespace Kernel;
 using namespace API;
@@ -215,9 +214,9 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
 void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
   // Use the first file property as the main Filename
   const auto &props = loader->getProperties();
-  for (auto it = props.begin(); it != props.end(); ++it) {
-    auto *fp = dynamic_cast<API::MultipleFileProperty *>(*it);
-    auto *fp2 = dynamic_cast<API::FileProperty *>(*it);
+  for (auto prop : props) {
+    auto *fp = dynamic_cast<API::MultipleFileProperty *>(prop);
+    auto *fp2 = dynamic_cast<API::FileProperty *>(prop);
     if (fp) {
       m_filenamePropName = fp->name();
       break;
@@ -245,8 +244,8 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // so take care of ensuring Load has the correct ones
   // THIS IS A COPY as the properties are mutated as we move through them
   const std::vector<Property *> existingProps = this->getProperties();
-  for (size_t i = 0; i < existingProps.size(); ++i) {
-    const std::string name = existingProps[i]->name();
+  for (auto existingProp : existingProps) {
+    const std::string name = existingProp->name();
     // Wipe all properties except the Load native ones
     if (m_baseProps.find(name) == m_baseProps.end()) {
       this->removeProperty(name);
@@ -260,10 +259,10 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
     if (loadProp->name() == m_filenamePropName)
       continue;
     try {
-      Property *propClone = loadProp->clone();
-      propClone->deleteSettings(); // Get rid of special settings because it
-                                   // does not work in custom GUI.
-      declareProperty(propClone, loadProp->documentation());
+      auto propClone = std::unique_ptr<Property>(loadProp->clone());
+      propClone->clearSettings(); // Get rid of special settings because it
+                                  // does not work in custom GUI.
+      declareProperty(std::move(propClone), loadProp->documentation());
     } catch (Exception::ExistsError &) {
       // Already exists as a static property
       continue;
@@ -278,26 +277,26 @@ void Load::init() {
       Mantid::Kernel::ConfigService::Instance().getFacility();
   std::vector<std::string> exts = defaultFacility.extensions();
   // Add in some other known extensions
-  exts.push_back(".xml");
-  exts.push_back(".dat");
-  exts.push_back(".txt");
-  exts.push_back(".csv");
-  exts.push_back(".spe");
-  exts.push_back(".grp");
-  exts.push_back(".nxspe");
-  exts.push_back(".h5");
-  exts.push_back(".hd5");
-  exts.push_back(".sqw");
-  exts.push_back(".fits");
+  exts.emplace_back(".xml");
+  exts.emplace_back(".dat");
+  exts.emplace_back(".txt");
+  exts.emplace_back(".csv");
+  exts.emplace_back(".spe");
+  exts.emplace_back(".grp");
+  exts.emplace_back(".nxspe");
+  exts.emplace_back(".h5");
+  exts.emplace_back(".hd5");
+  exts.emplace_back(".sqw");
+  exts.emplace_back(".fits");
 
   declareProperty(
-      new MultipleFileProperty("Filename", exts),
+      Kernel::make_unique<MultipleFileProperty>("Filename", exts),
       "The name of the file(s) to read, including the full or relative "
       "path. (N.B. case sensitive if running on Linux). Multiple runs "
       "can be loaded and added together, e.g. INST10,11+12,13.ext");
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                        Direction::Output),
       "The name of the workspace that will be created, filled with the "
       "read-in data and stored in the Analysis Data Service. Some algorithms "
       "can created additional OutputWorkspace properties on the fly, e.g. "
@@ -386,9 +385,7 @@ void Load::loadMultipleFiles() {
   std::transform(allFilenames.begin(), allFilenames.end(), wsNames.begin(),
                  generateWsNameFromFileNames);
 
-  std::vector<std::vector<std::string>>::const_iterator filenames =
-      allFilenames.begin();
-  std::vector<std::string>::const_iterator wsName = wsNames.begin();
+  auto wsName = wsNames.cbegin();
   assert(allFilenames.size() == wsNames.size());
 
   std::vector<API::Workspace_sptr> loadedWsList;
@@ -397,12 +394,13 @@ void Load::loadMultipleFiles() {
   Workspace_sptr tempWs;
 
   // Cycle through the filenames and wsNames.
-  for (; filenames != allFilenames.end(); ++filenames, ++wsName) {
-    std::vector<std::string>::const_iterator filename = filenames->begin();
+  for (auto filenames = allFilenames.cbegin(); filenames != allFilenames.cend();
+       ++filenames, ++wsName) {
+    auto filename = filenames->cbegin();
     Workspace_sptr sumWS = loadFileToWs(*filename, *wsName);
 
     ++filename;
-    for (; filename != filenames->end(); ++filename) {
+    for (; filename != filenames->cend(); ++filename) {
       tempWs = loadFileToWs(*filename, "__@loadsum_temp@");
       sumWS = plusWs(sumWS, tempWs);
     }
@@ -440,10 +438,9 @@ void Load::loadMultipleFiles() {
 
     std::vector<std::string> childWsNames = group->getNames();
     size_t count = 1;
-    for (auto childWsName = childWsNames.begin();
-         childWsName != childWsNames.end(); ++childWsName) {
-      if (*childWsName == outputWsName) {
-        Mantid::API::Workspace_sptr child = group->getItem(*childWsName);
+    for (auto &childWsName : childWsNames) {
+      if (childWsName == outputWsName) {
+        Mantid::API::Workspace_sptr child = group->getItem(childWsName);
         // child->setName(child->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
         const std::string childName =
@@ -455,14 +452,13 @@ void Load::loadMultipleFiles() {
 
     childWsNames = group->getNames();
     count = 1;
-    for (auto childWsName = childWsNames.begin();
-         childWsName != childWsNames.end(); ++childWsName) {
-      Workspace_sptr childWs = group->getItem(*childWsName);
+    for (auto &childWsName : childWsNames) {
+      Workspace_sptr childWs = group->getItem(childWsName);
       std::string outWsPropName =
           "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
       ++count;
-      declareProperty(new WorkspaceProperty<Workspace>(
-          outWsPropName, *childWsName, Direction::Output));
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          outWsPropName, childWsName, Direction::Output));
       setProperty(outWsPropName, childWs);
     }
   }
@@ -517,13 +513,13 @@ void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress,
   // If output workspaces are nameless, give them a temporary name to satisfy
   // validator
   const std::vector<Property *> &props = loader->getProperties();
-  for (unsigned int i = 0; i < props.size(); ++i) {
-    auto wsProp = dynamic_cast<IWorkspaceProperty *>(props[i]);
+  for (auto prop : props) {
+    auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
 
     if (wsProp && !wsProp->isOptional() &&
-        props[i]->direction() == Direction::Output) {
-      if (props[i]->value().empty())
-        props[i]->setValue("LoadChildWorkspace");
+        prop->direction() == Direction::Output) {
+      if (prop->value().empty())
+        prop->setValue("LoadChildWorkspace");
     }
   }
   if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.) {
@@ -549,7 +545,7 @@ void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
         prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = getOutputWorkspace(name, loader);
@@ -648,9 +644,8 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
   const std::vector<Kernel::Property *> &props = getProperties();
 
   // Loop through and set the properties on the Child Algorithm
-  std::vector<Kernel::Property *>::const_iterator prop = props.begin();
-  for (; prop != props.end(); ++prop) {
-    const std::string &propName = (*prop)->name();
+  for (auto prop : props) {
+    const std::string &propName = prop->name();
 
     if (this->existsProperty(propName)) {
       if (propName == "Filename") {
@@ -731,11 +726,11 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, Workspace_sptr ws2) {
  */
 API::WorkspaceGroup_sptr
 Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
-  WorkspaceGroup_sptr group = WorkspaceGroup_sptr(new WorkspaceGroup);
+  auto group = boost::make_shared<WorkspaceGroup>();
 
-  for (auto ws = wsList.begin(); ws != wsList.end(); ++ws) {
+  for (const auto &ws : wsList) {
     WorkspaceGroup_sptr isGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(*ws);
+        boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
     // If the ws to add is already a group, then add its children individually.
     if (isGroup) {
       std::vector<std::string> childrenNames = isGroup->getNames();
@@ -752,7 +747,7 @@ Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
       // Remove the old group from the ADS
       AnalysisDataService::Instance().remove(isGroup->getName());
     } else {
-      group->addWorkspace(*ws);
+      group->addWorkspace(ws);
     }
   }
 

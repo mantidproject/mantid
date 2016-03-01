@@ -7,9 +7,12 @@
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -51,13 +54,13 @@ DECLARE_ALGORITHM(CalculateMSVesuvio)
 
 /// Constructor
 CalculateMSVesuvio::CalculateMSVesuvio()
-    : Algorithm(), m_randgen(NULL), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
+    : Algorithm(), m_randgen(nullptr), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
       m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
-      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(NULL),
-      m_sampleProps(NULL), m_detHeight(-1.0), m_detWidth(-1.0),
+      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
+      m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0),
       m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
       m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
-      m_progress(NULL), m_inputWS() {}
+      m_progress(nullptr), m_inputWS() {}
 
 /// Destructor
 CalculateMSVesuvio::~CalculateMSVesuvio() {
@@ -74,8 +77,8 @@ void CalculateMSVesuvio::init() {
   auto inputWSValidator = boost::make_shared<CompositeValidator>();
   inputWSValidator->add<WorkspaceUnitValidator>("TOF");
   inputWSValidator->add<SampleShapeValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, inputWSValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "Input workspace to be corrected, in units of TOF.");
 
   // -- Sample --
@@ -92,10 +95,11 @@ void CalculateMSVesuvio::init() {
 
   auto nonEmptyArray = boost::make_shared<ArrayLengthValidator<double>>();
   nonEmptyArray->setLengthMin(3);
-  declareProperty(new ArrayProperty<double>("AtomicProperties", nonEmptyArray),
-                  "Atomic properties of masses within the sample. "
-                  "The expected format is 3 consecutive values per mass: "
-                  "mass(amu), cross-section (barns) & s.d of Compton profile.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("AtomicProperties", nonEmptyArray),
+      "Atomic properties of masses within the sample. "
+      "The expected format is 3 consecutive values per mass: "
+      "mass(amu), cross-section (barns) & s.d of Compton profile.");
   setPropertyGroup("NoOfMasses", "Sample");
   setPropertyGroup("SampleDensity", "Sample");
   setPropertyGroup("AtomicProperties", "Sample");
@@ -119,11 +123,12 @@ void CalculateMSVesuvio::init() {
   setPropertyGroup("NumEventsPerRun", "Algorithm");
 
   // Outputs
+  declareProperty(make_unique<WorkspaceProperty<>>("TotalScatteringWS", "",
+                                                   Direction::Output),
+                  "Workspace to store the calculated total scattering counts");
   declareProperty(
-      new WorkspaceProperty<>("TotalScatteringWS", "", Direction::Output),
-      "Workspace to store the calculated total scattering counts");
-  declareProperty(
-      new WorkspaceProperty<>("MultipleScatteringWS", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("MultipleScatteringWS", "",
+                                       Direction::Output),
       "Workspace to store the calculated multiple scattering counts summed for "
       "all orders");
 }
@@ -621,7 +626,7 @@ bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
     return false;
   }
   // Find distance inside object and compute probability of scattering
-  const auto &link = scatterTrack.begin();
+  const auto &link = scatterTrack.cbegin();
   double totalObjectDist = link->distInsideObject;
   const double scatterProb = 1.0 - exp(-m_sampleProps->mu * totalObjectDist);
   // Select a random point on the track that is the actual scatter point
@@ -651,8 +656,8 @@ CalculateMSVesuvio::calculateE1Range(const double theta,
 
   double e1min(1e10), e1max(-1e10); // large so that anything else is smaller
   const auto &atoms = m_sampleProps->atoms;
-  for (size_t i = 0; i < atoms.size(); ++i) {
-    const double mass = atoms[i].mass;
+  for (const auto &atom : atoms) {
+    const double mass = atom.mass;
 
     const double fraction =
         (cth + sqrt(mass * mass - sth * sth)) / (1.0 + mass);
@@ -661,7 +666,7 @@ CalculateMSVesuvio::calculateE1Range(const double theta,
     const double qr = sqrt(k0 * k0 + k1 * k1 - 2.0 * k0 * k1 * cth);
     const double wr = en0 - en1;
     const double width = PhysicalConstants::E_mev_toNeutronWavenumberSq *
-                         atoms[i].profile * qr / mass;
+                         atom.profile * qr / mass;
     const double e1a = en0 - wr - 10.0 * width;
     const double e1b = en0 - wr + 10.0 * width;
     if (e1a < e1min)
@@ -694,20 +699,20 @@ double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
   const auto &atoms = m_sampleProps->atoms;
   if (q > 0.0) // avoid continuous checking in loop
   {
-    for (size_t i = 0; i < atoms.size(); ++i) {
-      const double jstddev = atoms[i].profile;
-      const double mass = atoms[i].mass;
+    for (const auto &atom : atoms) {
+      const double jstddev = atom.profile;
+      const double mass = atom.mass;
       const double y = mass * w / (4.18036 * q) - 0.5 * q;
       const double jy =
           exp(-0.5 * y * y / (jstddev * jstddev)) / (jstddev * rt2pi);
       const double sqw = mass * jy / (4.18036 * q);
 
-      const double sclength = atoms[i].sclength;
+      const double sclength = atom.sclength;
       pdcs += sclength * sclength * (k1 / k0) * sqw;
     }
   } else {
-    for (size_t i = 0; i < atoms.size(); ++i) {
-      const double sclength = atoms[i].sclength;
+    for (const auto &atom : atoms) {
+      const double sclength = atom.sclength;
       pdcs += sclength * sclength;
     }
   }
@@ -758,7 +763,7 @@ V3D CalculateMSVesuvio::generateDetectorPos(
     Geometry::Track scatterToDet(scatterPt, scToDet);
     if (m_sampleShape->interceptSurface(scatterToDet) > 0) {
       scang = direcBeforeSc.angle(scToDet);
-      const auto &link = scatterToDet.begin();
+      const auto &link = scatterToDet.cbegin();
       distToExit = link->distInsideObject;
       break;
     }

@@ -1,6 +1,7 @@
 #ifndef _vtkMDHWSource_h 
 #define _vtkMDHWSource_h
 
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkStructuredGridAlgorithm.h"
 
@@ -91,7 +92,7 @@ private:
   double m_time;
 
   /// MVP presenter.
-  Mantid::VATES::MDLoadingPresenter* m_presenter;
+  std::unique_ptr<Mantid::VATES::MDLoadingPresenter> m_presenter;
 
   /// Cached typename.
   std::string typeName;
