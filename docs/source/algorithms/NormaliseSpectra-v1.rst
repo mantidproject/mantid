@@ -8,7 +8,8 @@
 
 Description
 -----------
-Algorithm designed to normalise all the spectra in the input workspace so that the maximum y value is 1.
+Algorithm designed to normalise all the spectra in the input workspace so that the value of the resulting data lies between 0 and 1.
+
 
 Usage
 -----
@@ -18,7 +19,7 @@ Usage
 .. testcode:: NormaliseSpectraExample
 
   # Create Workspace
-  data = '1,2,3,4,5'
+  data = '0,1,2,3,4,5'
   ws = CreateWorkspace(DataX=data, DataY=data, DataE=data, Nspec=1)
   
   # Execute algorithm
@@ -32,7 +33,7 @@ Output:
 .. testoutput:: NormaliseSpectraExample
   :options: +NORMALIZE_WHITESPACE
   
-  [ 0.2  0.4  0.6  0.8  1. ]
+  [ 0. 0.2  0.4  0.6  0.8  1. ]
 
 .. categories::
 
