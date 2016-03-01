@@ -62,10 +62,6 @@ public:
     void setOccupancyIntoView(const double fraction) override;
     /// Get the effective peak radius.
     double getEffectiveRadius() const override;
-    /// Get the width occupancy (fractional in the projection plane).
-    double getOccupancyInView() const override;
-    /// Get the depth occupancy (fractional into the projection plane)
-    double getOccupancyIntoView() const override;
     /// Get the origin
     const Mantid::Kernel::V3D &getOrigin() const override;
     /// Show the background radius
@@ -79,13 +75,18 @@ protected:
                 std::shared_ptr<PeakPrimitives> drawingInformation,
                 PeakRepresentationViewInformation viewInformation) override;
 
+    // The members are placed here for testing
+    /// Fraction of the view considered for the effectiveRadius.
+    double m_intoViewFraction;
+    /// Cross size percentage in y a fraction of the current screen height.
+    double m_crossViewFraction;
+
 private:
     /// Original origin x=h, y=k, z=l
     const Mantid::Kernel::V3D m_originalOrigin;
     /// Origin md-x, md-y, and md-z
     Mantid::Kernel::V3D m_origin;
-    /// Fraction of the view considered for the effectiveRadius.
-    double m_intoViewFraction;
+
     /// effective peak radius
     double m_effectiveRadius;
     /// Max opacity
@@ -94,8 +95,6 @@ private:
     const double m_opacityMin;
     /// Cached opacity gradient
     const double m_opacityGradient;
-    /// Cross size percentage in y a fraction of the current screen height.
-    double m_crossViewFraction;
     /// Cached opacity at the distance z from origin
     double m_opacityAtDistance;
     /// Current slice point.

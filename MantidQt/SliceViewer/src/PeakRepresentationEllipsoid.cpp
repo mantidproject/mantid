@@ -197,18 +197,6 @@ void PeakRepresentationEllipsoid::setOccupancyIntoView(const double)
     // DO NOTHING
 }
 
-double PeakRepresentationEllipsoid::getOccupancyInView() const
-{
-    // DO NOTHING
-    return -1.0;
-}
-
-double PeakRepresentationEllipsoid::getOccupancyIntoView() const
-{
-    // DO NOTHING
-    return -1.0;
-}
-
 const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const
 {
     return m_originEllipseBackgroundOuter;

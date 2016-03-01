@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <limits>
-#include <type_traits>
 /**
  *
  * The functions in this file intend to calculate the paramters of an ellipse
@@ -76,8 +74,7 @@
  * The ellipse origin is
  * -A^(-1)*B/2
  *
- * The tilting angle is:
- * alpha = tan(2*a01/(a11-a00))/2
+ * The tilting angle is calcualted via the eigenvectors.
  * This is the angle required to rotate the axis into the major axis.
  *
  */

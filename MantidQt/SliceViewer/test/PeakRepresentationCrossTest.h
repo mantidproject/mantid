@@ -8,39 +8,32 @@
 using namespace MantidQt::SliceViewer;
 using namespace testing;
 
+
+class PeakRepresentationCrossExposeProtectedWrapper
+    : public PeakRepresentationCross
+{
+public:
+    PeakRepresentationCrossExposeProtectedWrapper(
+        const Mantid::Kernel::V3D &origin, const double &maxZ,
+        const double &minZ)
+        : PeakRepresentationCross(origin, maxZ, minZ)
+    {
+    }
+
+    double getOccupancyInView() { return m_crossViewFraction; }
+
+    double getOccupancyIntoView() { return m_intoViewFraction; }
+
+    std::shared_ptr<PeakPrimitives> getDrawingInformationFromWrapper(
+        PeakRepresentationViewInformation viewInformation)
+    {
+        return this->getDrawingInformation(viewInformation);
+    }
+};
+
 class PeakRepresentationCrossTest : public CxxTest::TestSuite
 {
 public:
-    void test_setSlicePoint_to_intersect()
-    {
-
-      // TODO CHeck what can be tested here
-#if 0
-        V3D origin(0, 0, 0);
-        const double maxZ = 1;
-        const double minZ = 0;
-        PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
-
-        const double slicePoint = 0;
-        physicalPeak.setSlicePoint(slicePoint);
-
-        const double windowHeight = 200;
-        const double windowWidth = 200;
-
-        auto drawObject = physicalPeak.draw(windowHeight, windowWidth);
-
-        // Quick white-box calculations of the outputs to expect.
-        const double expectedLineWidth = 2;
-        const int expectedHalfCrossWidth = int(windowWidth * 0.015);
-        const int expectedHalfCrossHeight = int(windowHeight * 0.015);
-
-        TS_ASSERT_EQUALS(expectedHalfCrossWidth, drawObject.peakHalfCrossWidth);
-        TS_ASSERT_EQUALS(expectedHalfCrossHeight,
-                         drawObject.peakHalfCrossHeight);
-        TS_ASSERT_EQUALS(expectedLineWidth, drawObject.peakLineWidth);
-#endif
-    }
-
     void test_movePosition_moves_the_peak()
     {
 
@@ -144,7 +137,7 @@ public:
         Mantid::Kernel::V3D origin(0, 0, 0);
         const double maxZ = 1;
         const double minZ = 0;
-        PeakRepresentationCross peak(origin, maxZ, minZ);
+        PeakRepresentationCrossExposeProtectedWrapper peak(origin, maxZ, minZ);
 
         const double newEffectiveRadiusFactor = 0.2;
         const double effectiveRadius = newEffectiveRadiusFactor * (maxZ - minZ);
@@ -165,7 +158,7 @@ public:
         Mantid::Kernel::V3D origin(0, 0, 0);
         const double maxZ = 1;
         const double minZ = 0;
-        PeakRepresentationCross peak(origin, maxZ, minZ);
+        PeakRepresentationCrossExposeProtectedWrapper peak(origin, maxZ, minZ);
 
         const double occupancyFraction = 0.01; // 1%
 
@@ -183,7 +176,7 @@ public:
         Mantid::Kernel::V3D origin(0, 0, 0);
         const double maxZ = 1;
         const double minZ = 0;
-        PeakRepresentationCross peak(origin, maxZ, minZ);
+        PeakRepresentationCrossExposeProtectedWrapper peak(origin, maxZ, minZ);
 
         // Act
         double defaultOccupancy = peak.getOccupancyIntoView();
@@ -196,8 +189,9 @@ public:
     }
 };
 
-// TODO need to provide Mock QwtPlot etc to have this run properly, might be a
-// bit much (and not realistic)
+//---------------------------------------------------------------------
+// Performance Test
+//---------------------------------------------------------------------
 
 class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite
 {
@@ -205,8 +199,16 @@ private:
     typedef std::vector<boost::shared_ptr<PeakRepresentationCross>>
         VecPeakRepCross;
 
+    typedef std::
+        vector<boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>
+            VecPeakRepCrossWrapped;
+
     /// Collection to store a large number of PeakRepresentationCross.
     VecPeakRepCross m_peaks;
+
+    /// Collection to store a large number of
+    /// PeakRepresentationCrossProtectedWrapper.
+    VecPeakRepCrossWrapped m_peaksWrapped;
 
 public:
     /**
@@ -215,7 +217,6 @@ public:
     */
     PeakRepresentationCrossTestPerformance()
     {
-#if 0
         const int sizeInAxis = 100;
         const double maxZ = 100;
         const double minZ = 0;
@@ -223,20 +224,19 @@ public:
         for (int x = 0; x < sizeInAxis; ++x) {
             for (int y = 0; y < sizeInAxis; ++y) {
                 for (int z = 0; z < sizeInAxis; ++z) {
-                    V3D peakOrigin(x, y, z);
+                    Mantid::Kernel::V3D peakOrigin(x, y, z);
                     m_peaks.push_back(
-                        boost::make_shared<PeakRepresentationCross>(
+                        boost::make_shared<MantidQt::SliceViewer::
+                                               PeakRepresentationCross>(
                             peakOrigin, maxZ, minZ));
                 }
             }
         }
-#endif
     }
 
     /// Test the performance of just setting the slice point.
     void test_setSlicePoint_performance()
     {
-#if 0
         for (double z = 0; z < 100; z += 5) {
             VecPeakRepCross::iterator it = m_peaks.begin();
             while (it != m_peaks.end()) {
@@ -244,39 +244,55 @@ public:
                 ++it;
             }
         }
-#endif
     }
 
     /// Test the performance of just drawing.
     void test_draw_performance()
     {
-#if 0
         const int nTimesRedrawAll = 20;
         int timesDrawn = 0;
+
+        // View Settings Scale 1:1 on both x and y for simplicity.
+        MantidQt::SliceViewer::PeakRepresentationViewInformation
+            viewInformation;
+        viewInformation.viewHeight = 1.0;
+        viewInformation.viewWidth = 1.0;
+        viewInformation.windowHeight = 1.0;
+        viewInformation.windowWidth = 1.0;
+        viewInformation.xOriginWindow = 1;
+        viewInformation.yOriginWindow = 1;
+
         while (timesDrawn < nTimesRedrawAll) {
-            auto it = m_peaks.begin();
-            while (it != m_peaks.end()) {
-                (*it)->draw(1, 1);
+            auto it = m_peaksWrapped.begin();
+            while (it != m_peaksWrapped.end()) {
+                (*it)->getDrawingInformationFromWrapper(viewInformation);
                 ++it;
             }
             ++timesDrawn;
         }
-#endif
     }
 
     /// Test the performance of both setting the slice point and drawing..
     void test_whole_performance()
     {
-#if 0
-        auto it = m_peaks.begin();
         const double z = 10;
-        while (it != m_peaks.end()) {
+
+        // View Settings Scale 1:1 on both x and y for simplicity.
+        MantidQt::SliceViewer::PeakRepresentationViewInformation
+            viewInformation;
+        viewInformation.viewHeight = 1.0;
+        viewInformation.viewWidth = 1.0;
+        viewInformation.windowHeight = 1.0;
+        viewInformation.windowWidth = 1.0;
+        viewInformation.xOriginWindow = 1;
+        viewInformation.yOriginWindow = 1;
+
+        auto it = m_peaksWrapped.begin();
+        while (it != m_peaksWrapped.end()) {
             (*it)->setSlicePoint(z);
-            (*it)->draw(1, 1);
+            (*it)->getDrawingInformationFromWrapper(viewInformation);
             ++it;
         }
-
-#endif
     }
 };
 

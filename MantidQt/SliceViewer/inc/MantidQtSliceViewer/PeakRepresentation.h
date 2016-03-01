@@ -54,6 +54,8 @@ typedef boost::optional<double> optional_double;
 class DLLExport PeakRepresentation
 {
 public:
+    virtual ~PeakRepresentation(){}
+
     /// Draw template method
     void draw(QPainter &painter, PeakViewColor &foregroundColor,
               PeakViewColor &backgroundColor,
@@ -71,14 +73,11 @@ public:
     virtual void setOccupancyIntoView(const double fraction) = 0;
     /// Get the effective peak radius.
     virtual double getEffectiveRadius() const = 0;
-    /// Get the width occupancy (fractional in the projection plane).
-    virtual double getOccupancyInView() const = 0;
-    /// Get the depth occupancy (fractional into the projection plane)
-    virtual double getOccupancyIntoView() const = 0;
     /// Gets the origin
     virtual const Mantid::Kernel::V3D &getOrigin() const = 0;
     /// Show the background radius
     virtual void showBackgroundRadius(const bool show) = 0;
+
 
 protected:
     virtual std::shared_ptr<PeakPrimitives>

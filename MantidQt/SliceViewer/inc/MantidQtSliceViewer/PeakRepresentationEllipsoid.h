@@ -56,10 +56,6 @@ public:
   void setOccupancyIntoView(const double fraction) override;
   /// Get the effective peak radius.
   double getEffectiveRadius() const override;
-  /// Get the width occupancy (fractional in the projection plane).
-  double getOccupancyInView() const override;
-  /// Get the depth occupancy (fractional into the projection plane)
-  double getOccupancyIntoView() const override;
   /// Get the origin
   const Mantid::Kernel::V3D &getOrigin() const override;
   /// Show the background radius

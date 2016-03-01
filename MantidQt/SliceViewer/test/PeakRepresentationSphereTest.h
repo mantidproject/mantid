@@ -5,94 +5,9 @@
 #include "MantidQtSliceViewer/PeakRepresentationSphere.h"
 #include "MockObjects.h"
 
-#if 0
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidMDAlgorithms/SaveMD2.h"
-#endif
 
 using namespace MantidQt::SliceViewer;
 using namespace testing;
-
-#if 0
-namespace {
-// Add A Fake 'Peak' to both the event data and to the peaks workspace
-void addFakeEllipsoid(const Mantid::Kernel::V3D &peakHKL, const int &totalNPixels,
-                      const int &nEvents, const double tofGap,
-                      Mantid::DataObjects::EventWorkspace_sptr &eventWS,
-                      Mantid::DataObjects::PeaksWorkspace_sptr &peaksWS) {
-  // Create the peak and add it to the peaks ws
-  Mantid::DataObjects::Peak *peak = peaksWS->createPeakHKL(peakHKL);
-  peaksWS->addPeak(*peak);
-  const int detectorId = peak->getDetectorID();
-  const double tofExact = peak->getTOF();
-  delete peak;
-
-  Mantid::DataObjects::EventList &el = eventWS->getEventList(detectorId - totalNPixels);
-
-  // Add more events to the event list corresponding to the peak centre
-  double start = tofExact - (double(nEvents) / 2 * tofGap);
-  for (int i = 0; i < nEvents; ++i) {
-    const double tof = start + (i * tofGap);
-    el.addEventQuickly(Mantid::DataObjects::TofEvent(tof));
-  }
-}
-
-// Create diffraction data for test schenarios
-boost::tuple<Mantid::DataObjects::EventWorkspace_sptr, Mantid::DataObjects::PeaksWorkspace_sptr>
-createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
-                      const double tofGapBetweenEvents = 10) {
-  Mantid::Geometry::Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular(
-          1 /*num_banks*/, nPixels /*pixels in each direction yields n by n*/,
-          0.01, 1.0);
-
-  // Create a peaks workspace
-  auto peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
-  // Set the instrument to be the fake rectangular bank above.
-  peaksWS->setInstrument(inst);
-  // Set the oriented lattice for a cubic crystal
-  Mantid::Geometry::OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(Mantid::Kernel::V3D(6, 0, 0), Mantid::Kernel::V3D(0, 6, 0));
-  peaksWS->mutableSample().setOrientedLattice(&ol);
-
-  // Make an event workspace and add fake peak data
-  auto eventWS = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
-  eventWS->setInstrument(inst);
-  eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */,
-                      3 /* y-size */);
-  eventWS->getAxis(0)->setUnit("TOF");
-  // Give the spectra-detector mapping for all event lists
-  const int nPixelsTotal = nPixels * nPixels;
-  for (int i = 0; i < nPixelsTotal; ++i) {
-    auto &el = eventWS->getOrAddEventList(i);
-    el.setDetectorID(i + nPixelsTotal);
-  }
-
-  // Add some peaks which should correspond to real reflections (could
-  // calculate these). Same function also adds a fake ellipsoid
-  addFakeEllipsoid(Mantid::Kernel::V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(Mantid::Kernel::V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(Mantid::Kernel::V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(Mantid::Kernel::V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(Mantid::Kernel::V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(Mantid::Kernel::V3D(2, -3, -4), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-
-  // Return test data.
-  return boost::tuple<Mantid::DataObjects::EventWorkspace_sptr, Mantid::DataObjects::PeaksWorkspace_sptr>(eventWS,
-                                                                peaksWS);
-}
-}
-#endif
 
 class PeakRepresentationSphereExposeProtectedWrapper
     : public PeakRepresentationSphere

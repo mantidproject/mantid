@@ -12,11 +12,11 @@ namespace SliceViewer
 
 PeakRepresentationCross::PeakRepresentationCross(
     const Mantid::Kernel::V3D &origin, const double &maxZ, const double &minZ)
-    : m_originalOrigin(origin), m_origin(origin), m_intoViewFraction(0.015),
+    :  m_intoViewFraction(0.015), m_crossViewFraction(0.015), m_originalOrigin(origin), m_origin(origin),
       m_effectiveRadius((maxZ - minZ) * m_intoViewFraction), m_opacityMax(0.8),
       m_opacityMin(0.0),
       m_opacityGradient((m_opacityMin - m_opacityMax) / m_effectiveRadius),
-      m_crossViewFraction(0.015), m_opacityAtDistance(0.0), m_slicePoint(0.0)
+      m_opacityAtDistance(0.0), m_slicePoint(0.0)
 {
 }
 
@@ -83,16 +83,6 @@ void PeakRepresentationCross::setOccupancyIntoView(const double fraction)
 double PeakRepresentationCross::getEffectiveRadius() const
 {
     return m_effectiveRadius;
-}
-
-double PeakRepresentationCross::getOccupancyInView() const
-{
-    return m_crossViewFraction;
-}
-
-double PeakRepresentationCross::getOccupancyIntoView() const
-{
-    return m_intoViewFraction;
 }
 
 std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(

@@ -124,18 +124,6 @@ void PeakRepresentationSphere::setOccupancyIntoView(const double)
     // DO NOTHING
 }
 
-double PeakRepresentationSphere::getOccupancyInView() const
-{
-    // DO NOTHING
-  return -1.0;
-}
-
-double PeakRepresentationSphere::getOccupancyIntoView() const
-{
-    // DO NOTHING
-  return -1.0;
-}
-
 const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const
 {
     return m_origin;

@@ -50,7 +50,7 @@ std::vector<Mantid::Kernel::V3D> getDirectionsForEllipticalPeak(
     if (frame.name() == Mantid::Geometry::QSample::QSampleName) {
         Mantid::Kernel::Matrix<double> goniometerMatrix
             = peak.getGoniometerMatrix();
-        if (goniometerMatrix.Invert()) {
+        if (goniometerMatrix.Invert() != 0.0) {
             directions
                 = ellipticalShape.getDirectionInSpecificFrame(goniometerMatrix);
         } else {
