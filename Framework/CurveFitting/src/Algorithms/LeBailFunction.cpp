@@ -319,7 +319,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
       boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
   peak->setMillerIndex(h, k, l);
-  for (auto parname : m_peakParameterNameVec) {
+  for (const auto &parname : m_peakParameterNameVec) {
     double parvalue = m_functionParameters[parname];
     peak->setParameter(parname, parvalue);
   }
@@ -369,7 +369,7 @@ bool LeBailFunction::calculatePeaksIntensities(
   }
 
   // Set zero to all peaks out of boundary
-  for (auto peak : outboundpeakvec) {
+  for (const auto &peak : outboundpeakvec) {
     peak->setHeight(0.);
   }
 

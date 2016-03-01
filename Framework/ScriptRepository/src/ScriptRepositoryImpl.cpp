@@ -1427,7 +1427,7 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       if (!isEntryValid(filepath))
         continue;
       Json::Value entry_json = pt.get(filepath, "");
@@ -1492,7 +1492,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       Json::Value entry_json = pt.get(filepath, "");
 
       entry_it = repo.find(filepath);

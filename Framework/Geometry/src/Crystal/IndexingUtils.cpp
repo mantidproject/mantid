@@ -1087,7 +1087,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   std::vector<V3D> selected_dirs;
   V3D dir_temp;
 
-  for (auto current_dir : full_list) {
+  for (const auto &current_dir : full_list) {
     for (int step = 0; step <= n_steps; step++) {
       dir_temp = current_dir;
       dir_temp *= (min_d + step * delta_d); // increasing size

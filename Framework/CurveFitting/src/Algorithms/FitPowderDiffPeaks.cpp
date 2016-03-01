@@ -2170,7 +2170,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     vector<BackToBackExponential_sptr> peaks) {
-  for (auto thispeak : peaks) {
+  for (const auto &thispeak : peaks) {
     // 1. Set constraint on X.
     double fwhm = thispeak->fwhm();
     double centre = thispeak->centre();
@@ -2907,10 +2907,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       vector<string> tnb2bfuncparnames = tnb2bfunc.getParameterNames();
 
       // Set peak parameters
-      std::map<std::string, double>::iterator miter;
-      for (auto parname : tnb2bfuncparnames) {
+      for (const auto &parname : tnb2bfuncparnames) {
         if (parname.compare("Height") != 0) {
-          miter = m_instrumentParmaeters.find(parname);
+          auto miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {
             stringstream errss;
             errss << "Cannot find peak parameter " << parname

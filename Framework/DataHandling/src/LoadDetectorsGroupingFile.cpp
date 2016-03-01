@@ -230,7 +230,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
                     << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << std::endl;
 
-      for (auto child : children) {
+      for (const auto &child : children) {
         // c) convert component to detector
         Geometry::IDetector_const_sptr det =
             boost::dynamic_pointer_cast<const Geometry::IDetector>(child);

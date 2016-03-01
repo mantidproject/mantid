@@ -629,7 +629,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
       MDEW_MDEVENT_3);
 
-  for (auto thisWorkspace : vec_ws2d) {
+  for (const auto &thisWorkspace : vec_ws2d) {
     short unsigned int runnumber = static_cast<short unsigned int>(
         atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
 

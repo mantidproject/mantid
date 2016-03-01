@@ -237,7 +237,7 @@ std::map<V3D, UniqueReflection> SortHKL::getPossibleUniqueReflections(
 
   // Generate map of UniqueReflection-objects with reflection family as key.
   std::map<V3D, UniqueReflection> uniqueHKLs;
-  for (auto hkl : generator) {
+  for (const auto &hkl : generator) {
     if (filter->isAllowed(hkl)) {
       V3D hklFamily = pointGroup->getReflectionFamily(hkl);
       uniqueHKLs.emplace(hklFamily, UniqueReflection(hklFamily));
