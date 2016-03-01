@@ -21,6 +21,7 @@
 #include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/PreviewPlot.h"
+#include "MantidQtMantidWidgets/DisplayCurveFit.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -156,6 +157,10 @@ DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
 
 DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin,
     MantidQt::MantidWidgets::PreviewPlot,
+    "Curve plots for workspace spectra");
+
+DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
+    MantidQt::MantidWidgets::DisplayCurveFit,
     "Curve plots for workspace spectra");
 
 #endif
