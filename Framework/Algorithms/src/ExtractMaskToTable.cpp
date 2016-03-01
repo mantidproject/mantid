@@ -343,7 +343,7 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
   }
 
   // Exclude previously masked detectors IDs from masked detectors IDs
-  if (prevmaskedids.size() > 0) {
+  if (!prevmaskedids.empty()) {
     sort(prevmaskedids.begin(), prevmaskedids.end());
     maskeddetids = subtractVector(maskeddetids, prevmaskedids);
     numdetids = maskeddetids.size();

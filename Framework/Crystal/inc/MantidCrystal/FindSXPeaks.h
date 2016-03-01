@@ -33,7 +33,7 @@ public:
     if (intensity < 0) {
       throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
     }
-    if (spectral.size() == 0) {
+    if (spectral.empty()) {
       throw std::invalid_argument(
           "SXPeak: Cannot have zero sized spectral list");
     }

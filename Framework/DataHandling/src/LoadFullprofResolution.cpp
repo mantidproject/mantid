@@ -138,7 +138,7 @@ void LoadFullprofResolution::exec() {
 
   if (vec_bankinirf.empty()) {
     throw runtime_error("No Bank is found in input file.");
-  } else if (outputbankids.size() == 0) {
+  } else if (outputbankids.empty()) {
     vec_bankids = vec_bankinirf;
     // If workspaces, set up Bank-Workpace correspondence
     if (wsg)
@@ -177,7 +177,7 @@ void LoadFullprofResolution::exec() {
         }
       }
     }
-    if (vec_bankids.size() == 0) {
+    if (vec_bankids.empty()) {
       g_log.error("There is no valid specified bank IDs for output.");
       throw runtime_error("There is no valid specified bank IDs for output.");
     }
@@ -208,7 +208,7 @@ void LoadFullprofResolution::exec() {
   if (wsg) {
     // First check that number of workspaces in group matches number of banks,
     // if no WorkspacesForBanks is specified.
-    if ((outputwsids.size() == 0) && (wsg->size() != vec_bankids.size())) {
+    if ((outputwsids.empty()) && (wsg->size() != vec_bankids.size())) {
       std::ostringstream mess;
       mess << "Number of banks (" << vec_bankids.size()
            << ") does not match number of workspaces (" << wsg->size()
@@ -786,7 +786,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
 void LoadFullprofResolution::createBankToWorkspaceMap(
     const std::vector<int> &banks, const std::vector<int> &workspaces,
     std::map<int, size_t> &workspaceOfBank) {
-  if (workspaces.size() == 0) {
+  if (workspaces.empty()) {
     for (size_t i = 0; i < banks.size(); i++) {
       workspaceOfBank.emplace(banks[i], i + 1);
     }

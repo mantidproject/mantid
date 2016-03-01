@@ -72,7 +72,7 @@ public:
 
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
     MatrixWorkspace_sptr outWS;
-    if (m_indexes.size() > 0) {
+    if (!m_indexes.empty()) {
       Mantid::API::AlgorithmManagerImpl &factory =
           Mantid::API::AlgorithmManager::Instance();
       auto sumSpectraAlg = factory.create("SumSpectra");

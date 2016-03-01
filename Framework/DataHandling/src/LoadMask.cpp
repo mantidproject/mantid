@@ -322,7 +322,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                                            std::vector<int32_t> pairslow,
                                            std::vector<int32_t> pairsup) {
   // 1. Check
-  if (pairslow.size() == 0)
+  if (pairslow.empty())
     return;
   if (pairslow.size() != pairsup.size()) {
     g_log.error() << "Input spectrum IDs are not paired.  Size(low) = "

@@ -135,7 +135,7 @@ void SpatialGrouping::exec() {
     m_groups.push_back(group);
   }
 
-  if (m_groups.size() == 0) {
+  if (m_groups.empty()) {
     g_log.warning() << "No groups generated." << std::endl;
     return;
   }

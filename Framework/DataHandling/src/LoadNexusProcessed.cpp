@@ -2157,7 +2157,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<int>(m_spec_list.size());
 

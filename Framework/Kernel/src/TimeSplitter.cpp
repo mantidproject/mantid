@@ -139,7 +139,7 @@ TimeSplitterType operator&(const TimeSplitterType &a,
   TimeSplitterType out;
   // If either is empty, then no entries in the filter (aka everything is
   // removed)
-  if ((a.size() == 0) || (b.size() == 0))
+  if ((a.empty()) || (b.empty()))
     return out;
 
   TimeSplitterType::const_iterator ait;
@@ -241,7 +241,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
   temp = removeFilterOverlap(a);
 
   // No entries: then make a "filter" that keeps everything
-  if ((temp.size() == 0)) {
+  if ((temp.empty())) {
     out.push_back(
         SplittingInterval(DateAndTime::minimum(), DateAndTime::maximum(), 0));
     return out;

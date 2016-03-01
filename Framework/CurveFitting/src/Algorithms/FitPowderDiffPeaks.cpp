@@ -339,8 +339,7 @@ void FitPowderDiffPeaks::processInputProperties() {
   m_rightmostPeakRightBound = getProperty("RightMostPeakRightBound");
 
   if (m_fitMode == ROBUSTFIT) {
-    if (m_rightmostPeakHKL.size() == 0 ||
-        m_rightmostPeakLeftBound == EMPTY_DBL() ||
+    if (m_rightmostPeakHKL.empty() || m_rightmostPeakLeftBound == EMPTY_DBL() ||
         m_rightmostPeakRightBound == EMPTY_DBL()) {
       stringstream errss;
       errss << "If fit mode is 'RobustFit', then user must specify all 3 "
@@ -758,7 +757,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
                  << peakinfob1 << endl;
 
   // c) Fit peak parameters by the value from right peak
-  if (rightpeakparammap.size() > 0) {
+  if (!rightpeakparammap.empty()) {
     restoreFunctionParameters(peak, rightpeakparammap);
     peak->setParameter("X0", tof_h);
     peak->setParameter("I", height * fwhm);

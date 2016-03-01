@@ -483,7 +483,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // inside ISIS the run_number type is int32
     std::vector<int> value;
     file.getData(value);
-    if (value.size() > 0)
+    if (!value.empty())
       run = boost::lexical_cast<std::string>(value[0]);
   }
   if (!run.empty()) {
