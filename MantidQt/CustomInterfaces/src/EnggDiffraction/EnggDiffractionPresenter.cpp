@@ -227,6 +227,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     g_calibCropIdentifier = "Bank";
 
   } else if (specIdNum == BankMode::SPECIDS) {
+    g_calibCropIdentifier = "SpectrumNumbers";
     specId = m_view->currentCalibSpecNos();
   }
 
@@ -953,12 +954,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNumUsed)
+      if (specNumUsed) {
         alg->setPropertyValue(g_calibCropIdentifier,
                               boost::lexical_cast<std::string>(specNos));
-      else
+      } else {
         alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-
+      }
       const std::string outFitParamsTblName =
           outFitParamsTblNameGenerator(specNos, i);
       alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
