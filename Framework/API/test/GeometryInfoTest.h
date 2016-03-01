@@ -6,7 +6,6 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/GeometryInfo.h"
-
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -150,6 +149,86 @@ public:
 private:
   WorkspaceTester m_workspace;
   std::unique_ptr<GeometryInfoFactory> m_factory;
+};
+
+class GeometryInfoTestPerformance : public CxxTest::TestSuite {
+public:
+  static GeometryInfoTestPerformance *createSuite() {
+    return new GeometryInfoTestPerformance();
+  }
+  static void destroySuite(GeometryInfoTestPerformance *suite) { delete suite; }
+
+  GeometryInfoTestPerformance() {
+    const size_t numberOfHistograms = 100000;
+    const size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  void test_single_access_multiple_spectrum() {
+    /*
+     * We are testing the effect of single access to multiple detector detector
+     * l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+
+    for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
+      auto geometryInfo = factory.create(i);
+      result += geometryInfo.getL1();
+      result += geometryInfo.getL2();
+      result += geometryInfo.getTwoTheta();
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+  void test_typical_access_multiple_spectrum() {
+    /*
+     * We are testing the effect of typical access to multiple detector l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+
+    for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < 10; ++j) {
+        auto geometryInfo = factory.create(i);
+        result += geometryInfo.getL1();
+        result += geometryInfo.getL2();
+        result += geometryInfo.getTwoTheta();
+      }
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+  void test_multiple_access_single_spectrum() {
+    /*
+     * We are testing the effect of repeated (probably unrealistic) access to
+     * the same detector l1 l2,
+     * twoTheta information.
+     */
+    double result = 0.0;
+    GeometryInfoFactory factory(m_workspace);
+    auto geometryInfo = factory.create(0);
+    for (size_t i = 0; i < 100000; ++i) {
+
+      result += geometryInfo.getL1();
+      result += geometryInfo.getL2();
+      result += geometryInfo.getTwoTheta();
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT(result > 0);
+  }
+
+private:
+  WorkspaceTester m_workspace;
 };
 
 #endif /* MANTID_API_GEOMETRYINFOTEST_H_ */

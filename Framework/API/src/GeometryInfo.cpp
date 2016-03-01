@@ -42,45 +42,63 @@ bool GeometryInfo::isMasked() const { return m_detector->isMasked(); }
 double GeometryInfo::getL1() const { return m_factory.getL1(); }
 
 double GeometryInfo::getL2() const {
-  if (!isMonitor()) {
-    auto &sample = m_factory.getSample();
-    return m_detector->getDistance(sample);
-  } else {
-    auto &source = m_factory.getSource();
-    return m_detector->getDistance(source) - getL1();
+
+  if (!m_l2) {
+    if (!isMonitor()) {
+      auto &sample = m_factory.getSample();
+      m_l2 = m_detector->getDistance(sample);
+    } else {
+      auto &source = m_factory.getSource();
+      m_l2 = m_detector->getDistance(source) - getL1();
+    }
   }
+  return m_l2.value();
 }
 
+void GeometryInfo::invalidateL2Cache() { m_l2 = boost::optional<double>{}; }
+
 double GeometryInfo::getTwoTheta() const {
-  // Note: This function has big overlap with the method
-  // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
-  // latter, once GeometryInfo is in widespread use.
-  const Kernel::V3D samplePos = m_factory.getSamplePos();
-  const Kernel::V3D beamLine = samplePos - m_factory.getSourcePos();
 
-  if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+  if (!m_twoTheta) {
+    // Note: This function has big overlap with the method
+    // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
+    // latter, once GeometryInfo is in widespread use.
+    const Kernel::V3D samplePos = m_factory.getSamplePos();
+    const Kernel::V3D beamLine = samplePos - m_factory.getSourcePos();
+
+    if (beamLine.nullVector()) {
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Source and sample are at same position!");
+    }
+
+    // TODO. According to ConvertUnits. two-theta is always set to zero for
+    // monitors.
+    m_twoTheta = m_detector->getTwoTheta(samplePos, beamLine);
   }
-
-  return m_detector->getTwoTheta(samplePos, beamLine);
+  return m_twoTheta.value();
 }
 
 double GeometryInfo::getSignedTwoTheta() const {
-  // Note: This function has big overlap with the method
-  // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove
-  // the latter, once GeometryInfo is in widespread use.
-  const Kernel::V3D samplePos = m_factory.getSamplePos();
-  const Kernel::V3D beamLine = samplePos - m_factory.getSourcePos();
 
-  if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+  if (!m_signedTwoTheta) {
+    // Note: This function has big overlap with the method
+    // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually
+    // remove
+    // the latter, once GeometryInfo is in widespread use.
+    const Kernel::V3D samplePos = m_factory.getSamplePos();
+    const Kernel::V3D beamLine = samplePos - m_factory.getSourcePos();
+
+    if (beamLine.nullVector()) {
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Source and sample are at same position!");
+    }
+    // Get the instrument up axis.
+    const Kernel::V3D &instrumentUpAxis =
+        m_factory.getInstrument().getReferenceFrame()->vecPointingUp();
+    m_signedTwoTheta =
+        m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
   }
-  // Get the instrument up axis.
-  const Kernel::V3D &instrumentUpAxis =
-      m_factory.getInstrument().getReferenceFrame()->vecPointingUp();
-  return m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  return m_signedTwoTheta.value();
 }
 
 boost::shared_ptr<const Geometry::IDetector> GeometryInfo::getDetector() const {
