@@ -106,7 +106,7 @@ public:
    *the
    *                        NewInstrument's parameter map.
    *
-   *   @param RotateCenters Rotate the centers of the panels(the same amount)
+   *   @param RotCenters Rotate the centers of the panels(the same amount)
    *with the
    *                        rotation of panels around their center
    */

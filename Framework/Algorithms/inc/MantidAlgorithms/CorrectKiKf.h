@@ -87,7 +87,7 @@ private:
   void execEvent();
   /**
    * Execute CorrectKiKf for event lists
-   * @param events the list of events to correct
+   * @param wevector the list of events to correct
    * @param efixed the value of the fixed energy
    * @param emodeStr the energy mode description
    */
