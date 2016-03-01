@@ -27,18 +27,12 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(
         m_workspace, includeMonitors, startYNegative, instrumentName);
+
+    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
   }
 
   void test_constructor() {
     TS_ASSERT_THROWS_NOTHING(GeometryInfoFactory factory(m_workspace));
-  }
-
-  void test_constructor_no_instrument() {
-    WorkspaceTester ws;
-    size_t numberOfHistograms = 1;
-    size_t numberOfBins = 1;
-    ws.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
-    TS_ASSERT_THROWS(GeometryInfoFactory factory(ws), std::runtime_error);
   }
 
   void test_create() {
@@ -79,8 +73,34 @@ public:
     TS_ASSERT_EQUALS(factory.getL1(), 20.0);
   }
 
+  void test_getSource_no_instrument() {
+    GeometryInfoFactory factory(m_workspaceNoInstrument);
+    TS_ASSERT_THROWS(factory.getSource(), std::runtime_error);
+  }
+
+  void test_getSourcePos_no_instrument() {
+    GeometryInfoFactory factory(m_workspaceNoInstrument);
+    TS_ASSERT_THROWS(factory.getSourcePos(), std::runtime_error);
+  }
+
+  void test_getSample_no_instrument() {
+    GeometryInfoFactory factory(m_workspaceNoInstrument);
+    TS_ASSERT_THROWS(factory.getSample(), std::runtime_error);
+  }
+
+  void test_getSamplePos_no_instrument() {
+    GeometryInfoFactory factory(m_workspaceNoInstrument);
+    TS_ASSERT_THROWS(factory.getSamplePos(), std::runtime_error);
+  }
+
+  void test_getL1_no_instrument() {
+    GeometryInfoFactory factory(m_workspaceNoInstrument);
+    TS_ASSERT_THROWS(factory.getL1(), std::runtime_error);
+  }
+
 private:
   WorkspaceTester m_workspace;
+  WorkspaceTester m_workspaceNoInstrument;
 };
 
 class GeometryInfoFactoryTestPerformance : public CxxTest::TestSuite {
