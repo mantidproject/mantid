@@ -1,4 +1,7 @@
 #include "MantidAlgorithms/CopyLogs.h"
+
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
 
@@ -38,17 +41,15 @@ const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }
  */
 void CopyLogs::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace to copy logs from.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::InOut),
-      "Workspace to copy logs too.");
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
+      "Workspace to copy logs to.");
 
   // options for the type of strategy to take
-  std::vector<std::string> strategies;
-  strategies.push_back("WipeExisting");
-  strategies.push_back("MergeKeepExisting");
-  strategies.push_back("MergeReplaceExisting");
+  std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",
+                                      "MergeReplaceExisting"};
 
   auto strategiesValidator =
       boost::make_shared<StringListValidator>(strategies);

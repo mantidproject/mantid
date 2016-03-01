@@ -8,18 +8,16 @@
 #define INTEGRATEPEAKTIMESLICES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IAlgorithm.h"
 
 #include <array>
 
@@ -229,26 +227,26 @@ public:
   IntegratePeakTimeSlices();
 
   /// Destructor
-  virtual ~IntegratePeakTimeSlices();
+  ~IntegratePeakTimeSlices() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "IntegratePeakTimeSlices"; }
+  const std::string name() const override { return "IntegratePeakTimeSlices"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The algorithm uses CurveFitting::BivariateNormal for fitting a "
            "time slice";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Integration"; }
+  const std::string category() const override { return "Crystal\\Integration"; }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   bool m_EdgePeak;
 

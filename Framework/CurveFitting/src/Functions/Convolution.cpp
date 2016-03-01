@@ -36,9 +36,6 @@ Convolution::Convolution() {
   setAttributeValue("NumDeriv", true);
 }
 
-/// Destructor
-Convolution::~Convolution() {}
-
 void Convolution::init() {}
 
 void Convolution::functionDeriv(const FunctionDomain &domain,
@@ -178,6 +175,7 @@ void Convolution::function(const FunctionDomain &domain,
   CompositeFunction_sptr cf =
       boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
+    dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {

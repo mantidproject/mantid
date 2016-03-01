@@ -1,15 +1,19 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/bind.hpp>
@@ -72,21 +76,21 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
  */
 void ConvertUnitsUsingDetectorTable::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
   declareProperty("Target", "", boost::make_shared<StringListValidator>(
                                     UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorParameters",
-                                                        "", Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Name of a TableWorkspace containing the detector parameters "
-                  "to use instead of the IDF.");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+      "Name of a TableWorkspace containing the detector parameters "
+      "to use instead of the IDF.");
 
   // TODO: Do we need this ?
   declareProperty("AlignBins", false,
@@ -223,18 +227,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::setupOutputWorkspace(
   // the output
   if (outputWS != inputWS) {
     if (m_inputEvents) {
-      // Need to create by name as WorkspaceFactory otherwise spits out
-      // Workspace2D when EventWS passed in
-      outputWS = WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1);
-      // Copy geometry etc. over
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        false);
-      // Need to copy over the data as well
-      EventWorkspace_const_sptr inputEventWS =
-          boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS)
-          ->copyDataFrom(*inputEventWS);
+      outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
     } else {
       // Create the output workspace
       outputWS = WorkspaceFactory::Instance().create(inputWS);
@@ -560,12 +553,7 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
 
-  std::vector<double> retval;
-  retval.push_back(XMin);
-  retval.push_back(step);
-  retval.push_back(XMax);
-
-  return retval;
+  return {XMin, step, XMax};
 }
 
 /** Reverses the workspace if X values are in descending order

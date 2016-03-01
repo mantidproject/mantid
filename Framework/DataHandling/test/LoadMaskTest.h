@@ -6,8 +6,6 @@
 #include "MantidKernel/System.h"
 #include <sstream>
 
-#include "boost/assign/list_of.hpp"
-
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -115,11 +113,11 @@ public:
    */
   void test_ISISFormat() {
     // 1. Generate masking files
-    std::vector<specid_t> singlespectra;
+    std::vector<specnum_t> singlespectra;
     singlespectra.push_back(35);
     singlespectra.push_back(1001);
     singlespectra.push_back(2001);
-    std::vector<specid_t> pairspectra;
+    std::vector<specnum_t> pairspectra;
     pairspectra.push_back(1002);
     pairspectra.push_back(1005);
     pairspectra.push_back(37);
@@ -246,7 +244,7 @@ public:
     const std::string oldEmuIdf = "EMU_Definition_32detectors.xml";
     const std::string newEmuIdf = "EMU_Definition_96detectors.xml";
 
-    const std::vector<int> detIDs = boost::assign::list_of(2)(10);
+    const std::vector<int> detIDs = {2, 10};
     auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
 
     auto byInstName =
@@ -329,8 +327,8 @@ public:
    */
   ScopedFileHelper::ScopedFile
   genISISMaskingFile(std::string maskfilename,
-                     std::vector<specid_t> singlespectra,
-                     std::vector<specid_t> pairspectra) {
+                     std::vector<specnum_t> singlespectra,
+                     std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 
     // 1. Single spectra

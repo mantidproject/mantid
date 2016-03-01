@@ -307,8 +307,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "cropped";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -345,8 +344,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
     g_sumOfFilesFocus = "texture";
-    std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    std::vector<std::string> firstRun{multi_RunNo[0]};
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -938,7 +936,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
 
-  if (specNos != "") {
+  bool specNumUsed = specNos != "";
+  if (specNumUsed) {
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
   } else {
@@ -954,22 +953,16 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNos != "")
+      if (specNumUsed)
         alg->setPropertyValue(g_calibCropIdentifier,
                               boost::lexical_cast<std::string>(specNos));
       else
         alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      // TODO: figure out what should be done about the list of expected peaks
-      // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
-      // should be fixed in a nother ticket/issue
-      alg->setPropertyValue(
-          "ExpectedPeaks",
-          "3.1243, 2.7057, 1.9132, 1.6316, 1.5621, "
-          "1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, "
-          "0.8556, 0.8252, 0.8158, 0.7811");
-      alg->setPropertyValue("OutputParametersTableName",
-                            "engggui_calibration_bank_" +
-                                boost::lexical_cast<std::string>(i + 1));
+
+      const std::string outFitParamsTblName =
+          outFitParamsTblNameGenerator(specNos, i);
+      alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
+      alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
     } catch (std::runtime_error &re) {
       g_log.error() << "Error in calibration. ",
@@ -985,7 +978,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
   }
-
   // Creates appropriate directory
   Poco::Path saveDir = outFilesDir("Calibration");
 
@@ -999,6 +991,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
+
+  // plots the calibrated workspaces.
+  g_plottingCounter++;
+  plotCalibWorkspace(difc, tzero, specNos);
 }
 
 /**
@@ -1138,9 +1134,10 @@ EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
   std::vector<std::string> res;
+  res.reserve(banks.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_bank_";
   for (size_t b = 1; b <= banks.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_bank_" +
-                  boost::lexical_cast<std::string>(b) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(b) + ".nxs");
   }
   return res;
 }
@@ -1170,9 +1167,11 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   const std::string instStr = m_view->currentInstrument();
 
   std::vector<std::string> res;
+  res.reserve(bankIDs.size());
+  std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
   for (size_t b = 0; b < bankIDs.size(); b++) {
-    res.push_back(instStr + "_" + runNo + "_focused_texture_bank_" +
-                  boost::lexical_cast<std::string>(bankIDs[b]) + ".nxs");
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankIDs[b]) +
+                     ".nxs");
   }
 
   return res;
@@ -1272,7 +1271,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         for (size_t bidx = 0; bidx < banks.size(); bidx++) {
           if (banks[bidx]) {
             bankIDs.push_back(bidx + 1);
-            specs.push_back("");
+            specs.emplace_back("");
             effectiveFilenames = outputFocusFilenames(runNo, banks);
           }
         }
@@ -1593,7 +1592,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 
-  bool saveOutputFiles = m_view->saveOutputFiles();
+  bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
     try {
@@ -1858,13 +1857,12 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-	if (Poco::File(runNoDir).exists()) {
-		load->setPropertyValue("Filename", runNoDir);
-	}
-	else {
-		load->setPropertyValue("Filename", instStr + runNo);
-	}
-	const std::string inWSName = "engggui_preproc_input_ws";
+    if (Poco::File(runNoDir).exists()) {
+      load->setPropertyValue("Filename", runNoDir);
+    } else {
+      load->setPropertyValue("Filename", instStr + runNo);
+    }
+    const std::string inWSName = "engggui_preproc_input_ws";
     load->setPropertyValue("OutputWorkspace", inWSName);
 
     load->execute();
@@ -2102,7 +2100,7 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
       if (g_plottingCounter == 1)
         m_view->plotFocusedSpectrum(outWSName);
       else
-        m_view->plotReplacingWindow(outWSName);
+        m_view->plotReplacingWindow(outWSName, "0", "0");
 
     } else if (plotType == PlotMode::WATERFALL) {
       if (g_plottingCounter == 1)
@@ -2113,6 +2111,33 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
     } else if (plotType == PlotMode::MULTIPLE) {
       m_view->plotFocusedSpectrum(outWSName);
     }
+  }
+}
+
+/**
+* Check if the plot calibration check-box is ticked
+* python script is passed on to mantid python window
+* which plots the workspaces with customisation
+*
+* @param difc vector of double passed on to py script
+* @param tzero vector of double to plot graph
+* @param specNos string carrying cropped calib info
+*/
+void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
+                                                  std::vector<double> tzero,
+                                                  std::string specNos) {
+  const bool plotCalibWS = m_view->plotCalibWorkspace();
+  if (plotCalibWS) {
+    if (g_plottingCounter == 1) {
+      m_view->plotVanCurvesCalibOutput();
+    } else {
+      m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
+                                  "2");
+    }
+    const std::string pythonCode =
+        DifcZeroWorkspaceFactory(difc, tzero, specNos) +
+        plotDifcZeroWorkspace();
+    m_view->plotDifcZeroCalibOutput(pythonCode);
   }
 }
 
@@ -2289,6 +2314,155 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+/**
+* Generates the workspace with difc/zero according to the selected bank
+*
+* @param difc vector containing constants difc value of each bank
+* @param tzero vector containing constants tzero value of each bank
+* @param specNo used to set range for Calibration Cropped
+*
+* @return string with a python script
+*/
+std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
+    const std::vector<double> &difc, const std::vector<double> &tzero,
+    const std::string &specNo) const {
+
+  size_t bank1 = size_t(0);
+  size_t bank2 = size_t(1);
+  std::string pyRange;
+  std::string plotSpecNum = "False";
+
+  // sets the range to plot appropriate graph for the particular bank
+  if (specNo == "North") {
+    // only enable script to plot bank 1
+    pyRange = "1, 2";
+  } else if (specNo == "South") {
+    // only enables python script to plot bank 2
+    // as bank 2 data will be located in difc[0] & tzero[0] - refactor
+    pyRange = "2, 3";
+    bank2 = size_t(0);
+  } else if (specNo != "") {
+    pyRange = "1, 2";
+    plotSpecNum = "True";
+  } else {
+    // enables python script to plot bank 1 & 2
+    pyRange = "1, 3";
+  }
+
+  std::string pyCode =
+      "plotSpecNum = " + plotSpecNum + "\n"
+                                       "for i in range(" +
+      pyRange +
+      "):\n"
+
+      " if (plotSpecNum == False):\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+      " else:\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
+
+      " xVal = []\n"
+      " yVal = []\n"
+      " y2Val = []\n"
+
+      " if (i == 1):\n"
+      "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
+
+                                                              "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+
+      " for irow in range(0, bank_ws.rowCount()):\n"
+      "  xVal.append(bank_ws.cell(irow, 0))\n"
+      "  yVal.append(bank_ws.cell(irow, 5))\n"
+
+      "  y2Val.append(xVal[irow] * difc + tzero)\n"
+
+      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
+      "Peaks "
+      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
+      "us)\")\n"
+      " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n";
+  return pyCode;
+}
+
+/**
+* Plot the workspace with difc/zero acordding to selected bank
+*
+* @return string with a python script which will merge with
+*
+
+*/
+std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
+  std::string pyCode =
+      // plotSpecNum is true when SpectrumIDs being used
+      " if (plotSpecNum == False):\n"
+      "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      // delete workspace if exists within ADS already
+      " if(mtd.doesExist(output_ws)):\n"
+      "  DeleteWorkspace(output_ws)\n"
+
+      // append workspace with peaks data for Peaks Fitted
+      // and Difc/TZero Straight line
+      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
+      " DeleteWorkspace(ws1)\n"
+      " DeleteWorkspace(ws2)\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      " DifcZeroWs = workspace(DifcZero)\n"
+      " DifcZeroPlot = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      "str(i))\n"
+      " else:\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+
+      // set the legend title
+      " DifcZeroPlot.setCurveTitle(0, \"Peaks Fitted\")\n"
+      " DifcZeroPlot.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
+      " DifcZeroPlot.setAxisTitle(Layer.Bottom, \"Expected Peaks "
+      "Centre(dSpacing, "
+      " A)\")\n"
+      " DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+
+  return pyCode;
+}
+
+/**
+* Generates appropriate names for table workspaces
+*
+* @param specNos specIDs or bank name to be passed
+* @param bank_i current loop of the bank during calibration
+*/
+std::string
+EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
+                                                       size_t bank_i) {
+  std::string outFitParamsTblName;
+  bool specNumUsed = specNos != "";
+
+  if (specNumUsed) {
+    if (specNos == "North")
+      outFitParamsTblName = "engggui_calibration_bank_1";
+    else if (specNos == "South")
+      outFitParamsTblName = "engggui_calibration_bank_2";
+    else
+      outFitParamsTblName = "engggui_calibration_bank_cropped";
+  } else {
+    outFitParamsTblName = "engggui_calibration_bank_" +
+                          boost::lexical_cast<std::string>(bank_i + 1);
+  }
+  return outFitParamsTblName;
 }
 
 /**

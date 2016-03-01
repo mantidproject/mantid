@@ -53,35 +53,37 @@ void SetUB::init() {
   std::vector<double> zeroes(9, 0.), u0(3, 0), v0(3, 0);
   u0[0] = 1.;
   v0[1] = 1.;
-  this->declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "An input workspace.");
-  this->declareProperty(
-      new PropertyWithValue<double>("a", 1.0, mustBePositive, Direction::Input),
-      "Lattice parameter a");
-  this->declareProperty(
-      new PropertyWithValue<double>("b", 1.0, mustBePositive, Direction::Input),
-      "Lattice parameter b");
-  this->declareProperty(
-      new PropertyWithValue<double>("c", 1.0, mustBePositive, Direction::Input),
-      "Lattice parameter c");
-  this->declareProperty(new PropertyWithValue<double>(
+  this->declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                            "Workspace", "", Direction::InOut),
+                        "An input workspace.");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "a", 1.0, mustBePositive, Direction::Input),
+                        "Lattice parameter a");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "b", 1.0, mustBePositive, Direction::Input),
+                        "Lattice parameter b");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "c", 1.0, mustBePositive, Direction::Input),
+                        "Lattice parameter c");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
                             "alpha", 90.0, reasonableAngle, Direction::Input),
                         "Lattice parameter alpha (degrees)");
-  this->declareProperty(new PropertyWithValue<double>(
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
                             "beta", 90.0, reasonableAngle, Direction::Input),
                         "Lattice parameter beta (degrees)");
-  this->declareProperty(new PropertyWithValue<double>(
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
                             "gamma", 90.0, reasonableAngle, Direction::Input),
                         "Lattice parameter gamma(degrees) ");
-  this->declareProperty(new ArrayProperty<double>("u", u0, mustBe3D),
-                        "Vector along k_i, when goniometer is at 0");
   this->declareProperty(
-      new ArrayProperty<double>("v", v0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("u", u0, mustBe3D),
+      "Vector along k_i, when goniometer is at 0");
+  this->declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("v", v0, mustBe3D),
       "In plane vector perpendicular to k_i, when goniometer is at 0");
-  this->declareProperty(new ArrayProperty<double>("UB", zeroes, threeVthree),
-                        "UB Matrix");
-  this->declareProperty(new PropertyWithValue<int>(
+  this->declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("UB", zeroes, threeVthree),
+      "UB Matrix");
+  this->declareProperty(make_unique<PropertyWithValue<int>>(
                             "MDSampleNumber", EMPTY_INT(), Direction::Input),
                         "For an MD workspace, the sample number to wich to "
                         "attach an oriented lattice (starting from 0). No "

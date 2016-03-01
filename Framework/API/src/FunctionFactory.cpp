@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/LibraryManager.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <sstream>
 
 namespace Mantid {
@@ -21,8 +21,6 @@ FunctionFactoryImpl::FunctionFactoryImpl()
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
-
-FunctionFactoryImpl::~FunctionFactoryImpl() {}
 
 IFunction_sptr
 FunctionFactoryImpl::createFunction(const std::string &type) const {

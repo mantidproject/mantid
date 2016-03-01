@@ -2,12 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBins.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
@@ -30,12 +36,12 @@ void RemoveBins::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace.");
 
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
   declareProperty("XMin", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -50,9 +56,7 @@ void RemoveBins::init() {
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("None");
-  propOptions.push_back("Linear");
+  std::vector<std::string> propOptions{"None", "Linear"};
   declareProperty("Interpolation", "None",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "

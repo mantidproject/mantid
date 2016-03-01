@@ -15,7 +15,7 @@ public:
   /// Setter for the number of bins
   virtual void setEntry(int nBins, double min, double max) = 0;
   /// Destructor
-  virtual ~BinInputWidget(){}
+  ~BinInputWidget() override {}
 Q_SIGNALS:
   /// Signal
   void valueChanged();

@@ -52,7 +52,7 @@ public:
   virtual std::string transformArchivePath(const std::string &path) const;
 
   /// virtual destructor
-  virtual ~ICatalogInfo();
+  virtual ~ICatalogInfo() = default;
 
 private:
   /// Replace the content of a string using regex.

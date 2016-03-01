@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/WienerSmooth.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <numeric>
@@ -54,15 +57,16 @@ const std::string WienerSmooth::summary() const {
 /** Initialize the algorithm's properties.
  */
 void WienerSmooth::init() {
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(new Kernel::ArrayProperty<int>("WorkspaceIndexList"),
-                  "Workspace indices for spectra to process. "
-                  "If empty smooth all spectra.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
+      "Workspace indices for spectra to process. "
+      "If empty smooth all spectra.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <cxxtest/TestSuite.h>
+#include <mutex>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -60,11 +61,11 @@ public:
   virtual size_t getDataMemorySize() const { return 1; };
 
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 // Declare the static members here.
 std::string ISaveableTester::fakeFile = "";
-Kernel::Mutex ISaveableTester::streamMutex;
+std::mutex ISaveableTester::streamMutex;
 
 //====================================================================================
 class DiskBufferISaveableTest : public CxxTest::TestSuite {

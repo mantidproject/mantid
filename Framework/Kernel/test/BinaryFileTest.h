@@ -94,7 +94,7 @@ public:
     Poco::File(dummy_file).remove();
   }
 
-  void testLoadAllInto() {
+  void testLoadAllIntoVector() {
     MakeDummyFile(dummy_file, 20 * 8);
     file.open(dummy_file);
 
@@ -103,7 +103,7 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     std::vector<DasEvent> data;
-    TS_ASSERT_THROWS_NOTHING(file.loadAllInto(data));
+    TS_ASSERT_THROWS_NOTHING(data = file.loadAllIntoVector());
     TS_ASSERT_EQUALS(data.size(), num);
     // Check the first event
     TS_ASSERT_EQUALS(data.at(0).tof, 0);
@@ -187,7 +187,7 @@ public:
     DasEvent *buffer = NULL;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
     TS_ASSERT_THROWS(file2.loadAll(), std::runtime_error);
-    TS_ASSERT_THROWS(file2.loadAllInto(data), std::runtime_error);
+    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(), std::runtime_error);
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), std::runtime_error);
   }
 };

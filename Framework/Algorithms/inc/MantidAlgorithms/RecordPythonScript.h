@@ -44,31 +44,31 @@ class DLLExport RecordPythonScript : public Algorithms::GeneratePythonScript,
                                      public API::AlgorithmObserver {
 public:
   RecordPythonScript();
-  virtual ~RecordPythonScript() {}
+  ~RecordPythonScript() override {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "RecordPythonScript"; };
+  const std::string name() const override { return "RecordPythonScript"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "An Algorithm to generate a Python script file to reproduce the "
            "history of a workspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Python"; }
+  const std::string category() const override { return "Utility\\Python"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /** Handler of the start notifications. Must be overriden in inherited
   classes.
   @param alg :: Shared Pointer to the algorithm sending the notification.
   */
-  void startingHandle(API::IAlgorithm_sptr alg);
+  void startingHandle(API::IAlgorithm_sptr alg) override;
   /// buffer for the script
   std::string m_generatedScript;
 };

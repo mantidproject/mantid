@@ -39,9 +39,7 @@ namespace Poldi {
 
 class AbstractDoubleValueExtractor {
 public:
-  AbstractDoubleValueExtractor() {}
-
-  virtual ~AbstractDoubleValueExtractor() {}
+  virtual ~AbstractDoubleValueExtractor() = default;
 
   virtual double operator()(const API::Run &runInformation,
                             const std::string &propertyName) const = 0;
@@ -53,10 +51,9 @@ typedef boost::shared_ptr<AbstractDoubleValueExtractor>
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   NumberDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~NumberDoubleValueExtractor() {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return runInformation.getPropertyValueAsType<double>(propertyName);
   }
 };
@@ -64,10 +61,9 @@ public:
 class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~VectorDoubleValueExtractor() {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return runInformation.getPropertyValueAsType<std::vector<double>>(
                               propertyName).front();
   }
@@ -76,10 +72,9 @@ public:
 class VectorIntValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorIntValueExtractor() : AbstractDoubleValueExtractor() {}
-  virtual ~VectorIntValueExtractor() {}
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const {
+  double operator()(const API::Run &runInformation,
+                    const std::string &propertyName) const override {
     return static_cast<double>(
         runInformation.getPropertyValueAsType<std::vector<int>>(propertyName)
             .front());
@@ -93,7 +88,7 @@ public:
   PoldiInstrumentAdapter(
       const Geometry::Instrument_const_sptr &mantidInstrument,
       const API::Run &runInformation);
-  virtual ~PoldiInstrumentAdapter();
+  virtual ~PoldiInstrumentAdapter() = default;
 
   PoldiAbstractChopper_sptr chopper() const;
   PoldiAbstractDetector_sptr detector() const;

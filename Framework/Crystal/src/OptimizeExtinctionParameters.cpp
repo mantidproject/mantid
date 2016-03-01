@@ -57,20 +57,14 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
  */
 void OptimizeExtinctionParameters::init() {
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
-  std::vector<std::string> corrOptions;
-  corrOptions.push_back("Type I Zachariasen");
-  corrOptions.push_back("Type I Gaussian");
-  corrOptions.push_back("Type I Lorentzian");
-  corrOptions.push_back("Type II Zachariasen");
-  corrOptions.push_back("Type II Gaussian");
-  corrOptions.push_back("Type II Lorentzian");
-  corrOptions.push_back("Type I&II Zachariasen");
-  corrOptions.push_back("Type I&II Gaussian");
-  corrOptions.push_back("Type I&II Lorentzian");
-  corrOptions.push_back("None, Scaling Only");
+  std::vector<std::string> corrOptions{
+      "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",
+      "Type II Zachariasen",   "Type II Gaussian",   "Type II Lorentzian",
+      "Type I&II Zachariasen", "Type I&II Gaussian", "Type I&II Lorentzian",
+      "None, Scaling Only"};
   declareProperty("ExtinctionCorrectionType", corrOptions[0],
                   boost::make_shared<StringListValidator>(corrOptions),
                   "Select the type of extinction correction.");

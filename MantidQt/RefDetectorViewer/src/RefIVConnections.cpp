@@ -2,7 +2,6 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 namespace MantidQt
 {
@@ -211,11 +210,8 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer*  ui,
   m_ivUI->color_scale->setScaledContents(true);
   m_ivUI->color_scale->setMinimumHeight(15);
   m_ivUI->color_scale->setMinimumWidth(15);
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
+  auto positiveColorTable = ColorMaps::GetColorMap(ColorMaps::HEAT, 256);
+  auto negativeColorTable = ColorMaps::GetColorMap(ColorMaps::GRAY, 256);
 
   showColorScale( positiveColorTable, negativeColorTable );
 
@@ -445,109 +441,50 @@ void RefIVConnections::intensitySliderMoved()
 
 /* COLOUR MAP SLOTS */
 
-void RefIVConnections::heatColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::heatColorScale() {
+  setColorScale(ColorMaps::HEAT, ColorMaps::GRAY);
 }
 
-
-void RefIVConnections::grayColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::grayColorScale() {
+  setColorScale(ColorMaps::GRAY, ColorMaps::HEAT);
 }
 
-
-void RefIVConnections::negativeGrayColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::NEGATIVE_GRAY,256, positiveColorTable);
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::negativeGrayColorScale() {
+  setColorScale(ColorMaps::NEGATIVE_GRAY, ColorMaps::HEAT);
 }
 
-
-void RefIVConnections::greenYellowColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GREEN_YELLOW, 256, positiveColorTable);
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::greenYellowColorScale() {
+  setColorScale(ColorMaps::GREEN_YELLOW, ColorMaps::GRAY);
 }
 
-
-void RefIVConnections::rainbowColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::RAINBOW, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::rainbowColorScale() {
+  setColorScale(ColorMaps::RAINBOW, ColorMaps::GRAY);
 }
 
-
-void RefIVConnections::optimalColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::OPTIMAL, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::optimalColorScale() {
+  setColorScale(ColorMaps::OPTIMAL, ColorMaps::GRAY);
 }
 
-
-void RefIVConnections::multiColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::MULTI, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::multiColorScale() {
+  setColorScale(ColorMaps::MULTI, ColorMaps::GRAY);
 }
 
-
-void RefIVConnections::spectrumColorScale()
-{
-  std::vector<QRgb> positiveColorTable;
-  ColorMaps::GetColorMap( ColorMaps::SPECTRUM, 256, positiveColorTable );
-
-  std::vector<QRgb> negativeColorTable;
-  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negativeColorTable );
-
-  m_imageDisplay->setColorScales( positiveColorTable, negativeColorTable );
-  showColorScale( positiveColorTable, negativeColorTable );
+void RefIVConnections::spectrumColorScale() {
+  setColorScale(ColorMaps::SPECTRUM, ColorMaps::GRAY);
 }
 
+/**
+ * Set the color scale to the given positive and negative scales
+ * @param positive :: [input] Color scale for positive values
+ * @param negative :: [input] Color scale for negative values
+ */
+void RefIVConnections::setColorScale(ColorMaps::ColorScale positive,
+                                     ColorMaps::ColorScale negative) {
+  auto positiveColorTable = ColorMaps::GetColorMap(positive, 256);
+  auto negativeColorTable = ColorMaps::GetColorMap(negative, 256);
+  m_imageDisplay->setColorScales(positiveColorTable, negativeColorTable);
+  showColorScale(positiveColorTable, negativeColorTable);
+}
 
 /**
  *  Set the pix map that shows the color scale from the specified positive

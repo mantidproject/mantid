@@ -9,37 +9,38 @@
 #define INTEGRATEPEAKTIMESLICESTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Quat.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+
 #include <math.h>
 
-#include <map>
 #include "MantidAPI/ITableWorkspace.h"
+
 using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;

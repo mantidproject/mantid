@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -50,10 +51,10 @@ const std::string ClearInstrumentParameters::category() const {
 /** Initialize the algorithm's properties.
  */
 void ClearInstrumentParameters::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace whose instrument parameters are to be cleared.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::InOut,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace whose instrument parameters are to be cleared.");
 
   declareProperty(
       "LocationParameters", true,

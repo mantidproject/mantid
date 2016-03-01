@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -14,6 +15,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 namespace Mantid {
@@ -40,9 +42,9 @@ double DEG2RAD = M_PI / 180.0;
 /// Wavelength of absorption (30603e-24 * 6e19). Constant came from VMS
 double ABSORB_WAVELENGTH = 1.83618;
 /// Start of forward scattering spectrum numbers (inclusive)
-specid_t FORWARD_SCATTER_SPECMIN = 135;
+specnum_t FORWARD_SCATTER_SPECMIN = 135;
 /// End of forward scattering spectrum numbers (inclusive)
-specid_t FORWARD_SCATTER_SPECMAX = 198;
+specnum_t FORWARD_SCATTER_SPECMAX = 198;
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -81,25 +83,26 @@ void CalculateGammaBackground::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>(false); // point data
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace containing TOF data");
 
   declareProperty(
-      new API::FunctionProperty("ComptonFunction"),
+      make_unique<API::FunctionProperty>("ComptonFunction"),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "Indices of the spectra to include in the correction. If "
                   "provided, the output only include these spectra\n"
                   "(Default: all spectra from input)");
 
+  declareProperty(make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
+                                                   Direction::Output),
+                  "A new workspace containing the calculated background.");
   declareProperty(
-      new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output),
-      "A new workspace containing the calculated background.");
-  declareProperty(
-      new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
+                                       Direction::Output),
       "A new workspace containing the calculated background subtracted from "
       "the input.");
 }
@@ -153,7 +156,7 @@ bool CalculateGammaBackground::calculateBackground(const size_t inputIndex,
 
   try {
     const auto *inSpec = m_inputWS->getSpectrum(inputIndex);
-    const specid_t spectrumNo(inSpec->getSpectrumNo());
+    const specnum_t spectrumNo(inSpec->getSpectrumNo());
     m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
     m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
 
@@ -420,7 +423,7 @@ void CalculateGammaBackground::calculateTofSpectrum(
 void CalculateGammaBackground::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_profileFunction = getPropertyValue("ComptonFunction");
-  if (m_profileFunction.find(";") == std::string::npos) // not composite
+  if (m_profileFunction.find(';') == std::string::npos) // not composite
   {
     m_profileFunction = "composite=CompositeFunction;" + m_profileFunction;
   }
@@ -447,7 +450,7 @@ void CalculateGammaBackground::retrieveInputs() {
 
   // Spectrum numbers whose calculation of background from foils is reversed
   m_reversed.clear();
-  for (specid_t i = 143; i < 199; ++i) {
+  for (specnum_t i = 143; i < 199; ++i) {
     if ((i >= 143 && i <= 150) || (i >= 159 && i <= 166) ||
         (i >= 175 && i <= 182) || (i >= 191 && i <= 198))
       m_reversed.insert(i);
@@ -458,13 +461,13 @@ void CalculateGammaBackground::retrieveInputs() {
   std::vector<int> requestedIndices = getProperty("WorkspaceIndexList");
   if (requestedIndices.empty()) {
     for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i) {
-      m_indices.insert(std::make_pair(i, i)); // 1-to-1
+      m_indices.emplace(i, i); // 1-to-1
     }
   } else {
     for (size_t i = 0; i < requestedIndices.size(); ++i) {
-      m_indices.insert(std::make_pair(
+      m_indices.emplace(
           i, static_cast<size_t>(
-                 requestedIndices[i]))); // user-requested->increasing on output
+                 requestedIndices[i])); // user-requested->increasing on output
     }
   }
 

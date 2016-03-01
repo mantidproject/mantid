@@ -9,10 +9,6 @@
 
 namespace Mantid {
 namespace API {
-CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs() {}
-
-CatalogManagerImpl::~CatalogManagerImpl() {}
-
 /**
  * Logs the user into the catalog if session details are valid.
  * This is used here as we need to obtain the session for a specific catalog
@@ -36,7 +32,7 @@ CatalogSession_sptr CatalogManagerImpl::login(const std::string &username,
       catalog->login(username, password, endpoint, facility);
   // Creates a new catalog and adds it to the compositeCatalog and activeCatalog
   // list.
-  m_activeCatalogs.insert(std::make_pair(session, catalog));
+  m_activeCatalogs.emplace(session, catalog);
   return session;
 }
 

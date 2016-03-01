@@ -135,10 +135,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // get the file list from github
   StringToStringMap headers;
-  headers.insert(
-      std::make_pair("if-modified-since",
-                     Poco::DateTimeFormatter::format(
-                         gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+  headers.emplace("if-modified-since",
+                  Poco::DateTimeFormatter::format(
+                      gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
   std::string gitHubInstrumentRepoUrl =
       ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
   if (gitHubInstrumentRepoUrl == "") {
@@ -178,7 +177,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   fileStream.close();
 
-  std::set<std::string> repoFilenames;
+  std::unordered_set<std::string> repoFilenames;
 
   for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
@@ -197,14 +196,14 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // this will also catch when file is only present on github (as local sha
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
-      fileMap.insert(std::make_pair(
-          htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath
+      fileMap.emplace(htmlUrl,
+                      filePath.toString()); // ACTION - DOWNLOAD to localPath
     } else if ((localSha != "") && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
-      fileMap.insert(std::make_pair(
+      fileMap.emplace(
           htmlUrl,
-          filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
+          filePath.toString()); // ACTION - DOWNLOAD to localPath and overwrite
     }
   }
 
@@ -245,7 +244,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
         continue;
       std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.toString());
       // Track sha1
-      filesToSha.insert(std::make_pair(entryPath.getFileName(), sha1));
+      filesToSha.emplace(entryPath.getFileName(), sha1);
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: "
@@ -269,7 +268,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
 **/
 size_t DownloadInstrument::removeOrphanedFiles(
     const std::string &directoryPath,
-    const std::set<std::string> &filenamesToKeep) const {
+    const std::unordered_set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
   std::vector<std::string> filesToDelete;

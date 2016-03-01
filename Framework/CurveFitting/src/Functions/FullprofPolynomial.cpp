@@ -22,11 +22,6 @@ FullprofPolynomial::FullprofPolynomial() : m_n(6), m_bkpos(1.) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FullprofPolynomial::~FullprofPolynomial() {}
-
-//----------------------------------------------------------------------------------------------
 /** Function to calcualteFullprofPolynomial
  */
 void FullprofPolynomial::function1D(double *out, const double *xValues,
@@ -92,11 +87,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
  * @return A list of attribute names (identical toFullprofPolynomial)
 */
 std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("n");
-  res.push_back("Bkpos");
-
-  return res;
+  return {"n", "Bkpos"};
 }
 
 //----------------------------------------------------------------------------------------------

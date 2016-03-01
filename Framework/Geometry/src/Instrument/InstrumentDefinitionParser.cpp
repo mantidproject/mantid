@@ -29,7 +29,7 @@
 #include <Poco/SAX/AttributesImpl.h>
 
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -136,10 +136,6 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
 }
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -1931,10 +1927,10 @@ void InstrumentDefinitionParser::setLogfile(
     std::string tie = "";
 
     if (type.compare("fitting") == 0) {
-      size_t found = paramName.find(":");
+      size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
-        size_t index = paramName.find(":", found + 1);
+        size_t index = paramName.find(':', found + 1);
         if (index != std::string::npos) {
           g_log.error()
               << "Fitting <parameter> in instrument definition file defined "
@@ -1989,7 +1985,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
 
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    boost::shared_ptr<Interpolation> interpolation =
+        boost::make_shared<Interpolation>();
 
     if (numberLookUp >= 1) {
       Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
@@ -2067,12 +2064,11 @@ void InstrumentDefinitionParser::setLogfile(
     }
 
     auto cacheKey = std::make_pair(paramName, comp);
-    auto cacheValue =
-        boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-            logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-            paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-            extractSingleValueAs, eq, comp, m_angleConvertConst, description));
-    auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
+    auto cacheValue = boost::make_shared<XMLInstrumentParameter>(
+        logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+        paramName, type, tie, constraint, penaltyFactor, fittingFunction,
+        extractSingleValueAs, eq, comp, m_angleConvertConst, description);
+    auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;
     }
@@ -2291,7 +2287,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  Instrument_sptr physical(new Instrument(*m_instrument));
+  auto physical = boost::make_shared<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(physical);
 
@@ -2399,7 +2395,8 @@ void InstrumentDefinitionParser::adjust(
   // added
   // to pElem, and these <component>'s are deleted after loop
 
-  std::set<Element *> allComponentInType;   // used to hold <component>'s found
+  std::unordered_set<Element *>
+      allComponentInType;                   // used to hold <component>'s found
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++) {
     Element *pLoc = static_cast<Element *>(pNL->item(i));
@@ -2472,8 +2469,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  std::set<Element *>::iterator it;
-  for (it = allComponentInType.begin(); it != allComponentInType.end(); ++it)
+  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
+       ++it)
     pElem->removeChild(*it);
 }
 
@@ -2614,13 +2611,11 @@ InstrumentDefinitionParser::convertLocationsElement(
   }
 
   // A list of numeric attributes which are allowed to have corresponding -end
-  std::set<std::string> rangeAttrs =
-      boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
+  std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
   // Numeric attributes related to rotation. Doesn't make sense to have -end for
   // those
-  std::set<std::string> rotAttrs =
-      boost::assign::list_of("axis-x")("axis-y")("axis-z");
+  std::set<std::string> rotAttrs = {"axis-x", "axis-y", "axis-z"};
 
   // A set of all numeric attributes for convenience
   std::set<std::string> allAttrs;

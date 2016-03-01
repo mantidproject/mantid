@@ -5,6 +5,7 @@
  *below
  *  the level of MDEvents (e.g. Kernel, Geometry, API, DataObjects).
  *********************************************************************************/
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
@@ -64,7 +65,7 @@ EventWorkspace_sptr
 createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   double binDelta = 10.0;
 
-  EventWorkspace_sptr retVal(new EventWorkspace);
+  auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   // --------- Load the instrument -----------
@@ -241,12 +242,7 @@ MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
                                 double errorSquared, size_t *numBins,
                                 coord_t *min, coord_t *max, std::string name) {
-  std::vector<std::string> names;
-  names.push_back("x");
-  names.push_back("y");
-  names.push_back("z");
-  names.push_back("t");
-
+  std::vector<std::string> names{"x", "y", "z", "t"};
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
@@ -353,7 +349,7 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
         " invalid or unsupported number of dimensions given");
 
   ws_sptr->setTo(signal, errorSquared, numEvents);
-  ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
+  ws_sptr->addExperimentInfo(boost::make_shared<ExperimentInfo>());
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
   return ws_sptr;

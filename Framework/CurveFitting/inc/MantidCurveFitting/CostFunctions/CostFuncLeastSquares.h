@@ -44,26 +44,24 @@ class DLLExport CostFuncLeastSquares : public CostFuncFitting {
 public:
   /// Constructor
   CostFuncLeastSquares();
-  /// Virtual destructor
-  virtual ~CostFuncLeastSquares() {}
 
   /// Get name of minimizer
-  virtual std::string name() const { return "Least squares"; }
+  std::string name() const override { return "Least squares"; }
 
   /// Get short name of minimizer - useful for say labels in guis
-  virtual std::string shortName() const { return "Chi-sq"; };
+  std::string shortName() const override { return "Chi-sq"; };
 
   /// Calculate value of cost function
-  virtual double val() const;
+  double val() const override;
 
   /// Calculate the derivatives of the cost function
   /// @param der :: Container to output the derivatives
-  virtual void deriv(std::vector<double> &der) const;
+  void deriv(std::vector<double> &der) const override;
 
   /// Calculate the value and the derivatives of the cost function
   /// @param der :: Container to output the derivatives
   /// @return :: The value of the function
-  virtual double valAndDeriv(std::vector<double> &der) const;
+  double valAndDeriv(std::vector<double> &der) const override;
 
   virtual double valDerivHessian(bool evalDeriv = true,
                                  bool evalHessian = true) const;
@@ -77,8 +75,8 @@ public:
   void getParameters(GSLVector &params) const;
 
 protected:
-  virtual void calActiveCovarianceMatrix(GSLMatrix &covar,
-                                         double epsrel = 1e-8);
+  void calActiveCovarianceMatrix(GSLMatrix &covar,
+                                 double epsrel = 1e-8) override;
 
   void addVal(API::FunctionDomain_sptr domain,
               API::FunctionValues_sptr values) const;

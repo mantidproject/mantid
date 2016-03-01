@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -53,6 +54,12 @@ public:
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
 
   /** Constructor
+   *  @param values :: An unordered set of values consisting of the valid values
+   */
+  explicit ListValidator(const std::unordered_set<TYPE> &values)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
+
+  /** Constructor
    *  @param values :: A vector of the valid values
    *  @param aliases :: Optional aliases for the valid values.
    */
@@ -72,17 +79,15 @@ public:
       }
     }
   }
-  /// Destructor
-  virtual ~ListValidator(){};
   /// Clone the validator
-  IValidator_sptr clone() const {
+  IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);
   }
   /**
    * Returns the set of allowed values currently defined
    * @returns A set of allowed values that this validator will currently allow
    */
-  std::vector<std::string> allowedValues() const {
+  std::vector<std::string> allowedValues() const override {
     /// The interface requires strings
     std::vector<std::string> allowedStrings;
     allowedStrings.reserve(m_allowedValues.size());
@@ -110,7 +115,7 @@ public:
    * @param alias :: An alias string.
    * @return :: Allowed value or throw if alias is unknown.
    */
-  std::string getValueForAlias(const std::string &alias) const {
+  std::string getValueForAlias(const std::string &alias) const override {
     auto aliasIt = m_aliases.find(alias);
     if (aliasIt == m_aliases.end()) {
       throw std::invalid_argument("Unknown alias found " + alias);
@@ -124,7 +129,7 @@ protected:
    *  @return "" if the value is on the list, or "The value is not in the list
    * of allowed values"
    */
-  std::string checkValidity(const TYPE &value) const {
+  std::string checkValidity(const TYPE &value) const override {
     if (m_allowedValues.end() !=
         std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
       return "";

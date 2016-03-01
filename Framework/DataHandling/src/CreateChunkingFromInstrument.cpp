@@ -3,6 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
@@ -82,24 +83,27 @@ void CreateChunkingFromInstrument::init() {
   // instrument selection
   string grp1Name("Specify the Instrument");
 
+  std::vector<std::string> extensions{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
-      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
+      Kernel::make_unique<FileProperty>(PARAM_IN_FILE, "",
+                                        FileProperty::OptionalLoad, extensions),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
   this->declareProperty(
-      new WorkspaceProperty<>(PARAM_IN_WKSP, "", Direction::Input,
-                              PropertyMode::Optional),
+      Kernel::make_unique<WorkspaceProperty<>>(
+          PARAM_IN_WKSP, "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   this->declareProperty(
-      new PropertyWithValue<string>(PARAM_INST_NAME, "", Direction::Input),
+      Kernel::make_unique<PropertyWithValue<string>>(PARAM_INST_NAME, "",
+                                                     Direction::Input),
       "Optional: Name of the instrument to base the ChunkingWorkpace on which "
       "to base the GroupingWorkspace.");
 
   this->declareProperty(
-      new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
+      Kernel::make_unique<FileProperty>(PARAM_INST_FILE, "",
+                                        FileProperty::OptionalLoad, ".xml"),
       "Optional: Path to the instrument definition file on which to base the "
       "ChunkingWorkpace.");
 
@@ -116,12 +120,7 @@ void CreateChunkingFromInstrument::init() {
                   "as separate groups. "
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
-  vector<string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -136,7 +135,7 @@ void CreateChunkingFromInstrument::init() {
   declareProperty(PARAM_MAX_BANK_NUM, 300,
                   "Maximum bank number to search for in the instrument");
 
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       PARAM_OUT_WKSP, "", Direction::Output),
                   "An output workspace describing the cunking.");
 }
@@ -401,8 +400,8 @@ void CreateChunkingFromInstrument::exec() {
   } else if (inst->getName().compare("SNAP") == 0 &&
              groupLevel.compare("Group") == 0) {
     groupNames.clear();
-    groupNames.push_back("East");
-    groupNames.push_back("West");
+    groupNames.emplace_back("East");
+    groupNames.emplace_back("West");
   }
 
   // set up a progress bar with the "correct" number of steps

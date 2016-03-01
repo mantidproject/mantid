@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/Qxy.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

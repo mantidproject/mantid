@@ -964,7 +964,7 @@ public:
     */
   TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws) {
     // 1. Generate an empty table
-    TableWorkspace_sptr corrtable(new TableWorkspace());
+    auto corrtable = boost::make_shared<TableWorkspace>();
     corrtable->addColumn("int", "DetectorID");
     corrtable->addColumn("double", "Correction");
 

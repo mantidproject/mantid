@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid;

@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -37,11 +39,11 @@ void CorelliCrossCorrelate::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   declareProperty("TimingOffset", EMPTY_INT(),
@@ -109,15 +111,7 @@ void CorelliCrossCorrelate::exec() {
   outputWS = getProperty("OutputWorkspace");
 
   if (outputWS != inputWS) {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
+    outputWS = EventWorkspace_sptr(inputWS->clone().release());
   }
 
   // Read in chopper sequence from IDF.

@@ -23,15 +23,13 @@ void PolynomialCorrection::defineProperties() {
   // We need an array property for the coefficients of the polynomial: C0 + C1*x
   // + C2*x*x + ....
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Coefficients",
           boost::make_shared<MandatoryValidator<std::vector<double>>>()),
       "Array Property containing the coefficients of the polynomial correction "
       "function in ascending powers of X. Can be given as a comma separated "
       "list in string form.");
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Multiply");
-  propOptions.push_back("Divide");
+  std::vector<std::string> propOptions{"Multiply", "Divide"};
   declareProperty("Operation", "Multiply",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The operation with which the correction is applied to the "

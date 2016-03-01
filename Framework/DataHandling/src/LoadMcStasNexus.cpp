@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadMcStasNexus.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -58,12 +59,13 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadMcStasNexus::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
-      "The name of the Nexus file to load");
+  const std::vector<std::string> exts{".h5", ".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -141,14 +143,14 @@ void LoadMcStasNexus::exec() {
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption
-      boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+      auto lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
       Axis *axis2 = new NumericAxis(axis2Length);
       axis2->title() = axis2Name;
       // Set caption
-      lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+      lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis2Name, "");
       axis2->unit() = lblUnit;
 

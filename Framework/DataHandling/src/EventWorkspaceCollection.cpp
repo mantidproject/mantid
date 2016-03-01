@@ -1,6 +1,7 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 
 #include <vector>
@@ -43,11 +44,6 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EventWorkspaceCollection::~EventWorkspaceCollection() {}
-
 //-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace
@@ -79,7 +75,8 @@ void EventWorkspaceCollection::setNPeriods(
   m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(nPeriods);
 
   std::vector<int> periodNumbers = periodLog->valuesAsVector();
-  std::set<int> uniquePeriods(periodNumbers.begin(), periodNumbers.end());
+  std::unordered_set<int> uniquePeriods(periodNumbers.begin(),
+                                        periodNumbers.end());
   const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
 
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
@@ -170,7 +167,7 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
 }
 
 void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
-    const size_t spectrumNumber, const specid_t specid) {
+    const size_t spectrumNumber, const specnum_t specid) {
   for (auto &ws : m_WsVec) {
     auto spec = ws->getSpectrum(spectrumNumber);
     spec->setSpectrumNo(specid);
@@ -215,13 +212,14 @@ EventWorkspaceCollection::getEventList(const std::size_t workspace_index) {
       workspace_index); // TODO need to know PERIOD number TOO
 }
 
-void EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(
-    std::vector<size_t> &out, Mantid::specid_t &offset) const {
-  return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(out, offset);
+std::vector<size_t> EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(
+    Mantid::specnum_t &offset) const {
+  return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(offset);
 }
-void EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
-    std::vector<size_t> &out, Mantid::specid_t &offset, bool dothrow) const {
-  return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);
+std::vector<size_t>
+EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
+    Mantid::specnum_t &offset, bool dothrow) const {
+  return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(offset, dothrow);
 }
 
 Kernel::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {

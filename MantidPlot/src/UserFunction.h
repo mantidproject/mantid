@@ -59,11 +59,11 @@ class UserFunction2D : public Function2D
 public:
   explicit UserFunction2D(const QString &s);
     /// Get function value
-    double operator()(double x, double y);
+  double operator()(double x, double y) override;
     /// Get minimum positive value.
-    double getMinPositiveValue()const;
+  double getMinPositiveValue() const override;
     /// Save function parameters to a string.
-    QString saveToString() const;
+  QString saveToString() const override;
 
     QString formula() const {return d_formula;}
 

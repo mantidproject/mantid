@@ -5,8 +5,8 @@
 // Includes
 //--------------------------------------------
 #include "MantidKernel/DllConfig.h"
-
 #include <Poco/Logger.h>
+
 #ifdef _MSC_VER
 // Disable a flood of warnings about inheriting from std streams
 // See
@@ -20,7 +20,7 @@
 
 #include <istream>
 #include <Poco/Thread.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -62,8 +62,6 @@ public:
   /// Constructor
   ThreadSafeLogStreamBuf(Poco::Logger &logger,
                          Poco::Message::Priority priority);
-  /// Destructor
-  ~ThreadSafeLogStreamBuf();
 
 public:
   int overflow(char c);
@@ -71,13 +69,13 @@ public:
 
 private:
   /// Overridden fron base to write to the device in a thread-safe manner.
-  int writeToDevice(char c);
+  int writeToDevice(char c) override;
 
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
   /// mutex protecting logstream
-  Poco::FastMutex m_mutex;
+  std::mutex m_mutex;
 };
 
 /**
@@ -91,8 +89,6 @@ class MANTID_KERNEL_DLL ThreadSafeLogIOS : public virtual std::ios {
 public:
   /// Constructor
   ThreadSafeLogIOS(Poco::Logger &logger, Poco::Message::Priority priority);
-  /// Destructor
-  ~ThreadSafeLogIOS();
   // Return a pointer to the stream buffer object
   Poco::LogStreamBuf *rdbuf();
 
@@ -129,8 +125,6 @@ public:
   ThreadSafeLogStream(
       const std::string &loggerName,
       Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
-  /// Destroys the ThreadSafeLogStream.
-  ~ThreadSafeLogStream();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL.
   ThreadSafeLogStream &fatal();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL

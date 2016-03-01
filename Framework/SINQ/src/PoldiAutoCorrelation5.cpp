@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidSINQ/PoldiAutoCorrelation5.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -26,7 +27,7 @@ using namespace Geometry;
 void PoldiAutoCorrelation5::init() {
 
   // Input workspace containing the raw data.
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(
+  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "InputWorkspace", "", Direction::InOut),
                   "Input workspace containing raw POLDI data.");
 
@@ -38,7 +39,7 @@ void PoldiAutoCorrelation5::init() {
                   Direction::Input);
 
   // The output Workspace2D containing the Poldi data autocorrelation function.
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(
+  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output workspace containing the correlation spectrum.");
 

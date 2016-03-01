@@ -49,7 +49,6 @@
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
-#include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -145,7 +144,8 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        new Kernel::PropertyWithValue<std::string>(name, ""), value);
+        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        value);
   else
     settings->setProperty(name, value);
 }
@@ -435,8 +435,7 @@ void SANSRunWindow::initLocalPython() {
   // Make sure that user file is valid
   if (!isValidUserFile()) {
     m_cfg_loaded = false;
-  }
-  else {
+  } else {
     loadUserFile();
     handleInstrumentChange();
     m_cfg_loaded = true;
@@ -1465,12 +1464,10 @@ bool SANSRunWindow::workspaceExists(const QString &ws_name) const {
  * @returns A list of the currently available workspaces
  */
 QStringList SANSRunWindow::currentWorkspaceList() const {
-  std::set<std::string> ws_list =
-      AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator iend = ws_list.end();
+  auto ws_list = AnalysisDataService::Instance().getObjectNames();
+  auto iend = ws_list.end();
   QStringList current_list;
-  for (std::set<std::string>::const_iterator itr = ws_list.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = ws_list.begin(); itr != iend; ++itr) {
     current_list.append(QString::fromStdString(*itr));
   }
   return current_list;
@@ -1679,7 +1676,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
-  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
+  const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try {
     monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   } catch (std::runtime_error &) {
@@ -3666,10 +3663,9 @@ void SANSRunWindow::resetGeometryDetailsBox() {
 void SANSRunWindow::cleanup() {
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
-  std::set<std::string> workspaces = ads.getObjectNames();
-  std::set<std::string>::const_iterator iend = workspaces.end();
-  for (std::set<std::string>::const_iterator itr = workspaces.begin();
-       itr != iend; ++itr) {
+  auto workspaces = ads.getObjectNames();
+  auto iend = workspaces.end();
+  for (auto itr = workspaces.begin(); itr != iend; ++itr) {
     QString name = QString::fromStdString(*itr);
     if (name.endsWith("_raw") || name.endsWith("_nxs")) {
       ads.remove(*itr);
@@ -4920,7 +4916,7 @@ void SANSRunWindow::initQResolutionSettings() {
 }
 
 /**
- * Initialize the background corrections, ie reset all fields 
+ * Initialize the background corrections, ie reset all fields
  */
 void SANSRunWindow::initializeBackgroundCorrection() {
   m_uiForm.sansBackgroundCorrectionWidget->resetEntries();
@@ -5036,7 +5032,8 @@ void SANSRunWindow::addBackgroundCorrectionToPythonScript(
  */
 bool SANSRunWindow::hasUserFileValidFileExtension() {
   auto userFile = m_uiForm.userfile_edit->text().trimmed();
-  QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
+  QString checkValidity =
+      "i.has_user_file_valid_extension('" + userFile + "')\n";
 
   QString resultCheckValidity(runPythonCode(checkValidity, false));
   resultCheckValidity = resultCheckValidity.simplified();
@@ -5046,10 +5043,11 @@ bool SANSRunWindow::hasUserFileValidFileExtension() {
   }
 
   if (!isValid) {
-    QMessageBox::critical(this, "User File extension issue",
-                                "The specified user file does not seem to have a \n"
-				"valid file extension. Make sure that the user file \n" 
-				"has a .txt extension.");
+    QMessageBox::critical(
+        this, "User File extension issue",
+        "The specified user file does not seem to have a \n"
+        "valid file extension. Make sure that the user file \n"
+        "has a .txt extension.");
   }
 
   return isValid;
@@ -5074,7 +5072,7 @@ bool SANSRunWindow::isValidUserFile() {
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if (filetext.isEmpty()) {
     QMessageBox::warning(this, "Error loading user file",
-      "No user file has been specified");
+                         "No user file has been specified");
     m_cfg_loaded = false;
     return false;
   }
@@ -5082,7 +5080,7 @@ bool SANSRunWindow::isValidUserFile() {
   QFile user_file(filetext);
   if (!user_file.open(QIODevice::ReadOnly)) {
     QMessageBox::critical(this, "Error loading user file",
-      "Could not open user file \"" + filetext + "\"");
+                          "Could not open user file \"" + filetext + "\"");
     m_cfg_loaded = false;
     return false;
   }
@@ -5090,7 +5088,6 @@ bool SANSRunWindow::isValidUserFile() {
 
   return true;
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

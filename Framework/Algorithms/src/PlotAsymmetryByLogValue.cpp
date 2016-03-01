@@ -4,13 +4,14 @@
 #include <cmath>
 #include <vector>
 
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <MantidAPI/FileFinder.h>
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -84,25 +85,22 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(
-      new FileProperty("FirstRun", "", FileProperty::Load, nexusExt),
-      "The name of the first workspace in the series.");
-  declareProperty(new FileProperty("LastRun", "", FileProperty::Load, nexusExt),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "FirstRun", "", FileProperty::Load, nexusExt),
+                  "The name of the first workspace in the series.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "LastRun", "", FileProperty::Load, nexusExt),
                   "The name of the last workspace in the series.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the output workspace containing the resulting asymmetries.");
   declareProperty("LogValue", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
 
-  std::vector<std::string> optionsLog;
-  optionsLog.push_back("Mean");
-  optionsLog.push_back("Min");
-  optionsLog.push_back("Max");
-  optionsLog.push_back("First");
-  optionsLog.push_back("Last");
+  std::vector<std::string> optionsLog{"Mean", "Min", "Max", "First", "Last"};
   declareProperty(
       "Function", "Last", boost::make_shared<StringListValidator>(optionsLog),
       "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
@@ -111,9 +109,7 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("Green", EMPTY_INT(),
                   "The period number for the 'green' data.");
 
-  std::vector<std::string> options;
-  options.push_back("Integral");
-  options.push_back("Differential");
+  std::vector<std::string> options{"Integral", "Differential"};
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
@@ -123,29 +119,28 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("TimeMax", EMPTY_DBL(),
                   "The end of the time interval used in the calculations.");
 
-  declareProperty(new ArrayProperty<int>("ForwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The list of spectra for the forward group. If not specified "
                   "the following happens. The data will be grouped according "
                   "to grouping information in the data, if available. The "
                   "forward will use the first of these groups.");
-  declareProperty(new ArrayProperty<int>("BackwardSpectra"),
+  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The list of spectra for the backward group. If not "
                   "specified the following happens. The data will be grouped "
                   "according to grouping information in the data, if "
                   "available. The backward will use the second of these "
                   "groups.");
 
-  std::vector<std::string> deadTimeCorrTypes;
-  deadTimeCorrTypes.push_back("None");
-  deadTimeCorrTypes.push_back("FromRunData");
-  deadTimeCorrTypes.push_back("FromSpecifiedFile");
+  std::vector<std::string> deadTimeCorrTypes{"None", "FromRunData",
+                                             "FromSpecifiedFile"};
 
   declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),
                   "Type of Dead Time Correction to apply.");
 
-  declareProperty(new FileProperty("DeadTimeCorrFile", "",
-                                   FileProperty::OptionalLoad, nexusExt),
+  declareProperty(Kernel::make_unique<FileProperty>("DeadTimeCorrFile", "",
+                                                    FileProperty::OptionalLoad,
+                                                    nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
 }
@@ -480,7 +475,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
                                             std::string &fnExt, int &fnZeros) {
 
   // Parse first run's name
-  std::string firstExt = firstFN.substr(firstFN.find_last_of("."));
+  std::string firstExt = firstFN.substr(firstFN.find_last_of('.'));
   firstFN.erase(firstFN.size() - 4);
 
   std::string firstBase = firstFN;
@@ -494,7 +489,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
   firstFN.erase(0, firstBase.size());
 
   // Parse last run's name
-  std::string lastExt = lastFN.substr(lastFN.find_last_of("."));
+  std::string lastExt = lastFN.substr(lastFN.find_last_of('.'));
   lastFN.erase(lastFN.size() - 4);
 
   std::string lastBase = lastFN;

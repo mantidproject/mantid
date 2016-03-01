@@ -1,10 +1,12 @@
-#include "MantidKernel/OptionalBool.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -88,12 +90,12 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".peaks", ".integrate"}),
+  const std::vector<std::string> exts{".peaks", ".integrate"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to an ISAW-style .peaks filename.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -303,9 +305,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  boost::shared_ptr<ParameterMap> map(new ParameterMap());
-  Geometry::Instrument_const_sptr instr(
-      new Geometry::Instrument(instr_old->baseInstrument(), map));
+  auto map = boost::make_shared<ParameterMap>();
+  auto instr = boost::make_shared<const Geometry::Instrument>(
+      instr_old->baseInstrument(), map);
 
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);

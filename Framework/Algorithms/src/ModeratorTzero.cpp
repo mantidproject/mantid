@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -37,29 +39,26 @@ void ModeratorTzero::setFormula(const std::string &formula) {
 void ModeratorTzero::init() {
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
   // declare the output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
-  std::vector<std::string> EModeOptions;
-  EModeOptions.push_back("Indirect");
-  EModeOptions.push_back("Direct");
-  EModeOptions.push_back("Elastic");
+  std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
   this->declareProperty("EMode", "Indirect",
                         boost::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
 
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(make_unique<Kernel::PropertyWithValue<double>>(
                       "tolTOF", 0.1, Kernel::Direction::Input),
                   "Tolerance in the calculation of the emission time, in "
                   "microseconds (default:1)");
-  declareProperty(new Kernel::PropertyWithValue<size_t>(
+  declareProperty(make_unique<Kernel::PropertyWithValue<size_t>>(
                       "Niter", 1, Kernel::Direction::Input),
                   "Number of iterations (default:1)");
 } // end of void ModeratorTzero::init()
@@ -246,28 +245,14 @@ void ModeratorTzero::execEvent(const std::string &emode) {
 
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
-  Mantid::API::MatrixWorkspace_sptr matrixOutputWS =
-      getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
-    // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
     setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Get pointers to sample and source
   IComponent_const_sptr source = m_instrument->getSource();
@@ -277,7 +262,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
+    Kernel::Property *eiprop = outputWS->run().getProperty("Ei");
     double Ei = boost::lexical_cast<double>(eiprop->value());
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
@@ -286,6 +271,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   }
 
   // Loop over the spectra
+  const size_t numHists = static_cast<size_t>(outputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
@@ -299,7 +285,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
       double L2(-1);  // distance from sample to detector
 
       try {
-        det = inputWS->getDetector(i);
+        det = outputWS->getDetector(i);
         if (det->isMonitor()) {
           // redefine the sample as the monitor
           L1 = source->getDistance(*det);

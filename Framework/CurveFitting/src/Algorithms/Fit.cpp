@@ -49,10 +49,10 @@ void Fit::initConcrete() {
 
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
+  Kernel::IValidator_sptr minimizerValidator =
+      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
-  declareProperty("Minimizer", "Levenberg-Marquardt",
-                  Kernel::IValidator_sptr(
-                      new Kernel::StartsWithValidator(minimizerOptions)),
+  declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
                   "Minimizer to use for fitting. Minimizers available are "
                   "\"Levenberg-Marquardt\", \"Simplex\", \"FABADA\", "
                   "\"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate "
@@ -69,10 +69,10 @@ void Fit::initConcrete() {
       costFuncOption = "";
     }
   }
+  Kernel::IValidator_sptr costFuncValidator =
+      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
   declareProperty(
-      "CostFunction", "Least squares",
-      Kernel::IValidator_sptr(
-          new Kernel::ListValidator<std::string>(costFuncOptions)),
+      "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
       Kernel::Direction::InOut);
   declareProperty(
@@ -91,7 +91,8 @@ void Fit::initConcrete() {
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
-  declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
@@ -111,8 +112,9 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   for (auto property : properties) {
     if ((*property).direction() == Kernel::Direction::Output &&
         (*property).isValid() == "") {
-      Kernel::Property *clonedProperty = (*property).clone();
-      declareProperty(clonedProperty);
+      auto clonedProperty =
+          std::unique_ptr<Kernel::Property>((*property).clone());
+      declareProperty(std::move(clonedProperty));
     }
   }
 }
@@ -249,7 +251,7 @@ void Fit::execConcrete() {
     baseName += "_";
 
     declareProperty(
-        new API::WorkspaceProperty<API::ITableWorkspace>(
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
             "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final covariance "
         "matrix");
@@ -303,10 +305,11 @@ void Fit::execConcrete() {
     // create output parameter table workspace to store final fit parameters
     // including error estimates if derivative of fitting function defined
 
-    declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                        "OutputParameters", "", Kernel::Direction::Output),
-                    "The name of the TableWorkspace in which to store the "
-                    "final fit parameters");
+    declareProperty(
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "OutputParameters", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace in which to store the "
+        "final fit parameters");
 
     setPropertyValue("OutputParameters", baseName + "Parameters");
 

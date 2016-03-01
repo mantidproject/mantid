@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapMonitor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -39,12 +43,12 @@ void UnwrapMonitor::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, wsValidator),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();

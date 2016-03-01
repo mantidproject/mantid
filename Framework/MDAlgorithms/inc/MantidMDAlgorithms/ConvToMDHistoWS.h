@@ -56,9 +56,9 @@ public:
 
   size_t initialize(const MDWSDescription &WSD,
                     boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros);
+                    bool ignoreZeros) override;
 
-  void runConversion(API::Progress *pProgress);
+  void runConversion(API::Progress *pProgress) override;
 
 private:
   // the number of spectra to process by single computational thread;
@@ -70,7 +70,7 @@ private:
   void estimateThreadWork(size_t nThreads, size_t specSize,
                           size_t nPointsToProcess);
   // the function does a chunk of work. Expected to run on a thread.
-  size_t conversionChunk(size_t job_ID);
+  size_t conversionChunk(size_t job_ID) override;
 };
 
 } // endNamespace MDAlgorithms

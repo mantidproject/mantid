@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 
 #include <QFileInfo>

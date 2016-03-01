@@ -52,12 +52,13 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMcStas::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
-      "The name of the Nexus file to load");
+  const std::vector<std::string> exts{".h5", ".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
   declareProperty(
@@ -283,7 +284,7 @@ void LoadMcStas::readEventData(
                     << std::endl;
       return;
     }
-    if (isAnyNeutrons == false && nNeutrons > 0)
+    if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
     std::vector<int64_t> start(2);
@@ -392,8 +393,8 @@ void LoadMcStas::readEventData(
   std::string extraProperty =
       "Outputworkspace_dummy_" +
       boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-  declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                   Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      extraProperty, nameUserSee, Direction::Output));
   setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
   m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                               // unique
@@ -488,14 +489,14 @@ void LoadMcStas::readHistogramData(
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
-    boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+    auto lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
     Axis *axis2 = new NumericAxis(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+    lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 
@@ -534,8 +535,8 @@ void LoadMcStas::readHistogramData(
     std::string extraProperty =
         "Outputworkspace_dummy_" +
         boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-    declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                     Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
     m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                                 // unique

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,37 +59,38 @@ public:
   /// Default constructor
   Integration() : API::Algorithm(){};
   /// Destructor
-  virtual ~Integration(){};
+  ~Integration() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Integration"; }
+  const std::string name() const override { return "Integration"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Integration takes a 2D workspace or an EventWorkspace as input and "
            "sums the data values. Optionally, the range summed can be "
            "restricted in either dimension.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Arithmetic;Transforms\\Rebin";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
+
+  API::MatrixWorkspace_sptr
+  rangeFilterEventWorkspace(API::MatrixWorkspace_sptr eventWorkspace,
+                            double minRange, double maxRange);
 
   /// Get the input workspace
-  API::MatrixWorkspace_const_sptr getInputWorkspace();
+  API::MatrixWorkspace_sptr getInputWorkspace();
   /// Create the outputworkspace
-  API::MatrixWorkspace_sptr
-  getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS, const int minSpec,
-                     const int maxSpec);
-
-  /// Input event workspace
-  DataObjects::EventWorkspace_const_sptr inputEventWS;
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS,
+                                               const int minSpec,
+                                               const int maxSpec);
 };
 
 } // namespace Algorithm

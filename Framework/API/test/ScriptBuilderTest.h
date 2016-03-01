@@ -125,9 +125,9 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     }
 
     void init() {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
     void exec() {
@@ -139,7 +139,8 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output(new WorkspaceTester());
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -166,7 +167,8 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -209,7 +211,8 @@ public:
         "# End of child algorithms of TopLevelAlgorithm", "", "",
     };
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -253,7 +256,8 @@ public:
         "", "",
     };
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -300,7 +304,8 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
                                                  input);
 

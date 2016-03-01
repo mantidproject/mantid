@@ -58,7 +58,7 @@ protected slots:
 
 private:
  /// Called when the widget is shown
- void showEvent (QShowEvent * event);
+  void showEvent(QShowEvent *event) override;
 
  /// The text editor we are working on
  ScriptEditor *m_editor;

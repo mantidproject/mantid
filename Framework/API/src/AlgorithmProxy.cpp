@@ -309,16 +309,17 @@ std::string AlgorithmProxy::toString() const {
 
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> AlgorithmProxy::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
-  std::vector<std::string> res(tokenizer.begin(), tokenizer.end());
+  auto res = tokenizer.asVector();
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);
   if (depo != nullptr) {
-    res.push_back("Deprecated");
+    res.emplace_back("Deprecated");
   }
   return res;
 }

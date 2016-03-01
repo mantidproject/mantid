@@ -37,29 +37,29 @@ namespace Crystal {
 class DLLExport FindUBUsingIndexedPeaks : public API::Algorithm {
 public:
   FindUBUsingIndexedPeaks();
-  ~FindUBUsingIndexedPeaks();
+  ~FindUBUsingIndexedPeaks() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "FindUBUsingIndexedPeaks"; };
+  const std::string name() const override { return "FindUBUsingIndexedPeaks"; };
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\UBMatrix"; }
+  const std::string category() const override { return "Crystal\\UBMatrix"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculate the UB matrix from a peaks workspace, containing indexed "
            "peaks.";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
 
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Crystal

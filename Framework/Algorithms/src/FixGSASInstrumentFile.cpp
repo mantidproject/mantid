@@ -45,12 +45,14 @@ void FixGSASInstrumentFile::init() {
 
   // Input file
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, exts),
+      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                        exts),
       "Name of the GSAS instrument parameter file to get fixed for format. ");
 
   // Output file
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, exts),
+      Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                        FileProperty::Save, exts),
       "Name of the output GSAS instrument parameter file to have format "
       "fixed. ");
 

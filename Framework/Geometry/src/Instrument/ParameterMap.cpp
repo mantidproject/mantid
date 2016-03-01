@@ -344,7 +344,7 @@ void ParameterMap::add(const IComponent *comp,
     if (existing_par != m_map.end()) {
       existing_par->second = par;
     } else {
-      m_map.insert(std::make_pair(comp->getComponentID(), par));
+      m_map.emplace(comp->getComponentID(), par);
     }
   }
 }
@@ -823,7 +823,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           }
         } // found->firdst
       }   // it_found != m_map.end()
-    }     //!m_map.empty()
+    }     //! m_map.empty()
   }       // PARALLEL_CRITICAL(m_map_access)
   return result;
 }
@@ -1045,12 +1045,11 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
-
+  auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map
-    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
+    m_map.emplace(newComp->getComponentID(), thisParameter);
   }
 }
 

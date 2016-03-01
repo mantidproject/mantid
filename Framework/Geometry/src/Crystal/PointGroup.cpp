@@ -60,22 +60,6 @@ PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
   m_latticeSystem = getLatticeSystemFromCrystalSystemAndGroup(m_crystalSystem);
 }
 
-PointGroup::PointGroup(const PointGroup &other)
-    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name),
-      m_crystalSystem(other.m_crystalSystem),
-      m_latticeSystem(other.m_latticeSystem) {}
-
-PointGroup &PointGroup::operator=(const PointGroup &other) {
-  Group::operator=(other);
-
-  m_symbolHM = other.m_symbolHM;
-  m_name = other.m_name;
-  m_crystalSystem = other.m_crystalSystem;
-  m_latticeSystem = other.m_latticeSystem;
-
-  return *this;
-}
-
 /// Hermann-Mauguin symbol
 std::string PointGroup::getSymbol() const { return m_symbolHM; }
 
@@ -228,8 +212,9 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   PointGroupCrystalSystemMap map;
 
   std::vector<PointGroup_sptr> pointGroups = getAllPointGroups();
+
   for (auto &pointGroup : pointGroups) {
-    map.insert(std::make_pair(pointGroup->crystalSystem(), pointGroup));
+    map.emplace(pointGroup->crystalSystem(), pointGroup);
   }
 
   return map;

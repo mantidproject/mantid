@@ -70,7 +70,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
   */
 ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
     : m_frequency(0) {
-  size_t numbanks = bankids.size();
+  const size_t numbanks = bankids.size();
 
   // Initialize vectors
   m_bankIDs.assign(numbanks, 0);
@@ -83,7 +83,7 @@ ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
   m_bankIDs.assign(bankids.begin(), bankids.end());
   m_bankIDIndexMap.clear();
   for (size_t ib = 0; ib < numbanks; ++ib) {
-    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+    m_bankIDIndexMap.emplace(m_bankIDs[ib], ib);
   }
 }
 
@@ -120,7 +120,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq,
   // Set up bank ID / looking up index map
   m_bankIDIndexMap.clear();
   for (size_t ib = 0; ib < numbanks; ++ib) {
-    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+    m_bankIDIndexMap.emplace(m_bankIDs[ib], ib);
   }
 }
 
@@ -292,37 +292,33 @@ SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
   */
 void SaveGSASInstrumentFile::init() {
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of the table workspace containing the parameters.");
 
-  vector<string> infileexts;
-  infileexts.push_back(".irf");
-  auto infileprop = new FileProperty("InputFileName", "",
-                                     FileProperty::OptionalLoad, infileexts);
-  declareProperty(infileprop,
+  vector<string> infileexts{".irf"};
+  auto infileprop = Kernel::make_unique<FileProperty>(
+      "InputFileName", "", FileProperty::OptionalLoad, infileexts);
+  declareProperty(std::move(infileprop),
                   "Name of the input Fullprof resolution file (.irf).");
 
-  auto fileprop = new FileProperty("OutputFileName", "", FileProperty::Save,
-                                   {".iparam", ".prm"});
-  declareProperty(fileprop, "Name of the output GSAS instrument file.");
+  vector<string> outfileexts{".iparam", ".prm"};
+  auto fileprop = Kernel::make_unique<FileProperty>(
+      "OutputFileName", "", FileProperty::Save, outfileexts);
+  declareProperty(std::move(fileprop),
+                  "Name of the output GSAS instrument file.");
 
   declareProperty(
-      new ArrayProperty<unsigned int>("BankIDs"),
+      Kernel::make_unique<ArrayProperty<unsigned int>>("BankIDs"),
       "Bank IDs of the banks to be written to GSAS instrument file.");
 
-  vector<string> instruments;
-  instruments.push_back("powgen");
-  instruments.push_back("nomad");
+  vector<string> instruments{"powgen", "nomad"};
   declareProperty("Instrument", "powgen",
                   boost::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
-  vector<string> vecfreq;
-  vecfreq.push_back("10");
-  vecfreq.push_back("30");
-  vecfreq.push_back("60");
+  vector<string> vecfreq{"10", "30", "60"};
   declareProperty("ChopperFrequency", "60",
                   boost::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");
@@ -536,7 +532,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
       for (size_t icol = 0; icol < numbanks; ++icol) {
         double tmpdbl;
         tmprow >> tmpdbl;
-        vec_maptemp[icol].insert(make_pair(parname, tmpdbl));
+        vec_maptemp[icol].emplace(parname, tmpdbl);
       }
     } else {
       for (size_t icol = 0; icol < numbanks; ++icol) {
@@ -709,9 +705,9 @@ void SaveGSASInstrumentFile::convertToGSAS(
           "Chopper configuration does not have some certain bank.");
 
     double mndsp = m_configuration->getParameter(bankid, "MinDsp");
-    m_bank_mndsp.insert(make_pair(bankid, mndsp));
+    m_bank_mndsp.emplace(bankid, mndsp);
     double mxtof = m_configuration->getParameter(bankid, "MaxTOF");
-    m_bank_mxtof.insert(make_pair(bankid, mxtof));
+    m_bank_mxtof.emplace(bankid, mxtof);
   }
 
   // Write bank header

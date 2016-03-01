@@ -46,11 +46,6 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
- *  Destructor.
- */
-Integrate3DEvents::~Integrate3DEvents() {}
-
-/**
  * Add the specified event Q's to lists of events near peaks.  An event is
  * added to at most one list.  First the nearest h,k,l for that event Q vector
  * is calculated.  If a peak with that h,k,l was specified when this object
@@ -312,9 +307,9 @@ void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
 
   // copy the resulting eigen vectors to output vector
   for (size_t col = 0; col < size; col++) {
-    eigen_vectors.push_back(V3D(gsl_matrix_get(eigen_vec, 0, col),
-                                gsl_matrix_get(eigen_vec, 1, col),
-                                gsl_matrix_get(eigen_vec, 2, col)));
+    eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col),
+                               gsl_matrix_get(eigen_vec, 1, col),
+                               gsl_matrix_get(eigen_vec, 2, col));
   }
 
   gsl_matrix_free(matrix);

@@ -65,26 +65,26 @@ public:
   /// Constructor
   SaveGSS();
   /// Virtual destructor
-  virtual ~SaveGSS() {}
+  ~SaveGSS() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveGSS"; }
+  const std::string name() const override { return "SaveGSS"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a focused data set into a three column GSAS format.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Write GSAS file
   void writeGSASFile(const std::string &outfilename, bool append,
@@ -104,7 +104,8 @@ private:
                      const MantidVec &Y, const MantidVec &E) const;
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int periodNum);
+                          const std::string &propertyValue,
+                          int periodNum) override;
 
   bool m_useSpecAsBank;
 

@@ -78,21 +78,20 @@ public slots:
   bool dropAtPosition( MdiSubWindow *w, QPoint pos, bool global = true );
 
   /// Save
-  QString saveToString(const QString &info, bool = false);
+  QString saveToString(const QString &info, bool = false) override;
   /// Restore
-  void restore(const QStringList&);
+  void restore(const QStringList &) override;
   /// Print
-  void print();
+  void print() override;
 
 protected:
-
-  void mousePressEvent(QMouseEvent *ev);
-  void mouseReleaseEvent(QMouseEvent *ev);
-  void mouseMoveEvent(QMouseEvent *ev);
-  void dragEnterEvent(QDragEnterEvent* ev);
-  void dragLeaveEvent(QDragLeaveEvent *);
-  void dragMoveEvent(QDragMoveEvent* ev);
-  void dropEvent(QDropEvent* ev);
+  void mousePressEvent(QMouseEvent *ev) override;
+  void mouseReleaseEvent(QMouseEvent *ev) override;
+  void mouseMoveEvent(QMouseEvent *ev) override;
+  void dragEnterEvent(QDragEnterEvent *ev) override;
+  void dragLeaveEvent(QDragLeaveEvent *) override;
+  void dragMoveEvent(QDragMoveEvent *ev) override;
+  void dropEvent(QDropEvent *ev) override;
 
 private:
 
@@ -175,7 +174,7 @@ public:
   /// Constructor
   explicit Tile(QWidget *parent);
   /// Destructor
-  ~Tile();
+  ~Tile() override;
   /// Set the widget.
   void setWidget(MdiSubWindow *w);
   /// Remove the held widget without deleting it.
@@ -189,7 +188,8 @@ public:
   /// Check if the tile is selected
   bool isSelected() const {return m_selected;}
 protected:
-  void paintEvent(QPaintEvent *ev);
+  void paintEvent(QPaintEvent *ev) override;
+
 private:
   /// The TiledWindow which has this Tile
   QWidget *m_tiledWindow;

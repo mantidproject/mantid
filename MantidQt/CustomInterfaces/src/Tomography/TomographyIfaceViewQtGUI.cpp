@@ -1,4 +1,5 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -1059,8 +1060,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1280,7 +1281,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   std::string name;
   try {
     name = ws->run().getLogData("run_title")->value();
-    m_logMsgs.push_back(" Visualizing image: " + name);
+    m_logMsgs.emplace_back(" Visualizing image: " + name);
     m_presenter->notify(ITomographyIfacePresenter::LogMsg);
     m_logMsgs.clear();
   } catch (std::exception &e) {

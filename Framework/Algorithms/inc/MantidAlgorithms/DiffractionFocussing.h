@@ -68,33 +68,33 @@ public:
   /// Constructor
   DiffractionFocussing();
   /// Destructor
-  virtual ~DiffractionFocussing(){};
+  ~DiffractionFocussing() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "DiffractionFocussing"; }
+  const std::string name() const override { return "DiffractionFocussing"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Algorithm to focus powder diffraction data into a number of "
            "histograms according to a grouping scheme defined in a CalFile.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\Focussing";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   API::MatrixWorkspace_sptr
   convertUnitsToDSpacing(const API::MatrixWorkspace_sptr &workspace);
   void RebinWorkspace(API::MatrixWorkspace_sptr &workspace);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace,
                             double &min, double &max, double &step);
-  bool readGroupingFile(std::string groupingFileName,
-                        std::multimap<int64_t, int64_t> &detectorGroups);
+  std::multimap<int64_t, int64_t>
+  readGroupingFile(std::string groupingFileName);
 };
 
 } // namespace Algorithm

@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_statistics.h>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,10 +22,10 @@ using namespace API;
 
 /// Initialisation method
 void SplineBackground::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

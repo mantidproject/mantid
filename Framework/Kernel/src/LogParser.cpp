@@ -91,7 +91,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     isNumeric = !istr.fail();
     old_data = sdata;
 
-    change_times.insert(std::make_pair(stime, sdata));
+    change_times.emplace(stime, sdata);
   }
 
   if (change_times.empty())
@@ -117,11 +117,6 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   }
   return nullptr;
 }
-
-/**
- * Destructor
- */
-LogParser::~LogParser() {}
 
 /**
 Common creational method for generating a command map.

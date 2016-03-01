@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 

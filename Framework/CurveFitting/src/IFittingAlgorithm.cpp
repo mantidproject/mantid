@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidKernel/ListValidator.h"
@@ -76,19 +77,16 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      new API::FunctionProperty("Function"),
+      make_unique<API::FunctionProperty>("Function"),
       "Parameters defining the fitting function and its initial values");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "Name of the input Workspace");
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
-  std::vector<std::string> domainTypes;
-  domainTypes.push_back("Simple");
-  domainTypes.push_back("Sequential");
-  domainTypes.push_back("Parallel");
+  std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
   declareProperty(
       "DomainType", "Simple",
       Kernel::IValidator_sptr(
@@ -160,7 +158,7 @@ void IFittingAlgorithm::setFunction() {
       m_workspacePropertyNames[i] = workspacePropertyName;
       if (!existsProperty(workspacePropertyName)) {
         declareProperty(
-            new API::WorkspaceProperty<API::Workspace>(
+            Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                 workspacePropertyName, "", Kernel::Direction::Input),
             "Name of the input Workspace");
       }

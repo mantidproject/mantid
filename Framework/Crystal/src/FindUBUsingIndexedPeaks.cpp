@@ -31,11 +31,10 @@ FindUBUsingIndexedPeaks::~FindUBUsingIndexedPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty("Tolerance", 0.1, mustBePositive,
                         "Indexing Tolerance (0.1)");
@@ -66,8 +65,7 @@ void FindUBUsingIndexedPeaks::exec() {
                                              // just check for (0,0,0)
     {
       q_vectors.push_back(peaks[i].getQSampleFrame());
-      V3D miller_ind(round(hkl[0]), round(hkl[1]), round(hkl[2]));
-      hkl_vectors.push_back(V3D(miller_ind));
+      hkl_vectors.emplace_back(round(hkl[0]), round(hkl[1]), round(hkl[2]));
       indexed_count++;
     }
   }

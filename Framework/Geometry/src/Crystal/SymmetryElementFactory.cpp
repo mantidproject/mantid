@@ -1,5 +1,4 @@
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
-#include <boost/assign.hpp>
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
@@ -261,12 +260,19 @@ std::string SymmetryElementRotationGenerator::determineSymbol(
   return symbol;
 }
 
-std::map<V3R, std::string> SymmetryElementMirrorGenerator::g_glideSymbolMap =
-    boost::assign::map_list_of(V3R(0, 0, 0), "m")(V3R(1, 0, 0) / 2,
-                                                  "a")(V3R(0, 1, 0) / 2, "b")(
-        V3R(0, 0, 1) / 2, "c")(V3R(1, 1, 0) / 2, "n")(V3R(1, 0, 1) / 2, "n")(
-        V3R(0, 1, 1) / 2, "n")(V3R(1, 1, 1) / 2, "n")(V3R(1, 1, 0) / 4, "d")(
-        V3R(1, 0, 1) / 4, "d")(V3R(0, 1, 1) / 4, "d")(V3R(1, 1, 1) / 4, "d");
+std::map<V3R, std::string> SymmetryElementMirrorGenerator::g_glideSymbolMap = {
+    {V3R(0, 0, 0), "m"},
+    {V3R(1, 0, 0) / 2, "a"},
+    {V3R(0, 1, 0) / 2, "b"},
+    {V3R(0, 0, 1) / 2, "c"},
+    {V3R(1, 1, 0) / 2, "n"},
+    {V3R(1, 0, 1) / 2, "n"},
+    {V3R(0, 1, 1) / 2, "n"},
+    {V3R(1, 1, 1) / 2, "n"},
+    {V3R(1, 1, 0) / 4, "d"},
+    {V3R(1, 0, 1) / 4, "d"},
+    {V3R(0, 1, 1) / 4, "d"},
+    {V3R(1, 1, 1) / 4, "d"}};
 
 /// Generates an instance of SymmetryElementMirror with the corresponding
 /// symbol, axis and translation vector.
@@ -390,7 +396,7 @@ AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
 /// Inserts the provided prototype into the factory.
 void SymmetryElementFactoryImpl::insertPrototype(
     const std::string &identifier, const SymmetryElement_sptr &prototype) {
-  m_prototypes.insert(std::make_pair(identifier, prototype));
+  m_prototypes.emplace(identifier, prototype);
 }
 
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator)

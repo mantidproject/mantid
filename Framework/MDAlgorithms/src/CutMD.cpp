@@ -239,33 +239,36 @@ CutMD::~CutMD() {}
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("Projection", "", Direction::Input,
-                                             PropertyMode::Optional),
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "Projection", "", Direction::Input, PropertyMode::Optional),
       "Projection");
 
-  declareProperty(new ArrayProperty<double>("P1Bin"), "Projection 1 binning.");
-  declareProperty(new ArrayProperty<double>("P2Bin"), "Projection 2 binning.");
-  declareProperty(new ArrayProperty<double>("P3Bin"), "Projection 3 binning.");
-  declareProperty(new ArrayProperty<double>("P4Bin"), "Projection 4 binning.");
-  declareProperty(new ArrayProperty<double>("P5Bin"), "Projection 5 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P1Bin"),
+                  "Projection 1 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P2Bin"),
+                  "Projection 2 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P3Bin"),
+                  "Projection 3 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P4Bin"),
+                  "Projection 4 binning.");
+  declareProperty(make_unique<ArrayProperty<double>>("P5Bin"),
+                  "Projection 5 binning.");
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output cut workspace");
   declareProperty("NoPix", false, "If False creates a full MDEventWorkspaces "
                                   "as output. True to create an "
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back(AutoMethod);
-  propOptions.push_back(RLUMethod);
-  propOptions.push_back(InvAngstromMethod);
+  std::vector<std::string> propOptions{AutoMethod, RLUMethod,
+                                       InvAngstromMethod};
   char buffer[1024];
   std::sprintf(
       buffer, "How will the Q units of the input workspace be interpreted? "
@@ -289,12 +292,9 @@ void CutMD::exec() {
   const IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projectionWS = getProperty("Projection");
-  std::vector<std::vector<double>> pbins(5);
-  pbins[0] = getProperty("P1Bin");
-  pbins[1] = getProperty("P2Bin");
-  pbins[2] = getProperty("P3Bin");
-  pbins[3] = getProperty("P4Bin");
-  pbins[4] = getProperty("P5Bin");
+  std::vector<std::vector<double>> pbins{
+      getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
+      getProperty("P4Bin"), getProperty("P5Bin")};
 
   Workspace_sptr sliceWS; // output worskpace
 
@@ -338,10 +338,9 @@ void CutMD::exec() {
     }
 
     // Get extents in projection
-    std::vector<MinMax> extentLimits;
-    extentLimits.push_back(getDimensionExtents(eventInWS, 0));
-    extentLimits.push_back(getDimensionExtents(eventInWS, 1));
-    extentLimits.push_back(getDimensionExtents(eventInWS, 2));
+    std::vector<MinMax> extentLimits{getDimensionExtents(eventInWS, 0),
+                                     getDimensionExtents(eventInWS, 1),
+                                     getDimensionExtents(eventInWS, 2)};
 
     // Scale projection
     DblMatrix projectionMatrix(3, 3);
@@ -385,12 +384,12 @@ void CutMD::exec() {
         steppedExtents.push_back(extentLimit);
         steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
       } else if (nArgs == 2) {
-        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
+        steppedExtents.emplace_back(pbins[i][0], pbins[i][1]);
         steppedBins.push_back(1);
       } else if (nArgs == 3) {
         const double dimRange = pbins[i][2] - pbins[i][0];
         const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
-        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
+        steppedExtents.emplace_back(pbins[i][0], pbins[i][2]);
         steppedBins.push_back(static_cast<int>(dimRange / stepSize));
       }
 

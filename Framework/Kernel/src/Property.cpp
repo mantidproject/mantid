@@ -18,8 +18,7 @@ namespace Kernel {
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_settings(nullptr), m_group(""),
-      m_remember(true) {
+      m_direction(direction), m_units(""), m_group(""), m_remember(true) {
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
@@ -31,17 +30,14 @@ Property::Property(const std::string &name, const std::type_info &type,
 Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation),
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
-      m_units(right.m_units), m_settings(nullptr), m_group(right.m_group),
+      m_units(right.m_units), m_group(right.m_group),
       m_remember(right.m_remember) {
   if (right.m_settings)
-    m_settings = right.m_settings->clone();
+    m_settings.reset(right.m_settings->clone());
 }
 
 /// Virtual destructor
-Property::~Property() {
-  if (m_settings)
-    delete m_settings;
-}
+Property::~Property() {}
 
 /** Get the property's name
  *  @return The name of the property
@@ -85,25 +81,20 @@ std::string Property::isValid() const {
  * Takes ownership of the given object
  * @param settings A pointer to an object specifying the settings type
  */
-void Property::setSettings(IPropertySettings *settings) {
-  if (m_settings)
-    delete m_settings;
-  m_settings = settings;
+void Property::setSettings(std::unique_ptr<IPropertySettings> settings) {
+  m_settings = std::move(settings);
 }
 
 /**
  *
  * @return the PropertySettings for this property
  */
-IPropertySettings *Property::getSettings() { return m_settings; }
+IPropertySettings *Property::getSettings() { return m_settings.get(); }
 
 /**
  * Deletes the PropertySettings object contained
  */
-void Property::deleteSettings() {
-  delete m_settings;
-  m_settings = nullptr;
-}
+void Property::clearSettings() { m_settings.reset(nullptr); }
 
 /**
 * Whether to remember this property input
@@ -321,87 +312,67 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   // will get initialized when the function is first used
   static std::map<string, string> typestrings;
   if (typestrings.empty()) {
-    typestrings.insert(make_pair(typeid(char).name(), string("letter")));
-    typestrings.insert(make_pair(typeid(int).name(), string("number")));
-    typestrings.insert(make_pair(typeid(long long).name(), string("number")));
-    typestrings.insert(make_pair(typeid(int64_t).name(), string("number")));
-    typestrings.insert(make_pair(typeid(double).name(), string("number")));
-    typestrings.insert(make_pair(typeid(bool).name(), string("boolean")));
-    typestrings.insert(make_pair(typeid(string).name(), string("string")));
-    typestrings.insert(
-        make_pair(typeid(std::vector<string>).name(), string("str list")));
-    typestrings.insert(
-        make_pair(typeid(std::vector<int>).name(), string("int list")));
-    typestrings.insert(
-        make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
-    typestrings.insert(make_pair(typeid(std::vector<size_t>).name(),
-                                 string("unsigned int list")));
-    typestrings.insert(
-        make_pair(typeid(std::vector<double>).name(), string("dbl list")));
-    typestrings.insert(
-        make_pair(typeid(std::vector<std::vector<string>>).name(),
-                  string("list of str lists")));
+    typestrings.emplace(typeid(char).name(), string("letter"));
+    typestrings.emplace(typeid(int).name(), string("number"));
+    typestrings.emplace(typeid(long long).name(), string("number"));
+    typestrings.emplace(typeid(int64_t).name(), string("number"));
+    typestrings.emplace(typeid(double).name(), string("number"));
+    typestrings.emplace(typeid(bool).name(), string("boolean"));
+    typestrings.emplace(typeid(string).name(), string("string"));
+    typestrings.emplace(typeid(std::vector<string>).name(), string("str list"));
+    typestrings.emplace(typeid(std::vector<int>).name(), string("int list"));
+    typestrings.emplace(typeid(std::vector<int64_t>).name(),
+                        string("int list"));
+    typestrings.emplace(typeid(std::vector<size_t>).name(),
+                        string("unsigned int list"));
+    typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
+    typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
+                        string("list of str lists"));
 
     // Workspaces
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<Workspace>).name(),
-                                 string("Workspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<MatrixWorkspace>).name(),
-                  string("MatrixWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<ITableWorkspace>).name(),
-                  string("TableWorkspace")));
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDWorkspace>).name(),
-                                 string("IMDWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<IMDEventWorkspace>).name(),
-                  string("MDEventWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<IEventWorkspace>).name(),
-                  string("IEventWorkspace")));
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<Workspace2D>).name(),
-                                 string("Workspace2D")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<EventWorkspace>).name(),
-                  string("EventWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<PeaksWorkspace>).name(),
-                  string("PeaksWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<IPeaksWorkspace>).name(),
-                  string("IPeaksWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<GroupingWorkspace>).name(),
-                  string("GroupingWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<WorkspaceGroup>).name(),
-                  string("WorkspaceGroup")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<OffsetsWorkspace>).name(),
-                  string("OffsetsWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<MaskWorkspace>).name(),
-                  string("MaskWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
-                  string("SpecialWorkspace2D")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),
-                  string("IMDHistoWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<SplittersWorkspace>).name(),
-                  string("SplittersWorkspace")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
-                  string("SpecialWorkspace2D")));
-    typestrings.insert(
-        make_pair(typeid(boost::shared_ptr<TableWorkspace>).name(),
-                  string("TableWorkspace")));
+    typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),
+                        string("Workspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<MatrixWorkspace>).name(),
+                        string("MatrixWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<ITableWorkspace>).name(),
+                        string("TableWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<IMDWorkspace>).name(),
+                        string("IMDWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<IMDEventWorkspace>).name(),
+                        string("MDEventWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<IEventWorkspace>).name(),
+                        string("IEventWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<Workspace2D>).name(),
+                        string("Workspace2D"));
+    typestrings.emplace(typeid(boost::shared_ptr<EventWorkspace>).name(),
+                        string("EventWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<PeaksWorkspace>).name(),
+                        string("PeaksWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<IPeaksWorkspace>).name(),
+                        string("IPeaksWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<GroupingWorkspace>).name(),
+                        string("GroupingWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<WorkspaceGroup>).name(),
+                        string("WorkspaceGroup"));
+    typestrings.emplace(typeid(boost::shared_ptr<OffsetsWorkspace>).name(),
+                        string("OffsetsWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<MaskWorkspace>).name(),
+                        string("MaskWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
+                        string("SpecialWorkspace2D"));
+    typestrings.emplace(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),
+                        string("IMDHistoWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<SplittersWorkspace>).name(),
+                        string("SplittersWorkspace"));
+    typestrings.emplace(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
+                        string("SpecialWorkspace2D"));
+    typestrings.emplace(typeid(boost::shared_ptr<TableWorkspace>).name(),
+                        string("TableWorkspace"));
     // FunctionProperty
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<IFunction>).name(),
-                                 string("Function")));
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<IAlgorithm>).name(),
-                                 string("IAlgorithm")));
+    typestrings.emplace(typeid(boost::shared_ptr<IFunction>).name(),
+                        string("Function"));
+    typestrings.emplace(typeid(boost::shared_ptr<IAlgorithm>).name(),
+                        string("IAlgorithm"));
   }
   std::map<std::string, std::string>::const_iterator mitr =
       typestrings.find(type.name());

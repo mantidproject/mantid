@@ -23,24 +23,24 @@ public:
   /// (Empty) Constructor
   EQSANSQ2D() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~EQSANSQ2D() {}
+  ~EQSANSQ2D() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "EQSANSQ2D"; }
+  const std::string name() const override { return "EQSANSQ2D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Workflow algorithm to process a reduced EQSANS workspace and "
            "produce I(Qx,Qy).";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

@@ -56,8 +56,8 @@ ChangeTimeZero::~ChangeTimeZero() {}
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
                           "A relative time offset in seconds.");
@@ -66,8 +66,8 @@ void ChangeTimeZero::init() {
                   "An absolute time offset as an ISO8601 string "
                   "(YYYY-MM-DDTHH:MM::SS, eg 2013-10-25T13:58:03).");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -281,23 +281,23 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
 
   // If both inputs are being used, then return straight away.
   if (isRelative && absoluteTimeInput) {
-    invalidProperties.insert(std::make_pair(
-        "RelativeTimeOffset", "You can either sepcify a relative time shift or "
-                              "an absolute time shift."));
-    invalidProperties.insert(std::make_pair(
-        "AbsoluteTimeOffset", "You can either sepcify a relative time shift or "
-                              "an absolute time shift."));
+    invalidProperties.emplace("RelativeTimeOffset",
+                              "You can either sepcify a relative time shift or "
+                              "an absolute time shift.");
+    invalidProperties.emplace("AbsoluteTimeOffset",
+                              "You can either sepcify a relative time shift or "
+                              "an absolute time shift.");
 
     return invalidProperties;
   } else if (!isRelative && !isAbsolute) {
-    invalidProperties.insert(std::make_pair(
+    invalidProperties.emplace(
         "RelativeTimeOffset",
         "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp."));
-    invalidProperties.insert(std::make_pair(
+        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
+    invalidProperties.emplace(
         "AbsoluteTimeOffset",
         "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp."));
+        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
   }
 
   // If we are dealing with an absolute time we need to ensure that the

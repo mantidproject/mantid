@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -15,7 +17,7 @@ using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveReflCustomAscii::extraProps() {
-  declareProperty(new ArrayProperty<std::string>("LogList"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("Title", "", "Text to be written to the Title field");
   declareProperty(

@@ -4,7 +4,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 #include <list>
-#include <set>
+#include <unordered_set>
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
@@ -26,13 +26,13 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  typedef std::list<std::set<size_t>> GroupType;
+  typedef std::list<std::unordered_set<size_t>> GroupType;
 
   /// Groups of labels to maintain
   GroupType m_groups;
 
   /// Type for identifying labels already seen
-  typedef std::set<size_t> LabelHash;
+  typedef std::unordered_set<size_t> LabelHash;
 
   /// Hash of labels merged
   LabelHash m_labelHash;
@@ -116,10 +116,9 @@ public:
 */
 ClusterRegister::ClusterRegister() : m_Impl(new ImplClusterRegister) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ClusterRegister::~ClusterRegister() {}
+ClusterRegister::~ClusterRegister() = default;
 
 /**
  * Add/register a cluster.
@@ -128,8 +127,8 @@ ClusterRegister::~ClusterRegister() {}
  */
 void ClusterRegister::add(const size_t &label,
                           const boost::shared_ptr<ICluster> &cluster) {
-  m_Impl->m_register.insert(std::make_pair(label, cluster));
-  m_Impl->m_unique.insert(std::make_pair(label, cluster));
+  m_Impl->m_register.emplace(label, cluster);
+  m_Impl->m_unique.emplace(label, cluster);
 }
 
 /**
@@ -165,8 +164,8 @@ ClusterRegister::MapCluster ClusterRegister::clusters() const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
-  for (auto &merged : mergedClusters) {
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+  for (const auto &merged : mergedClusters) {
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }
@@ -184,7 +183,7 @@ ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   auto mergedClusters = m_Impl->makeCompositeClusters();
   for (auto &merged : mergedClusters) {
     merged->toUniformMinimum(elements);
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }

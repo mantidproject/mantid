@@ -30,22 +30,24 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                     Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace1", "", Direction::Output));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
+                                                     Direction::Output));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
   void exec() {
-    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out1 =
+        boost::make_shared<WorkspaceTester>();
     out1->init(10, 10, 10);
-    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out2 =
+        boost::make_shared<WorkspaceTester>();
     out2->init(10, 10, 10);
     std::string outName = getPropertyValue("InputWorkspace1") + "+" +
                           getPropertyValue("InputWorkspace2") + "+" +
@@ -71,10 +73,10 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
@@ -127,8 +129,8 @@ public:
   static const std::string FAIL_MSG;
 
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                     Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -190,11 +192,10 @@ public:
   }
 
   void testCategories() {
-    std::vector<std::string> result;
-    result.push_back("Cat");
+    std::vector<std::string> result{"Cat"};
     TS_ASSERT_EQUALS(alg.categories(), result);
-    result.push_back("Leopard");
-    result.push_back("Mink");
+    result.emplace_back("Leopard");
+    result.emplace_back("Mink");
     TS_ASSERT_EQUALS(algv2.categories(), result);
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
@@ -439,7 +440,8 @@ public:
   void do_test_locking(std::string in1, std::string in2, std::string inout,
                        std::string out1, std::string out2) {
     for (size_t i = 0; i < 6; i++) {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
     }
@@ -475,7 +477,8 @@ public:
   /** Have a workspace property that does NOT lock the workspace.
    * The failure mode of this test is HANGING. */
   void test_workspace_notLocking() {
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
@@ -512,7 +515,8 @@ public:
     if (contents1.empty()) {
       if (group1.empty())
         return;
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace(group1, ws);
       return;
     }
@@ -525,7 +529,8 @@ public:
       AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
       std::vector<std::string>::iterator it = names.begin();
       for (; it != names.end(); it++) {
-        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        boost::shared_ptr<WorkspaceTester> ws =
+            boost::make_shared<WorkspaceTester>();
         ws->init(10, 10, 10);
         AnalysisDataService::Instance().addOrReplace(*it, ws);
         wsGroup->add(*it);

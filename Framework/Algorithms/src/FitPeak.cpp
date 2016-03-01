@@ -317,8 +317,8 @@ bool FitOneSinglePeak::simpleFit() {
   m_sstream << "One-Step-Fit Function: " << compfunc->asString() << "\n";
 
   // Store starting setup
-  push(m_peakFunc, m_bkupPeakFunc);
-  push(m_bkgdFunc, m_bkupBkgdFunc);
+  m_bkupPeakFunc = backup(m_peakFunc);
+  m_bkupBkgdFunc = backup(m_bkgdFunc);
 
   // Fit with different starting values of peak width
   size_t numfits = m_vecFWHM.size();
@@ -535,7 +535,7 @@ void FitOneSinglePeak::highBkgdFit() {
   m_peakFunc->setHeight(est_peakheight);
 
   // Store starting setup
-  push(m_peakFunc, m_bkupPeakFunc);
+  m_bkupPeakFunc = backup(m_peakFunc);
 
   Progress progress(this, 0, 1, m_vecFWHM.size());
 
@@ -580,45 +580,43 @@ void FitOneSinglePeak::highBkgdFit() {
 //----------------------------------------------------------------------------------------------
 /** Push/store a fit result (function) to storage
   * @param func :: function to get parameter values stored
-  * @param funcparammap :: map to store function parameter's names and value
+  * @returns :: map to store function parameter's names and value
   */
-void FitOneSinglePeak::push(IFunction_const_sptr func,
-                            std::map<std::string, double> &funcparammap) {
-  // Clear map
-  funcparammap.clear();
+std::map<std::string, double>
+FitOneSinglePeak::backup(IFunction_const_sptr func) {
+  std::map<std::string, double> funcparammap;
 
   // Set up
   vector<string> funcparnames = func->getParameterNames();
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parvalue = func->getParameter(i);
-    funcparammap.insert(make_pair(funcparnames[i], parvalue));
+    funcparammap.emplace(funcparnames[i], parvalue);
   }
 
-  return;
+  return funcparammap;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Push/store function parameters' error resulted from fitting
   * @param func :: function to get parameter values stored
-  * @param paramerrormap :: map to store function parameter's names and fitting
+  * @returns :: map to store function parameter's names and fitting
  * error
   */
-void FitOneSinglePeak::storeFunctionError(
-    const IFunction_const_sptr &func,
-    std::map<std::string, double> &paramerrormap) {
-  // Clear output map
-  paramerrormap.clear();
+std::map<std::string, double>
+FitOneSinglePeak::storeFunctionError(const IFunction_const_sptr &func) {
+  // output map
+  std::map<std::string, double> paramerrormap;
 
   // Get function error and store in output map
   vector<string> funcparnames = func->getParameterNames();
   size_t nParam = funcparnames.size();
   for (size_t i = 0; i < nParam; ++i) {
     double parerror = func->getError(i);
-    paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    paramerrormap.emplace(funcparnames[i], parerror);
   }
 
-  return;
+  return paramerrormap;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -859,11 +857,10 @@ double FitOneSinglePeak::fitCompositeFunction(
   m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
-  map<string, double> bkuppeakmap, bkupbkgdmap;
-  push(peakfunc, bkuppeakmap);
-  push(bkgdfunc, bkupbkgdmap);
-  storeFunctionError(peakfunc, m_fitErrorPeakFunc);
-  storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
+  auto bkuppeakmap = backup(peakfunc);
+  auto bkupbkgdmap = backup(bkgdfunc);
+  m_fitErrorPeakFunc = storeFunctionError(peakfunc);
+  m_fitErrorBkgdFunc = storeFunctionError(bkgdfunc);
 
   // Fit
   double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx);
@@ -944,7 +941,7 @@ double FitOneSinglePeak::checkFittedPeak(IPeakFunction_sptr peakfunc,
 API::IBackgroundFunction_sptr
 FitOneSinglePeak::fitBackground(API::IBackgroundFunction_sptr bkgdfunc) {
   // Back up background function
-  push(bkgdfunc, m_bkupBkgdFunc);
+  m_bkupBkgdFunc = backup(bkgdfunc);
 
   // Fit in multiple domain
   vector<double> vec_xmin(2);
@@ -959,8 +956,8 @@ FitOneSinglePeak::fitBackground(API::IBackgroundFunction_sptr bkgdfunc) {
   // Process fit result
   if (chi2 < DBL_MAX - 1) {
     // Store fitting result
-    push(bkgdfunc, m_bestBkgdFunc);
-    storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
+    m_bestBkgdFunc = backup(bkgdfunc);
+    m_fitErrorBkgdFunc = storeFunctionError(bkgdfunc);
   } else {
     // Restore background function
     pop(m_bkupBkgdFunc, bkgdfunc);
@@ -1019,11 +1016,11 @@ void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
 
   // Store result if
   if (rwp < m_bestRwp && fitsuccess) {
-    push(m_peakFunc, m_bestPeakFunc);
-    storeFunctionError(m_peakFunc, m_fitErrorPeakFunc);
+    m_bestPeakFunc = backup(m_peakFunc);
+    m_fitErrorPeakFunc = storeFunctionError(m_peakFunc);
     if (storebkgd) {
-      push(m_bkgdFunc, m_bestBkgdFunc);
-      storeFunctionError(m_bkgdFunc, m_fitErrorBkgdFunc);
+      m_bestBkgdFunc = backup(m_bkgdFunc);
+      m_fitErrorBkgdFunc = storeFunctionError(m_bkgdFunc);
     }
     m_bestRwp = rwp;
 
@@ -1041,18 +1038,18 @@ void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
 double FitOneSinglePeak::getFitCostFunctionValue() { return m_bestRwp; }
 
 //----------------------------------------------------------------------------------------------
-/** Get the fitting error of both peak function and background function
-  */
-void FitOneSinglePeak::getFitError(
-    std::map<std::string, double> &peakerrormap,
-    std::map<std::string, double> &bkgderrormap) {
-  peakerrormap.clear();
-  bkgderrormap.clear();
+/**
+ * Get the fitting error of the peak function
+ */
+std::map<std::string, double> FitOneSinglePeak::getPeakError() {
+  return m_fitErrorPeakFunc;
+}
 
-  peakerrormap.insert(m_fitErrorPeakFunc.begin(), m_fitErrorPeakFunc.end());
-  bkgderrormap.insert(m_fitErrorBkgdFunc.begin(), m_fitErrorBkgdFunc.end());
-
-  return;
+/**
+ * Get the fitting error of the background function
+ */
+std::map<std::string, double> FitOneSinglePeak::getBackgroundError() {
+  return m_fitErrorBkgdFunc;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1094,17 +1091,17 @@ FitPeak::~FitPeak() {}
 /** Declare properties
  */
 void FitPeak::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing fitted peak.");
 
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("ParameterTableWorkspace", "",
-                                            Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "ParameterTableWorkspace", "", Direction::Output),
       "Name of the table workspace containing the fitted parameters. ");
 
   boost::shared_ptr<BoundedValidator<int>> mustBeNonNegative =
@@ -1119,47 +1116,45 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
-  declareProperty(new ArrayProperty<string>("PeakParameterNames"),
-                  "List of peak parameter names. ");
-
-  declareProperty(new ArrayProperty<double>("PeakParameterValues"),
-                  "List of peak parameter values.  They must have a 1-to-1 "
-                  "mapping to PeakParameterNames list. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<string>>("PeakParameterNames"),
+      "List of peak parameter names. ");
 
   declareProperty(
-      new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
-      "Fitted peak parameter values. ");
+      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      "List of peak parameter values.  They must have a 1-to-1 "
+      "mapping to PeakParameterNames list. ");
 
-  vector<string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Flat (A0)");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Linear (A0, A1)");
-  bkgdtypes.push_back("Quadratic");
-  bkgdtypes.push_back("Quadratic (A0, A1, A2)");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "FittedPeakParameterValues", Direction::Output),
+                  "Fitted peak parameter values. ");
+
+  vector<string> bkgdtypes{"Flat", "Flat (A0)", "Linear", "Linear (A0, A1)",
+                           "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
-  declareProperty(new ArrayProperty<string>("BackgroundParameterNames"),
-                  "List of background parameter names. ");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
+      "List of background parameter names. ");
 
   declareProperty(
-      new ArrayProperty<double>("BackgroundParameterValues"),
+      Kernel::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
       "List of background parameter values.  "
       "They must have a 1-to-1 mapping to BackgroundParameterNames list. ");
 
-  declareProperty(new ArrayProperty<double>("FittedBackgroundParameterValues",
-                                            Direction::Output),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "FittedBackgroundParameterValues", Direction::Output),
                   "Fitted background parameter values. ");
 
-  declareProperty(new ArrayProperty<double>("FitWindow"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Enter a comma-separated list of the expected X-position of "
                   "windows to fit. "
                   "The number of values must be 2.");
 
   declareProperty(
-      new ArrayProperty<double>("PeakRange"),
+      Kernel::make_unique<ArrayProperty<double>>("PeakRange"),
       "Enter a comma-separated list of expected x-position as peak range. "
       "The number of values must be 2.");
 
@@ -1193,9 +1188,7 @@ void FitPeak::init() {
                   "from proposed value more than "
                   "the given value, fit is treated as failure. ");
 
-  vector<string> costFuncOptions;
-  costFuncOptions.push_back("Chi-Square");
-  costFuncOptions.push_back("Rwp");
+  vector<string> costFuncOptions{"Chi-Square", "Rwp"};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
@@ -1259,11 +1252,8 @@ void FitPeak::exec() {
 
   m_finalGoodnessValue = fit1peakalg.getFitCostFunctionValue();
 
-  map<string, double> peakfuncfiterrormap, bkgdfuncfiterrormap;
-  fit1peakalg.getFitError(peakfuncfiterrormap, bkgdfuncfiterrormap);
-
   // Output
-  setupOutput(peakfuncfiterrormap, bkgdfuncfiterrormap);
+  setupOutput(fit1peakalg.getPeakError(), fit1peakalg.getBackgroundError());
 
   return;
 }
@@ -1503,7 +1493,7 @@ std::string FitPeak::parseFunctionTypeFull(const std::string &fullstring,
 
   size_t n = std::count(fullstring.begin(), fullstring.end(), '(');
   if (n > 0) {
-    peaktype = fullstring.substr(0, fullstring.find("("));
+    peaktype = fullstring.substr(0, fullstring.find('('));
     boost::algorithm::trim(peaktype);
     defaultparorder = true;
   } else {
@@ -1611,30 +1601,6 @@ void FitPeak::setupOutput(
 
   // Output chi^2 or Rwp
   setProperty("CostFunctionValue", m_finalGoodnessValue);
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Push/store a fit result
-  */
-void FitPeak::push(IFunction_const_sptr func,
-                   std::map<std::string, double> &funcparammap,
-                   std::map<std::string, double> &paramerrormap) {
-  // Clear map
-  funcparammap.clear();
-  paramerrormap.clear();
-
-  // Set up
-  vector<string> funcparnames = func->getParameterNames();
-  size_t nParam = funcparnames.size();
-  for (size_t i = 0; i < nParam; ++i) {
-    double parvalue = func->getParameter(i);
-    funcparammap.emplace(funcparnames[i], parvalue);
-
-    double parerror = func->getError(i);
-    paramerrormap.emplace(funcparnames[i], parerror);
-  }
 
   return;
 }

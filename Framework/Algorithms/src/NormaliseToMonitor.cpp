@@ -5,8 +5,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -115,8 +117,7 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  std::vector<size_t> indexList;
-  inputWS->getIndicesFromDetectorIDs(mon, indexList);
+  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -176,7 +177,8 @@ void NormaliseToMonitor::init() {
   // It's been said that we should restrict the unit to being wavelength, but
   // I'm not sure about that...
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       val),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
   //
@@ -185,9 +187,9 @@ void NormaliseToMonitor::init() {
   //   monitor one");
   // Can either set a spectrum within the workspace to be the monitor
   // spectrum.....
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace");
   // should be any spectrum ID, but named this property MonitorSpectrum to keep
   // compatibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor
@@ -208,18 +210,19 @@ void NormaliseToMonitor::init() {
                   "to empty data and the field then can accepts any MonitorID "
                   "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
-  setPropertySettings("MonitorID",
-                      new MonIDPropChanger("InputWorkspace", "MonitorSpectrum",
-                                           "MonitorWorkspace"));
+  setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
+                                       "InputWorkspace", "MonitorSpectrum",
+                                       "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(new WorkspaceProperty<>("MonitorWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional, val),
+  declareProperty(make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional, val),
                   "A workspace containing one or more spectra to normalize the "
                   "InputWorkspace by.");
-  setPropertySettings("MonitorWorkspace", new Kernel::EnabledWhenProperty(
-                                              "MonitorSpectrum", IS_DEFAULT));
+  setPropertySettings("MonitorWorkspace",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "MonitorSpectrum", IS_DEFAULT));
 
   declareProperty("MonitorWorkspaceIndex", 0,
                   "The index of the spectrum within the MonitorWorkspace(2 "
@@ -230,9 +233,9 @@ void NormaliseToMonitor::init() {
                   "If no value is provided in this field, '''InputWorkspace''' "
                   "will be normalized by first spectra (with index 0)",
                   Direction::InOut);
-  setPropertySettings(
-      "MonitorWorkspaceIndex",
-      new Kernel::EnabledWhenProperty("MonitorSpectrum", IS_DEFAULT));
+  setPropertySettings("MonitorWorkspaceIndex",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "MonitorSpectrum", IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
   // 1) normalization is by an integrated count instead of bin-by-bin
@@ -250,8 +253,8 @@ void NormaliseToMonitor::init() {
       "end of the integration range are also included");
 
   declareProperty(
-      new WorkspaceProperty<>("NormFactorWS", "", Direction::Output,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("NormFactorWS", "", Direction::Output,
+                                       PropertyMode::Optional),
       "Name of the workspace, containing the normalization factor.\n"
       "If this name is empty, normalization workspace is not returned. If the "
       "name coincides with the output workspace name, _normFactor suffix is "
@@ -383,8 +386,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
     // set spectra of detector's ID of one selected monitor ID
     std::vector<detid_t> detID(1, monitorID);
     // got the index of correspondent spectra (should be only one).
-    std::vector<size_t> indexList;
-    inputWorkspace->getIndicesFromDetectorIDs(detID, indexList);
+    auto indexList = inputWorkspace->getIndicesFromDetectorIDs(detID);
     if (indexList.empty()) {
       throw std::runtime_error(
           "Can not find spectra, corresponding to the requested monitor ID");
@@ -395,14 +397,13 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
     }
     spectra_num = static_cast<int>(indexList[0]);
   } else { // monitor spectrum is specified.
-    spec2index_map specs;
     const SpectraAxis *axis =
         dynamic_cast<const SpectraAxis *>(inputWorkspace->getAxis(1));
     if (!axis) {
       throw std::runtime_error("Cannot retrieve monitor spectrum - spectrum "
                                "numbers not attached to workspace");
     }
-    axis->getSpectraIndexMap(specs);
+    auto specs = axis->getSpectraIndexMap();
     if (!specs.count(monitorSpec)) {
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");
@@ -560,25 +561,16 @@ void NormaliseToMonitor::normaliseBinByBin(
     API::MatrixWorkspace_sptr &outputWorkspace) {
   EventWorkspace_sptr inputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
-  EventWorkspace_sptr outputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
     if (inputEvent) {
-      // Make a brand new EventWorkspace
-      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
-      // Copy geometry and data
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          inputEvent, outputEvent, false);
-      outputEvent->copyDataFrom((*inputEvent));
-      outputWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEvent);
+      outputWorkspace = MatrixWorkspace_sptr(inputWorkspace->clone().release());
     } else
       outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   }
+  auto outputEvent =
+      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Get hold of the monitor spectrum
   const MantidVec &monX = m_monitor->readX(0);

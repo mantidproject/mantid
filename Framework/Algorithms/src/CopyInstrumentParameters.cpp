@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <iostream>
@@ -28,10 +29,10 @@ CopyInstrumentParameters::~CopyInstrumentParameters() {}
 
 void CopyInstrumentParameters::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace giving the instrument");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
       "Name of the workspace receiving the instrument");
 }
 

@@ -14,10 +14,6 @@
 namespace Mantid {
 namespace Geometry {
 
-CompositeImplicitFunction::CompositeImplicitFunction() {}
-
-CompositeImplicitFunction::~CompositeImplicitFunction() {}
-
 bool CompositeImplicitFunction::addFunction(
     Mantid::Geometry::MDImplicitFunction_sptr constituentFunction) {
   bool bSuccess = false;

@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/Crystal/HKLFilter.cpp
 	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
-	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
@@ -189,8 +188,10 @@ set ( INC_FILES
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
+	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
+	inc/MantidGeometry/Instrument_fwd.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h

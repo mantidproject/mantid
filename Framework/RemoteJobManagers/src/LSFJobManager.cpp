@@ -1096,9 +1096,9 @@ LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
 const std::string
 LSFJobManager::filterPACFilename(const std::string &PACName) const {
   // discard up to last / (path)
-  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  std::string name = PACName.substr(PACName.rfind('/') + 1);
   // remove trailing parameters
-  size_t ast = name.find("*");
+  size_t ast = name.find('*');
   if (std::string::npos != ast)
     name.replace(ast, std::string::npos, "");
   return name;
@@ -1324,10 +1324,10 @@ LSFJobManager::makeHeaders(const std::string &contentType,
         std::pair<std::string, std::string>("Content-Type", contentType));
   }
   if (!token.empty()) {
-    headers.insert(std::make_pair("Cookie", token));
+    headers.emplace("Cookie", token);
   }
   if (!acceptType.empty()) {
-    headers.insert(std::make_pair("Accept", acceptType));
+    headers.emplace("Accept", acceptType);
   }
 
   return headers;

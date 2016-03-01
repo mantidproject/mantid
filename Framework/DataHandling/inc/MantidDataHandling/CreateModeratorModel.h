@@ -32,19 +32,19 @@ namespace DataHandling {
  */
 class DLLExport CreateModeratorModel : public API::Algorithm {
 public:
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates the given moderator model and attaches it to the input "
            "workspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace DataHandling

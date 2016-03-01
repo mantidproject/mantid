@@ -40,60 +40,62 @@ public:
   FileBackedExperimentInfo(const std::string &filename,
                            const std::string &path);
 
-  ExperimentInfo *cloneExperimentInfo() const;
+  ExperimentInfo *cloneExperimentInfo() const override;
 
-  const std::string toString() const;
+  const std::string toString() const override;
 
-  Geometry::Instrument_const_sptr getInstrument() const;
+  Geometry::Instrument_const_sptr getInstrument() const override;
 
-  const Geometry::ParameterMap &instrumentParameters() const;
+  const Geometry::ParameterMap &instrumentParameters() const override;
 
-  Geometry::ParameterMap &instrumentParameters();
+  Geometry::ParameterMap &instrumentParameters() override;
 
-  const Geometry::ParameterMap &constInstrumentParameters() const;
+  const Geometry::ParameterMap &constInstrumentParameters() const override;
 
-  void populateInstrumentParameters();
+  void populateInstrumentParameters() override;
 
-  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap) override;
 
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+  void swapInstrumentParameters(Geometry::ParameterMap &pmap) override;
 
-  void cacheDetectorGroupings(const det2group_map &mapping);
+  void cacheDetectorGroupings(const det2group_map &mapping) override;
 
-  const std::vector<detid_t> &getGroupMembers(const detid_t detID) const;
+  const std::vector<detid_t> &
+  getGroupMembers(const detid_t detID) const override;
 
-  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
+  Geometry::IDetector_const_sptr
+  getDetectorByID(const detid_t detID) const override;
 
-  void setModeratorModel(ModeratorModel *source);
+  void setModeratorModel(ModeratorModel *source) override;
 
-  ModeratorModel &moderatorModel() const;
+  ModeratorModel &moderatorModel() const override;
 
-  void setChopperModel(ChopperModel *chopper, const size_t index = 0);
+  void setChopperModel(ChopperModel *chopper, const size_t index = 0) override;
 
-  ChopperModel &chopperModel(const size_t index = 0) const;
+  ChopperModel &chopperModel(const size_t index = 0) const override;
 
-  const Sample &sample() const;
+  const Sample &sample() const override;
 
-  Sample &mutableSample();
+  Sample &mutableSample() override;
 
-  const Run &run() const;
+  const Run &run() const override;
 
-  Run &mutableRun();
+  Run &mutableRun() override;
 
-  Kernel::Property *getLog(const std::string &log) const;
+  Kernel::Property *getLog(const std::string &log) const override;
 
-  double getLogAsSingleValue(const std::string &log) const;
+  double getLogAsSingleValue(const std::string &log) const override;
 
-  int getRunNumber() const;
+  int getRunNumber() const override;
 
-  Kernel::DeltaEMode::Type getEMode() const;
+  Kernel::DeltaEMode::Type getEMode() const override;
 
-  double getEFixed(const detid_t detID) const;
+  double getEFixed(const detid_t detID) const override;
 
   double getEFixed(const Geometry::IDetector_const_sptr detector =
-                       Geometry::IDetector_const_sptr()) const;
+                       Geometry::IDetector_const_sptr()) const override;
 
-  void setEFixed(const detid_t detID, const double value);
+  void setEFixed(const detid_t detID, const double value) override;
 
 private:
   void populateIfNotLoaded() const;

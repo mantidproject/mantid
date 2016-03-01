@@ -1108,7 +1108,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
         max_indexed = num_indexed;
       }
       if (num_indexed >= max_indexed) {
-        selected_dirs.push_back(V3D(dir_temp));
+        selected_dirs.emplace_back(dir_temp);
       }
     }
   }
@@ -1948,10 +1948,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   for (size_t row = 0; row < 3; row++)
     for (size_t col = 0; col < 3; col++) {
-      if ((boost::math::isnan)(UB[row][col])) {
-        return false;
-      }
-      if ((boost::math::isinf)(UB[row][col])) {
+      if ((boost::math::isnan)(UB[row][col]) ||
+          (boost::math::isinf)(UB[row][col])) {
         return false;
       }
     }
@@ -1959,12 +1957,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
   double det = UB.determinant();
 
   double abs_det = fabs(det);
-  if (abs_det > 10 || abs_det < 1e-12) // UB not found correctly
-  {
-    return false;
-  }
 
-  return true;
+  return !(abs_det > 10 || abs_det < 1e-12);
 }
 
 /**
@@ -2138,13 +2132,13 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
     hkl = UB_inverse * q_vector / (2.0 * M_PI);
     if (ValidIndex(hkl, tolerance)) {
       count++;
-      miller_indices.push_back(V3D(hkl));
+      miller_indices.emplace_back(hkl);
       h_error = fabs(round(hkl[0]) - hkl[0]);
       k_error = fabs(round(hkl[1]) - hkl[1]);
       l_error = fabs(round(hkl[2]) - hkl[2]);
       ave_error += h_error + k_error + l_error;
     } else
-      miller_indices.push_back(V3D(0, 0, 0));
+      miller_indices.emplace_back(0, 0, 0);
   }
 
   if (count > 0) {

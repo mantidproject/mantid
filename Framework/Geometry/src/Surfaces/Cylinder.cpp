@@ -52,15 +52,6 @@ Cylinder::Cylinder()
   Cylinder::setBaseEqn();
 }
 
-Cylinder::Cylinder(const Cylinder &A)
-    : Quadratic(A), Centre(A.Centre), Normal(A.Normal), Nvec(A.Nvec),
-      Radius(A.Radius)
-/**
- Standard Copy Constructor
- @param A :: Cyclinder to copy
- */
-{}
-
 Cylinder *Cylinder::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
@@ -77,23 +68,6 @@ Makes a clone (implicit virtual copy constructor)
 */
 {
   return std::unique_ptr<Cylinder>(doClone());
-}
-
-Cylinder &Cylinder::operator=(const Cylinder &A)
-/**
- Standard Assignment operator
- @param A :: Cylinder object to copy
- @return *this
- */
-{
-  if (this != &A) {
-    Quadratic::operator=(A);
-    Centre = A.Centre;
-    Normal = A.Normal;
-    Nvec = A.Nvec;
-    Radius = A.Radius;
-  }
-  return *this;
 }
 
 int Cylinder::setSurface(const std::string &Pstr)

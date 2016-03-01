@@ -9,7 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -54,14 +54,14 @@ public:
   /// Default constructor.
   WorkspaceGroup();
   /// Destructor
-  ~WorkspaceGroup();
+  ~WorkspaceGroup() override;
   /// Return a string ID of the class
-  virtual const std::string id() const { return "WorkspaceGroup"; }
+  const std::string id() const override { return "WorkspaceGroup"; }
   /// Returns a formatted string detailing the contents of the group
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
   /// The collection itself is considered to take up no space
-  virtual size_t getMemorySize() const { return 0; }
+  size_t getMemorySize() const override { return 0; }
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -117,7 +117,7 @@ protected:
   const WorkspaceGroup &operator=(const WorkspaceGroup &);
 
 private:
-  virtual WorkspaceGroup *doClone() const {
+  WorkspaceGroup *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
   }
   /// ADS removes a member of this group using this method. It doesn't send
@@ -145,7 +145,7 @@ private:
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

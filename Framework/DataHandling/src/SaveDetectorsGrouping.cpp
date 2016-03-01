@@ -50,11 +50,11 @@ SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
-      new API::WorkspaceProperty<DataObjects::GroupingWorkspace>(
+      make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
   declareProperty(
-      new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
+      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 
@@ -94,8 +94,6 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     auto it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
       std::vector<detid_t> tempvector;
-      // groupwkspmap.insert(std::pair<int, std::vector<detid_t> >(groupid,
-      // tempvector));
       groupwkspmap[groupid] = tempvector;
     }
     it = groupwkspmap.find(groupid);
@@ -111,7 +109,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
                     << " has no spectrum.  Impossible!" << std::endl;
       throw;
     }
-    std::set<detid_t> detids = mspec->getDetectorIDs();
+    auto detids = mspec->getDetectorIDs();
     if (detids.size() != 1) {
       g_log.error() << "Spectrum " << mspec->getSpectrumNo() << " has "
                     << detids.size() << " detectors.  Not allowed situation!"

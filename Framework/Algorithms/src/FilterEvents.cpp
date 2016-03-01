@@ -55,26 +55,26 @@ FilterEvents::~FilterEvents() {}
 /** Declare Inputs
  */
 void FilterEvents::init() {
-  declareProperty(new API::WorkspaceProperty<EventWorkspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "SplitterWorkspace", "", Direction::Input),
                   "An input SpilltersWorskpace for filtering");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                   "The base name to use for the output workspace");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace",
-                                                        "", Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Optional output for the information of each splitter "
-                  "workspace index.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional output for the information of each splitter "
+      "workspace index.");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace",
-                                             "TOFCorrectWS", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
       "Name of output workspace for TOF correction factor. ");
 
   declareProperty("FilterByPulseTime", false,
@@ -91,38 +91,32 @@ void FilterEvents::init() {
                   "and continuous. ");
 
   // TOF correction
-  vector<string> corrtypes;
-  corrtypes.push_back("None");
-  corrtypes.push_back("Customized");
-  corrtypes.push_back("Direct");
-  corrtypes.push_back("Elastic");
-  corrtypes.push_back("Indirect");
+  vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
+                           "Indirect"};
   declareProperty("CorrectionToSample", "None",
                   boost::make_shared<StringListValidator>(corrtypes),
                   "Type of correction on neutron events to sample time from "
                   "detector time. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "DetectorTOFCorrectionWorkspace", "", Direction::Input,
-      PropertyMode::Optional);
-  declareProperty(tablewsprop, "Name of table workspace containing the log "
-                               "time correction factor for each detector. ");
-  setPropertySettings(
-      "DetectorTOFCorrectionWorkspace",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Customized"));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "DetectorTOFCorrectionWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Name of table workspace containing the log "
+                  "time correction factor for each detector. ");
+  setPropertySettings("DetectorTOFCorrectionWorkspace",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
-  setPropertySettings(
-      "IncidentEnergy",
-      new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
+  setPropertySettings("IncidentEnergy",
+                      Kernel::make_unique<VisibleWhenProperty>(
+                          "CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
-  vector<string> spec_no_det;
-  spec_no_det.push_back("Skip");
-  spec_no_det.push_back("Skip only if TOF correction");
+  vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};
   declareProperty("SpectrumWithoutDetector", "Skip",
                   boost::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");
@@ -139,9 +133,9 @@ void FilterEvents::init() {
   declareProperty("DBSpectrum", EMPTY_INT(),
                   "Spectrum (workspace index) for debug purpose. ");
 
-  declareProperty(
-      new ArrayProperty<string>("OutputWorkspaceNames", Direction::Output),
-      "List of output workspaces names");
+  declareProperty(Kernel::make_unique<ArrayProperty<string>>(
+                      "OutputWorkspaceNames", Direction::Output),
+                  "List of output workspaces names");
 
   declareProperty(
       "RelativeTime", false,
@@ -507,9 +501,7 @@ void FilterEvents::createOutputWorkspaces() {
   if (m_hasInfoWS) {
     for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ir) {
       API::TableRow row = m_informationWS->getRow(ir);
-      int &indexws = row.Int(0);
-      std::string &info = row.String(1);
-      infomap.insert(std::make_pair(indexws, info));
+      infomap.emplace(row.Int(0), row.String(1));
     }
   }
 
@@ -528,16 +520,13 @@ void FilterEvents::createOutputWorkspaces() {
   }
 
   // Set up new workspaces
-  std::set<int>::iterator groupit;
   int numoutputws = 0;
   double numnewws = static_cast<double>(m_workGroupIndexes.size());
   double wsgindex = 0.;
 
-  for (groupit = m_workGroupIndexes.begin();
-       groupit != m_workGroupIndexes.end(); ++groupit) {
+  for (auto const wsgroup : m_workGroupIndexes) {
     // Generate new workspace name
     bool add2output = true;
-    int wsgroup = *groupit;
     std::stringstream wsname;
     if (wsgroup >= 0) {
       wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
@@ -556,7 +545,7 @@ void FilterEvents::createOutputWorkspaces() {
                 "EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws,
                                                            false);
-    m_outputWS.insert(std::make_pair(wsgroup, optws));
+    m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
     if (m_hasInfoWS) {
@@ -588,7 +577,8 @@ void FilterEvents::createOutputWorkspaces() {
 
       // Set (property) to output workspace and set to ADS
       declareProperty(
-          new API::WorkspaceProperty<DataObjects::EventWorkspace>(
+          Kernel::make_unique<
+              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
               propertynamess.str(), wsname.str(), Direction::Output),
           "Output");
       setProperty(propertynamess.str(), optws);
@@ -740,7 +730,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     row >> detid >> offset_factor;
     if (offset_factor >= 0 && offset_factor <= 1) {
       // Valid offset (factor value)
-      toffactormap.insert(make_pair(detid, offset_factor));
+      toffactormap.emplace(detid, offset_factor);
     } else {
       // Error, throw!
       stringstream errss;
@@ -754,7 +744,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     if (hasshift) {
       double shift;
       row >> shift;
-      tofshiftmap.insert(make_pair(detid, shift));
+      tofshiftmap.emplace(detid, shift);
     }
   } // ENDFOR(row i)
 
@@ -784,8 +774,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
       const DataObjects::EventList events = m_eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
+      auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
         stringstream errss;
@@ -796,7 +785,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         throw runtime_error(errss.str());
       }
       detid_t detid = 0;
-      for (detit = detids.begin(); detit != detids.end(); ++detit)
+      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
         detid = *detit;
       vecDetIDs[i] = detid;
     }
@@ -880,7 +869,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 
@@ -912,8 +901,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     return;
   }
 
-  std::vector<std::string> lognames;
-  this->getTimeSeriesLogNames(lognames);
+  auto lognames = this->getTimeSeriesLogNames();
   g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = "
                 << lognames.size() << " to " << m_outputWS.size()
                 << " outptu workspaces. \n";
@@ -925,8 +913,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     DataObjects::EventWorkspace_sptr opws = wsiter->second;
 
     // Generate a list of splitters for current output workspace
-    Kernel::TimeSplitterType splitters;
-    generateSplitters(wsindex, splitters);
+    Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
 
     g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
                   << ": Name = " << opws->name()
@@ -982,7 +969,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
           int index = wsiter->first;
           DataObjects::EventList *output_el =
               wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          outputs.emplace(index, output_el);
         }
       }
 
@@ -1030,17 +1017,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 /** Generate splitters for specified workspace index as a subset of
  * m_splitters
  */
-void FilterEvents::generateSplitters(int wsindex,
-                                     Kernel::TimeSplitterType &splitters) {
-  splitters.clear();
+Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
+  Kernel::TimeSplitterType splitters;
   for (auto splitter : m_splitters) {
     int index = splitter.index();
     if (index == wsindex) {
       splitters.push_back(splitter);
     }
   }
-
-  return;
+  return splitters;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1073,9 +1058,10 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
 
 //----------------------------------------------------------------------------------------------
 /** Get all filterable logs' names
+ * @returns Vector of names of logs
  */
-void FilterEvents::getTimeSeriesLogNames(std::vector<std::string> &lognames) {
-  lognames.clear();
+std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
+  std::vector<std::string> lognames;
 
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
@@ -1086,9 +1072,9 @@ void FilterEvents::getTimeSeriesLogNames(std::vector<std::string> &lognames) {
       std::string pname = timeprop->name();
       lognames.push_back(pname);
     }
-  } // FOR
+  }
 
-  return;
+  return lognames;
 }
 
 } // namespace Mantid

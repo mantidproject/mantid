@@ -8,7 +8,7 @@
 #include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/make_shared.hpp>
-#include <set>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Geometry {
@@ -29,7 +29,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL AbstractSymmetryElementGenerator {
 public:
-  virtual ~AbstractSymmetryElementGenerator() {}
+  virtual ~AbstractSymmetryElementGenerator() = default;
 
   /// Must generate a valid SymmetryElement from the given operation.
   virtual SymmetryElement_sptr
@@ -51,12 +51,9 @@ typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
 class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementIdentityGenerator() {}
-  ~SymmetryElementIdentityGenerator() {}
-
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementTranslationGenerator
@@ -67,12 +64,9 @@ public:
 class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementTranslationGenerator() {}
-  ~SymmetryElementTranslationGenerator() {}
-
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementInversionGenerator
@@ -83,12 +77,9 @@ public:
 class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  SymmetryElementInversionGenerator() {}
-  ~SymmetryElementInversionGenerator() {}
-
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 };
 
 MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
@@ -111,8 +102,6 @@ MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
     : public AbstractSymmetryElementGenerator {
 public:
-  ~SymmetryElementWithAxisGenerator() {}
-
 protected:
   V3R determineTranslation(const SymmetryOperation &operation) const;
   V3R determineAxis(const Kernel::IntMatrix &matrix) const;
@@ -131,19 +120,17 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
-  SymmetryElementRotationGenerator() {}
-  ~SymmetryElementRotationGenerator() {}
-
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 
 protected:
   SymmetryElementRotation::RotationSense
   determineRotationSense(const SymmetryOperation &operation,
                          const V3R &rotationAxis) const;
 
-  std::string determineSymbol(const SymmetryOperation &operation) const;
+  std::string
+  determineSymbol(const SymmetryOperation &operation) const override;
 };
 
 /** @class SymmetryElementMirrorGenerator
@@ -158,15 +145,13 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
-  SymmetryElementMirrorGenerator() {}
-  ~SymmetryElementMirrorGenerator() {}
-
   SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) const;
-  bool canProcess(const SymmetryOperation &operation) const;
+  generateElement(const SymmetryOperation &operation) const override;
+  bool canProcess(const SymmetryOperation &operation) const override;
 
 protected:
-  std::string determineSymbol(const SymmetryOperation &operation) const;
+  std::string
+  determineSymbol(const SymmetryOperation &operation) const override;
 
   static std::map<V3R, std::string> g_glideSymbolMap;
 };
@@ -233,7 +218,7 @@ protected:
 */
 class MANTID_GEOMETRY_DLL SymmetryElementFactoryImpl {
 public:
-  virtual ~SymmetryElementFactoryImpl() {}
+  virtual ~SymmetryElementFactoryImpl() = default;
 
   SymmetryElement_sptr createSymElement(const SymmetryOperation &operation);
 
@@ -254,9 +239,6 @@ public:
   }
 
 protected:
-  SymmetryElementFactoryImpl()
-      : m_generators(), m_generatorNames(), m_prototypes() {}
-
   bool isSubscribed(const std::string &generatorClassName) const;
   void subscribe(const AbstractSymmetryElementGenerator_sptr &generator,
                  const std::string &generatorClassName);
@@ -268,7 +250,7 @@ protected:
                        const SymmetryElement_sptr &prototype);
 
   std::vector<AbstractSymmetryElementGenerator_sptr> m_generators;
-  std::set<std::string> m_generatorNames;
+  std::unordered_set<std::string> m_generatorNames;
   std::map<std::string, SymmetryElement_sptr> m_prototypes;
 
 private:

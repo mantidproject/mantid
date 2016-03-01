@@ -2,10 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -30,15 +33,15 @@ void Q1DWeighted::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace that will contain the I(Q) data");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace that will contain the I(Q) data");
-  declareProperty(
-      new ArrayProperty<double>("OutputBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
       "x_2,\\dots,x_n</math>");
 
@@ -60,7 +63,7 @@ void Q1DWeighted::init() {
   declareProperty("WedgeOffset", 0.0, positiveDouble,
                   "Wedge offset relative to the horizontal axis, in degrees.");
   declareProperty(
-      new WorkspaceProperty<WorkspaceGroup>(
+      make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
 
@@ -331,7 +334,7 @@ void Q1DWeighted::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
   for (auto &wedgeWorkspace : wedgeWorkspaces) {
     wsgroup->addWorkspace(wedgeWorkspace);

@@ -54,8 +54,6 @@ struct MANTID_KERNEL_DLL NeutronAtom {
               const double inc_b_img, const double coh_xs, const double inc_xs,
               const double tot_xs, const double abs_xs);
 
-  NeutronAtom(const NeutronAtom &other);
-
   NeutronAtom();
 
   /// The atomic number, or number of protons, for the atom.

@@ -53,49 +53,51 @@ namespace SliceViewer
     PeakOverlayMultiCross(PeaksPresenter* const peaksPresenter, QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
                           const QColor& peakColour);
     /// Destructor
-    virtual ~PeakOverlayMultiCross();
+    ~PeakOverlayMultiCross() override;
     /// Set the slice point at position.
-    virtual void setSlicePoint(const double& point, const std::vector<bool>& viewablePeaks);
+    void setSlicePoint(const double &point,
+                       const std::vector<bool> &viewablePeaks) override;
     /// Hide the view.
-    virtual void hideView();
+    void hideView() override;
     /// Show the view.
-    virtual void showView();
+    void showView() override;
     /// Update the view.
-    virtual void updateView();
+    void updateView() override;
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
+    void
+    movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
     /// Change foreground colour
-    virtual void changeForegroundColour(const QColor);
+    void changeForegroundColour(const QColor) override;
     /// Change background colour
-    virtual void changeBackgroundColour(const QColor);
+    void changeBackgroundColour(const QColor) override;
     /// Get a bounding box for this peak.
-    virtual PeakBoundingBox getBoundingBox(const int peakIndex) const;
+    PeakBoundingBox getBoundingBox(const int peakIndex) const override;
     /// Changes the size of the overlay to be the requested fraction of the current view width.
-    virtual void changeOccupancyInView(const double fraction);
+    void changeOccupancyInView(const double fraction) override;
     /// Changes the size of the overlay to be the requested fraction of the view depth.
-    virtual void changeOccupancyIntoView(const double fraction);
+    void changeOccupancyIntoView(const double fraction) override;
     /// Get the occupancy in the view.
-    virtual double getOccupancyInView() const;
+    double getOccupancyInView() const override;
     /// Get the occupancy into the view.
-    virtual double getOccupancyIntoView() const;
+    double getOccupancyIntoView() const override;
     /// Flag indicating that the peak is position only.
-    bool positionOnly() const;
+    bool positionOnly() const override;
     /// Get the effective radius.
-    virtual double getRadius() const;
+    double getRadius() const override;
     /// Is the background radius visible
-    virtual bool isBackgroundShown() const;
+    bool isBackgroundShown() const override;
     /// Get the foreground colour
-    virtual QColor getForegroundColour() const;
+    QColor getForegroundColour() const override;
     /// Get the background colour
-    virtual QColor getBackgroundColour() const;
+    QColor getBackgroundColour() const override;
 
     /// Take settings from another view
-    virtual void takeSettingsFrom(const PeakOverlayView * const);
+    void takeSettingsFrom(const PeakOverlayView *const) override;
 
   private:
 
     /// Pure virtual on PeakOverlayInteractive
-    virtual void doPaintPeaks(QPaintEvent*);
+    void doPaintPeaks(QPaintEvent *) override;
 
     /// Physical model of the spacial cross peaks
     VecPhysicalCrossPeak m_physicalPeaks;

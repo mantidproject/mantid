@@ -46,17 +46,17 @@ public:
   DerivMinimizer();
   DerivMinimizer(const double stepSize, const double tolerance);
   /// Destructor
-  ~DerivMinimizer();
+  ~DerivMinimizer() override;
 
   /// Do one iteration.
-  bool iterate(size_t);
+  bool iterate(size_t) override;
   /// Return current value of the cost function
-  double costFunctionVal();
+  double costFunctionVal() override;
   /// Calculate the covariance matrix.
   void calCovarianceMatrix(gsl_matrix *covar, double epsrel = 0.0001);
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 0);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations = 0) override;
   /// Set maximum value of the gradient at which iterations can stop
   void setStopGradient(const double value);
 

@@ -35,13 +35,14 @@ CreateCalFileByNames::CreateCalFileByNames() : API::Algorithm() {}
  */
 void CreateCalFileByNames::init() {
   declareProperty(
-      new WorkspaceProperty<>("InstrumentWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InstrumentWorkspace", "", Direction::Input,
+          boost::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest. "
       "You can use LoadEmptyInstrument to create such a workspace.");
-  declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Save, ".cal"),
-      "The name of the output CalFile");
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::Save, ".cal"),
+                  "The name of the output CalFile");
   declareProperty(
       "GroupNames", "",
       "A string of the instrument component names to use as separate groups. "
@@ -103,7 +104,7 @@ void CreateCalFileByNames::exec() {
 
   if (current.get()) {
     top_group = group_map[current->getName()]; // Return 0 if not in map
-    assemblies.push(std::make_pair(current, top_group));
+    assemblies.emplace(current, top_group);
   }
 
   std::string filename = getProperty("GroupingFilename");
@@ -141,7 +142,7 @@ void CreateCalFileByNames::exec() {
             child_group = group_map[currentchild->getName()];
             if (child_group == 0)
               child_group = top_group;
-            assemblies.push(std::make_pair(currentchild, child_group));
+            assemblies.emplace(currentchild, child_group);
           }
         }
       }

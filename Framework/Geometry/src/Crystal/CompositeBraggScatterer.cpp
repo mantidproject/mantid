@@ -188,7 +188,7 @@ void CompositeBraggScatterer::redeclareProperties() {
     for (auto &property : properties) {
       std::string propertyName = property->name();
       if (!existsProperty(propertyName)) {
-        declareProperty(property->clone());
+        declareProperty(std::unique_ptr<Property>(property->clone()));
       }
     }
   }
@@ -208,9 +208,8 @@ CompositeBraggScatterer::getPropertyCountMap() const {
 
   std::vector<Property *> compositeProperties = getProperties();
   for (auto &compositeProperty : compositeProperties) {
-    propertyUseCount.insert(std::make_pair(compositeProperty->name(), 0));
+    propertyUseCount.emplace(compositeProperty->name(), 0);
   }
-
   return propertyUseCount;
 }
 

@@ -1,16 +1,17 @@
 #ifndef MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 #define MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/RotateInstrumentComponent.h"
-#include "MantidDataHandling/MoveInstrumentComponent.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
