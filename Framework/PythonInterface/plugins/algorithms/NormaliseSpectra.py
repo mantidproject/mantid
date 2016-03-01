@@ -2,8 +2,9 @@
 from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
+
 import numpy as np
-import math
+
 
 class NormaliseSpectra(DataProcessorAlgorithm):
 
