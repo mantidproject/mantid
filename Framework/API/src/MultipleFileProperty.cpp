@@ -262,7 +262,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // load a single (and possibly existing) file within a token, but which
       // has unexpected zero
       // padding, or some other anomaly.
-      if (flattenFileNames(f).size() == 0)
+      if (flattenFileNames(f).empty())
         f.push_back(std::vector<std::string>(1, *plusTokenString));
 
       if (plusTokenStrings.size() > 1) {

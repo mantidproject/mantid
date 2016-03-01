@@ -493,7 +493,7 @@ void DiffractionFocussing2::execEvent() {
     }
 
     // Now you set the X axis to the X you saved before.
-    if (group2xvector.size() > 0) {
+    if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
         out->setX(workspaceIndex, (git->second));

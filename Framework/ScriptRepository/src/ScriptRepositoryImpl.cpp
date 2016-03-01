@@ -1527,7 +1527,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     } // end loop FOREACH entry in local json
 
     // delete the entries to be deleted in json file
-    if (entries_to_delete.size() > 0) {
+    if (!entries_to_delete.empty()) {
 
       // clear the auto_update flag from the folders if the user deleted files
       for (const auto &folder : folders_of_deleted) {

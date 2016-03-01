@@ -920,7 +920,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
                   << "; Number of splitters = " << splitters.size() << ".\n";
 
     // Skip output workspace has ZERO splitters
-    if (splitters.size() == 0) {
+    if (splitters.empty()) {
       g_log.warning() << "[FilterEvents] Workspace " << opws->name()
                       << " Indexed @ " << wsindex
                       << " won't have logs splitted due to zero splitter size. "

@@ -835,7 +835,7 @@ void LeBailFunction::groupPeaks(
                           << " causes grouping "
                           << "peak over at maximum TOF = " << xmax << ".\n";
 
-      if (peakgroup.size() > 0) {
+      if (!peakgroup.empty()) {
         vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroupcopy =
             peakgroup;
         peakgroupvec.push_back(peakgroupcopy);

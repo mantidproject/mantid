@@ -163,7 +163,7 @@ void ConvertUnitsUsingDetectorTable::exec() {
 
   // If the units conversion has flipped the ascending direction of X, reverse
   // all the vectors
-  if (outputWS->dataX(0).size() &&
+  if (!outputWS->dataX(0).empty() &&
       (outputWS->dataX(0).front() > outputWS->dataX(0).back() ||
        outputWS->dataX(m_numberOfSpectra / 2).front() >
            outputWS->dataX(m_numberOfSpectra / 2).back())) {

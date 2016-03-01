@@ -63,7 +63,7 @@ std::istream &MantidWebServiceAPIHelper::httpGet(
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     g_cookies = newCookies;
   }
 
@@ -152,7 +152,7 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     g_cookies = newCookies;
   }
 

@@ -936,7 +936,7 @@ void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
   // Check
   if (m_vecPeakCentre.size() != m_vecPeakFWHM.size())
     throw runtime_error("Number of peak centres and FWHMs are different!");
-  else if (m_vecPeakCentre.size() == 0)
+  else if (m_vecPeakCentre.empty())
     throw runtime_error(
         "There is not any peak entry in input table workspace.");
 
@@ -950,7 +950,7 @@ Workspace2D_sptr
 RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
                          double numfwhm) {
   // Check
-  if (m_vecPeakCentre.size() == 0)
+  if (m_vecPeakCentre.empty())
     throw runtime_error("RemovePeaks has not been setup yet. ");
 
   // Initialize vectors

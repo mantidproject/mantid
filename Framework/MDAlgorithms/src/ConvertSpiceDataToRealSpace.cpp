@@ -411,7 +411,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   } // ENDFOR (icol)
 
   // Check detectors' names
-  if (anodelist.size() == 0) {
+  if (anodelist.empty()) {
     std::stringstream errss;
     errss << "There is no log name starting with " << anodelogprefix
           << " for detector. ";

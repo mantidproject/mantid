@@ -662,7 +662,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   }
 
   // 2. Record for the best parameters
-  if (bestparammap.size() == 0) {
+  if (bestparammap.empty()) {
     // No record yet
     duplicateParameters(parammap, bestparammap);
   } else if (recordparameter) {
@@ -796,7 +796,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
 double RefinePowderInstrumentParameters3::calculateFunction(
     map<string, Parameter> parammap, vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
-  if (parammap.size() > 0)
+  if (!parammap.empty())
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
