@@ -12,21 +12,6 @@ GeometryInfoFactory::GeometryInfoFactory(const MatrixWorkspace &workspace)
   if (!m_instrument)
     throw std::runtime_error("Workspace " + workspace.getName() +
                              " does not contain an instrument!");
-
-  // TODO: Create these only when needed (thread-safe via atomics)
-  m_source = m_instrument->getSource();
-  m_sample = m_instrument->getSample();
-
-  if (!m_source)
-    throw std::runtime_error("Instrument in workspace " + workspace.getName() +
-                             " does not contain source!");
-  if (!m_sample)
-    throw std::runtime_error("Instrument in workspace " + workspace.getName() +
-                             "  does not contain sample!");
-
-  m_sourcePos = m_source->getPos();
-  m_samplePos = m_sample->getPos();
-  m_L1 = getSource().getDistance(getSample());
 }
 
 GeometryInfo GeometryInfoFactory::create(const size_t index) const {
@@ -43,17 +28,52 @@ const Geometry::Instrument &GeometryInfoFactory::getInstrument() const {
 }
 
 const Geometry::IComponent &GeometryInfoFactory::getSource() const {
+  std::call_once(m_sourceCached, &GeometryInfoFactory::cacheSource, this);
   return *m_source;
 }
 
 const Geometry::IComponent &GeometryInfoFactory::getSample() const {
+  std::call_once(m_sampleCached, &GeometryInfoFactory::cacheSample, this);
   return *m_sample;
 }
 
-Kernel::V3D GeometryInfoFactory::getSourcePos() const { return m_sourcePos; }
+Kernel::V3D GeometryInfoFactory::getSourcePos() const {
+  std::call_once(m_sourceCached, &GeometryInfoFactory::cacheSource, this);
+  return m_sourcePos;
+}
 
-Kernel::V3D GeometryInfoFactory::getSamplePos() const { return m_samplePos; }
+Kernel::V3D GeometryInfoFactory::getSamplePos() const {
+  std::call_once(m_sampleCached, &GeometryInfoFactory::cacheSample, this);
+  return m_samplePos;
+}
 
-double GeometryInfoFactory::getL1() const { return m_L1; }
+double GeometryInfoFactory::getL1() const {
+  std::call_once(m_L1Cached, &GeometryInfoFactory::cacheL1, this);
+  return m_L1;
+}
+
+void GeometryInfoFactory::cacheSource() const {
+  m_source = m_instrument->getSource();
+  if (!m_source)
+    throw std::runtime_error("Instrument in workspace " +
+                             m_workspace.getName() +
+                             " does not contain source!");
+  m_sourcePos = m_source->getPos();
+}
+
+void GeometryInfoFactory::cacheSample() const {
+  m_sample = m_instrument->getSample();
+  if (!m_sample)
+    throw std::runtime_error("Instrument in workspace " +
+                             m_workspace.getName() +
+                             "  does not contain sample!");
+  m_samplePos = m_sample->getPos();
+}
+
+void GeometryInfoFactory::cacheL1() const {
+  std::call_once(m_sourceCached, &GeometryInfoFactory::cacheSource, this);
+  std::call_once(m_sampleCached, &GeometryInfoFactory::cacheSample, this);
+  m_L1 = m_source->getDistance(*m_sample);
+}
 }
 }

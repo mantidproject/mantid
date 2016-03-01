@@ -42,12 +42,12 @@ public:
   }
 
   void test_create() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_THROWS_NOTHING(factory.create(0).getDetector());
   }
 
   void test_getInstrument() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     // This might fail if we get a null instrument, so we test for throw. Since
     // workspace->getInstrument() creates a copy of the instrument there is no
     // point in attempting to verify that the pointer is "correct".
@@ -55,27 +55,27 @@ public:
   }
 
   void test_getSource() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_THROWS_NOTHING(factory.getSource());
   }
 
   void test_getSample() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_THROWS_NOTHING(factory.getSample());
   }
 
   void test_getSourcePos() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_EQUALS(factory.getSourcePos(), Kernel::V3D(-20.0, 0.0, 0.0));
   }
 
   void test_getSamplePos() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_EQUALS(factory.getSamplePos(), Kernel::V3D(0.0, 0.0, 0.0));
   }
 
   void test_getL1() {
-    auto factory = GeometryInfoFactory(m_workspace);
+    GeometryInfoFactory factory(m_workspace);
     TS_ASSERT_EQUALS(factory.getL1(), 20.0);
   }
 
