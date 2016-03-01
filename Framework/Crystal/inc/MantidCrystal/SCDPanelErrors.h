@@ -46,7 +46,8 @@ public:
   /**
      * Constructor
      * @param pwk       - The PeaksWorkspace
-     * @param Component_name - The comma separated list of bank names for which this
+     * @param Component_name - The comma separated list of bank names for which
+    *this
     *Function
      *                     this Function calculates the associated errors in
     *qx,qy,qz

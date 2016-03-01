@@ -135,7 +135,7 @@ void Unit::initialize(const double &_l1, const double &_l2,
 }
 
 //---------------------------------------------------------------------------------------
-/** Perform the conversion to TOF on a vector of data 
+/** Perform the conversion to TOF on a vector of data
 @param xdata
 @param ydata
 @param _l1
@@ -156,7 +156,7 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleToTOF(xdata[i]);
 }
 
-/** Convert a single value to TOF 
+/** Convert a single value to TOF
 @param xvalue
 @param l1
 @param l2
@@ -195,7 +195,7 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleFromTOF(xdata[i]);
 }
 
-/** Convert a single value from TOF 
+/** Convert a single value from TOF
 @param xvalue
 @param l1
 @param l2
