@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include <fstream>
 
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -164,8 +163,9 @@ Mantid::API::Grouping MuonGroupingHelper::parseGroupingTable() const {
  * Fills in the grouping table using information from provided Grouping struct.
  *
  * @param grouping :: [input] Grouping struct to use for filling the table
+ * @returns Index of default group/group pair
  */
-void MuonGroupingHelper::fillGroupingTable(
+int MuonGroupingHelper::fillGroupingTable(
     const Mantid::API::Grouping &grouping) {
   // Add groups to a table
   for (int gi = 0; gi < static_cast<int>(grouping.groups.size()); gi++) {
@@ -200,20 +200,19 @@ void MuonGroupingHelper::fillGroupingTable(
   m_uiForm.groupDescription->setText(grouping.description.c_str());
 
   // Select default element
-  setGroupGroupPair(grouping.defaultName);
+  return getGroupGroupPairIndex(grouping.defaultName);
 }
 
 /**
- * Set Group / Group Pair name
- *
- * @param name :: Name you want to set the front Group / Group Pair name to
+ * Get the index of the named Group / Group Pair
+ * @param name :: Name of the Group / Group Pair
+ * returns Index of the group/pair of that name
  */
-void MuonGroupingHelper::setGroupGroupPair(const std::string &name) {
+int MuonGroupingHelper::getGroupGroupPairIndex(const std::string &name) {
   QString qsname(name.c_str());
   for (int i = 0; i < m_uiForm.frontGroupGroupPairComboBox->count(); i++) {
     if (m_uiForm.frontGroupGroupPairComboBox->itemText(i) == qsname) {
-      m_MuonAnalysis->setGroupOrPairToPlot(i);
-      break;
+      return i;
     }
   }
 }
@@ -256,7 +255,6 @@ std::vector<int> MuonGroupingHelper::whichGroupToWhichRow() const {
 /**
  * create 'map' relating pair number to row number in pair table
  *
- * @param m_uiForm :: The UI form
  * @returns :: The 'map' of pair number to table row number
  */
 std::vector<int> MuonGroupingHelper::whichPairToWhichRow() const {

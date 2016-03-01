@@ -22,7 +22,6 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
@@ -96,10 +95,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_fitDataTab(NULL),
       m_resultTableTab(NULL), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
-      m_currentLabel("NoLabelSet"), m_numPeriods(0) {
-  m_groupingHelper =
-      Kernel::make_unique<MuonGroupingHelper>(this, this->m_uiForm);
-}
+      m_currentLabel("NoLabelSet"), m_numPeriods(0),
+      m_groupingHelper(this->m_uiForm) {}
 
 /**
  * Initialize local Python environmnet.
@@ -677,7 +674,7 @@ void MuonAnalysis::runSaveGroupButton() {
 
   if (!groupingFile.isEmpty()) {
     Mantid::API::Grouping groupingToSave =
-        m_groupingHelper->parseGroupingTable();
+        m_groupingHelper.parseGroupingTable();
     MuonGroupingHelper::saveGroupingToXML(groupingToSave,
                                           groupingFile.toStdString());
 
@@ -728,7 +725,7 @@ void MuonAnalysis::runLoadGroupButton() {
   }
 
   clearTablesAndCombo();
-  m_groupingHelper->fillGroupingTable(loadedGrouping);
+  fillGroupingTable(loadedGrouping);
 
   m_updating = false;
 
@@ -966,7 +963,7 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
     }
   }
 
-  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
+  m_groupToRow = m_groupingHelper.whichGroupToWhichRow();
   updatePairTable();
 
   if (m_loaded && !m_updating) {
@@ -1009,7 +1006,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
         return;
       }
     }
-    m_pairToRow = m_groupingHelper->whichPairToWhichRow();
+    m_pairToRow = m_groupingHelper.whichPairToWhichRow();
     updateFrontAndCombo();
   }
 
@@ -1041,7 +1038,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
       }
     }
 
-    m_pairToRow = m_groupingHelper->whichPairToWhichRow();
+    m_pairToRow = m_groupingHelper.whichPairToWhichRow();
     updateFrontAndCombo();
 
     // check to see if alpha is specified (if name!="") and if not
@@ -1302,7 +1299,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>(
-        m_groupingHelper->parseGroupingTable());
+        m_groupingHelper.parseGroupingTable());
   } else {
     // Need to load a new grouping
     result->usedExistGrouping = false;
@@ -1447,7 +1444,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   //      clear the grouping
   if (!groupResult->usedExistGrouping) {
     runClearGroupingButton();
-    m_groupingHelper->fillGroupingTable(*(groupResult->groupingUsed));
+    fillGroupingTable(*(groupResult->groupingUsed));
   }
 
   // Populate instrument fields
@@ -1614,7 +1611,7 @@ void MuonAnalysis::guessAlphaClicked() {
  * @return number of groups
  */
 int MuonAnalysis::numGroups() {
-  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
+  m_groupToRow = m_groupingHelper.whichGroupToWhichRow();
   return static_cast<int>(m_groupToRow.size());
 }
 
@@ -1624,7 +1621,7 @@ int MuonAnalysis::numGroups() {
  * @return number of pairs
  */
 int MuonAnalysis::numPairs() {
-  m_pairToRow = m_groupingHelper->whichPairToWhichRow();
+  m_pairToRow = m_groupingHelper.whichPairToWhichRow();
   return static_cast<int>(m_pairToRow.size());
 }
 
@@ -1724,7 +1721,7 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
  * @return Group number
  */
 int MuonAnalysis::getGroupNumberFromRow(int row) {
-  m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
+  m_groupToRow = m_groupingHelper.whichGroupToWhichRow();
   for (unsigned int i = 0; i < m_groupToRow.size(); i++) {
     if (m_groupToRow[i] == row)
       return i;
@@ -1740,7 +1737,7 @@ int MuonAnalysis::getGroupNumberFromRow(int row) {
  * @return Pair number
  */
 int MuonAnalysis::getPairNumberFromRow(int row) {
-  m_pairToRow = m_groupingHelper->whichPairToWhichRow();
+  m_pairToRow = m_groupingHelper.whichPairToWhichRow();
   for (unsigned int i = 0; i < m_pairToRow.size(); i++) {
     if (m_pairToRow[i] == row)
       return i;
@@ -1993,7 +1990,7 @@ void MuonAnalysis::showAllPlotWindows() {
  * @return true if set
  */
 bool MuonAnalysis::isGroupingSet() const {
-  auto dummy = m_groupingHelper->whichGroupToWhichRow();
+  auto dummy = m_groupingHelper.whichGroupToWhichRow();
 
   return !dummy.empty();
 }
@@ -2847,7 +2844,7 @@ void MuonAnalysis::groupLoadedWorkspace() {
  * @return ITableWorkspace of the format returned by LoadMuonNexus
  */
 ITableWorkspace_sptr MuonAnalysis::parseGrouping() {
-  auto grouping = m_groupingHelper->parseGroupingTable();
+  auto grouping = m_groupingHelper.parseGroupingTable();
   return grouping.toTable();
 }
 
@@ -3103,6 +3100,16 @@ void MuonAnalysis::setGroupOrPairToPlot(int index) {
  */
 int MuonAnalysis::getGroupOrPairToPlot() const {
   return m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+}
+
+/**
+ * Fills in the grouping table using information from provided Grouping struct.
+ *
+ * @param grouping :: [input] Grouping struct to use for filling the table
+ */
+void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
+  int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
+  setGroupOrPairToPlot(defaultIndex);
 }
 
 } // namespace MantidQT

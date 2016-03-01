@@ -5,7 +5,7 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt
@@ -49,8 +49,7 @@ using namespace Mantid::API;
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonGroupingHelper {
 public:
   /// Constructor
-  MuonGroupingHelper(MuonAnalysis *muonAnalysis, Ui::MuonAnalysis &uiForm)
-      : m_MuonAnalysis(muonAnalysis), m_uiForm(uiForm){};
+  MuonGroupingHelper(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm){};
 
   /// Saves grouping to the XML file specified
   static void saveGroupingToXML(const Mantid::API::Grouping &grouping,
@@ -61,7 +60,7 @@ public:
 
   /// Fills in the grouping table using information from provided Grouping
   /// struct
-  void fillGroupingTable(const Mantid::API::Grouping &grouping);
+  int fillGroupingTable(const Mantid::API::Grouping &grouping);
 
   /// create 'map' relating group number to row number in group table
   std::vector<int> whichGroupToWhichRow() const;
@@ -69,14 +68,12 @@ public:
   /// create 'map' relating pair number to row number in pair table
   std::vector<int> whichPairToWhichRow() const;
 
-  /// Set Group / Group Pair name
-  void setGroupGroupPair(const std::string &name);
+  /// Get index of Group / Group Pair name
+  int getGroupGroupPairIndex(const std::string &name);
 
 private:
   /// Reference to UI
   Ui::MuonAnalysis &m_uiForm;
-  /// Pointer to MuonAnalysis object
-  MuonAnalysis *m_MuonAnalysis;
 };
 }
 }

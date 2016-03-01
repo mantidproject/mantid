@@ -16,6 +16,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
+#include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 #include <map>
 
@@ -31,9 +32,6 @@ using namespace Mantid::Geometry;
 
 namespace Muon
 {
-  // Forward declaration
-  class MuonGroupingHelper;
-
   // Tab classes
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
@@ -489,6 +487,9 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+  /// Fills in the grouping table using information from provided Grouping
+  void fillGroupingTable(const Mantid::API::Grouping &grouping);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -515,7 +516,7 @@ private:
   size_t m_numPeriods;
 
   /// Grouping helper class
-  std::unique_ptr<MuonGroupingHelper> m_groupingHelper;
+  MuonGroupingHelper m_groupingHelper;
 };
 }
 }

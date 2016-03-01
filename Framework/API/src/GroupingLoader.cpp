@@ -282,5 +282,11 @@ ITableWorkspace_sptr Grouping::toTable() const {
 
   return newTable;
 }
+
+/**
+ * Define destructor here because the type is complete
+ */
+Grouping::~Grouping() = default;
+
 } // namespace API
 } // namespace Mantid
