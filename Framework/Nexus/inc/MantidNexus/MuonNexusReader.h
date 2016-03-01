@@ -90,7 +90,7 @@ public:
   void readLogData(const std::string &filename);  ///< read log data
   void getTimeChannels(float *timebnds,
                        const int &nbnds) const; ///< get time bin boundaries
-                                              /// return sample name
+                                                /// return sample name
   std::string getSampleName() const { return nexus_samplename; };
   int numberOfLogs() const; ///< Number of NXlog sections read from file
   int getLogLength(const int i) const;       ///< Lenght of i'th log

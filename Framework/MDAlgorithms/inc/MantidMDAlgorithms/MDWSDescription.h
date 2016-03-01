@@ -147,9 +147,10 @@ public: // for the time being
                                         const std::vector<double> &maxVal);
   /** function extracts the coordinates from additional workspace properties and
    * places them to AddCoord vector for further usage*/
-  static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,
-                                const std::vector<std::string> &dimPropertyNames,
-                                std::vector<coord_t> &AddCoord);
+  static void
+  fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,
+                    const std::vector<std::string> &dimPropertyNames,
+                    std::vector<coord_t> &AddCoord);
 
   static boost::shared_ptr<Geometry::OrientedLattice>
   getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);

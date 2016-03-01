@@ -95,7 +95,9 @@ Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
 Mantid::DataObjects::Workspace2D_sptr
 Create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError);
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(
+    int nhist,
+    int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries);
 Mantid::DataObjects::Workspace2D_sptr
 Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(
@@ -128,8 +130,11 @@ Create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
-Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nhist, const int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries, const double xBoundaries[]);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(
+    int nhist,
+    const int
+        numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries,
+    const double xBoundaries[]);
 
 /**
  * Creates a 2D workspace from taking the function values from the input

@@ -94,8 +94,7 @@ private:
       const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStart,
-      const OptionalDouble &stitchingDelta,
-      const OptionalDouble &stitchingEnd,
+      const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
       const OptionalDouble &stitchingStartOverlap,
       const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep,
       const std::string &numeratorProcessingCommands);

@@ -111,8 +111,8 @@ public:
   void setBinCount(double m_binCount) override;
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
-  void setGoniometerMatrix(
-      Mantid::Kernel::Matrix<double> goniometerMatrix) override;
+  void
+  setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;

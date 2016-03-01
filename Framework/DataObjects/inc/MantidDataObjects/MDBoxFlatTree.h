@@ -128,7 +128,8 @@ public:
   static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName,
                                               int &nDims,
                                               const std::string &WSEventType,
-                                              bool readOnly, bool &alreadyExists);
+                                              bool readOnly,
+                                              bool &alreadyExists);
   // save each experiment info into its own NeXus group within an existing
   // opened group
   static void saveExperimentInfos(::NeXus::File *const file,

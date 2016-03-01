@@ -391,7 +391,8 @@ private:
 
   template <class T>
   static typename std::vector<T>::const_iterator
-  findFirstPulseEvent(const std::vector<T> &events, const double seek_pulsetime);
+  findFirstPulseEvent(const std::vector<T> &events,
+                      const double seek_pulsetime);
 
   template <class T>
   typename std::vector<T>::const_iterator

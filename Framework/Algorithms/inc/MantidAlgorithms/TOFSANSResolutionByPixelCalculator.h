@@ -35,8 +35,8 @@ public:
                                         double lCollim, double l2) const;
   double getSigmaQValue(double moderatorValue,
                         double wavlengthIndependentFactor, double q,
-                        double wavelength, double deltaWavelength,
-                        double l1, double l2) const;
+                        double wavelength, double deltaWavelength, double l1,
+                        double l2) const;
 };
 }
 }

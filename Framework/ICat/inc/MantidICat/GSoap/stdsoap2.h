@@ -2551,8 +2551,8 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_dime_forward(struct soap *, unsigned char **,
 #ifndef WITH_NOIDREF
 SOAP_FMAC1 int SOAP_FMAC2
 soap_pointer_lookup_id(struct soap *, void *p, int t, struct soap_plist **);
-SOAP_FMAC1 int SOAP_FMAC2
-soap_pointer_lookup(struct soap *, const void *p, int type, struct soap_plist **);
+SOAP_FMAC1 int SOAP_FMAC2 soap_pointer_lookup(struct soap *, const void *p,
+                                              int type, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2 soap_pointer_enter(struct soap *, const void *p,
                                              const struct soap_array *a, int n,
                                              int type, struct soap_plist **);
@@ -2792,7 +2792,8 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_recv_header(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_response(struct soap *, int);
 
-SOAP_FMAC1 int SOAP_FMAC2 soap_send_empty_response(struct soap *, int httpstatuscode);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_send_empty_response(struct soap *, int httpstatuscode);
 SOAP_FMAC1 int SOAP_FMAC2 soap_recv_empty_response(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_send_fault(struct soap *);

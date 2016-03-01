@@ -107,8 +107,8 @@ protected:
 private:
   /// how to transform workspace data in elastic case
   inline bool calcMatrixCoord3DElastic(const double &k0,
-                                       std::vector<coord_t> &Coord, double &signal,
-                                       double &errSq) const;
+                                       std::vector<coord_t> &Coord,
+                                       double &signal, double &errSq) const;
   /// how to transform workspace data in inelastic case
   inline bool calcMatrixCoord3DInelastic(const double &E_tr,
                                          std::vector<coord_t> &Coord) const;

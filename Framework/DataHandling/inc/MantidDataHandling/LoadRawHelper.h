@@ -87,14 +87,13 @@ public:
                                         bool &bexcludeMonitors,
                                         API::Algorithm *const pAlgo);
   /// creates monitor workspace
-  static void createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
-                                     DataObjects::Workspace2D_sptr &normalws_sptr,
-                                     API::WorkspaceGroup_sptr &mongrp_sptr,
-                                     const int64_t mwsSpecs,
-                                     const int64_t nwsSpecs,
-                                     const int64_t numberOfPeriods,
-                                     const int64_t lengthIn, std::string title,
-                                     API::Algorithm *const pAlg);
+  static void
+  createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
+                         DataObjects::Workspace2D_sptr &normalws_sptr,
+                         API::WorkspaceGroup_sptr &mongrp_sptr,
+                         const int64_t mwsSpecs, const int64_t nwsSpecs,
+                         const int64_t numberOfPeriods, const int64_t lengthIn,
+                         std::string title, API::Algorithm *const pAlg);
   /// creates  shared pointer to group workspace
   static API::WorkspaceGroup_sptr createGroupWorkspace();
 
@@ -258,7 +257,8 @@ private:
   /// if  alternate data stream named checksum exists for the raw file
   bool adsExists(const std::string &pathToFile);
   /// returns the list of log files from ADS checksum
-  std::set<std::string> getLogFilenamesfromADS(const std::string &pathToRawFile);
+  std::set<std::string>
+  getLogFilenamesfromADS(const std::string &pathToRawFile);
 };
 
 } // namespace DataHandling

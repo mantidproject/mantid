@@ -71,8 +71,7 @@ public:
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
   /// Returns the bin boundaries for a given value
-  std::pair<double, double>
-  histogramBinBoundaries(const double value) const;
+  std::pair<double, double> histogramBinBoundaries(const double value) const;
   /// Returns the vector of bin boundaries
   std::vector<double> getBinBoundaries() const;
 

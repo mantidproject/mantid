@@ -82,9 +82,8 @@ public:
                         const std::string &name);
   /// Convert single time value to Y,Q & Ei values
   static void calculateY(double &yspace, double &qspace, double &ei,
-                         const double mass, const double tsec,
-                         const double k1, const double v1,
-                         const DetectorParams &detpar);
+                         const double mass, const double tsec, const double k1,
+                         const double v1, const DetectorParams &detpar);
 
 private:
   void init() override;

@@ -57,9 +57,8 @@ private:
   void updateCMatrixValues() const;
 
   /// Cache reference to workspace for use in setupForFit
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,
-                     size_t wsIndex, double startX, double endX) override;
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,
+                          size_t wsIndex, double startX, double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters

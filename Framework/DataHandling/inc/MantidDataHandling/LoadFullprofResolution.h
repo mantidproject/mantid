@@ -145,7 +145,8 @@ private:
   void parseResolutionStrings(std::map<std::string, double> &parammap,
                               const std::vector<std::string> &lines,
                               const bool useFileBankIDs, int bankid,
-                              int startlineindex, int endlineindex, int profNumber);
+                              int startlineindex, int endlineindex,
+                              int profNumber);
 
   void parseBankLine(std::string line, double &cwl, int &bankid);
 

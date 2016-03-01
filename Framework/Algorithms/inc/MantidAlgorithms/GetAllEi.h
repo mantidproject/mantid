@@ -95,8 +95,8 @@ protected: // for testing, private otherwise.
   /**Get energy of monitor peak if one is present*/
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei,
                        const std::vector<size_t> &monsRangeMin,
-                       const std::vector<size_t> &monsRangeMax, double &position,
-                       double &height, double &twoSigma);
+                       const std::vector<size_t> &monsRangeMax,
+                       double &position, double &height, double &twoSigma);
   /**Find indexes of each expected peak intervals */
   void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                      const std::vector<double> &guess_energy,

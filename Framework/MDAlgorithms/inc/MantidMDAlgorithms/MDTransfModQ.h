@@ -55,8 +55,8 @@ public:
 
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &x, std::vector<coord_t> &Coord, double &signal,
-                       double &ErrSq) const override;
+  bool calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
+                       double &signal, double &ErrSq) const override;
   // constructor;
   MDTransfModQ();
   /* clone method allowing to provide the copy of the particular class */

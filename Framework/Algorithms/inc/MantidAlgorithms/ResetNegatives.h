@@ -52,8 +52,8 @@ private:
   void pushMinimum(API::MatrixWorkspace_const_sptr minWS,
                    API::MatrixWorkspace_sptr wksp, API::Progress &prog);
   void changeNegatives(API::MatrixWorkspace_const_sptr minWS,
-                       const double spectrumNegativeValues, API::MatrixWorkspace_sptr wksp,
-                       API::Progress &prog);
+                       const double spectrumNegativeValues,
+                       API::MatrixWorkspace_sptr wksp, API::Progress &prog);
 };
 
 } // namespace Algorithms

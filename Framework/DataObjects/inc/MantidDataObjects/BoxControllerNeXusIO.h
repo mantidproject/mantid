@@ -159,8 +159,7 @@ private:
   void saveGenericBlock(const std::vector<Type> &DataBlock,
                         const uint64_t blockPosition) const;
   template <typename Type>
-  void loadGenericBlock(std::vector<Type> &Block,
-                        const uint64_t blockPosition,
+  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
                         const size_t nPoints) const;
 };
 }
