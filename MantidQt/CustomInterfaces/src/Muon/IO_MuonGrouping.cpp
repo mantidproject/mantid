@@ -200,13 +200,19 @@ int MuonGroupingHelper::fillGroupingTable(
   m_uiForm.groupDescription->setText(grouping.description.c_str());
 
   // Select default element
-  return getGroupGroupPairIndex(grouping.defaultName);
+  try {
+    return getGroupGroupPairIndex(grouping.defaultName);
+  } catch (std::invalid_argument & /*err*/) {
+    // Not a big error. Just select the first group in the list
+    return 0;
+  }
 }
 
 /**
  * Get the index of the named Group / Group Pair
  * @param name :: Name of the Group / Group Pair
- * returns Index of the group/pair of that name
+ * @returns Index of the group/pair of that name
+ * @throws std::invalid_argument if there is no group/pair of that name
  */
 int MuonGroupingHelper::getGroupGroupPairIndex(const std::string &name) {
   QString qsname(name.c_str());
@@ -215,6 +221,10 @@ int MuonGroupingHelper::getGroupGroupPairIndex(const std::string &name) {
       return i;
     }
   }
+  // If we reach here, we didn't find any such group
+  std::ostringstream message;
+  message << "No group/pair with name " << name << " found in list";
+  throw std::invalid_argument(message.str());
 }
 
 /**
