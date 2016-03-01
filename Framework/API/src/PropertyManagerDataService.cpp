@@ -9,10 +9,5 @@ PropertyManagerDataServiceImpl::PropertyManagerDataServiceImpl()
     : Mantid::Kernel::DataService<Mantid::Kernel::PropertyManager>(
           "PropertyManagerDataService") {}
 
-/*
-* Destructor
-*/
-PropertyManagerDataServiceImpl::~PropertyManagerDataServiceImpl() {}
-
 } // Namespace API
 } // Namespace Mantid

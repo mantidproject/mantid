@@ -38,36 +38,38 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() {}
 
 void SortHKL::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    pgOptions.push_back(m_pointGroups[i]->getName());
+  pgOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    pgOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    centeringOptions.push_back(m_refConds[i]->getName());
+  centeringOptions.reserve(m_refConds.size());
+  for (auto &refCond : m_refConds)
+    centeringOptions.push_back(refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(new PropertyWithValue<std::string>("RowName", "Overall",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
@@ -169,9 +171,9 @@ ReflectionCondition_sptr SortHKL::getCentering() const {
       boost::make_shared<ReflectionConditionPrimitive>();
 
   std::string refCondName = getPropertyValue("LatticeCentering");
-  for (size_t i = 0; i < m_refConds.size(); ++i)
-    if (m_refConds[i]->getName() == refCondName)
-      centering = m_refConds[i];
+  for (const auto &refCond : m_refConds)
+    if (refCond->getName() == refCondName)
+      centering = refCond;
 
   return centering;
 }
@@ -183,9 +185,9 @@ PointGroup_sptr SortHKL::getPointgroup() const {
       PointGroupFactory::Instance().createPointGroup("-1");
 
   std::string pointGroupName = getPropertyValue("PointGroup");
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    if (m_pointGroups[i]->getName() == pointGroupName)
-      pointGroup = m_pointGroups[i];
+  for (const auto &m_pointGroup : m_pointGroups)
+    if (m_pointGroup->getName() == pointGroupName)
+      pointGroup = m_pointGroup;
 
   return pointGroup;
 }
@@ -238,7 +240,7 @@ std::map<V3D, UniqueReflection> SortHKL::getPossibleUniqueReflections(
   for (auto hkl : generator) {
     if (filter->isAllowed(hkl)) {
       V3D hklFamily = pointGroup->getReflectionFamily(hkl);
-      uniqueHKLs.insert(std::make_pair(hklFamily, UniqueReflection(hklFamily)));
+      uniqueHKLs.emplace(hklFamily, UniqueReflection(hklFamily));
     }
   }
 
@@ -342,11 +344,9 @@ PeaksStatistics::getLambdaLimits(const std::vector<Peak> &peaks) const {
 
 /// Sorts the peaks in the workspace by H, K and L.
 void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
-  std::vector<std::pair<std::string, bool>> criteria;
   // Sort by HKL
-  criteria.push_back(std::make_pair("H", true));
-  criteria.push_back(std::make_pair("K", true));
-  criteria.push_back(std::make_pair("L", true));
+  std::vector<std::pair<std::string, bool>> criteria{
+      {"H", true}, {"K", true}, {"L", true}};
   outputPeaksWorkspace->sort(criteria);
 }
 

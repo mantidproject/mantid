@@ -41,21 +41,18 @@ National Laboratory & European Spallation Source
 class DLLExport StaticKuboToyabe : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
-  /// Destructor
-  virtual ~StaticKuboToyabe() {}
+  /// overwrite IFunction base class methods
+  std::string name() const override { return "StaticKuboToyabe"; }
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "StaticKuboToyabe"; }
-
-  /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   /// overwrite IFunction base class method that declares function parameters
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

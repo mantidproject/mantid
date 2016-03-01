@@ -90,9 +90,8 @@ public:
   }
   size_t candidateHKLSize() const { return _hkls.size(); }
   void delHKL(int h, int k, int l) {
-    std::set<index>::const_iterator it =
-        std::find(_hkls.begin(), _hkls.end(), index(h, k, l));
-    if (it != _hkls.end())
+    auto it = std::find(_hkls.cbegin(), _hkls.cend(), index(h, k, l));
+    if (it != _hkls.cend())
       _hkls.erase(it);
   }
   const Mantid::Kernel::V3D &getQ() const { return _Q; }
@@ -103,7 +102,7 @@ public:
   }
   void setFirst() {
     if (_hkls.size() > 0) {
-      std::set<index>::iterator it = _hkls.begin(); // Take the first possiblity
+      auto it = _hkls.begin(); // Take the first possiblity
       it++;
       _hkls.erase(it, _hkls.end()); // Erase all others!
     }
@@ -157,20 +156,20 @@ public:
   /// Default constructor
   IndexSXPeaks() : API::Algorithm(){};
   /// Destructor
-  virtual ~IndexSXPeaks(){};
+  ~IndexSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "IndexSXPeaks"; }
+  const std::string name() const override { return "IndexSXPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes a PeaksWorkspace and a B-Matrix and determines the HKL "
            "values corresponding to each Single Crystal peak. Sets indexes on "
            "the input/output workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
   // Helper method to cull potential hkls off each peak.
@@ -179,9 +178,9 @@ private:
   // Helper method used to check that not all peaks are colinear.
   void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;
   // Overridden Algorithm methods
-  void init();
+  void init() override;
   //
-  void exec();
+  void exec() override;
   //
 };
 

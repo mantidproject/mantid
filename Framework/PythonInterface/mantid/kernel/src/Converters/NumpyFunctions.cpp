@@ -14,7 +14,7 @@ PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
   return reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
       &PyArray_Type, PyArray_DescrFromType(datatype), ndims, // rank
       dims, // Length in each dimension
-      NULL, NULL, 0, NULL));
+      nullptr, NULL, 0, nullptr));
 }
 }
 }

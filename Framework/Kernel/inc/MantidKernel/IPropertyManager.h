@@ -6,8 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/make_unique.h"
 #include <vector>
-#include <set>
+#include <unordered_set>
 
 namespace Json {
 class Value;
@@ -62,10 +63,11 @@ template <typename T> class Matrix;
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
   // IPropertyManager(){}
-  virtual ~IPropertyManager() {}
+  virtual ~IPropertyManager() = default;
 
   /// Function to declare properties (i.e. store them)
-  virtual void declareProperty(Property *p, const std::string &doc = "") = 0;
+  virtual void declareProperty(std::unique_ptr<Property> p,
+                               const std::string &doc = "") = 0;
 
   /// Removes the property from management
   virtual void removeProperty(const std::string &name,
@@ -79,8 +81,8 @@ public:
   */
   virtual void setPropertiesWithSimpleString(
       const std::string &propertiesString,
-      const std::set<std::string> &
-          ignoreProperties = std::set<std::string>()) = 0;
+      const std::unordered_set<std::string> &
+          ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
@@ -90,8 +92,8 @@ public:
    */
   virtual void
   setProperties(const std::string &propertiesJson,
-                const std::set<std::string> &
-                    ignoreProperties = std::set<std::string>()) = 0;
+                const std::unordered_set<std::string> &
+                    ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a json object
      @param jsonValue :: A json name value pair collection
@@ -100,8 +102,8 @@ public:
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
-                const std::set<std::string> &
-                    ignoreProperties = std::set<std::string>()) = 0;
+                const std::unordered_set<std::string> &
+                    ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
@@ -183,10 +185,10 @@ public:
    * @param name :: property name
    * @param settings :: IPropertySettings     */
   void setPropertySettings(const std::string &name,
-                           IPropertySettings *settings) {
+                           std::unique_ptr<IPropertySettings> settings) {
     Property *prop = getPointerToProperty(name);
     if (prop)
-      prop->setSettings(settings);
+      prop->setSettings(std::move(settings));
   }
   /** Set the group for a given property
    * @param name :: property name
@@ -225,8 +227,10 @@ protected:
       IValidator_sptr validator = IValidator_sptr(new NullValidator),
       const std::string &doc = "",
       const unsigned int direction = Direction::Input) {
-    Property *p = new PropertyWithValue<T>(name, value, validator, direction);
-    declareProperty(p, doc);
+    std::unique_ptr<PropertyWithValue<T>> p =
+        Kernel::make_unique<PropertyWithValue<T>>(name, value, validator,
+                                                  direction);
+    declareProperty(std::move(p), doc);
   }
 
   /** Add a property to the list of managed properties with no validator
@@ -242,9 +246,10 @@ protected:
   template <typename T>
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
-    Property *p = new PropertyWithValue<T>(
-        name, value, boost::make_shared<NullValidator>(), direction);
-    declareProperty(p, doc);
+    std::unique_ptr<PropertyWithValue<T>> p =
+        Kernel::make_unique<PropertyWithValue<T>>(
+            name, value, boost::make_shared<NullValidator>(), direction);
+    declareProperty(std::move(p), doc);
   }
 
   /** Add a property of the template type to the list of managed properties
@@ -258,9 +263,10 @@ protected:
   template <typename T>
   void declareProperty(const std::string &name, T value,
                        const unsigned int direction) {
-    Property *p = new PropertyWithValue<T>(
-        name, value, boost::make_shared<NullValidator>(), direction);
-    declareProperty(p);
+    std::unique_ptr<PropertyWithValue<T>> p =
+        Kernel::make_unique<PropertyWithValue<T>>(
+            name, value, boost::make_shared<NullValidator>(), direction);
+    declareProperty(std::move(p));
   }
 
   /** Specialised version of declareProperty template method to prevent the

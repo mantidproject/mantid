@@ -107,9 +107,9 @@ void DownloadInstrument::exec() {
                    << " from the instrument repository" << std::endl;
   }
 
-  for (auto itMap = fileMap.begin(); itMap != fileMap.end(); ++itMap) {
+  for (auto &itMap : fileMap) {
     // download a file
-    doDownloadFile(itMap->first, itMap->second);
+    doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
@@ -135,10 +135,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // get the file list from github
   StringToStringMap headers;
-  headers.insert(
-      std::make_pair("if-modified-since",
-                     Poco::DateTimeFormatter::format(
-                         gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+  headers.emplace("if-modified-since",
+                  Poco::DateTimeFormatter::format(
+                      gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
   std::string gitHubInstrumentRepoUrl =
       ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
   if (gitHubInstrumentRepoUrl == "") {
@@ -178,10 +177,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   fileStream.close();
 
-  std::set<std::string> repoFilenames;
+  std::unordered_set<std::string> repoFilenames;
 
-  for (Json::ArrayIndex i = 0; i < serverContents.size(); ++i) {
-    const auto &serverElement = serverContents[i];
+  for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
     repoFilenames.insert(name);
     Poco::Path filePath(localPath, name);
@@ -198,14 +196,14 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // this will also catch when file is only present on github (as local sha
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
-      fileMap.insert(std::make_pair(
-          htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath
+      fileMap.emplace(htmlUrl,
+                      filePath.toString()); // ACTION - DOWNLOAD to localPath
     } else if ((localSha != "") && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
-      fileMap.insert(std::make_pair(
+      fileMap.emplace(
           htmlUrl,
-          filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
+          filePath.toString()); // ACTION - DOWNLOAD to localPath and overwrite
     }
   }
 
@@ -246,7 +244,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
         continue;
       std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.toString());
       // Track sha1
-      filesToSha.insert(std::make_pair(entryPath.getFileName(), sha1));
+      filesToSha.emplace(entryPath.getFileName(), sha1);
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: "
@@ -270,10 +268,10 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
 **/
 size_t DownloadInstrument::removeOrphanedFiles(
     const std::string &directoryPath,
-    const std::set<std::string> &filenamesToKeep) const {
+    const std::unordered_set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
-  std::set<std::string> filesToDelete;
+  std::vector<std::string> filesToDelete;
 
   try {
     using Poco::DirectoryIterator;
@@ -286,7 +284,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: " << entryPath.getFileName() << std::endl;
-        filesToDelete.insert(it->path());
+        filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
@@ -303,8 +301,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
 
   // delete any identified files
   try {
-    for (auto it = filesToDelete.begin(); it != filesToDelete.end(); ++it) {
-      Poco::File file(*it);
+    for (const auto &filename : filesToDelete) {
+      Poco::File file(filename);
       file.remove();
     }
   } catch (Poco::Exception &ex) {

@@ -22,7 +22,8 @@ private:
 
     void init() {
       declareProperty(
-          new WorkspaceProperty<>("Workspace", "", Direction::InOut), "");
+          make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+          "");
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);
@@ -57,7 +58,8 @@ private:
 
   void createWorkspace(std::string wsName) {
     // create a fake workspace for testing
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace(wsName, input);
 
     Mantid::API::AlgorithmFactory::Instance().subscribe<SimpleSum>();

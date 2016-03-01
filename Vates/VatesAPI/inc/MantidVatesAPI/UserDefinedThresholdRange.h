@@ -40,19 +40,19 @@ public:
 
   UserDefinedThresholdRange(signal_t min, signal_t max);
 
-  virtual void calculate();
+  void calculate() override;
 
-  virtual signal_t getMinimum() const;
+  signal_t getMinimum() const override;
 
-  virtual signal_t getMaximum() const;
+  signal_t getMaximum() const override;
 
-  ~UserDefinedThresholdRange();
+  ~UserDefinedThresholdRange() override;
 
-  virtual bool hasCalculated() const;
+  bool hasCalculated() const override;
 
-  virtual UserDefinedThresholdRange* clone() const;
+  UserDefinedThresholdRange *clone() const override;
 
-  virtual bool inRange(const signal_t& signal);
+  bool inRange(const signal_t &signal) override;
 
 private:
 

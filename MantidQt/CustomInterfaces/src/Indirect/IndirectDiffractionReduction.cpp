@@ -3,11 +3,13 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -259,11 +261,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   // Get save formats
   std::vector<std::string> saveFormats;
   if (m_uiForm.ckGSS->isChecked())
-    saveFormats.push_back("gss");
+    saveFormats.emplace_back("gss");
   if (m_uiForm.ckNexus->isChecked())
-    saveFormats.push_back("nxs");
+    saveFormats.emplace_back("nxs");
   if (m_uiForm.ckAscii->isChecked())
-    saveFormats.push_back("ascii");
+    saveFormats.emplace_back("ascii");
 
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
@@ -594,11 +596,10 @@ bool IndirectDiffractionReduction::validateRebin() {
     m_uiForm.valRebinEnd->setText("");
   } else {
 #define CHECK_VALID(text, validator)                                           \
-  if (text.isEmpty()) {                                                        \
-    rebinValid = false;                                                        \
+  rebinValid = !text.isEmpty();                                                \
+  if (!rebinValid) {                                                           \
     validator->setText("*");                                                   \
   } else {                                                                     \
-    rebinValid = true;                                                         \
     validator->setText("");                                                    \
   }
 

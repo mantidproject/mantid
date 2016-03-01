@@ -52,31 +52,31 @@ public:
   /// Default constructor
   CreateWorkspace();
   /// Default desctructor
-  virtual ~CreateWorkspace();
+  ~CreateWorkspace() override;
 
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "CreateWorkspace";
   } ///< @return the algorithms name
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm constructs a MatrixWorkspace when passed a vector "
            "for each of the X, Y, and E data values.";
   }
 
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Utility\\Workspaces";
   } ///< @return the algorithms category
-  virtual int version() const {
+  int version() const override {
     return (1);
   } ///< @return version number of algorithm
 
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the Algorithm (declare properties)
-  void init();
+  void init() override;
   /// Execute the Algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

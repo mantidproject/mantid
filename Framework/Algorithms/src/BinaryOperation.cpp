@@ -2,15 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/make_shared.hpp>
 
@@ -28,7 +31,7 @@ BinaryOperation::BinaryOperation()
       m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false), m_indicesToMask(),
-      m_progress(NULL) {}
+      m_progress(nullptr) {}
 
 BinaryOperation::~BinaryOperation() {
   if (m_progress)
@@ -41,19 +44,19 @@ BinaryOperation::~BinaryOperation() {
  */
 void BinaryOperation::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(inputPropName1(), "",
-                                             Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          inputPropName1(), "", Direction::Input),
       "The name of the input workspace on the left hand side of the operation");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(), "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      inputPropName2(), "", Direction::Input),
                   "The name of the input workspace on the right hand side of "
                   "the operation");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(), "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "The name to call the output workspace");
   declareProperty(
-      new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false,
-                                  Direction::Input),
+      make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra", false,
+                                           Direction::Input),
       "Are workspaces with different number of spectra allowed? "
       "For example, the LHSWorkspace might have one spectrum per detector, "
       "but the RHSWorkspace could have its spectra averaged per bank. If true, "
@@ -63,7 +66,8 @@ void BinaryOperation::init() {
       "apply the RHS spectrum to the LHS.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ClearRHSWorkspace", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
+                                           Direction::Input),
       "For EventWorkspaces only. This will clear out event lists "
       "from the RHS workspace as the binary operation is applied. "
       "This can prevent excessive memory use, e.g. when subtracting "
@@ -222,18 +226,9 @@ void BinaryOperation::exec() {
             "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
-
-      // Create a copy of the lhs workspace
-      m_eout = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_elhs->getNumberHistograms(), 2, 1));
-      // Copy geometry, spectra map, etc. over.
-      API::WorkspaceFactory::Instance().initializeFromParent(m_elhs, m_eout,
-                                                             false);
-      // And we copy all the events from the lhs
-      m_eout->copyDataFrom(*m_elhs);
-      // Make sure m_out still points to the same as m_eout;
-      m_out = boost::dynamic_pointer_cast<API::MatrixWorkspace>(m_eout);
+      m_out = MatrixWorkspace_sptr(m_lhs->clone().release());
+      // Make sure m_eout still points to the same as m_out;
+      m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
     }
 
     // Always clear the MRUs.

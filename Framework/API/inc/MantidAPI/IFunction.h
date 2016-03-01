@@ -10,7 +10,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN
@@ -179,7 +178,7 @@ public:
   class DLLExport AttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
-    virtual ~AttributeVisitor() {}
+    virtual ~AttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
     T operator()(std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
@@ -211,7 +210,7 @@ public:
   class DLLExport ConstAttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
-    virtual ~ConstAttributeVisitor() {}
+    virtual ~ConstAttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
     T operator()(std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
@@ -315,7 +314,7 @@ public:
 
   /// Constructor
   IFunction()
-      : m_isParallel(false), m_handler(NULL), m_progReporter(NULL),
+      : m_isParallel(false), m_handler(nullptr), m_progReporter(nullptr),
         m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
@@ -588,7 +587,7 @@ public:
   /// Constructor
   FunctionHandler(IFunction_sptr fun) : m_fun(fun) {}
   /// Virtual destructor
-  virtual ~FunctionHandler() {}
+  virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function
   virtual void init() = 0;
   /// Return the handled function

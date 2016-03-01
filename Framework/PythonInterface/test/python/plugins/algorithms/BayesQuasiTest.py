@@ -8,6 +8,7 @@ if platform.system() == "Windows":
 
         _res_ws = None
         _sample_ws = None
+        _resnorm_ws = None
         _num_bins = None
         _num_hists = None
 
@@ -16,9 +17,94 @@ if platform.system() == "Windows":
                                 OutputWorkspace='__BayesQuasiTest_Resolution')
             self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
                                 OutputWorkspace='__BayesQuasiTest_Sample')
+            self._resnorm_ws = Load(Filename='irs26173_graphite002_ResNorm.nxs',
+                                OutputWorkspace='irs26173_graphite002_ResNorm')
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
 
+
+        def tearDown(self):
+            """
+            Remove workspaces from ADS.
+            """
+            DeleteWorkspace(self._sample_ws)
+            DeleteWorkspace(self._res_ws)
+            DeleteWorkspace(self._resnorm_ws)
+
+
+#----------------------------------Algorithm tests----------------------------------------
+
+        def test_QLr_Run(self):
+            """
+            Test Lorentzian fit for BayesQuasi
+            """
+            fit_group, result, prob = BayesQuasi(Program='QL',
+                                              SampleWorkspace=self._sample_ws,
+                                              ResolutionWorkspace=self._res_ws,
+                                              MinRange=-0.547607,
+                                              MaxRange=0.543216,
+                                              SampleBins=1,
+                                              ResolutionBins=1,
+                                              Elastic=False,
+                                              Background='Sloping',
+                                              FixedWidth=False,
+                                              UseResNorm=False,
+                                              WidthFile='',
+                                              Loop=True,
+                                              Save=False,
+                                              Plot='None')
+            self._validate_QLr_shape(result, prob, fit_group)
+            self._validate_Qlr_value(result, prob, fit_group)
+
+
+        def test_QSe_Run(self):
+            """
+            Test Stretched Exponential fit for BayesQuasi
+            """
+            fit_group, result = BayesQuasi(Program='QSe',
+                                      SampleWorkspace=self._sample_ws,
+                                      ResolutionWorkspace=self._res_ws,
+                                      MinRange=-0.547607,
+                                      MaxRange=0.543216,
+                                      SampleBins=1,
+                                      ResolutionBins=1,
+                                      Elastic=False,
+                                      Background='Sloping',
+                                      FixedWidth=False,
+                                      UseResNorm=False,
+                                      WidthFile='',
+                                      Loop=True,
+                                      Save=False,
+                                      Plot='None')
+            self._validate_QSe_shape(result, fit_group)
+            self._validate_QSe_value(result, fit_group)
+
+
+        def test_run_with_resNorm_file(self):
+            """
+            Test a simple lorentzian fit with a ResNorm file
+            """
+            fit_group, result, prob = BayesQuasi(Program='QL',
+                                           SampleWorkspace=self._sample_ws,
+                                           ResolutionWorkspace=self._res_ws,
+                                           ResNormWorkspace=self._resnorm_ws,
+                                           MinRange=-0.547607,
+                                           MaxRange=0.543216,
+                                           SampleBins=1,
+                                           ResolutionBins=1,
+                                           Elastic=False,
+                                           Background='Sloping',
+                                           FixedWidth=False,
+                                           UseResNorm=True,
+                                           WidthFile='',
+                                           Loop=True,
+                                           Save=False,
+                                           Plot='None')
+            self._validate_QLr_shape(result, prob, fit_group)
+            self._validate_QLr_value_with_resnorm(result, prob, fit_group)
+
+
+#--------------------------------Validate results------------------------------------------------
 
         def _validate_QLr_shape(self, result, probability, group):
             """
@@ -65,26 +151,58 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 0.92237)
-            self.assertEquals(round(result.dataY(1)[0], 4), 6.9651)
-            self.assertEquals(round(result.dataY(2)[0], 7), 0.0620143)
-            self.assertEquals(round(result.dataY(3)[0], 7), 0.1169424)
+            self.assertEquals(round(result.dataY(0)[0], 5), 6.06105)
+            self.assertEquals(round(result.dataY(1)[0], 4), 68.5744)
+            self.assertEquals(round(result.dataY(2)[0], 7), 0.0589315)
+            self.assertEquals(round(result.dataY(3)[0], 7), 0.0812087)
 
             # Test values of probability
             prob_y = probability.dataY(0)
-            self.assertEquals(round(probability.dataY(0)[0], 1), -65487.5)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -375.124)
-            self.assertEquals(round(probability.dataY(2)[0], 6), 0)
+            self.assertEquals(round(probability.dataY(0)[0], 1), -74176.1)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -404.884)
+            self.assertEquals(round(probability.dataY(2)[0], 6), -0.222565)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01887)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00653)
-            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01605)
-            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00935)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01903)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00638)
+            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01614)
+            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00926)
 
+
+        def _validate_QLr_value_with_resnorm(self, result, probability, group):
+            """
+            Validates that the output workspaces have the expected values
+            with values from the last known correct version
+
+            @param result Result workspace from BayesQuasi
+            @param prob Probability workspace from BayesQuasi
+            @param group Group workspace of fitted spectra from BayesQuasi
+            """
+
+            # Test values of result
+            result_y = result.dataY(0)
+            self.assertEquals(round(result.dataY(0)[0], 3), 153.471)
+            self.assertEquals(round(result.dataY(1)[0], 2), 1785.06)
+            self.assertEquals(round(result.dataY(2)[0], 7), 0.0588549)
+            self.assertEquals(round(result.dataY(3)[0], 7), 0.0791689)
+
+            # Test values of probability
+            prob_y = probability.dataY(0)
+            self.assertEquals(round(probability.dataY(0)[0], 1), -74887.1)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -407.593)
+            self.assertEquals(round(probability.dataY(2)[0], 6), -0.480316)
+
+            # Test values of group
+            sub_ws = group.getItem(0)
+            sub_y = sub_ws.dataY(0)
+            self.assertEquals(round(sub_ws.dataY(0)[0], 6), 0.652046)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.48846)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 6), -0.163586)
+            self.assertEquals(round(sub_ws.dataY(3)[0], 6), 0.414406)
+            self.assertEquals(round(sub_ws.dataY(4)[0], 6), -0.23764)
 
         def _validate_QSe_shape(self, result, group):
             """
@@ -124,62 +242,16 @@ if platform.system() == "Windows":
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 8.28044)
-            self.assertEquals(round(result.dataY(1)[0], 7), 0.0335993)
-            self.assertEquals(round(result.dataY(2)[0], 5), 0.77844)
+            self.assertEquals(round(result.dataY(0)[0], 5), 81.12644)
+            self.assertEquals(round(result.dataY(1)[0], 7), 0.0319747)
+            self.assertEquals(round(result.dataY(2)[0], 5), 0.77168)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01656)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00884)
-
-
-        def test_QLr_Run(self):
-            """
-            Test Lorentzian fit for BayesQuasi
-            """
-            fit_group, result, prob= BayesQuasi(Program='QL',
-                                              SampleWorkspace=self._sample_ws,
-                                              ResolutionWorkspace=self._res_ws,
-                                              MinRange=-0.547607,
-                                              MaxRange=0.543216,
-                                              SampleBins=1,
-                                              ResolutionBins=1,
-                                              Elastic=False,
-                                              Background='Sloping',
-                                              FixedWidth=False,
-                                              UseResNorm=False,
-                                              WidthFile='',
-                                              Loop=True,
-                                              Save=False,
-                                              Plot='None')
-            self._validate_QLr_shape(result, prob, fit_group)
-            self._validate_Qlr_value(result, prob, fit_group)
-
-
-        def test_QSe_Run(self):
-            """
-            Test Stretched Exponential fit for BayesQuasi
-            """
-            fit_group, result = BayesQuasi(Program='QSe',
-                                      SampleWorkspace=self._sample_ws,
-                                      ResolutionWorkspace=self._res_ws,
-                                      MinRange=-0.547607,
-                                      MaxRange=0.543216,
-                                      SampleBins=1,
-                                      ResolutionBins=1,
-                                      Elastic=False,
-                                      Background='Sloping',
-                                      FixedWidth=False,
-                                      UseResNorm=False,
-                                      WidthFile='',
-                                      Loop=True,
-                                      Save=False,
-                                      Plot='None')
-            self._validate_QSe_shape(result, fit_group)
-            self._validate_QSe_value(result, fit_group)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01632)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00908)
 
     if __name__=="__main__":
         unittest.main()

@@ -44,13 +44,12 @@ namespace API
 
   public:
     OptionsPropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
-    virtual ~OptionsPropertyWidget();
-    QString getValue() const;
-    virtual void setValueImpl(const QString & value);
+    ~OptionsPropertyWidget() override;
+    QString getValue() const override;
+    void setValueImpl(const QString &value) override;
 
     ///@return the main widget of this combo of widgets
-    QWidget * getMainWidget() {return m_combo; }
-
+    QWidget *getMainWidget() override { return m_combo; }
 
   protected:
     /// Label (name of the property)

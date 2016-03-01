@@ -153,7 +153,6 @@ public:
 
     const double occupancyFraction = 0.01; // 1%
     physicalPeak.setOccupancyInView(occupancyFraction);// 1 %
-    auto drawingObject = physicalPeak.draw(1000, 1000);
     TS_ASSERT_EQUALS(occupancyFraction, physicalPeak.getOccupancyInView());
   }
 

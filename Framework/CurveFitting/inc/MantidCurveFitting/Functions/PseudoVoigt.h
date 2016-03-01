@@ -49,27 +49,25 @@ namespace Functions {
 */
 class DLLExport PseudoVoigt : public API::IPeakFunction {
 public:
-  virtual ~PseudoVoigt() {}
+  double centre() const override { return getParameter("PeakCentre"); }
+  double height() const override { return getParameter("Height"); }
+  double fwhm() const override { return getParameter("FWHM"); }
 
-  double centre() const { return getParameter("PeakCentre"); }
-  double height() const { return getParameter("Height"); }
-  double fwhm() const { return getParameter("FWHM"); }
+  void setCentre(const double c) override { setParameter("PeakCentre", c); }
+  void setHeight(const double h) override { setParameter("Height", h); }
+  void setFwhm(const double w) override { setParameter("FWHM", w); }
 
-  void setCentre(const double c) { setParameter("PeakCentre", c); }
-  void setHeight(const double h) { setParameter("Height", h); }
-  void setFwhm(const double w) { setParameter("FWHM", w); }
-
-  std::string name() const { return "PseudoVoigt"; }
-  const std::string category() const { return "Peak"; }
+  std::string name() const override { return "PseudoVoigt"; }
+  const std::string category() const override { return "Peak"; }
 
 protected:
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const;
+                     const size_t nData) const override;
 
   void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData);
+                          const size_t nData) override;
 
-  void init();
+  void init() override;
 };
 
 } // namespace Functions

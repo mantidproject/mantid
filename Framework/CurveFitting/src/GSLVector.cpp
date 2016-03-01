@@ -138,8 +138,8 @@ double GSLVector::norm() const { return sqrt(norm2()); }
 /// Get vector's norm squared
 double GSLVector::norm2() const {
   double res = 0.0;
-  for (auto el = m_data.begin(); el != m_data.end(); ++el) {
-    res += (*el) * (*el);
+  for (double el : m_data) {
+    res += el * el;
   }
   return res;
 }

@@ -61,8 +61,9 @@ public:
 	std::string saveToString();
 
 private:
-	void draw (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect) const;
-	void drawLines(QPainter *painter, const QRect &rect, Qt::Orientation orientation, const QwtScaleMap &map,
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &rect) const override;
+        void drawLines(QPainter *painter, const QRect &rect, Qt::Orientation orientation, const QwtScaleMap &map,
     	const QwtValueList &values) const;
 
 	QPen d_maj_pen_y;

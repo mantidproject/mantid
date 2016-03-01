@@ -43,9 +43,9 @@ const std::string RemoveWorkspaceHistory::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RemoveWorkspaceHistory::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "Workspace to remove the algorithm history from.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                            Direction::InOut),
+                  "Workspace to remove the algorithm history from.");
 }
 
 //----------------------------------------------------------------------------------------------

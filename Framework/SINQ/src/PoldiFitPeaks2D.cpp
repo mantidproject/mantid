@@ -1,30 +1,30 @@
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ILatticeFunction.h"
+#include "MantidAPI/IPawleyFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MultiDomainFunction.h"
+
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
-#include "MantidAPI/FunctionDomain1D.h"
-
-#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
-#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
-
-#include "MantidAPI/ILatticeFunction.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IPawleyFunction.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-
-#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 #include "boost/make_shared.hpp"
-#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -160,10 +160,10 @@ PoldiFitPeaks2D::getNormalizedPeakCollections(
 
   std::vector<PoldiPeakCollection_sptr> normalizedPeakCollections;
 
-  for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
+  for (const auto &peakCollection : peakCollections) {
     // First integrate peak collection, then normalize and append to vector
     PoldiPeakCollection_sptr integratedPeakCollection =
-        getIntegratedPeakCollection(*pc);
+        getIntegratedPeakCollection(peakCollection);
 
     normalizedPeakCollections.push_back(
         getNormalizedPeakCollection(integratedPeakCollection));
@@ -469,7 +469,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
@@ -522,7 +522,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) {
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
       boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
@@ -671,21 +671,20 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
     std::vector<std::string> parameters = poldiFn->getParameterNames();
 
     std::vector<std::string> tieComponents;
-    for (auto it = tieParameters.begin(); it != tieParameters.end(); ++it) {
-      if (!(*it).empty()) {
+    for (auto &tieParameter : tieParameters) {
+      if (!tieParameter.empty()) {
         std::vector<std::string> matchedParameters;
 
-        for (auto parName = parameters.begin(); parName != parameters.end();
-             ++parName) {
-          if (boost::algorithm::ends_with(*parName, *it)) {
-            matchedParameters.push_back(*parName);
+        for (auto &parameter : parameters) {
+          if (boost::algorithm::ends_with(parameter, tieParameter)) {
+            matchedParameters.push_back(parameter);
           }
         }
 
         switch (matchedParameters.size()) {
         case 0:
-          g_log.warning("Function does not have a parameter called '" + *it +
-                        "', ignoring.");
+          g_log.warning("Function does not have a parameter called '" +
+                        tieParameter + "', ignoring.");
           break;
         case 1:
           g_log.warning("There is only one peak, no ties necessary.");
@@ -980,12 +979,12 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
       getNormalizedPeakCollections(peakCollections);
 
   // Create a Poldi2DFunction that collects all sub-functions
-  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+  auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
   // Add one Poldi2DFunction for each peak collection
-  for (auto pc = normalizedPeakCollections.begin();
-       pc != normalizedPeakCollections.end(); ++pc) {
-    mdFunction->addFunction(getFunctionFromPeakCollection(*pc));
+  for (auto &normalizedPeakCollection : normalizedPeakCollections) {
+    mdFunction->addFunction(
+        getFunctionFromPeakCollection(normalizedPeakCollection));
   }
 
   // And finally background terms
@@ -1184,11 +1183,11 @@ bool PoldiFitPeaks2D::isValidDeltaT(double deltaT) const {
 
 /// Initialization of algorithm properties.
 void PoldiFitPeaks2D::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Measured POLDI 2D-spectrum.");
-  declareProperty(new WorkspaceProperty<Workspace>("PoldiPeakWorkspace", "",
-                                                   Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "PoldiPeakWorkspace", "", Direction::Input),
                   "Table workspace with peak information.");
 
   auto peakFunctionValidator = boost::make_shared<StringListValidator>(
@@ -1221,11 +1220,11 @@ void PoldiFitPeaks2D::init() {
                                           "the fit. Use 0 to calculate "
                                           "2D-spectrum without fitting.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Calculated POLDI 2D-spectrum");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Calculated1DSpectrum",
-                                                         "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Calculated1DSpectrum", "", Direction::Output),
                   "Calculated POLDI 1D-spectrum.");
 
   declareProperty("LambdaMin", 1.1,
@@ -1233,8 +1232,8 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LambdaMax", 5.0,
                   "Maximum wavelength for 1D spectrum calculation");
 
-  declareProperty(new WorkspaceProperty<Workspace>("RefinedPoldiPeakWorkspace",
-                                                   "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
 
   declareProperty("OutputIntegratedIntensities", false,
@@ -1242,13 +1241,13 @@ void PoldiFitPeaks2D::init() {
                   "output will have integrated intensities instead of the "
                   "maximum.");
 
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
 
-  declareProperty(new WorkspaceProperty<Workspace>("RawFitParameters", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
-                  "Table workspace that contains all raw fit parameters.");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>(
+          "RawFitParameters", "", Direction::Output, PropertyMode::Optional),
+      "Table workspace that contains all raw fit parameters.");
 }
 
 /// Executes the algorithm
@@ -1267,8 +1266,8 @@ void PoldiFitPeaks2D::exec() {
   Property *profileFunctionProperty =
       getPointerToProperty("PeakProfileFunction");
   if (!profileFunctionProperty->isDefault()) {
-    for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
-      (*pc)->setProfileFunctionName(profileFunctionProperty->value());
+    for (auto &peakCollection : peakCollections) {
+      peakCollection->setProfileFunctionName(profileFunctionProperty->value());
     }
   }
 
@@ -1299,8 +1298,8 @@ void PoldiFitPeaks2D::exec() {
   } else {
     WorkspaceGroup_sptr peaksGroup = boost::make_shared<WorkspaceGroup>();
 
-    for (auto pc = integralPeaks.begin(); pc != integralPeaks.end(); ++pc) {
-      peaksGroup->addWorkspace((*pc)->asTableWorkspace());
+    for (auto &integralPeak : integralPeaks) {
+      peaksGroup->addWorkspace(integralPeak->asTableWorkspace());
     }
 
     setProperty("RefinedPoldiPeakWorkspace", peaksGroup);
@@ -1333,8 +1332,8 @@ void PoldiFitPeaks2D::exec() {
       } else {
         WorkspaceGroup_sptr cellsGroup = boost::make_shared<WorkspaceGroup>();
 
-        for (auto it = cells.begin(); it != cells.end(); ++it) {
-          cellsGroup->addWorkspace(*it);
+        for (auto &cell : cells) {
+          cellsGroup->addWorkspace(cell);
         }
 
         setProperty("RefinedCellParameters", cellsGroup);

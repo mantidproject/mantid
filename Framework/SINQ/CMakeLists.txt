@@ -12,8 +12,7 @@ set ( SRC_FILES
 	src/PoldiPeakSearch.cpp
 	src/PoldiPeakSummary.cpp
 	src/PoldiTruncateData.cpp
-	src/PoldiUtilities/IPoldiFunction1D.cpp
-	src/PoldiUtilities/MillerIndices.cpp
+        src/PoldiUtilities/MillerIndices.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
@@ -76,6 +75,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
 	inc/MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h
+        inc/MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumConstantBackground.h
         inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h

@@ -43,13 +43,13 @@ public:
   /// Constructor.
   FRConjugateGradientMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const {
+  std::string name() const override {
     return "Conjugate gradient (Fletcher-Reeves imp.)";
   }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
-  virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
+  const gsl_multimin_fdfminimizer_type *getGSLMinimizerType() override;
 };
 
 } // namespace FuncMinimisers

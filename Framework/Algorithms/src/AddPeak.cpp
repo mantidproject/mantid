@@ -1,8 +1,11 @@
 #include "MantidAlgorithms/AddPeak.h"
-#include "MantidKernel/System.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::PhysicalConstants;
 
@@ -31,11 +34,11 @@ AddPeak::~AddPeak() {}
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "",
-                                                         Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::InOut),
                   "A peaks workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("RunWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "RunWorkspace", "", Direction::Input),
                   "An input workspace containing the run information.");
   declareProperty("TOF", 0.0, "Peak position in time of flight.");
   declareProperty("DetectorID", 0, "ID of a detector at the peak centre.");

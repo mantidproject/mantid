@@ -53,9 +53,12 @@ void ResNorm::setup() {}
  */
 bool ResNorm::validate() {
   UserInputValidator uiv;
+  QString errors("");
 
-  const bool vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  const bool resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+  const bool vanValid =
+      uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
+  const bool resValid =
+      uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
     // Check vanadium input is _red ws
@@ -88,7 +91,14 @@ bool ResNorm::validate() {
     }
   }
 
-  QString errors = uiv.generateErrorMessage();
+  // check eMin and eMax values
+  const auto eMin = m_dblManager->value(m_properties["EMin"]);
+  const auto eMax = m_dblManager->value(m_properties["EMax"]);
+  if (eMin >= eMax)
+    errors.append("EMin must be strictly less than EMax.\n");
+
+  // Create and show error messages
+  errors.append(uiv.generateErrorMessage());
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
     return false;
@@ -109,7 +119,6 @@ void ResNorm::run() {
 
   QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
-
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
   resNorm->setProperty("VanadiumWorkspace", vanWsName.toStdString());
@@ -118,7 +127,8 @@ void ResNorm::run() {
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
   resNorm->setProperty("OutputWorkspace", outputWsName.toStdString());
-  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit").toStdString());
+  resNorm->setProperty("OutputWorkspaceTable",
+                       (outputWsName + "_Fit").toStdString());
   m_batchAlgoRunner->addAlgorithm(resNorm);
 
   // Handle saving
@@ -128,7 +138,6 @@ void ResNorm::run() {
 
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
-
 }
 
 /**

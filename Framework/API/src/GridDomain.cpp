@@ -18,18 +18,20 @@ Kernel::Logger g_log("GridDomain");
 size_t GridDomain::size() const {
   if (!m_grids.size())
     return 0;
-  size_t n = 1;
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    n *= (*it)->size();
-  return n;
+  else
+    return std::accumulate(
+        m_grids.begin(), m_grids.end(), size_t{1},
+        [](size_t n, const boost::shared_ptr<GridDomain> &grid) {
+          return n * grid->size();
+        });
 }
 
 /// number of dimensions of the grid
 size_t GridDomain::nDimensions() {
-  size_t n = 0;
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    n += (*it)->nDimensions();
-  return n;
+  return std::accumulate(m_grids.begin(), m_grids.end(), size_t{0},
+                         [](size_t n, boost::shared_ptr<GridDomain> &grid) {
+                           return n + grid->nDimensions();
+                         });
 }
 
 /* return item of member m_grids
@@ -46,8 +48,8 @@ GridDomain_sptr GridDomain::getGrid(size_t index) {
 }
 
 void GridDomain::reScale(const std::string &scaling) {
-  for (auto it = m_grids.begin(); it != m_grids.end(); it++)
-    (*it)->reScale(scaling);
+  for (auto &grid : m_grids)
+    grid->reScale(scaling);
 }
 
 } // namespace API

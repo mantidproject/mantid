@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 //#include "MantidDataObjects/Events.h"
@@ -158,7 +160,7 @@ TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
     : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
-      m_udpBuf(NULL), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
+      m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
       m_thread(), m_stopThread(false), m_backgroundException() {
 
   m_udpBuf = new unsigned char[m_udpBufSize];
@@ -298,7 +300,7 @@ void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 void TOPAZLiveEventDataListener::run() {
   try {
 
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string("TOPAZLiveEventDataListener::run(): "
                                            "No connection to event_catcher."));
@@ -310,7 +312,7 @@ void TOPAZLiveEventDataListener::run() {
 
     Poco::Net::SocketAddress sendAddr; // address of the sender
     // loop until the foreground thread tells us to stop
-    while (m_stopThread == false) {
+    while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
       if (m_stopThread) {
         break;
@@ -320,7 +322,7 @@ void TOPAZLiveEventDataListener::run() {
       try {
         bytesRead = m_dataSocket.receiveFrom(m_udpBuf, m_udpBufSize, sendAddr);
       } catch (Poco::TimeoutException &) {
-        if (m_stopThread == false) {
+        if (!m_stopThread) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning("Timeout reading from the network.  "
                         "Is event_catcher still sending?");
@@ -387,7 +389,7 @@ void TOPAZLiveEventDataListener::run() {
         // Timestamp for the events
         Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
         // TODO:  We're not sure what the units are on the charge value
         // They *might* be picoCoulombs, or the might be units of 10pC
@@ -430,8 +432,7 @@ void TOPAZLiveEventDataListener::run() {
                   << "Thread will exit." << std::endl;
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can throw
@@ -444,8 +445,7 @@ void TOPAZLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
   } catch (Poco::Exception &e) { // Generic POCO exception handler
     g_log.fatal("Uncaught POCO exception in TOPAZLiveEventDataListener network "
                 "read thread.");
@@ -588,8 +588,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   // TODO: At present, there's no way for monitor logs to be added
   // to m_monitorLogs.  Either implement this feature, or remove
   // m_monitorLogs!
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 
@@ -603,7 +603,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 

@@ -49,31 +49,30 @@ public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
                 bool warnAboutMasked = false);
-  virtual ~DetectorGroup();
 
   void addDetector(IDetector_const_sptr det, bool &warn);
 
   // IDetector methods
-  detid_t getID() const;
-  std::size_t nDets() const;
-  Kernel::V3D getPos() const;
-  double getDistance(const IComponent &comp) const;
+  detid_t getID() const override;
+  std::size_t nDets() const override;
+  Kernel::V3D getPos() const override;
+  double getDistance(const IComponent &comp) const override;
   double getTwoTheta(const Kernel::V3D &observer,
-                     const Kernel::V3D &axis) const;
+                     const Kernel::V3D &axis) const override;
   double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
-                           const Kernel::V3D &instrumentUp) const;
-  double getPhi() const;
-  double getPhiOffset(const double &offset) const;
-  double solidAngle(const Kernel::V3D &observer) const;
-  bool isParametrized() const;
-  bool isMasked() const;
-  bool isMonitor() const;
-  bool isValid(const Kernel::V3D &point) const;
-  virtual bool isOnSide(const Kernel::V3D &point) const;
+                           const Kernel::V3D &instrumentUp) const override;
+  double getPhi() const override;
+  double getPhiOffset(const double &offset) const override;
+  double solidAngle(const Kernel::V3D &observer) const override;
+  bool isParametrized() const override;
+  bool isMasked() const override;
+  bool isMonitor() const override;
+  bool isValid(const Kernel::V3D &point) const override;
+  bool isOnSide(const Kernel::V3D &point) const override;
   /// Try to find a point that lies within (or on) the object
-  int getPointInObject(Kernel::V3D &point) const;
+  int getPointInObject(Kernel::V3D &point) const override;
   /// Get the bounding box for this component and store it in the given argument
-  virtual void getBoundingBox(BoundingBox &boundingBox) const;
+  void getBoundingBox(BoundingBox &boundingBox) const override;
 
   /// What detectors are contained in the group?
   std::vector<detid_t> getDetectorIDs() const;
@@ -86,16 +85,17 @@ public:
   // resort to
   // one for each type, luckily there won't be too many
   /// Return the parameter names
-  virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+  std::set<std::string> getParameterNames(bool recursive = true) const override;
   /// return the parameter names and the component they are from
-  virtual std::map<std::string, ComponentID>
-  getParameterNamesByComponent() const;
+  std::map<std::string, ComponentID>
+  getParameterNamesByComponent() const override;
   /// Returns a boolean indicating whether the parameter exists or not
-  bool hasParameter(const std::string &name, bool recursive = true) const;
+  bool hasParameter(const std::string &name,
+                    bool recursive = true) const override;
   // Hack used untill Geomertry can not exprot different types parematers
   // properly
   std::string getParameterType(const std::string &name,
-                               bool recursive = true) const;
+                               bool recursive = true) const override;
   /**
   * Get a parameter defined as a double
   * @param pname :: The name of the parameter
@@ -104,7 +104,7 @@ public:
   * @returns A list of size 0 as this is not a parameterized component
   */
   std::vector<double> getNumberParameter(const std::string &pname,
-                                         bool recursive = true) const;
+                                         bool recursive = true) const override;
   /**
   * Get a parameter defined as a Kernel::V3D
   * @param pname :: The name of the parameter
@@ -112,8 +112,9 @@ public:
   * components
   * @returns A list of size 0 as this is not a parameterized component
   */
-  std::vector<Kernel::V3D> getPositionParameter(const std::string &pname,
-                                                bool recursive = true) const;
+  std::vector<Kernel::V3D>
+  getPositionParameter(const std::string &pname,
+                       bool recursive = true) const override;
   /**
   * Get a parameter defined as a Kernel::Quaternion
   * @param pname :: The name of the parameter
@@ -121,8 +122,9 @@ public:
   * components
   * @returns A list of size 0 as this is not a parameterized component
   */
-  std::vector<Kernel::Quat> getRotationParameter(const std::string &pname,
-                                                 bool recursive = true) const;
+  std::vector<Kernel::Quat>
+  getRotationParameter(const std::string &pname,
+                       bool recursive = true) const override;
 
   /**
   * Get a parameter defined as a string
@@ -131,8 +133,9 @@ public:
   * components
   * @returns A list of size 0 as this is not a parameterized component
   */
-  std::vector<std::string> getStringParameter(const std::string &pname,
-                                              bool recursive = true) const;
+  std::vector<std::string>
+  getStringParameter(const std::string &pname,
+                     bool recursive = true) const override;
 
   /**
   * Get a parameter defined as an integer
@@ -142,7 +145,7 @@ public:
   * @returns A list of size 0 as this is not a parameterized component
   */
   std::vector<int> getIntParameter(const std::string &pname,
-                                   bool recursive = true) const;
+                                   bool recursive = true) const override;
 
   /**
   * Get a parameter defined as an integer
@@ -152,7 +155,7 @@ public:
   * @returns A list of size 0 as this is not a parameterized component
   */
   std::vector<bool> getBoolParameter(const std::string &pname,
-                                     bool recursive = true) const;
+                                     bool recursive = true) const override;
 
   /**
    * Get a string representation of a parameter
@@ -162,12 +165,12 @@ public:
    * @returns A empty string as this is not a parameterized component
    */
   std::string getParameterAsString(const std::string &pname,
-                                   bool recursive = true) const;
+                                   bool recursive = true) const override;
 
   /** returns the detector's group topology if it has been calculated before or
   invokes the procedure of
   calculating such topology if it was not */
-  det_topology getTopology(Kernel::V3D &center) const;
+  det_topology getTopology(Kernel::V3D &center) const override;
 
   /// Return separator for list of names of detectors
   std::string getNameSeparator() const { return ";"; }
@@ -175,7 +178,7 @@ public:
      the logic behind getComponentID overload, so CopyInstrumentParameters will
      fail on
       grouped instrument but it is something TO DO:      */
-  virtual IComponent const *getBaseComponent() const {
+  IComponent const *getBaseComponent() const override {
     return const_cast<const DetectorGroup *>(this);
   }
 
@@ -198,53 +201,54 @@ protected:
   mutable Kernel::V3D groupCentre;
 
   // functions inherited from IComponent
-  Component *clone() const { return NULL; }
-  ComponentID getComponentID(void) const { return NULL; }
-  boost::shared_ptr<const IComponent> getParent() const {
+  Component *clone() const override { return nullptr; }
+  ComponentID getComponentID(void) const override { return nullptr; }
+  boost::shared_ptr<const IComponent> getParent() const override {
     return boost::shared_ptr<const IComponent>();
   }
-  virtual const IComponent *getBareParent() const { return NULL; }
-  std::vector<boost::shared_ptr<const IComponent>> getAncestors() const {
+  const IComponent *getBareParent() const override { return nullptr; }
+  std::vector<boost::shared_ptr<const IComponent>>
+  getAncestors() const override {
     return std::vector<boost::shared_ptr<const IComponent>>();
   }
-  std::string getName() const;
-  std::string getFullName() const;
-  void setParent(IComponent *) {}
-  void setName(const std::string &) {}
+  std::string getName() const override;
+  std::string getFullName() const override;
+  void setParent(IComponent *) override {}
+  void setName(const std::string &) override {}
 
-  void setPos(double, double, double) {}
-  void setPos(const Kernel::V3D &) {}
-  void setRot(const Kernel::Quat &) {}
+  void setPos(double, double, double) override {}
+  void setPos(const Kernel::V3D &) override {}
+  void setRot(const Kernel::Quat &) override {}
   void copyRot(const IComponent &) {}
-  int interceptSurface(Track &) const { return -10; }
-  void translate(const Kernel::V3D &) {}
-  void translate(double, double, double) {}
-  void rotate(const Kernel::Quat &) {}
-  void rotate(double, const Kernel::V3D &) {}
-  const Kernel::V3D getRelativePos() const {
+  int interceptSurface(Track &) const override { return -10; }
+  void translate(const Kernel::V3D &) override {}
+  void translate(double, double, double) override {}
+  void rotate(const Kernel::Quat &) override {}
+  void rotate(double, const Kernel::V3D &) override {}
+  const Kernel::V3D getRelativePos() const override {
     throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");
   }
-  const Kernel::Quat &getRelativeRot() const {
+  const Kernel::Quat &getRelativeRot() const override {
     throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup");
   }
-  const Kernel::Quat getRotation() const { return Kernel::Quat(); }
-  void printSelf(std::ostream &) const {}
+  const Kernel::Quat getRotation() const override { return Kernel::Quat(); }
+  void printSelf(std::ostream &) const override {}
 
   // functions inherited from IObjComponent
 
   void getBoundingBox(double &, double &, double &, double &, double &,
                       double &) const {};
 
-  void draw() const {};
-  void drawObject() const {};
-  void initDraw() const {};
+  void draw() const override{};
+  void drawObject() const override{};
+  void initDraw() const override{};
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const {
+  const boost::shared_ptr<const Object> shape() const override {
     return boost::shared_ptr<const Object>();
   }
   /// Returns the material of the Object
-  const boost::shared_ptr<const Kernel::Material> material() const {
+  const boost::shared_ptr<const Kernel::Material> material() const override {
     return boost::shared_ptr<const Kernel::Material>();
   }
 

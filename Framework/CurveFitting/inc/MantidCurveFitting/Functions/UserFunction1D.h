@@ -77,31 +77,31 @@ public:
   UserFunction1D()
       : m_x(0.0), m_x_set(false), m_parameters(new double[100]), m_nPars(0){};
   /// Destructor
-  virtual ~UserFunction1D(){};
+  ~UserFunction1D() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "UserFunction1D"; }
+  const std::string name() const override { return "UserFunction1D"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Optimization\\FitAlgorithms";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fits a histogram from a workspace to a user defined function.";
   }
 
 protected:
   /// overwrite base class methods
   // double function(const double* in, const double& x);
-  virtual void function(const double *in, double *out, const double *xValues,
-                        const size_t nData);
-  virtual void declareAdditionalProperties();
-  virtual void declareParameters(){};
-  virtual void prepare();
+  void function(const double *in, double *out, const double *xValues,
+                const size_t nData) override;
+  void declareAdditionalProperties() override;
+  void declareParameters() override{};
+  void prepare() override;
   /// Derivatives of function with respect to parameters you are trying to fit
-  virtual void functionDeriv(const double *in, API::Jacobian *out,
-                             const double *xValues, const size_t nData);
+  void functionDeriv(const double *in, API::Jacobian *out,
+                     const double *xValues, const size_t nData) override;
 
   static double *AddVariable(const char *varName, void *palg);
 

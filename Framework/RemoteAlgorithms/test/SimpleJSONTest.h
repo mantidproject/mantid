@@ -32,11 +32,11 @@ public:
     TS_ASSERT_EQUALS(false, vBool.getValue(getBool));
     TS_ASSERT_EQUALS(true, getBool);
 
-    TS_ASSERT_THROWS_NOTHING(JSONValue str1(""));
-    TS_ASSERT_THROWS_NOTHING(JSONValue str2("str"));
+    TS_ASSERT_THROWS_NOTHING(JSONValue str1(std::string("")));
+    TS_ASSERT_THROWS_NOTHING(JSONValue str2(std::string("str")));
 
-    JSONValue str1("s1");
-    JSONValue str2("s2");
+    JSONValue str1(std::string("s1"));
+    JSONValue str2(std::string("s2"));
     TS_ASSERT_THROWS_NOTHING(str1 = str2);
 
     JSONValue vs;

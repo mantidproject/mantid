@@ -35,8 +35,9 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(NULL), implicitFunction(NULL), indexMultiplier(NULL),
-      signals(NULL), errors(NULL), numEvents(NULL) {}
+    : outWS(), prog(nullptr), implicitFunction(nullptr),
+      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
+      numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -49,8 +50,8 @@ BinMD::~BinMD() {}
 /** Initialize the algorithm's properties.
  */
 void BinMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
@@ -59,14 +60,15 @@ void BinMD::init() {
   // --------------- Processing methods and options
   // ---------------------------------------
   std::string grp = "Methods";
-  declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ImplicitFunctionXML", "", Direction::Input),
                   "XML string describing the implicit function determining "
                   "which bins to use.");
   setPropertyGroup("ImplicitFunctionXML", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("IterateEvents", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("IterateEvents", true,
+                                           Direction::Input),
       "Alternative binning method where you iterate through every event, "
       "placing them in the proper bin.\n"
       "This may be faster for workspaces with few events and lots of output "
@@ -74,14 +76,14 @@ void BinMD::init() {
   setPropertyGroup("IterateEvents", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("Parallel", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Parallel", false, Direction::Input),
       "Temporary parameter: true to run in parallel. This is ignored for "
       "file-backed workspaces, where running in parallel makes things slower "
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output MDHistoWorkspace.");
 }
 
@@ -332,8 +334,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
 
       // Go through every box for this chunk.
-      for (size_t i = 0; i < boxes.size(); i++) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      for (auto &boxe : boxes) {
+        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
         if (box)
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
@@ -373,7 +375,7 @@ void BinMD::exec() {
 
   // De serialize the implicit function
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
-  implicitFunction = NULL;
+  implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
     implicitFunction =
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(

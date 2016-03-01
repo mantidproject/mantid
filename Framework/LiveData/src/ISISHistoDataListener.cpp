@@ -1,16 +1,18 @@
 #include "MantidLiveData/ISISHistoDataListener.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -44,17 +46,19 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
+    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
-  declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
-                  "An optional list of spectra to load. If blank, all "
-                  "available spectra will be loaded.");
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
+      "An optional list of spectra to load. If blank, all "
+      "available spectra will be loaded.");
 
   auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
   validator->setLower(1);
-  declareProperty(new Kernel::ArrayProperty<int>("PeriodList", validator),
-                  "An optional list of periods to load. If blank, all "
-                  "available periods will be loaded.");
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
+      "An optional list of periods to load. If blank, all "
+      "available periods will be loaded.");
 }
 
 /// Destructor
@@ -94,7 +98,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
   if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, address.port()) != 0) {
-    m_daeHandle = NULL;
+    m_daeHandle = nullptr;
     return false;
   }
 
@@ -102,7 +106,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
 
   // Set the spectra list to load
-  std::vector<specid_t> spectra = getProperty("SpectraList");
+  std::vector<specnum_t> spectra = getProperty("SpectraList");
   if (!spectra.empty()) {
     setSpectra(spectra);
   }
@@ -121,7 +125,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 bool ISISHistoDataListener::isConnected() {
-  if (m_daeHandle == NULL)
+  if (m_daeHandle == nullptr)
     return false;
   // try to read a parameter, success means connected
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;
@@ -271,7 +275,8 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
   const int maxSize = 1024;
   char buffer[maxSize];
   int dim = maxSize, ndims = 1;
-  if (IDCgetparc(m_daeHandle, par.c_str(), (char *)buffer, &dim, &ndims) != 0) {
+  if (IDCgetparc(m_daeHandle, par.c_str(), static_cast<char *>(buffer), &dim,
+                 &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
     throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
                                        m_daeName);
@@ -283,7 +288,7 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
  * spectra.
   * @param specList :: A vector with spectra indices.
   */
-void ISISHistoDataListener::setSpectra(const std::vector<specid_t> &specList) {
+void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
   // after listener has created its first workspace the spectra numbers cannot
   // be changed
   if (!isInitilized) {
@@ -296,7 +301,7 @@ void ISISHistoDataListener::setSpectra(const std::vector<specid_t> &specList) {
   * @param periodList :: A vector with period numbers.
   */
 void ISISHistoDataListener::setPeriods(
-    const std::vector<specid_t> &periodList) {
+    const std::vector<specnum_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be
   // changed
   if (!isInitilized) {
@@ -381,9 +386,9 @@ void ISISHistoDataListener::calculateIndicesForReading(
   } else {
     // combine consecutive spectra but don't exceed the maxNumberOfSpectra
     size_t i0 = 0;
-    specid_t spec = m_specList[i0];
+    specnum_t spec = m_specList[i0];
     for (size_t i = 1; i < m_specList.size(); ++i) {
-      specid_t next = m_specList[i];
+      specnum_t next = m_specList[i];
       if (next - m_specList[i - 1] > 1 ||
           static_cast<int>(i - i0) >= maxNumberOfSpectra) {
         int n = static_cast<int>(i - i0);
@@ -431,7 +436,8 @@ void ISISHistoDataListener::getData(int period, int index, int count,
     workspace->setX(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
-    workspace->getSpectrum(wi)->setSpectrumNo(index + static_cast<specid_t>(i));
+    workspace->getSpectrum(wi)
+        ->setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
     y.assign(dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size());
     std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
@@ -548,9 +554,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
           m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
         }
 
-        for (auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end();
-             ++mon) {
-          g_log.information() << "Monitor spectrum " << *mon << std::endl;
+        for (auto &mon : m_monitorSpectra) {
+          g_log.information() << "Monitor spectrum " << mon << std::endl;
         }
 
         const std::string detRTCB =
@@ -599,14 +604,13 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
     if (m_monitorSpectra.empty())
       return 0;
     int regime = -1;
-    for (auto specIt = m_specList.begin(); specIt != m_specList.end();
-         ++specIt) {
+    for (auto specIt : m_specList) {
       bool isMonitor =
-          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(),
-                    *specIt) != m_monitorSpectra.end();
-      if (!isMonitor && *specIt > m_totalNumberOfSpectra)
+          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) !=
+          m_monitorSpectra.end();
+      if (!isMonitor && specIt > m_totalNumberOfSpectra)
         throw std::invalid_argument("Invalid spectra index is found: " +
-                                    boost::lexical_cast<std::string>(*specIt));
+                                    boost::lexical_cast<std::string>(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;

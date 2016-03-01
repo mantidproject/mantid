@@ -6,15 +6,21 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
+
 #include <string>
 #include <vector>
 #include <set>
+
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+}
+
 namespace Geometry {
 //---------------------------------------------------------
 // Forward declarations
@@ -70,7 +76,7 @@ public:
   //! Return a clone to the current object
   virtual IComponent *clone() const = 0;
   /// Destructor
-  virtual ~IComponent() {}
+  virtual ~IComponent() = default;
   //! Returns the ComponentID - a unique identifier of the component.
   virtual ComponentID getComponentID() const = 0;
   //! Returns const pointer to base component if this component is parametrized

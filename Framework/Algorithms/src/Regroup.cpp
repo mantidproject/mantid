@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Regroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-#include <numeric>
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,16 +32,16 @@ void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of regrouping.");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>()),
       "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
 

@@ -42,9 +42,9 @@ class LegendWidget: public QWidget
 
 public:
   explicit LegendWidget(Plot *);
-        ~LegendWidget();
+  ~LegendWidget() override;
 
-	void clone(LegendWidget* t);
+        void clone(LegendWidget* t);
 	QwtPlot *plot(){return d_plot;};
 
 	//! The kinds of frame a LegendWidget can draw around the Text.
@@ -96,11 +96,13 @@ private:
 	int symbolsMaxWidth();
 	QString parse(const QString& str);
 
-	virtual void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-	void contextMenuEvent(QContextMenuEvent * ){emit showMenu();};
+        void paintEvent(QPaintEvent *e) override;
+        void mousePressEvent(QMouseEvent *e) override;
+        void contextMenuEvent(QContextMenuEvent *) override {
+          emit showMenu();
+        };
 
-	//! Parent plot
+        //! Parent plot
 	Plot *d_plot;
 
 	//! Frame type

@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/MDAlgorithmsTestHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                          )
 

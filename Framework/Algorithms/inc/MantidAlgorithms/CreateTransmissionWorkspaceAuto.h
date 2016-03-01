@@ -37,23 +37,23 @@ class DLLExport CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
   CreateTransmissionWorkspaceAuto();
-  virtual ~CreateTransmissionWorkspaceAuto();
+  ~CreateTransmissionWorkspaceAuto() override;
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "CreateTransmissionWorkspaceAuto";
   }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Reflectometry\\ISIS"; }
+  const std::string category() const override { return "Reflectometry\\ISIS"; }
   /// Algorithm's summary for documentation
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   template <typename T> boost::optional<T> isSet(std::string propName) const;
 

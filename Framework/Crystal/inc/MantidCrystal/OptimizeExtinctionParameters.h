@@ -44,20 +44,20 @@ public:
   /// Default constructorMatrix
   OptimizeExtinctionParameters();
   /// Destructor
-  virtual ~OptimizeExtinctionParameters();
+  ~OptimizeExtinctionParameters() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "OptimizeExtinctionParameters";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Finds optimal mosaic and r_crystallite parameters for extinction "
            "correction.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Corrections"; }
+  const std::string category() const override { return "Crystal\\Corrections"; }
   /// Call TOFExtinction as a Child Algorithm to get statistics of the peaks
   double fitMosaic(double mosaic, double rcrystallite, std::string inname,
                    std::string corrOption, std::string pointOption,
@@ -67,8 +67,8 @@ private:
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithm

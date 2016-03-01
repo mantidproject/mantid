@@ -5,6 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,9 +45,9 @@ public:
   /// Default constructor
   XDataConverter();
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
 protected:
   /// Returns true if the algorithm needs to be run.
@@ -64,9 +65,9 @@ protected:
 
 private:
   /// Override init
-  virtual void init();
+  void init() override;
   /// Override exec
-  virtual void exec();
+  void exec() override;
 
   /// Set the X data on given spectra
   void setXData(API::MatrixWorkspace_sptr outputWS,

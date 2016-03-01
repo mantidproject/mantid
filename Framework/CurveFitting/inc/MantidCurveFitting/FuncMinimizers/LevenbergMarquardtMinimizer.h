@@ -42,20 +42,20 @@ namespace FuncMinimisers {
 class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
-  ~LevenbergMarquardtMinimizer();
+  ~LevenbergMarquardtMinimizer() override;
   LevenbergMarquardtMinimizer();
 
   /// Overloading base class methods
   /// Name of the minimizer.
-  std::string name() const { return "Levenberg-Marquardt"; }
+  std::string name() const override { return "Levenberg-Marquardt"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 0);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations = 0) override;
   /// Do one iteration.
-  virtual bool iterate(size_t);
+  bool iterate(size_t) override;
   /// Return current value of the cost function
-  virtual double costFunctionVal();
+  double costFunctionVal() override;
 
 private:
   void calCovarianceMatrix(double epsrel, gsl_matrix *covar);

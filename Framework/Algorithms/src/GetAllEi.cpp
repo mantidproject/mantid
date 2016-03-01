@@ -1,18 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <string>
-
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
+
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,15 +31,16 @@ GetAllEi::GetAllEi()
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper(), m_pFilterLog(NULL) {}
+      m_chopper(), m_pFilterLog(nullptr) {}
 
 /// Initialization method.
 void GetAllEi::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "Workspace", "", Kernel::Direction::Input),
-                  "The input workspace containing the monitor's spectra "
-                  "measured after the last chopper");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Kernel::Direction::Input),
+      "The input workspace containing the monitor's spectra "
+      "measured after the last chopper");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
@@ -75,11 +81,11 @@ void GetAllEi::init() {
       "values where the derivative of the log turns zero.\n"
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
-  setPropertySettings(
-      "FilterWithDerivative",
-      new Kernel::EnabledWhenProperty("FilterBaseLog",
-                                      Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                                      "Defined in IDF"));
+  setPropertySettings("FilterWithDerivative",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FilterBaseLog",
+                          Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                          "Defined in IDF"));
 
   auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);
@@ -119,8 +125,8 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"
       "together with total intensity within each peak.");
@@ -272,8 +278,8 @@ void GetAllEi::exec() {
   destUnit->initialize(mon1Distance, 0., 0.,
                        static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
                        unused);
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    double eGuess = destUnit->singleFromTOF(guess_opening[i]);
+  for (double time : guess_opening) {
+    double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {
       guess_ei.push_back(eGuess);
     }
@@ -282,8 +288,8 @@ void GetAllEi::exec() {
                        boost::lexical_cast<std::string>(guess_ei.size()) +
                        " fell within both monitor's recording energy range\n";
   g_log.debug() << " Guess Energies are:\n";
-  for (size_t i = 0; i < guess_ei.size(); i++) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_ei[i]);
+  for (double ei : guess_ei) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;
 
@@ -399,13 +405,13 @@ void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                 << " chopper prospective opening within time frame: "
                 << TOF_range.first << " to: " << TOF_range.second << std::endl;
   g_log.debug() << " Timings are:\n";
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
+  for (double time : guess_opening) {
+    g_log.debug() << boost::str(boost::format(" %8.2f; ") % time);
   }
   g_log.debug() << std::endl;
   g_log.debug() << " Corresponding to energies:\n";
-  for (size_t i = 0; i < guess_opening.size(); i++) {
-    double ei = destUnit->singleFromTOF(guess_opening[i]);
+  for (double time : guess_opening) {
+    double ei = destUnit->singleFromTOF(time);
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;
@@ -873,9 +879,9 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // at this stage all properties are validated so its safe to access them
   // without
   // additional checks.
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
   auto pSpectr1 = inputWS->getSpectrum(wsIndex0);
   auto pSpectr2 = inputWS->getSpectrum(wsIndex1);
@@ -982,7 +988,7 @@ GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
   if (boost::iequals(LogName, "Defined in IDF")) {
     auto AllNames = m_chopper->getStringParameter(propertyName);
     if (AllNames.size() != 1)
-      return NULL;
+      return nullptr;
     LogName = AllNames[0];
   }
   auto pIProperty = (inputWS->run().getProperty(LogName));
@@ -1237,7 +1243,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
                           "Rebin input workspace first.";
   }
 
-  specid_t specNum1 = getProperty("Monitor1SpecID");
+  specnum_t specNum1 = getProperty("Monitor1SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum1);
   } catch (std::runtime_error &) {
@@ -1245,7 +1251,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
         "Input workspace does not contain spectra with ID: " +
         boost::lexical_cast<std::string>(specNum1);
   }
-  specid_t specNum2 = getProperty("Monitor2SpecID");
+  specnum_t specNum2 = getProperty("Monitor2SpecID");
   try {
     inputWS->getIndexFromSpectrumNumber(specNum2);
   } catch (std::runtime_error &) {

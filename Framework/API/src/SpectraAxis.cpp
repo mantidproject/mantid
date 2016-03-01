@@ -84,7 +84,7 @@ void SpectraAxis::setValue(const std::size_t &index, const double &value) {
 /**
  * Finds the index of the given value on the axis
  * @param value A value on the axis. It is treated as a spectrum number and cast
- * to specid_t on input
+ * to specnum_t on input
  * @return The index closest to given value
  * @throws std::out_of_range if the value is out of range of the axis
  */
@@ -109,7 +109,7 @@ size_t SpectraAxis::indexOfValue(const double value) const {
  *  @return The spectrum number as an int
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-specid_t SpectraAxis::spectraNo(const std::size_t &index) const {
+specnum_t SpectraAxis::spectraNo(const std::size_t &index) const {
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1,
                                         "SpectraAxis: Index out of range.");
@@ -120,17 +120,18 @@ specid_t SpectraAxis::spectraNo(const std::size_t &index) const {
 
 /** Returns a map where spectra is the key and index is the value
  *  This is used for efficient search of spectra number within a workspace
- *  @param  map Reference to the map
+ *  @returns :: map of spectra to index
  */
-void SpectraAxis::getSpectraIndexMap(spec2index_map &map) const {
+spec2index_map SpectraAxis::getSpectraIndexMap() const {
   size_t nel = length();
 
   if (nel == 0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
-  map.clear();
+  spec2index_map map;
   for (size_t i = 0; i < nel; ++i) {
-    map.insert(std::make_pair(m_parentWS->getSpectrum(i)->getSpectrumNo(), i));
+    map.emplace(m_parentWS->getSpectrum(i)->getSpectrumNo(), i);
   }
+  return map;
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent

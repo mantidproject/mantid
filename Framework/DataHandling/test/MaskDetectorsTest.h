@@ -22,7 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::MantidVecPtr;
 using Mantid::detid_t;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -118,7 +118,7 @@ public:
 
     TS_ASSERT_EQUALS(props[1]->name(), "SpectraList");
     TS_ASSERT(props[1]->isDefault());
-    TS_ASSERT(dynamic_cast<ArrayProperty<specid_t> *>(props[1]));
+    TS_ASSERT(dynamic_cast<ArrayProperty<specnum_t> *>(props[1]));
 
     TS_ASSERT_EQUALS(props[2]->name(), "DetectorList");
     TS_ASSERT(props[2]->isDefault());

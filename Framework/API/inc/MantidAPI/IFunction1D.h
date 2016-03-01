@@ -58,19 +58,14 @@ class FunctionHandler;
 */
 class MANTID_API_DLL IFunction1D : public virtual IFunction {
 public:
-  /// Virtual destructor
-  /// (avoids warnings about non-trivial move assignment in virtually inheriting
-  /// classes)
-  virtual ~IFunction1D() {}
-
   /* Overidden methods */
 
-  virtual void function(const FunctionDomain &domain,
-                        FunctionValues &values) const;
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
   virtual void derivative(const FunctionDomain &domain, FunctionValues &values,
                           const size_t order = 1) const;
 
-  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Function you want to fit to.
   virtual void function1D(double *out, const double *xValues,

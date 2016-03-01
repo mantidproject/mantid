@@ -54,26 +54,27 @@ public:
   /// Default constructor
   PolynomialCorrection();
   /// Destructor
-  virtual ~PolynomialCorrection(){};
+  ~PolynomialCorrection() override{};
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "PolynomialCorrection"; }
+  const std::string name() const override { return "PolynomialCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Corrects the data in a workspace by the value of a polynomial "
            "function which is evaluated at the X value of each data point.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "CorrectionFunctions"; }
+  const std::string category() const override { return "CorrectionFunctions"; }
 
 private:
   // Overridden UnaryOperation methods
-  void defineProperties();
-  void retrieveProperties();
+  void defineProperties() override;
+  void retrieveProperties() override;
   void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut, double &EOut);
+                             const double EIn, double &YOut,
+                             double &EOut) override;
 
   std::vector<double> m_coeffs; ///< Holds the coefficients for the polynomial
   /// correction function

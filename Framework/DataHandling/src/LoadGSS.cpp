@@ -2,17 +2,21 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadGSS.h"
-#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
+
 #include <fstream>
 #include <sstream>
 
@@ -60,12 +64,13 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialise the algorithm
   */
 void LoadGSS::init() {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".gsa", ".gss", ".gda", ".txt"}),
+  const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace name to load into.");
 
   declareProperty("UseBankIDasSpectrumNumber", false,
@@ -107,7 +112,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = NULL;
+  Progress *prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -145,7 +150,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == NULL) {
+    if (nSpec != 0 && prog == nullptr) {
       prog = new Progress(this, 0.0, 1.0, nSpec);
     }
 
@@ -232,7 +237,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         vecY.clear();
         vecE.clear();
 
-        if (prog != NULL)
+        if (prog != nullptr)
           prog->report();
       }
 
@@ -410,7 +415,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
-      specid_t specno = static_cast<specid_t>(detectorIDs[i]);
+      specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
       outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
     }
   }

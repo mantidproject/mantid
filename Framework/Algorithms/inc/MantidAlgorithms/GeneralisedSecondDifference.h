@@ -58,27 +58,27 @@ public:
   /// (Empty) Constructor
   GeneralisedSecondDifference();
   /// Virtual destructor
-  virtual ~GeneralisedSecondDifference();
+  ~GeneralisedSecondDifference() override;
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "GeneralisedSecondDifference";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Computes the generalised second difference of a spectrum or "
            "several spectra.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   ///
   void computePrefactors();
   /// Vector that contains the prefactor coefficients Cij in the range

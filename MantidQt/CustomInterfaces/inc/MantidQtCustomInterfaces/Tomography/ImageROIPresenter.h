@@ -44,9 +44,9 @@ class DLLExport ImageROIPresenter : public IImageROIPresenter {
 public:
   /// Default constructor - normally used from the concrete view
   ImageROIPresenter(IImageROIView *view);
-  virtual ~ImageROIPresenter();
+  ~ImageROIPresenter() override;
 
-  void notify(IImageROIPresenter::Notification notif);
+  void notify(IImageROIPresenter::Notification notif) override;
 
 protected:
   void initialize();

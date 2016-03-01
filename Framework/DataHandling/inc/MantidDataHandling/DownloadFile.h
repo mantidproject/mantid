@@ -39,19 +39,19 @@ namespace DataHandling {
 class DLLExport DownloadFile : public API::Algorithm {
 public:
   DownloadFile();
-  virtual ~DownloadFile();
+  ~DownloadFile() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 protected:
   Kernel::InternetHelper *m_internetHelper;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace DataHandling

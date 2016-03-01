@@ -142,21 +142,20 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
                          const std::string &create_alg_name,
                          const std::string &accumulate_alg_name) {
   // Using a set so we only insert unique names
-  std::set<std::string> historical_data_sources;
+  std::unordered_set<std::string> historical_data_sources;
 
   // Get previously added data sources from DataSources property of the original
   // call of CreateMD and any subsequent calls of AccumulateMD
   auto view = ws_history.createView();
   view->unrollAll();
   const std::vector<HistoryItem> history_items = view->getAlgorithmsList();
-  for (auto iter = history_items.begin(); iter != history_items.end(); ++iter) {
-    auto alg_history = iter->getAlgorithmHistory();
+  for (const auto &history_item : history_items) {
+    auto alg_history = history_item.getAlgorithmHistory();
     if (alg_history->name() == create_alg_name ||
         alg_history->name() == accumulate_alg_name) {
       auto props = alg_history->getProperties();
-      for (auto prop_iter = props.begin(); prop_iter != props.end();
-           ++prop_iter) {
-        PropertyHistory_const_sptr prop_history = *prop_iter;
+      for (auto &prop : props) {
+        PropertyHistory_const_sptr prop_history = prop;
         if (prop_history->name() == "DataSources") {
           insertDataSources(prop_history->value(), historical_data_sources);
         }
@@ -176,8 +175,9 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
  * sources
  * @param historical_data_sources :: set of data sources
 */
-void insertDataSources(const std::string &data_sources,
-                       std::set<std::string> &historical_data_sources) {
+void insertDataSources(
+    const std::string &data_sources,
+    std::unordered_set<std::string> &historical_data_sources) {
   // Split the property string into a vector of data sources
   std::vector<std::string> data_split;
   boost::split(data_split, data_sources, boost::is_any_of(","));
@@ -188,9 +188,7 @@ void insertDataSources(const std::string &data_sources,
       boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
 
   // Insert each data source into our complete set of historical data sources
-  for (auto it = data_split.begin(); it != data_split.end(); ++it) {
-    historical_data_sources.insert(*it);
-  }
+  historical_data_sources.insert(data_split.begin(), data_split.end());
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -224,76 +222,74 @@ const std::string AccumulateMD::summary() const {
  * Initialize the algorithm's properties.
 */
 void AccumulateMD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace to append data to.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDEventWorkspace with new data appended.");
 
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "DataSources",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  std::vector<std::string> e_mode_options;
-  e_mode_options.push_back("Elastic");
-  e_mode_options.push_back("Direct");
-  e_mode_options.push_back("Indirect");
+  std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
                   boost::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Alatt",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Angdeg",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(new ArrayProperty<double>("Psi", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Psi", Direction::Input),
                   "Psi rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gl", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gl", Direction::Input),
                   "gl rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gs", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gs", Direction::Input),
                   "gs rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      new PropertyWithValue<bool>("InPlace", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
 
-  declareProperty(new PropertyWithValue<bool>("Clean", false, Direction::Input),
-                  "Create workspace from fresh rather than appending to "
-                  "existing workspace data.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("Clean", false, Direction::Input),
+      "Create workspace from fresh rather than appending to "
+      "existing workspace data.");
 }
 
 /*
@@ -339,7 +335,7 @@ void AccumulateMD::exec() {
     IMDEventWorkspace_sptr out_ws =
         createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
-    g_log.notice() << this->name() << " succesfully created a clean workspace"
+    g_log.notice() << this->name() << " successfully created a clean workspace"
                    << std::endl;
     this->progress(1.0);
     return; // POSSIBLE EXIT POINT

@@ -114,7 +114,13 @@ _translations = {
     'Dominic Oram'            : 'Oram, Dominic',
     'Shahroz Ahmed'           : 'Ahmed, Shahroz',
     'celinedurniak'           : 'Durniak, Celine',
-    'Celine Durniak'          : 'Durniak, Celine'
+    'Celine Durniak'          : 'Durniak, Celine',
+    'Michael Hart'            : 'Hart, Michael',
+    'Lamar Moore'             : 'Moore, Lamar',
+    'LamarMoore'              : 'Moore, Lamar',
+    'Tom Perkins'             : 'Perkins, Tom',
+    'Jan Burle'               : 'Burle, Jan',
+    'Duc Le'                  : 'Le, Duc'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -126,7 +132,8 @@ _blacklist = [
     'Yao, Marie',
     'Utkarsh Ayachit',
     'Chris Kerr',
-    'Thomas Brooks'
+    'Thomas Brooks',
+    'mantid-builder',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <fstream>
 
@@ -35,20 +37,18 @@ CreateLogTimeCorrection::~CreateLogTimeCorrection() {}
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {
-  auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputWorkspace", "", Direction::Input,
-      boost::make_shared<InstrumentValidator>());
-  declareProperty(inpwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
                   "Name of the input workspace to generate log correct from.");
 
-  auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output);
-  declareProperty(outwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing the corrections.");
 
-  auto fileprop =
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave);
-  declareProperty(fileprop, "Name of the output time correction file.");
+  declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                                    FileProperty::OptionalSave),
+                  "Name of the output time correction file.");
 
   return;
 }
@@ -108,11 +108,11 @@ void CreateLogTimeCorrection::getInstrumentSetup() {
 
   // 2. Get detector IDs
   std::vector<detid_t> detids = m_instrument->getDetectorIDs(true);
-  for (size_t i = 0; i < detids.size(); ++i) {
-    IDetector_const_sptr detector = m_instrument->getDetector(detids[i]);
+  for (auto &detid : detids) {
+    IDetector_const_sptr detector = m_instrument->getDetector(detid);
     V3D detpos = detector->getPos();
     double l2 = detpos.distance(samplepos);
-    m_l2map.insert(make_pair(detids[i], l2));
+    m_l2map.emplace(detid, l2);
   }
 
   // 3. Output information
@@ -134,7 +134,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
     int detid = miter->first;
     double l2 = miter->second;
     double corrfactor = m_L1 / (m_L1 + l2);
-    m_correctionMap.insert(make_pair(detid, corrfactor));
+    m_correctionMap.emplace(detid, corrfactor);
   }
 }
 
@@ -142,7 +142,7 @@ void CreateLogTimeCorrection::calculateCorrection() {
 /** Write L2 map and correction map to a TableWorkspace
   */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");

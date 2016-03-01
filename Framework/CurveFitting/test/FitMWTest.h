@@ -458,8 +458,7 @@ public:
     const std::string inputWSName = "FitMWTest_CompositeTest";
     // AnalysisDataService::Instance().add(inputWSName, ws2);
 
-    auto composite =
-        boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+    auto composite = boost::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);
     expDecay->setParameter("Height", 1.5);
     expDecay->setError(0, 0.01);
@@ -479,8 +478,9 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(new WorkspaceProperty<Workspace>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws2);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -543,8 +543,9 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(new WorkspaceProperty<Workspace>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -638,8 +639,9 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(new WorkspaceProperty<Workspace>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -653,7 +655,7 @@ public:
   }
 
   void do_test_convolve_members_option(bool withBackground) {
-    auto conv = boost::shared_ptr<Convolution>(new Convolution);
+    auto conv = boost::make_shared<Convolution>();
     auto resolution = IFunction_sptr(new Gaussian);
     resolution->initialize();
     resolution->setParameter("Height", 1.0);
@@ -675,7 +677,8 @@ public:
     conv->addFunction(gaussian2);
 
     // workspace with 100 points on interval -10 <= x <= 10
-    boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
     for (size_t i = 0; i < data->blocksize(); i++) {
       data->dataX(0)[i] = -10.0 + 0.2 * double(i);
@@ -687,8 +690,9 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(new WorkspaceProperty<Workspace>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, data);
 
     IFunction_sptr fitfun;
@@ -696,8 +700,7 @@ public:
       API::IFunction_sptr bckgd(new ExpDecay);
       bckgd->setParameter("Height", 1.);
       bckgd->setParameter("Lifetime", 1.);
-      auto composite =
-          boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+      auto composite = boost::make_shared<API::CompositeFunction>();
       composite->addFunction(bckgd);
       composite->addFunction(conv);
       fitfun = composite;

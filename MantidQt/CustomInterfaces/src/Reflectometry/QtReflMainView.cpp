@@ -59,11 +59,10 @@ void QtReflMainView::initLayout() {
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
   // Finally, create a presenter to do the thinking for us
-  m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
+  m_presenter = boost::make_shared<ReflMainViewPresenter>(
       this /*main view*/,
-      this /*currently this concrete view is also responsibile for prog reporting*/));
-  m_algoRunner = boost::shared_ptr<MantidQt::API::AlgorithmRunner>(
-      new MantidQt::API::AlgorithmRunner(this));
+      this /*currently this concrete view is also responsibile for prog reporting*/);
+  m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
 /**

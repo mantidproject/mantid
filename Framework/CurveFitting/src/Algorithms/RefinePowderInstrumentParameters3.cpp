@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
@@ -38,8 +39,8 @@ RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() {}
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputPeakPositionWorkspace",
-                                         "Anonymous", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "InputPeakPositionWorkspace", "Anonymous", Direction::Input),
       "Data workspace containing workspace positions in TOF agains dSpacing.");
 
   // Workspace Index
@@ -49,28 +50,26 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Output workspace
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("OutputPeakPositionWorkspace",
-                                         "Anonymous2", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+          "OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
       "agains dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputInstrumentParameterWorkspace",
-                                            "Anonymous3", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputInstrumentParameterWorkspace", "Anonymous3", Direction::Input),
       "INput tableWorkspace containg instrument's parameters.");
 
   // Output table workspace containing the refined parameters
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "Anonymous4",
           Direction::Output),
       "Output tableworkspace containing instrument's fitted parameters. ");
 
   // Refinement algorithm
-  vector<string> algoptions;
-  algoptions.push_back("OneStepFit");
-  algoptions.push_back("MonteCarlo");
+  vector<string> algoptions{"OneStepFit", "MonteCarlo"};
   auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
@@ -84,9 +83,7 @@ void RefinePowderInstrumentParameters3::init() {
                   "Random seed for Monte Carlo simulation. ");
 
   // Method to calcualte the standard error of peaks
-  vector<string> stdoptions;
-  stdoptions.push_back("ConstantValue");
-  stdoptions.push_back("UseInputValue");
+  vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
       boost::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
@@ -295,7 +292,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
     }
     newpar.fit = fit;
 
-    parammap.insert(make_pair(parname, newpar));
+    parammap.emplace(parname, newpar);
   }
 
   return;
@@ -520,13 +517,12 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
-  for (size_t i = 0; i < mcgroup.size(); ++i) {
+  for (auto paramname : mcgroup) {
     // random number between -1 and 1
     double randomnumber =
         2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
 
     // parameter information
-    string paramname = mcgroup[i];
     Parameter param = curparammap[paramname];
     double stepsize = m_dampingFactor * currchisq *
                       (param.curvalue * param.mcA1 + param.mcA0) *
@@ -639,17 +635,7 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
     // Higher Rwp. Take a chance to accept
     double dice = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
     double bar = exp(-(newchisq - curchisq) / (curchisq * temperature));
-    // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-    // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice <<
-    // endl;
-    if (dice < bar) {
-      // random number (dice, 0 and 1) is smaller than bar (between -infty and
-      // 0)
-      accept = true;
-    } else {
-      // Reject
-      accept = false;
-    }
+    accept = dice < bar;
   }
 
   return accept;
@@ -694,7 +680,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   {
     map<string, Parameter> storemap;
     duplicateParameters(parammap, storemap);
-    bestresults.push_back(make_pair(chisq, storemap));
+    bestresults.emplace_back(chisq, storemap);
     sort(bestresults.begin(), bestresults.end());
   }
   */
@@ -723,8 +709,8 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
   mcgroups.push_back(geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (size_t i = 0; i < geomparams.size(); ++i)
-    dboutss << geomparams[i] << "\t\t";
+  for (auto &geomparam : geomparams)
+    dboutss << geomparam << "\t\t";
   dboutss << endl;
 
   g_log.notice(dboutss.str());
@@ -1064,7 +1050,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     map<string, Parameter> parameters, double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
-  TableWorkspace_sptr tablews(new TableWorkspace);
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
@@ -1114,7 +1100,7 @@ void RefinePowderInstrumentParameters3::addOrReplace(
     Parameter newparameter;
     newparameter.name = parname;
     newparameter.curvalue = parvalue;
-    parameters.insert(make_pair(parname, newparameter));
+    parameters.emplace(parname, newparameter);
   }
 
   return;
@@ -1187,8 +1173,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   msgss << "Set Instrument Function Parameter : " << endl;
 
   std::map<std::string, Parameter>::iterator paramiter;
-  for (size_t i = 0; i < funparamnames.size(); ++i) {
-    string parname = funparamnames[i];
+  for (auto parname : funparamnames) {
     paramiter = params.find(parname);
 
     if (paramiter != params.end()) {
@@ -1317,7 +1302,7 @@ void duplicateParameters(map<string, Parameter> source,
     Parameter param = miter->second;
     Parameter newparam;
     newparam = param;
-    target.insert(make_pair(parname, newparam));
+    target.emplace(parname, newparam);
   }
 
   return;
@@ -1360,7 +1345,7 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
   lookupdict.clear();
 
   for (size_t i = 0; i < strvec.size(); ++i)
-    lookupdict.insert(make_pair(strvec[i], i));
+    lookupdict.emplace(strvec[i], i);
 
   return;
 }
@@ -1397,7 +1382,7 @@ void storeFunctionParameterValue(
     string &parname = parnames[i];
     double parvalue = function->getParameter(i);
     double parerror = function->getError(i);
-    parvaluemap.insert(make_pair(parname, make_pair(parvalue, parerror)));
+    parvaluemap.emplace(parname, make_pair(parvalue, parerror));
   }
 
   return;
@@ -1413,8 +1398,7 @@ void restoreFunctionParameterValue(
     map<string, Parameter> &parammap) {
   vector<string> parnames = function->getParameterNames();
 
-  for (size_t i = 0; i < parnames.size(); ++i) {
-    string &parname = parnames[i];
+  for (auto &parname : parnames) {
     map<string, pair<double, double>>::iterator miter;
     miter = parvaluemap.find(parname);
 

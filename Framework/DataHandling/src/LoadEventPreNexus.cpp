@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -16,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -77,10 +79,10 @@ static const double TOF_CONVERSION = .1;
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
 LoadEventPreNexus::LoadEventPreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(NULL),
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(nullptr),
       spectra_list(), pulsetimes(), event_indices(), proton_charge(),
       proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-      eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      eventfile(nullptr), num_events(0), num_pulses(0), numpixel(0),
       num_good_events(0), num_error_events(0), num_ignored_events(0),
       first_event(0), max_events(0), using_mapping_file(false),
       loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
@@ -124,22 +126,24 @@ int LoadEventPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadEventPreNexus::init() {
   // which files to use
   declareProperty(
-      new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
+      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                        EVENT_EXT),
       "The name of the neutron event file to read, including its full or "
       "relative path. The file typically ends in neutron_event.dat (N.B. case "
       "sensitive if running on Linux).");
-  declareProperty(new FileProperty(PULSEID_PARAM, "",
-                                   FileProperty::OptionalLoad, PULSE_EXT),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // which pixels to load
-  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -154,13 +158,10 @@ void LoadEventPreNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -171,7 +172,8 @@ void LoadEventPreNexus::init() {
 
   // the output workspace name
   declareProperty(
-      new WorkspaceProperty<IEventWorkspace>(OUT_PARAM, "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+          OUT_PARAM, "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 }
@@ -237,14 +239,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) { //
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -265,8 +265,8 @@ string getRunnumber(const string &filename) {
   if (runnumber.find("neutron") >= string::npos)
     return "0";
 
-  std::size_t left = runnumber.find("_");
-  std::size_t right = runnumber.find("_", left + 1);
+  std::size_t left = runnumber.find('_');
+  std::size_t right = runnumber.find('_', left + 1);
 
   return runnumber.substr(left + 1, right - left - 1);
 }
@@ -372,9 +372,9 @@ void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename,
                                           MatrixWorkspace_sptr localWorkspace) {
   // determine the instrument parameter file
   string instrument = Poco::Path(eventfilename).getFileName();
-  size_t pos = instrument.rfind("_");   // get rid of 'event.dat'
-  pos = instrument.rfind("_", pos - 1); // get rid of 'neutron'
-  pos = instrument.rfind("_", pos - 1); // get rid of the run number
+  size_t pos = instrument.rfind('_');   // get rid of 'event.dat'
+  pos = instrument.rfind('_', pos - 1); // get rid of 'neutron'
+  pos = instrument.rfind('_', pos - 1); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work
@@ -470,7 +470,7 @@ void LoadEventPreNexus::procEvents(
       EventList &spec = workspace->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }
@@ -479,8 +479,8 @@ void LoadEventPreNexus::procEvents(
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = spectra_list.begin(); it != spectra_list.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (auto &spectrum : spectra_list)
+    spectraLoadMap[spectrum] = true;
 
   CPUTimer tim;
 
@@ -844,7 +844,6 @@ void LoadEventPreNexus::setProtonCharge(
  */
 void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
   this->using_mapping_file = false;
-  this->pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -859,7 +858,7 @@ void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->pixelmap);
+  this->pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(pixelmap.begin(), pixelmap.end(),

@@ -35,26 +35,25 @@ class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction
     : public PoldiSpectrumDomainFunction {
 public:
   PoldiSpectrumPawleyFunction();
-  virtual ~PoldiSpectrumPawleyFunction() {}
 
-  std::string name() const { return "PoldiSpectrumPawleyFunction"; }
+  std::string name() const override { return "PoldiSpectrumPawleyFunction"; }
 
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
 
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::FunctionValues &values) const;
+                          API::FunctionValues &values) const override;
   void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                               API::Jacobian &jacobian);
+                               API::Jacobian &jacobian) override;
   void poldiFunction1D(const std::vector<int> &indices,
                        const API::FunctionDomain1D &domain,
-                       API::FunctionValues &values) const;
+                       API::FunctionValues &values) const override;
 
   API::IPawleyFunction_sptr getPawleyFunction() const;
 
 protected:
-  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
   API::IPawleyFunction_sptr m_pawleyFunction;
 };

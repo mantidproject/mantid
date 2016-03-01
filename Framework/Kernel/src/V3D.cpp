@@ -18,9 +18,6 @@ V3D::V3D() : x(0), y(0), z(0) {}
 V3D::V3D(const double xx, const double yy, const double zz)
     : x(xx), y(yy), z(zz) {}
 
-/// Copy constructor
-V3D::V3D(const V3D &v) : x(v.x), y(v.y), z(v.z) {}
-
 /**
   Sets the vector position based on spherical coordinates
 
@@ -97,21 +94,6 @@ void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
   if (std::abs(z) < Tolerance)
     z = 0.0;
 }
-
-/**
-  Assignment operator
-  @param rhs :: V3D to copy
-  @return *this
-*/
-V3D &V3D::operator=(const V3D &rhs) {
-  x = rhs.x;
-  y = rhs.y;
-  z = rhs.z;
-  return *this;
-}
-
-/// Destructor
-V3D::~V3D() {}
 
 /**
   Addtion operator
@@ -506,7 +488,7 @@ void V3D::rotate(const Kernel::Matrix<double> &A)
 bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const {
   const V3D &Av = *this;
   const V3D Tmp((Bv - Av).cross_prod(Cv - Av));
-  return (Tmp.norm() > Tolerance) ? false : true;
+  return Tmp.norm() <= Tolerance;
 }
 
 bool V3D::nullVector(const double Tol) const

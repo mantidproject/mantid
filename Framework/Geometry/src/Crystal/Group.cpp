@@ -25,20 +25,6 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations)
   setSymmetryOperations(symmetryOperations);
 }
 
-/// Copy constructor.
-Group::Group(const Group &other)
-    : m_allOperations(other.m_allOperations),
-      m_operationSet(other.m_operationSet), m_axisSystem(other.m_axisSystem) {}
-
-/// Assignment operator.
-Group &Group::operator=(const Group &other) {
-  m_allOperations = other.m_allOperations;
-  m_operationSet = other.m_operationSet;
-  m_axisSystem = other.m_axisSystem;
-
-  return *this;
-}
-
 /// Returns the order of the group, which is the number of symmetry operations.
 size_t Group::order() const { return m_allOperations.size(); }
 
@@ -71,11 +57,9 @@ Group Group::operator*(const Group &other) const {
   std::vector<SymmetryOperation> result;
   result.reserve(order() * other.order());
 
-  for (auto selfOp = m_allOperations.begin(); selfOp != m_allOperations.end();
-       ++selfOp) {
-    for (auto otherOp = other.m_allOperations.begin();
-         otherOp != other.m_allOperations.end(); ++otherOp) {
-      result.push_back((*selfOp) * (*otherOp));
+  for (const auto &operation : m_allOperations) {
+    for (const auto &otherOp : other.m_allOperations) {
+      result.push_back(operation * otherOp);
     }
   }
 
@@ -86,9 +70,9 @@ Group Group::operator*(const Group &other) const {
 /// operations, vectors are wrapped to [0, 1).
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
-
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    result.push_back(Geometry::getWrappedVector((*op) * vector));
+  result.reserve(m_allOperations.size());
+  for (const auto &operation : m_allOperations) {
+    result.push_back(Geometry::getWrappedVector(operation * vector));
   }
 
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
@@ -148,8 +132,11 @@ void Group::setSymmetryOperations(
     throw std::invalid_argument("Group needs at least one element.");
   }
 
-  m_operationSet = std::set<SymmetryOperation>(symmetryOperations.begin(),
-                                               symmetryOperations.end());
+  m_operationSet.clear();
+  std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
+                 std::inserter(m_operationSet, m_operationSet.begin()),
+                 &getUnitCellIntervalOperation);
+
   m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(),
                                                    m_operationSet.end());
   m_axisSystem = getCoordinateSystemFromOperations(m_allOperations);
@@ -159,9 +146,8 @@ void Group::setSymmetryOperations(
 /// systems have 4 non-zero elements in the matrix, orthogonal have 6.
 Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
-  for (auto op = symmetryOperations.begin(); op != symmetryOperations.end();
-       ++op) {
-    std::vector<int> matrix = (*op).matrix();
+  for (const auto &symmetryOperation : symmetryOperations) {
+    std::vector<int> matrix = symmetryOperation.matrix();
     if (std::count(matrix.begin(), matrix.end(), 0) == 5) {
       return Group::Hexagonal;
     }
@@ -199,8 +185,8 @@ bool Group::hasIdentity() const {
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (!containsOperation((*op).inverse())) {
+  for (const auto &operation : m_allOperations) {
+    if (!containsOperation(getUnitCellIntervalOperation(operation.inverse()))) {
       return false;
     }
   }

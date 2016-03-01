@@ -1,6 +1,7 @@
 #include "MantidMatrixFunction.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 MantidMatrixFunction::MantidMatrixFunction(MantidMatrix &matrix):
     m_outside(0)

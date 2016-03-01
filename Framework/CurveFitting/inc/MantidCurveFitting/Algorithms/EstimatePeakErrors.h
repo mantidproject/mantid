@@ -34,15 +34,15 @@ class DLLExport EstimatePeakErrors : public API::Algorithm {
 public:
   EstimatePeakErrors();
 
-  const std::string name() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  const std::string summary() const override;
 
-  int version() const;
-  const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

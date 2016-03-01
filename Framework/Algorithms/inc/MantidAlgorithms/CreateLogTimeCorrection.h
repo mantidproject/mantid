@@ -43,25 +43,25 @@ namespace Algorithms {
 class DLLExport CreateLogTimeCorrection : public API::Algorithm {
 public:
   CreateLogTimeCorrection();
-  virtual ~CreateLogTimeCorrection();
+  ~CreateLogTimeCorrection() override;
 
-  virtual const std::string name() const { return "CreateLogTimeCorrection"; }
+  const std::string name() const override { return "CreateLogTimeCorrection"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create log time correction table.  Correction for each pixel is "
            "based on L1 and L2.";
   }
 
-  virtual int version() const { return 1; }
-  virtual const std::string category() const {
+  int version() const override { return 1; }
+  const std::string category() const override {
     return "Events\\EventFiltering";
   }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Get instrument geometry setup including L2 for each detector and L1
   void getInstrumentSetup();

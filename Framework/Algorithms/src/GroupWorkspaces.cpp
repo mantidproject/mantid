@@ -19,13 +19,13 @@ GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
 void GroupWorkspaces::init() {
 
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Name of the Input Workspaces to Group");
   declareProperty(
-      new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "Name of the workspace to be created as the output of grouping ");
 }
 
@@ -51,8 +51,8 @@ void GroupWorkspaces::exec() {
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  for (auto citr = names.cbegin(); citr != names.cend(); ++citr) {
-    auto workspace = ads.retrieve(*citr);
+  for (const auto &name : names) {
+    auto workspace = ads.retrieve(name);
     addToGroup(workspace);
   }
 }

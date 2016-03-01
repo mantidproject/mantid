@@ -6,6 +6,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <cstdio>
 
 // Register the algorithm into the AlgorithmFactory
@@ -83,10 +84,11 @@ const std::string RawFileInfo::runHeader(const ISISRAW &isisRaw) {
 
 /// Create properties
 void RawFileInfo::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
-      "The name of the [[RAW_File | RAW]] file from which to "
-      "extract the parameters");
+  const std::vector<std::string> exts{".raw", ".s*"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the [[RAW_File | RAW]] file from which to "
+                  "extract the parameters");
   declareProperty("GetRunParameters", false,
                   "If this is true, the parameters from the RPB struct are "
                   "placed into a TableWorkspace called Raw_RPB",
@@ -141,7 +143,7 @@ void RawFileInfo::exec() {
   // Get the run information if we are told to
   bool get_run_info = getProperty("GetRunParameters");
   if (get_run_info) {
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                         "RunParameterTable", "Raw_RPB", Direction::Output),
                     "The name of the TableWorkspace in which to store the list "
                     "of run parameters");

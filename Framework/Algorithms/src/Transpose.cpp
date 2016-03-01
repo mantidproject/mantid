@@ -5,6 +5,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid {
@@ -17,13 +18,13 @@ using namespace Kernel;
 using namespace API;
 
 void Transpose::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace.");
 }
 
 void Transpose::exec() {
@@ -104,7 +105,7 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X
-  API::NumericAxis *newYAxis(NULL);
+  API::NumericAxis *newYAxis(nullptr);
   if (inputWorkspace->isHistogramData()) {
     newYAxis = new API::BinEdgeAxis(inX);
   } else {

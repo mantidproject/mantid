@@ -75,7 +75,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
   // -- Use the boost preprocessor to generate a list of else if clause to cut
   // out copy
   // and pasted code.
-  PyObject *result(NULL);
+  PyObject *result(nullptr);
   if (false) {
   } // So that it always falls through to the list checking
   BOOST_PP_LIST_FOR_EACH(GET_BUILTIN, _, BUILTIN_TYPES)
@@ -155,7 +155,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
   if (column)
     column->setPlotType(plottype);
 
-  return column != 0;
+  return column != nullptr;
 }
 
 /**
@@ -170,7 +170,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
  */
 bool addColumnSimple(ITableWorkspace &self, const std::string &type,
                      const std::string &name) {
-  return self.addColumn(type, name) != 0;
+  return self.addColumn(type, name) != nullptr;
 }
 
 /**
@@ -293,9 +293,9 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
   try {
     // Retrieve and set the value for each column
     auto columns = self.getColumnNames();
-    for (auto iter = columns.begin(); iter != columns.end(); ++iter) {
-      column = self.getColumn(*iter);
-      value = rowItems[*iter];
+    for (auto &iter : columns) {
+      column = self.getColumn(iter);
+      value = rowItems[iter];
       setValue(column, rowIndex, value);
     }
   } catch (bpl::error_already_set &) {

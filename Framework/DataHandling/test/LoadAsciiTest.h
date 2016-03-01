@@ -3,8 +3,13 @@
 
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadAscii.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+
 #include <Poco/File.h>
+
 #include <fstream>
 
 class LoadAsciiTest : public CxxTest::TestSuite {

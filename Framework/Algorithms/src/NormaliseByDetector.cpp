@@ -60,19 +60,19 @@ void NormaliseByDetector::init() {
       boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input,
-                                                         compositeValidator),
-                  "An input workspace in wavelength");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, compositeValidator),
+      "An input workspace in wavelength");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
     Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det) {
-  if (parameter == NULL) {
+  if (parameter == nullptr) {
     std::stringstream stream;
     stream << det->getName() << " and all of it's parent components, have no "
                                 "fitting type parameters. This algorithm "
@@ -116,9 +116,8 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
   ParamNames allParamNames = function->getParameterNames();
 
   // Lookup each parameter name.
-  for (auto it = allParamNames.begin(); it != allParamNames.end(); ++it) {
-    Geometry::Parameter_sptr param =
-        paramMap.getRecursive(&(*det), (*it), type);
+  for (auto &name : allParamNames) {
+    Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), name, type);
 
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);
@@ -183,7 +182,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
 
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.
-  if (m_parallelExecution == true) {
+  if (m_parallelExecution) {
     PARALLEL_FOR2(inWS, denominatorWS)
     for (int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex) {
       PARALLEL_START_INTERUPT_REGION

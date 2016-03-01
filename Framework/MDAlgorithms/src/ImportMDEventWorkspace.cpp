@@ -102,12 +102,11 @@ const std::string ImportMDEventWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void ImportMDEventWorkspace::init() {
-  std::vector<std::string> fileExtensions(1);
-  fileExtensions[0] = ".txt";
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        fileExtensions),
+  std::vector<std::string> fileExtensions{".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

@@ -34,26 +34,27 @@ CentroidPeaks::~CentroidPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input 2D Workspace.");
 
   declareProperty(
-      new PropertyWithValue<int>("PeakRadius", 10, Direction::Input),
+      make_unique<PropertyWithValue<int>>("PeakRadius", 10, Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(new PropertyWithValue<int>("EdgePixels", 0, Direction::Input),
-                  "The number of pixels where peaks are removed at edges. Only "
-                  "for instruments with RectangularDetectors. ");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("EdgePixels", 0, Direction::Input),
+      "The number of pixels where peaks are removed at edges. Only "
+      "for instruments with RectangularDetectors. ");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }
@@ -339,7 +340,7 @@ void CentroidPeaks::exec() {
 
   eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inWS);
   if (eventW) {
-    eventW->sortAll(TOF_SORT, NULL);
+    eventW->sortAll(TOF_SORT, nullptr);
     this->integrateEvent();
   } else {
     this->integrate();
@@ -381,11 +382,8 @@ bool CentroidPeaks::edgePixel(std::string bankName, int col, int row,
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    if (col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-        row >= (RDet->ypixels() - Edge))
-      return true;
-    else
-      return false;
+    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
+           row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -398,11 +396,8 @@ bool CentroidPeaks::edgePixel(std::string bankName, int col, int row,
     int NROWS = static_cast<int>(grandchildren.size());
     int NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    if (col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
-        row - 1 >= (NROWS - Edge))
-      return true;
-    else
-      return false;
+    return col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
+           row - 1 >= (NROWS - Edge);
   }
   return false;
 }

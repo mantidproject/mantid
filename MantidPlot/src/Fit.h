@@ -58,19 +58,24 @@ class Fit : public Filter
 
 		Fit(ApplicationWindow *parent, Graph *g = 0, const QString& name = QString());
 		Fit(ApplicationWindow *parent, Table *t, const QString& name = QString());
-		~Fit();
+                ~Fit() override;
 
-		//! Actually does the fit. Should be reimplemented in derived classes.
+                //! Actually does the fit. Should be reimplemented in derived classes.
 		virtual void fit();
-        virtual bool run(){fit(); return true;};
+                bool run() override {
+                  fit();
+                  return true;
+                };
 
-		//! Sets the data set to be used for weighting
+                //! Sets the data set to be used for weighting
 		bool setWeightingData(WeightingMethod w, const QString& colName = QString::null);
 
-		void setDataCurve(int curve, double start, double end);
-		bool setDataFromTable(Table *t, const QString& xColName, const QString& yColName, int from = 1, int to = -1);
+                void setDataCurve(int curve, double start, double end) override;
+                bool setDataFromTable(Table *t, const QString &xColName,
+                                      const QString &yColName, int from = 1,
+                                      int to = -1) override;
 
-		QString resultFormula(){return d_result_formula;};
+                QString resultFormula(){return d_result_formula;};
 		QString formula(){return d_formula;};
 		virtual void setFormula(const QString&){};
 
@@ -92,9 +97,9 @@ class Fit : public Filter
 		void generateFunction(bool yes, int points = 100);
 
 		//! Output string added to the plot as a new legend
-		virtual QString legendInfo();
+                QString legendInfo() override;
 
-		//! Returns a vector with the fit results
+                //! Returns a vector with the fit results
 		double* results(){return d_results;};
 
 		//! Returns a vector with the standard deviations of the results

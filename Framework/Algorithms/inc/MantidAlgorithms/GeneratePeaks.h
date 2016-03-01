@@ -42,26 +42,26 @@ namespace Algorithms {
 class DLLExport GeneratePeaks : public API::Algorithm {
 public:
   GeneratePeaks();
-  virtual ~GeneratePeaks();
+  ~GeneratePeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GeneratePeaks"; }
+  const std::string name() const override { return "GeneratePeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Generate peaks in an output workspace according to a "
            "TableWorkspace containing a list of peak's parameters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
-  void init();
+  void init() override;
 
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process algorithm properties
   void processAlgProperties(std::string &peakfunctype,
@@ -71,7 +71,7 @@ private:
   void processTableColumnNames();
 
   void importPeaksFromTable(
-      std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
+      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
           functionmap);
 
   /// Import peak and background function parameters from vector
@@ -80,7 +80,7 @@ private:
 
   /// Generate peaks in output data workspaces
   void generatePeaks(
-      const std::map<specid_t,
+      const std::map<specnum_t,
                      std::vector<std::pair<double, API::IFunction_sptr>>> &
           functionmap,
       API::MatrixWorkspace_sptr dataWS);
@@ -117,11 +117,11 @@ private:
   std::vector<double> m_vecBkgdParamValues;
 
   /// Spectrum map from full spectra workspace to partial spectra workspace
-  std::map<specid_t, specid_t> m_SpectrumMap;
+  std::map<specnum_t, specnum_t> m_SpectrumMap;
 
   /// Set of spectra (workspace indexes) in the original workspace that contain
   /// peaks to generate
-  std::set<specid_t> m_spectraSet;
+  std::set<specnum_t> m_spectraSet;
 
   /// Flag to use automatic background (???)
   bool m_useAutoBkgd;

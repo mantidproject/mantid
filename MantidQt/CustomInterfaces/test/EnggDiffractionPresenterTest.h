@@ -88,11 +88,11 @@ public:
     m_ex_enginx_banks.push_back(false);
 
     // default run number
-    m_ex_empty_run_num.push_back("");
-    m_invalid_run_number.push_back("");
+    m_ex_empty_run_num.emplace_back("");
+    m_invalid_run_number.emplace_back("");
     m_ex_run_number.push_back(g_validRunNo);
-    g_vanNo.push_back("8899999988");
-    g_ceriaNo.push_back("9999999999");
+    g_vanNo.emplace_back("8899999988");
+    g_ceriaNo.emplace_back("9999999999");
     g_rebinRunNo.push_back(g_eventModeRunNo);
 
     // provide personal directories in order to carry out the full disable tests
@@ -124,7 +124,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     std::vector<std::string> sv;
-    sv.push_back("dummy msg");
+    sv.emplace_back("dummy msg");
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
 
     // No errors/warnings
@@ -176,6 +176,8 @@ public:
         .WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
+
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -300,6 +302,12 @@ public:
     // when a separate thread finished (here the thread is mocked)
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
 
+    // plots peaks and curves
+    // the test doesnt get to here as it finishes at EnggCalibrate algo
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
     // and error messages logged
@@ -328,6 +336,12 @@ public:
     // provided here instead
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
+
+    // plots peaks and curves
+    // the test doesnt get to here as it finishes at EnggCalibrate algo
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -486,6 +500,11 @@ public:
     // when a separate thread finished (here the thread is mocked)
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
 
+    // tests whether the plot functions have been called
+    EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
+    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
     // and error messages logged
@@ -635,9 +654,7 @@ public:
         .Times(1)
         .WillOnce(Return(m_invalid_run_number));
     // missing bank on/off vector!
-    std::vector<bool> banks;
-    banks.push_back(false);
-    banks.push_back(false);
+    std::vector<bool> banks{false, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     // would needs basic calibration settings, but only if there was at least
@@ -705,9 +722,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo())
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
-    std::vector<bool> banks;
-    banks.push_back(true); // 1 bank used
-    banks.push_back(false);
+    std::vector<bool> banks{true, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     EXPECT_CALL(mockView, currentInstrument())
@@ -750,9 +765,7 @@ public:
     EXPECT_CALL(mockView, focusingRunNo())
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
-    std::vector<bool> banks;
-    banks.push_back(false);
-    banks.push_back(false);
+    std::vector<bool> banks{false, false};
     EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     // will need basic calibration settings from the user
@@ -1115,7 +1128,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     std::vector<std::string> sv;
-    sv.push_back("dummy log");
+    sv.emplace_back("dummy log");
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
 
     // No errors/warnings

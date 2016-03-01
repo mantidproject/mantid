@@ -6,10 +6,6 @@
 
 namespace Mantid {
 namespace Kernel {
-/// constructor
-UserStringParser::UserStringParser() {}
-/// Destructor
-UserStringParser::~UserStringParser() {}
 
 /**This method parses a given string of numbers and returns a vector of vector
   *of numbers.
@@ -21,7 +17,7 @@ UserStringParser::parse(const std::string &userString) {
   std::vector<std::vector<unsigned int>> numbers;
   // first separate commas
   std::vector<std::string> commaseparatedstrings;
-  if (userString.find(",") != std::string::npos) {
+  if (userString.find(',') != std::string::npos) {
     commaseparatedstrings = separateComma(userString);
   }
   if (!commaseparatedstrings.empty()) {
@@ -78,7 +74,7 @@ void UserStringParser::parse(const std::string &userString,
   */
 bool UserStringParser::Contains(const std::string &input, char ch) {
   std::string::size_type pos = input.find(ch);
-  return (pos == std::string::npos ? false : true);
+  return (pos != std::string::npos);
 }
 
 /**This method parses a given string of numbers into comma separated tokens.
@@ -191,7 +187,7 @@ bool UserStringParser::isValidStepSeparator(const std::string &input,
       step_separator = input.substr(index - 1, 1);
     }
     // step values must be preceded by colon ':'
-    return (!step_separator.compare(":") ? true : false);
+    return (!step_separator.compare(":"));
   }
   return true;
 }

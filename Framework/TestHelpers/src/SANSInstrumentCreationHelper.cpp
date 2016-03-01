@@ -10,7 +10,9 @@
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
 /*****************************************************
@@ -18,7 +20,7 @@
  *****************************************************/
 
 using Mantid::detid_t;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using Mantid::DataObjects::Workspace2D_sptr;
@@ -123,7 +125,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   // Monitor: IDs start at 1 and increment by 1
   for (size_t i = 0; i < nMonitors; i++) {
     // std::cout << "SANS instrument monitor number " << i << std::endl;
-    workspace->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
+    workspace->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
     workspace->getSpectrum(wi)->setDetectorID(detid_t(wi + 1));
     wi++;
   }
@@ -131,7 +133,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   // Detector pixels
   for (size_t ix = 0; ix < nXbins; ix++) {
     for (size_t iy = 0; iy < nYbins; iy++) {
-      workspace->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
+      workspace->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
       workspace->getSpectrum(wi)
           ->setDetectorID(detid_t(1000000 + iy * 1000 + ix));
       wi++;

@@ -24,8 +24,8 @@ RotateInstrumentComponent::RotateInstrumentComponent() {}
 void RotateInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
-                                                   Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
@@ -93,7 +93,7 @@ void RotateInstrumentComponent::exec() {
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);
-    if (comp == 0) {
+    if (comp == nullptr) {
       std::ostringstream mess;
       mess << "Detector with ID " << DetID << " was not found.";
       g_log.error(mess.str());
@@ -101,7 +101,7 @@ void RotateInstrumentComponent::exec() {
     }
   } else if (!ComponentName.empty()) {
     comp = inst->getComponentByName(ComponentName);
-    if (comp == 0) {
+    if (comp == nullptr) {
       std::ostringstream mess;
       mess << "Component with name " << ComponentName << " was not found.";
       g_log.error(mess.str());

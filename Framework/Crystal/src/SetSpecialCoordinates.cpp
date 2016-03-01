@@ -40,12 +40,12 @@ SetSpecialCoordinates::SetSpecialCoordinates() {
   m_specialCoordinatesNames.push_back(SetSpecialCoordinates::QSampleOption());
   m_specialCoordinatesNames.push_back(SetSpecialCoordinates::HKLOption());
 
-  m_specialCoordinatesMap.insert(std::make_pair(
-      SetSpecialCoordinates::QLabOption(), Mantid::Kernel::QLab));
-  m_specialCoordinatesMap.insert(std::make_pair(
-      SetSpecialCoordinates::QSampleOption(), Mantid::Kernel::QSample));
-  m_specialCoordinatesMap.insert(
-      std::make_pair(SetSpecialCoordinates::HKLOption(), Mantid::Kernel::HKL));
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(),
+                                  Mantid::Kernel::QLab);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QSampleOption(),
+                                  Mantid::Kernel::QSample);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::HKLOption(),
+                                  Mantid::Kernel::HKL);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -74,7 +74,8 @@ const std::string SetSpecialCoordinates::category() const {
  */
 void SetSpecialCoordinates::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                Direction::InOut),
       "An input/output workspace. The new log will be added to it. Important "
       "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "
       "MDHisto worksapces are not affaceted by this algorithm");

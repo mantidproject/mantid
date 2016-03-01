@@ -3,8 +3,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -46,13 +44,13 @@ const std::string CreateTransmissionWorkspace::category() const {
 void CreateTransmissionWorkspace::init() {
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run, or the low wavelength transmision "
                   "run if SecondTransmissionRun is also provided.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator->clone()),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -63,20 +61,20 @@ void CreateTransmissionWorkspace::init() {
   this->initIndexInputs();
   this->initWavelengthInputs();
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output Workspace IvsQ.");
 
-  setPropertySettings(
-      "Params", new Kernel::EnabledWhenProperty("SecondTransmissionWorkspace",
-                                                IS_NOT_DEFAULT));
+  setPropertySettings("Params",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
   setPropertySettings("EndOverlap",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 }
 
@@ -225,9 +223,8 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     }
     if (stitchingStart.is_initialized() && stitchingEnd.is_initialized() &&
         stitchingDelta.is_initialized()) {
-      const std::vector<double> params =
-          boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-              stitchingEnd.get()).convert_to_container<std::vector<double>>();
+      const std::vector<double> params = {
+          stitchingStart.get(), stitchingDelta.get(), stitchingEnd.get()};
       stitch1DAlg->setProperty("Params", params);
     } else if (stitchingDelta.is_initialized()) {
       const double delta = stitchingDelta.get();

@@ -60,15 +60,13 @@ const std::string MuonProcess::category() const { return "Workflow\\Muon"; }
  * Initialize the algorithm's properties.
  */
 void MuonProcess::init() {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Mandatory),
-                  "Input workspace loaded from file (e.g. by LoadMuonNexus)");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
+      "Input workspace loaded from file (e.g. by LoadMuonNexus)");
 
-  std::vector<std::string> allowedModes;
-  allowedModes.push_back("CorrectAndGroup");
-  allowedModes.push_back("Analyse");
-  allowedModes.push_back("Combined");
+  std::vector<std::string> allowedModes{"CorrectAndGroup", "Analyse",
+                                        "Combined"};
   auto modeVal = boost::make_shared<CompositeValidator>();
   modeVal->add(boost::make_shared<StringListValidator>(allowedModes));
   modeVal->add(boost::make_shared<MandatoryValidator<std::string>>());
@@ -78,26 +76,27 @@ void MuonProcess::init() {
                   "crops, rebins and calculates asymmetry; Combined does all "
                   "of the above.");
 
-  declareProperty(new ArrayProperty<int>("SummedPeriodSet", Direction::Input),
-                  "Comma-separated list of periods to be summed");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
+      "Comma-separated list of periods to be summed");
 
   declareProperty(
-      new ArrayProperty<int>("SubtractedPeriodSet", Direction::Input),
+      make_unique<ArrayProperty<int>>("SubtractedPeriodSet", Direction::Input),
       "Comma-separated list of periods to be subtracted from the "
       "SummedPeriodSet");
 
   declareProperty(
       "ApplyDeadTimeCorrection", false,
       "Whether dead time correction should be applied to loaded workspace");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DeadTimeTable", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Table with dead time information, e.g. from LoadMuonNexus."
-                  "Must be specified if ApplyDeadTimeCorrection is set true.");
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
+      "Table with dead time information, e.g. from LoadMuonNexus."
+      "Must be specified if ApplyDeadTimeCorrection is set true.");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>("DetectorGroupingTable",
+                                                     "", Direction::Input,
+                                                     PropertyMode::Optional),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
   declareProperty("TimeZero", EMPTY_DBL(),
@@ -106,15 +105,13 @@ void MuonProcess::init() {
                   boost::make_shared<MandatoryValidator<double>>(),
                   "Time Zero value loaded from file, e.g. from LoadMuonNexus.");
   declareProperty(
-      new ArrayProperty<double>("RebinParams"),
+      make_unique<ArrayProperty<double>>("RebinParams"),
       "Params used for rebinning. If empty - rebinning is not done.");
   declareProperty("Xmin", EMPTY_DBL(), "Minimal X value to include");
   declareProperty("Xmax", EMPTY_DBL(), "Maximal X value to include");
 
-  std::vector<std::string> allowedTypes;
-  allowedTypes.push_back("PairAsymmetry");
-  allowedTypes.push_back("GroupAsymmetry");
-  allowedTypes.push_back("GroupCounts");
+  std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry",
+                                        "GroupCounts"};
   declareProperty("OutputType", "PairAsymmetry",
                   boost::make_shared<StringListValidator>(allowedTypes),
                   "What kind of workspace required for analysis.");
@@ -127,8 +124,8 @@ void MuonProcess::init() {
 
   declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

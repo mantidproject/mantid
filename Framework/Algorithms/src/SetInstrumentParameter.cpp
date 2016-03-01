@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -46,23 +47,21 @@ const std::string SetInstrumentParameter::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetInstrumentParameter::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace to add the log entry to");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::InOut,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace to add the log entry to");
   declareProperty("ComponentName", "", "The name of the component to attach "
                                        "the parameter to. Default: the whole "
                                        "instrument");
-  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
   declareProperty("ParameterName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("String");
-  propOptions.push_back("Number");
+  std::vector<std::string> propOptions{"String", "Number"};
   declareProperty("ParameterType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");
@@ -103,13 +102,13 @@ void SetInstrumentParameter::exec() {
 
   auto &paramMap = ws->instrumentParameters();
   if (!dets.empty()) {
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
-      addParameter(paramMap, (*it).get(), paramName, paramType, paramValue);
+    for (auto &det : dets) {
+      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
     }
   } else {
     if (cmptList.size() > 0) {
-      for (auto it = cmptList.begin(); it != cmptList.end(); ++it) {
-        addParameter(paramMap, it->get(), paramName, paramType, paramValue);
+      for (auto &cmpt : cmptList) {
+        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
       }
     } else {
       g_log.warning("Could not find the component requested.");

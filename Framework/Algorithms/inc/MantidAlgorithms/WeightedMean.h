@@ -47,39 +47,39 @@ public:
   /// Empty Constructor
   WeightedMean() : BinaryOperation() {}
   /// Empty Destructor
-  virtual ~WeightedMean() {}
+  ~WeightedMean() override {}
 
-  virtual const std::string name() const { return "WeightedMean"; }
+  const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "An algorithm to calculate the weighted mean of two workspaces.";
   }
 
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
 private:
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
+                              MantidVec &EOut) override;
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut);
-  virtual bool
+                              MantidVec &EOut) override;
+  bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                     const API::MatrixWorkspace_const_sptr rhs) const;
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+                     const API::MatrixWorkspace_const_sptr rhs) const override;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
 
   /// The name of the first input workspace property for BinaryOperation
-  virtual std::string inputPropName1() const { return "InputWorkspace1"; }
+  std::string inputPropName1() const override { return "InputWorkspace1"; }
   /// The name of the second input workspace property for BinaryOperation
-  virtual std::string inputPropName2() const { return "InputWorkspace2"; }
+  std::string inputPropName2() const override { return "InputWorkspace2"; }
 };
 
 } // namespace Algorithms

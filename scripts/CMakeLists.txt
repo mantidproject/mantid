@@ -19,6 +19,16 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUIHFIR_4Circle_Reduction
 )
 
+# Put them into the 'CompileUI' folder or group in VS and the like, for convenience
+set_property ( TARGET CompilePyUI PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIFilterEvents PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIPyChop PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUILib1To2 PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
+
 set ( TEST_PY_FILES
       test/ConvertToWavelengthTest.py
       test/DirectReductionHelpersTest.py
@@ -33,6 +43,8 @@ set ( TEST_PY_FILES
       test/SANSBatchModeTest.py
       test/SANSCentreFinderTest.py
       test/SANSCommandInterfaceTest.py
+      test/SANSDarkRunCorrectionTest.py
+      test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
       test/SANSReductionStepsUserFileTest.py

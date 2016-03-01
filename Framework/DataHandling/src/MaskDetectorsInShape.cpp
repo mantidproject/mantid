@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectorsInShape.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -20,8 +22,9 @@ MaskDetectorsInShape::MaskDetectorsInShape() {}
 MaskDetectorsInShape::~MaskDetectorsInShape() {}
 
 void MaskDetectorsInShape::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "The input workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "The input workspace");
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");

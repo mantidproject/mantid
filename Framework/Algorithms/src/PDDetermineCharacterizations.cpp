@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -54,21 +55,21 @@ const std::string PDDetermineCharacterizations::summary() const {
 
 /**
  * These should match those in LoadPDCharacterizations
+ * - "frequency" double
+ * -  "wavelength" (double)
+ * -  "bank" (integer)
+ * -  "container" (string)
+ * -  "vanadium" (string)
+ * -  "empty" (string)
+ * -  "d_min" (string)
+ * -  "d_max" (string)
+ * -  "tof_min" (double)
+ * -  "tof_max" (double)
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  std::vector<std::string> names;
-  names.push_back("frequency");  // double
-  names.push_back("wavelength"); // double
-  names.push_back("bank");       // integer
-  names.push_back("container");  // string
-  names.push_back("vanadium");   // string
-  names.push_back("empty");      // string
-  names.push_back("d_min");      // string
-  names.push_back("d_max");      // string
-  names.push_back("tof_min");    // double
-  names.push_back("tof_max");    // double
-  return names;
+  return {"frequency", "wavelength", "bank",  "container", "vanadium",
+          "empty",     "d_min",      "d_max", "tof_min",   "tof_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -90,10 +91,10 @@ PDDetermineCharacterizations::validateInputs() {
         << expectedNames.size();
     result[CHAR_PROP_NAME] = msg.str();
   } else {
-    for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-      if (std::find(names.begin(), names.end(), *it) == names.end()) {
+    for (auto &expectedName : expectedNames) {
+      if (std::find(names.begin(), names.end(), expectedName) == names.end()) {
         std::stringstream msg;
-        msg << "Failed to find column named " << (*it);
+        msg << "Failed to find column named " << expectedName;
         result[CHAR_PROP_NAME] = msg.str();
       }
     }
@@ -104,12 +105,12 @@ PDDetermineCharacterizations::validateInputs() {
 /// Initialize the algorithm's properties.
 void PDDetermineCharacterizations::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              API::PropertyMode::Optional),
+      Kernel::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, API::PropertyMode::Optional),
       "Workspace with logs to help identify frequency and wavelength");
 
   declareProperty(
-      new WorkspaceProperty<API::ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           CHAR_PROP_NAME, "", Direction::Input, API::PropertyMode::Optional),
       "Table of characterization information");
 
@@ -119,25 +120,24 @@ void PDDetermineCharacterizations::init() {
   const std::string defaultMsg =
       " run to use. 0 to use value in table, -1 to not use.";
 
-  declareProperty(new Kernel::ArrayProperty<int32_t>("BackRun", "0"),
-                  "Empty container" + defaultMsg);
-  declareProperty(new Kernel::ArrayProperty<int32_t>("NormRun", "0"),
-                  "Normalization" + defaultMsg);
-  declareProperty(new Kernel::ArrayProperty<int32_t>("NormBackRun", "0"),
-                  "Normalization background" + defaultMsg);
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("BackRun", "0"),
+      "Empty container" + defaultMsg);
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormRun", "0"),
+      "Normalization" + defaultMsg);
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormBackRun", "0"),
+      "Normalization background" + defaultMsg);
 
-  std::vector<std::string> defaultFrequencyNames;
-  defaultFrequencyNames.push_back("SpeedRequest1");
-  defaultFrequencyNames.push_back("Speed1");
-  defaultFrequencyNames.push_back("frequency");
-  declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
-                                                         defaultFrequencyNames),
+  std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
+                                                 "frequency"};
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+                      FREQ_PROP_NAME, defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  std::vector<std::string> defaultWavelengthNames;
-  defaultWavelengthNames.push_back("LambdaRequest");
-  defaultWavelengthNames.push_back("lambda");
-  declareProperty(new Kernel::ArrayProperty<std::string>(
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda"};
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");
 }
@@ -156,10 +156,7 @@ bool closeEnough(const double left, const double right) {
 
   // same within 5%
   const double relativeDiff = diff * 2 / (left + right);
-  if (relativeDiff < .05)
-    return true;
-
-  return false;
+  return relativeDiff < .05;
 }
 
 /// Fill in the property manager from the correct line in the table
@@ -222,7 +219,7 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
   if (propName == WL_PROP_NAME)
     label = "wavelength";
 
-  std::set<std::string> validUnits;
+  std::unordered_set<std::string> validUnits;
   if (propName == WL_PROP_NAME) {
     validUnits.insert("Angstrom");
     validUnits.insert("A");
@@ -230,26 +227,26 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
     validUnits.insert("Hz");
   }
 
-  for (auto name = names.begin(); name != names.end(); ++name) {
-    if (run.hasProperty(*name)) {
-      const std::string units = run.getProperty(*name)->units();
+  for (auto &name : names) {
+    if (run.hasProperty(name)) {
+      const std::string units = run.getProperty(name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(*name);
+        double value = run.getLogAsSingleValue(name);
         if (value == 0.) {
           std::stringstream msg;
-          msg << "'" << *name << "' has a mean value of zero " << units;
+          msg << "'" << name << "' has a mean value of zero " << units;
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found " << label << " in log '" << *name
+          msg << "Found " << label << " in log '" << name
               << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << *name
+        msg << "When looking at " << name
             << " log encountered unknown units for " << label << ":" << units;
         g_log.warning(msg.str());
       }
@@ -263,40 +260,43 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
 void PDDetermineCharacterizations::setDefaultsInPropManager() {
   if (!m_propertyManager->existsProperty("frequency")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<double>("frequency", 0.));
+        Kernel::make_unique<PropertyWithValue<double>>("frequency", 0.));
   }
   if (!m_propertyManager->existsProperty("wavelength")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<double>("wavelength", 0.));
+        Kernel::make_unique<PropertyWithValue<double>>("wavelength", 0.));
   }
   if (!m_propertyManager->existsProperty("bank")) {
-    m_propertyManager->declareProperty(new PropertyWithValue<int>("bank", 1));
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<PropertyWithValue<int>>("bank", 1));
   }
   if (!m_propertyManager->existsProperty("vanadium")) {
     m_propertyManager->declareProperty(
-        new ArrayProperty<int32_t>("vanadium", "0"));
+        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
   }
   if (!m_propertyManager->existsProperty("container")) {
     m_propertyManager->declareProperty(
-        new ArrayProperty<int32_t>("container", "0"));
+        Kernel::make_unique<ArrayProperty<int32_t>>("container", "0"));
   }
   if (!m_propertyManager->existsProperty("empty")) {
     m_propertyManager->declareProperty(
-        new ArrayProperty<int32_t>("empty", "0"));
+        Kernel::make_unique<ArrayProperty<int32_t>>("empty", "0"));
   }
   if (!m_propertyManager->existsProperty("d_min")) {
-    m_propertyManager->declareProperty(new ArrayProperty<double>("d_min"));
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<double>>("d_min"));
   }
   if (!m_propertyManager->existsProperty("d_max")) {
-    m_propertyManager->declareProperty(new ArrayProperty<double>("d_max"));
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<double>>("d_max"));
   }
   if (!m_propertyManager->existsProperty("tof_min")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<double>("tof_min", 0.));
+        Kernel::make_unique<PropertyWithValue<double>>("tof_min", 0.));
   }
   if (!m_propertyManager->existsProperty("tof_max")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<double>("tof_max", 0.));
+        Kernel::make_unique<PropertyWithValue<double>>("tof_max", 0.));
   }
 }
 
@@ -352,12 +352,13 @@ void PDDetermineCharacterizations::exec() {
   overrideRunNumProperty("NormBackRun", "empty");
 
   std::vector<std::string> expectedNames = getColumnNames();
-  for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
-    if (m_propertyManager->existsProperty(*it)) {
-      g_log.debug() << (*it) << ":" << m_propertyManager->getPropertyValue(*it)
+  for (auto &expectedName : expectedNames) {
+    if (m_propertyManager->existsProperty(expectedName)) {
+      g_log.debug() << expectedName << ":"
+                    << m_propertyManager->getPropertyValue(expectedName)
                     << "\n";
     } else {
-      g_log.warning() << (*it) << " DOES NOT EXIST\n";
+      g_log.warning() << expectedName << " DOES NOT EXIST\n";
     }
   }
 }

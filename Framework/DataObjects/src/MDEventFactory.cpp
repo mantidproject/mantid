@@ -254,11 +254,11 @@ API::IMDNode *MDEventFactory::createBox(
 /// static vector, conaining the pointers to the functions creating MD boxes
 std::vector<MDEventFactory::fpCreateBox> MDEventFactory::boxCreatorFP(
     MDEventFactory::NumBoxTypes *(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1),
-    NULL);
+    nullptr);
 // static vector, conaining the pointers to the functions creating MD Workspaces
 std::vector<MDEventFactory::fpCreateMDWS>
     MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1,
-                                NULL);
+                                nullptr);
 
 //########### Teplate methaprogrammed CODE SOURCE start:
 //-------------------------------------
@@ -418,7 +418,6 @@ public:
 // which process 0-dimension workspace operations (throw invalid argument)
 template <> class LOOP<0> {
 public:
-  LOOP() {}
   static inline void EXEC() {
     MDEventFactory::wsCreatorFP[0] = &MDEventFactory::createMDWorkspaceND<0>;
 

@@ -38,8 +38,6 @@ public:
   // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
   OrientedLattice(const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
                                                                        true));
-  // Copy constructor
-  OrientedLattice(const OrientedLattice &other);
   // a,b,c constructor
   OrientedLattice(const double _a, const double _b, const double _c,
                   const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
@@ -54,12 +52,6 @@ public:
   OrientedLattice(const UnitCell &uc,
                   const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
                                                                        true));
-  // UnitCell constructor
-  OrientedLattice(const UnitCell *uc,
-                  const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3,
-                                                                       true));
-  // Destructor
-  virtual ~OrientedLattice();
 
   // Access private variables
   const Kernel::DblMatrix &getU() const;
@@ -93,7 +85,7 @@ private:
   Kernel::DblMatrix UB;
 
   /** Make recalculateFromGstar private. */
-  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) {
+  void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }
 };

@@ -129,7 +129,8 @@ private:
     // Test names as they are used in scripts
     if (nattrs <= profile.nAttributes()) {
       const char *attrAarr[nattrs] = {"Mass", "HermiteCoeffs"};
-      std::set<std::string> expectedAttrs(attrAarr, attrAarr + nattrs);
+      std::unordered_set<std::string> expectedAttrs(attrAarr,
+                                                    attrAarr + nattrs);
       std::vector<std::string> actualNames = profile.getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {

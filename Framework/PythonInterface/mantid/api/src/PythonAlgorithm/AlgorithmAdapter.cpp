@@ -22,7 +22,8 @@ using Environment::CallMethod0;
  */
 template <typename BaseAlgorithm>
 AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
-    : BaseAlgorithm(), m_self(self), m_isRunningObj(NULL), m_wikiSummary("") {
+    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr),
+      m_wikiSummary("") {
   // Cache the isRunning call to save the lookup each time it is called
   // as it is most likely called in a loop
 
@@ -141,7 +142,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     return SuperClass::isRunning();
   } else {
     Environment::GlobalInterpreterLock gil;
-    PyObject *result = PyObject_CallObject(m_isRunningObj, NULL);
+    PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       Environment::throwRuntimeError(true);
     if (PyBool_Check(result))
@@ -243,7 +244,7 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
   // We need to clone the property so that python doesn't own the object that
   // gets inserted
   // into the manager
-  caller.declareProperty(prop->clone(), doc);
+  caller.declareProperty(std::unique_ptr<Kernel::Property>(prop->clone()), doc);
 }
 
 /**
@@ -264,9 +265,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &validator, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(Registry::PropertyWithValueFactory::create(
-                             name, defaultValue, validator, direction),
-                         doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue, validator,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**
@@ -285,9 +287,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &defaultValue, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(
-      Registry::PropertyWithValueFactory::create(name, defaultValue, direction),
-      doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**

@@ -80,33 +80,34 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 */
 void LoadMD::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "The name of the Nexus file to load, as a full or relative path");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
-                  "Load Box structure and other metadata without events. The "
-                  "loaded workspace will be empty and not file-backed.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+      "Load Box structure and other metadata without events. The "
+      "loaded workspace will be empty and not file-backed.");
 
   declareProperty(
-      new Kernel::PropertyWithValue<bool>("BoxStructureOnly", false),
+      make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly", false),
       "Load partial information about the boxes and events. Redundant property "
-      "currently equivalent to  MetadataOnly");
+      "currently equivalent to MetadataOnly");
 
-  declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
+  declareProperty(make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
                   "Set to true to load the data only on demand.");
-  setPropertySettings(
-      "FileBackEnd", new EnabledWhenProperty("MetadataOnly", IS_EQUAL_TO, "0"));
+  setPropertySettings("FileBackEnd", make_unique<EnabledWhenProperty>(
+                                         "MetadataOnly", IS_EQUAL_TO, "0"));
 
   declareProperty(
-      new PropertyWithValue<double>("Memory", -1),
+      make_unique<PropertyWithValue<double>>("Memory", -1),
       "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
       "in-memory cache.\n"
       "If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory",
-                      new EnabledWhenProperty("FileBackEnd", IS_EQUAL_TO, "1"));
+  setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
+                                    "FileBackEnd", IS_EQUAL_TO, "1"));
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
 
@@ -652,7 +653,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   inD--;
   outD--;
   Matrix<coord_t> mat(vec);
-  CoordTransform *transform = NULL;
+  CoordTransform *transform = nullptr;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
     auto affine = new CoordTransformAffine(inD, outD);
     affine->setMatrix(mat);
@@ -715,10 +716,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Set the MDFrames for each axes
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = framesToSet.begin(); frame != framesToSet.end();
-         ++frame) {
+    for (auto &frame : framesToSet) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", frame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();
@@ -729,9 +729,9 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
-    for (auto frame = oldFrames.begin(); frame != oldFrames.end(); ++frame) {
+    for (auto &oldFrame : oldFrames) {
       setMDFrameAlg->setProperty("InputWorkspace", ws);
-      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("MDFrame", oldFrame);
       setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
       ++axesCounter;
       setMDFrameAlg->executeAsChildAlg();
