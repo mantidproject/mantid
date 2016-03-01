@@ -760,7 +760,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(
 
   // The array of indices for each event list #
   int dims_array[1] = {static_cast<int>(indices.size())};
-  if (indices.size() > 0) {
+  if (!indices.empty()) {
     if (compress)
       NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array,
                      m_nexuscompression, dims_array);

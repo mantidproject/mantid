@@ -59,7 +59,7 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
   const auto history = it->getAlgorithmHistory();
   const auto childHistories = history->getChildHistories();
 
-  if (!it->isUnrolled() && childHistories.size() > 0) {
+  if (!it->isUnrolled() && !childHistories.empty()) {
     // mark this record as being ignored by the script builder
     it->unrolled(true);
 

@@ -707,7 +707,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const Mantid::MantidVec &y = this->readY(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (y.size() >= 1)) {
+    if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default

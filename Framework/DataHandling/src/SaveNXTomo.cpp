@@ -76,7 +76,7 @@ void SaveNXTomo::exec() {
   } catch (...) {
   }
 
-  if (m_workspaces.size() != 0)
+  if (!m_workspaces.empty())
     processAll();
 }
 
@@ -96,7 +96,7 @@ bool SaveNXTomo::processGroups() {
   } catch (...) {
   }
 
-  if (m_workspaces.size() != 0)
+  if (!m_workspaces.empty())
     processAll();
 
   return true;

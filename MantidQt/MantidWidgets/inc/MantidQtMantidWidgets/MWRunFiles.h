@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Override parent class run().
-  virtual void run();
+  virtual void run() override;
 
 private:
   /// Use the specified algorithm and property to find files instead of using
@@ -189,9 +189,9 @@ public:
   void setEntryNum(const int num);
   /// Overridden from base class to retrieve user input through a common
   /// interface
-  QVariant getUserInput() const;
+  QVariant getUserInput() const override;
   /// Sets a value on the widget through a common interface
-  void setUserInput(const QVariant &value);
+  void setUserInput(const QVariant &value) override;
   /// Sets a value on the widget but doesn't emit a signal to say it has changed
   void setText(const QString &value);
   /// flag a problem with the file the user entered, an empty string means no
@@ -250,9 +250,9 @@ public slots:
 
 protected:
   // Method for handling drop events
-  void dropEvent(QDropEvent *);
+  void dropEvent(QDropEvent *) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *);
+  void dragEnterEvent(QDragEnterEvent *) override;
 
 private:
   /// Create a file filter from a list of extensions

@@ -676,7 +676,7 @@ void LeBailFit::execRefineBackground() {
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");
 
-  for (auto parname : m_bkgdParameterNames) {
+  for (const auto &parname : m_bkgdParameterNames) {
     double parvalue = m_backgroundFunction->getParameter(parname);
 
     TableRow newrow = outtablews->appendRow();
@@ -748,7 +748,7 @@ void LeBailFit::createLeBailFunction() {
       boost::make_shared<LeBailFunction>(LeBailFunction(m_peakType));
 
   // Set up profile parameters
-  if (m_funcParameters.size() == 0)
+  if (m_funcParameters.empty())
     throw runtime_error("Function parameters must be set up by this point.");
 
   map<string, double> pardblmap = convertToDoubleMap(m_funcParameters);
@@ -1908,14 +1908,14 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
 
   // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
   // a) Sig0, Sig1, Sig2
-  for (auto parname : sigs) {
+  for (const auto &parname : sigs) {
     m_funcParameters[parname].mcA0 = 2.0;
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = true;
   }
 
   // b) Alpha
-  for (auto parname : alphs) {
+  for (const auto &parname : alphs) {
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = false;
   }
@@ -2094,7 +2094,7 @@ bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
       ::transform(values.begin(), values.end(), vecBkgd.begin(), values.begin(),
                   ::plus<double>());
     } else {
-      if (veccalbkgd.size() == 0)
+      if (veccalbkgd.empty())
         throw runtime_error("Programming logic error.");
       ::transform(values.begin(), values.end(), veccalbkgd.begin(),
                   values.begin(), ::plus<double>());
@@ -2113,7 +2113,7 @@ bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
                      caldata.begin(), std::plus<double>());
     } else {
       // Re-calculate background
-      if (veccalbkgd.size() == 0)
+      if (veccalbkgd.empty())
         throw runtime_error("Programming logic error (2). ");
       std::transform(values.begin(), values.end(), veccalbkgd.begin(),
                      caldata.begin(), std::plus<double>());
@@ -2156,7 +2156,7 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
 
   // Find out parameters to refine in this step/MC group
   g_log.debug() << "Parameter Number In Group = " << mcgroup.size() << "\n";
-  for (auto paramname : mcgroup) {
+  for (const auto &paramname : mcgroup) {
     // Find out the i-th parameter to be refined or not
     auto mapiter = curparammap.find(paramname);
     if (mapiter == curparammap.end()) {
@@ -2401,7 +2401,7 @@ void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap,
     m_bestMCStep = istep;
 
     // b) Record parameters
-    if (m_bestParameters.size() == 0) {
+    if (m_bestParameters.empty()) {
       // If not be initialized, initialize it!
       m_bestParameters = parammap;
     } else {

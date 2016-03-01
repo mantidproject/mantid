@@ -529,7 +529,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     axes_radii.push_back(r1 * sigmas[i]);
   }
 
-  if (E1Vec.size() > 0) {
+  if (!E1Vec.empty()) {
     double h3 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundOuterRadii);
     // scaled from area of circle minus segment when r normalized to 1
     double m3 = std::sqrt(

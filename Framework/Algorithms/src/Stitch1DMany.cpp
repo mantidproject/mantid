@@ -85,7 +85,7 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   }
 
   // Check that all the workspaces are of the same type
-  if (m_inputWorkspaces.size() > 0) {
+  if (!m_inputWorkspaces.empty()) {
     const std::string id = m_inputWorkspaces[0]->id();
     for (auto &inputWorkspace : m_inputWorkspaces) {
       if (inputWorkspace->id() != id) {
@@ -118,8 +118,7 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   m_startOverlaps = this->getProperty("StartOverlaps");
   m_endOverlaps = this->getProperty("EndOverlaps");
 
-  if (m_startOverlaps.size() > 0 &&
-      m_startOverlaps.size() != m_numWorkspaces - 1)
+  if (!m_startOverlaps.empty() && m_startOverlaps.size() != m_numWorkspaces - 1)
     errors["StartOverlaps"] = "If given, StartOverlaps must have one fewer "
                               "entries than the number of input workspaces.";
 
@@ -132,7 +131,7 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   m_manualScaleFactor = this->getProperty("ManualScaleFactor");
   m_params = this->getProperty("Params");
 
-  if (m_params.size() < 1)
+  if (m_params.empty())
     errors["Params"] = "At least one parameter must be given.";
 
   if (!m_scaleRHSWorkspace) {

@@ -232,7 +232,7 @@ Rfactor getRFactor(const std::vector<double> &obsI,
           << ") have different number of elements.";
     throw std::runtime_error(errss.str());
   }
-  if (obsI.size() == 0) {
+  if (obsI.empty()) {
     throw std::runtime_error("getRFactor(): the input arrays are empty.");
   }
 
