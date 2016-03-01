@@ -115,13 +115,14 @@ whose values will be set to zero once the true maximum entropy solution is found
 Usage
 -----
 
+
 **Example - Reconstruct Fourier coefficients**
 
 In the example below, a workspace containing five Fourier coefficients is created and
 used as input to :ref:`algm-MaxEnt`. In the figure we show the original and reconstructed data (left),
 and the reconstructed image, i.e. Fourier transform (right).
 
-.. code-block:: python
+.. testcode:: ExFourierCoeffs
 
    # Create an empty workspace
    X = []
@@ -144,6 +145,22 @@ and the reconstructed image, i.e. Fourier transform (right).
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', chiTarget=N, A=0.0001)
 
+   print "First  reconstructed coefficient: %.3f" % data.readY(0)[5]
+   print "Second reconstructed coefficient: %.3f" % data.readY(0)[10]
+   print "Third  reconstructed coefficient: %.3f" % data.readY(0)[20]
+   print "Fourth reconstructed coefficient: %.3f" % data.readY(0)[12]
+   print "Fifth  reconstructed coefficient: %.3f" % data.readY(0)[14]
+
+Output:
+
+.. testoutput:: ExFourierCoeffs
+
+   First  reconstructed coefficient: 0.849
+   Second reconstructed coefficient: 0.847
+   Third  reconstructed coefficient: 0.848
+   Fourth reconstructed coefficient: 0.901
+   Fifth  reconstructed coefficient: 0.899
+
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
 
@@ -154,7 +171,7 @@ In this example, :ref:`algm-MaxEnt` is run on a pre-analyzed muon dataset. The c
 the original and reconstructed data (left), and the real part of the image obtained with :ref:`algm-MaxEnt`
 and :ref:`algm-FFT` (right).
 
-.. code-block:: python
+.. testcode:: ExMUSR00022725
 
    Load(Filename=r'MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
    CropWorkspace(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', XMin=0.11, XMax=1.6, EndWorkspaceIndex=0)
@@ -164,6 +181,18 @@ and :ref:`algm-FFT` (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='MUSR00022725')
 
+   print "Image at %.3f: %.3f" % (image.readX(0)[44], image.readY(0)[44])
+   print "Image at %.3f: %.3f" % (image.readX(0)[46], image.readY(0)[46])
+   print "Image at %.3f: %.3f" % (image.readX(0)[48], image.readY(0)[48])
+
+Output:
+
+.. testoutput:: ExMUSR00022725
+
+   Image at -1.359: 0.102
+   Image at 0.000: 0.010
+   Image at 1.359: 0.102
+
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
@@ -171,7 +200,7 @@ Next, :ref:`algm-MaxEnt` is run on a different muon dataset. The figure shows
 the original and reconstructed data (left), the real part of the image (middle)
 and its imaginary part (right).
 
-.. code-block:: python
+.. testcode:: ExEMU00020884
 
    Load(Filename=r'EMU00020884.nxs', OutputWorkspace='EMU00020884')
    CropWorkspace(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
@@ -181,6 +210,24 @@ and its imaginary part (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
+   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[129], image.readY(0)[129])
+   print "Image (real part) at  %.3f:  %.3f" % (image.readX(0)[135], image.readY(0)[135])
+   print "Image (real part) at  %.3f: %.3f" % (image.readX(0)[141], image.readY(0)[141])
+   print "Image (imaginary part) at %.3f: %.3f" % (image.readX(0)[129], image.readY(0)[129])
+   print "Image (imaginary part) at  %.3f:  %.3f" % (image.readX(0)[135], image.readY(0)[135])
+   print "Image (imaginary part) at  %.3f: %.3f" % (image.readX(0)[141], image.readY(0)[141])
+
+Output:
+
+.. testoutput:: ExEMU00020884
+
+   Image (real part) at -1.389: -0.079
+   Image (real part) at  0.000:  0.015
+   Image (real part) at  1.389: -0.079
+   Image (imaginary part) at -1.389: -0.079
+   Image (imaginary part) at  0.000:  0.015
+   Image (imaginary part) at  1.389: -0.079
+
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
 
@@ -188,10 +235,11 @@ Finally, we show an example where a complex signal is analyzed. In this case, th
 real and imaginary part of the same signal. The figure shows
 the original and reconstructed data (left), and the reconstructed image (right).
 
-.. code-block:: python
+.. testcode:: ExRealImage
 
    from math import pi, sin, cos
-   from random import random
+   from random import random, seed
+   seed(0)
    # Create a test workspace
    X = []
    YRe = []
@@ -208,6 +256,18 @@ the original and reconstructed data (left), and the reconstructed image (right).
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001)
 
+   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[102], image.readY(0)[102])
+   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[103], image.readY(0)[103])
+   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[104], image.readY(0)[104])
+
+Output:
+
+.. testoutput:: ExRealImage
+
+   Image (real part) at 0.318: 0.000
+   Image (real part) at 0.477: 5.842
+   Image (real part) at 0.637: 0.000
+
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
 
@@ -222,13 +282,15 @@ alternative expression:
 
 In addition, the algorithm explicitly protects against negative values by setting those to a fraction of the maximum entropy constant *A*.
 In the example below both modes are compared. As the input is a complex signal with expected Fourier transform :math:`F(\omega) = \delta\left(\omega-\omega_0\right)`,
+i.e. positive,
 both modes should produce the same results (note that the maximum entropy constant *A* typically needs to be set to smaller values for positive
 image in order to obtain smooth results).
 
-.. code-block:: python
+.. testcode:: ExRealPosImage
 
    from math import pi, sin, cos
-   from random import random
+   from random import random, seed
+   seed(0)
    # Create a test workspace
    X = []
    YRe = []
@@ -242,8 +304,21 @@ image in order to obtain smooth results).
        YRe.append(cos(w*x)+(random()-0.5)*0.3)
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
+   CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=1, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
+
+   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102])
+   print "Image at %.3f:  %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
+   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102])
+
+Output:
+
+.. testoutput:: ExRealPosImage
+
+   Image at 0.318: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.477:  5.843 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.637: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -260,4 +335,3 @@ References
 .. categories::
 
 .. sourcelink::
-
