@@ -37,7 +37,6 @@ class DLLExport ProductQuadraticExp : public API::ParamFunction,
                                       public API::IFunction1D {
 public:
   ProductQuadraticExp();
-  ~ProductQuadraticExp() override;
 
   std::string name() const override { return "ProductQuadraticExp"; }
 

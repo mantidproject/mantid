@@ -76,7 +76,7 @@ private:
   /// Pointer to the new workspace
   API::MatrixWorkspace_sptr m_outputWS;
   /// List of detector groupings
-  std::map<specid_t, std::set<detid_t>> m_detGroups;
+  std::map<specnum_t, std::set<detid_t>> m_detGroups;
 };
 
 } // namespace DataHandling

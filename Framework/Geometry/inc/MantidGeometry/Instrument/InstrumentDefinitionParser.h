@@ -65,7 +65,7 @@ public:
                              const IDFObject_const_sptr expectedCacheFile,
                              const std::string &instName,
                              const std::string &xmlText);
-  ~InstrumentDefinitionParser();
+  ~InstrumentDefinitionParser() = default;
 
   /// Caching
   enum CachingOption {
@@ -83,7 +83,7 @@ public:
   /// specified in <component-link> XML elements
   void setComponentLinks(boost::shared_ptr<Geometry::Instrument> &instrument,
                          Poco::XML::Element *pElem,
-                         Kernel::ProgressBase *progress = NULL);
+                         Kernel::ProgressBase *progress = nullptr);
 
   std::string getMangledName();
 

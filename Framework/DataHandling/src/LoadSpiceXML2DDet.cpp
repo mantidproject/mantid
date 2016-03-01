@@ -183,13 +183,13 @@ const std::string LoadSpiceXML2DDet::summary() const {
  */
 void LoadSpiceXML2DDet::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::FileAction::Load,
-                       {".xml"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::FileAction::Load,
+                                ".xml"),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "Name of output matrix workspace. "
       "Output workspace will be an X by Y Workspace2D if instrument "
       "is not loaded. ");
@@ -198,7 +198,7 @@ void LoadSpiceXML2DDet::init() {
                   "Log name for detector counts.");
 
   declareProperty(
-      new ArrayProperty<size_t>("DetectorGeometry"),
+      make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
       "A size-2 unsigned integer array [X, Y] for detector geometry. "
       "Such that the detector contains X x Y pixels.");
 
@@ -208,15 +208,15 @@ void LoadSpiceXML2DDet::init() {
       "HFIR's HB3A will be loaded if InstrumentFileName is not specified.");
 
   declareProperty(
-      new FileProperty("InstrumentFilename", "", FileProperty::OptionalLoad,
-                       ".xml"),
+      make_unique<FileProperty>("InstrumentFilename", "",
+                                FileProperty::OptionalLoad, ".xml"),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Note Filename or "
       "InstrumentName must be specified but not both.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
           "SpiceTableWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Table workspace loaded from SPICE file by LoadSpiceAscii.");
 

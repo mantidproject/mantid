@@ -59,12 +59,13 @@ public:
     checkSuccessor();
     return *m_successor;
   }
-  bool hasSuccessor() const { return m_successor.get() != NULL; }
+  bool hasSuccessor() const { return bool(m_successor); }
   virtual ~Chainable() = 0;
 };
 
 /// Keep our destructor pure virtual, but require an implementation.
-template <typename ChainableType> Chainable<ChainableType>::~Chainable() {}
+template <typename ChainableType>
+Chainable<ChainableType>::~Chainable() = default;
 
 } // namespace Kernel
 } // namespace Mantid

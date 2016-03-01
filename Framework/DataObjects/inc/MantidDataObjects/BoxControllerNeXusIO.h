@@ -4,8 +4,9 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
-#include <Poco/Mutex.h>
 #include <nexus/NeXusFile.hpp>
+
+#include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
@@ -43,7 +44,7 @@ public:
   BoxControllerNeXusIO(API::BoxController *const theBC);
 
   ///@return true if the file to write events is opened and false otherwise
-  bool isOpened() const override { return (m_File != NULL); }
+  bool isOpened() const override { return m_File != nullptr; }
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
@@ -102,9 +103,8 @@ private:
   /// the vector, which describes the event specific data size, namely how many
   /// column an event is composed into and this class reads/writres
   std::vector<int64_t> m_BlockSize;
-  /// lock Nexus file operations as Nexus is not thread safe // Poco::Mutex -- >
-  /// is recursive.
-  mutable Poco::FastMutex m_fileMutex;
+  /// lock Nexus file operations as Nexus is not thread safe
+  mutable std::mutex m_fileMutex;
 
   // Mainly static information which may be split into different IO classes
   // selected through chein of responsibility.

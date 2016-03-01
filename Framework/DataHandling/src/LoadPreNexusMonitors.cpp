@@ -48,14 +48,14 @@ LoadPreNexusMonitors::LoadPreNexusMonitors()
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
-  declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load,
-                                   "_runinfo.xml"),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
                   "The filename of the runinfo file for a particular run. "
                   "Allowed Values are: _runinfo.xml");
 
   // The output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(WORKSPACE_OUT, "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      WORKSPACE_OUT, "", Direction::Output),
                   "The workspace to load the monitors into.");
 
   // Make sure things are initialised.
@@ -177,9 +177,6 @@ void LoadPreNexusMonitors::exec() {
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nMonitors, numberTimeBins, tchannels);
 
-  // temp buffer for file reading
-  std::vector<uint32_t> buffer;
-
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
@@ -188,14 +185,15 @@ void LoadPreNexusMonitors::exec() {
                   << std::endl;
 
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
-    monitorFile.loadAllInto(buffer);
+    // temp buffer for file reading
+    std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 
     MantidVec intensity(buffer.begin(), buffer.end());
     // Copy the same data into the error array
     MantidVec error(buffer.begin(), buffer.end());
     // Now take the sqrt()
     std::transform(error.begin(), error.end(), error.begin(),
-                   (double (*)(double))sqrt);
+                   static_cast<double (*)(double)>(sqrt));
 
     localWorkspace->dataX(i) = time_bins;
     localWorkspace->dataY(i) = intensity;

@@ -50,7 +50,7 @@ public:
     mvalue = value;
   }
 
-  ~TimeValueUnit() {}
+  ~TimeValueUnit() = default;
 
   bool operator>(const TimeValueUnit &rhs) { return (mtime > rhs.mtime); }
 

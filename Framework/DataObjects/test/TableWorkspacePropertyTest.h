@@ -42,8 +42,8 @@ private:
 };
 
 void TableWorkspaceAlgorithm::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Table", "", Direction::Input));
+  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      "Table", "", Direction::Input));
 }
 
 void TableWorkspaceAlgorithm::exec() {

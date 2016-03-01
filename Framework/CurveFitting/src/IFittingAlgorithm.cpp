@@ -77,10 +77,10 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      new API::FunctionProperty("Function"),
+      make_unique<API::FunctionProperty>("Function"),
       "Parameters defining the fitting function and its initial values");
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "Name of the input Workspace");
   declareProperty("IgnoreInvalidData", false,
@@ -158,7 +158,7 @@ void IFittingAlgorithm::setFunction() {
       m_workspacePropertyNames[i] = workspacePropertyName;
       if (!existsProperty(workspacePropertyName)) {
         declareProperty(
-            new API::WorkspaceProperty<API::Workspace>(
+            Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                 workspacePropertyName, "", Kernel::Direction::Input),
             "Name of the input Workspace");
       }

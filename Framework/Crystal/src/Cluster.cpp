@@ -18,11 +18,6 @@ Cluster::Cluster(const size_t &label)
 }
 
 /**
- * Destructor
- */
-Cluster::~Cluster() {}
-
-/**
  * Get the label
  * @return : Return label.
  */

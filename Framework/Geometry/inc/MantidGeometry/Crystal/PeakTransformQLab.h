@@ -19,12 +19,6 @@ public:
   /// Constructor
   PeakTransformQLab(const std::string &xPlotLabel,
                     const std::string &yPlotLabel);
-  /// Destructor
-  ~PeakTransformQLab() override;
-  /// Copy constructor
-  PeakTransformQLab(const PeakTransformQLab &other);
-  /// Assigment
-  PeakTransformQLab &operator=(const PeakTransformQLab &other);
   /// Virtual constructor
   PeakTransform_sptr clone() const override;
   /// Transform peak.

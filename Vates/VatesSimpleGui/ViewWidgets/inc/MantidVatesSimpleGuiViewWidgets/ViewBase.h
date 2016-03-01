@@ -145,6 +145,8 @@ public:
   void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
+  /// Has active source
+  bool hasActiveSource();
 
 public slots:
   /// Set the color scale back to the original bounds.

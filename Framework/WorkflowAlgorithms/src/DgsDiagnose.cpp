@@ -47,36 +47,38 @@ const std::string DgsDiagnose::category() const {
  */
 void DgsDiagnose::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("DetVanWorkspace", "", Direction::Input),
       "The detector vanadium workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("DetVanMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the detector vanadium workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanCompWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(
+          "DetVanCompWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A detector vanadium workspace to compare against the primary one.");
-  this->declareProperty(new WorkspaceProperty<>("DetVanCompMonitorWorkspace",
-                                                "", Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "DetVanCompMonitorWorkspace", "", Direction::Input,
+                            PropertyMode::Optional),
                         "A monitor workspace associated with the comparison "
                         "detector vanadium workspace.");
-  this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A sample workspace to run some diagnostics on.");
   this->declareProperty(
-      new WorkspaceProperty<>("SampleMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("SampleWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "A sample workspace to run some diagnostics on.");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>("SampleMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
-  this->declareProperty(new WorkspaceProperty<>("HardMaskWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A hard mask workspace to apply.");
   this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "This is the resulting mask workspace.");
+      make_unique<WorkspaceProperty<>>(
+          "HardMaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A hard mask workspace to apply.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "This is the resulting mask workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
 }

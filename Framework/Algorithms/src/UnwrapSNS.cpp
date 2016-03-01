@@ -60,11 +60,11 @@ void UnwrapSNS::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Contains numbers counts against time of flight (TOF).");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "This workspace will be in the units of time of flight. (See "
                   "http://www.mantidproject.org/Units)");
 
@@ -190,22 +190,11 @@ void UnwrapSNS::exec() {
 void UnwrapSNS::execEvent() {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = this->getProperty("OutputWorkspace");
-  DataObjects::EventWorkspace_sptr outW;
-  if (matrixOutW == m_inputWS)
-    outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
-  else {
-    outW = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                                 m_numberOfSpectra, 2, 1));
-    // Copy required stuff from it
-    API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, outW,
-                                                           false);
-    outW->copyDataFrom((*m_inputEvWS));
-
-    // cast to the matrixoutput workspace and save it
-    matrixOutW = boost::dynamic_pointer_cast<MatrixWorkspace>(outW);
-    this->setProperty("OutputWorkspace", matrixOutW);
+  if (matrixOutW != m_inputWS) {
+    matrixOutW = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    setProperty("OutputWorkspace", matrixOutW);
   }
+  auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
   m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra * 2);

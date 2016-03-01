@@ -21,11 +21,6 @@ public:
   CalculateReflectometryKiKf() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
   /**
-   Destructor
-   */
-  ~CalculateReflectometryKiKf() override{};
-
-  /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees

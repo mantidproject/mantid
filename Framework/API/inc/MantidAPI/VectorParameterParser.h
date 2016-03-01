@@ -53,8 +53,6 @@ template <class VectorValueParameterType>
 class DLLExport VectorParameterParser
     : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  VectorParameterParser();
-
   VectorValueParameterType *parseVectorParameter(std::string value);
 
   Mantid::API::ImplicitFunctionParameter *
@@ -65,15 +63,9 @@ public:
 
   void setSuccessorParser(
       Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
-
-  ~VectorParameterParser() override;
 };
 
 ////////////////////////////////////////////////////////////////////
-
-/// Default constructor
-template <typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::VectorParameterParser() {}
 
 //----------------------------------------------------------------------
 /* Parse the value aspect of the parameter only.
@@ -152,10 +144,6 @@ void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-
-/// Destructor
-template <typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::~VectorParameterParser() {}
 }
 }
 

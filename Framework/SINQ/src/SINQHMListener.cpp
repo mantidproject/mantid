@@ -34,8 +34,6 @@ SINQHMListener::SINQHMListener()
   rank = 0;
 }
 
-SINQHMListener::~SINQHMListener() {}
-
 bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
   std::string host = address.toString();
   std::string::size_type i = host.find(':');
@@ -106,7 +104,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
 
   readHMData(ws);
@@ -115,7 +113,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
 }
 
 void SINQHMListener::setSpectra(
-    const std::vector<Mantid::specid_t> & /*specList*/) {
+    const std::vector<Mantid::specnum_t> & /*specList*/) {
   /**
    * Nothing to do: we always go for the full data.
    * SINQHM would do subsampling but this cannot easily

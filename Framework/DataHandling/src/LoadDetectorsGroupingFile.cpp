@@ -45,13 +45,15 @@ LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() {}
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
-  declareProperty(
-      new FileProperty("InputFile", "", FileProperty::Load, {".xml", ".map"}),
-      "The XML or Map file with full path.");
+  const std::vector<std::string> exts{".xml", ".map"};
+  declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
+                                                    FileProperty::Load, exts),
+                  "The XML or Map file with full path.");
 
-  declareProperty(new WorkspaceProperty<DataObjects::GroupingWorkspace>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output workspace.");
+  declareProperty(
+      make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output workspace.");
 }
 
 /// Run the algorithm

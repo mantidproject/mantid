@@ -28,12 +28,13 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<HistogramValidator>()),
       "The name of the input workspace. Must contain histogram data.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the Workspace containing the masked bins.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the Workspace containing the masked bins.");
 
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but
@@ -46,7 +47,7 @@ void MaskBins::init() {
                   "The value to end masking at.");
 
   // which pixels to load
-  this->declareProperty(new ArrayProperty<int>("SpectraList"),
+  this->declareProperty(make_unique<ArrayProperty<int>>("SpectraList"),
                         "Optional: A list of individual which spectra to mask "
                         "(specified using the workspace index). If not set, "
                         "all spectra are masked. Can be entered as a "
@@ -90,6 +91,13 @@ void MaskBins::exec() {
     }
   }
 
+  // Only create the output workspace if it's different to the input one
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != inputWS) {
+    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    setProperty("OutputWorkspace", outputWS);
+  }
+
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventW =
@@ -108,20 +116,6 @@ void MaskBins::exec() {
     if (commonBins) {
       const MantidVec &X = inputWS->readX(0);
       this->findIndices(X, startBin, endBin);
-    }
-
-    // Only create the output workspace if it's different to the input one
-    MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-    if (outputWS != inputWS) {
-      outputWS = WorkspaceFactory::Instance().create(inputWS);
-      setProperty("OutputWorkspace", outputWS);
-
-      // Copy over the data
-      for (size_t wi = 0; wi < outputWS->getNumberHistograms(); ++wi) {
-        outputWS->dataX(wi) = inputWS->readX(wi);
-        outputWS->dataY(wi) = inputWS->readY(wi);
-        outputWS->dataE(wi) = inputWS->readE(wi);
-      }
     }
 
     const int numHists = static_cast<int>(inputWS->getNumberHistograms());
@@ -167,35 +161,11 @@ void MaskBins::exec() {
 /** Execution code for EventWorkspaces
  */
 void MaskBins::execEvent() {
-  MatrixWorkspace_const_sptr inputMatrixWS = getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputMatrixWS);
-  EventWorkspace_sptr outputWS;
-
-  // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputMatrixWS = getProperty("OutputWorkspace");
-  if (outputMatrixWS != inputWS) {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    MatrixWorkspace_sptr matrixOutputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
-  } else {
-    // Output is same as input
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
-  }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
 
   // set up the progress bar
-  const size_t numHists = inputWS->getNumberHistograms();
+  const size_t numHists = outputWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numHists * 2);
 
   // sort the events

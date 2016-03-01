@@ -47,7 +47,6 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectraAxis : public Axis {
 public:
   explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
-  ~SpectraAxis() override {}
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
               const MatrixWorkspace *const parentWorkspace) override;
@@ -61,10 +60,10 @@ public:
   bool operator==(const Axis &) const override;
   std::string label(const std::size_t &index) const override;
 
-  specid_t spectraNo(const std::size_t &index) const override;
+  specnum_t spectraNo(const std::size_t &index) const override;
   // Get a map that contains the spectra index as the key and the index in the
-  // array as teh value
-  void getSpectraIndexMap(spec2index_map &) const;
+  // array as the value
+  spec2index_map getSpectraIndexMap() const;
 
   double getMin() const override;
   double getMax() const override;

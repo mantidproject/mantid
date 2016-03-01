@@ -53,13 +53,6 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
 
-Intersection::Intersection()
-    : Rule(), A(), B()
-/**
-  Standard Constructor with null leaves
-*/
-{}
-
 Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
     : Rule(), A(std::move(Iy)), B(std::move(Ix))
 /**
@@ -370,13 +363,6 @@ TopoDS_Shape Intersection::analyze() {
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
-
-Union::Union()
-    : Rule(), A(), B()
-/**
-  Standard Constructor with null leaves
-*/
-{}
 
 Union::Union(Rule *Parent, std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
     : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
@@ -977,29 +963,6 @@ CompObj::CompObj()
 */
 {}
 
-CompObj::CompObj(const CompObj &A)
-    : Rule(A), objN(A.objN), key(A.key)
-/**
-  Standard copy constructor
-  @param A :: CompObj to copy
- */
-{}
-
-CompObj &CompObj::operator=(const CompObj &A)
-/**
-  Standard assignment operator
-  @param A :: CompObj to copy
-  @return *this
- */
-{
-  if (this != &A) {
-    Rule::operator=(A);
-    objN = A.objN;
-    key = A.key;
-  }
-  return *this;
-}
-
 CompObj *CompObj::doClone() const
 /**
   Clone of this
@@ -1272,14 +1235,6 @@ BoolValue::BoolValue()
 */
 {}
 
-BoolValue::BoolValue(const BoolValue &A)
-    : Rule(A), status(A.status)
-/**
-  Copy Constructor
-  @param A :: BoolValue to copy
-*/
-{}
-
 BoolValue &BoolValue::operator=(const BoolValue &A)
 /**
   Assignment operator
@@ -1428,13 +1383,6 @@ void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //----------------------------------------
 //       COMPGRP
 //----------------------------------------
-
-CompGrp::CompGrp()
-    : Rule(), A()
-/**
-  Constructor
-*/
-{}
 
 CompGrp::CompGrp(Rule *Parent, std::unique_ptr<Rule> Cx)
     : Rule(Parent), A(std::move(Cx))

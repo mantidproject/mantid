@@ -68,7 +68,6 @@ public:
   //                      BitmapGeometryHandler(boost::shared_ptr<Object> obj);
   //                      ///<Constructor
   //                      BitmapGeometryHandler(Object *obj); ///<Constructor
-  ~BitmapGeometryHandler() override;
   BitmapGeometryHandler *createInstance(
       IObjComponent *) override; ///< Create an instance of concrete geometry
   /// handler for ObjComponent
@@ -87,9 +86,9 @@ public:
   /// get the number of points or vertices
   int NumberOfPoints() override { return 0; }
   /// Extract the vertices of the triangles
-  double *getTriangleVertices() override { return NULL; }
+  double *getTriangleVertices() override { return nullptr; }
   /// Extract the Faces of the triangles
-  int *getTriangleFaces() override { return NULL; }
+  int *getTriangleFaces() override { return nullptr; }
   /// Sets the geometry cache using the triangulation information provided
   void setGeometryCache(int noPts, int noFaces, double *pts,
                         int *faces) override {

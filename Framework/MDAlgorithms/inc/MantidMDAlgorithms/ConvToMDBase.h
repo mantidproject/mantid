@@ -60,7 +60,7 @@ public:
   /// method which starts the conversion procedure
   virtual void runConversion(API::Progress *) = 0;
   /// virtual destructor
-  virtual ~ConvToMDBase() {}
+  virtual ~ConvToMDBase() = default;
   /// Set the normalization options
   virtual void setDisplayNormalization(
       Mantid::API::IMDEventWorkspace_sptr mdWorkspace,

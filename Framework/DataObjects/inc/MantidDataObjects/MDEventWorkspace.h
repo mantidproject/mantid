@@ -43,7 +43,8 @@ public:
                        Mantid::API::MDNormalization::VolumeNormalization,
                    Mantid::API::MDNormalization preferredNormalizationHisto =
                        Mantid::API::MDNormalization::VolumeNormalization);
-
+  MDEventWorkspace<MDE, nd> &
+  operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
   ~MDEventWorkspace() override;
 
   /// Returns a clone of the workspace
@@ -69,7 +70,7 @@ public:
   /// Creates a new iterator pointing to the first cell (box) in the workspace
   std::vector<Mantid::API::IMDIterator *> createIterators(
       size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = NULL) const override;
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Returns the (normalized) signal at a given coordinates
   signal_t getSignalAtCoord(
@@ -88,11 +89,9 @@ public:
   getNormalizedSignal(const API::IMDNode *box,
                       const Mantid::API::MDNormalization &normalization) const;
 
-  void getLinePlot(const Mantid::Kernel::VMD &start,
-                   const Mantid::Kernel::VMD &end,
-                   API::MDNormalization normalize, std::vector<coord_t> &x,
-                   std::vector<signal_t> &y,
-                   std::vector<signal_t> &e) const override;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       API::MDNormalization normalize) const override;
 
   //------------------------ (END) IMDWorkspace Methods
   //-----------------------------------------
@@ -153,7 +152,7 @@ public:
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
-    return (dynamic_cast<MDGridBox<MDE, nd> *>(data) != NULL);
+    return dynamic_cast<MDGridBox<MDE, nd> *>(data) != nullptr;
   }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
@@ -201,16 +200,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  /// Windows Visual Studio 2012 has trouble with declaration without definition
-  /// so we provide one that throws an error. This seems template related.
-  /// TODO: clean this up.
-  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
-    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
-    // this codepath should never be reached, prevent unused parameter warning:
-    setTitle(other.getTitle());
-    return *this;
-  }
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;

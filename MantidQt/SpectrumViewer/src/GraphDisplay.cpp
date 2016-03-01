@@ -234,11 +234,11 @@ void GraphDisplay::showInfoList( double x, double y )
     {
       if ( m_isVertical )
       {
-        m_dataSource->getInfoList( m_imageX, y, info_list );
+        info_list = m_dataSource->getInfoList(m_imageX, y);
       }
       else
       {
-        m_dataSource->getInfoList( x, m_imageY, info_list );
+        info_list = m_dataSource->getInfoList(x, m_imageY);
       }
     }
     else

@@ -70,13 +70,13 @@ public:
   std::unique_ptr<Rule> clone() const {
     return std::unique_ptr<Rule>(doClone());
   }
-  virtual ~Rule();
+  virtual ~Rule() = default;
   virtual std::string className() const {
     return "Rule";
   } ///< Returns class name as string
 
   /// No leaf for a base rule
-  virtual Rule *leaf(const int = 0) const { return 0; }
+  virtual Rule *leaf(const int = 0) const { return nullptr; }
   void setParent(Rule *);
   Rule *getParent() const;
   void makeParents();
@@ -142,7 +142,7 @@ protected:
   Intersection &operator=(const Intersection &);
 
 public:
-  Intersection();
+  Intersection() = default;
   explicit Intersection(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Intersection(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   std::unique_ptr<Intersection>
@@ -199,7 +199,7 @@ protected:
   Union &operator=(const Union &);
 
 public:
-  Union();
+  Union() = default;
   explicit Union(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Union(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
 
@@ -257,7 +257,7 @@ public:
   } ///< Returns class name as string
   std::unique_ptr<SurfPoint> clone() const;
 
-  Rule *leaf(const int = 0) const override { return 0; } ///< No Leaves
+  Rule *leaf(const int = 0) const override { return nullptr; } ///< No Leaves
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>) override;
   void setLeaf(std::unique_ptr<Rule>, const int = 0) override;
   int findLeaf(const Rule *) const override;
@@ -302,8 +302,8 @@ private:
   CompObj *doClone() const override;
 
 protected:
-  CompObj(const CompObj &);
-  CompObj &operator=(const CompObj &);
+  CompObj(const CompObj &) = default;
+  CompObj &operator=(const CompObj &) = default;
 
 public:
   CompObj();
@@ -362,7 +362,7 @@ protected:
   CompGrp &operator=(const CompGrp &);
 
 public:
-  CompGrp();
+  CompGrp() = default;
   explicit CompGrp(Rule *, std::unique_ptr<Rule>);
   std::unique_ptr<CompGrp> clone() const;
   std::string className() const override {
@@ -412,7 +412,7 @@ private:
   BoolValue *doClone() const override;
 
 protected:
-  BoolValue(const BoolValue &);
+  BoolValue(const BoolValue &) = default;
   BoolValue &operator=(const BoolValue &);
 
 public:
@@ -422,11 +422,11 @@ public:
     return "BoolValue";
   } ///< Returns class name as string
 
-  Rule *leaf(const int = 0) const override { return 0; } ///< No leaves
+  Rule *leaf(const int = 0) const override { return nullptr; } ///< No leaves
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>) override;
   void setLeaf(std::unique_ptr<Rule>, const int = 0) override;
   int findLeaf(const Rule *) const override;
-  Rule *findKey(const int) override { return 0; }
+  Rule *findKey(const int) override { return nullptr; }
 
   int type() const override { return 0; } // effective name
 

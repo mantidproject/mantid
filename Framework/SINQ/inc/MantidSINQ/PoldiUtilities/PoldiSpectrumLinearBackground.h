@@ -48,7 +48,6 @@ class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
       public IPoldiFunction1D {
 public:
   PoldiSpectrumLinearBackground();
-  ~PoldiSpectrumLinearBackground() override {}
 
   std::string name() const override { return "PoldiSpectrumLinearBackground"; }
 

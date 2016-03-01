@@ -122,15 +122,12 @@ public:
   FileError(const FileError &A);
   /// Assignment operator
   FileError &operator=(const FileError &A);
-  /// Destructor
-  ~FileError() throw() override {}
-
   const char *what() const throw() override;
 };
 
 /// Records the filename, the description of failure and the line on which it
 /// happened
-class MANTID_KERNEL_DLL ParseError : public FileError {
+class MANTID_KERNEL_DLL ParseError final : public FileError {
 private:
   /// Number of the line where the error occured
   const int m_lineNumber;
@@ -150,27 +147,18 @@ public:
   ParseError(const ParseError &A);
   /// Assignment operator
   ParseError &operator=(const ParseError &A);
-  /// Destructor
-  ~ParseError() throw() override {}
-
   const char *what() const throw() override;
 };
 
 /// Marks code as not implemented yet.
-class MANTID_KERNEL_DLL NotImplementedError : public std::logic_error {
+class MANTID_KERNEL_DLL NotImplementedError final : public std::logic_error {
 public:
   NotImplementedError(const std::string &);
-  NotImplementedError(const NotImplementedError &A);
-  /// Assignment operator
-  NotImplementedError &operator=(const NotImplementedError &A);
-  /// Destructor
-  ~NotImplementedError() throw() override {}
-
   const char *what() const throw() override;
 };
 
 /// Exception for when an item is not found in a collection.
-class MANTID_KERNEL_DLL NotFoundError : public std::runtime_error {
+class MANTID_KERNEL_DLL NotFoundError final : public std::runtime_error {
 private:
   /// The name of the search object
   const std::string objectName;
@@ -185,14 +173,11 @@ public:
   NotFoundError(const NotFoundError &A);
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
-  /// Destructor
-  ~NotFoundError() throw() override {}
-
   const char *what() const throw() override;
 };
 
 /// Exception for when an item is already in a collection.
-class MANTID_KERNEL_DLL ExistsError : public std::runtime_error {
+class MANTID_KERNEL_DLL ExistsError final : public std::runtime_error {
 private:
   /// The name of the search object
   const std::string objectName;
@@ -204,8 +189,6 @@ public:
   ExistsError(const ExistsError &A);
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
-  /// Destructor
-  ~ExistsError() throw() override {}
 
   const char *what() const throw() override;
 };
@@ -244,8 +227,6 @@ public:
   AbsObjMethod(const AbsObjMethod &A);
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
-  /// Destructor
-  ~AbsObjMethod() throw() override {}
 
   const char *what() const throw() override;
 };
@@ -265,8 +246,6 @@ public:
   InstrumentDefinitionError(const InstrumentDefinitionError &A);
   /// Assignment operator
   InstrumentDefinitionError &operator=(const InstrumentDefinitionError &A);
-  /// Destructor
-  ~InstrumentDefinitionError() throw() override {}
 
   const char *what() const throw() override;
 };
@@ -287,8 +266,6 @@ public:
   OpenGLError(const OpenGLError &A);
   /// Assignment operator
   OpenGLError &operator=(const OpenGLError &A);
-  /// Destructor
-  ~OpenGLError() throw() override {}
 
   const char *what() const throw() override;
 };
@@ -309,7 +286,6 @@ public:
   MisMatch(const T &, const T &, const std::string &);
   MisMatch(const MisMatch<T> &A);
   MisMatch<T> &operator=(const MisMatch<T> &rhs);
-  ~MisMatch() throw() override {}
 
   /// Overloaded reporting method
   const char *what() const throw() override;
@@ -332,7 +308,6 @@ public:
   IndexError(const size_t V, const size_t B, const std::string &Place);
   IndexError(const IndexError &A);
   IndexError &operator=(const IndexError &A);
-  ~IndexError() throw() override {}
 
   /// Overloaded reporting method
   const char *what() const throw() override;
@@ -350,11 +325,6 @@ private:
 
 public:
   NullPointerException(const std::string &place, const std::string &objectName);
-  NullPointerException(const NullPointerException &);
-  ~NullPointerException() throw() override {}
-
-  NullPointerException &operator=(const NullPointerException &);
-
   /// Overloaded reporting method
   const char *what() const throw() override;
 };
@@ -364,7 +334,7 @@ public:
  *  @author Nick Draper, Tessella
  *  @date 13/11/2013
  */
-class MANTID_KERNEL_DLL InternetError : public std::runtime_error {
+class MANTID_KERNEL_DLL InternetError final : public std::runtime_error {
 private:
   /// The message returned by what()
   std::string outMessage;
@@ -372,11 +342,6 @@ private:
 
 public:
   InternetError(const std::string &message, const int &errorCode = 0);
-  InternetError(const InternetError &);
-  ~InternetError() throw() override {}
-
-  InternetError &operator=(const InternetError &);
-
   /// Overloaded reporting method
   const char *what() const throw() override;
   const int &errorCode() const;

@@ -52,7 +52,6 @@ class MatrixWorkspace;
 class MANTID_API_DLL TextAxis : public Axis {
 public:
   TextAxis(const std::size_t &length);
-  ~TextAxis() override {}
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
               const MatrixWorkspace *const parentWorkspace) override;

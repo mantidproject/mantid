@@ -186,12 +186,13 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_start, x_end))
     return;
 
+  const auto &inX = inputWS->readX(i);
   const auto &inY = inputWS->readY(i);
   const auto &inE = inputWS->readE(i);
   // Don't do the overlap removal if already RebinnedOutput.
   // This wreaks havoc on the data.
-  const bool removeOverlap(inputWS->isDistribution() &&
-                           inputWS->id() != "RebinnedOutput");
+  const bool removeBinWidth(inputWS->isDistribution() &&
+                            inputWS->id() != "RebinnedOutput");
   // It seems to be more efficient to construct this once and clear it before
   // each calculation
   // in the loop
@@ -215,9 +216,11 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
         double eValue = inE[j] * weight;
-        if (removeOverlap) {
-          const double overlapWidth =
-              intersectOverlap.maxX() - intersectOverlap.minX();
+        if (removeBinWidth) {
+          // If the input workspace was normalized by the bin width, we need to
+          // recover the original Y value, we do it by 'removing' the bin
+          // width
+          const double overlapWidth = inX[j + 1] - inX[j];
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }

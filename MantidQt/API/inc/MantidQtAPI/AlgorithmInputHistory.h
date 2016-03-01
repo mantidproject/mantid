@@ -37,6 +37,9 @@ namespace API
 class EXPORT_OPT_MANTIDQT_API AbstractAlgorithmInputHistory
 {
 public:
+  AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
+  AbstractAlgorithmInputHistory &
+  operator=(const AbstractAlgorithmInputHistory &) = delete;
   /// Abstract destructor
   virtual ~AbstractAlgorithmInputHistory() = 0;
 
@@ -64,11 +67,6 @@ protected:
   AbstractAlgorithmInputHistory(QString settingsGroup);
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory&);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AbstractAlgorithmInputHistory& operator = (const AbstractAlgorithmInputHistory&);
-  
   /// Load any values that are available from persistent storage
   void load();
   

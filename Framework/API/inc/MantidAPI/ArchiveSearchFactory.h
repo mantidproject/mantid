@@ -42,17 +42,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL ArchiveSearchFactoryImpl
     : public Kernel::DynamicFactory<IArchiveSearch> {
+public:
+  ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &) = delete;
+  ArchiveSearchFactoryImpl &
+  operator=(const ArchiveSearchFactoryImpl &) = delete;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ArchiveSearchFactoryImpl>;
 
   /// Private Constructor for singleton class
   ArchiveSearchFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ArchiveSearchFactoryImpl &operator=(const ArchiveSearchFactoryImpl &);
   /// Private Destructor
-  ~ArchiveSearchFactoryImpl() override {}
+  ~ArchiveSearchFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

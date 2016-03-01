@@ -29,15 +29,16 @@ using namespace API;
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<HistogramValidator>()),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
       "boundaries");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace.");
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
 
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -45,7 +46,7 @@ void CalculateFlatBackground::init() {
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue,
                   "The X value at which to end the background fit");
   declareProperty(
-      new ArrayProperty<int>("WorkspaceIndexList"),
+      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
   std::vector<std::string> modeOptions{"Linear Fit", "Mean"};

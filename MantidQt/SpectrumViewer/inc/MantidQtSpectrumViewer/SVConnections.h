@@ -11,6 +11,7 @@
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 
 /**
@@ -102,6 +103,8 @@ public slots:
 private:
   /// Event filter for mouse wheel capture
   bool eventFilter(QObject *object, QEvent *event);
+  void setColorScale(ColorMaps::ColorScale positive,
+                     ColorMaps::ColorScale negative);
 
   Ui_SpectrumViewer*  m_svUI;
   SpectrumView*       m_svMainWindow;

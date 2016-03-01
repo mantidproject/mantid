@@ -8,15 +8,16 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/GeometryInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,19 +39,19 @@ void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, sourceValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to give the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to give the output workspace");
 
   auto vsValidator = boost::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
-      new WorkspaceProperty<>("BkgWorkspace", "", Direction::Input,
-                              vsValidator),
+      make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input,
+                                       vsValidator),
       "An optional histogram workspace in the units of TOF defining background "
       "for removal during rebinning."
       "The workspace has to have single value or contain the same number of "
@@ -93,16 +94,6 @@ void RemoveBackground::exec() {
   API::MatrixWorkspace_const_sptr bkgWksp = getProperty("BkgWorkspace");
   bool nullifyNegative = getProperty("NullifyNegativeValues");
 
-  // source workspace has to have full instrument defined to perform background
-  // removal using this procedure.
-  auto pInstrument = inputWS->getInstrument();
-  if (pInstrument) {
-    if (!pInstrument->getSample())
-      throw std::invalid_argument(" Workspace: " + inputWS->getName() +
-                                  " does not have properly defined instrument. "
-                                  "Can not remove background");
-  }
-
   if (!(bkgWksp->getNumberHistograms() == 1 ||
         inputWS->getNumberHistograms() == bkgWksp->getNumberHistograms())) {
     throw std::invalid_argument(" Background Workspace: " + bkgWksp->getName() +
@@ -111,7 +102,6 @@ void RemoveBackground::exec() {
                                 "workspace");
   }
 
-  //
   int eMode; // in convert units emode is still integer
   const std::string emodeStr = getProperty("EMode");
   eMode = static_cast<int>(Kernel::DeltaEMode::fromString(emodeStr));
@@ -127,7 +117,6 @@ void RemoveBackground::exec() {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
 
-  //
   int nThreads = PARALLEL_GET_MAX_THREADS;
   m_BackgroundHelper.initialize(bkgWksp, inputWS, eMode, &g_log, nThreads,
                                 inPlace, nullifyNegative);
@@ -164,7 +153,7 @@ void RemoveBackground::exec() {
 BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_nullifyNegative(false),
+      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
@@ -217,14 +206,7 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
     throw std::invalid_argument(" Source Workspace: " + sourceWS->getName() +
                                 " should have units");
 
-  Geometry::IComponent_const_sptr source =
-      sourceWS->getInstrument()->getSource();
-  m_Sample = sourceWS->getInstrument()->getSample();
-  if ((!source) || (!m_Sample))
-    throw std::invalid_argument(
-        "Instrument on Source workspace:" + sourceWS->getName() +
-        "is not sufficiently defined: failed to get source and/or sample");
-  m_L1 = source->getDistance(*m_Sample);
+  m_geometryInfoFactory = Kernel::make_unique<GeometryInfoFactory>(*sourceWS);
 
   // just in case.
   this->deleteUnitsConverters();
@@ -284,10 +266,10 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
   }
 
   try {
-    auto detector = m_wkWS->getDetector(nHist);
-    //
-    double twoTheta = m_wkWS->detectorTwoTheta(detector);
-    double L2 = detector->getDistance(*m_Sample);
+    auto geometryInfo = m_geometryInfoFactory->create(nHist);
+    double twoTheta = geometryInfo.getTwoTheta();
+    double L1 = geometryInfo.getL1();
+    double L2 = geometryInfo.getL2();
     double delta(std::numeric_limits<double>::quiet_NaN());
     // get access to source workspace in case if target is different from source
     const MantidVec &XValues = m_wkWS->readX(nHist);
@@ -296,7 +278,7 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
 
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum];
-    unitConv->initialize(m_L1, L2, twoTheta, m_Emode, m_Efix, delta);
+    unitConv->initialize(L1, L2, twoTheta, m_Emode, m_Efix, delta);
 
     x_data[0] = XValues[0];
     double tof1 = unitConv->singleToTOF(x_data[0]);

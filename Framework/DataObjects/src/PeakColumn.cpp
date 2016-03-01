@@ -4,8 +4,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 
-#include <Poco/Mutex.h>
-
 #include <boost/variant/get.hpp>
 
 using namespace Mantid::Kernel;
@@ -89,11 +87,6 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakColumn::~PeakColumn() {}
 
 /// Returns typeid for the data in the column
 const std::type_info &PeakColumn::get_type_info() const {
@@ -206,12 +199,8 @@ void PeakColumn::read(size_t index, const std::string &text) {
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {
-  if ((m_name == "h") || (m_name == "k") || (m_name == "l") ||
-      (m_name == "RunNumber"))
-    return false;
-  else
-    // Default to true for most columns
-    return true;
+  return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
+           (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------

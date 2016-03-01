@@ -23,7 +23,7 @@ Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
 
 void Merge2WorkspaceLogs::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "Workspace to have logs merged");
   declareProperty("LogName1", "", "The name of the first log to be merged.");

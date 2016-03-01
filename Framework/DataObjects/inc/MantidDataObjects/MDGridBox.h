@@ -56,11 +56,11 @@ public:
   /**get object responsible for saving the box to a file.
     *@return the const pointer to the object. The GridBox is not saveable at the
     *moment so it is always NULL */
-  Kernel::ISaveable *getISaveable() override { return NULL; }
+  Kernel::ISaveable *getISaveable() override { return nullptr; }
   /**get const object responsible for saving the box to a file.
     *@return the const pointer the const object. The GridBox is not saveable at
     *the moment so it is always NULL */
-  Kernel::ISaveable *getISaveable() const override { return NULL; }
+  Kernel::ISaveable *getISaveable() const override { return nullptr; }
   /**Recursively make all underlaying boxes file-backed*/
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
                      const bool /*markSaved*/) override;
@@ -163,11 +163,11 @@ public:
                          signal_t &signal, signal_t &errorSquared,
                          std::vector<signal_t> &signal_fit) const override;
 
-  void splitContents(size_t index, Kernel::ThreadScheduler *ts = NULL);
+  void splitContents(size_t index, Kernel::ThreadScheduler *ts = nullptr);
 
-  void splitAllIfNeeded(Kernel::ThreadScheduler *ts = NULL) override;
+  void splitAllIfNeeded(Kernel::ThreadScheduler *ts = nullptr) override;
 
-  void refreshCache(Kernel::ThreadScheduler *ts = NULL) override;
+  void refreshCache(Kernel::ThreadScheduler *ts = nullptr) override;
 
   bool getIsMasked() const override;
   /// Setter for masking the box
@@ -247,7 +247,7 @@ private:
    * with box controller */
   MDGridBox(const MDGridBox<MDE, nd> &box);
   /**Private constructor as it does not work without box controller */
-  MDGridBox() {}
+  MDGridBox() = default;
   /// common part of MDGridBox contstructor;
   size_t initGridBox();
 };

@@ -4,7 +4,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include <Poco/Mutex.h>
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
@@ -20,8 +19,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ThreadPoolRunnable : public Poco::Runnable {
 public:
   ThreadPoolRunnable(size_t threadnum, ThreadScheduler *scheduler,
-                     ProgressBase *prog = NULL, double waitSec = 0.0);
-  ~ThreadPoolRunnable() override;
+                     ProgressBase *prog = nullptr, double waitSec = 0.0);
 
   /// Return the thread number of this thread.
   size_t threadnum() { return m_threadnum; }

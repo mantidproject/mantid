@@ -222,32 +222,20 @@ class RunSetupScript(BaseScriptElement):
             self.finalunits = BaseScriptElement.getStringElement(instrument_dom,\
                     "finaldataunits", default=RunSetupScript.finalunits)
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,\
+            self.bkgdrunnumber = BaseScriptElement.getStringElement(instrument_dom,\
                     "backgroundnumber", default=RunSetupScript.bkgdrunnumber)
-            try:
-                self.bkgdrunnumber = int(tempint)
-            except ValueError:
-                self.bkgdrunnumber = None
             tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablebackgroundcorrection", default=str(int(RunSetupScript.disablebkgdcorrection)))
             self.disablebkgdcorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,\
+            self.vanrunnumber = BaseScriptElement.getStringElement(instrument_dom,\
                     "vanadiumnumber", default=RunSetupScript.vanrunnumber)
-            try:
-                self.vanrunnumber = int(tempint)
-            except ValueError:
-                self.vanrunnumber = ""
             tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablevanadiumcorrection", default=str(int(RunSetupScript.disablevancorrection)))
             self.disablevancorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,\
+            self.vanbkgdrunnumber = BaseScriptElement.getStringElement(instrument_dom,\
                     "vanadiumbackgroundnumber", default=RunSetupScript.vanbkgdrunnumber)
-            try:
-                self.vanbkgdrunnumber = int(tempint)
-            except ValueError:
-                self.vanbkgdrunnumber = None
             tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablevanadiumbackgroundcorrection", default=str(int(RunSetupScript.disablevanbkgdcorrection)))
             self.disablevanbkgdcorrection = bool(int(tempbool))

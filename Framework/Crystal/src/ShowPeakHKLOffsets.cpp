@@ -29,14 +29,14 @@ ShowPeakHKLOffsets::ShowPeakHKLOffsets() : Algorithm() {}
 ShowPeakHKLOffsets::~ShowPeakHKLOffsets() {}
 
 void ShowPeakHKLOffsets::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("HKLIntegerOffsets",
-                                                         "HKLIntegerOffsets",
-                                                         Direction::Output),
-                  "Workspace with the Results");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "HKLIntegerOffsets", "HKLIntegerOffsets", Direction::Output),
+      "Workspace with the Results");
 }
 
 void ShowPeakHKLOffsets::exec() {
@@ -63,7 +63,6 @@ void ShowPeakHKLOffsets::exec() {
   UBinv.Invert();
   UBinv /= 2 * M_PI;
 
-  // TableWorkspace_sptr Res( new TableWorkspace());
   boost::shared_ptr<ITableWorkspace> Res =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
   Res->setTitle("HKL int offsets for " + Peaks->getName());

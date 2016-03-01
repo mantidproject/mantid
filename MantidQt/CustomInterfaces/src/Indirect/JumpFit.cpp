@@ -221,7 +221,6 @@ void JumpFit::fitAlgDone(bool error) {
       m_dblManager->setValue(m_properties[propName], value);
     }
   }
-
 }
 
 /**

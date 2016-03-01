@@ -18,7 +18,6 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/assign.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -106,11 +105,6 @@ ReflectometryTransform::ReflectometryTransform(
     throw std::invalid_argument(
         "The supplied minimum values must be less than the maximum values.");
 }
-
-/**
- * Destructor
- */
-ReflectometryTransform::~ReflectometryTransform() {}
 
 /**
  * Creates an MD workspace
@@ -286,12 +280,12 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController,
     Mantid::Geometry::MDFrame_uptr frame) const {
-  MDHistoDimension_sptr dim0 = MDHistoDimension_sptr(new MDHistoDimension(
+  auto dim0 = boost::make_shared<MDHistoDimension>(
       m_d0Label, m_d0ID, *frame, static_cast<Mantid::coord_t>(m_d0Min),
-      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
-  MDHistoDimension_sptr dim1 = MDHistoDimension_sptr(new MDHistoDimension(
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins);
+  auto dim1 = boost::make_shared<MDHistoDimension>(
       m_d1Label, m_d1ID, *frame, static_cast<Mantid::coord_t>(m_d1Min),
-      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins);
 
   auto ws = createMDWorkspace(dim0, dim1, boxController);
 
@@ -441,10 +435,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   std::vector<double> xBinsVec;
   std::vector<double> zBinsVec;
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d1Min)(widthD1)(m_d1Max), zBinsVec);
-  VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_d0Min)(widthD0)(m_d0Max), xBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d1Min, widthD1, m_d1Max},
+                                          zBinsVec);
+  VectorHelper::createAxisFromRebinParams({m_d0Min, widthD0, m_d0Max},
+                                          xBinsVec);
 
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = new BinEdgeAxis(zBinsVec);
@@ -463,7 +457,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   const size_t nBins = inputWS->blocksize();
 
   // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
+  std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
   addColumnHeadings(vertexes, outputDimensions);

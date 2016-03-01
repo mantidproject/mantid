@@ -187,7 +187,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   std::string baseName = alg->getPropertyValue("OutputWorkspace");
 
   alg->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "SumOfCounts", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of counts");
   alg->setPropertyValue("SumOfCounts", baseName + "_sumOfCounts");
@@ -195,7 +195,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   alg->setProperty("SumOfCounts", sumOfCounts);
 
   alg->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "sumOfNormFactors", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of normalising factors");
   alg->setPropertyValue("sumOfNormFactors", baseName + "_sumOfNormFactors");
