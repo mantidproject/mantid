@@ -183,12 +183,15 @@ void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Add data to the object in the form of a property
- * @param prop :: A pointer to a property whose ownership is transferred to this
- * object
- * @param overwrite :: If true, a current value is overwritten. (Default: False)
- */
-void LogManager::addProperty(Kernel::Property *prop, bool overwrite) {
+  * Add data to the object in the form of a property
+  * @param prop :: A pointer to a property whose ownership is transferred to
+ * this
+  * object
+  * @param overwrite :: If true, a current value is overwritten. (Default:
+ * False)
+  */
+void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
+                             bool overwrite) {
   // Make an exception for the proton charge
   // and overwrite it's value as we don't want to store the proton charge in two
   // separate locations
@@ -199,7 +202,7 @@ void LogManager::addProperty(Kernel::Property *prop, bool overwrite) {
        prop->name() == "run_title")) {
     removeProperty(name);
   }
-  m_manager.declareProperty(prop, "");
+  m_manager.declareProperty(prop.release(), "");
 }
 
 //-----------------------------------------------------------------------------------------------
