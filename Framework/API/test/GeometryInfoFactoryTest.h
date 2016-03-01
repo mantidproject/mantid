@@ -28,7 +28,8 @@ public:
     InstrumentCreationHelper::addFullInstrumentToWorkspace(
         m_workspace, includeMonitors, startYNegative, instrumentName);
 
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
+                                 numberOfBins - 1);
   }
 
   void test_constructor() {
