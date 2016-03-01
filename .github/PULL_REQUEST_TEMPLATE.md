@@ -6,7 +6,7 @@ Description of work.
 
 Fixes #xxxx.
 
-Either link to [Release notes](http://www.mantidproject.org/Release_Notes_3.7) change-set or state "Does not need to be in the release notes."
+Either update the [Release notes](/docs/source/release/) or state "Does not need to be in the release notes."
 
 ---
 
