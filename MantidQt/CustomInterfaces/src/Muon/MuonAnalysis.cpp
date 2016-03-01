@@ -968,7 +968,6 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
 
   m_groupToRow = m_groupingHelper->whichGroupToWhichRow();
   updatePairTable();
-  updateFrontAndCombo();
 
   if (m_loaded && !m_updating) {
     try {
@@ -981,6 +980,9 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
           "Unable to group the workspace. See log for details");
     }
   }
+
+  // Put this call after grouping so that correct data is replotted
+  updateFrontAndCombo();
 }
 
 /**
