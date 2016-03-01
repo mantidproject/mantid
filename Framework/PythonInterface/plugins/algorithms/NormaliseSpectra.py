@@ -68,10 +68,8 @@ class NormaliseSpectra(DataProcessorAlgorithm):
             ymin = np.amin(y_data)
             if ymin < lowest_value:
                 lowest_value = ymin
-            logger.warning(str(lowest_value))
-            logger.warning(str(type(lowest_value)))
         if lowest_value <= 0.0:
-            logger.warning('scaling Workspace to remove negative data')
+            logger.warning('Scaling Workspace to remove negative data')
             scale_factor = 0-lowest_value
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
                   Factor=scale_factor, Operation='Add')
