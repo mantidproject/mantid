@@ -114,29 +114,12 @@ class CrystalStructureBuilder(object):
 
         return ' '.join(unitCellValues)
 
-    def _getAtoms(self, cifData):
+    def _getAtoms(self, cifData, unitCell=None):
         atomSymbols = self._getAtomSymbols(cifData)
+        atomCoordinates = self._getAtomCoordinates(cifData)
+        occupancies = self._getOccupancies(cifData, len(atomSymbols))
 
-        atomFieldsRequirements = [(u'_atom_site_fract_x', True),
-                                  (u'_atom_site_fract_y', True),
-                                  (u'_atom_site_fract_z', True),
-                                  (u'_atom_site_occupancy', False)]
-
-        atomFields = []
-
-        for field, required in atomFieldsRequirements:
-            if field in cifData.keys():
-                atomFields.append(field)
-            else:
-                if required:
-                    raise RuntimeError(
-                        'Mandatory field {0} not found in CIF-file.' \
-                        'Please check the atomic position definitions.'.format(field))
-
-        atomLists = [atomSymbols] + [cifData[x] for x in atomFields]
-
-        if not u'_atom_site_occupancy' in cifData.keys():
-            atomLists += [['1.0'] * len(atomSymbols)]
+        atomLists = [atomSymbols] + atomCoordinates + occupancies
 
         try:
             isotropicUs = self._getIsotropicUs(cifData)
@@ -155,6 +138,21 @@ class CrystalStructureBuilder(object):
 
         return ';'.join(atomLines)
 
+    def _getAtomCoordinates(self, cifData):
+        coordinateFields = [u'_atom_site_fract_x', u'_atom_site_fract_y', u'_atom_site_fract_z']
+
+        atomCoordinates = []
+
+        for field in coordinateFields:
+            if field in cifData.keys():
+                atomCoordinates += [cifData[field]]
+            else:
+                raise RuntimeError(
+                    'Mandatory field {0} not found in CIF-file.' \
+                    'Please check the atomic position definitions.'.format(field))
+
+        return atomCoordinates
+
     def _getAtomSymbols(self, cifData):
         rawAtomSymbols = [cifData[x] for x in [u'_atom_site_type_symbol', u'_atom_site_label'] if x in
                           cifData.keys()]
@@ -164,6 +162,13 @@ class CrystalStructureBuilder(object):
                                'missing.')
 
         return [self._getCleanAtomSymbol(x) for x in rawAtomSymbols[0]]
+
+    def _getOccupancies(self, cifData, length):
+        occupancyField = u'_atom_site_occupancy'
+        if not occupancyField in cifData.keys():
+            return [['1.0'] * length]
+
+        return [cifData[occupancyField]]
 
     def _getIsotropicUs(self, cifData):
         keyUIso = u'_atom_site_u_iso_or_equiv'
