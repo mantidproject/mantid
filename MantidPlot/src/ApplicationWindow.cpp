@@ -1254,9 +1254,6 @@ void ApplicationWindow::initMainMenu() {
   connect(interfaceMenu, SIGNAL(aboutToShow()), this,
           SLOT(interfaceMenuAboutToShow()));
 
-  foldersMenu = new QMenu(this);
-  foldersMenu->setCheckable(true);
-
   tiledWindowMenu = new QMenu(this);
   tiledWindowMenu->setObjectName("tiledWindowMenu");
   connect(tiledWindowMenu, SIGNAL(aboutToShow()), this,
@@ -1557,8 +1554,10 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
   } else
     disableActions();
 
-  myMenuBar()->insertItem(tr("&Windows"), windowsMenu);
-  windowsMenuAboutToShow();
+  if (!currentFolder()->isEmpty()) {
+    myMenuBar()->insertItem(tr("&Windows"), windowsMenu);
+    windowsMenuAboutToShow();
+  }
   // -- Mantid: add script actions, if any exist --
   QListIterator<QMenu *> mIter(d_user_menus);
   while (mIter.hasNext()) {
@@ -8992,6 +8991,7 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
 
   if (!w) {
     setActiveWindow(NULL);
+    customMenu(NULL);
     return;
   }
 
@@ -9422,29 +9422,6 @@ void ApplicationWindow::editMenuAboutToShow() { reloadCustomActions(); }
  */
 void ApplicationWindow::windowsMenuAboutToShow() {
   windowsMenu->clear();
-  foldersMenu->clear();
-
-  int folder_param = 0;
-  Folder *f = projectFolder();
-  while (f) {
-    int id;
-    if (folder_param < 9)
-      id = foldersMenu->insertItem("&" + QString::number(folder_param + 1) +
-                                       " " + f->path(),
-                                   this, SLOT(foldersMenuActivated(int)));
-    else
-      id = foldersMenu->insertItem(f->path(), this,
-                                   SLOT(foldersMenuActivated(int)));
-
-    foldersMenu->setItemParameter(id, folder_param);
-    folder_param++;
-    foldersMenu->setItemChecked(id, f == currentFolder());
-
-    f = f->folderBelow();
-  }
-
-  windowsMenu->insertItem(tr("&Folders"), foldersMenu);
-  windowsMenu->insertSeparator();
 
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   int n = static_cast<int>(windows.count());
@@ -16661,6 +16638,9 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal) {
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating,
                                         bool showNormal) {
+  addListViewItem(w);
+  currentFolder()->addWindow(w);
+
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow *)), this,
           SLOT(modifiedProject(MdiSubWindow *)));
   connect(w, SIGNAL(resizedWindow(MdiSubWindow *)), this,
@@ -16685,9 +16665,6 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating,
       sw->showMinimized();
     }
   }
-
-  addListViewItem(w);
-  currentFolder()->addWindow(w);
 }
 
 /**

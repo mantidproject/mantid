@@ -112,6 +112,8 @@ public:
 
 	QString logInfo(){return d_log_info;};
 	void clearLogInfo(){d_log_info = QString();};
+
+  bool isEmpty() const;
 	
 public slots:
   ///Mantid: made this a slot for use with script messages when there is no script window

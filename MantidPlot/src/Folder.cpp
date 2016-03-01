@@ -231,6 +231,10 @@ Folder *Folder::rootFolder() {
   return i;
 }
 
+bool Folder::isEmpty() const {
+  return lstWindows.isEmpty();
+}
+
 /*****************************************************************************
  *
  * Class FolderListItem
