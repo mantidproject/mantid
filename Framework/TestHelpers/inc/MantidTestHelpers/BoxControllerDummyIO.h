@@ -48,7 +48,7 @@ namespace MantidTestHelpers {
 */
 class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO {
 public:
-  BoxControllerDummyIO(const Mantid::API::BoxController *bc
+  BoxControllerDummyIO(const Mantid::API::BoxController *bc);
   ///@return true if the file to write events is opened and false otherwise
   bool isOpened() const override { return (m_isOpened); }
   /// get the full file name of the file used for IO operations
