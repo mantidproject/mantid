@@ -592,7 +592,7 @@ def IndentifyDataBoundaries(sample_ws):
     """
 
     sample_ws = mtd[sample_ws]
-    nhists = sample_ws.getNumberHistograms() - 1
+    nhists = sample_ws.getNumberHistograms()
     start_data_idx, end_data_idx = 0,0
     # For all spectra in the workspace
     for spectra in range(0, nhists):
@@ -605,11 +605,10 @@ def IndentifyDataBoundaries(sample_ws):
             start_data_idx = spectra_start_data
         if spectra_end_data > end_data_idx:
             end_data_idx = spectra_end_data
-
     # Convert Bin index to data value
     x_data = sample_ws.readX(0)
     first_data_point = x_data[start_data_idx]
-    last_data_point = x_data[len(x_data) - end_data_idx - 1]
+    last_data_point = x_data[len(x_data) - end_data_idx - 2]
     return first_data_point, last_data_point
 
 def firstNonZero(data):
