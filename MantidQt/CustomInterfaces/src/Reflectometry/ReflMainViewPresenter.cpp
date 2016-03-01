@@ -3,8 +3,8 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -16,18 +16,18 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -702,9 +702,12 @@ void ReflMainViewPresenter::reduceRow(int rowNo) {
   auto runWS = prepareRunWorkspace(runStr);
   const std::string runNo = getRunNumber(runWS);
 
+  // Parse and set any user-specified options
+  auto optionsMap = parseKeyValueString(options);
+
   Workspace_sptr transWS;
   if (!transStr.empty())
-    transWS = makeTransWS(transStr);
+    transWS = makeTransWS(transStr, optionsMap);
 
   IAlgorithm_sptr algReflOne =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
@@ -718,8 +721,6 @@ void ReflMainViewPresenter::reduceRow(int rowNo) {
   if (thetaGiven)
     algReflOne->setProperty("ThetaIn", theta);
 
-  // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       algReflOne->setProperty(kvp->first, kvp->second);
@@ -937,9 +938,11 @@ void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
 /**
 Create a transmission workspace
 @param transString : the numbers of the transmission runs to use
+@param optionsMap : the map of user-specified options
 */
-Workspace_sptr
-ReflMainViewPresenter::makeTransWS(const std::string &transString) {
+Workspace_sptr ReflMainViewPresenter::makeTransWS(
+    const std::string &transString,
+    const std::map<std::string, std::string> &optionsMap) {
   const size_t maxTransWS = 2;
 
   std::vector<std::string> transVec;
@@ -974,6 +977,15 @@ ReflMainViewPresenter::makeTransWS(const std::string &transString) {
     wsName += "_" + getRunNumber(transWSVec[1]);
 
   algCreateTrans->setProperty("OutputWorkspace", wsName);
+
+  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    try {
+      algCreateTrans->setProperty(kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      // We can't apply this option to the transmission run
+      // This is totally OK, just continue with the next option
+    }
+  }
 
   if (!algCreateTrans->isInitialized())
     throw std::runtime_error(

@@ -4,11 +4,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 
 #include <Poco/AutoPtr.h>
 #include <memory>
@@ -83,7 +83,9 @@ protected:
   // get an unused group id
   int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
   // make a transmission workspace
-  Mantid::API::Workspace_sptr makeTransWS(const std::string &transString);
+  Mantid::API::Workspace_sptr
+  makeTransWS(const std::string &transString,
+              const std::map<std::string, std::string> &optionsMap);
   // Validate rows
   bool rowsValid(std::set<int> rows);
   // Validate a row
