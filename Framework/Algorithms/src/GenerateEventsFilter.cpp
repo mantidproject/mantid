@@ -380,7 +380,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (vec_timeintervals.size() == 0)
+  if (vec_timeintervals.empty())
     singleslot = true;
 
   // Progress
@@ -1420,7 +1420,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   // To fill the blanks at the end of log to make last entry of splitter is stop
   // time
   // To make it non-empty
-  if (vecSplitTime.size() == 0) {
+  if (vecSplitTime.empty()) {
     start = m_dblLog->nthTime(istart);
     stop = m_dblLog->nthTime(iend);
     lastindex = -1;
@@ -1686,7 +1686,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter
-    if (m_vecSplitterTime.size() == 0) {
+    if (m_vecSplitterTime.empty()) {
       // First splitter
       m_vecSplitterTime.push_back(starttime);
     } else if (m_vecSplitterTime.back() < starttime) {

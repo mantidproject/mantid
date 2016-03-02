@@ -208,7 +208,7 @@ size_t LoadReflTBL::getCells(std::string line,
     findQuotePairs(line, quoteBounds);
     // if we didn't find any quotes, then there are too many commas and we
     // definitely have too many delimiters
-    if (quoteBounds.size() == 0) {
+    if (quoteBounds.empty()) {
       std::string message =
           "A line must contain 16 cell-delimiting commas. Found " +
           boost::lexical_cast<std::string>(found) + ".";

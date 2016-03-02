@@ -77,7 +77,7 @@ void MaskBins::exec() {
   //---------------------------------------------------------------------------------
   // what spectra (workspace indices) to load. Optional.
   this->spectra_list = this->getProperty("SpectraList");
-  if (this->spectra_list.size() > 0) {
+  if (!this->spectra_list.empty()) {
     const int numHist = static_cast<int>(inputWS->getNumberHistograms());
     //--- Validate spectra list ---
     for (auto wi : this->spectra_list) {
@@ -123,7 +123,7 @@ void MaskBins::exec() {
     // Parallel running has problems with a race condition, leading to
     // occaisional test failures and crashes
 
-    bool useSpectraList = (this->spectra_list.size() > 0);
+    bool useSpectraList = (!this->spectra_list.empty());
 
     // Alter the for loop ending based on what we are looping on
     int for_end = numHists;
@@ -172,7 +172,7 @@ void MaskBins::execEvent() {
   outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
 
   // Go through all histograms
-  if (this->spectra_list.size() > 0) {
+  if (!this->spectra_list.empty()) {
     // Specific spectra were specified
     PARALLEL_FOR1(outputWS)
     for (int i = 0; i < static_cast<int>(this->spectra_list.size()); ++i) {

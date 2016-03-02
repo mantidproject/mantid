@@ -263,6 +263,5 @@ CreateTransmissionWorkspaceAuto::isSet(std::string propName) const {
     return boost::optional<T>(value);
   }
 }
-
 } // namespace Algorithms
 } // namespace Mantid

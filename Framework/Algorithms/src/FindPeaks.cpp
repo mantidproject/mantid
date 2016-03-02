@@ -253,7 +253,7 @@ void FindPeaks::processAlgorithmProperties() {
 
   // Specified peak positions, which is optional
   m_vecPeakCentre = getProperty("PeakPositions");
-  if (m_vecPeakCentre.size() > 0)
+  if (!m_vecPeakCentre.empty())
     std::sort(m_vecPeakCentre.begin(), m_vecPeakCentre.end());
   m_vecFitWindows = getProperty("FitWindows");
 

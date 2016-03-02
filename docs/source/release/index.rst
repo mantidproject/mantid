@@ -6,6 +6,7 @@ Release Notes
    :maxdepth: 1
    :titlesonly:
 
+   v3.7.0 <v3.7.0/index>
    v3.6.0 <v3.6.0/index>
 
 
