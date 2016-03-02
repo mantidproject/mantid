@@ -1,6 +1,6 @@
 from mantid.api import Algorithm
 
-class base(Algorithm):
+class VesuvioBase(Algorithm):
 
     # There seems to be a problem with Python algorithms
     # defining a __init__ method

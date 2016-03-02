@@ -2,7 +2,7 @@
 from mantid.kernel import *
 from mantid.api import *
 
-from vesuvio.base import base, TableWorkspaceDictionaryFacade
+from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
 from vesuvio.instrument import VESUVIO
 
@@ -11,7 +11,7 @@ _DIFF_MODES = ("double", "single")
 # Fitting modes
 _FIT_MODES = ("bank", "spectrum")
 
-class VesuvioTOFFit(base):
+class VesuvioTOFFit(VesuvioBase):
 
     def summary(self):
         return "Processes runs for Vesuvio at ISIS"

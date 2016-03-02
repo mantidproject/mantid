@@ -2,7 +2,7 @@
 from string import Template
 from mantid.kernel import *
 from mantid.api import *
-from vesuvio.base import base, TableWorkspaceDictionaryFacade
+from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
 
 #----------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ def create_cuboid_xml(height, width, depth):
 
 #----------------------------------------------------------------------------------------
 
-class VesuvioCorrections(base):
+class VesuvioCorrections(VesuvioBase):
 
     _input_ws = None
     _output_ws = None
