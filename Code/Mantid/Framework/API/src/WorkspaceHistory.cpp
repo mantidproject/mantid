@@ -201,7 +201,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
  */
 void getWordsInString(const std::string &words3, std::string &w1,
                       std::string &w2, std::string &w3) {
-  Poco::StringTokenizer data(words3, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 3)
     throw std::out_of_range("Algorithm list line " + words3 +
                             " is not of the correct format\n");
@@ -224,7 +225,8 @@ void getWordsInString(const std::string &words3, std::string &w1,
  */
 void getWordsInString(const std::string &words4, std::string &w1,
                       std::string &w2, std::string &w3, std::string &w4) {
-  Poco::StringTokenizer data(words4, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 4)
     throw std::out_of_range("Algorithm list line " + words4 +
                             " is not of the correct format\n");

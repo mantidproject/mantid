@@ -39,7 +39,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -3291,11 +3291,14 @@ void SANSRunWindow::checkList()
 
   bool valid(false);
   //split up the comma separated list ignoring spaces
-  Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer in(input, ",",
+                                     Mantid::Kernel::StringTokenizer::TOK_TRIM);
   try
   {
-    for(Poco::StringTokenizer::Iterator i=in.begin(), end=in.end(); i!=end; ++i)
-    {// try a lexical cast, we don't need its result only if there was an error
+    for (Mantid::Kernel::StringTokenizer::Iterator i = in.begin(),
+                                                   end = in.end();
+         i != end; ++i) { // try a lexical cast, we don't need its result only
+                          // if there was an error
       boost::lexical_cast<double>(*i);
     }
     // there were no errors

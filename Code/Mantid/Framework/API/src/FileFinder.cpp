@@ -14,7 +14,7 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
@@ -598,10 +598,10 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
-  Poco::StringTokenizer hints(hint, ",",
-                              Poco::StringTokenizer::TOK_TRIM |
-                                  Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = hints.begin();
+  Mantid::Kernel::StringTokenizer hints(
+      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer::Iterator h = hints.begin();
 
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
@@ -617,9 +617,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
       fileSuspected = true;
     }
 
-    Poco::StringTokenizer range(*h, "-",
-                                Poco::StringTokenizer::TOK_TRIM |
-                                    Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+    Mantid::Kernel::StringTokenizer range(
+        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {

@@ -8,7 +8,7 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
 
 #include <sstream>

@@ -18,7 +18,7 @@
 #include <Poco/LoggingFactory.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -77,15 +77,15 @@ void splitPath(const std::string &path, std::vector<std::string> &splitted) {
     return;
   }
 
-  int options =
-      Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+  int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
+                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
 
   splitted.clear();
-  Poco::StringTokenizer tokenizer(path, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
+  Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
+  Mantid::Kernel::StringTokenizer::Iterator iend = tokenizer.end();
   splitted.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend;
-       ++itr) {
+  for (Mantid::Kernel::StringTokenizer::Iterator itr = tokenizer.begin();
+       itr != iend; ++itr) {
     if (!itr->empty()) {
       splitted.push_back(*itr);
     }

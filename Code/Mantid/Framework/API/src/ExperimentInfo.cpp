@@ -1135,15 +1135,15 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
 
-  int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  options += Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer splitter(parameterStr, "|", options);
+  int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+  options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
-  Poco::StringTokenizer::Iterator iend = splitter.end();
+  Mantid::Kernel::StringTokenizer::Iterator iend = splitter.end();
   // std::string prev_name;
-  for (Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend;
-       ++itr) {
-    Poco::StringTokenizer tokens(*itr, ";");
+  for (Mantid::Kernel::StringTokenizer::Iterator itr = splitter.begin();
+       itr != iend; ++itr) {
+    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];

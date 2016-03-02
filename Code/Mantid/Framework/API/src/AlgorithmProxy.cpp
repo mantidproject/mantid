@@ -301,15 +301,12 @@ std::string AlgorithmProxy::toString() const {
 
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> AlgorithmProxy::categories() const {
-  std::vector<std::string> res;
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
+  auto res = tokenizer.asVector();
 
   const DeprecatedAlgorithm *depo =
       dynamic_cast<const DeprecatedAlgorithm *>(this);

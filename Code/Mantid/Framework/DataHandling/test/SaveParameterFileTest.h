@@ -138,8 +138,8 @@ public:
 		const Mantid::Geometry::FitParameter& fitParam = param->value<FitParameter>();
 
 		// Info about fitting parameter is in string value, see FitParameter class
-		typedef Poco::StringTokenizer tokenizer;
-		tokenizer values(value, ",", tokenizer::TOK_TRIM);
+                typedef Mantid::Kernel::StringTokenizer tokenizer;
+                tokenizer values(value, ",", tokenizer::TOK_TRIM);
 		TS_ASSERT_EQUALS(fitParam.getFormula(), values[7]);
 		TS_ASSERT_EQUALS(fitParam.getFunction(), values[1]);
 		TS_ASSERT_EQUALS(fitParam.getResultUnit(), values[9]);

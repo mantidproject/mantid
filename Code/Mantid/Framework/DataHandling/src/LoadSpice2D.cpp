@@ -14,7 +14,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <Poco/Path.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -324,10 +324,10 @@ void LoadSpice2D::exec() {
 
   // Parse out each pixel. Pixels can be separated by white space, a tab, or an
   // end-of-line character
-  Poco::StringTokenizer pixels(data_str, " \n\t",
-                               Poco::StringTokenizer::TOK_TRIM |
-                                   Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator pixel = pixels.begin();
+  Mantid::Kernel::StringTokenizer pixels(
+      data_str, " \n\t", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                             Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer::Iterator pixel = pixels.begin();
 
   // Check that we don't keep within the size of the workspace
   size_t pixelcount = pixels.count();
