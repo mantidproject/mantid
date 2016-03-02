@@ -126,8 +126,7 @@ void LoadSwans::placeDetectorInSpace() {
       m_ws->getInstrument()->getStringParameter("detector-name")[0];
   const double distance = static_cast<double>(
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
-  // Make the angle negative to accommodate the sense of rotation.
-  const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
+  const double angle = m_ws->run().getPropertyValueAsType<double>("angle");
 
   g_log.information() << "Moving detector " << componentName << " " << distance
                       << " meters and " << angle << " degrees." << std::endl;
