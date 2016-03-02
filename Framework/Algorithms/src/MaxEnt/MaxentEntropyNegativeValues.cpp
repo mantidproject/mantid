@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
