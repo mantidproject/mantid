@@ -101,9 +101,8 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
 
-  declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
-                                                      Mantid::EMPTY_INT(),
-                                                      PropertyMode::Optional),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index. Optional.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
@@ -115,17 +114,22 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background min in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background max in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor integral min in angstroms", Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor integral max in angstroms", Direction::Input);
-
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background max in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor integral min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor integral max in angstroms");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "

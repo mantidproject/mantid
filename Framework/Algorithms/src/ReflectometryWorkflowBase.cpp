@@ -37,9 +37,8 @@ ReflectometryWorkflowBase::~ReflectometryWorkflowBase() {}
  * Init index properties.
  */
 void ReflectometryWorkflowBase::initIndexInputs() {
-  declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
-                                                      Mantid::EMPTY_INT(),
-                                                      PropertyMode::Optional),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -72,25 +71,24 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
           boost::make_shared<MandatoryValidator<double>>(), Direction::Input),
       "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for "
       "rebinning intermediate workspaces converted into wavelength.");
-  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
-  boundedIndex->setLower(0);
+
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                      PropertyMode::Optional),
+                      Direction::Input),
                   "Wavelength minimum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                      PropertyMode::Optional),
+                      Direction::Input),
                   "Wavelength maximum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      PropertyMode::Optional),
+                      Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      PropertyMode::Optional),
+                      Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
 }
 
