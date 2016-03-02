@@ -1503,17 +1503,17 @@ void SCDCalibratePanels::init() {
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("ColWorkspace", "ColWorkspace",
                                              Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical");
+      "Workspace comparing calculated and theoretical column of each peak.");
 
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("RowWorkspace", "RowWorkspace",
                                              Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical");
+      "Workspace comparing calculated and theoretical row of each peak.");
 
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("TofWorkspace", "TofWorkspace",
                                              Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical");
+      "Workspace comparing calculated and theoretical TOF of each peak.");
 
   const string OUTPUTS("Outputs");
   setPropertyGroup("DetCalFilename", OUTPUTS);
