@@ -31,6 +31,8 @@ if ( SPHINX_FOUND )
   # runner
   if ( APPLE )
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${BIN_DIR}/MantidPlot )
+  elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/launch_mantidplot.sh )
   else ()
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
   endif()
