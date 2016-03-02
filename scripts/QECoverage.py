@@ -1,5 +1,7 @@
-﻿# pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements, too-many-branches, no-self-use
+﻿# pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
+# pylint: disable= too-many-branches, no-self-use
 import sys
+
 import numpy as np
 import mantid
 from PyQt4 import QtGui
@@ -74,6 +76,10 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_ei_input = QtGui.QLineEdit("55", self.direct_ei)
         self.direct_ei_input.setToolTip("Incident Energy in meV")
         self.direct_ei_grid.addWidget(self.direct_ei_input)
+        self.ei_msgbox = QtGui.QMessageBox()
+        self.ei_msgbox.setText("Ei cannot be negative! Please try again")
+        self.ei_emin_msgbox = QtGui.QMessageBox()
+        self.ei_emin_msgbox.setText("Ei must be greater than Emin! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
         self.direct_plotover = QtGui.QCheckBox("Plot Over", self.tab_direct)
         self.direct_plotover.setToolTip("Hold this plot?")
@@ -209,7 +215,7 @@ class QECoverageGUI(QtGui.QWidget):
             self.tthlims = [2.373, 135.955]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
-# HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
+        # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
         elif Inst == 'HYSPEC':
             self.tthlims = [0, 60]
             # reset s2
@@ -285,13 +291,18 @@ class QECoverageGUI(QtGui.QWidget):
         if ',' not in ei_str:
             try:
                 ei_vec = [float(ei_str)]
+                ei_vec = self.direct_input_check(ei_vec)
+
             except ValueError:
                 raise ValueError(eierr)
+
         else:
             try:
                 ei_vec = [float(val) for val in ei_str.split(',')]
+
             except ValueError:
                 raise ValueError(eierr)
+
         qe = calcQE(ei_vec, self.tthlims, emin=float(self.direct_emin_input.text()))
         if not overplot:
             self.axes.clear()
@@ -331,6 +342,20 @@ class QECoverageGUI(QtGui.QWidget):
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.axes.legend()
         self.canvas.draw()
+
+    def direct_input_check(self, ei_vec):
+        lowest_ei = [float(1)]
+        if ei_vec < lowest_ei:
+            self.ei_msgbox.show()
+            ei_vec = lowest_ei
+            self.direct_ei_input.setText("1")
+
+        if ei_vec < [float(self.direct_emin_input.text())]:
+            self.ei_emin_msgbox.show()
+            renew_val = str(ei_vec[0] - 1)
+            self.direct_emin_input.setText(renew_val)
+
+        return ei_vec
 
 
 def qapp():
