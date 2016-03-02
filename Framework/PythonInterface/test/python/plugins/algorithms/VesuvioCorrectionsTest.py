@@ -9,10 +9,11 @@ are configured to find the Vesuvio data
 import unittest
 
 from mantid.api import *
+from mantid import logger
 import mantid.simpleapi as ms
-import VesuvioCommands as vesuvio
+import vesuvio.commands as vesuvio
 
-class VesuvioCorrections(unittest.TestCase):
+class VesuvioCorrectionsTest(unittest.TestCase):
 
     _test_ws = None
     _test_container_ws = None

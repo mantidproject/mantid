@@ -1,7 +1,7 @@
 import unittest
 
 from mantid.simpleapi import *
-from VesuvioProfiles import (create_from_str, GaussianMassProfile,
+from vesuvio.profiles import (create_from_str, GaussianMassProfile,
                               GramCharlierMassProfile)
 
 # --------------------------------------------------------------------------------

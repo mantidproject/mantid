@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import AlgorithmManager
 from mantid.simpleapi import LoadVesuvio
-import VesuvioCommands as vesuvio
+import vesuvio.commands as vesuvio
 
 class VesuvioPreFitTest(unittest.TestCase):
 

@@ -1,11 +1,11 @@
 import unittest
 
 from mantid.simpleapi import *
-from VesuvioBackgrounds import PolynomialBackground
-from VesuvioFitting import FittingOptions, parse_fit_options
-from VesuvioProfiles import GaussianMassProfile, GramCharlierMassProfile
+from vesuvio.backgrounds import PolynomialBackground
+from vesuvio.fitting import FittingOptions, parse_fit_options
+from vesuvio.profiles import GaussianMassProfile, GramCharlierMassProfile
 
-class FittingTest(unittest.TestCase):
+class VesuvioFittingTest(unittest.TestCase):
 
     def test_function_str_with_no_given_params_looks_as_expected(self):
         fit_opts = self._create_test_fitting_opts()

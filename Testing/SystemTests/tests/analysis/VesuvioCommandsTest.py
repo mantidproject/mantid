@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 import mantid
 from mantid.simpleapi import *
-from VesuvioCommands import fit_tof
+from vesuvio.commands import fit_tof
 
 
 #=====================================Helper Function=================================

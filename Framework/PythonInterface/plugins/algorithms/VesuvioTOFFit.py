@@ -2,16 +2,16 @@
 from mantid.kernel import *
 from mantid.api import *
 
-from VesuvioBase import TableWorkspaceDictionaryFacade, VesuvioBase
-from VesuvioFitting import parse_fit_options
-from VesuvioInstrument import VESUVIO
+from vesuvio.base import base, TableWorkspaceDictionaryFacade
+from vesuvio.fitting import parse_fit_options
+from vesuvio.instrument import VESUVIO
 
 # Loading difference modes
 _DIFF_MODES = ("double", "single")
 # Fitting modes
 _FIT_MODES = ("bank", "spectrum")
 
-class VesuvioTOFFit(VesuvioBase):
+class VesuvioTOFFit(base):
 
     def summary(self):
         return "Processes runs for Vesuvio at ISIS"

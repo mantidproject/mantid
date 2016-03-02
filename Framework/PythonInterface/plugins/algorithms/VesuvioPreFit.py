@@ -2,10 +2,10 @@
 from mantid.kernel import *
 from mantid.api import *
 import numpy as np
-from VesuvioBase import VesuvioBase
+from vesuvio.base import base
 
 
-class VesuvioPreFit(VesuvioBase):
+class VesuvioPreFit(base):
 
     def summary(self):
         return "Apply preprocessing steps to loaded vesuvio data"
