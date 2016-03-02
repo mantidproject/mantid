@@ -14,38 +14,6 @@ Load Instrument Breaking Change
 -  The RewriteSpectraMap property of :ref:`LoadInstrument <algm-LoadInstrument>` must be specified as
    of version 3.6. This has previously been optional.
 
-MD Algorithms (VATES CLI)
--------------------------
-
-Many of these areas will see further improvements in the following
-release:
-
--  Added progress reporting and interruptibility to several MD
-   algorithms.
--  Fixed several bugs related to dimension naming in MDWorkspaces.
--  Added the
-   :ref:`AccumulateMD <algm-AccumulateMD>` algorithm.
--  :ref:`TransposeMD <algm-TransposeMD>` can now be used as :ref:`TransposeMD <algm-TransposeMD>`
-   which will be more familiar for users of Matlab and Horace.
--  Data in MDWorkspaces which is masked using :ref:`MaskMD <algm-MaskMD>` will no longer be
-   displayed in 1D plots, the Slice Viewer or the Vates Simple
-   Interface.
--  Data in MDWorkspaces which is masked using :ref:`MaskMD <algm-MaskMD>` is now set to *not
-   a number* (NaN).
-
-Performance
------------
-
--  The performance of loading a partial subset of spectra from Event
-   Nexus files has been greatly increased.
--  The performance of loading instruments with lots of rectangular
-   detector banks has been notably increased.
--  Loading of ISAW Peaks files has been optimized. A test file with 6000
-   peaks that previously took 2.5 minutes to load now takes 7 seconds.
-   Another file with 157,377 lines that reportedly took about one hour
-   to load now loads in roughly 8 seconds.
--  Removed unnecessary clone of surfaces in Mantid::Geometry::Rule.
-
 Algorithms
 ----------
 
@@ -112,6 +80,39 @@ Deprecated
 -  :ref:`LoadAscii <algm-LoadAscii>` v1 is deprecated in favour of v2.
 -  :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` v1 is deprecated in favour of v2.
 
+MD Algorithms (VATES CLI)
+#########################
+
+Many of these areas will see further improvements in the following
+release:
+
+-  Added progress reporting and interruptibility to several MD
+   algorithms.
+-  Fixed several bugs related to dimension naming in MDWorkspaces.
+-  Added the
+   :ref:`AccumulateMD <algm-AccumulateMD>` algorithm.
+-  :ref:`TransposeMD <algm-TransposeMD>` can now be used as :ref:`TransposeMD <algm-TransposeMD>`
+   which will be more familiar for users of Matlab and Horace.
+-  Data in MDWorkspaces which is masked using :ref:`MaskMD <algm-MaskMD>` will no longer be
+   displayed in 1D plots, the Slice Viewer or the Vates Simple
+   Interface.
+-  Data in MDWorkspaces which is masked using :ref:`MaskMD <algm-MaskMD>` is now set to *not
+   a number* (NaN).
+
+Performance
+-----------
+
+-  The performance of loading a partial subset of spectra from Event
+   Nexus files has been greatly increased.
+-  The performance of loading instruments with lots of rectangular
+   detector banks has been notably increased.
+-  Loading of ISAW Peaks files has been optimized. A test file with 6000
+   peaks that previously took 2.5 minutes to load now takes 7 seconds.
+   Another file with 157,377 lines that reportedly took about one hour
+   to load now loads in roughly 8 seconds.
+-  Removed unnecessary clone of surfaces in Mantid::Geometry::Rule.
+
+
 CurveFitting
 ------------
 
@@ -174,5 +175,5 @@ Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.6%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`_
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.6%22+is%3Amerged+label%3A%22Component%3A+Python%22>`_
-changes on github
+changes on GitHub
 

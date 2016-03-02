@@ -48,6 +48,8 @@ public:
     c1 = Kernel::DblMatrix(dim, 1);
     s2 = Kernel::DblMatrix(dim, dim);
     c2 = Kernel::DblMatrix(dim, dim);
+    chisq = 0.0;
+    angle = 0.0;
   };
   Kernel::DblMatrix xIm;  // Search directions in image space
   Kernel::DblMatrix xDat; // Search directions in data space

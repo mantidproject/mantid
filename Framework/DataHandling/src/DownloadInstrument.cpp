@@ -99,7 +99,7 @@ void DownloadInstrument::exec() {
     return;
   }
 
-  if (fileMap.size() == 0) {
+  if (fileMap.empty()) {
     g_log.notice("All instrument definitions up to date");
   } else {
     std::string s = (fileMap.size() > 1) ? "s" : "";

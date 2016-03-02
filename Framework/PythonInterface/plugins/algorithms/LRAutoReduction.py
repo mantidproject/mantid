@@ -43,6 +43,7 @@ class LRAutoReduction(PythonAlgorithm):
         # ---------------------------------------------------------------------
 
         self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
+        self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
         self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
@@ -358,8 +359,9 @@ class LRAutoReduction(PythonAlgorithm):
         m = 1.675e-27  # kg
         wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         chopper_speed = self.event_data.getRun().getProperty('SpeedRequest1').value[0]
-        tof_min = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
-        tof_max = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
+        wl_offset = self.getProperty("WavelengthOffset").value
+        tof_min = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
+        tof_max = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
         return [tof_min, tof_max]
 
 

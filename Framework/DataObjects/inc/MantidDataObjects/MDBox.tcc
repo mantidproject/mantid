@@ -378,7 +378,7 @@ TMDE(bool MDBox)::isDataAdded() const {
     if (m_Saveable->isLoaded())
       return data.size() != m_Saveable->getFileSize();
   }
-  return (data.size() != 0);
+  return (!data.empty());
 }
 
 //-----------------------------------------------------------------------------------------------

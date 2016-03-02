@@ -49,8 +49,6 @@ private:
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
-  void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
-                      const API::MatrixWorkspace_sptr outputWS);
 
   void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 

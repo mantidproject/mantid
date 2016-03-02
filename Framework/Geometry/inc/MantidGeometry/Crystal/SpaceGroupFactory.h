@@ -225,7 +225,7 @@ public:
      */
     std::vector<std::string> transformedSpaceGroupSymbols;
 
-    for (auto transformation : transformations) {
+    for (const auto &transformation : transformations) {
       std::string transformedSymbol =
           getTransformedSymbolOrthorhombic(hmSymbol, transformation);
 

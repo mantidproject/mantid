@@ -417,7 +417,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
         if (!pElem->hasAttribute("idlist")) {
           g_log.error("No detector ID list found for detectors of type " +
                       pElem->getAttribute("type"));
-        } else if (idList.vec.size() == 0) {
+        } else if (idList.vec.empty()) {
           g_log.error("No detector IDs found for detectors in list " +
                       pElem->getAttribute("idlist") + "for detectors of type" +
                       pElem->getAttribute("type"));
@@ -1339,7 +1339,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
                     name);
         throw Kernel::Exception::InstrumentDefinitionError(
             "Detector location element " + name + " has no idlist.", filename);
-      } else if (idList.vec.size() == 0) {
+      } else if (idList.vec.empty()) {
         g_log.error("No detector IDs found for detectors in list " +
                     idList.idname);
       } else {

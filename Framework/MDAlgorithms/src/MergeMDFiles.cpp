@@ -359,7 +359,7 @@ void MergeMDFiles::exec() {
   }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-  if (m_Filenames.size() == 0)
+  if (m_Filenames.empty())
     throw std::invalid_argument("Must specify at least one filename.");
   std::string firstFile = m_Filenames[0];
 

@@ -127,13 +127,9 @@ bool Quasi::validate() {
 }
 
 /**
- * Collect the settings on the GUI and build a python
- * script that runs Quasi
+* Run the BayesQuasi algorithm
  */
 void Quasi::run() {
-  // Using 1/0 instead of True/False for compatibility with underlying Fortran
-  // code
-  // in some places
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");

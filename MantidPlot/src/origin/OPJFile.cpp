@@ -51,7 +51,7 @@ const char *colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define ERROR_MSG                                                              \
   "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"
 
-#define SwapBytes(x) ByteSwap((unsigned char *) & x, sizeof(x))
+#define SwapBytes(x) ByteSwap((unsigned char *)&x, sizeof(x))
 
 int strcmp_i(const char *s1,
              const char *s2) { // compare two strings ignoring case
@@ -426,6 +426,9 @@ int OPJFile::ParseFormatOld() {
         if (!current_col)
           current_col = 1;
         current_col++;
+      } else {
+        fprintf(debug, "SPREADSHEET got negative index: %d\n", spread);
+        return -1;
       }
     }
     fprintf(debug, "SPREADSHEET = %s COLUMN %d NAME = %s (@0x%X)\n", sname,
@@ -839,6 +842,11 @@ int OPJFile::ParseFormatNew() {
   fprintf(debug, " [column found = %d/0x%X @ 0x%X]\n", col_found, col_found,
           (unsigned int)ftell(f));
   int colpos = int(ftell(f));
+  if (colpos < 0) {
+    fprintf(debug,
+            " ERROR : ftell returned a negative value after finding a column");
+    return -1;
+  }
 
   int current_col = 1, nr = 0, nbytes = 0;
   double a;
@@ -1402,6 +1410,11 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   CHECKED_FREAD(debug, &name, 25, 1, f);
 
   int spread = compareSpreadnames(name);
+  if (spread < 0) {
+    fprintf(debug, "ERROR: got negative index for a spreadsheet: %d\n", spread);
+    return;
+  }
+
   SPREADSHEET[spread].name = name;
   readWindowProperties(SPREADSHEET[spread], f, debug, POS, headersize);
   SPREADSHEET[spread].bLoose = false;

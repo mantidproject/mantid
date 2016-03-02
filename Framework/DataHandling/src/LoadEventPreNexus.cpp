@@ -476,7 +476,7 @@ void LoadEventPreNexus::procEvents(
   }
 
   // For slight speed up
-  loadOnlySomeSpectra = (this->spectra_list.size() > 0);
+  loadOnlySomeSpectra = (!this->spectra_list.empty());
 
   // Turn the spectra list into a map, for speed of access
   for (auto &spectrum : spectra_list)
