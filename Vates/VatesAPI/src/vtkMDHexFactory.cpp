@@ -92,7 +92,7 @@ void vtkMDHexFactory::doCreate(
 
   // To cache the signal
   std::vector<float> signalCache(numBoxes, 0);
-    
+
   // True for boxes that we will use
   // We do not use vector<bool> here because of the parallelization below
   // Simultaneous access to different elements of vector<bool> is not safe
@@ -115,14 +115,14 @@ void vtkMDHexFactory::doCreate(
     PRAGMA_OMP( parallel for schedule (dynamic) )
     for (int ii = 0; ii < int(boxes.size()); ii++) {
       // Get the box here
-      size_t i = size_t(ii);
+      size_t i = static_cast<size_t>(ii);
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
-        signalCache[i] = float(signal_normalized);
+        signalCache[i] = static_cast<float>(signal_normalized);
         useBox[i] = true;
 
         // Get the coordinates.
@@ -138,7 +138,7 @@ void vtkMDHexFactory::doCreate(
               std::unique_ptr<coord_t[]>(box->getVertexesArray(numVertexes));
 
         if (numVertexes == 8) {
-          std::copy_n(coords.get(), 24, pointsPtr + i * 24);
+          std::copy_n(coords.get(), 24, std::next(pointsPtr, i * 24));
         }
       } else {
         useBox[i] = false;
