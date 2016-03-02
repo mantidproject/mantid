@@ -12,7 +12,7 @@ class TextFileIO
 {
 public:
   /// Construct the object with a list of file filters
-  TextFileIO(QStringList fileFilters = QStringList());
+  explicit TextFileIO(QStringList fileFilters = QStringList());
 
   /// Save to a file
   bool save(const QString & txt, const QString & filename) const;

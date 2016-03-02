@@ -40,6 +40,7 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
                            const std::string &, const TYPE)) &                 \
                            TimeSeriesProperty<TYPE>::addValue,                 \
            (arg("self"), arg("time"), arg("value")))                           \
+      .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))             \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \
       .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))               \
       .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"))     \

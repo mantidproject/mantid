@@ -37,14 +37,10 @@ namespace DataObjects {
 */
 class DLLExport PeakShapeSphericalFactory : public PeakShapeFactory {
 public:
-  /// Constructor
-  PeakShapeSphericalFactory();
-  /// Destructor
-  virtual ~PeakShapeSphericalFactory();
   /// Make product
-  Mantid::Geometry::PeakShape *create(const std::string &source) const;
+  Mantid::Geometry::PeakShape *create(const std::string &source) const override;
   /// Set a successor should this factory be unsuitable
-  void setSuccessor(PeakShapeFactory_const_sptr successorFactory);
+  void setSuccessor(PeakShapeFactory_const_sptr successorFactory) override;
 
 private:
   /// Successor factory

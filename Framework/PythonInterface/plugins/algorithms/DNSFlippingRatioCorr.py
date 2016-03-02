@@ -1,7 +1,7 @@
 # pylint: disable=too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction
 import numpy as np
 
 
@@ -24,7 +24,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         self.input_workspaces = {}
         self.sf_outws_name = None
         self.nsf_outws_name = None
-        self.dfr = 0.05
 
     def category(self):
         """
@@ -58,8 +57,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
                              doc="A workspace to save the corrected spin-flip data.")
         self.declareProperty(MatrixWorkspaceProperty("NSFOutputWorkspace", "", direction=Direction.Output),
                              doc="A workspace to save the corrected non spin-flip data.")
-        self.declareProperty("DoubleSpinFlipScatteringProbability", 0.05, FloatBoundedValidator(lower=0, upper=1.0),
-                             doc="Probability of the double spin-flip scattering. Number between 0 and 1.")
 
         return
 
@@ -164,19 +161,9 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         _tmp_ws_ = api.Divide(LHSWorkspace=_diff_ws_, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True)
         _tmp_ws_.setYUnit(nsf_data_ws.YUnit())
         api.Plus(LHSWorkspace=nsf_data_ws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)
-        nsf_outws = api.AnalysisDataService.retrieve(self.nsf_outws_name)
         # SF_corr[i] = SF[i] - (NSF[i] - SF[i])/(F[i] - 1)
         api.Minus(LHSWorkspace=sf_data_ws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.sf_outws_name)
-        sf_outws = api.AnalysisDataService.retrieve(self.sf_outws_name)
         api.DeleteWorkspace(_tmp_ws_)
-
-        # 5. Apply correction for a double spin-flip scattering
-        if self.dfr > 1e-7:
-            _tmp_ws_ = sf_outws * self.dfr
-            _tmp_ws_.setYUnit(nsf_outws.YUnit())
-            wslist.append(_tmp_ws_.getName())
-            # NSF_corr[i] = NSF_prev_corr[i] - SF_prev_corr*dfr, SF_corr = SF_prev_corr
-            api.Minus(LHSWorkspace=nsf_outws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)
 
         # cleanup
         self.cleanup(wslist)
@@ -229,7 +216,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         self.input_workspaces['NSF_Background'] = self.getPropertyValue("NSFBkgrWorkspace")
         self.sf_outws_name = self.getPropertyValue("SFOutputWorkspace")
         self.nsf_outws_name = self.getPropertyValue("NSFOutputWorkspace")
-        self.dfr = float(self.getPropertyValue("DoubleSpinFlipScatteringProbability"))
 
         # check if possible to apply correction
         self._can_correct()

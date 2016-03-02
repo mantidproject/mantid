@@ -12,6 +12,7 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(int64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(uint64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(bool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(double)
+DEFINE_IPROPERTYMANAGER_GETVALUE(OptionalBool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int16_t>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint16_t>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int32_t>)
@@ -70,10 +71,10 @@ bool IPropertyManager::existsProperty(const std::string &name) const {
  */
 void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
   auto props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    const std::string propName = (**prop).name();
+  for (auto &prop : props) {
+    const std::string propName = (*prop).name();
     if (other.existsProperty(propName)) {
-      (**prop).setValueFromProperty(*other.getPointerToProperty(propName));
+      (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
     }
   }
 }
@@ -123,6 +124,9 @@ IPropertyManager::TypedValue::operator double() {
 }
 IPropertyManager::TypedValue::operator std::string() {
   return pm.getPropertyValue(prop);
+}
+IPropertyManager::TypedValue::operator OptionalBool() {
+  return pm.getValue<OptionalBool>(prop);
 }
 IPropertyManager::TypedValue::operator Property *() {
   return pm.getPointerToProperty(prop);

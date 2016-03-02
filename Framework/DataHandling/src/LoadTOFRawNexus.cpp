@@ -1,12 +1,15 @@
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -27,13 +30,11 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 //-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the NeXus file to load");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "The name of the NeXus file to load");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
                   "Number of the signal to load from the file. Default is 1 = "
@@ -44,12 +45,13 @@ void LoadTOFRawNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
-      new PropertyWithValue<specid_t>("SpectrumMin", 1, mustBePositive),
+      make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
+                                                mustBePositive),
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
   declareProperty(
-      new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(),
-                                      mustBePositive),
+      make_unique<PropertyWithValue<specnum_t>>(
+          "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
 }
@@ -64,8 +66,7 @@ void LoadTOFRawNexus::init() {
 int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-      descriptor.pathOfTypeExists("/entry-state0", "NXentry") ||
-      descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+      descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)
@@ -99,7 +100,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
   bankNames.clear();
 
   // Create the root Nexus class
-  ::NeXus::File *file = new ::NeXus::File(nexusfilename);
+  auto file = new ::NeXus::File(nexusfilename);
 
   // Open the default data group 'entry'
   file->openGroup(entry_name, "NXentry");
@@ -202,8 +203,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
           if (!dims.empty()) {
             size_t newPixels = 1;
-            for (size_t i = 0; i < dims.size(); i++)
-              newPixels *= dims[i];
+            for (auto dim : dims)
+              newPixels *= dim;
             m_numPixels += newPixels;
           }
         } else {
@@ -250,7 +251,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 pixel_id.end();)
 {
   detid_t pixelID = *it;
-  specid_t wi = static_cast<specid_t>((*id_to_wi)[pixelID]);
+  specnum_t wi = static_cast<specnum_t>((*id_to_wi)[pixelID]);
   // spectrum is just wi+1
   if (wi+1 < m_spec_min || wi+1 > m_spec_max) pixel_id.erase(it);
   else ++it;
@@ -259,17 +260,17 @@ pixel_id.end();)
 namespace {
 // Check the numbers supplied are not in the range and erase the ones that are
 struct range_check {
-  range_check(specid_t min, specid_t max, detid2index_map id_to_wi)
+  range_check(specnum_t min, specnum_t max, detid2index_map id_to_wi)
       : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
 
-  bool operator()(specid_t x) {
-    specid_t wi = static_cast<specid_t>((m_id_to_wi)[x]);
+  bool operator()(specnum_t x) {
+    specnum_t wi = static_cast<specnum_t>((m_id_to_wi)[x]);
     return (wi + 1 < m_min || wi + 1 > m_max);
   }
 
 private:
-  specid_t m_min;
-  specid_t m_max;
+  specnum_t m_min;
+  specnum_t m_max;
   detid2index_map m_id_to_wi;
 };
 }
@@ -292,7 +293,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   m_fileMutex.lock();
 
   // Navigate to the point in the file
-  ::NeXus::File *file = new ::NeXus::File(nexusfilename);
+  auto file = new ::NeXus::File(nexusfilename);
   file->openGroup(entry_name, "NXentry");
   file->openGroup("instrument", "NXinstrument");
   file->openGroup(bankName, "NXdetector");
@@ -354,8 +355,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   if (m_spec_max != Mantid::EMPTY_INT()) {
     uint32_t ifirst = pixel_id[0];
     range_check out_range(m_spec_min, m_spec_max, id_to_wi);
-    std::vector<uint32_t>::iterator newEnd =
-        std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
+    auto newEnd = std::remove_if(pixel_id.begin(), pixel_id.end(), out_range);
     pixel_id.erase(newEnd, pixel_id.end());
     // check if beginning or end of array was erased
     if (ifirst != pixel_id[0])
@@ -429,7 +429,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
     // Set the basic info of that spectrum
     ISpectrum *spec = WS->getSpectrum(wi);
-    spec->setSpectrumNo(specid_t(wi + 1));
+    spec->setSpectrumNo(specnum_t(wi + 1));
     spec->setDetectorID(pixel_id[i - iPart]);
     // Set the shared X pointer
     spec->setX(X);
@@ -446,8 +446,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                errors.begin() + (i + 1) * m_numBins);
     } else {
       // Now take the sqrt(Y) to give E
-      E = Y;
-      std::transform(E.begin(), E.end(), E.begin(), (double (*)(double))sqrt);
+      E = MantidVec();
+      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
+                     static_cast<double (*)(double)>(sqrt));
     }
   }
 
@@ -458,7 +459,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 /** @return the name of the entry that we will load */
 std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   std::string entry_name = "entry";
-  ::NeXus::File *file = new ::NeXus::File(filename);
+  auto file = new ::NeXus::File(filename);
   std::map<std::string, std::string> entries = file->getEntries();
   file->close();
   delete file;
@@ -500,7 +501,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  Progress *prog = new Progress(this, 0.0, 1.0, 10);
+  auto prog = new Progress(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -519,8 +520,8 @@ void LoadTOFRawNexus::exec() {
   g_log.debug() << "Loading DAS logs" << std::endl;
 
   int nPeriods = 1; // Unused
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log")); // Unused
+  auto periodLog =
+      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 
@@ -551,9 +552,8 @@ void LoadTOFRawNexus::exec() {
 
   // Load each bank sequentially
   // PARALLEL_FOR1(WS)
-  for (int i = 0; i < int(bankNames.size()); i++) {
+  for (const auto &bankName : bankNames) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << std::endl;
     loadBank(filename, entry_name, bankName, WS, id_to_wi);

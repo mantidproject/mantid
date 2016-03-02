@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 
@@ -174,6 +176,7 @@ namespace CustomInterfaces
     loadInstAlg->initialize();
     loadInstAlg->setProperty("Workspace", energyWs);
     loadInstAlg->setProperty("InstrumentName", instName.toStdString());
+    loadInstAlg->setProperty("RewriteSpectraMap", OptionalBool(true));
     loadInstAlg->execute();
     energyWs = loadInstAlg->getProperty("Workspace");
 

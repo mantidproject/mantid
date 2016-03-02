@@ -1,7 +1,8 @@
 #ifndef MANTIDQTAPI_MANTIDQWTWORKSPACEDATA_H
 #define MANTIDQTAPI_MANTIDQWTWORKSPACEDATA_H
 /**
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -29,26 +30,23 @@
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
-namespace Mantid
-{
-  namespace API
-  {
-    class MatrixWorkspace;
-  }
+namespace Mantid {
+namespace API {
+class MatrixWorkspace;
+}
 }
 
 /**
  * Base class for Workspace Qwt data types
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtWorkspaceData : public QwtData
-{
+class EXPORT_OPT_MANTIDQT_API MantidQwtWorkspaceData : public QwtData {
 public:
   virtual void setLogScale(bool on) = 0;
   virtual bool logScale() const = 0;
   virtual void saveLowestPositiveValue(const double v) = 0;
   virtual size_t esize() const = 0;
-  virtual double e(size_t i)const = 0;
-  virtual double ex(size_t i)const = 0;
+  virtual double e(size_t i) const = 0;
+  virtual double ex(size_t i) const = 0;
   virtual double getYMin() const = 0;
   virtual double getYMax() const = 0;
   virtual QString getXAxisLabel() const = 0;
@@ -57,23 +55,30 @@ public:
                                   double &yMin, double &yMax,
                                   double &yMinPositive);
 
+  virtual void setXOffset(const double x) = 0;
+  virtual void setYOffset(const double y) = 0;
+  virtual void setWaterfallPlot(bool on) = 0;
+
 protected:
   // Assignment operator (virtualized).
-  MantidQwtWorkspaceData& operator=(const MantidQwtWorkspaceData&); // required by QwtData base class
+  MantidQwtWorkspaceData &
+  operator=(const MantidQwtWorkspaceData &); // required by QwtData base class
 };
 
 /**
  * Base class for MatrixWorkspace Qwt data types
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData : public MantidQwtWorkspaceData
-{
+class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData
+    : public MantidQwtWorkspaceData {
 public:
   /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtMatrixWorkspaceData* copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const = 0;
+  virtual MantidQwtMatrixWorkspaceData *
+  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const = 0;
 
 protected:
   // Assignment operator (virtualized).
-  MantidQwtMatrixWorkspaceData& operator=(const MantidQwtMatrixWorkspaceData&); // required by QwtData base class
+  MantidQwtMatrixWorkspaceData &operator=(
+      const MantidQwtMatrixWorkspaceData &); // required by QwtData base class
 };
 
 #endif

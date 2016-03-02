@@ -6,8 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+
 #include "BoundingBox.h"
 #include <map>
 
@@ -15,6 +14,11 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
+namespace Kernel {
+class V3D;
+class Material;
+}
+
 namespace Geometry {
 class Rule;
 class CompGrp;
@@ -69,7 +73,7 @@ public:
   virtual ~Object();
 
   /// Return the top rule
-  const Rule *topRule() const { return TopRule; }
+  const Rule *topRule() const { return TopRule.get(); }
 
   void setName(const int nx) { ObjName = nx; } ///< Set Name
   int getName() const { return ObjName; }      ///< Get Name
@@ -139,9 +143,9 @@ public:
   /// Return cached value of axis-aligned bounding box
   const BoundingBox &getBoundingBox() const;
   /// Define axis-aligned bounding box
-  void defineBoundingBox(const double &xmax, const double &ymax,
-                         const double &zmax, const double &xmin,
-                         const double &ymin, const double &zmin);
+  void defineBoundingBox(const double &xMax, const double &yMax,
+                         const double &zMax, const double &xMin,
+                         const double &yMin, const double &zMin);
   /// Set a null bounding box for this object
   void setNullBoundingBox();
   // find internal point to object
@@ -166,14 +170,23 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int ObjName;   ///< Creation number
-  Rule *TopRule; ///< Top rule [ Geometric scope of object]
+  int ObjName;                   ///< Creation number
+  std::unique_ptr<Rule> TopRule; ///< Top rule [ Geometric scope of object]
 
-  int procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
+  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
-  CompGrp *procComp(Rule *) const;
+  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
+
+  /// Calculate bounding box using Rule system
+  void calcBoundingBoxByRule();
+
+  /// Calculate bounding box using object's vertices
+  void calcBoundingBoxByVertices();
+
+  /// Calculate bounding box using object's geometric data
+  void calcBoundingBoxByGeometry();
 
   // -- DEPRECATED --
   mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache

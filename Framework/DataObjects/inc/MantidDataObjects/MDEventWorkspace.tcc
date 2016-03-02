@@ -16,6 +16,8 @@
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <iomanip>
 #include <functional>
 #include <algorithm>
@@ -24,18 +26,13 @@
 #include "MantidKernel/Exception.h"
 
 // Test for gcc 4.4
-#if __GNUC__ > 4 || \
-    (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || \
-		       (__GNUC_MINOR__ == 4 && \
-			__GNUC_PATCHLEVEL__ > 0)))
+#if __GNUC__ > 4 ||                                                            \
+    (__GNUC__ == 4 &&                                                          \
+     (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
+// clang-format off
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 #endif
-
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace DataObjects {
@@ -47,11 +44,11 @@ namespace DataObjects {
 TMDE(MDEventWorkspace)::MDEventWorkspace(
     Mantid::API::MDNormalization preferredNormalization,
     Mantid::API::MDNormalization preferredNormalizationHisto)
-    : API::IMDEventWorkspace(), data(NULL),
-      m_BoxController(new BoxController(nd)),
+    : API::IMDEventWorkspace(), data(nullptr),
+      m_BoxController(new API::BoxController(nd)),
       m_displayNormalization(preferredNormalization),
       m_displayNormalizationHisto(preferredNormalizationHisto),
-      m_coordSystem(None) {
+      m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
   data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
 }
@@ -60,7 +57,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other), data(NULL),
+    : IMDEventWorkspace(other), data(nullptr),
       m_BoxController(other.m_BoxController->clone()),
       m_displayNormalization(other.m_displayNormalization),
       m_displayNormalizationHisto(other.m_displayNormalizationHisto),
@@ -171,10 +168,10 @@ TMDE(uint64_t MDEventWorkspace)::getNPoints() const {
  * @throw std::runtime_error if there is not enough memory for the boxes.
  */
 TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
-  BoxController_sptr bc = this->getBoxController();
+  API::BoxController_sptr bc = this->getBoxController();
   double numBoxes = pow(double(bc->getNumSplit()), double(minDepth));
   double memoryToUse = numBoxes * double(sizeof(MDBox<MDE, nd>)) / 1024.0;
-  MemoryStats stats;
+  Kernel::MemoryStats stats;
   if (double(stats.availMem()) < memoryToUse) {
     std::ostringstream mess;
     mess << "Not enough memory available for the given MinRecursionDepth! "
@@ -195,7 +192,7 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
       if (gbox) {
         // Split ALL the contents.
         for (size_t j = 0; j < gbox->getNumChildren(); j++)
-          gbox->splitContents(j, NULL);
+          gbox->splitContents(j, nullptr);
       }
     }
   }
@@ -215,7 +212,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     size_t finestSplit = 1;
     for (size_t i = 0; i < realDepth; i++)
       finestSplit *= m_BoxController->getSplitInto(d);
-    IMDDimension_const_sptr dim = this->getDimension(d);
+    Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
     out.push_back((dim->getMaximum() - dim->getMinimum()) /
                   static_cast<coord_t>(finestSplit));
@@ -233,7 +230,7 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
     size_t suggestedNumCores,
     Mantid::Geometry::MDImplicitFunction *function) const {
   // Get all the boxes in this workspaces
-  std::vector<IMDNode *> boxes;
+  std::vector<API::IMDNode *> boxes;
   // TODO: Should this be leaf only? Depends on most common use case
   if (function)
     this->data->getBoxes(boxes, 10000, true, function);
@@ -251,7 +248,7 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
     numCores = 1;
 
   // Create one iterator per core, splitting evenly amongst spectra
-  std::vector<IMDIterator *> out;
+  std::vector<API::IMDIterator *> out;
   for (size_t i = 0; i < numCores; i++) {
     size_t begin = (i * numElements) / numCores;
     size_t end = ((i + 1) * numElements) / numCores;
@@ -273,28 +270,65 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
 TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
-  // Do an initial bounds check
-  for (size_t d = 0; d < nd; d++) {
-    coord_t x = coords[d];
-    if (data->getExtents(d).outside(x))
-      return std::numeric_limits<signal_t>::quiet_NaN();
+  if (!isInBounds(coords)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
   // If you got here, then the point is in the workspace.
   const API::IMDNode *box = data->getBoxAtCoord(coords);
+  return getNormalizedSignal(box, normalization);
+}
+
+TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
+    const API::IMDNode *box,
+    const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
-    case NoNormalization:
+    case API::NoNormalization:
       return box->getSignal();
-    case VolumeNormalization:
+    case API::VolumeNormalization:
       return box->getSignal() * box->getInverseVolume();
-    case NumEventsNormalization:
+    case API::NumEventsNormalization:
       return box->getSignal() / double(box->getNPoints());
     }
     // Should not reach here
     return box->getSignal();
   } else
     return std::numeric_limits<signal_t>::quiet_NaN();
+}
+
+TMDE(bool MDEventWorkspace)::isInBounds(const coord_t *coords) const {
+  for (size_t d = 0; d < nd; d++) {
+    coord_t x = coords[d];
+    if (data->getExtents(d).outside(x))
+      return false;
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the signal at a particular coordinate in the workspace
+ * or return 0 if masked
+ *
+ * @param coords :: numDimensions-sized array of the coordinates to look at
+ * @param normalization : Normalisation to use.
+ * @return the (normalized) signal at a given coordinates.
+ *         NaN if outside the range of this workspace
+ */
+TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
+    const coord_t *coords,
+    const Mantid::API::MDNormalization &normalization) const {
+  if (!isInBounds(coords)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
+  }
+  // Check if masked
+  const API::IMDNode *box = data->getBoxAtCoord(coords);
+  if (!box)
+    return API::MDMaskValue;
+  if (box->getIsMasked()) {
+    return API::MDMaskValue;
+  }
+  return getNormalizedSignal(box, normalization);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -340,6 +374,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
 TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::vector<std::string> out;
   std::ostringstream mess;
+
   size_t mem;
   mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
         1024;
@@ -411,7 +446,7 @@ bool SortBoxesByID(const BOXTYPE &a, const BOXTYPE &b) {
 /** Create a table of data about the boxes contained */
 TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
     size_t start, size_t num) {
-  CPUTimer tim;
+  Kernel::CPUTimer tim;
   UNUSED_ARG(start);
   UNUSED_ARG(num);
 
@@ -563,7 +598,7 @@ TMDE(void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting.
  */
-TMDE(void MDEventWorkspace)::splitTrackedBoxes(ThreadScheduler *ts) {
+TMDE(void MDEventWorkspace)::splitTrackedBoxes(Kernel::ThreadScheduler *ts) {
   UNUSED_ARG(ts);
   throw std::runtime_error("Not implemented yet");
   //    // Get a COPY of the vector (to avoid thread-safety issues)
@@ -699,74 +734,63 @@ TMDE(void MDEventWorkspace)::refreshCache() {
  *- 1
  * @param e :: vector of errors for each bin.
  */
-TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
-                                         const Mantid::Kernel::VMD &end,
-                                         Mantid::API::MDNormalization normalize,
-                                         std::vector<coord_t> &x,
-                                         std::vector<signal_t> &y,
-                                         std::vector<signal_t> &e) const {
+TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
+::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+              Mantid::API::MDNormalization normalize) const {
   // TODO: Don't use a fixed number of points later
-  size_t numPoints = 200;
+  size_t numPoints = 500;
 
-  VMD step = (end - start) / double(numPoints);
+  Kernel::VMD step = (end - start) / double(numPoints - 1);
   double stepLength = step.norm();
 
-  // These will be the curve as plotted
-  x.clear();
-  y.clear();
-  e.clear();
+  // This will be the curve as plotted
+  LinePlot line;
   for (size_t i = 0; i < numPoints; i++) {
     // Coordinate along the line
-    VMD coord = start + step * double(i);
-    // Record the position along the line
-    x.push_back(static_cast<coord_t>(stepLength * double(i)));
+    Kernel::VMD coord = start + step * double(i);
 
     // Look for the box at this coordinate
     // const MDBoxBase<MDE,nd> * box = NULL;
-    const IMDNode *box = NULL;
+    const API::IMDNode *box = nullptr;
 
-    // Do an initial bounds check
-    bool outOfBounds = false;
-    for (size_t d = 0; d < nd; d++) {
-      if (data->getExtents(d).outside(coord[d])) {
-        outOfBounds = true;
-        break;
-      }
-    }
-
-    // TODO: make the logic/reuse in the following nicer.
-    if (!outOfBounds) {
+    if (isInBounds(coord.getBareArray())) {
       box = this->data->getBoxAtCoord(coord.getBareArray());
 
-      if (box != NULL) {
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize) {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = box->getInverseVolume();
-          break;
-        case NumEventsNormalization:
-          normalizer = 1.0 / double(box->getNPoints());
-          break;
+      if (box) {
+        if (!box->getIsMasked()) {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize) {
+          case API::NoNormalization:
+            break;
+          case API::VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case API::NumEventsNormalization:
+            normalizer = 1.0 / double(box->getNPoints());
+            break;
+          }
+          // Record the position along the line
+          line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
+          // And add the normalized signal/error to the list
+          line.y.push_back(box->getSignal() * normalizer);
+          line.e.push_back(box->getError() * normalizer);
         }
-
-        // And add the normalized signal/error to the list
-        y.push_back(box->getSignal() * normalizer);
-        e.push_back(box->getError() * normalizer);
       } else {
-        y.push_back(std::numeric_limits<double>::quiet_NaN());
-        e.push_back(std::numeric_limits<double>::quiet_NaN());
+        // Record the position along the line
+        line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
+        line.y.push_back(std::numeric_limits<double>::quiet_NaN());
+        line.e.push_back(std::numeric_limits<double>::quiet_NaN());
       }
     } else {
+      // Record the position along the line
+      line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
       // Point is outside the workspace. Add NANs
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      line.y.push_back(std::numeric_limits<double>::quiet_NaN());
+      line.e.push_back(std::numeric_limits<double>::quiet_NaN());
     }
   }
-  // And the last point
-  x.push_back((end - start).norm());
+  return line;
 }
 
 /**
@@ -825,42 +849,38 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
   m_coordSystem = coordSystem;
 }
 
-
 /**
   Set the display normalization for any subsequently generated histoworkspaces.
-  @param preferredNormalization : Display normalization preference to pass on to generated histo workspaces.
+  @param preferredNormalization : Display normalization preference to pass on to
+  generated histo workspaces.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
-     const Mantid::API::MDNormalization preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization preferredNormalizationHisto) {
   m_displayNormalizationHisto = preferredNormalizationHisto;
 }
 
 /**
 Return the preferred normalization preference for subsequent histoworkspaces.
 */
-TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
   return m_displayNormalizationHisto;
 }
-
 
 /**
   Set the display normalization
   @param preferredNormalization : Display normalization preference.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalization(
-     const Mantid::API::MDNormalization preferredNormalization) {
+    const Mantid::API::MDNormalization preferredNormalization) {
   m_displayNormalization = preferredNormalization;
 }
-
 
 /**
 Return the preferred normalization to use for visualization.
 */
-TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
-  return m_displayNormalization ;
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalization() const {
+  return m_displayNormalization;
 }
-
-
 
 } // namespace DataObjects
 

@@ -18,7 +18,8 @@ class ScriptingEnv;
 class ScriptingChangeEvent : public QEvent
 {
 public:
-  ScriptingChangeEvent(ScriptingEnv *e) : QEvent(SCRIPTING_CHANGE_EVENT), env(e) {}
+  explicit ScriptingChangeEvent(ScriptingEnv *e)
+      : QEvent(SCRIPTING_CHANGE_EVENT), env(e) {}
   ScriptingEnv *scriptingEnv() const { return env; }
   Type type() const { return SCRIPTING_CHANGE_EVENT; }
 private:

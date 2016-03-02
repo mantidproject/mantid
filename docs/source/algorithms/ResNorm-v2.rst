@@ -27,7 +27,7 @@ Usage
 **Example - a basic example using ResNorm.**
 
 .. testcode:: ExIRISResNorm
-
+    
     def createSampleWorkspace(name, num_spec=10, random=False):
       """
       Creates a sample workspace with a single lorentzian that looks like IRIS data
@@ -54,7 +54,7 @@ Usage
       ws = ScaleX(ws, 0.1, "Multiply")
 
       # Load instrument and instrument parameters
-      LoadInstrument(ws, InstrumentName='IRIS')
+      LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=True)
       path = os.path.join(config['instrumentDefinition.directory'], 'IRIS_graphite_002_Parameters.xml')
       LoadParameterFile(ws, Filename=path)
       ws = RenameWorkspace(ws, OutputWorkspace=name)

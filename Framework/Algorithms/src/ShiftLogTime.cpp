@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ShiftLogTime.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -38,15 +40,15 @@ const string ShiftLogTime::category() const { return "DataHandling\\Logs"; }
 /** Initialize the algorithm's properties.
  */
 void ShiftLogTime::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A workspace with units of TOF");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   this->declareProperty("LogName", "", "Name of the log to add the offset to");
   this->declareProperty(
-      new PropertyWithValue<int>("IndexShift", Direction::Input),
+      make_unique<PropertyWithValue<int>>("IndexShift", Direction::Input),
       "Number of (integer) values to move the log values. Required.");
 }
 
@@ -98,7 +100,7 @@ void ShiftLogTime::exec() {
   }
 
   // Create the new log
-  TimeSeriesProperty<double> *newlog = new TimeSeriesProperty<double>(logname);
+  auto newlog = new TimeSeriesProperty<double>(logname);
   newlog->setUnits(oldlog->units());
   newlog->create(times, values);
 

@@ -2,13 +2,17 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
+#include "MantidDataHandling/LoadHelper.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 
 #include <boost/algorithm/string/predicate.hpp> // boost::starts_with
 
@@ -66,30 +70,31 @@ LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_monitorElasticPeakPosition = 0;
   m_l1 = 0;
   m_l2 = 0;
-  m_supportedInstruments.push_back("IN4");
-  m_supportedInstruments.push_back("IN5");
-  m_supportedInstruments.push_back("IN6");
+  m_supportedInstruments.emplace_back("IN4");
+  m_supportedInstruments.emplace_back("IN5");
+  m_supportedInstruments.emplace_back("IN6");
 }
 
 /**
  * Initialise the algorithm
  */
 void LoadILL::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "File path of the Data file to load");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "File path of the Data file to load");
 
-  declareProperty(new FileProperty("FilenameVanadium", "",
-                                   FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(make_unique<FileProperty>("FilenameVanadium", "",
+                                            FileProperty::OptionalLoad, ".nxs"),
                   "File path of the Vanadium file to load (Optional)");
 
   declareProperty(
-      new WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "WorkspaceVanadium", "", Direction::Input, PropertyMode::Optional),
       "Vanadium Workspace file to load (Optional)");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 /**
@@ -171,7 +176,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
                                 MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
-  if (vanaWS != NULL) {
+  if (vanaWS != nullptr) {
 
     // Check if it has been store on the run object for this workspace
     if (vanaWS->run().hasProperty("EPP")) {
@@ -516,15 +521,16 @@ void LoadILL::loadDataIntoTheWorkSpace(
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
-  for (auto it = monitors.begin(); it != monitors.end(); ++it) {
+  for (const auto &monitor : monitors) {
 
     m_localWorkspace->dataX(spec)
         .assign(detectorTofBins.begin(), detectorTofBins.end());
     // Assign Y
-    m_localWorkspace->dataY(spec).assign(it->begin(), it->end());
+    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(spec);
-    std::transform(it->begin(), it->end(), E.begin(), LoadILL::calculateError);
+    std::transform(monitor.begin(), monitor.end(), E.begin(),
+                   LoadILL::calculateError);
     ++spec;
   }
 
@@ -604,6 +610,8 @@ void LoadILL::runLoadInstrument() {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

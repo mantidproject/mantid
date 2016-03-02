@@ -17,6 +17,7 @@ INSTANTIATE(unsigned int)
 INSTANTIATE(unsigned long)
 INSTANTIATE(unsigned long long)
 INSTANTIATE(bool)
+INSTANTIATE(OptionalBool)
 INSTANTIATE(double)
 INSTANTIATE(std::string)
 /// @endcond

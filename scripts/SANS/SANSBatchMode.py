@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 #
 # SANSBatchMode.py
 #
@@ -101,6 +101,9 @@ def addRunToStore(parts, run_store):
         @param parts: the parts of a CSV line
         @param run_store: Append info about CSV line
     """
+    if "MANTID_BATCH_FILE" in parts:
+        return 0
+
     # Check logical structure of line
     nparts = len(parts)
     if nparts not in ALLOWED_NUM_ENTRIES:

@@ -9,6 +9,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -17,15 +18,17 @@ using namespace Mantid::Kernel;
 
 namespace {
 /// Create the test source property
-Mantid::Kernel::TimeSeriesProperty<double> *
+std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
-  auto source = new Mantid::Kernel::TimeSeriesProperty<double>(name);
+  auto source =
+      Mantid::Kernel::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(
+          name);
   source->addValue("2007-11-30T16:17:00", 1);
   source->addValue("2007-11-30T16:17:10", 2);
   source->addValue("2007-11-30T16:17:20", 3);
   source->addValue("2007-11-30T16:17:30", 4);
   source->addValue("2007-11-30T16:17:40", 5);
-  return source;
+  return std::move(source);
 }
 
 /// Create test filter
@@ -51,8 +54,9 @@ class PropertyManagerTest : public CxxTest::TestSuite {
 public:
   void setUp() {
     manager = new PropertyManagerHelper;
-    Property *p = new PropertyWithValue<int>("aProp", 1);
-    manager->declareProperty(p);
+    std::unique_ptr<Property> p =
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
+    manager->declareProperty(std::move(p));
     manager->declareProperty("anotherProp", 1.11);
     manager->declareProperty("yetAnotherProp", "itsValue");
   }
@@ -123,9 +127,11 @@ public:
 
   void testdeclareProperty_pointer() {
     PropertyManagerHelper mgr;
-    Property *p = new PropertyWithValue<double>("myProp", 9.99);
-    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(p));
-    TS_ASSERT(mgr.existsProperty(p->name()));
+    std::unique_ptr<Property> p =
+        Mantid::Kernel::make_unique<PropertyWithValue<double>>("myProp", 9.99);
+    auto copy = std::unique_ptr<Property>(p->clone());
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(std::move(p)));
+    TS_ASSERT(mgr.existsProperty(copy->name()));
     // Confirm that the first 4 characters of the string are the same
 
     // Note that some versions of boost::lexical_cast > 1.34 give a string such
@@ -137,11 +143,15 @@ public:
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp").substr(0, 4),
                      std::string("9.99"));
 
-    TS_ASSERT_THROWS(mgr.declareProperty(p), Exception::ExistsError);
-    TS_ASSERT_THROWS(mgr.declareProperty(new PropertyWithValue<int>("", 0)),
-                     std::invalid_argument);
-    mgr.declareProperty(new PropertyWithValue<int>("GoodIntProp", 1),
-                        "Test doc");
+    TS_ASSERT_THROWS(mgr.declareProperty(std::move(copy)),
+                     Exception::ExistsError);
+    TS_ASSERT_THROWS(
+        mgr.declareProperty(
+            Mantid::Kernel::make_unique<PropertyWithValue<int>>("", 0)),
+        std::invalid_argument);
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("GoodIntProp", 1),
+        "Test doc");
     TS_ASSERT_EQUALS(mgr.getPointerToProperty("GoodIntProp")->documentation(),
                      "Test doc");
   }
@@ -226,7 +236,8 @@ public:
 
   void testSetProperties_arrayValueString() {
     PropertyManagerHelper mgr;
-    mgr.declareProperty(new ArrayProperty<double>("ArrayProp"));
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp"));
 
     std::string jsonString = "{\"ArrayProp\":\"10,12,23\"}";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
@@ -412,8 +423,8 @@ public:
 
   void test_asStringWithArrayProperty() {
     PropertyManagerHelper mgr;
-    TS_ASSERT_THROWS_NOTHING(
-        mgr.declareProperty(new ArrayProperty<double>("ArrayProp")));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp")));
 
     ::Json::Reader reader;
     ::Json::Value value;
@@ -445,23 +456,27 @@ public:
    */
   void testAdditionOperator() {
     PropertyManager mgr1;
-    Property *p;
-    p = new PropertyWithValue<double>("double", 12.0);
-    mgr1.declareProperty(p, "docs");
-    p = new PropertyWithValue<int>("int", 23);
-    mgr1.declareProperty(p, "docs");
-    p = new PropertyWithValue<double>("double_only_in_mgr1", 456.0);
-    mgr1.declareProperty(p, "docs");
+    mgr1.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 12.0),
+        "docs");
+    mgr1.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+    mgr1.declareProperty(Mantid::Kernel::make_unique<PropertyWithValue<double>>(
+                             "double_only_in_mgr1", 456.0),
+                         "docs");
 
     PropertyManager mgr2;
-    p = new PropertyWithValue<double>("double", 23.6);
-    mgr2.declareProperty(p, "docs");
-    p = new PropertyWithValue<int>("int", 34);
-    mgr2.declareProperty(p, "docs");
-    p = new PropertyWithValue<double>("new_double_in_mgr2", 321.0);
-    mgr2.declareProperty(p, "docs");
-    p = new PropertyWithValue<int>("new_int", 655);
-    mgr2.declareProperty(p, "docs");
+    mgr2.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 23.6),
+        "docs");
+    mgr2.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 34), "docs");
+    mgr2.declareProperty(Mantid::Kernel::make_unique<PropertyWithValue<double>>(
+                             "new_double_in_mgr2", 321.0),
+                         "docs");
+    mgr2.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("new_int", 655),
+        "docs");
 
     // Add em together
     mgr1 += mgr2;
@@ -479,6 +494,36 @@ public:
     TS_ASSERT_EQUALS(i, 57);
     i = mgr1.getProperty("new_int");
     TS_ASSERT_EQUALS(i, 655);
+  }
+
+  void test_char_array() {
+    PropertyManagerHelper mgr;
+
+    auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+    mgr.declareProperty("SampleChemicalFormula", "",
+                        "Chemical composition of the sample material",
+                        nonEmptyString, Direction::Input);
+
+    TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
+    mgr.setProperty("SampleChemicalFormula", "CH3");
+    TSM_ASSERT("Mandatory validator should be satisfied.",
+               mgr.validateProperties());
+  }
+
+  void test_optional_bool_property() {
+    PropertyManagerHelper mgr;
+
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+            "PropertyX", OptionalBool::Unset,
+            boost::make_shared<MandatoryValidator<OptionalBool>>(),
+            Direction::Input),
+        "Custom property");
+
+    TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
+    mgr.setProperty("PropertyX", OptionalBool(true));
+    TSM_ASSERT("Mandatory validator should be satisfied.",
+               mgr.validateProperties());
   }
 
 private:

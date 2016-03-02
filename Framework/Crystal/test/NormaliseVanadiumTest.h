@@ -1,8 +1,9 @@
 #ifndef MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 #define MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/NormaliseVanadium.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -75,6 +76,8 @@ public:
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
     delete loadInst;
     // Populate the instrument parameters in this workspace - this works around

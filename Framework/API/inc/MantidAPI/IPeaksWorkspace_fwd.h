@@ -2,6 +2,7 @@
 #define MANTID_API_IPEAKWORKSPACE_FWD_H_
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,6 +37,10 @@ class IPeaksWorkspace;
 typedef boost::shared_ptr<IPeaksWorkspace> IPeaksWorkspace_sptr;
 /// shared pointer to Mantid::API::IPeaksWorkspace (const version)
 typedef boost::shared_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_sptr;
+/// unique pointer to Mantid::API::IPeaksWorkspace
+typedef std::unique_ptr<IPeaksWorkspace> IPeaksWorkspace_uptr;
+/// unique pointer to Mantid::API::IPeaksWorkspace (const version)
+typedef std::unique_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_uptr;
 }
 }
 #endif // MANTID_API_IPEAKWORKSPACE_FWD_H_

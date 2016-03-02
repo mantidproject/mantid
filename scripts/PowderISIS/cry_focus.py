@@ -1,4 +1,4 @@
-#pylint: disable=too-many-arguments,unused-variable
+﻿#pylint: disable=too-many-arguments,unused-variable
 
 from mantid.simpleapi import *
 from os.path import join
@@ -13,7 +13,8 @@ import cry_vana
 # ==========
 
 
-def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Eff=True, Norm=True):
+def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Eff=True, Norm=True,
+              Write_ExtV=True):
     if scale == 0:
         scale = float(EXPR_FILE.scale)
     # === Norm boolean flag used to Optionally correct to a Vana ===
@@ -29,7 +30,7 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
                 # CORRECT
         elif EXPR_FILE.ExistV == "no" and EXPR_FILE.VGrpfocus == "van":
             print "was here?"
-            cry_vana.create_vana(EXPR_FILE, NoAbs=NoVabs)
+            cry_vana.create_vana(EXPR_FILE, NoAbs=NoVabs, write_existingv=Write_ExtV)
     else:
         load_sac_eff(EXPR_FILE, NoSAC=True)
     # === Construct a list of runs, sum of runs
@@ -105,12 +106,13 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     (outname, uampstotal) = cry_sample.get_data_sum(sampleAdd, "sample", EXPR_FILE)
     if uampstotal < 1e-6:
         return "No usable data, Raw files probably not found: cannot create " + outname + "\n"
-    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile)
+    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile) # where user and GrpFile is appended
     Integration(InputWorkspace="sample", OutputWorkspace="sampleSum")
     MaskDetectorsIf(InputWorkspace="sampleSum", InputCalFile=EXPR_FILE.Path2GrpFile, OutputCalFile=newCalFile,
                     Mode="DeselectIf", Operator="Equal", Value=10)
     mtd.remove("sampleSum")
     EXPR_FILE.Path2DatGrpFile = newCalFile
+    # isfirst always true when called from FocusAll
     if EXPR_FILE.VGrpfocus == "sam" and isfirst:
         cry_vana.create_vana(EXPR_FILE, NoAbs)
     if EXPR_FILE.SEmptyFile[0] != "none":

@@ -52,17 +52,22 @@ public:
         5 ///< to specify a directory that does not have to exist
   };
 
-  /// Constructor
-  FileProperty(const std::string &name, const std::string &default_value,
+  /// Constructor taking a list of extensions as a vector
+  FileProperty(const std::string &name, const std::string &defaultValue,
                unsigned int action, const std::vector<std::string> &exts =
                                         std::vector<std::string>(),
                unsigned int direction = Kernel::Direction::Input);
+  /// Constructor taking a single extension as a string
   FileProperty(const std::string &name, const std::string &default_value,
                unsigned int action, const std::string &ext,
                unsigned int direction = Kernel::Direction::Input);
+  /// Constructor taking a list of extensions as an initializer_list
+  FileProperty(const std::string &name, const std::string &default_value,
+               unsigned int action, std::initializer_list<std::string> exts,
+               unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
-  virtual FileProperty *clone() const { return new FileProperty(*this); }
+  FileProperty *clone() const override { return new FileProperty(*this); }
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
@@ -73,10 +78,10 @@ public:
   /// Check if this property is optional
   bool isOptional() const;
   /// Overridden setValue method
-  virtual std::string setValue(const std::string &propValue);
+  std::string setValue(const std::string &propValue) override;
   /// Returns an empty string if the property is valid, otherwise contains an
   /// error message
-  virtual std::string isValid() const;
+  std::string isValid() const override;
 
   /// Returns the main file extension that's used
   std::string getDefaultExt() const { return m_defaultExt; }
@@ -87,8 +92,6 @@ public:
 private:
   /// Returns a string depending on whether an empty value is valid
   std::string isEmptyValueValid() const;
-  /// Setup based on the default extension
-  void setUp(const std::string &defExt);
   /// Do the allowed values match the facility preference extensions for run
   /// files
   bool extsMatchRunFiles();

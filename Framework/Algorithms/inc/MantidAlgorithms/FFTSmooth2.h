@@ -40,40 +40,32 @@ public:
   /// Default constructor
   FFTSmooth2() : API::Algorithm(){};
   /// Destructor
-  virtual ~FFTSmooth2(){};
+  ~FFTSmooth2() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FFTSmooth"; }
+  const std::string name() const override { return "FFTSmooth"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs smoothing of a spectrum using various filters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Arithmetic\\FFT;Transforms\\Smoothing";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
-  // Smoothing by truncation.
-  void truncate(int n);
   // Smoothing by zeroing.
-  void zero(int n);
+  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
+            API::MatrixWorkspace_sptr &filteredWS);
   // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(int n, int order);
-
-  /// The input workspace
-  API::MatrixWorkspace_sptr m_inWS;
-  /// Temporary workspace for keeping the unfiltered Fourier transform of the
-  /// imput spectrum
-  API::MatrixWorkspace_sptr m_unfilteredWS;
-  /// Temporary workspace for keeping the filtered spectrum
-  API::MatrixWorkspace_sptr m_filteredWS;
+  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS,
+                   API::MatrixWorkspace_sptr &filteredWS);
 };
 
 } // namespace Algorithm

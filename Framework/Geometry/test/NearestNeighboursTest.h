@@ -26,9 +26,9 @@ using Mantid::Kernel::V3D;
 class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
   static ISpectrumDetectorMapping
-  buildSpectrumDetectorMapping(const specid_t start, const specid_t end) {
-    std::unordered_map<specid_t, std::set<detid_t>> map;
-    for (specid_t i = start; i <= end; ++i) {
+  buildSpectrumDetectorMapping(const specnum_t start, const specnum_t end) {
+    std::unordered_map<specnum_t, std::set<detid_t>> map;
+    for (specnum_t i = start; i <= end; ++i) {
       map[i].insert(i);
     }
     return map;
@@ -45,7 +45,7 @@ private:
         : NearestNeighbours(instrument, spectraMap, ignoreMasked) {}
 
     // Direct access to intermdiate spectra detectors
-    std::map<specid_t, IDetector_const_sptr> getSpectraDetectors() {
+    std::map<specnum_t, IDetector_const_sptr> getSpectraDetectors() {
       return NearestNeighbours::getSpectraDetectors(m_instrument, m_spectraMap);
     }
   };
@@ -69,7 +69,7 @@ public:
 
     // Check distances calculated in NearestNeighbours compare with those using
     // getDistance on component
-    std::map<specid_t, V3D> distances = nn.neighbours(14);
+    std::map<specnum_t, V3D> distances = nn.neighbours(14);
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(expectedNeighboursNumber, distances.size());
@@ -108,8 +108,8 @@ public:
 
     // Check distances calculated in NearestNeighbours compare with those using
     // getDistance on component
-    std::map<specid_t, V3D> distances = nn.neighbours(5);
-    std::map<specid_t, V3D>::iterator distIt;
+    std::map<specnum_t, V3D> distances = nn.neighbours(5);
+    std::map<specnum_t, V3D>::iterator distIt;
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(distances.size(), 8);
@@ -163,10 +163,10 @@ public:
             m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
     TS_ASSERT(det);
-    std::map<specid_t, V3D> nb;
+    std::map<specnum_t, V3D> nb;
 
     // Too close!
-    specid_t spec =
+    specnum_t spec =
         256 + 2 * 16 + 3; // This gives the spectrum number for this detector
     nb = nn.neighboursInRadius(spec, 0.003);
     TS_ASSERT_EQUALS(nb.size(), 0);
@@ -186,7 +186,7 @@ public:
     ParameterMap_sptr pmap(new ParameterMap());
 
     // Mask the first 5 detectors
-    for (Mantid::specid_t i = 1; i < 3; i++) {
+    for (Mantid::specnum_t i = 1; i < 3; i++) {
       if (const Geometry::ComponentID det =
               instrument->getDetector(*spectramap.at(i).begin())
                   ->getComponentID()) {

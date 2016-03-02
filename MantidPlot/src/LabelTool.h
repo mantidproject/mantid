@@ -46,11 +46,11 @@ class QMenu;
 class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterface
 {
   Q_OBJECT
-public: 
- LabelTool(Graph *graph);
- virtual ~LabelTool();
- virtual int rtti() const {return PlotToolInterface::Rtti_LabelTool;};
- 
+public:
+  explicit LabelTool(Graph *graph);
+  ~LabelTool() override;
+  int rtti() const override { return PlotToolInterface::Rtti_LabelTool; };
+
  void removeTextBox();
 
 protected:

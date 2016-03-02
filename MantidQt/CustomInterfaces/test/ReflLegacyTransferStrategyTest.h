@@ -56,8 +56,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
-
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
@@ -92,7 +92,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
@@ -136,7 +137,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
@@ -199,7 +201,8 @@ public:
     MockProgressBase progress;
     EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
 
-    auto output = strategy.transferRuns(input, progress);
+    auto transferRuns = strategy.transferRuns(input, progress);
+    auto output = transferRuns.getTransferRuns();
 
     TS_ASSERT_EQUALS(output, expected);
     TS_ASSERT(Mock::VerifyAndClear(&progress));
@@ -207,9 +210,8 @@ public:
 
   void test_clone() {
     ReflLegacyTransferStrategy strategy;
-    auto *clone = strategy.clone();
-    TS_ASSERT(dynamic_cast<ReflLegacyTransferStrategy *>(clone));
-    delete clone;
+    auto clone = strategy.clone();
+    TS_ASSERT(dynamic_cast<ReflLegacyTransferStrategy *>(clone.get()));
   }
 
   void test_filtering() {

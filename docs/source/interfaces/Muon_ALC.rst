@@ -124,9 +124,14 @@ Data Loading
 
 In the Data Loading step, a sequence of runs are loaded through the fields **First** and **Last**.
 All datasets with run number between these limits will be loaded, and a warning message
-will be shown if any of them is missing. The input files must be Muon Nexus files with
-names beginning with at least one letter and followed by a number. In addition, the user must supply
-the **Log** data that will be used as X parameter from the list of available log values.
+will be shown if any of them is missing. Instead of selecting the **Last** dataset manually, the
+**Auto** checkbox can be ticked. In this case, the text box and button are disabled and the interface
+automatically selects the most recently modified file in the directory. The data will be automatically
+updated when new files are added to the directory.
+
+The input files must be Muon Nexus files with names beginning with at least one letter
+and followed by a number. In addition, the user must supply the **Log** data that will
+be used as X parameter from the list of available log values.
 Some additional options may be specified: the **Dead Time Corrections**, if any, can be
 loaded from the input dataset itself or from a custom file specified by the user. The
 detector **Grouping** is defaulted to **Auto**, in which case the grouping information
@@ -137,7 +142,7 @@ if the option **Subtract** is checked, and finally the type of **Calculation** t
 with the time limits. A click on the **Load** button results in the calculation of the
 asymmetry, displayed on the right panel.
 
-.. figure:: ../images/ALCDataLoading.png
+.. figure:: ../images/ALCDataLoading3.6.png
    :align: center
    :width: 800
 

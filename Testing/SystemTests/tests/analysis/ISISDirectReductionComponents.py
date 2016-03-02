@@ -55,7 +55,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         saveFileName = self.rd.reducer.save_file_name
 #pylint: disable=unused-variable
         outWS = Load(Filename=saveFileName+'.nxs')
-        outWS *= 0.997979227566217
+        #outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
         os.remove(fullRezPath)
         return 'outWS'
@@ -104,7 +104,7 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
         # temporary workflow, until we fix workspace adjustment
         # disable pylint -- access to protected member
 #pylint: disable=W0212
-        rd._tolerr =3.e-3
+        rd._tolerr =1.e-6
         rd.reducer.prop_man.save_file_name = 'MARIReduction.nxs'
         rd.validate_run_number=11001
         try:

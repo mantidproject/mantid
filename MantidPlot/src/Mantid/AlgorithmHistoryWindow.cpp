@@ -435,37 +435,66 @@ void AlgorithmHistoryWindow::doRoll( int index )
 // AlgHistoryProperties Definitions
 //--------------------------------------------------------------------------------------------------
 
-AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory_sptr>& propHist):
-  m_Histprop(propHist)
-{
+AlgHistoryProperties::AlgHistoryProperties(
+    QWidget *w, const std::vector<PropertyHistory_sptr> &propHist)
+    : m_Histprop(propHist) {
   QStringList hList;
-  hList<<"Name"<<"Value"<<"Default?:"<<"Direction"<<"";
-  m_histpropTree = new  QTreeWidget(w);
-  if(m_histpropTree)
-  {
-    m_histpropTree->setColumnCount(5);
-    m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
-    m_histpropTree->setHeaderLabels(hList);
-    m_histpropTree->setGeometry (213,5,350,200);
-  }
+  hList << "Name"
+        << "Value"
+        << "Default?:"
+        << "Direction"
+        << "";
+
+  m_histpropTree = new QTreeWidget(w);
+  m_histpropTree->setColumnCount(5);
+  m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
+  m_histpropTree->setHeaderLabels(hList);
+  m_histpropTree->setGeometry(213, 5, 350, 200);
+
+  m_contextMenu = new QMenu(w);
+
+  m_copyAction = new QAction("Copy to Clipboard", m_contextMenu);
+  connect(m_copyAction, SIGNAL(triggered()), this,
+          SLOT(copySelectedItemText()));
+  m_contextMenu->addAction(m_copyAction);
+
+  m_histpropTree->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_histpropTree, SIGNAL(customContextMenuRequested(const QPoint &)),
+          this, SLOT(popupMenu(const QPoint &)));
 }
-void AlgHistoryProperties::clearData()
-{
-  if(m_histpropTree)
-  {   m_histpropTree->clear();
-    int ntopcount=m_histpropTree->topLevelItemCount() ;
-    while(ntopcount--)
-    {m_histpropTree->topLevelItem(ntopcount);
+
+void AlgHistoryProperties::clearData() {
+  if (m_histpropTree) {
+    m_histpropTree->clear();
+    int ntopcount = m_histpropTree->topLevelItemCount();
+    while (ntopcount--) {
+      m_histpropTree->topLevelItem(ntopcount);
     }
   }
 }
-void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory_sptr>& histProp)
-{
-  m_Histprop.assign(histProp.begin(),histProp.end());
+
+void AlgHistoryProperties::setAlgProperties(
+    const std::vector<PropertyHistory_sptr> &histProp) {
+  m_Histprop.assign(histProp.begin(), histProp.end());
 }
-const PropertyHistories& AlgHistoryProperties:: getAlgProperties()
-{
+
+const PropertyHistories &AlgHistoryProperties::getAlgProperties() {
   return m_Histprop;
+}
+
+void AlgHistoryProperties::popupMenu(const QPoint &pos) {
+  QTreeWidgetItem *treeItem = m_histpropTree->itemAt(pos);
+  if (!treeItem)
+    return;
+
+  m_selectedItemText = treeItem->text(m_histpropTree->currentColumn());
+  m_contextMenu->popup(QCursor::pos());
+}
+
+void AlgHistoryProperties::copySelectedItemText() {
+  QClipboard *clipboard = QApplication::clipboard();
+  if (clipboard)
+    clipboard->setText(m_selectedItemText);
 }
 
 /**

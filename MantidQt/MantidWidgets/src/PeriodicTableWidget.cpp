@@ -205,6 +205,10 @@ QString PeriodicTableWidget::getAllCheckedElementsStr() {
   return allCheckedElementsStr;
 }
 
+QString PeriodicTableWidget::getValue() {
+    return getAllCheckedElementsStr();
+}
+
 void PeriodicTableWidget::disableButtons(
     QVector<QPushButton *> buttonsToDisable) {
   for (auto i = buttonsToDisable.begin(); i != buttonsToDisable.end(); i++) {

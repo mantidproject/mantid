@@ -6,7 +6,10 @@
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string/split.hpp>
+
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
@@ -95,7 +98,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  AlgorithmHistories::const_iterator start = m_algorithms.begin();
+  auto start = m_algorithms.cbegin();
   std::advance(start, index);
   return *start;
 }
@@ -180,9 +183,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
 
   // Algorithm History
   int algCount = 0;
-  AlgorithmHistories::const_iterator histIter = m_algorithms.begin();
-  for (; histIter != m_algorithms.end(); ++histIter) {
-    (*histIter)->saveNexus(file, algCount);
+  for (const auto &algorithm : m_algorithms) {
+    algorithm->saveNexus(file, algCount);
   }
 
   // close process group
@@ -201,7 +203,8 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
  */
 void getWordsInString(const std::string &words3, std::string &w1,
                       std::string &w2, std::string &w3) {
-  Poco::StringTokenizer data(words3, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 3)
     throw std::out_of_range("Algorithm list line " + words3 +
                             " is not of the correct format\n");
@@ -224,7 +227,8 @@ void getWordsInString(const std::string &words3, std::string &w1,
  */
 void getWordsInString(const std::string &words4, std::string &w1,
                       std::string &w2, std::string &w3, std::string &w4) {
-  Poco::StringTokenizer data(words4, " ", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer data(
+      words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 4)
     throw std::out_of_range("Algorithm list line " + words4 +
                             " is not of the correct format\n");
@@ -269,8 +273,9 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
                                          AlgorithmHistory_sptr parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
-  for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it) {
-    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(*it);
+  for (auto historyNumber : historyNumbers) {
+    std::string entryName =
+        "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
@@ -305,8 +310,8 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string entryName = it->first;
+  for (auto &entry : entries) {
+    std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
       entryName = entryName.substr(16, entryName.size() - 16);
@@ -387,18 +392,18 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   for (size_t index = static_cast<size_t>(PARAMS) + 1; index < nlines;
        ++index) {
     const std::string line = info[index];
-    std::string::size_type colon = line.find(":");
-    std::string::size_type comma = line.find(",");
+    std::string::size_type colon = line.find(':');
+    std::string::size_type comma = line.find(',');
     // Each colon has a space after it
     std::string prop_name = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
+    colon = line.find(':', comma);
     comma = line.find(", Default?", colon);
     std::string prop_value = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
+    colon = line.find(':', comma);
     comma = line.find(", Direction", colon);
     std::string is_def = line.substr(colon + 2, comma - colon - 2);
-    colon = line.find(":", comma);
-    comma = line.find(",", colon);
+    colon = line.find(':', comma);
+    comma = line.find(',', colon);
     std::string direction = line.substr(colon + 2, comma - colon - 2);
     unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
     alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);

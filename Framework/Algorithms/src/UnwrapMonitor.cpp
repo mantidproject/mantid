@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapMonitor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -22,13 +26,13 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(NULL) {}
+      m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
 UnwrapMonitor::~UnwrapMonitor() {
   if (m_progress)
     delete m_progress;
-  m_progress = NULL;
+  m_progress = nullptr;
 }
 
 /// Initialisation method
@@ -39,12 +43,12 @@ void UnwrapMonitor::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, wsValidator),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();
@@ -370,20 +374,19 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
   }
   if (rangeBounds[0] != -1 && rangeBounds[1] > 0) {
     // Now append the lower range
-    MantidVec::const_iterator YStart = YIn.begin();
-    MantidVec::const_iterator EStart = EIn.begin();
+    auto YStart = YIn.begin();
+    auto EStart = EIn.begin();
     Y.insert(Y.end(), YStart + rangeBounds[0], YStart + rangeBounds[1]);
     E.insert(E.end(), EStart + rangeBounds[0], EStart + rangeBounds[1]);
     // Propagate masking, if necessary
     if (m_inputWS->hasMaskedBins(spectrum)) {
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        const int maskIndex = static_cast<int>((*it).first);
+      for (const auto &inputMask : inputMasks) {
+        const int maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
-                             (*it).second);
+                             inputMask.second);
       }
     }
   }

@@ -40,7 +40,7 @@ double BoseEinsteinDistribution::n(const double energy,
                      "function not well-behaved",
                      beta);
 
-  return 1.0 / (std::exp(beta) - 1.0);
+  return 1.0 / std::expm1(beta);
 }
 
 /**

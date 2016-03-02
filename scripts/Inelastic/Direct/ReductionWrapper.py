@@ -591,8 +591,7 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
-#pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
         except:
             out_ws_name = None
@@ -614,15 +613,15 @@ def iliad(reduce):
                 try:
                     config.appendDataSearchDir(str(data_path))
                     args[1] = os.path.basename(input_file)
-#pylint: disable=bare-except
+                #pylint: disable=bare-except
                 except: # if mantid is not available, this should ignore config
                     pass
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
 
-#pylint: disable=protected-access
+        #pylint: disable=protected-access
         if host._run_from_web:
-#pylint: disable=protected-access
+            #pylint: disable=protected-access
             web_vars = host._wvs.get_all_vars()
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
@@ -635,7 +634,7 @@ def iliad(reduce):
         rez = reduce(*args)
 
         # prohibit returning workspace to web services.
-#pylint: disable=protected-access
+        #pylint: disable=protected-access
         if host._run_from_web and not isinstance(rez,str):
             rez = ""
         else:
@@ -643,8 +642,8 @@ def iliad(reduce):
               # multirep run, just return as it is
                 return rez
             if not(rez is None) and out_ws_name and rez.name() != out_ws_name:
-# the function does not return None, pylint is wrong
-#pylint: disable=W1111
+            # the function does not return None, pylint is wrong
+            #pylint: disable=W1111
                 rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
 
         return rez

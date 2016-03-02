@@ -12,7 +12,7 @@
 
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
-    <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
+    <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$"></prefix>
       <windows replacement=""></windows>
@@ -324,6 +324,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
+   <instrument name="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
    <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
@@ -380,6 +384,7 @@
 
    <instrument name="REF_L" beamline="4B">
       <technique>Reflectometry</technique>
+      <livedata address="bl4b-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="CNCS" beamline="5">
@@ -453,6 +458,10 @@
    <instrument name="VENUS">
       <technique>Imaging</technique>
       <technique>Tomography</technique>
+   </instrument>
+   
+   <instrument name="SWANS" shortname="SWANS" beamline="7">
+      <technique>Small Wide Angle Scattering</technique>
    </instrument>
 
    <livedata listener="SNSLiveEventDataListener"/>

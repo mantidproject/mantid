@@ -20,10 +20,11 @@ public:
   virtual int version() const { return 1; }
   virtual const std::string summary() const { return "Test summary"; }
   virtual void init() {
-    declareProperty(
-        new ArrayProperty<std::string>("MyInputWorkspaces", Direction::Input));
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "");
+    declareProperty(make_unique<ArrayProperty<std::string>>("MyInputWorkspaces",
+                                                            Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                     Direction::Output),
+                    "");
   }
   virtual void exec() {
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));

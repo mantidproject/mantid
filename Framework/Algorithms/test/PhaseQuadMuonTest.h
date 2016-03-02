@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
@@ -64,7 +66,7 @@ public:
     auto specImE = outputWs->getSpectrum(1)->readE();
     // Check real Y values
     TS_ASSERT_DELTA(specReY[0], -0.9982, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.0251, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], -0.0252, 0.0001);
     TS_ASSERT_DELTA(specReY[50], 0.0264, 0.0001);
     // Check real E values
     TS_ASSERT_DELTA(specReE[0], 0.0010, 0.0001);

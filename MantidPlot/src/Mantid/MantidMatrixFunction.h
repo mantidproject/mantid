@@ -5,6 +5,7 @@
 #include "MantidMatrix.h"
 
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <QPointer>
 #include <vector>
@@ -21,8 +22,7 @@ class MantidMatrixFunctionWorkspaceObserver: public QObject, public MantidQt::AP
 {
     Q_OBJECT
 public:
-
-    MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
+  explicit MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
 
 signals:
     void requestRedraw();
@@ -31,9 +31,13 @@ signals:
 private:
     /* Base class virtual methods */
 
-    void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-    void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace>);
-    void clearADSHandle();
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+  void clearADSHandle() override;
 
     MantidMatrixFunction *m_function;
 };
@@ -44,15 +48,15 @@ private:
 class MantidMatrixFunction: public Function2D
 {
 public:
-    MantidMatrixFunction(MantidMatrix &matrix);
-    ~MantidMatrixFunction();
+  explicit MantidMatrixFunction(MantidMatrix &matrix);
+  ~MantidMatrixFunction() override;
 
   /* Base class virtual methods */
 
-  double operator()(double x, double y);
-  double getMinPositiveValue()const;
-  QString saveToString() const;
-  void connectToViewer(QObject *viewer);
+  double operator()(double x, double y) override;
+  double getMinPositiveValue() const override;
+  QString saveToString() const override;
+  void connectToViewer(QObject *viewer) override;
 
   /* Public methods */
 

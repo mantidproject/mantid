@@ -84,6 +84,7 @@ void Quasi::setup() {}
  */
 bool Quasi::validate() {
   UserInputValidator uiv;
+  QString errors("");
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
@@ -97,12 +98,21 @@ bool Quasi::validate() {
     uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
   }
 
-  QString errors = uiv.generateErrorMessage();
+  // check eMin and eMax values
+  const auto eMin = m_dblManager->value(m_properties["EMin"]);
+  const auto eMax = m_dblManager->value(m_properties["EMax"]);
+  if (eMin >= eMax)
+	  errors.append("EMin must be strictly less than EMax.\n");
+
+  // Create and show error messages
+  errors.append(uiv.generateErrorMessage());
+  auto test = errors.toStdString();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
     return false;
   }
 
+  //Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
@@ -117,13 +127,9 @@ bool Quasi::validate() {
 }
 
 /**
- * Collect the settings on the GUI and build a python
- * script that runs Quasi
+* Run the BayesQuasi algorithm
  */
 void Quasi::run() {
-  // Using 1/0 instead of True/False for compatibility with underlying Fortran
-  // code
-  // in some places
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
@@ -230,7 +236,6 @@ void Quasi::run() {
  * Updates the data and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
-
   if (error)
     return;
   else

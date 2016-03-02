@@ -473,7 +473,7 @@ private:
   const QString m_wsName;
 
 public:
-  MatchWorkspaceName(const QString &name) : m_wsName(name) {}
+  explicit MatchWorkspaceName(const QString &name) : m_wsName(name) {}
   bool operator()(SetPeaksWorkspaces::value_type ws) {
     const std::string wsName = ws->name();
     const std::string toMatch = m_wsName.toStdString();
@@ -550,7 +550,7 @@ private:
   PeaksPresenter *m_toFind;
 
 public:
-  MatchPointer(PeaksPresenter *toFind) : m_toFind(toFind) {}
+  explicit MatchPointer(PeaksPresenter *toFind) : m_toFind(toFind) {}
   bool operator()(PeaksPresenter_sptr candidate) {
     return candidate.get() == m_toFind;
   }

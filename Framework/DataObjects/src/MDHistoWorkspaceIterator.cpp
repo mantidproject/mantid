@@ -155,7 +155,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +245,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -302,7 +302,8 @@ bool MDHistoWorkspaceIterator::valid() const { return (m_pos < m_max); }
 /// @return true if you can continue iterating
 bool MDHistoWorkspaceIterator::next() {
   if (m_function) {
-    bool allIncremented = false;
+    bool allIncremented;
+
     do {
       m_pos++;
       allIncremented =
@@ -311,24 +312,20 @@ bool MDHistoWorkspaceIterator::next() {
       for (size_t d = 0; d < m_nd; d++) {
         m_center[d] =
             m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
-        //          std::cout << m_center[d] << ",";
       }
-      //        std::cout<<std::endl;
-      // Keep incrementing until you are in the implicit function
-    } while (!allIncremented && !m_function->isPointContained(m_center) &&
-             m_pos < m_max);
+      // Keep incrementing until you are in the implicit function and not masked
+    } while (m_pos < m_max &&
+             ((!allIncremented && !m_function->isPointContained(m_center)) ||
+              m_skippingPolicy->keepGoing()));
   } else {
-    ++m_pos;
+    // Keep moving to next position if the current position is masked and
+    // still valid.
+    do {
+      m_pos++;
+    } while (m_skippingPolicy->keepGoing() && m_pos < m_max);
   }
+
   bool ret = m_pos < m_max;
-  if (ret) {
-    // Keep calling next if the current position is masked and still valid.
-    while (m_skippingPolicy->keepGoing()) {
-      ret = this->next();
-      if (!ret)
-        break;
-    }
-  }
   // Go through every point;
   return ret;
 }
@@ -529,12 +526,12 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
   std::vector<int> widths(
       m_nd, 3); // Face touching width is always 3 in each dimension
-  for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
-    if (m_permutationsFaceTouching[i] == 0) {
+  for (auto permutation : m_permutationsFaceTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -566,7 +563,7 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
 std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     const std::vector<int> &widths) const {
   // look-up
-  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
+  auto it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
 
     if (widths[0] % 2 == 0) {
@@ -658,12 +655,12 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   // Accumulate neighbour indexes.
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
-  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
+  for (auto permutation : permutationsVertexTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {

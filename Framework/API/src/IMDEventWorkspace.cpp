@@ -14,12 +14,6 @@ IMDEventWorkspace::IMDEventWorkspace()
     : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
 
 //-----------------------------------------------------------------------------------------------
-/** Copy constructor */
-IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace &other)
-    : IMDWorkspace(other), MultipleExperimentInfos(other),
-      m_fileNeedsUpdating(other.m_fileNeedsUpdating) {}
-
-//-----------------------------------------------------------------------------------------------
 /** @return the marker set to true when a file-backed workspace needs its
  * back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
  */
@@ -55,8 +49,8 @@ const std::string IMDEventWorkspace::toString() const {
 
   // Now box controller details
   std::vector<std::string> stats = getBoxControllerStats();
-  for (size_t i = 0; i < stats.size(); i++) {
-    os << stats[i] << "\n";
+  for (auto &stat : stats) {
+    os << stat << "\n";
   }
 
   os << MultipleExperimentInfos::toString() << "\n";
@@ -85,8 +79,9 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IMDEventWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IMDEventWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -104,10 +99,20 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const IMDEventWorkspace.";
-    throw std::runtime_error(message);
+    // Every other class with this behaviour allows you to get a shared_ptr<T>
+    // property as a shared_ptr<const T>. This class should be consistent, so
+    // try that:
+    PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *nonConstProp =
+        dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(
+            getPointerToProperty(name));
+    if (nonConstProp) {
+      return nonConstProp->operator()();
+    } else {
+      std::string message =
+          "Attempt to assign property " + name +
+          " to incorrect type. Expected const shared_ptr<IMDEventWorkspace>.";
+      throw std::runtime_error(message);
+    }
   }
 }
 

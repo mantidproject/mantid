@@ -5,7 +5,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -27,15 +29,16 @@ using namespace API;
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<HistogramValidator>()),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
       "boundaries");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace.");
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
 
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -43,12 +46,10 @@ void CalculateFlatBackground::init() {
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue,
                   "The X value at which to end the background fit");
   declareProperty(
-      new ArrayProperty<int>("WorkspaceIndexList"),
+      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
-  std::vector<std::string> modeOptions;
-  modeOptions.push_back("Linear Fit");
-  modeOptions.push_back("Mean");
+  std::vector<std::string> modeOptions{"Linear Fit", "Mean"};
   declareProperty("Mode", "Linear Fit",
                   boost::make_shared<StringListValidator>(modeOptions),
                   "The background count rate is estimated either by taking a "
@@ -56,9 +57,8 @@ void CalculateFlatBackground::init() {
                   "linear fit (default: Linear Fit)");
   // Property to determine whether we subtract the background or just return the
   // background.
-  std::vector<std::string> outputOptions;
-  outputOptions.push_back("Subtract Background");
-  outputOptions.push_back("Return Background");
+  std::vector<std::string> outputOptions{"Subtract Background",
+                                         "Return Background"};
   declareProperty("OutputMode", "Subtract Background",
                   boost::make_shared<StringListValidator>(outputOptions),
                   "Once the background has been determined it can either be "
@@ -70,6 +70,14 @@ void CalculateFlatBackground::init() {
                   "from monitors in the same way as from normal detectors\n"
                   "If this property is set to true, background is not "
                   "calculated/removed from monitors.",
+                  Direction::Input);
+  declareProperty("NullifyNegativeValues", true,
+                  "When background is subtracted, signals in some time "
+                  "channels may become negative.\n"
+                  "If this option is true, signal in such bins is nullified "
+                  "and the module of the removed signal"
+                  "is added to the error. If false, the signal and errors are "
+                  "left unchanged",
                   Direction::Input);
 }
 
@@ -85,6 +93,7 @@ void CalculateFlatBackground::exec() {
                              "not possible.");
 
   m_skipMonitors = getProperty("SkipMonitors");
+  m_nullifyNegative = getProperty("NullifyNegativeValues");
   // Get the required X range
   double startX, endX;
   this->checkRange(startX, endX);
@@ -188,7 +197,7 @@ void CalculateFlatBackground::exec() {
           Y[j] = background;
         }
         // remove negative values
-        if (Y[j] < 0.0) {
+        if (m_nullifyNegative && Y[j] < 0.0) {
           Y[j] = 0;
           // The error estimate must go up in this nonideal situation and the
           // value of background is a good estimate for it. However, don't
@@ -302,7 +311,7 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 */
 void CalculateFlatBackground::getSpecInds(std::vector<int> &output,
                                           const int workspaceTotal) {
-  if (output.size() > 0) {
+  if (!output.empty()) {
     return;
   }
 

@@ -51,12 +51,12 @@ typedef std::vector<boost::shared_ptr<Command>> VecCommands;
  * Command yielding no result.
  */
 class NullCommand : public Command {
-  virtual bool isValid() const { return false; }
-  virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr) const {
+  bool isValid() const override { return false; }
+  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr) const override {
     throw std::runtime_error(
         "Should not be attempting ::execute on a NullCommand");
   }
-  virtual ~NullCommand() {}
+  ~NullCommand() override {}
 };
 
 /**
@@ -67,11 +67,12 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  AdditionCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit AdditionCommand(const std::vector<int> &indexes)
+      : m_indexes(indexes) {}
 
-  virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const {
+  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
     MatrixWorkspace_sptr outWS;
-    if (m_indexes.size() > 0) {
+    if (!m_indexes.empty()) {
       Mantid::API::AlgorithmManagerImpl &factory =
           Mantid::API::AlgorithmManager::Instance();
       auto sumSpectraAlg = factory.create("SumSpectra");
@@ -86,7 +87,7 @@ public:
     return outWS;
   }
 
-  virtual ~AdditionCommand() {}
+  ~AdditionCommand() override {}
 };
 
 /**
@@ -97,9 +98,9 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  CropCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit CropCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
 
-  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const {
+  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
 
     MatrixWorkspace_sptr outWS;
     for (size_t i = 0; i < m_indexes.size(); ++i) {
@@ -129,7 +130,7 @@ public:
     }
     return outWS;
   }
-  virtual ~CropCommand() {}
+  ~CropCommand() override {}
 };
 
 /**
@@ -150,8 +151,8 @@ typedef std::vector<boost::shared_ptr<CommandParser>> VecCommandParsers;
  */
 template <typename ProductType> class CommandParserBase : public CommandParser {
 public:
-  virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+  Command *interpret(const std::string &instruction) const override {
+    Command *command = nullptr;
     boost::regex ex = getRegex();
     if (boost::regex_match(instruction, ex)) {
       auto indexes =
@@ -162,7 +163,7 @@ public:
     }
     return command;
   }
-  virtual ~CommandParserBase() {}
+  ~CommandParserBase() override {}
 
 private:
   virtual std::string getSeparator() const = 0;
@@ -174,13 +175,13 @@ private:
  */
 class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
-  virtual ~AdditionParserRange() {}
+  ~AdditionParserRange() override {}
 
 private:
-  boost::regex getRegex() const {
+  boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*$");
   }
-  std::string getSeparator() const { return "-"; }
+  std::string getSeparator() const override { return "-"; }
 };
 
 /**
@@ -188,10 +189,10 @@ private:
  */
 class AdditionParser : public CommandParser {
 public:
-  virtual ~AdditionParser() {}
+  ~AdditionParser() override {}
 
-  virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+  Command *interpret(const std::string &instruction) const override {
+    Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
     if (boost::regex_match(instruction, ex)) {
       std::vector<std::string> arguments;
@@ -216,13 +217,13 @@ public:
  */
 class CropParserRange : public CommandParserBase<CropCommand> {
 public:
-  virtual ~CropParserRange() {}
+  ~CropParserRange() override {}
 
 private:
-  boost::regex getRegex() const {
+  boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*:\\s*[0-9]+\\s*$");
   }
-  std::string getSeparator() const { return ":"; }
+  std::string getSeparator() const override { return ":"; }
 };
 
 /**
@@ -230,10 +231,10 @@ private:
  */
 class CropParserIndex : public CommandParser {
 public:
-  virtual ~CropParserIndex() {}
+  ~CropParserIndex() override {}
 
-  virtual Command *interpret(const std::string &instruction) const {
-    Command *command = NULL;
+  Command *interpret(const std::string &instruction) const override {
+    Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*$");
     if (boost::regex_match(instruction, ex)) {
       int index = -1;
@@ -257,9 +258,7 @@ DECLARE_ALGORITHM(PerformIndexOperations)
 //------------------------------------------------------------------------------
 /** Constructor
  */
-PerformIndexOperations::PerformIndexOperations() {
-  useAlgorithm("GroupDetectors", 2);
-}
+PerformIndexOperations::PerformIndexOperations() {}
 
 //------------------------------------------------------------------------------
 /** Destructor
@@ -286,14 +285,14 @@ const std::string PerformIndexOperations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input to processes workspace.");
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Processing instructions. See full instruction list.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output processed workspace");
 }
 
@@ -317,13 +316,9 @@ VecCommands interpret(const std::string &processingInstructions) {
   commandParsers.push_back(boost::make_shared<AdditionParser>());
 
   VecCommands commands;
-  for (auto it = processingInstructionsSplit.begin();
-       it != processingInstructionsSplit.end(); ++it) {
-    const std::string candidate = *it;
+  for (const auto &candidate : processingInstructionsSplit) {
     bool parserFound = false;
-    for (auto parserIt = commandParsers.begin();
-         parserIt != commandParsers.end(); ++parserIt) {
-      auto commandParser = *parserIt;
+    for (auto commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
       boost::shared_ptr<Command> commandSptr(command);
       if (commandSptr->isValid()) // Do not record invalid commands.
@@ -343,11 +338,6 @@ VecCommands interpret(const std::string &processingInstructions) {
 /** Execute the algorithm.
  */
 void PerformIndexOperations::exec() {
-  g_log.error("PerformIndexOperations has been deprecated. It will be "
-              "removed in the next release of Mantid. The same functionality "
-              "is provided by GroupDetectors-v2. Its GroupingPattern "
-              "property accepts the same syntax as PerformIndexOperations' "
-              "ProcessingInstructions property.");
   MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
   const std::string processingInstructions =
       this->getProperty("ProcessingInstructions");

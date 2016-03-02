@@ -139,7 +139,7 @@ class EnergyBandsAggregator(object):
         @param dtype :: can be used to force a pixel type, otherwise the type
                         of the input data is used
 
-        Returns:: name of the file saved
+        Returns :: name of the file saved
         """
         if not img_format:
             img_format = self.default_out_format
@@ -302,7 +302,7 @@ class EnergyBandsAggregator(object):
     #pylint: disable=too-many-arguments
     def agg_angles(self, in_path, output_path=None, band_indices=None,
                    agg_method='sum', out_format=None, angle_subdir_prefix='angle',
-                   verbose=True, too_verbose=False):
+                   verbose=True, too_verbose=False, out_files_name_prefix='angle_agg_', zero_pad=6):
         """
         Aggregate a stack, processing all the angles (projections) found. Produces an output stack with
         one single image per projection into an output directory. Does not store all the images in
@@ -323,6 +323,9 @@ class EnergyBandsAggregator(object):
         @param verbose :: write progress info and additional messages to the standard output
 
         @param too_verbose :: write more detailed progress information, for testing purposes
+
+        @param zero_pad :: width (number of digits) to pad the index number to, in the output file
+        names
         """
         self._check_inputs_to_agg_angles(in_path, output_path, out_format, band_indices)
 
@@ -353,7 +356,8 @@ class EnergyBandsAggregator(object):
             if self._default_output_type != img_data.dtype:
                 img_data = img_data.astype(self._default_output_type)
 
-            out_name = os.path.join(output_path, 'angle_agg_' + str(idx))
+            out_name = os.path.join(output_path, out_files_name_prefix + str(idx).zfill(zero_pad))
+
             out_name = self._write_image(img_data=img_data, filename=out_name,
                                          img_format=self._out_format, dtype=img_data.dtype)
 

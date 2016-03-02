@@ -55,10 +55,10 @@ public:
   PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
                QObject * context);
   /// Destructor
-  ~PythonScript();
+  ~PythonScript() override;
 
   /// Set the identifier of the script. If empty, set a default so that the code object behaves correctly
-  void setIdentifier(const QString & name);
+  void setIdentifier(const QString &name) override;
 
   /// Create a PyObject that wraps this C++ instance
   PyObject * createSipInstanceFromMe();
@@ -71,7 +71,7 @@ public:
   /// Simulate file-like object (required for colorama)
   inline bool closed() { return false;  }
   /// Is the given code complete
-  bool compilesToCompleteStatement(const QString & code) const;
+  bool compilesToCompleteStatement(const QString &code) const override;
 
   // -------------------------- Line number tracing ---------------------------
   /// Emits a signal from this object indicating the current line number of the
@@ -81,7 +81,7 @@ public:
   void sendLineChangeSignal(int lineNo, bool error);
 
   /// Create a list of keywords for the code completion API
-  void generateAutoCompleteList();
+  void generateAutoCompleteList() override;
 
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
@@ -90,24 +90,22 @@ public:
                       bool root=true);
 
   /// Set the name of the passed object so that Python can refer to it
-  bool setQObject(QObject *val, const char *name);
+  bool setQObject(QObject *val, const char *name) override;
   /// Set the name of the integer so that Python can refer to it
-  bool setInt(int val, const char* name);
+  bool setInt(int val, const char *name) override;
   /// Set the name of the double so that Python can refer to it
-  bool setDouble(double val, const char* name);
+  bool setDouble(double val, const char *name) override;
   /// Set the context for this script
-  void setContext(QObject *context);
+  void setContext(QObject *context) override;
   /// Resets the local dictionary to the defaults
-  void clearLocals();
+  void clearLocals() override;
 
 private:
   /// Helper class to ensure the sys.path variable is updated correctly
   struct PythonPathHolder
   {
     /// Update the path with the given entry
-    PythonPathHolder(const QString & entry)
-      : m_path(entry)
-    {
+    explicit PythonPathHolder(const QString &entry) : m_path(entry) {
       const QFileInfo filePath(m_path);
       if( filePath.exists() )
       {
@@ -160,13 +158,13 @@ private:
 
   // --------------------------- Script compilation/execution  -----------------------------------
   /// Compile the code, returning true if it was successful, false otherwise
-  bool compileImpl();
+  bool compileImpl() override;
   /// Evaluate the current code and return a result as a QVariant
-  QVariant evaluateImpl();
+  QVariant evaluateImpl() override;
   /// Execute the current code and return a boolean indicating success/failure
-  bool executeImpl();
+  bool executeImpl() override;
   /// Request that this script be aborted
-  void abortImpl();
+  void abortImpl() override;
   /// Get the value of the Python thread ID when a script is executed
   long getThreadID();
 
@@ -182,13 +180,15 @@ private:
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS
-  void addHandle(const std::string& wsName, const Mantid::API::Workspace_sptr ws);
+  void addHandle(const std::string &wsName,
+                 const Mantid::API::Workspace_sptr ws) override;
   /// Listen to add/replace notifications from the ADS
-  void afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  void afterReplaceHandle(const std::string &wsName,
+                          const Mantid::API::Workspace_sptr ws) override;
   /// Listen to delete notifications
-  void postDeleteHandle(const std::string& wsName);
+  void postDeleteHandle(const std::string &wsName) override;
   /// Listen to ADS clear notifications
-  void clearADSHandle();
+  void clearADSHandle() override;
   /// Add/update a Python reference to the given workspace
   void addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
   /// Delete a Python reference to the given workspace name

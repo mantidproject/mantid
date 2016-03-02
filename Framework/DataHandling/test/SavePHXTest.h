@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid;
@@ -194,6 +195,7 @@ private:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", input);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
 
     // mask the detector

@@ -51,27 +51,21 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
                      size_t total_rows, size_t total_cols,
                      std::vector<float> data );
 
-    ~ArrayDataSource();
+    ~ArrayDataSource() override;
 
-    virtual bool hasData(const std::string& wsName,
-                         const boost::shared_ptr<Mantid::API::Workspace> ws);
+    bool hasData(const std::string &wsName,
+                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray_const_sptr getDataArray( bool is_log_x );
+    DataArray_const_sptr getDataArray(bool is_log_x) override;
 
     /// Get DataArray covering restricted range of data
-    DataArray_const_sptr getDataArray( double  xMin,
-                                       double  xMax,
-                                       double  yMin,
-                                       double  yMax,
-                                       size_t  nRows,
-                                       size_t  nCols,
-                                       bool    isLogX );
+    DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
+                                      double yMax, size_t nRows, size_t nCols,
+                                      bool isLogX) override;
 
     /// Get a list containing pairs of strings with information about x,y
-    void getInfoList( double x,
-                      double y,
-                      std::vector<std::string> &list );
+    std::vector<std::string> getInfoList(double x, double y) override;
 
   private:
     std::vector<float> m_data;

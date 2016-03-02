@@ -3,13 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
 
 #include <vector>
 
@@ -221,6 +223,8 @@ public:
         "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     pLoadInstrument->setPropertyValue("Workspace", wsName);
+    pLoadInstrument->setProperty("RewriteSpectraMap",
+                                 Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
     TS_ASSERT(pLoadInstrument->isExecuted());
   }

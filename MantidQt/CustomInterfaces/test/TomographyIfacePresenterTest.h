@@ -45,8 +45,9 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     // needs the basic paths at a very minimum
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
     EXPECT_CALL(mockView, enableLoggedActions(false)).Times(1);
     EXPECT_CALL(mockView, setComputeResources(testing::_, testing::_)).Times(1);
@@ -70,8 +71,9 @@ public:
         .Times(1);
 
     // but this should be called once at setup time
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
     // One error, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -96,8 +98,9 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentReconTool()).Times(1).WillRepeatedly(
-        Return(g_ccpi));
+    EXPECT_CALL(mockView, currentReconTool())
+        .Times(1)
+        .WillRepeatedly(Return(g_ccpi));
     EXPECT_CALL(mockView, reconToolsSettings()).Times(0);
 
     // wrong tool => doesn't have a config dialog
@@ -115,12 +118,14 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     // needs the basic paths at a very minimum
-    EXPECT_CALL(mockView, currentReconTool()).Times(2).WillRepeatedly(
-        Return("TomoPy"));
+    EXPECT_CALL(mockView, currentReconTool())
+        .Times(2)
+        .WillRepeatedly(Return("TomoPy"));
     // and basic tools settings
     TomoReconToolsUserSettings toolsSettings;
-    EXPECT_CALL(mockView, reconToolsSettings()).Times(1).WillOnce(
-        Return(toolsSettings));
+    EXPECT_CALL(mockView, reconToolsSettings())
+        .Times(1)
+        .WillOnce(Return(toolsSettings));
 
     EXPECT_CALL(mockView, showToolConfig(testing::_)).Times(1);
 
@@ -171,8 +176,9 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     // needs basic paths config - using defaults
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -201,15 +207,24 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     std::vector<std::string> tools;
-    tools.push_back("Astra Toolbox");
-    tools.push_back("TomoPy");
+    tools.emplace_back("Astra Toolbox");
+    tools.emplace_back("TomoPy");
     tools.push_back(g_ccpi);
-    tools.push_back("Savu");
+    tools.emplace_back("Savu");
 
-    for (size_t i = 0; i < tools.size(); i++) {
-      EXPECT_CALL(mockView, currentReconTool()).Times(1).WillOnce(
-          Return(tools[i]));
-      EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+    TSM_ASSERT_EQUALS("There should be 4 tools in this test", tools.size(), 4);
+    // up to this index the tools are supported
+    const size_t indexToolsWork = 1;
+    for (size_t i = 0; i < 3; i++) {
+      EXPECT_CALL(mockView, currentReconTool())
+          .Times(1)
+          .WillOnce(Return(tools[i]));
+      if (i <= indexToolsWork) {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(1);
+      } else {
+        EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+      }
+
       EXPECT_CALL(mockView, enableRunReconstruct(testing::_)).Times(1);
       EXPECT_CALL(mockView, enableConfigTool(testing::_)).Times(1);
 
@@ -225,8 +240,9 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentComputeResource()).Times(1).WillOnce(
-        Return(g_scarfName));
+    EXPECT_CALL(mockView, currentComputeResource())
+        .Times(1)
+        .WillOnce(Return(g_scarfName));
     EXPECT_CALL(mockView, currentReconTool()).Times(0);
 
     // No errors, no warnings
@@ -241,8 +257,9 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     // needs some basic paths config - using defaults from constructor
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -267,8 +284,9 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     // needs basic paths config - using defaults
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -282,8 +300,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     std::vector<std::string> msgs;
-    msgs.push_back("foo log");
-    msgs.push_back("baz log");
+    msgs.emplace_back("foo log");
+    msgs.emplace_back("baz log");
 
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(msgs));
 
@@ -299,7 +317,8 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -313,13 +332,59 @@ public:
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ITomographyIfacePresenter::RefreshJobs);
+  }
+
+  void test_filtersSettings() {
+    TomoReconFiltersSettings def;
+
+    // When the presenter uses these settings for job submission there
+    // the test should be extended with something like this:
+    // EXPECT_CALL(mockView, prePostProcSettings()).Times(1).WillOnce(
+    //             Return("TomoPy"));
+
+    TSM_ASSERT_EQUALS("Pre-processing filter settings default values should be "
+                      "as expected (proton-charge normalization)",
+                      def.prep.normalizeByFlatDark, true);
+
+    TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
+                      "expected (flat/dark normalization)",
+                      def.prep.normalizeByProtonCharge, true);
+
+    TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
+                      "expected (median filter width)",
+                      def.prep.medianFilterWidth, 3);
+
+    TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
+                      "expected (rotation)",
+                      def.prep.rotation, 0);
+
+    TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
+                      "expected (maximum angle)",
+                      def.prep.maxAngle, 360.0);
+
+    TSM_ASSERT_LESS_THAN_EQUALS(
+        "Pre-processing settings default values should be as "
+        "expected (scale down)",
+        def.prep.scaleDownFactor, 1);
+
+    TSM_ASSERT_DELTA("Post-processing settings default values should be as "
+                     "expected (circular mask)",
+                     def.postp.circMaskRadius, 0.94, 1e-5);
+
+    TSM_ASSERT_EQUALS("Post-processing settings default values should be as "
+                      "expected (cut-off)",
+                      def.postp.cutOffLevel, 0.0);
+
+    TSM_ASSERT_EQUALS("Output settings default values should be as expected",
+                      def.outputPreprocImages, true);
   }
 
   // An attempt at testing a sequence of steps from the user.
@@ -329,29 +394,64 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentPathsConfig()).Times(1).WillOnce(
-        Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
+    // user changes some paths
     pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
 
-    EXPECT_CALL(mockView, currentComputeResource()).Times(1).WillOnce(
-        Return(g_scarfName));
+    EXPECT_CALL(mockView, currentComputeResource())
+        .Times(2)
+        .WillRepeatedly(Return(g_scarfName));
 
+    // user changes the compute resource
     pres.notify(ITomographyIfacePresenter::CompResourceChanged);
 
-    EXPECT_CALL(mockView, currentReconTool()).Times(2).WillRepeatedly(
-        Return("TomoPy"));
+    EXPECT_CALL(mockView, currentReconTool())
+        .Times(2)
+        .WillRepeatedly(Return("TomoPy"));
 
     TomoReconToolsUserSettings toolsSettings;
-    EXPECT_CALL(mockView, reconToolsSettings()).Times(1).WillOnce(
-        Return(toolsSettings));
+    EXPECT_CALL(mockView, reconToolsSettings())
+        .Times(1)
+        .WillOnce(Return(toolsSettings));
 
+    // user opens dialog and sets up a reconstruction tool
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
+
+    TomoPathsConfig pathsCfg;
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(pathsCfg));
+
+    ImageStackPreParams roiEtc;
+    EXPECT_CALL(mockView, currentROIEtcParams())
+        .Times(1)
+        .WillOnce(Return(roiEtc));
+
+    EXPECT_CALL(mockView, tomopyMethod()).Times(1).WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, astraMethod()).Times(1).WillOnce(Return(""));
+
+    TomoReconFiltersSettings filters;
+    EXPECT_CALL(mockView, prePostProcSettings())
+        .Times(1)
+        .WillOnce(Return(filters));
+
+    EXPECT_CALL(mockView, externalInterpreterPath())
+        .Times(1)
+        .WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, pathLocalReconScripts())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    // finally, user tries to run a reconstruction job
     pres.notify(ITomographyIfacePresenter::RunReconstruct);
   }
 

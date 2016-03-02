@@ -103,6 +103,33 @@ public:
     }
   }
 
+  void testLookupMaskedValues() {
+    MDHistoWorkspace_sptr ws_sptr =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
+    vtkNew<vtkMDHWSignalArray<double>> signal;
+    std::size_t offset = 0;
+    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
+    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
+    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
+    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+
+    ws_sptr->setMDMaskAt(0, true);
+    ws_sptr->setMDMaskAt(7, true);
+    ws_sptr->setMDMaskAt(42, true);
+
+    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
+        dynamic_cast<MDHistoWorkspaceIterator *>(
+            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
+                                            ws_sptr.get())));
+    signal->InitializeArray(std::move(iterator), offset, imageSize);
+
+    vtkNew<vtkIdList> idList1, idList2;
+
+    signal->LookupTypedValue(1.0, idList2.GetPointer());
+    TSM_ASSERT_EQUALS("IDs for the 61 unmasked points should have been found",
+                      idList2->GetNumberOfIds(), 61);
+  }
+
   void xtestGetTuplesRange() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
@@ -132,52 +159,52 @@ public:
     }
   }
 
-    void xtestLookupOneValue() {
-      MDHistoWorkspace_sptr ws_sptr =
-          MDEventsTestHelper::makeFakeMDHistoWorkspace(8.0, 3, 10, 5.0);
-      vtkNew<vtkMDHWSignalArray<double>> signal;
-      std::size_t offset = 0;
-      const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-      const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-      const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-      const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+  void xtestLookupOneValue() {
+    MDHistoWorkspace_sptr ws_sptr =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(8.0, 3, 10, 5.0);
+    vtkNew<vtkMDHWSignalArray<double>> signal;
+    std::size_t offset = 0;
+    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
+    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
+    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
+    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-      std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(
-              createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                              ws_sptr.get())));
-      signal->InitializeArray(std::move(iterator), offset, imageSize);
-      TS_ASSERT(signal->LookupValue(1.0) == 0);
-      TS_ASSERT(signal->LookupTypedValue(1.0) == 0);
+    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
+        dynamic_cast<MDHistoWorkspaceIterator *>(
+            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
+                                            ws_sptr.get())));
+    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    TS_ASSERT(signal->LookupValue(1.0) == 0);
+    TS_ASSERT(signal->LookupTypedValue(1.0) == 0);
+  }
+
+  void xtestLookupAllValues() {
+    MDHistoWorkspace_sptr ws_sptr =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    vtkNew<vtkMDHWSignalArray<double>> signal;
+    std::size_t offset = 0;
+    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
+    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
+    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
+    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+
+    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
+        dynamic_cast<MDHistoWorkspaceIterator *>(
+            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
+                                            ws_sptr.get())));
+    signal->InitializeArray(std::move(iterator), offset, imageSize);
+
+    vtkNew<vtkIdList> idList1, idList2;
+    signal->LookupValue(0.0, idList1.GetPointer());
+    for (vtkIdType i = 0; i < idList1->GetNumberOfIds(); ++i) {
+      TS_ASSERT(signal->GetValue(idList1->GetId(i)) == 1.0);
     }
 
-    void xtestLookupAllValues() {
-      MDHistoWorkspace_sptr ws_sptr =
-          MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-      vtkNew<vtkMDHWSignalArray<double>> signal;
-      std::size_t offset = 0;
-      const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-      const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-      const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-      const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-
-      std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(
-              createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                              ws_sptr.get())));
-      signal->InitializeArray(std::move(iterator), offset, imageSize);
-
-      vtkNew<vtkIdList> idList1, idList2;
-      signal->LookupValue(0.0, idList1.GetPointer());
-      for (vtkIdType i = 0; i < idList1->GetNumberOfIds(); ++i) {
-        TS_ASSERT(signal->GetValue(idList1->GetId(i)) == 1.0);
-      }
-
-      signal->LookupTypedValue(1.0, idList2.GetPointer());
-      for (vtkIdType i = 0; i < idList2->GetNumberOfIds(); ++i) {
-        TS_ASSERT(signal->GetValue(idList2->GetId(i)) == 1.0);
-      }
+    signal->LookupTypedValue(1.0, idList2.GetPointer());
+    for (vtkIdType i = 0; i < idList2->GetNumberOfIds(); ++i) {
+      TS_ASSERT(signal->GetValue(idList2->GetId(i)) == 1.0);
     }
+  }
 };
 
 class vtkMDHWSignalArrayTestPerformance : public CxxTest::TestSuite {

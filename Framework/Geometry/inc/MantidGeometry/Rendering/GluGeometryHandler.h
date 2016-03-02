@@ -72,14 +72,14 @@ private:
   GEOMETRY_TYPE
   type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
-  GluGeometryHandler(IObjComponent *obj);            ///< Constructor
+  GluGeometryHandler(IObjComponent *comp);           ///< Constructor
   GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   GluGeometryHandler(Object *obj);                   ///< Constructor
-  boost::shared_ptr<GeometryHandler> clone() const;
-  ~GluGeometryHandler(); ///< Destructor
-  GeometryHandler *createInstance(IObjComponent *comp);
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj);
-  GeometryHandler *createInstance(Object *);
+  boost::shared_ptr<GeometryHandler> clone() const override;
+  ~GluGeometryHandler() override; ///< Destructor
+  GeometryHandler *createInstance(IObjComponent *comp) override;
+  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
+  GeometryHandler *createInstance(Object *) override;
   /// sets the geometry handler for a cuboid
   void setCuboid(Kernel::V3D, Kernel::V3D, Kernel::V3D, Kernel::V3D);
   /// sets the geometry handler for a cone
@@ -90,11 +90,11 @@ public:
   void setCone(Kernel::V3D, Kernel::V3D, double, double);
   /// sets the geometry handler for a segmented cylinder
   void setSegmentedCylinder(Kernel::V3D, Kernel::V3D, double, double);
-  void Triangulate();
-  void Render();
-  void Initialize();
+  void Triangulate() override;
+  void Render() override;
+  void Initialize() override;
   void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight);
+                     double &myradius, double &myheight) override;
 };
 
 } // NAMESPACE Geometry

@@ -3,9 +3,13 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+parseDimensionNames(const std::string &names_string);
 
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
   exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
@@ -30,26 +34,28 @@ namespace MDAlgorithms {
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  File change history is stored at: <https://github.com/mantidproject/mantid>
+  File change history is stored at:
+  <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MaskMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
 public:
   MaskMD();
-  virtual ~MaskMD();
+  ~MaskMD() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Mask an MDWorkspace in-situ marking specified boxes as masked";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace MDAlgorithms

@@ -10,6 +10,7 @@ import csv
 import time
 
 from PyQt4 import QtCore, QtGui
+from mantidqtpython import MantidQt
 
 import reduce4circleControl as r4c
 import guiutility as gutil
@@ -37,6 +38,10 @@ class MainWindow(QtGui.QMainWindow):
         # UI Window (from Qt Designer)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # Make UI scrollable
+        self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
+        self._scrollbars.setEnabled(True) # Must follow after setupUi(self)!
 
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())

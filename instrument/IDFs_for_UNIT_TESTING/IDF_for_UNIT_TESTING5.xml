@@ -62,15 +62,6 @@
     <location name="B" y="10" rot="90" axis-x="1" axis-y="0" axis-z="0" />
   </component>
   <algebra val="A : B" />
-  
-  <bounding-box>
-    <x-min val="-0.5"/>
-    <x-max val="0.5"/>
-    <y-min val="-5.0"/>
-    <y-max val="10.5"/>
-    <z-min val="-5.0"/>
-    <z-max val="5.0"/>
-  </bounding-box>
 </type>
 
 <type name="nested cuboid" is="detector">
@@ -101,15 +92,6 @@
     <location name="B" y="20" />
   </component>
   <algebra val="A : B" />
-  
-  <bounding-box>
-    <x-min val="0.5"/>
-    <x-max val="1.5"/>
-    <y-min val="-5.0"/>
-    <y-max val="10.5"/>
-    <z-min val="-5.0"/>
-    <z-max val="5.0"/>
-  </bounding-box>
 </type>
 
 <type name="cuboid1" is="detector"> 

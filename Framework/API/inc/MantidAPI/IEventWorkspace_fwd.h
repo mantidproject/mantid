@@ -2,6 +2,7 @@
 #define MANTID_API_IEVENTWORKSPACE_FWD_H_
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,6 +37,10 @@ class IEventWorkspace;
 typedef boost::shared_ptr<IEventWorkspace> IEventWorkspace_sptr;
 /// shared pointer to Mantid::API::IEventWorkspace (const version)
 typedef boost::shared_ptr<const IEventWorkspace> IEventWorkspace_const_sptr;
+/// unique pointer to Mantid::API::IEventWorkspace
+typedef std::unique_ptr<IEventWorkspace> IEventWorkspace_uptr;
+/// unique pointer to Mantid::API::IEventWorkspace (const version)
+typedef std::unique_ptr<const IEventWorkspace> IEventWorkspace_const_uptr;
 
 } // namespace API
 } // namespace Mantid

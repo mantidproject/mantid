@@ -11,10 +11,10 @@
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
-#include <boost/assign/list_of.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -96,6 +96,92 @@ public:
       it->jumpTo(i);
       TS_ASSERT_DELTA(it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
     }
+  }
+
+  void test_edge_of_masked_region_falls_outside_implicit_function_bounds() {
+
+    std::vector<coord_t> normal_vector;
+    std::vector<coord_t> bound_vector;
+    normal_vector.push_back(1.);
+    bound_vector.push_back(3.);
+
+    MDImplicitFunction *function = new MDImplicitFunction();
+    function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10, 11)));
+
+    ws->setMaskValueAt(0, true);  // Masked
+    ws->setMaskValueAt(1, true);  // Masked
+    ws->setMaskValueAt(2, false); // NOT MASKED, EXCLUDED BY FUNCTION
+    ws->setMaskValueAt(3, true);  // Masked
+    ws->setMaskValueAt(4, true);  // Masked
+    ws->setMaskValueAt(5, false); // NOT MASKED
+    ws->setMaskValueAt(6, true);  // Masked
+    ws->setMaskValueAt(7, false); // NOT MASKED
+    ws->setMaskValueAt(8, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        new MDHistoWorkspaceIterator(ws, function);
+
+    TSM_ASSERT_EQUALS("The first index hit should be 5 since that is the first "
+                      "unmasked and inside function",
+                      5, histoIt->getLinearIndex());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The next index hit should be 7 since that is the next "
+                      "unmasked and inside function",
+                      7, histoIt->getLinearIndex());
+
+    delete histoIt;
+  }
+
+  void test_getNormalizedSignal_with_mask() {
+    // std::vector<coord_t> normal_vector{1.};
+    // std::vector<coord_t> bound_vector{3.};
+
+    // MDImplicitFunction *function = new MDImplicitFunction();
+    // function->addPlane(MDPlane(normal_vector, bound_vector));
+
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    WritableHistoWorkspace *ws =
+        new WritableHistoWorkspace(MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
+
+    ws->setSignalAt(0, 3.0);
+    ws->setSignalAt(1, 3.0);
+    ws->setSignalAt(2, 3.0);
+    ws->setSignalAt(3, 3.0);
+    ws->setSignalAt(4, 3.0);
+
+    ws->setMDMaskAt(0, false); // Unmasked
+    ws->setMDMaskAt(1, false); // Unmasked
+    ws->setMDMaskAt(2, true);  // Masked
+    ws->setMDMaskAt(3, false); // Unmasked
+    ws->setMDMaskAt(4, true);  // Masked
+
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator *histoIt =
+        dynamic_cast<MDHistoWorkspaceIterator *>(ws->createIterator());
+
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignal());
+    histoIt->jumpTo(2);
+    TSM_ASSERT("Should return NaN here as data at the iterator are masked",
+               boost::math::isnan(histoIt->getNormalizedSignal()));
+    histoIt->jumpTo(3);
+    TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
+                      " are unmasked",
+                      3.0, histoIt->getNormalizedSignal());
+
+    delete histoIt;
   }
 
   void test_iterator_1D() { do_test_iterator(1, 10); }
@@ -267,8 +353,8 @@ public:
         2, histoIt->getLinearIndex());
     histoIt->next();
     TSM_ASSERT_EQUALS(
-        "The first index hit should be 2 since that is the first unmasked one",
-        5, histoIt->getLinearIndex());
+        "The next index hit should be 5 since that is the next unmasked one", 5,
+        histoIt->getLinearIndex());
 
     delete histoIt;
   }
@@ -594,9 +680,7 @@ public:
     it->jumpTo(1);
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(4, neighbourIndexes.size());
-    std::vector<size_t> expected_neighbours =
-        boost::assign::list_of(0)(2)(5)(17)
-            .convert_to_container<std::vector<size_t>>();
+    std::vector<size_t> expected_neighbours = {0, 2, 5, 17};
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
@@ -608,8 +692,7 @@ public:
     TSM_ASSERT_EQUALS("Should have 2*n neighbours here", 6,
                       neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours = boost::assign::list_of(17)(20)(22)(25)(5)(37)
-                              .convert_to_container<std::vector<size_t>>();
+    expected_neighbours = {17, 20, 22, 25, 5, 37};
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {
@@ -621,8 +704,7 @@ public:
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
     // Is on edge
-    expected_neighbours = boost::assign::list_of(47)(59)(62)
-                              .convert_to_container<std::vector<size_t>>();
+    expected_neighbours = {47, 59, 62};
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {
@@ -678,9 +760,8 @@ public:
     it->jumpTo(1);
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
-    std::vector<size_t> expected_neighbours =
-        boost::assign::list_of(0)(2)(4)(5)(6)(16)(17)(18)(20)(21)(22)(22)
-            .convert_to_container<std::vector<size_t>>();
+    std::vector<size_t> expected_neighbours = {0,  2,  4,  5,  6,  16,
+                                               17, 18, 20, 21, 22, 22};
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
@@ -692,10 +773,8 @@ public:
     TSM_ASSERT_EQUALS("Should have 3^n-1 neighbours here", 26,
                       neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours =
-        boost::assign::list_of(0)(1)(2)(4)(5)(6)(8)(9)(10)(16)(17)(18)(22)(20)(
-            24)(25)(26)(32)(33)(34)(37)(38)(36)(41)(40)(42)
-            .convert_to_container<std::vector<size_t>>();
+    expected_neighbours = {0,  1,  2,  4,  5,  6,  8,  9,  10, 16, 17, 18, 22,
+                           20, 24, 25, 26, 32, 33, 34, 37, 38, 36, 41, 40, 42};
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {
@@ -707,8 +786,7 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(7, neighbourIndexes.size());
     // Is on edge
-    expected_neighbours = boost::assign::list_of(42)(43)(46)(47)(58)(59)(62)
-                              .convert_to_container<std::vector<size_t>>();
+    expected_neighbours = {42, 43, 46, 47, 58, 59, 62};
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
          ++i) {

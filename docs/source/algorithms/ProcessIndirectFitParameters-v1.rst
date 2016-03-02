@@ -14,6 +14,11 @@ An Algorithm designed to allow for the TableWorkspace output of the
 PlotPeakByLogValue algorithm to be transformed into a Matrix workspace 
 based on the desired parameters.
 
+Workflow
+--------
+
+.. diagram:: ProcessIndirectFitParameters-v1_wkflw.dot
+
 
 Usage
 -----

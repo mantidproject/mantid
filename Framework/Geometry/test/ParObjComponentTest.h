@@ -158,8 +158,8 @@ public:
     ObjComponent pocyl(&ocyl, pmap.get());
 
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track), 1);
-    Track::LType::const_iterator it = track.begin();
-    if (it == track.end())
+    Track::LType::const_iterator it = track.cbegin();
+    if (it == track.cend())
       return;
     TS_ASSERT_EQUALS(it->distFromStart, 10.5);
     TS_ASSERT_DELTA(it->distInsideObject, 1, 0.0001);
@@ -173,8 +173,8 @@ public:
     // Create a new test track going from the origin down the line y = -x
     Track track2(V3D(0, 0, 0), V3D(0, 1, -1));
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track2), 1);
-    Track::LType::const_iterator it2 = track2.begin();
-    if (it2 == track2.end())
+    Track::LType::const_iterator it2 = track2.cbegin();
+    if (it2 == track2.cend())
       return;
     TS_ASSERT_DELTA(it2->distFromStart, sqrt(2 * 10.5 * 10.5), 0.0001);
     TS_ASSERT_DELTA(it2->distInsideObject, sqrt(2.0), 0.0001);
@@ -273,13 +273,8 @@ public:
     TS_ASSERT_DELTA(point.Y(), 10.0, 1e-6);
     TS_ASSERT_DELTA(point.Z(), -10.0, 1e-6);
     // Cuboid not on principle axes
-    std::vector<std::string> planes;
-    planes.push_back("px 0.5");
-    planes.push_back("px 1.5");
-    planes.push_back("py -22");
-    planes.push_back("py -21");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    std::vector<std::string> planes{"px 0.5", "px 1.5",  "py -22",
+                                    "py -21", "pz -0.5", "pz 0.5"};
     ObjComponent D("ocube", createCuboid(planes));
     D.setPos(10, 0, 0);
     D.setRot(Quat(90.0, V3D(0, 0, 1)));
@@ -363,7 +358,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    boost::shared_ptr<Object> retVal = boost::make_shared<Object>();
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 

@@ -2,10 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -30,15 +33,15 @@ void Q1DWeighted::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace that will contain the I(Q) data");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace that will contain the I(Q) data");
-  declareProperty(
-      new ArrayProperty<double>("OutputBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
       "x_2,\\dots,x_n</math>");
 
@@ -60,7 +63,7 @@ void Q1DWeighted::init() {
   declareProperty("WedgeOffset", 0.0, positiveDouble,
                   "Wedge offset relative to the horizontal axis, in degrees.");
   declareProperty(
-      new WorkspaceProperty<WorkspaceGroup>(
+      make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
 
@@ -207,8 +210,9 @@ void Q1DWeighted::exec() {
         double sub_y = pixelSizeY *
                        ((isub % nSubPixels) - (nSubPixels - 1.0) / 2.0) /
                        nSubPixels;
-        double sub_x = pixelSizeX * (floor((double)isub / nSubPixels) -
-                                     (nSubPixels - 1.0) / 2.0) /
+        double sub_x = pixelSizeX *
+                       (floor(static_cast<double>(isub) / nSubPixels) -
+                        (nSubPixels - 1.0) / 2.0) /
                        nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
@@ -224,14 +228,15 @@ void Q1DWeighted::exec() {
         // Bin assignment depends on whether we have log or linear bins
         if (binParams.size() == 3) {
           if (binParams[1] > 0.0) {
-            iq = (int)floor((q - binParams[0]) / binParams[1]);
+            iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
           } else {
-            iq = (int)floor(log(q / binParams[0]) / log(1.0 - binParams[1]));
+            iq = static_cast<int>(
+                floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0; i_qbin < (int)XOut.access().size() - 1;
-               i_qbin++) {
+          for (int i_qbin = 0;
+               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
             if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
               iq = i_qbin;
               break;
@@ -329,10 +334,10 @@ void Q1DWeighted::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
-  for (auto it = wedgeWorkspaces.begin(); it != wedgeWorkspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &wedgeWorkspace : wedgeWorkspaces) {
+    wsgroup->addWorkspace(wedgeWorkspace);
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");

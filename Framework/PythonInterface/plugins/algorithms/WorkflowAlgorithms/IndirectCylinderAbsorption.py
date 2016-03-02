@@ -121,11 +121,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 Scale(InputWorkspace=can_wave_ws, OutputWorkspace=can_wave_ws, Factor=self._can_scale, Operation='Multiply')
 
             can_thickness = self._can_radius - self._sample_radius
-            logger.information('Can thickness: ' + str(can_thickness))
+            logger.information('Container thickness: ' + str(can_thickness))
 
             if self._use_can_corrections:
                 # Doing can corrections
-                prog.report('Calculating can corrections')
+                prog.report('Calculating container corrections')
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
@@ -147,7 +147,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
             else:
                 # Doing simple can subtraction
-                prog.report('Calculating can scaling')
+                prog.report('Calculating container scaling')
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
@@ -169,11 +169,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                        ('sample_radius', self._sample_radius)]
 
         if self._can_ws_name is not None:
-            sample_logs.append(('can_filename', self._can_ws_name))
-            sample_logs.append(('can_scale', self._can_scale))
+            sample_logs.append(('container_filename', self._can_ws_name))
+            sample_logs.append(('container_scale', self._can_scale))
             if self._use_can_corrections:
                 sample_log_workspaces.append(self._acc_ws)
-                sample_logs.append(('can_thickness', can_thickness))
+                sample_logs.append(('container_thickness', can_thickness))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]

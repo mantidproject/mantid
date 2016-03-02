@@ -15,11 +15,11 @@ public:
   /// Empty code
   ScriptCode();
   /// Code from a C-string with zero offset
-  ScriptCode(const char * codeStr);
+  explicit ScriptCode(const char *codeStr);
   /// Code from a C-string with a defined offset
   ScriptCode(const char * codeStr, const int offset);
   /// Code from a QString with zero offset
-  ScriptCode(const QString & codeStr);
+  explicit ScriptCode(const QString &codeStr);
   /// Code from a QString with a defined offset
   ScriptCode(const QString & codeStr, const int offset);
 

@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -620,6 +621,26 @@ public:
 
     TSM_ASSERT("Has not used SkippingPolicy as expected.",
                testing::Mock::VerifyAndClearExpectations(mockPolicy));
+  }
+
+  void test_getNormalizedSignal_with_mask() {
+    // Make a MDBox with 10 events
+    ibox_t *A = MDEventsTestHelper::makeMDBox1();
+    MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
+    MDBoxIterator<MDLeanEvent<1>, 1> *it =
+        new MDBoxIterator<MDLeanEvent<1>, 1>(A, 20, true);
+
+    // Initially the box is unmasked
+    TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);
+
+    it->next();
+
+    // Now mask the box
+    it->getBox()->mask();
+    // For masked boxes, getNormalizedSignal() should return NaN.
+    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
+
+    delete it;
   }
 };
 

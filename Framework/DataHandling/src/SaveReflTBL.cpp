@@ -23,14 +23,12 @@ SaveReflTBL::SaveReflTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
 void SaveReflTBL::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".tbl");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".tbl"),
+      "The filename of the output TBL file.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                  "The filename of the output TBL file.");
-
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
                   "save to a TBL file.");
 }
@@ -75,10 +73,8 @@ void SaveReflTBL::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  typedef std::map<int, std::vector<size_t>>::iterator map_it_type;
-  for (map_it_type iterator = m_stichgroups.begin();
-       iterator != m_stichgroups.end(); ++iterator) {
-    std::vector<size_t> &rowNos = iterator->second;
+  for (auto &stichgroup : m_stichgroups) {
+    std::vector<size_t> &rowNos = stichgroup.second;
     size_t i = 0;
     for (; i < rowNos.size(); ++i) {
       // for each row in the group print the first 5 columns to file
@@ -104,10 +100,8 @@ void SaveReflTBL::exec() {
 
   // now do the same for the ungrouped
 
-  typedef std::vector<size_t>::iterator vec_it_type;
-  for (vec_it_type iterator = m_nogroup.begin(); iterator != m_nogroup.end();
-       ++iterator) {
-    TableRow row = ws->getRow(*iterator);
+  for (auto &iterator : m_nogroup) {
+    TableRow row = ws->getRow(iterator);
     for (int j = 0; j < 5; ++j) {
       writeVal(row.cell<std::string>(j), file);
     }

@@ -15,7 +15,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-
+#include "MantidGeometry/Instrument.h"
 
 vtkStandardNewMacro(vtkPeaksSource)
 

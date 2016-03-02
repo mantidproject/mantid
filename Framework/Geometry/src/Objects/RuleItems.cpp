@@ -53,15 +53,8 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
 
-Intersection::Intersection()
-    : Rule(), A(0), B(0)
-/**
-  Standard Constructor with null leaves
-*/
-{}
-
-Intersection::Intersection(Rule *Ix, Rule *Iy)
-    : Rule(), A(Iy), B(Ix)
+Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(), A(std::move(Iy)), B(std::move(Ix))
 /**
   Intersection constructor from two Rule ptrs.
   - Sets A,B's parents to *this
@@ -76,8 +69,9 @@ Intersection::Intersection(Rule *Ix, Rule *Iy)
     B->setParent(this);
 }
 
-Intersection::Intersection(Rule *Parent, Rule *Ix, Rule *Iy)
-    : Rule(Parent), A(Ix), B(Iy)
+Intersection::Intersection(Rule *Parent, std::unique_ptr<Rule> Ix,
+                           std::unique_ptr<Rule> Iy)
+    : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
 /**
   Intersection constructor from two Rule ptrs
   - Sets A,B's parents to *this.
@@ -93,7 +87,7 @@ Intersection::Intersection(Rule *Parent, Rule *Ix, Rule *Iy)
 }
 
 Intersection::Intersection(const Intersection &Iother)
-    : Rule(), A(0), B(0)
+    : Rule(), A(), B()
 /**
   Copy constructor:
   Does a clone on the sub-tree below
@@ -122,38 +116,33 @@ Intersection &Intersection::operator=(const Intersection &Iother)
     Rule::operator=(Iother);
     // first create new copy all fresh
     if (Iother.A) {
-      Rule *Xa = Iother.A->clone();
-      delete A;
-      A = Xa;
+      A = Iother.A->clone();
       A->setParent(this);
     }
     if (Iother.B) {
-      Rule *Xb = Iother.B->clone();
-      delete B;
-      B = Xb;
+      B = Iother.B->clone();
       B->setParent(this);
     }
   }
   return *this;
 }
 
-Intersection::~Intersection()
-/**
-  Destructor :: responsible for the two
-  leaf intersections.
-*/
-{
-  delete A;
-  delete B;
-}
-
-Intersection *Intersection::clone() const
+Intersection *Intersection::doClone() const
 /**
   Virtual copy constructor
   @return new Intersection(this)
 */
 {
   return new Intersection(*this);
+}
+
+std::unique_ptr<Intersection> Intersection::clone() const
+/**
+  Virtual copy constructor
+  @return new Intersection(this)
+*/
+{
+  return std::unique_ptr<Intersection>(doClone());
 }
 
 int Intersection::isComplementary() const
@@ -173,7 +162,7 @@ int Intersection::isComplementary() const
   return 0;
 }
 
-void Intersection::setLeaves(Rule *aR, Rule *bR)
+void Intersection::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
 /**
   Replaces a both with a rule.
   No deletion is carried out but sets the parents.
@@ -181,8 +170,8 @@ void Intersection::setLeaves(Rule *aR, Rule *bR)
   @param bR :: Rule on the right
 */
 {
-  A = aR;
-  B = bR;
+  A = std::move(aR);
+  B = std::move(bR);
   if (A)
     A->setParent(this);
   if (B)
@@ -190,7 +179,7 @@ void Intersection::setLeaves(Rule *aR, Rule *bR)
   return;
 }
 
-void Intersection::setLeaf(Rule *nR, const int side)
+void Intersection::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   Calls delete on previous leaf.
@@ -201,13 +190,11 @@ void Intersection::setLeaf(Rule *nR, const int side)
 */
 {
   if (side) {
-    delete B;
-    B = nR;
+    B = std::move(nR);
     if (B)
       B->setParent(this);
   } else {
-    delete A;
-    A = nR;
+    A = std::move(nR);
     if (A)
       A->setParent(this);
   }
@@ -223,9 +210,9 @@ int Intersection::findLeaf(const Rule *R) const
   @retval -1 :: neither leaf
 */
 {
-  if (A == R)
+  if (A.get() == R)
     return 0;
-  if (B == R)
+  if (B.get() == R)
     return 1;
   return -1;
 }
@@ -238,10 +225,10 @@ Rule *Intersection::findKey(const int KeyN)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 std::string Intersection::display() const
@@ -313,7 +300,7 @@ bool Intersection::isValid(const std::map<int, int> &MX) const
 {
   if (!A || !B)
     return false;
-  return (A->isValid(MX) && B->isValid(MX)) ? true : false;
+  return A->isValid(MX) && B->isValid(MX);
 }
 
 int Intersection::simplify()
@@ -377,15 +364,8 @@ TopoDS_Shape Intersection::analyze() {
 //         UNION
 //---------------------------------------------------------------
 
-Union::Union()
-    : Rule(), A(0), B(0)
-/**
-  Standard Constructor with null leaves
-*/
-{}
-
-Union::Union(Rule *Parent, Rule *Ix, Rule *Iy)
-    : Rule(Parent), A(Ix), B(Iy)
+Union::Union(Rule *Parent, std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
 /**
   Union constructor from two Rule ptrs.
   - Sets A,B's parents to *this
@@ -401,8 +381,8 @@ Union::Union(Rule *Parent, Rule *Ix, Rule *Iy)
     B->setParent(this);
 }
 
-Union::Union(Rule *Ix, Rule *Iy)
-    : Rule(), A(Ix), B(Iy)
+Union::Union(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(), A(std::move(Ix)), B(std::move(Iy))
 /**
   Union constructor from two Rule ptrs
   - Sets A,B's parents to *this.
@@ -418,7 +398,7 @@ Union::Union(Rule *Ix, Rule *Iy)
 }
 
 Union::Union(const Union &Iother)
-    : Rule(Iother), A(0), B(0)
+    : Rule(Iother), A(), B()
 /**
   Copy constructor:
   Does a clone on the sub-tree below
@@ -447,31 +427,18 @@ Union &Union::operator=(const Union &Iother)
     Rule::operator=(Iother);
     // first create new copy all fresh
     if (Iother.A) {
-      Rule *Xa = Iother.A->clone();
-      delete A;
-      A = Xa;
+      A = Iother.A->clone();
       A->setParent(this);
     }
     if (Iother.B) {
-      Rule *Xb = Iother.B->clone();
-      delete B;
-      B = Xb;
+      B = Iother.B->clone();
       B->setParent(this);
     }
   }
   return *this;
 }
 
-Union::~Union()
-/**
-  Delete operator : deletes both leaves
-*/
-{
-  delete A;
-  delete B;
-}
-
-Union *Union::clone() const
+Union *Union::doClone() const
 /**
   Clone allows deep virtual coping
   @return new Union copy.
@@ -480,7 +447,16 @@ Union *Union::clone() const
   return new Union(*this);
 }
 
-void Union::setLeaf(Rule *nR, const int side)
+std::unique_ptr<Union> Union::clone() const
+/**
+  Clone allows deep virtual coping
+  @return new Union copy.
+*/
+{
+  return std::unique_ptr<Union>(doClone());
+}
+
+void Union::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   Calls delete on previous leaf.
@@ -491,20 +467,18 @@ void Union::setLeaf(Rule *nR, const int side)
 */
 {
   if (side) {
-    delete B;
-    B = nR;
+    B = std::move(nR);
     if (B)
       B->setParent(this);
   } else {
-    delete A;
-    A = nR;
+    A = std::move(nR);
     if (A)
       A->setParent(this);
   }
   return;
 }
 
-void Union::setLeaves(Rule *aR, Rule *bR)
+void Union::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
 /**
    Replaces a both with a rule.
   No deletion is carried out but sets the parents.
@@ -512,8 +486,8 @@ void Union::setLeaves(Rule *aR, Rule *bR)
   @param bR :: Rule on the right
 */
 {
-  A = aR;
-  B = bR;
+  A = std::move(aR);
+  B = std::move(bR);
   if (A)
     A->setParent(this);
   if (B)
@@ -530,9 +504,9 @@ int Union::findLeaf(const Rule *R) const
   @retval -1 :: neither leaf
 */
 {
-  if (A == R)
+  if (A.get() == R)
     return 0;
-  if (B == R)
+  if (B.get() == R)
     return 1;
   return -1;
 }
@@ -546,10 +520,10 @@ Rule *Union::findKey(const int KeyN)
 */
 {
 
-  Rule *PtrOut = (A) ? A->findKey(KeyN) : 0;
+  Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
   if (PtrOut)
     return PtrOut;
-  return (B) ? B->findKey(KeyN) : 0;
+  return (B) ? B->findKey(KeyN) : nullptr;
 }
 
 int Union::isComplementary() const
@@ -592,7 +566,7 @@ bool Union::isValid(const Kernel::V3D &Vec) const
   @retval 0 :: Vec is outside object.
 */
 {
-  return ((A && A->isValid(Vec)) || (B && B->isValid(Vec))) ? true : false;
+  return (A && A->isValid(Vec)) || (B && B->isValid(Vec));
 }
 
 bool Union::isValid(const std::map<int, int> &MX) const
@@ -604,7 +578,7 @@ bool Union::isValid(const std::map<int, int> &MX) const
   @retval 0 :: Neither side is valid
 */
 {
-  return ((A && A->isValid(MX)) || (B && B->isValid(MX))) ? true : false;
+  return (A && A->isValid(MX)) || (B && B->isValid(MX));
 }
 
 std::string Union::display() const
@@ -703,7 +677,7 @@ SurfPoint::SurfPoint()
 */
 {}
 
-SurfPoint *SurfPoint::clone() const
+SurfPoint *SurfPoint::doClone() const
 /**
   Clone constructor
   @return new(*this)
@@ -712,7 +686,16 @@ SurfPoint *SurfPoint::clone() const
   return new SurfPoint(*this);
 }
 
-void SurfPoint::setLeaf(Rule *nR, const int)
+std::unique_ptr<SurfPoint> SurfPoint::clone() const
+/**
+ Clone constructor
+ @return new(*this)
+ */
+{
+  return std::unique_ptr<SurfPoint>(doClone());
+}
+
+void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -721,13 +704,14 @@ void SurfPoint::setLeaf(Rule *nR, const int)
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR);
+
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.get());
   if (newX)
     *this = *newX;
   return;
 }
 
-void SurfPoint::setLeaves(Rule *aR, Rule *)
+void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -735,7 +719,7 @@ void SurfPoint::setLeaves(Rule *aR, Rule *)
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR);
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -760,7 +744,7 @@ Rule *SurfPoint::findKey(const int KeyNum)
   @retval Rule* if an appropiate leaf is found
 */
 {
-  return (KeyNum == keyN) ? this : 0;
+  return (KeyNum == keyN) ? this : nullptr;
 }
 
 void SurfPoint::setKeyN(const int Ky)
@@ -817,11 +801,11 @@ bool SurfPoint::isValid(const std::map<int, int> &MX) const
   @return MX.second if key found or 0
 */
 {
-  std::map<int, int>::const_iterator lx = MX.find(keyN);
+  auto lx = MX.find(keyN);
   if (lx == MX.end())
     return false;
   const int rtype = (lx->second) ? 1 : -1;
-  return (rtype * sign) >= 0 ? true : false;
+  return (rtype * sign) >= 0;
 }
 
 std::string SurfPoint::display() const
@@ -873,62 +857,62 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
     m_key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymax, zmax));
+      listOfPoints.emplace_back(xmax, ymax, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymax, zmax));
+      listOfPoints.emplace_back(xmin, ymax, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymax, zmin));
+      listOfPoints.emplace_back(xmin, ymax, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymax, zmin));
+      listOfPoints.emplace_back(xmax, ymax, zmin);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymin, zmin));
+      listOfPoints.emplace_back(xmin, ymin, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmin <= gZmax && zmin >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymin, zmin));
+      listOfPoints.emplace_back(xmax, ymin, zmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmax, ymin, zmax));
+      listOfPoints.emplace_back(xmax, ymin, zmax);
     if (!((xmin <= gXmax && xmin >= gXmin) &&
           (ymin <= gYmax && ymin >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
-      listOfPoints.push_back(V3D(xmin, ymin, zmax));
+      listOfPoints.emplace_back(xmin, ymin, zmax);
 
     // group box inside input box
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+      listOfPoints.emplace_back(gXmax, gYmax, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+      listOfPoints.emplace_back(gXmin, gYmax, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+      listOfPoints.emplace_back(gXmin, gYmax, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+      listOfPoints.emplace_back(gXmax, gYmax, gZmin);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+      listOfPoints.emplace_back(gXmin, gYmin, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmin <= zmax && gZmin >= zmin)) &&
         (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-      listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+      listOfPoints.emplace_back(gXmax, gYmin, gZmin);
     if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+      listOfPoints.emplace_back(gXmax, gYmin, gZmax);
     if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
          (gZmax <= zmax && gZmax >= zmin)) &&
         (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-      listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+      listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
     if (!listOfPoints.empty()) {
       xmin = ymin = zmin = DBL_MAX;
@@ -973,48 +957,28 @@ TopoDS_Shape SurfPoint::analyze() {
 //----------------------------------------
 
 CompObj::CompObj()
-    : Rule(), objN(0), key(0)
+    : Rule(), objN(0), key(nullptr)
 /**
   Constructor
 */
 {}
 
-CompObj::CompObj(const CompObj &A)
-    : Rule(A), objN(A.objN), key(A.key)
-/**
-  Standard copy constructor
-  @param A :: CompObj to copy
- */
-{}
-
-CompObj &CompObj::operator=(const CompObj &A)
-/**
-  Standard assignment operator
-  @param A :: CompObj to copy
-  @return *this
- */
-{
-  if (this != &A) {
-    Rule::operator=(A);
-    objN = A.objN;
-    key = A.key;
-  }
-  return *this;
-}
-
-CompObj::~CompObj()
-/**
-  Destructor
-*/
-{}
-
-CompObj *CompObj::clone() const
+CompObj *CompObj::doClone() const
 /**
   Clone of this
   @return new copy of this
 */
 {
   return new CompObj(*this);
+}
+
+std::unique_ptr<CompObj> CompObj::clone() const
+/**
+ Clone of this
+ @return new copy of this
+*/
+{
+  return std::unique_ptr<CompObj>(doClone());
 }
 
 void CompObj::setObjN(const int Ky)
@@ -1037,7 +1001,7 @@ void CompObj::setObj(Object *val)
   return;
 }
 
-void CompObj::setLeaf(Rule *aR, const int)
+void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1045,14 +1009,14 @@ void CompObj::setLeaf(Rule *aR, const int)
   @param :: Null side point
 */
 {
-  CompObj *newX = dynamic_cast<CompObj *>(aR);
+  CompObj *newX = dynamic_cast<CompObj *>(aR.get());
   // Make a copy
   if (newX)
     *this = *newX;
   return;
 }
 
-void CompObj::setLeaves(Rule *aR, Rule *oR)
+void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type CompObj
@@ -1062,7 +1026,7 @@ void CompObj::setLeaves(Rule *aR, Rule *oR)
 {
   (void)oR; // Avoid compiler warning
 
-  CompObj *newX = dynamic_cast<CompObj *>(aR);
+  CompObj *newX = dynamic_cast<CompObj *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1078,7 +1042,7 @@ Rule *CompObj::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompObj::findLeaf(const Rule *A) const
@@ -1174,62 +1138,62 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
   key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmax));
+    listOfPoints.emplace_back(xmax, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmax));
+    listOfPoints.emplace_back(xmin, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmin));
+    listOfPoints.emplace_back(xmin, ymax, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmin));
+    listOfPoints.emplace_back(xmax, ymax, zmin);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmin));
+    listOfPoints.emplace_back(xmin, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmin));
+    listOfPoints.emplace_back(xmax, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmax));
+    listOfPoints.emplace_back(xmax, ymin, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmax));
+    listOfPoints.emplace_back(xmin, ymin, zmax);
 
   // object box inside input box
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmin);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = DBL_MAX;
@@ -1271,14 +1235,6 @@ BoolValue::BoolValue()
 */
 {}
 
-BoolValue::BoolValue(const BoolValue &A)
-    : Rule(A), status(A.status)
-/**
-  Copy Constructor
-  @param A :: BoolValue to copy
-*/
-{}
-
 BoolValue &BoolValue::operator=(const BoolValue &A)
 /**
   Assignment operator
@@ -1293,7 +1249,7 @@ BoolValue &BoolValue::operator=(const BoolValue &A)
   return *this;
 }
 
-BoolValue *BoolValue::clone() const
+BoolValue *BoolValue::doClone() const
 /**
   Clone constructor
   @return new(*this)
@@ -1302,13 +1258,16 @@ BoolValue *BoolValue::clone() const
   return new BoolValue(*this);
 }
 
-BoolValue::~BoolValue()
+std::unique_ptr<BoolValue> BoolValue::clone() const
 /**
-  Destructor
+  Clone constructor
+  @return new(*this)
 */
-{}
+{
+  return std::unique_ptr<BoolValue>(doClone());
+}
 
-void BoolValue::setLeaf(Rule *aR, const int)
+void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1318,13 +1277,13 @@ void BoolValue::setLeaf(Rule *aR, const int)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR);
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
   return;
 }
 
-void BoolValue::setLeaves(Rule *aR, Rule *oR)
+void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1334,7 +1293,7 @@ void BoolValue::setLeaves(Rule *aR, Rule *oR)
 {
   (void)oR; // Avoid compiler warning
   // std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR);
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1350,7 +1309,7 @@ bool BoolValue::isValid(const Kernel::V3D &pt) const
 */
 {
   (void)pt; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 bool BoolValue::isValid(const std::map<int, int> &map) const
@@ -1361,7 +1320,7 @@ bool BoolValue::isValid(const std::map<int, int> &map) const
 */
 {
   (void)map; // Avoid compiler warning
-  return (status > 0) ? true : false;
+  return status > 0;
 }
 
 int BoolValue::simplify()
@@ -1425,15 +1384,8 @@ void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //       COMPGRP
 //----------------------------------------
 
-CompGrp::CompGrp()
-    : Rule(), A(0)
-/**
-  Constructor
-*/
-{}
-
-CompGrp::CompGrp(Rule *Parent, Rule *Cx)
-    : Rule(Parent), A(Cx)
+CompGrp::CompGrp(Rule *Parent, std::unique_ptr<Rule> Cx)
+    : Rule(Parent), A(std::move(Cx))
 /**
   Constructor to build parent and complent tree
   @param Parent :: Rule that is the parent to this
@@ -1445,14 +1397,14 @@ CompGrp::CompGrp(Rule *Parent, Rule *Cx)
 }
 
 CompGrp::CompGrp(const CompGrp &Cother)
-    : Rule(Cother), A(0)
+    : Rule(Cother), A()
 /**
   Standard copy constructor
   @param Cother :: CompGrp to copy
  */
 {
   if (Cother.A) {
-    A = Cother.A->clone();
+    A = std::unique_ptr<Rule>(Cother.A->clone());
     A->setParent(this);
   }
 }
@@ -1467,24 +1419,14 @@ CompGrp &CompGrp::operator=(const CompGrp &Cother)
   if (this != &Cother) {
     Rule::operator=(Cother);
     if (Cother.A) {
-      Rule *Xa = Cother.A->clone();
-      delete A;
-      A = Xa;
+      A = std::unique_ptr<Rule>(Cother.A->clone());
       A->setParent(this);
     }
   }
   return *this;
 }
 
-CompGrp::~CompGrp()
-/**
-  Destructor
-*/
-{
-  delete A;
-}
-
-CompGrp *CompGrp::clone() const
+CompGrp *CompGrp::doClone() const
 /**
   Clone of this
   @return new copy of this
@@ -1493,7 +1435,16 @@ CompGrp *CompGrp::clone() const
   return new CompGrp(*this);
 }
 
-void CompGrp::setLeaf(Rule *nR, const int side)
+std::unique_ptr<CompGrp> CompGrp::clone() const
+/**
+  Clone of this
+  @return new copy of this
+*/
+{
+  return std::unique_ptr<CompGrp>(doClone());
+}
+
+void CompGrp::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   No deletion is carried out
@@ -1502,13 +1453,13 @@ void CompGrp::setLeaf(Rule *nR, const int side)
 */
 {
   (void)side; // Avoid compiler warning
-  A = nR;
+  A = std::move(nR);
   if (A)
     A->setParent(this);
   return;
 }
 
-void CompGrp::setLeaves(Rule *aR, Rule *oR)
+void CompGrp::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   No deletion is carried out but sets the parents.
@@ -1517,7 +1468,7 @@ void CompGrp::setLeaves(Rule *aR, Rule *oR)
 */
 {
   (void)oR; // Avoid compiler warning
-  A = aR;
+  A = std::move(aR);
   if (A)
     A->setParent(this);
   return;
@@ -1533,7 +1484,7 @@ Rule *CompGrp::findKey(const int i)
 */
 {
   (void)i; // Avoid compiler warning
-  return 0;
+  return nullptr;
 }
 
 int CompGrp::findLeaf(const Rule *R) const
@@ -1543,7 +1494,7 @@ int CompGrp::findLeaf(const Rule *R) const
   @retval 0 on success -ve on failuire
 */
 {
-  return (A == R) ? 0 : -1;
+  return (A.get() == R) ? 0 : -1;
 }
 
 bool CompGrp::isValid(const Kernel::V3D &Pt) const
@@ -1572,7 +1523,7 @@ bool CompGrp::isValid(const std::map<int, int> &SMap) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(SMap)) ? false : true;
+    return !A->isValid(SMap);
   return true;
 }
 
@@ -1640,62 +1591,62 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
   A->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmax));
+    listOfPoints.emplace_back(xmax, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmax));
+    listOfPoints.emplace_back(xmin, ymax, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymax, zmin));
+    listOfPoints.emplace_back(xmin, ymax, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymax <= gYmax && ymax >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymax, zmin));
+    listOfPoints.emplace_back(xmax, ymax, zmin);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmin));
+    listOfPoints.emplace_back(xmin, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmin <= gZmax && zmin >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmin));
+    listOfPoints.emplace_back(xmax, ymin, zmin);
   if (!((xmax <= gXmax && xmax >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmax, ymin, zmax));
+    listOfPoints.emplace_back(xmax, ymin, zmax);
   if (!((xmin <= gXmax && xmin >= gXmin) && (ymin <= gYmax && ymin >= gYmin) &&
         (zmax <= gZmax && zmax >= gZmin)))
-    listOfPoints.push_back(V3D(xmin, ymin, zmax));
+    listOfPoints.emplace_back(xmin, ymin, zmax);
 
   // group box inside input box
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmax, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmax <= ymax && gYmax >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmax != ymax || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmax, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmax, gZmin);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmin <= zmax && gZmin >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmin != zmin))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmin));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmin);
   if (((gXmax <= xmax && gXmax >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmax != xmax || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmax, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmax, gYmin, gZmax);
   if (((gXmin <= xmax && gXmin >= xmin) && (gYmin <= ymax && gYmin >= ymin) &&
        (gZmax <= zmax && gZmax >= zmin)) &&
       (gXmin != xmin || gYmin != ymin || gZmax != zmax))
-    listOfPoints.push_back(V3D(gXmin, gYmin, gZmax));
+    listOfPoints.emplace_back(gXmin, gYmin, gZmax);
 
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = DBL_MAX;

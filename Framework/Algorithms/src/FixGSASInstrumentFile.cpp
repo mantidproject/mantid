@@ -40,17 +40,19 @@ FixGSASInstrumentFile::~FixGSASInstrumentFile() {}
 /** Implement abstract Algorithm methods
  */
 void FixGSASInstrumentFile::init() {
+
+  std::initializer_list<std::string> exts = {".prm", ".iparm"};
+
   // Input file
-  vector<std::string> exts;
-  exts.push_back(".prm");
-  exts.push_back(".iparm");
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, exts),
+      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                        exts),
       "Name of the GSAS instrument parameter file to get fixed for format. ");
 
   // Output file
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, exts),
+      Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                        FileProperty::Save, exts),
       "Name of the output GSAS instrument parameter file to have format "
       "fixed. ");
 
@@ -80,7 +82,7 @@ void FixGSASInstrumentFile::exec() {
     // Split "\n"
     vector<string> fields;
     boost::algorithm::split(fields, line, boost::algorithm::is_any_of("\n"));
-    if (fields.size() == 0)
+    if (fields.empty())
       throw runtime_error("Impossible to have an empty line. ");
     vec_line.push_back(fields[0]);
   }
@@ -98,8 +100,7 @@ void FixGSASInstrumentFile::exec() {
     throw runtime_error(errss.str());
   }
 
-  for (size_t i = 0; i < vec_line.size(); ++i) {
-    string &line = vec_line[i];
+  for (auto &line : vec_line) {
     ofile << line;
     for (size_t j = line.size(); j < LINESIZE; ++j)
       ofile << " ";

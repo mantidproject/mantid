@@ -9,16 +9,6 @@ namespace DataObjects {
 
 using namespace Mantid::Kernel;
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakShapeSphericalFactory::PeakShapeSphericalFactory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeSphericalFactory::~PeakShapeSphericalFactory() {}
-
 /**
  * @brief PeakShapeSphericalFactory::create : Creational method
  * @param source : Source JSON
@@ -28,7 +18,7 @@ Mantid::Geometry::PeakShape *
 PeakShapeSphericalFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
-  Mantid::Geometry::PeakShape *product = NULL;
+  Mantid::Geometry::PeakShape *product = nullptr;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeSpherical::sphereShapeName()) {

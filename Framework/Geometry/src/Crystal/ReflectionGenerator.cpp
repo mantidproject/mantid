@@ -11,7 +11,7 @@ using namespace Kernel;
 /// Small helper functor to calculate d-Values from a unit cell.
 class LatticeSpacingCalculator {
 public:
-  LatticeSpacingCalculator(const UnitCell &cell) : m_cell(cell) {}
+  explicit LatticeSpacingCalculator(const UnitCell &cell) : m_cell(cell) {}
 
   double operator()(const V3D &hkl) { return m_cell.d(hkl); }
 

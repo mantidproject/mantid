@@ -71,34 +71,34 @@ public:
   /// Default constructor
   ConvertUnits();
   /// Virtual destructor
-  virtual ~ConvertUnits();
+  ~ConvertUnits() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ConvertUnits"; }
+  const std::string name() const override { return "ConvertUnits"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs a unit change on the X values of a workspace";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Units"; }
+  const std::string category() const override { return "Transforms\\Units"; }
 
 private:
-  const std::string workspaceMethodName() const { return "convertUnits"; }
-  const std::string workspaceMethodInputProperty() const {
+  const std::string workspaceMethodName() const override {
+    return "convertUnits";
+  }
+  const std::string workspaceMethodInputProperty() const override {
     return "InputWorkspace";
   }
 
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
-  void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
-                      const API::MatrixWorkspace_sptr outputWS);
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
@@ -116,7 +116,7 @@ private:
   calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
 
   /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr workspace);
+  void reverse(API::MatrixWorkspace_sptr WS);
 
   /// For conversions to energy transfer, removes bins corresponding to
   /// inaccessible values

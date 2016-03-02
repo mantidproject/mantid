@@ -86,7 +86,7 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         self.red.def_advanced_properties()
         self.red.def_main_properties()
     # temporary fix to account for different monovan integral
-        self.scale_to_fix_abf = 0.997979227566217
+        self.scale_to_fix_abf = 1
 
     def runTest(self):
         #self.red.run_reduction()
@@ -213,7 +213,7 @@ class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
         self.red.def_advanced_properties()
         self.red.def_main_properties()
 
-        self.scale_to_fix_abf = 0.997979227566217
+        self.scale_to_fix_abf = 1.
 
 
     def runTest(self):
@@ -246,8 +246,10 @@ class MARIReductionMon2Norm(ISISDirectInelasticReduction):
         """Defines the workflow for the test"""
         #pylint: disable=unused-variable
         outWS=self.red.reduce()
-        # temporary fix to account for different monovan integral
-        outWS*=0.989834962505304
+        # As we compare with workspace, normalized by current, this is the difference
+        # between current and monitor-2 normalization in this particular case
+        # (well within round-off)
+        outWS*=0.991886
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -283,7 +285,7 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
         #pylint: disable=unused-variable
         outWS=self.red.reduce()
         # temporary fix to account for different monovan integral
-        outWS*=0.997966051169129
+        #outWS*=0.997966051169129
 
 
     def get_result_workspace(self):

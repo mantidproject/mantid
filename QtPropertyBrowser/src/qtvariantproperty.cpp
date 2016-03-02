@@ -2182,7 +2182,7 @@ void QtVariantEditorFactory::connectPropertyManager(QtVariantPropertyManager *ma
 
     Reimplemented from the QtAbstractEditorFactory class.
 */
-QWidget *QtVariantEditorFactory::createEditor(QtVariantPropertyManager *manager, QtProperty *property,
+QWidget *QtVariantEditorFactory::createEditorForManager(QtVariantPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
     const int propType = manager->propertyType(property);

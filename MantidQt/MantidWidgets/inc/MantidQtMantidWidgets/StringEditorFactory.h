@@ -11,9 +11,11 @@ public:
   StringEditorFactory(QObject *parent = 0): QtAbstractEditorFactory<QtStringPropertyManager>(parent){}
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  void connectPropertyManager(QtStringPropertyManager *){}
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
-  void disconnectPropertyManager(QtStringPropertyManager *){}
+  void connectPropertyManager(QtStringPropertyManager *) override {}
+  QWidget *createEditorForManager(QtStringPropertyManager *manager,
+                                  QtProperty *property,
+                                  QWidget *parent) override;
+  void disconnectPropertyManager(QtStringPropertyManager *) override {}
 };
 
 class StringEditor: public QLineEdit

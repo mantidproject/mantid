@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -8,7 +9,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
-#include <vector>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -29,8 +29,8 @@ const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
  */
 void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
                           bool strictSpectrumChecking, Logger &logger) {
-  std::set<int> uniqueSpectrumNumbers(spectrumNumbers.begin(),
-                                      spectrumNumbers.end());
+  std::unordered_set<int> uniqueSpectrumNumbers(spectrumNumbers.begin(),
+                                                spectrumNumbers.end());
   if (uniqueSpectrumNumbers.size() != spectrumNumbers.size()) {
     throw std::invalid_argument("Spectrum numbers are not unique.");
   }
@@ -86,14 +86,14 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   boost::make_shared<StringListValidator>(propOptions),
                   message.str());
 
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
@@ -101,22 +101,22 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
   auto boundedArrayValidator = boost::make_shared<ArrayBoundedValidator<int>>();
   boundedArrayValidator->setLower(0);
   declareProperty(
-      new ArrayProperty<int>("SpectrumNumbersOfDetectors",
-                             boundedArrayValidator, Direction::Input),
+      make_unique<ArrayProperty<int>>("SpectrumNumbersOfDetectors",
+                                      boundedArrayValidator, Direction::Input),
       "A list of spectrum numbers making up an effective point detector.");
 
-  declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
+                                                       true, Direction::Input),
                   "Enable, disable strict spectrum checking. Strict spectrum "
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
   setPropertySettings("SampleComponentName",
-                      new Kernel::EnabledWhenProperty(
+                      make_unique<Kernel::EnabledWhenProperty>(
                           "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "SpectrumNumbersOfDetectors",
-      new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
+  setPropertySettings("SpectrumNumbersOfDetectors",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleComponentName", IS_NOT_DEFAULT));
 }
 
 /**
@@ -135,7 +135,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -165,9 +165,9 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
     bool warnIfMasked = true;
-    for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
-      const size_t &spectrumNumber = spectrumNumbers[i];
-      auto it = specToWorkspaceIndex.find(spectrumNumbers[i]);
+    for (auto index : spectrumNumbers) {
+      const size_t spectrumNumber{static_cast<size_t>(index)};
+      auto it = specToWorkspaceIndex.find(index);
       if (it == specToWorkspaceIndex.end()) {
         std::stringstream message;
         message << "Spectrum number " << spectrumNumber
@@ -188,7 +188,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       componentToCorrect = this->getPropertyValue("DetectorComponentName");
     }
     searchResult = inst->getComponentByName(componentToCorrect);
-    if (searchResult == NULL) {
+    if (searchResult == nullptr) {
       throw std::invalid_argument(componentToCorrect +
                                   " does not exist. Check input properties.");
     }

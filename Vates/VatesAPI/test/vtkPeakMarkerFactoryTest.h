@@ -7,6 +7,7 @@
 #include "MockObjects.h"
 
 #include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -52,7 +53,8 @@ public:
   void do_test(MockPeak & peak1, vtkPeakMarkerFactory::ePeakDimensions dims)
   {
     FakeProgressAction updateProgress;
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr =
+        boost::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace & pw = *pw_ptr;
 
     //Peaks workspace will return 5 identical peaks
@@ -61,7 +63,8 @@ public:
 
     vtkPeakMarkerFactory factory("signal", dims);
     factory.initialize(pw_ptr);
-    vtkPolyData * set = factory.create(updateProgress);
+    auto set =
+        vtkSmartPointer<vtkPolyData>::Take(factory.create(updateProgress));
 
     // As the marker type are three axes(2 points), we expect 5*2*3 points
     // The angle is 45degrees and the size is 0.3
@@ -71,7 +74,6 @@ public:
 
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
-    set->Delete();
   }
 
   void test_progress_updates()
@@ -85,7 +87,8 @@ public:
     //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
     EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr =
+        boost::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace & pw = *pw_ptr;
 
     //Peaks workspace will return 5 identical peaks
@@ -94,8 +97,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal", vtkPeakMarkerFactory::Peak_in_Q_lab);
     factory.initialize(pw_ptr);
-    vtkPolyData * set = factory.create(mockProgress);
-    set->Delete();
+    auto set = vtkSmartPointer<vtkPolyData>::Take(factory.create(mockProgress));
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
   }

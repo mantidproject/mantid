@@ -76,16 +76,14 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
 
     WorkspaceNameType workspaces =
         sourceAlg->getProperty(this->m_workspacePropertyName);
-    WorkspaceNameType::iterator it = workspaces.begin();
 
     // Inspect all the input workspaces in the ArrayProperty input.
-    while (it != workspaces.end()) {
-      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
+    for (auto &workspace : workspaces) {
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(workspace);
       if (!ws) {
-        throw Kernel::Exception::NotFoundError("Workspace", *it);
+        throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
       tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
-      ++it;
     }
   } else {
     typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
@@ -93,10 +91,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
-    WorkspaceVector::iterator it = inWorkspaces.begin();
-    while (it != inWorkspaces.end()) {
-      tryAddInputWorkspaceToInputGroups(*it, vecWorkspaceGroups);
-      ++it;
+    for (auto &inWorkspace : inWorkspaces) {
+      tryAddInputWorkspaceToInputGroups(inWorkspace, vecWorkspaceGroups);
     }
   }
 
@@ -134,9 +130,8 @@ std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
     const size_t &periodIndex, const VecWSGroupType &vecWorkspaceGroups) const {
   std::string prefix = "";
   std::string inputWorkspaces = "";
-  for (size_t j = 0; j < vecWorkspaceGroups.size(); ++j) {
-    inputWorkspaces +=
-        prefix + vecWorkspaceGroups[j]->getItem(periodIndex)->name();
+  for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
+    inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
     prefix = ",";
   }
   return inputWorkspaces;
@@ -159,8 +154,7 @@ void MultiPeriodGroupWorker::copyInputWorkspaceProperties(
     IAlgorithm *targetAlg, IAlgorithm *sourceAlg,
     const int &periodNumber) const {
   std::vector<Property *> props = sourceAlg->getProperties();
-  for (size_t j = 0; j < props.size(); j++) {
-    Property *prop = props[j];
+  for (auto prop : props) {
     if (prop) {
       if (prop->direction() == Direction::Input) {
         if (const IWorkspaceProperty *wsProp =
@@ -199,7 +193,7 @@ bool MultiPeriodGroupWorker::processGroups(
     Algorithm *const sourceAlg,
     const VecWSGroupType &vecMultiPeriodGroups) const {
   // If we are not processing multiperiod groups, use the base behaviour.
-  if (vecMultiPeriodGroups.size() < 1) {
+  if (vecMultiPeriodGroups.empty()) {
     return false; // Indicates that this is not a multiperiod group workspace.
   }
   Property *outputWorkspaceProperty = sourceAlg->getProperty("OutputWorkspace");

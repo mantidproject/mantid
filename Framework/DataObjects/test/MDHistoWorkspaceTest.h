@@ -19,6 +19,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/Strings.h"
+#include "PropertyManagerHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
@@ -513,8 +514,87 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
+  void test_getSignalWithMaskAtVMD() {
+    // 2D workspace with signal[i] = i (linear index)
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
+    for (size_t i = 0; i < 100; i++) {
+      ws->setSignalAt(i, double(i));
+      ws->setNumEventsAt(i, 10.0);
+    }
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(5);
+    max.push_back(5);
+
+    // Mask part of the workspace
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ws->setMDMasking(function);
+
+    IMDWorkspace_sptr iws(ws);
+
+    // Testing with isnan() as following commented line doesn't work
+    // when MDMaskValue is NaN.
+    // TS_ASSERT_DELTA(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5)), MDMaskValue,
+    // 1e-6);
+    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(boost::math::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
+
+    TS_ASSERT(boost::math::isnan(
+        iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(boost::math::isnan(
+        iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+  }
+
+  void test_getLinePlot() {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    auto line = ws->getLinePlot(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 500);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[50], 0.9018, 1e-5);
+    TS_ASSERT_DELTA(line.x[100], 1.8036, 1e-5);
+    TS_ASSERT_DELTA(line.x[499], 9.0, 1e-5);
+
+    TS_ASSERT_EQUALS(line.y.size(), 500);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[50], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[100], 2.0, 1e-5);
+  }
+
+  void test_getLinePlotWithMaskedData() {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+
+    std::vector<coord_t> min{0, 0};
+    std::vector<coord_t> max{5, 5};
+
+    // Mask part of the workspace
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ws->setMDMasking(function);
+
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    auto line = ws->getLinePlot(start, end, NoNormalization);
+
+    // Masked points omitted
+    TS_ASSERT_EQUALS(line.y.size(), 250);
+    // Unmasked value
+    TS_ASSERT_DELTA(line.y[200], 8.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
-  void test_getLinePlot_horizontal() {
+  void test_getLineData_horizontal() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
@@ -524,140 +604,153 @@ public:
     std::vector<coord_t> x;
     std::vector<signal_t> y;
     std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
-  void test_getLinePlot_3D() {
+  void test_getLineData_horizontal_withMask() {
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i = 0; i < 100; i++)
+      ws->setSignalAt(i, double(i));
+
+    std::vector<coord_t> min{0, 0};
+    std::vector<coord_t> max{5, 5};
+
+    // Mask part of the workspace
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    ws->setMDMasking(function);
+
+    VMD start(0.5, 0.5);
+    VMD end(9.5, 0.5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    // Masked value should be zero
+    TS_ASSERT(boost::math::isnan(line.y[2]));
+    // Unmasked value
+    TS_ASSERT_DELTA(line.y[9], 9.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Line along X, going positive */
+  void test_getLineData_3D() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
     for (size_t i = 0; i < 1000; i++)
       ws->setSignalAt(i, double(i));
     VMD start(0.5, 0.5, 0.5);
     VMD end(9.5, 0.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going negative */
-  void test_getLinePlot_horizontal_backwards() {
+  void test_getLineData_horizontal_backwards() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(9.5, 0.5);
     VMD end(0.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 9.0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 9.0, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 9.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 8.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 7.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 9.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 8.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 7.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Diagonal line at 45 degrees crosses through 3 bins */
-  void test_getLinePlot_diagonal() {
+  void test_getLineData_diagonal() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(0.9, 0.5);
     VMD end(1.9, 1.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    std::cout << "X\n" << Strings::join(x.begin(), x.end(), ",") << std::endl;
-    std::cout << "Y\n" << Strings::join(y.begin(), y.end(), ",") << std::endl;
+    auto line = ws->getLineData(start, end, NoNormalization);
+    std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
+              << std::endl;
+    std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
+              << std::endl;
 
-    TS_ASSERT_EQUALS(x.size(), 4);
-    TS_ASSERT_DELTA(x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(x[1], 0.1 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(x[2], 0.5 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(x[3], 1.0 * sqrt(2.0), 1e-5);
+    TS_ASSERT_EQUALS(line.x.size(), 4);
+    TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.1 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 0.5 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[3], 1.0 * sqrt(2.0), 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 3);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 11.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 3);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 11.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive, starting before and ending after limits */
-  void test_getLinePlot_horizontal_pastEdges() {
+  void test_getLineData_horizontal_pastEdges() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(-0.5, 0.5);
     VMD end(10.5, 0.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 11);
-    TS_ASSERT_DELTA(x[0], 0.5, 1e-5);
-    TS_ASSERT_DELTA(x[1], 1.5, 1e-5);
-    TS_ASSERT_DELTA(x[2], 2.5, 1e-5);
-    TS_ASSERT_DELTA(x[10], 10.5, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 11);
+    TS_ASSERT_DELTA(line.x[0], 0.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 1.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 2.5, 1e-5);
+    TS_ASSERT_DELTA(line.x[10], 10.5, 1e-5);
 
-    TS_ASSERT_EQUALS(y.size(), 10);
-    TS_ASSERT_DELTA(y[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(y[1], 1.0, 1e-5);
-    TS_ASSERT_DELTA(y[2], 2.0, 1e-5);
+    TS_ASSERT_EQUALS(line.y.size(), 10);
+    TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA(line.y[2], 2.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Line that completely misses the workspace */
-  void test_getLinePlot_totallyOutOfBounds() {
+  void test_getLineData_totallyOutOfBounds() {
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(-5, 5);
     VMD end(1, 20.5);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y;
-    std::vector<signal_t> e;
-    ws->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(x.size(), 2);
-    TS_ASSERT_DELTA(x[0], 0, 1e-5);
+    auto line = ws->getLineData(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.x.size(), 2);
+    TS_ASSERT_DELTA(line.x[0], 0, 1e-5);
     // NAN for Y
-    TS_ASSERT_EQUALS(y.size(), 1);
-    TS_ASSERT(y[0] != y[0]);
+    TS_ASSERT_EQUALS(line.y.size(), 1);
+    TS_ASSERT(line.y[0] != line.y[0]);
   }
 
   //--------------------------------------------------------------------------------------
@@ -1065,6 +1158,42 @@ public:
     // Quick check of clone
     auto clone = ws3.clone();
     TS_ASSERT_EQUALS(targetDisplayNormalization, clone->displayNormalization());
+  }
+
+  /**
+  * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(
+        new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    IMDHistoWorkspace_sptr wsInput(new MDHistoWorkspace(
+        dimX, dimX, dimX, dimX, Mantid::API::VolumeNormalization));
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IMDHistoWorkspace_const_sptr wsConst;
+    IMDHistoWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IMDHistoWorkspace_const_sptr wsCastConst;
+    IMDHistoWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDHistoWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDHistoWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

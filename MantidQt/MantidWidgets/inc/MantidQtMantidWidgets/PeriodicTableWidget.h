@@ -37,7 +37,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeriodicTableWidget : public QWidget {
 public:
   ///Constructor
   PeriodicTableWidget(QWidget *parent = 0);
-
+  ///Destructor
+  virtual ~PeriodicTableWidget() {};
   /// Vectors to Hold the QPushButtons of Elements in corresponding Groups
   QVector<QPushButton *> OtherNonMetals;
   QVector<QPushButton *> AlkaliMetals;
@@ -74,6 +75,9 @@ public:
 
   ///Displays or hides the Legend for the colour coding of periodic groups
   void showGroupLegend(bool checked);
+
+  QString getValue();
+
 
 private:
   ///The Form containing the PeriodicTableWidget

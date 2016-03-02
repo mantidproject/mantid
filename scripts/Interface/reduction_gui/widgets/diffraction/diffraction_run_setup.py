@@ -2,10 +2,8 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 from mantid.kernel import Logger
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
@@ -20,6 +18,10 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
+def generateRegExpValidator(widget, expression):
+    rx = QtCore.QRegExp(expression)
+    return QtGui.QRegExpValidator(rx, widget)
 
 class RunSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -103,21 +105,14 @@ class RunSetupWidget(BaseWidget):
         self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
-        # Integers
-        iv0 = QtGui.QIntValidator(self._content.emptyrun_edit)
-        iv0.setBottom(0)
+        expression = r'[\d,-]*'
+        iv0 = generateRegExpValidator(self._content.emptyrun_edit, expression)
         self._content.emptyrun_edit.setValidator(iv0)
 
-        iv1 = QtGui.QIntValidator(self._content.vanrun_edit)
-        iv1.setBottom(0)
+        iv1 = generateRegExpValidator(self._content.vanrun_edit, expression)
         self._content.vanrun_edit.setValidator(iv1)
 
-        # iv2 = QtGui.QIntValidator(self._content.vannoiserun_edit)
-        # iv2.setBottom(0)
-        # self._content.vannoiserun_edit.setValidator(iv2)
-
-        iv3 = QtGui.QIntValidator(self._content.vanbkgdrun_edit)
-        iv3.setBottom(0)
+        iv3 = generateRegExpValidator(self._content.vanbkgdrun_edit, expression)
         self._content.vanbkgdrun_edit.setValidator(iv3)
 
         siv = QtGui.QIntValidator(self._content.resamplex_edit)
@@ -176,38 +171,62 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
+
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
-        self._content.binning_edit.setText(str(state.binning))
-        state.binning = float(state.binning)
-        if state.binning > 0.0:
-            #print "[DBx304-1]: state.binning = %f, Set binning type to Linear" % (state.binning)
-            self._content.bintype_combo.setCurrentIndex(0)
-            #print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
+        # Set binning type (logarithm or linear)
+        bintype_index = 1
+        if state.doresamplex is True:
+            # resample x
+            self._content.resamplex_button.setChecked(True)
+            self._content.binning_edit.setEnabled(False)
+            self._content.resamplex_edit.setEnabled(True)
+            if state.resamplex > 0:
+                bintype_index = 0
         else:
-            #print "[DBx304-1]: state.binning = %f, Set binning type to Logarithmic" % (state.binning)
-            self._content.bintype_combo.setCurrentIndex(1)
-            #print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
+            # binning
+            self._content.usebin_button.setChecked(True)
+            self._content.binning_edit.setEnabled(True)
+            self._content.resamplex_edit.setEnabled(False)
+            if state.binning > 0.:
+                bintype_index = 0
+        # END-IF-ELSE
+        self._content.bintype_combo.setCurrentIndex(bintype_index)
 
+        # Set binning parameter
+        try:
+            binning_float = float(state.binning)
+            binning_str = '%.6f' % abs(binning_float)
+        except ValueError:
+            binning_str = str(state.binning)
+        self._content.binning_edit.setText(binning_str)
+        # Set ResampleX
+        try:
+            resamplex_i = int(state.resamplex)
+            resamplex_str = '%d' % abs(resamplex_i)
+        except ValueError:
+            resamplex_str = str(state.resamplex)
+        self._content.resamplex_edit.setText(resamplex_str)
+        # Others
         self._content.binind_checkbox.setChecked(state.binindspace)
-        self._content.resamplex_edit.setText(str(state.resamplex))
         self._content.outputdir_edit.setText(state.outputdir)
         self._content.saveas_combo.setCurrentIndex(self._content.saveas_combo.findText(state.saveas))
         self._content.unit_combo.setCurrentIndex(self._content.unit_combo.findText(state.finalunits))
 
         # Background correction
         if state.bkgdrunnumber is not None and state.bkgdrunnumber != "":
-            self._content.emptyrun_edit.setText(str(int(state.bkgdrunnumber)))
+            self._content.emptyrun_edit.setText(state.bkgdrunnumber)
         self._content.disablebkgdcorr_chkbox.setChecked(state.disablebkgdcorrection)
         # Vanadium correction
         if state.vanrunnumber is not None and state.vanrunnumber != "":
-            self._content.vanrun_edit.setText(str(abs(int(state.vanrunnumber))))
+            self._content.vanrun_edit.setText(state.vanrunnumber)
         self._content.disablevancorr_chkbox.setChecked(state.disablevancorrection)
         # Vanadium background correction
         if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "":
-            self._content.vanbkgdrun_edit.setText(str(int(state.vanbkgdrunnumber)))
+            self._content.vanbkgdrun_edit.setText(state.vanbkgdrunnumber)
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
 
         # self._content.vannoiserun_edit.setText(str(state.vannoiserunnumber))
@@ -237,28 +256,39 @@ class RunSetupWidget(BaseWidget):
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
 
-        bintypestr = self._content.bintype_combo.currentText()
+        bintypestr = str(self._content.bintype_combo.currentText())
         s.binindspace = self._content.binind_checkbox.isChecked()
 
         if self._content.resamplex_button.isChecked() is True:
-            # use ResampleX
-            s.resamplex = int(self._content.resamplex_edit.text())
+            # use ResampleX: do not touch pre-saved s.binning
             s.doresamplex = True
-            if s.resamplex <= 0:
-                raise RuntimeError('ResampleX\'s parameter must be larger than 0!')
-            # s.binning = ''
+            try:
+                s.resamplex = int(self._content.resamplex_edit.text())
+            except ValueError:
+                raise RuntimeError('ResampleX parameter is not given!')
+
+            if s.resamplex < 0 and bintypestr.startswith('Linear'):
+                self._content.bintype_combo.setCurrentIndex(1)
+            elif s.resamplex > 0 and bintypestr.startswith('Logarithmic'):
+                s.resamplex = -1 * s.resamplex
+            elif s.resamplex == 0:
+                raise RuntimeError('ResampleX\'s parameter cannot be equal to 0!')
         else:
-            # use binning
+            # use binning: do not touch pre-saved s.resamplex
             s.doresamplex = False
-            # s.resamplex = ''
-            s.binning = str(self._content.binning_edit.text())
-            if len(s.binning) > 0:
-                if bintypestr.count("Linear") == 1:
-                    s.binning = abs(float(s.binning))
-                else:
-                    s.binning = -1.*abs(float(s.binning))
-            else:
+            try:
+                s.binning = float(self._content.binning_edit.text())
+            except ValueError as e:
                 raise RuntimeError('Binning parameter is not given!')
+
+            if s.binning < 0. and bintypestr.startswith('Linear'):
+                self._content.bintype_combo.setCurrentIndex(1)
+            elif s.binning > 0. and bintypestr.startswith('Logarithmic'):
+                s.binning = -1 * s.binning
+            elif abs(s.binning) < 1.0E-20:
+                raise RuntimeError('Binning\'s parameter cannot be equal to 0!')
+        # END-IF-ELSE (binning/resampleX)
+
         s.outputdir = self._content.outputdir_edit.text()
         s.saveas = str(self._content.saveas_combo.currentText())
         s.finalunits = str(self._content.unit_combo.currentText())
@@ -315,12 +345,14 @@ class RunSetupWidget(BaseWidget):
     def _binvalue_edit(self):
         """ Handling event for binning value changed
         """
-        print "New value...."
-        fvalue = float(self._content.binning_edit.text())
-        if fvalue < 0.0:
-            self._content.bintype_combo.setCurrentIndex(2)
+        if self._content.resamplex_button.isChecked():
+            fvalue = int(self._content.resamplex_edit.text())
         else:
+            fvalue = float(self._content.binning_edit.text())
+        if fvalue < 0:
             self._content.bintype_combo.setCurrentIndex(1)
+        else:
+            self._content.bintype_combo.setCurrentIndex(0)
 
         return
 
@@ -328,8 +360,6 @@ class RunSetupWidget(BaseWidget):
         """ Handling bin type changed
         """
         currindex = self._content.bintype_combo.currentIndex()
-        # print "New Index = %d" % (currindex)
-
         curbinning = self._content.binning_edit.text()
         if curbinning != "" and curbinning != None:
             curbinning = float(curbinning)

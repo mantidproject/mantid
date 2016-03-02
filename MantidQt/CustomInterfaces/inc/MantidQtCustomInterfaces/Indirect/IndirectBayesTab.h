@@ -78,14 +78,10 @@ class DLLExport IndirectBayesTab : public IndirectTab {
 
 public:
   IndirectBayesTab(QWidget *parent = 0);
-  ~IndirectBayesTab();
+  ~IndirectBayesTab() override;
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;
-
-signals:
-  /// Send signal to parent window to show a message box to user
-  void showMessageBox(const QString &message);
 
 protected slots:
   /// Slot to update the guides when the range properties change

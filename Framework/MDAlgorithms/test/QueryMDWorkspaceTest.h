@@ -322,6 +322,47 @@ public:
     TSM_ASSERT_DELTA("To max", xMax, xColumn->toDouble(table->rowCount() - 1),
                      binHalfWidth /*account for bin widths*/);
   }
+
+  void test_query_large_masked_workspace() {
+    /*
+     Regression test for a stack overflow bug caused by high recursion depth
+     when workspace iterator skips over many masked cells
+     */
+    MDEventWorkspace3Lean::sptr in_ws =
+        MDEventsTestHelper::makeMDEW<3>(64, 0.0, 10.0, 3);
+
+    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    binMDAlg->initialize();
+    binMDAlg->setRethrows(true);
+    binMDAlg->setChild(true);
+    binMDAlg->setProperty("InputWorkspace", in_ws);
+    binMDAlg->setProperty("AlignedDim0", "Axis0,0,10,64");
+    binMDAlg->setProperty("AlignedDim1", "Axis1,0,10,64");
+    binMDAlg->setProperty("AlignedDim2", "Axis2,0,10,64");
+    binMDAlg->setPropertyValue("OutputWorkspace", "temp_out_ws");
+    binMDAlg->execute();
+    Workspace_sptr binned_temp = binMDAlg->getProperty("OutputWorkspace");
+    IMDWorkspace_sptr binned_md_temp =
+        boost::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
+
+    IAlgorithm_sptr maskMDAlg = AlgorithmManager::Instance().create("MaskMD");
+    maskMDAlg->initialize();
+    maskMDAlg->setRethrows(true);
+    maskMDAlg->setChild(true);
+    maskMDAlg->setProperty("Workspace", binned_md_temp);
+    maskMDAlg->setProperty("Dimensions", "Axis0,Axis1,Axis2");
+    maskMDAlg->setProperty("Extents", "0,10,0,10,0,10");
+    maskMDAlg->execute();
+    IMDWorkspace_sptr temp = maskMDAlg->getProperty("Workspace");
+
+    QueryMDWorkspace query;
+    query.setRethrows(true);
+    query.setChild(true);
+    query.initialize();
+    query.setProperty("InputWorkspace", temp);
+    query.setPropertyValue("OutputWorkspace", "QueryWS");
+    TSM_ASSERT_THROWS_NOTHING("Should execute successfully", query.execute());
+  }
 };
 
 #endif /* MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_ */

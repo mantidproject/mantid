@@ -40,6 +40,7 @@ public:
   MOCK_METHOD0(requestNotebookPath, std::string());
 
   MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
+  MOCK_METHOD0(showImportDialog, void());
   MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
 
   //IO
@@ -53,7 +54,7 @@ public:
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
-
+  MOCK_CONST_METHOD0(getAlgorithmRunner, boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string>&));
 
   //Calls we don't care about

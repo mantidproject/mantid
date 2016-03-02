@@ -35,19 +35,11 @@ Flipping ratio correction is performed using the measurements of :math:`Ni_{0.89
 
 3. Apply correction to the data:
 
-   :math:`(I^{NSF}_i)_{corr0} = I^{NSF}_i + \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
+   :math:`(I^{NSF}_i)_{corr} = I^{NSF}_i + \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
    
-   :math:`(I^{SF}_i)_{corr0} = I^{SF}_i - \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
+   :math:`(I^{SF}_i)_{corr} = I^{SF}_i - \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
 
    where :math:`I^{SF,\,NSF}_i` are the neutron counts in the **SFDataWorkspace** and **NSFDataWorkspace**, respectively.
-
-4. Apply correction for a double spin-flip scattering in a sample:
-
-   :math:`(I^{NSF}_i)_{corr} = (I^{NSF}_i)_{corr0} - (I^{SF}_i)_{corr0}\cdot f`
-
-   :math:`(I^{SF}_i)_{corr} = (I^{SF}_i)_{corr0}`
-
-   where :math:`f` is a double spin-flip scattering probability. It is a number between 0 and 1.
 
 
 Valid input workspaces
@@ -108,8 +100,7 @@ Usage
 
     # apply correction
     DNSFlippingRatioCorr(sf_vana_bg, nsf_vana_bg, sf_nicr, nsf_nicr, sf_bkgr, nsf_bkgr,
-                         SFOutputWorkspace='sf_corrected', NSFOutputWorkspace='nsf_corrected',
-                         DoubleSpinFlipScatteringProbability=0.03)
+                         SFOutputWorkspace='sf_corrected', NSFOutputWorkspace='nsf_corrected')
 
     # retrieve output workspaces
     sf_corrected = mtd['sf_corrected']

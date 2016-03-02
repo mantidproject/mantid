@@ -25,17 +25,14 @@ LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
  */
 void LoadSavuTomoConfig::init() {
   // Required input properties
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".nx5");
-  exts.push_back(".xml");
-
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, exts),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Nexus parameterization file to read, as a full "
       "or relative path.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "savuTomoConfig",
                       Kernel::Direction::Output, PropertyMode::Mandatory),
                   "The name of the workspace to be created as output of "

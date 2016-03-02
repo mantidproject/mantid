@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
 #import os
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]

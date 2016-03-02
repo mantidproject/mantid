@@ -36,7 +36,7 @@ class TitlePicker: public QObject
     Q_OBJECT
 
 public:
-    TitlePicker(QwtPlot *plot);
+  explicit TitlePicker(QwtPlot *plot);
     void setSelected(bool select = true);
 	bool selected(){return d_selected;};
 
@@ -47,7 +47,7 @@ signals:
 	void showTitleMenu();
 
 private:
-	bool eventFilter(QObject *, QEvent *);
-	QwtTextLabel *title;
+  bool eventFilter(QObject *, QEvent *) override;
+        QwtTextLabel *title;
 	bool d_selected;
 };

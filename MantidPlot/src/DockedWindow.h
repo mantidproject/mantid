@@ -15,7 +15,7 @@ class DockedWindow: public QMdiSubWindow
 {
   Q_OBJECT
 public:
-  DockedWindow(ApplicationWindow* appWindow);
+  explicit DockedWindow(ApplicationWindow *appWindow);
   MdiSubWindow* mdiSubWindow() const;
   void setMdiSubWindow(MdiSubWindow* sw);
 
@@ -25,9 +25,8 @@ public slots:
   void dragMouseMove(QPoint);
 
 protected:
-
-  bool event(QEvent *ev);
-  void moveEvent(QMoveEvent *ev);
+  bool event(QEvent *ev) override;
+  void moveEvent(QMoveEvent *ev) override;
 
 private:
 

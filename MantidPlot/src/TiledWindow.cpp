@@ -139,7 +139,7 @@ namespace {
   {
   public:
     /// Constructor
-    InnerWidget(QWidget *parent): QWidget(parent),m_draw(false) {}
+    explicit InnerWidget(QWidget *parent) : QWidget(parent), m_draw(false) {}
 
     /**
      * Work out where to put the marker.
@@ -194,8 +194,7 @@ namespace {
   protected:
 
     /// Paint event handler
-    void paintEvent(QPaintEvent*)
-    {
+    void paintEvent(QPaintEvent *) override {
       QPainter painter(this);
       painter.fillRect( this->rect().adjusted(0,0,-1,-1), QColor("white") );
       if ( m_draw )

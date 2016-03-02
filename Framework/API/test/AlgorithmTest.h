@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "FakeAlgorithms.h"
+#include "PropertyManagerHelper.h"
 #include <map>
 
 using namespace Mantid::Kernel;
@@ -29,22 +30,24 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                     Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace1", "", Direction::Output));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
+                                                     Direction::Output));
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
   void exec() {
-    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out1 =
+        boost::make_shared<WorkspaceTester>();
     out1->init(10, 10, 10);
-    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out2 =
+        boost::make_shared<WorkspaceTester>();
     out2->init(10, 10, 10);
     std::string outName = getPropertyValue("InputWorkspace1") + "+" +
                           getPropertyValue("InputWorkspace2") + "+" +
@@ -70,10 +73,10 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink"; }
   const std::string summary() const { return "Test summary"; }
   void init() {
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
@@ -126,8 +129,8 @@ public:
   static const std::string FAIL_MSG;
 
   void init() {
-    declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                     Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -189,11 +192,10 @@ public:
   }
 
   void testCategories() {
-    std::vector<std::string> result;
-    result.push_back("Cat");
+    std::vector<std::string> result{"Cat"};
     TS_ASSERT_EQUALS(alg.categories(), result);
-    result.push_back("Leopard");
-    result.push_back("Mink");
+    result.emplace_back("Leopard");
+    result.emplace_back("Mink");
     TS_ASSERT_EQUALS(algv2.categories(), result);
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
@@ -438,7 +440,8 @@ public:
   void do_test_locking(std::string in1, std::string in2, std::string inout,
                        std::string out1, std::string out2) {
     for (size_t i = 0; i < 6; i++) {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
     }
@@ -474,7 +477,8 @@ public:
   /** Have a workspace property that does NOT lock the workspace.
    * The failure mode of this test is HANGING. */
   void test_workspace_notLocking() {
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
@@ -511,7 +515,8 @@ public:
     if (contents1.empty()) {
       if (group1.empty())
         return;
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace(group1, ws);
       return;
     }
@@ -524,7 +529,8 @@ public:
       AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
       std::vector<std::string>::iterator it = names.begin();
       for (; it != names.end(); it++) {
-        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        boost::shared_ptr<WorkspaceTester> ws =
+            boost::make_shared<WorkspaceTester>();
         ws->init(10, 10, 10);
         AnalysisDataService::Instance().addOrReplace(*it, ws);
         wsGroup->add(*it);
@@ -735,6 +741,39 @@ public:
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->name(), "D3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A3+D3+D3");
+  }
+
+  /**
+  * Test declaring an algorithm property and retrieving as const
+  * and non-const
+  */
+  void testGetProperty_const_sptr() {
+    const std::string algName = "InputAlgorithm";
+    IAlgorithm_sptr algInput(new StubbedWorkspaceAlgorithm());
+    PropertyManagerHelper manager;
+    manager.declareProperty(algName, algInput,
+                            Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const or non-const sptr
+    IAlgorithm_const_sptr algConst;
+    IAlgorithm_sptr algNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
+    TS_ASSERT(algConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(algNonConst =
+                                 manager.getValue<IAlgorithm_sptr>(algName));
+    TS_ASSERT(algNonConst != NULL);
+    TS_ASSERT_EQUALS(algConst, algNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, algName);
+    IAlgorithm_const_sptr algCastConst;
+    IAlgorithm_sptr algCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(algCastConst = (IAlgorithm_const_sptr)val);
+    TS_ASSERT(algCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
+    TS_ASSERT(algCastNonConst != NULL);
+    TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 
 private:

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Scale.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -15,9 +16,9 @@ using namespace API;
 
 void Scale::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   declareProperty("Factor", 1.0,
                   "The value by which to scale the input workspace");
@@ -38,11 +39,16 @@ void Scale::exec() {
 
   auto hasDx = inputWS->hasDx(0);
 
+  Progress progress(this, 0, 1, 2);
+
   // We require a copy of the workspace if the
   auto inPlace = outputWS == inputWS;
   MatrixWorkspace_sptr bufferWS;
 
   if (op == "Multiply") {
+
+    progress.report("Multiplying factor...");
+
     if (outputWS == inputWS) {
       if (hasDx) {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
@@ -52,6 +58,9 @@ void Scale::exec() {
       outputWS = inputWS * factor;
     }
   } else {
+
+    progress.report("Adding factor...");
+
     if (outputWS == inputWS) {
       if (hasDx) {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
@@ -61,6 +70,8 @@ void Scale::exec() {
       outputWS = inputWS + factor;
     }
   }
+
+  progress.report();
 
   // If there are any Dx values in the input workspace, then
   // copy them across. We check only the first spectrum.

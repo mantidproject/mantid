@@ -40,33 +40,33 @@ public:
   GetSpiceDataRawCountsFromMD();
 
   /// Destructor
-  virtual ~GetSpiceDataRawCountsFromMD();
+  ~GetSpiceDataRawCountsFromMD() override;
 
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "GetSpiceDataRawCountsFromMD";
   }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Get detectors' raw counts or sample environment log values from "
            "IMDEventWorkspace created from SPICE data file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Export all detectors' counts for a run
   void exportDetCountsOfRun(API::IMDEventWorkspace_const_sptr datamdws,

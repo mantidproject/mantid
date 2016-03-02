@@ -8,6 +8,8 @@
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 #include <utility>
+#include <unordered_set>
+
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
@@ -95,7 +97,11 @@ Json::Value readJsonFile(const std::string &filename,
   }
   Json::Reader json_reader;
   Json::Value read;
-  json_reader.parse(filestream, read);
+  if (!json_reader.parse(filestream, read)) {
+    throw ScriptRepoException("Bad JSON string from file: " + filename + ". " +
+                              error);
+  }
+
   return read;
 }
 
@@ -118,10 +124,7 @@ Test if a file with this filename already exists
 */
 bool fileExists(const std::string &filename) {
   Poco::File test_file(filename);
-  if (test_file.exists()) {
-    return true;
-  }
-  return false;
+  return test_file.exists();
 }
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
@@ -262,8 +265,6 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
   repo.clear();
   valid = true;
 }
-
-ScriptRepositoryImpl::~ScriptRepositoryImpl() throw() {}
 
 /**
  Check the connection with the server through the ::doDownloadFile method.
@@ -475,8 +476,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   // and also fill up the output vector (in reverse order)
   Mantid::API::SCRIPTSTATUS acc_status = Mantid::API::BOTH_UNCHANGED;
   std::string last_directory = "";
-  for (Repository::reverse_iterator it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
@@ -559,7 +559,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     case LOCAL_ONLY:
     case LOCAL_CHANGED:
     case REMOTE_CHANGED:
-      acc_status = (SCRIPTSTATUS)(acc_status | entry.status);
+      acc_status = static_cast<SCRIPTSTATUS>(acc_status | entry.status);
       break;
     case LOCAL_ONLY | LOCAL_CHANGED:
       acc_status = LOCAL_CHANGED;
@@ -619,21 +619,21 @@ void ScriptRepositoryImpl::download_directory(
   std::string directory_path_with_slash =
       std::string(directory_path).append("/");
   bool found = false;
-  for (Repository::iterator it = repo.begin(); it != repo.end(); ++it) {
+  for (auto &entry : repo) {
     // skip all entries that are not children of directory_path
     // the map will list the entries in alphabetical order, so,
     // when it first find the directory, it will list all the
     // childrens of this directory, and them,
     // it will list other things, so we can, break the loop
-    if (it->first.find(directory_path) != 0) {
+    if (entry.first.find(directory_path) != 0) {
       if (found)
         break; // for the sake of performance
       else
         continue;
     }
     found = true;
-    if (it->first != directory_path &&
-        it->first.find(directory_path_with_slash) != 0) {
+    if (entry.first != directory_path &&
+        entry.first.find(directory_path_with_slash) != 0) {
       // it is not a children of this entry, just similar. Example:
       // TofConverter/README
       // TofConverter.py
@@ -642,27 +642,27 @@ void ScriptRepositoryImpl::download_directory(
       continue;
     }
     // now, we are dealing with the children of directory path
-    if (!it->second.directory)
-      download_file(it->first, it->second);
+    if (!entry.second.directory)
+      download_file(entry.first, entry.second);
     else {
       // download the directory.
 
       // we will not download the directory, but create one with the
       // same name, and update the local json
 
-      Poco::File dir(std::string(local_repository).append(it->first));
+      Poco::File dir(std::string(local_repository).append(entry.first));
       dir.createDirectories();
 
-      it->second.status = BOTH_UNCHANGED;
-      it->second.downloaded_date = DateAndTime(
+      entry.second.status = BOTH_UNCHANGED;
+      entry.second.downloaded_date = DateAndTime(
           Poco::DateTimeFormatter::format(dir.getLastModified(), timeformat));
-      it->second.downloaded_pubdate = it->second.pub_date;
-      updateLocalJson(it->first, it->second);
+      entry.second.downloaded_pubdate = entry.second.pub_date;
+      updateLocalJson(entry.first, entry.second);
 
-    }                                   // end downloading directory
-                                        // update the status
-    it->second.status = BOTH_UNCHANGED; // update this entry
-  }                                     // end interaction with all entries
+    }                                     // end downloading directory
+                                          // update the status
+    entry.second.status = BOTH_UNCHANGED; // update this entry
+  }                                       // end interaction with all entries
 }
 
 /**
@@ -840,7 +840,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     form.add("path", folder);
 
     // inserting the file
-    FilePartSource *m_file = new FilePartSource(absolute_path);
+    auto m_file = new FilePartSource(absolute_path);
     form.addPart("file", m_file);
 
     inetHelper.setBody(form);
@@ -860,7 +860,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // get exception from the read_json parser
       std::string server_reply_str;
       server_reply_str = server_reply.str();
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1181,7 +1181,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
       server_reply_str = server_reply.str();
       // remove the status message from the end of the reply,
       // in order not to get exception from the read_json parser
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1256,13 +1256,13 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
   std::vector<std::string> output_list;
   // look for all the files in the list, to check those that
   // has the auto_update and check it they have changed.
-  for (Repository::iterator it = repo.begin(); it != repo.end(); ++it) {
-    if (it->second.auto_update) {
+  for (auto &file : repo) {
+    if (file.second.auto_update) {
       // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
-      if (it->second.status & REMOTE_CHANGED) {
-        download(it->first);
-        output_list.push_back(it->first);
-        g_log.debug() << "Update file " << it->first
+      if (file.second.status & REMOTE_CHANGED) {
+        download(file.first);
+        output_list.push_back(file.first);
+        g_log.debug() << "Update file " << file.first
                       << " to more recently version available" << std::endl;
       }
     }
@@ -1312,13 +1312,12 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
   ensureValidRepository();
   std::string path = convertPath(input_path);
   std::vector<std::string> files_to_update;
-  for (Repository::reverse_iterator it = repo.rbegin(); it != repo.rend();
-       ++it) {
+  for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
-    if (entry_path.find(path) == 0 && entry.status != REMOTE_ONLY &&
-        entry.status != LOCAL_ONLY)
+    if (entry_path.compare(0, path.size(), path) == 0 &&
+        entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
       files_to_update.push_back(entry_path);
   }
 
@@ -1335,7 +1334,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
     throw ScriptRepoException(ex.what());
   }
   // g_log.debug() << "SetAutoUpdate... end" << std::endl;
-  return (int)files_to_update.size();
+  return static_cast<int>(files_to_update.size());
 }
 
 /** Download a url and fetch it inside the local path given.
@@ -1432,8 +1431,7 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (unsigned int i = 0; i < member_names.size(); ++i) {
-      std::string filepath = member_names[i];
+    for (const auto &filepath : member_names) {
       if (!isEntryValid(filepath))
         continue;
       Json::Value entry_json = pt.get(filepath, "");
@@ -1488,7 +1486,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
   std::string filename = std::string(local_repository).append(".local.json");
   std::vector<std::string> entries_to_delete;
   Repository::iterator entry_it;
-  std::set<std::string> folders_of_deleted;
+  std::unordered_set<std::string> folders_of_deleted;
 
   try {
     Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
@@ -1498,8 +1496,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (unsigned int i = 0; i < member_names.size(); ++i) {
-      std::string filepath = member_names[i];
+    for (const auto &filepath : member_names) {
       Json::Value entry_json = pt.get(filepath, "");
 
       entry_it = repo.find(filepath);
@@ -1534,10 +1531,10 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     } // end loop FOREACH entry in local json
 
     // delete the entries to be deleted in json file
-    if (entries_to_delete.size() > 0) {
+    if (!entries_to_delete.empty()) {
 
       // clear the auto_update flag from the folders if the user deleted files
-      BOOST_FOREACH (const std::string &folder, folders_of_deleted) {
+      for (const auto &folder : folders_of_deleted) {
         if (!pt.isMember(folder))
           continue;
 
@@ -1551,10 +1548,9 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
         }
       }
 
-      for (std::vector<std::string>::iterator it = entries_to_delete.begin();
-           it != entries_to_delete.end(); ++it) {
+      for (auto &entry : entries_to_delete) {
         // remove this entry
-        pt.removeMember(*it);
+        pt.removeMember(entry);
       }
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json not hidden (to be able to edit
@@ -1704,7 +1700,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
 }
 
 std::string ScriptRepositoryImpl::getParentFolder(const std::string &file) {
-  size_t pos = file.rfind("/");
+  size_t pos = file.rfind('/');
   if (pos == file.npos) {
     return "";
   }

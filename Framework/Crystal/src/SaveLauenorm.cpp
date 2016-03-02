@@ -9,7 +9,6 @@
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "boost/assign.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
@@ -17,7 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
 
 namespace Mantid {
 namespace Crystal {
@@ -41,11 +39,11 @@ SaveLauenorm::~SaveLauenorm() {}
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
       "Select the directory and base name for the output files.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -55,10 +53,8 @@ void SaveLauenorm::init() {
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
   declareProperty("MaxWavelength", EMPTY_DBL(),
                   "Maximum wavelength (Angstroms)");
-  std::vector<std::string> histoTypes;
-  histoTypes.push_back("Bank");
-  histoTypes.push_back("RunNumber");
-  histoTypes.push_back("Both Bank and RunNumber");
+  std::vector<std::string> histoTypes{"Bank", "RunNumber",
+                                      "Both Bank and RunNumber"};
   declareProperty("SortFilesBy", histoTypes[0],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");
@@ -111,6 +107,12 @@ void SaveLauenorm::exec() {
 
   // ============================== Save all Peaks
   // =========================================
+  // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+  // Default for kf-ki has -q
+  double qSign = -1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
@@ -170,10 +172,12 @@ void SaveLauenorm::exec() {
     // h k l lambda theta intensity and  sig(intensity)  in format
     // (3I5,2F10.5,2I10)
     // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+    // unless Crystallography convention
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
-    out << std::setw(5) << Utils::round(-p.getH()) << std::setw(5)
-        << Utils::round(-p.getK()) << std::setw(5) << Utils::round(-p.getL());
+    out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
+        << Utils::round(qSign * p.getK()) << std::setw(5)
+        << Utils::round(qSign * p.getL());
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
     // Assume that want theta not two-theta
     out << std::setw(10) << std::fixed << std::setprecision(5)

@@ -1,5 +1,4 @@
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
-#include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
@@ -10,7 +9,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::PythonInterface::DataServiceExporter;
-using Mantid::PythonInterface::TrackingInstanceMethod;
 using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
@@ -24,7 +22,8 @@ void export_PropertyManagerDataService() {
                               PropertyManager_sptr> PMDExporter;
   auto pmdType = PMDExporter::define("PropertyManagerDataServiceImpl");
 
-  // Instance method
-  TrackingInstanceMethod<PropertyManagerDataService,
-                         PMDExporter::PythonType>::define(pmdType);
+  pmdType.def("Instance", &PropertyManagerDataService::Instance,
+              return_value_policy<reference_existing_object>(),
+              "Return a reference to the singleton instance")
+      .staticmethod("Instance");
 }

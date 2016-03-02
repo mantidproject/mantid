@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebunch.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
-
-#include <sstream>
-#include <numeric>
-#include <cmath>
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,11 +27,11 @@ using API::MatrixWorkspace;
  *
  */
 void Rebunch::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of rebinning");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -248,9 +251,9 @@ void Rebunch::rebunch_point(const std::vector<double> &xold,
       i_in++;
     }
     // average contributing x values
-    xnew[j] = xsum / (double)n_bunch;
-    ynew[j] = ysum / (double)n_bunch;
-    enew[j] = sqrt(esum) / (double)n_bunch;
+    xnew[j] = xsum / static_cast<double>(n_bunch);
+    ynew[j] = ysum / static_cast<double>(n_bunch);
+    enew[j] = sqrt(esum) / static_cast<double>(n_bunch);
     j++;
   }
   if (rem != 0) {
@@ -263,9 +266,9 @@ void Rebunch::rebunch_point(const std::vector<double> &xold,
       esum += eold[i_in] * eold[i_in];
       i_in++;
     }
-    xnew[j] = xsum / (double)rem;
-    ynew[j] = ysum / (double)rem;
-    enew[j] = sqrt(esum) / (double)rem;
+    xnew[j] = xsum / static_cast<double>(rem);
+    ynew[j] = ysum / static_cast<double>(rem);
+    enew[j] = sqrt(esum) / static_cast<double>(rem);
   }
 }
 

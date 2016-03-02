@@ -14,10 +14,8 @@
 
 #include <vector>
 
-namespace MantidQt
-{
-namespace API
-{
+namespace MantidQt {
+namespace API {
 
 /** Implemenation of QwtRasterData that can display the data
  * from a slice of an IMDWorkspace.
@@ -29,37 +27,40 @@ namespace API
  * @date Sep 29, 2011
  */
 
-class EXPORT_OPT_MANTIDQT_API QwtRasterDataMD : public QwtRasterData
-{
+class EXPORT_OPT_MANTIDQT_API QwtRasterDataMD : public QwtRasterData {
 public:
   QwtRasterDataMD();
-  virtual ~QwtRasterDataMD();
-  QwtRasterDataMD* copy() const;
+  ~QwtRasterDataMD() override;
+  QwtRasterDataMD *copy() const override;
 
   virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
   Mantid::API::IMDWorkspace_const_sptr getWorkspace() const;
 
   void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
-  QwtDoubleInterval range() const;
-  void setRange(const QwtDoubleInterval & range);
+  QwtDoubleInterval range() const override;
+  void setRange(const QwtDoubleInterval &range);
 
-  void setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X, Mantid::Geometry::IMDDimension_const_sptr Y, std::vector<Mantid::coord_t> & slicePoint);
+  void setSliceParams(size_t dimX, size_t dimY,
+                      Mantid::Geometry::IMDDimension_const_sptr X,
+                      Mantid::Geometry::IMDDimension_const_sptr Y,
+                      std::vector<Mantid::coord_t> &slicePoint);
 
-  double value(double x, double y) const;
+  double value(double x, double y) const override;
 
-  QSize rasterHint(const QwtDoubleRect &) const;
+  QSize rasterHint(const QwtDoubleRect &) const override;
 
   void setFastMode(bool fast);
 
   void setZerosAsNan(bool val);
 
+  bool isZerosAsNan() const;
+
   void setNormalization(Mantid::API::MDNormalization normalization);
   Mantid::API::MDNormalization getNormalization() const;
 
 protected:
-
-  void copyFrom(const QwtRasterDataMD & source, QwtRasterDataMD& dest) const;
+  void copyFrom(const QwtRasterDataMD &source, QwtRasterDataMD &dest) const;
 
   /// Workspace being shown
   Mantid::API::IMDWorkspace_const_sptr m_ws;
@@ -82,8 +83,9 @@ protected:
   /// The Y dimensions of the workspace (with the estimated bin resolution)
   Mantid::Geometry::IMDDimension_const_sptr m_Y;
 
-  /// nd-sized array indicating where the slice is being done in the OTHER dimensions
-  Mantid::coord_t * m_slicePoint;
+  /// nd-sized array indicating where the slice is being done in the OTHER
+  /// dimensions
+  Mantid::coord_t *m_slicePoint;
 
   /// Range of colors to plot
   QwtDoubleInterval m_range;

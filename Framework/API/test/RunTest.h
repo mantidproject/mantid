@@ -95,7 +95,7 @@ public:
 
   void testGetSetProtonCharge() {
     Run runInfo;
-    TS_ASSERT_THROWS(runInfo.getProtonCharge(), Exception::NotFoundError);
+    TS_ASSERT_EQUALS(runInfo.getProtonCharge(), 0.0);
     TS_ASSERT_THROWS_NOTHING(runInfo.setProtonCharge(10.0));
     TS_ASSERT_EQUALS(runInfo.getProtonCharge(), 10.0);
   }

@@ -5,9 +5,11 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -28,8 +30,8 @@ void FindCenterOfMassPosition2::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
                   "name will contain the center of mass position.");
@@ -255,7 +257,7 @@ void FindCenterOfMassPosition2::exec() {
   // otherwise use an ArrayProperty
   if (!output.empty()) {
     // Store the result in a table workspace
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
 
     // Set the name of the new workspace
@@ -275,7 +277,7 @@ void FindCenterOfMassPosition2::exec() {
   } else {
     // Store the results using an ArrayProperty
     if (!existsProperty("CenterOfMass"))
-      declareProperty(new ArrayProperty<double>(
+      declareProperty(make_unique<ArrayProperty<double>>(
           "CenterOfMass", boost::make_shared<NullValidator>(),
           Direction::Output));
     std::vector<double> center_of_mass;

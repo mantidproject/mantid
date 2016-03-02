@@ -29,7 +29,7 @@ public:
     LineEditWithClear(QWidget *parent = 0);
 
 protected:
-    void resizeEvent(QResizeEvent *);
+  void resizeEvent(QResizeEvent *) override;
 
 private slots:
     void updateCloseButton(const QString &text);

@@ -4,8 +4,6 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
 
-#include <sstream>
-
 namespace Mantid {
 namespace Kernel {
 
@@ -23,33 +21,6 @@ PropertyHistory::PropertyHistory(Property const *const prop)
       m_name(prop->name()),
       m_value(prop->value()), m_type(prop->type()),
       m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
-
-/// Destructor
-PropertyHistory::~PropertyHistory() {}
-
-/**
- * Standard Copy Constructor
- * @param A :: PropertyHistory Item to copy
- */
-PropertyHistory::PropertyHistory(const PropertyHistory &A)
-    : m_name(A.m_name), m_value(A.m_value), m_type(A.m_type),
-      m_isDefault(A.m_isDefault), m_direction(A.m_direction) {}
-
-/**
- * Standard Assignment operator
- * @param A :: PropertyHistory Item to assign to 'this'
- * @return pointer to this
- */
-PropertyHistory &PropertyHistory::operator=(const PropertyHistory &A) {
-  if (this != &A) {
-    m_name = A.m_name;
-    m_value = A.m_value;
-    m_type = A.m_type;
-    m_isDefault = A.m_isDefault;
-    m_direction = A.m_direction;
-  }
-  return *this;
-}
 
 /** Prints a text representation of itself
  *  @param os :: The ouput stream to write to

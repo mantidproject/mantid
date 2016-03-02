@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 // Forward declarations
 class QwtPlot;
@@ -13,6 +14,15 @@ class QwtPlotMagnifier;
 class QTableWidget;
 class QComboBox;
 class QPushButton;
+class QwtPlotCurve;
+
+namespace Mantid
+{
+namespace API
+{
+  class IFunction;
+}
+}
 
 namespace MantidQt
 {
@@ -30,6 +40,7 @@ namespace MDF
 {
 
 class DatasetPlotData;
+class MDFFunctionPlotData;
 
 /**
   * A class for controlling the plot widget and the displayed data.
@@ -45,12 +56,14 @@ class PlotController: public QObject
 public:
   PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
   ~PlotController();
-  void clear();
+  void clear(bool clearGuess = false);
   void update();
   int getCurrentIndex() const {return m_currentIndex;}
   bool isZoomEnabled() const;
   bool isPanEnabled() const;
   bool isRangeSelectorEnabled() const;
+  void setGuessFunction(const QString& funStr);
+  void updateGuessFunction(const Mantid::API::IFunction& fun);
 signals:
   void currentIndexChanged(int);
   void fittingRangeChanged(int, double, double);
@@ -64,12 +77,14 @@ public slots:
   void zoomToRange();
   void exportCurrentPlot();
   void exportAllPlots();
+  void showGuessFunction(bool ok);
 private slots:
   void tableUpdated();
   void prevPlot();
   void nextPlot();
   void plotDataSet(int);
   void updateFittingRange(double startX, double endX);
+  void updateGuessPlot();
 private:
   MultiDatasetFit *owner() const;
   void disableAllTools();
@@ -78,6 +93,8 @@ private:
   boost::shared_ptr<DatasetPlotData> getData(int i);
   void exportPlot(int index);
   QString makePyPlotSource(int index) const;
+  void plotGuess();
+  void hideGuess();
 
   /// The plot widget
   QwtPlot *m_plot;
@@ -102,6 +119,10 @@ private:
   QMap<int,boost::shared_ptr<DatasetPlotData>> m_plotData;
   int m_currentIndex;
   bool m_showDataErrors;
+
+  /// Function guess
+  boost::scoped_ptr<MDFFunctionPlotData> m_guessFunctionData;
+  bool m_showGuessFunction;
 };
 
 } // MDF

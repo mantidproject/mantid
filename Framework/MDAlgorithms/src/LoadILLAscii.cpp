@@ -8,18 +8,22 @@
  *WIKI*/
 
 #include "MantidMDAlgorithms/LoadILLAscii.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
+
+#include <boost/shared_ptr.hpp>
+#include <Poco/TemporaryFile.h>
 
 #include <algorithm>
 #include <iterator> // std::distance
@@ -27,9 +31,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-
-#include <boost/shared_ptr.hpp>
-#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -45,7 +46,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
  */
 LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
   // Add here supported instruments by this loader
-  m_supportedInstruments.push_back("D2B");
+  m_supportedInstruments.emplace_back("D2B");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -101,9 +102,10 @@ const std::string LoadILLAscii::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
-                  "Name of the data file to load.");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ""),
+      "Name of the data file to load.");
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 }
@@ -230,6 +232,8 @@ void LoadILLAscii::loadIDF(API::MatrixWorkspace_sptr &workspace) {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          OptionalBool(OptionalBool::True));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");
@@ -246,16 +250,16 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
   thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
 
   size_t spec = 0;
-  for (size_t i = 0; i < thisSpectrum.size(); ++i) {
+  for (auto value : thisSpectrum) {
 
     if (spec > 0) {
       // just copy the time binning axis to every spectra
       thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
     }
     // Assign Y
-    thisWorkspace->dataY(spec)[0] = thisSpectrum[i];
+    thisWorkspace->dataY(spec)[0] = value;
     // Assign Error
-    thisWorkspace->dataE(spec)[0] = thisSpectrum[i] * thisSpectrum[i];
+    thisWorkspace->dataE(spec)[0] = value * value;
 
     ++spec;
   }
@@ -291,7 +295,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
-  if (workspaceList.size() > 0) {
+  if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
     for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
       std::size_t pos = std::distance(workspaceList.begin(), it);

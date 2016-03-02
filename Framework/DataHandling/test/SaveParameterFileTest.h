@@ -136,7 +136,7 @@ public:
         param->value<FitParameter>();
 
     // Info about fitting parameter is in string value, see FitParameter class
-    typedef Poco::StringTokenizer tokenizer;
+    typedef Mantid::Kernel::StringTokenizer tokenizer;
     tokenizer values(value, ",", tokenizer::TOK_TRIM);
     TS_ASSERT_EQUALS(fitParam.getFormula(), values[7]);
     TS_ASSERT_EQUALS(fitParam.getFunction(), values[1]);
@@ -177,6 +177,8 @@ public:
     loaderIDF2.setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
+    loaderIDF2.setProperty("RewriteSpectraMap",
+                           Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 

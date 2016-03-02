@@ -144,7 +144,7 @@ class ColorPickerButton : public QFrame
     Q_OBJECT
 
 public:
-    ColorPickerButton(QWidget *parent);
+  explicit ColorPickerButton(QWidget *parent);
 
 signals:
     void clicked();

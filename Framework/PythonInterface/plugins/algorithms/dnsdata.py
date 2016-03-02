@@ -74,15 +74,18 @@ class DNSdata(object):
 
             # parse each block
             # parse block 0 (header)
-            res = parse_header(blocks[0])
-            # if not res: raise Exception "wrong file format" else
-            try:
-                self.run_number = res['file']
-                self.experiment_number = res['exp']
-                self.sample_name = res['sample']
-                self.userid = res['userid']
-            except:
+            # if header does not start with # DNS: raise Exception "wrong file format" else
+            if not blocks[0].startswith('# DNS'):
                 raise RuntimeError("The file %s does not contain valid DNS data format." % filename)
+
+            res = parse_header(blocks[0])
+            # try to parse parameters, perform nothing if not successfull: sample and userid may be empty
+            self.run_number = res['file']
+            self.experiment_number = res['exp']
+            if res.has_key('sample'):
+                self.sample_name = res['sample']
+            if res.has_key('userid'):
+                self.userid = res['userid']
             # parse block 1 (general information)
             b1splitted = [s.strip() for s in blocks[1].split('#')]
             b1rest = [el for el in b1splitted]
@@ -213,7 +216,7 @@ def parse_header(header):
     parses the header string and returns the parsed dictionary
     """
     header_dict = {}
-    regexp = re.compile(r"(\w+)=(\w+)")
+    regexp = re.compile(r"(\w+)=(\w+\s?\w*)")
     result = regexp.finditer(header)
     for res in result:
         header_dict[res.groups()[0]] = res.groups()[1]

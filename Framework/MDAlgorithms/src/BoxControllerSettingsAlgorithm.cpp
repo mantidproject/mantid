@@ -35,29 +35,28 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
   mustBeMoreThen1->setLower(1);
 
   // Split up comma-separated properties
-  std::vector<int> value;
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(SplitInto, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  value.clear();
-  value.reserve(values.count());
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-    value.push_back(boost::lexical_cast<int>(*it));
+  std::vector<int> valueVec;
+  valueVec.reserve(values.count());
+  for (const auto &value : values)
+    valueVec.push_back(boost::lexical_cast<int>(value));
 
   declareProperty(
-      new ArrayProperty<int>("SplitInto", value),
+      Kernel::make_unique<ArrayProperty<int>>("SplitInto", valueVec),
       "A comma separated list of into how many sub-grid elements each "
       "dimension should split; "
       "or just one to split into the same number for all dimensions. Default " +
           SplitInto + ".");
 
   declareProperty(
-      new PropertyWithValue<int>("SplitThreshold", SplitThreshold,
-                                 mustBePositive),
+      make_unique<PropertyWithValue<int>>("SplitThreshold", SplitThreshold,
+                                          mustBePositive),
       "How many events in a box before it should be split. Default " +
           Strings::toString(SplitThreshold) + ".");
 
-  declareProperty(new PropertyWithValue<int>(
+  declareProperty(make_unique<PropertyWithValue<int>>(
                       "MaxRecursionDepth", MaxRecursionDepth, mustBeMoreThen1),
                   "How many levels of box splitting recursion are allowed. "
                   "The smallest box will have each side length :math:`l = "

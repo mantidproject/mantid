@@ -1,10 +1,12 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/RegisterFileLoader.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -50,12 +52,12 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, ".xml"),
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
       "The filename (including its full or relative path) of an instrument\n"
       "definition file");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace in which to store the imported instrument");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -69,9 +71,10 @@ void LoadEmptyInstrument::init() {
       "This value affects the colour of the monitors in the instrument\n"
       "display window (default 2)");
 
-  declareProperty(new PropertyWithValue<bool>("MakeEventWorkspace", false),
-                  "Set to True to create an EventWorkspace (with no events) "
-                  "instead of a Workspace2D.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("MakeEventWorkspace", false),
+      "Set to True to create an EventWorkspace (with no events) "
+      "instead of a Workspace2D.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -173,6 +176,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
   loadInst->setPropertyValue("Filename", fullPathIDF);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   MatrixWorkspace_sptr ws =
       WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);

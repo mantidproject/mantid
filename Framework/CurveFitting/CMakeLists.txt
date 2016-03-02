@@ -1,8 +1,4 @@
 set ( SRC_FILES
-	#	src/CostFuncIgnorePosPeaks.cpp
-	#	src/SCDPanelErrors.cpp
-	# src/ChebyshevPolynomialBackground.cpp
-	#src/RefinePowderInstrumentParameters.cpp
 	src/Algorithms/CalculateChiSquared.cpp
 	src/Algorithms/CalculateGammaBackground.cpp
 	src/Algorithms/CalculateMSVesuvio.cpp
@@ -91,6 +87,7 @@ set ( SRC_FILES
 	src/Functions/StaticKuboToyabe.cpp
 	src/Functions/StaticKuboToyabeTimesExpDecay.cpp
 	src/Functions/StaticKuboToyabeTimesGausDecay.cpp
+	src/Functions/StaticKuboToyabeTimesStretchExp.cpp
 	src/Functions/StretchExp.cpp
 	src/Functions/StretchExpMuon.cpp
 	src/Functions/TabulatedFunction.cpp
@@ -121,10 +118,6 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
-	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
-	#	inc/MantidCurveFitting/SCDPanelErrors.h
-	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
-	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
 	inc/MantidCurveFitting/Algorithms/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h
@@ -214,6 +207,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
 	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
 	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
+	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesStretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExpMuon.h
 	inc/MantidCurveFitting/Functions/TabulatedFunction.h
@@ -334,6 +328,7 @@ set ( TEST_FILES
 	Functions/StaticKuboToyabeTest.h
 	Functions/StaticKuboToyabeTimesExpDecayTest.h
 	Functions/StaticKuboToyabeTimesGausDecayTest.h
+	Functions/StaticKuboToyabeTimesStretchExpTest.h
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h

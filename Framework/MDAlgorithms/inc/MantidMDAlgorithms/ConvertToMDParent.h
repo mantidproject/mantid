@@ -48,22 +48,22 @@ namespace MDAlgorithms {
 class DLLExport ConvertToMDParent : public BoxControllerSettingsAlgorithm {
 public:
   ConvertToMDParent() {}
-  ~ConvertToMDParent() {}
+  ~ConvertToMDParent() override {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const = 0;
+  const std::string name() const override = 0;
   /// Algorithm's version for identification
-  virtual int version() const = 0;
+  int version() const override = 0;
   /// Algorithm's category for identification
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 protected:
-  void init();
+  void init() override;
   //
   DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions(
       const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &dEModeRequested, bool updateMasks,
-      const std::string &preproc_detectorsWSName);
+      const std::string &OutWSName);
   DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(
       const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &OutWSName, const std::string &dEModeRequested,

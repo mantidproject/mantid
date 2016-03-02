@@ -44,11 +44,11 @@ ParameterTie::~ParameterTie() {
  * @return pointer to added variable
  */
 double *ParameterTie::AddVariable(const char *varName, void *palg) {
-  ParameterTie &tie = *(ParameterTie *)palg;
+  ParameterTie &tie = *reinterpret_cast<ParameterTie *>(palg);
   ParameterReference ref(tie.m_function1,
                          tie.m_function1->parameterIndex(std::string(varName)));
 
-  double *var = new double;
+  auto var = new double;
   *var = 0;
   tie.m_varMap[var] = ref;
 
@@ -65,7 +65,7 @@ void ParameterTie::set(const std::string &expr) {
        it != m_varMap.end(); ++it) {
     delete it->first;
   }
-  if (m_varMap.size()) {
+  if (!m_varMap.empty()) {
     m_varMap.clear();
   }
   try { // Set the expression and initialize the variables
@@ -137,7 +137,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
   try {
     res_expression = fun->parameterName(fun->getParameterIndex(*this)) + "=";
 
-    if (m_varMap.size() == 0) { // constants
+    if (m_varMap.empty()) { // constants
       return res_expression + m_expression;
       ;
     }
@@ -152,12 +152,10 @@ std::string ParameterTie::asString(const IFunction *fun) const {
 
       int iTemp = boost::lexical_cast<int>(res[1]);
       int i = 0;
-      for (std::map<double *, ParameterReference>::const_iterator it =
-               m_varMap.begin();
-           it != m_varMap.end(); ++it) {
+      for (const auto &var : m_varMap) {
         if (i == iTemp) {
           res_expression +=
-              fun->parameterName(fun->getParameterIndex(it->second));
+              fun->parameterName(fun->getParameterIndex(var.second));
           break;
         }
         i++;
@@ -178,10 +176,8 @@ std::string ParameterTie::asString(const IFunction *fun) const {
  * @return True if any of the parameters is used as a variable in the mu::Parser
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
-  for (std::map<double *, ParameterReference>::const_iterator it =
-           m_varMap.begin();
-       it != m_varMap.end(); ++it) {
-    if (it->second.getFunction() == fun) {
+  for (const auto &varPair : m_varMap) {
+    if (varPair.second.getFunction() == fun) {
       return true;
     }
   }

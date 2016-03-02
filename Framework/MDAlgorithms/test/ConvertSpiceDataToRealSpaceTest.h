@@ -4,13 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidDataHandling/LoadSpiceAscii.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -56,6 +58,7 @@ public:
 
     loader.setProperty("InstrumentName", "HB2A");
     loader.setProperty("Workspace", dataws);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());

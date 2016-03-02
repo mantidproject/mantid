@@ -9,6 +9,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -28,7 +29,7 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(NULL),
+    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
       m_ParallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
@@ -61,12 +62,12 @@ const std::string CompareWorkspaces::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace1", "", Direction::Input),
-      "The name of the first input workspace.");
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace2", "", Direction::Input),
-      "The name of the second input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
+                                                            Direction::Input),
+                  "The name of the first input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
+                                                            Direction::Input),
+                  "The name of the second input workspace.");
 
   declareProperty(
       "Tolerance", 0.0,
@@ -107,8 +108,8 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("Messages", "compare_msgs",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
   m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -132,6 +133,11 @@ void CompareWorkspaces::exec() {
   if (!m_Result) {
     std::string message = m_Messages->cell<std::string>(0, 0);
     g_log.notice() << "The workspaces did not match: " << message << std::endl;
+  } else {
+    std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
+    std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->name();
+    g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
+                   << "\" matched!" << std::endl;
   }
 
   setProperty("Result", m_Result);
@@ -171,6 +177,11 @@ bool CompareWorkspaces::processGroups() {
         "Type mismatch. One workspace is a group, the other is not.");
   }
 
+  if (m_Result && ws1 && ws2) {
+    g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
+                   << "\" and \"" << ws2->name() << "\" matched!" << std::endl;
+  }
+
   setProperty("Result", m_Result);
   setProperty("Messages", m_Messages);
 
@@ -206,8 +217,7 @@ void CompareWorkspaces::processGroups(
   const std::vector<Property *> &allProps = this->getProperties();
   std::vector<Property *> nonDefaultProps;
   nonDefaultProps.reserve(allProps.size());
-  for (size_t i = 0; i < allProps.size(); ++i) {
-    Property *p = allProps[i];
+  for (auto p : allProps) {
     const std::string &propName = p->name();
     // Skip those not set and the input workspaces
     if (p->isDefault() || propName == "Workspace1" || propName == "Workspace2")
@@ -223,8 +233,8 @@ void CompareWorkspaces::processGroups(
     // We should use an algorithm for each so that the output properties are
     // reset properly
     Algorithm_sptr checker = this->createChildAlgorithm(
-        this->name(), progressFraction * (double)i,
-        progressFraction * (double)(i + 1), false, this->version());
+        this->name(), progressFraction * static_cast<double>(i),
+        progressFraction * static_cast<double>(i + 1), false, this->version());
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for (size_t j = 0; j < numNonDefault; ++j) {
@@ -661,8 +671,8 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     Unit_const_sptr ax1_unit = ax1->unit();
     Unit_const_sptr ax2_unit = ax2->unit();
 
-    if ((ax1_unit == NULL && ax2_unit != NULL) ||
-        (ax1_unit != NULL && ax2_unit == NULL) ||
+    if ((ax1_unit == nullptr && ax2_unit != nullptr) ||
+        (ax1_unit != nullptr && ax2_unit == nullptr) ||
         (ax1_unit && ax1_unit->unitID() != ax2_unit->unitID())) {
       recordMismatch(axis_name + " unit mismatch");
       return false;
@@ -731,9 +741,9 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
       recordMismatch(out.str());
       return false;
     }
-    std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
-    std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
-    for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2) {
+    auto it2 = spec2->getDetectorIDs().cbegin();
+    for (auto it1 = spec1->getDetectorIDs().cbegin();
+         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/FFTDerivative.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 #include <functional>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -15,11 +17,11 @@ using namespace Mantid::API;
 
 void FFTDerivative::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Input workspace for differentiation");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace with result derivatives");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace with result derivatives");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("Order", 1, mustBePositive, "The order of the derivative");

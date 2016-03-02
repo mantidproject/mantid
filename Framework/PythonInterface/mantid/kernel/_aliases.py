@@ -2,11 +2,12 @@
     Defines a set of aliases for the kernel module to make
     accessing certain objects easier.
 """
-from _kernel import ConfigServiceImpl, Logger, UnitFactoryImpl
+from _kernel import ConfigServiceImpl, Logger, UnitFactoryImpl, UsageServiceImpl
 
 ###############################################################################
 # Singletons - Make them just look like static classes
 ###############################################################################
+UsageService = UsageServiceImpl.Instance()
 ConfigService = ConfigServiceImpl.Instance()
 config = ConfigService
 

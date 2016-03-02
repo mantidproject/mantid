@@ -130,6 +130,13 @@ Output:
     Ki Kf
     Pz_i + Pz_f Pz_i - Pz_f
     
+Plot of the SignedTheta vs Wavelength workspace:
+================================================
+Before the ConvertToReflectometryQ algorithm is executed in the usage example above, the plot of the 'SignedTheta_vs_Wavelength' workspace should resemble this plot:
+
+.. figure:: /images/SignedThetaVSlam_plot.png
+   :alt: plot of Signed theta vs lambda. 
+    
 Patch Plot with Dumped Vertexes
 ###############################
 

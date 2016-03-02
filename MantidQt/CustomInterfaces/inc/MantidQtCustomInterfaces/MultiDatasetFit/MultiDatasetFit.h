@@ -101,6 +101,7 @@ private slots:
   void setLogNames();
   void setParameterNamesForPlotting();
   void invalidateOutput();
+  void updateGuessFunction(const QString&, const QString&);
 
 protected:
   virtual void initLayout();

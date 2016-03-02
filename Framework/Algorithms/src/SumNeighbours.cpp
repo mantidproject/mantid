@@ -27,7 +27,7 @@ using namespace DataObjects;
  *
  */
 void SumNeighbours::init() {
-  declareProperty(new WorkspaceProperty<Mantid::API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
@@ -35,8 +35,8 @@ void SumNeighbours::init() {
                   "pixelID (e.g. no grouping or previous calls to "
                   "SumNeighbours).");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
@@ -74,6 +74,10 @@ void SumNeighbours::exec() {
 
   Mantid::API::MatrixWorkspace_sptr outWS;
 
+  Progress progress(this, 0, 1, 2);
+
+  progress.report("Smoothing Neighbours...");
+
   IAlgorithm_sptr smooth = createChildAlgorithm("SmoothNeighbours");
   smooth->setProperty("InputWorkspace", inWS);
   if (rect) {
@@ -87,6 +91,8 @@ void SumNeighbours::exec() {
     smooth->setProperty("SumNumberOfNeighbours", SumX * SumY);
   }
   smooth->executeAsChildAlg();
+
+  progress.report();
   // Get back the result
   outWS = smooth->getProperty("OutputWorkspace");
   // Cast to the matrixOutputWS and save it

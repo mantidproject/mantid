@@ -10,21 +10,6 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IMDHistoWorkspace::IMDHistoWorkspace()
-    : IMDWorkspace(), MultipleExperimentInfos() {}
-
-//----------------------------------------------------------------------------------------------
-/** Copy Constructor
- */
-IMDHistoWorkspace::IMDHistoWorkspace(const IMDHistoWorkspace &other)
-    : IMDWorkspace(other), MultipleExperimentInfos(other) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IMDHistoWorkspace::~IMDHistoWorkspace() {}
 
 const std::string IMDHistoWorkspace::toString() const {
   std::ostringstream os;
@@ -51,8 +36,9 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IMDHistoWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IMDHistoWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -71,7 +57,7 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name +
-        " to incorrect type. Expected const IMDHistoWorkspace.";
+        " to incorrect type. Expected const shared_ptr<IMDHistoWorkspace>.";
     throw std::runtime_error(message);
   }
 }

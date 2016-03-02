@@ -21,11 +21,6 @@ SplittersWorkspace::SplittersWorkspace() {
   this->addColumn("int", "workspacegroup");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplittersWorkspace::~SplittersWorkspace() {}
-
 /*
  * Add a Splitter to
  */
@@ -91,8 +86,9 @@ IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected SplittersWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<SplittersWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -110,7 +106,7 @@ IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name +
-        " to incorrect type. Expected const SplittersWorkspace.";
+        " to incorrect type. Expected const shared_ptr<SplittersWorkspace>.";
     throw std::runtime_error(message);
   }
 }

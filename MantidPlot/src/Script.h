@@ -65,7 +65,7 @@ class Script : public QObject
   Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
          QObject * context = NULL);
   /// Destructor
-  ~Script();
+  ~Script() override;
   /// Returns the envirnoment this script is tied to
   inline ScriptingEnv *environment() { return m_env; }
   /// Returns the identifier for the script.
@@ -159,9 +159,9 @@ private:
   class ScriptTask : public QFutureInterface<bool>, public QRunnable
   {
   public:
-    ScriptTask(Script & script);
+    explicit ScriptTask(Script &script);
     QFuture<bool> start();
-    void run();
+    void run() override;
 
   private:
     ScriptTask();

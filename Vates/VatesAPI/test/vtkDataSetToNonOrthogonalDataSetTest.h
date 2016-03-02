@@ -2,6 +2,7 @@
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASETTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <MantidVatesAPI/ADSWorkspaceProvider.h>
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -20,6 +21,8 @@
 #include <vtkPoints.h>
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 #include <vtkUnstructuredGrid.h>
+#include <vtkNew.h>
+#include <vtkSmartPointer.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -227,86 +230,94 @@ public:
   void testThrowIfVtkDatasetNull()
   {
     vtkDataSet *dataset = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, ""),
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, "", std::move(workspaceProvider)),
                      std::runtime_error);
   }
 
-  void testThrowsIfWorkspaceNameEmpty()
-  {
-    vtkUnstructuredGrid *dataset = vtkUnstructuredGrid::New();
-    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, ""),
-                     std::runtime_error);
-    dataset->Delete();
+  void testThrowsIfWorkspaceNameEmptyAndUsingADSWorkspaceProvider() {
+    vtkNew<vtkUnstructuredGrid> dataset;
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    TS_ASSERT_THROWS(
+        vtkDataSetToNonOrthogonalDataSet temp(dataset.GetPointer(), "", std::move(workspaceProvider)),
+        std::runtime_error);
   }
 
-  void testThrowIfVtkDatasetWrongType()
-  {
-    vtkRectilinearGrid *grid = vtkRectilinearGrid::New();
-    vtkDataSetToNonOrthogonalDataSet converter(grid, "name");
+  void testThrowIfVtkDatasetWrongType() {
+    vtkNew<vtkRectilinearGrid> grid;
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(grid.GetPointer(), "name", std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::runtime_error);
-    grid->Delete();
   }
 
   void testSimpleDataset()
   {
     std::string wsName = createMantidWorkspace(false);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     this->checkUnityTransformation(ds);
-    ds->Delete();
   }
 
   void testThrowsSimpleDatasetWrongCoords()
   {
     std::string wsName = createMantidWorkspace(false, true);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
-    ds->Delete();
   }
 
   void testThrowsSimpleDatasetNoUB()
   {
     std::string wsName = createMantidWorkspace(false, false, true);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
-    ds->Delete();
   }
 
   void testThrowsSimpleDatasetNoWMatrix()
   {
     std::string wsName = createMantidWorkspace(false, false, false, true);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
-    ds->Delete();
   }
 
   void testNoThrowsSimpleDataSetNoAffineMatrix()
   {
     std::string wsName = createMantidWorkspace(false, false, false, false, true);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
-    ds->Delete();
   }
 
   void testStaticUseForSimpleDataSet()
   {
     std::string wsName = createMantidWorkspace(false);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(ds,
-                                                                    wsName));
-    ds->Delete();
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    TS_ASSERT_THROWS_NOTHING(
+        vtkDataSetToNonOrthogonalDataSet::exec(ds, wsName, std::move(workspaceProvider)));
   }
 
   void testNonUnitySimpleDataset()
   {
     std::string wsName = createMantidWorkspace(true);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     // Now, check some values
     /// Get the (1,1,1) point
@@ -344,25 +355,26 @@ public:
     TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
     TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
     TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
-
-    ds->Delete();
   }
 
   void testScaledSimpleDataset()
   {
     std::string wsName = createMantidWorkspace(false, false, false, false, false, 2.0);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     this->checkUnityTransformation(ds);
-    ds->Delete();
   }
 
   void testScaledNonUnitySimpleDataset()
   {
     std::string wsName = createMantidWorkspace(true, false, false, false, false, 2.0);
-    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    vtkSmartPointer<vtkUnstructuredGrid> ds;
+    ds.TakeReference(createSingleVoxelPoints());
+    auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName, std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     // Now, check some values
     /// Get the (1,1,1) point
@@ -400,8 +412,6 @@ public:
     TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
     TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
     TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
-
-    ds->Delete();
   }
 };
 

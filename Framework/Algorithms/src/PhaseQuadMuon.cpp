@@ -2,8 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspaceValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
@@ -18,17 +20,16 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  *
  */
 void PhaseQuadMuon::init() {
-
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace containing the spectra");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>("PhaseTable", "",
-                                                       Direction::Input),
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "PhaseTable", "", Direction::Input),
       "Name of the table containing the detector phases and asymmetries");
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
@@ -72,9 +73,18 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   // Check that input ws and table ws have compatible dimensions
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   API::ITableWorkspace_const_sptr tabWS = getProperty("PhaseTable");
-
+  if (!inputWS) {
+    result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
+                               "provide a MatrixWorkspace as the "
+                               "InputWorkspace";
+    return result;
+  }
   size_t nspec = inputWS->getNumberHistograms();
   size_t ndet = tabWS->rowCount();
+
+  if (tabWS->columnCount() == 0) {
+    result["PhaseTable"] = "Please provide a non-empty PhaseTable.";
+  }
 
   if (nspec != ndet) {
     result["PhaseTable"] = "PhaseTable must have one row per spectrum";
@@ -169,7 +179,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       maxAsym = phase->Double(h, 1);
     }
   }
-  if (!maxAsym) {
+  if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
 

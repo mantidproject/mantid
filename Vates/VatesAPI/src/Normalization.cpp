@@ -57,21 +57,17 @@ createIteratorWithNormalization(const VisualNormalization normalizationOption,
   if (normalizationOption == AutoSelect) {
     // enum to enum.
     targetNormalization =
-      static_cast<MDNormalization>(ws->displayNormalization());
-  }
-  else {
+        static_cast<MDNormalization>(ws->displayNormalization());
+  } else {
     targetNormalization = static_cast<MDNormalization>(normalizationOption);
   }
 
   // Create the iterator
-  IMDIterator * iterator = ws->createIterator();
+  IMDIterator *iterator = ws->createIterator();
   // Set normalization
   iterator->setNormalization(targetNormalization);
   // Return it
   return iterator;
 }
-
-
-
 }
 }

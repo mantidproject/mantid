@@ -47,21 +47,21 @@ class SCDCalibratePanels : public Mantid::API::Algorithm {
 public:
   SCDCalibratePanels();
 
-  virtual ~SCDCalibratePanels();
+  ~SCDCalibratePanels() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Panel parameters, sample position,L0 and T0 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /**
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the
@@ -106,7 +106,7 @@ public:
    *the
    *                        NewInstrument's parameter map.
    *
-   *   @param RotateCenters Rotate the centers of the panels(the same amount)
+   *   @param RotCenters Rotate the centers of the panels(the same amount)
    *with the
    *                        rotation of panels around their center
    */
@@ -116,7 +116,7 @@ public:
       Kernel::V3D const pos, Kernel::Quat const rot, double const DetWScale,
       double const DetHtScale,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
-      bool RotateCenters);
+      bool RotCenters);
 
   /**
    * *  Updates the ParameterMap for NewInstrument to reflect the position of
@@ -141,6 +141,22 @@ public:
       double const L0, Kernel::V3D const newSampPos,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
 
+  struct compareBanks {
+    bool operator()(const std::string &lhs, const std::string &rhs) const {
+      std::string bankPart = "bank";
+      std::string bankName = lhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank1 = 0;
+      Kernel::Strings::convert(bankName, bank1);
+      bankName = rhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank2 = 0;
+      Kernel::Strings::convert(bankName, bank2);
+      return bank1 < bank2;
+    }
+  };
   /**
    * Given a string representation of a set of groups( [] separated list of
    * bank nums separated by commas or colons( for ranges) , this method will
@@ -164,7 +180,7 @@ public:
    *names.
    *
    */
-  void CalculateGroups(std::set<std::string> &AllBankNames,
+  void CalculateGroups(std::set<std::string, compareBanks> &AllBankNames,
                        std::string Grouping, std::string bankPrefix,
                        std::string bankingCode,
                        std::vector<std::vector<std::string>> &Groups);
@@ -230,14 +246,16 @@ private:
                       std::set<std::string> &AllBankName, double T0,
                       std::string filename);
 
-  void createResultWorkspace(const int numGroups,
+  void createResultWorkspace(const int numGroups, const int colNum,
                              const std::vector<std::string> &names,
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
 
-  void exec();
+  void exec() override;
 
-  void init();
+  void init() override;
+
+  API::ITableWorkspace_sptr Result;
 
   /**
    * Creates a new instrument when a calibration file( .xml or .detcal)

@@ -4,10 +4,13 @@
 #include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
-#include <sstream>
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
+
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -17,7 +20,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ConvolveWorkspaces)
 
 /// Constructor
-ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(NULL) {}
+ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(nullptr) {}
 
 /// Virtual destructor
 ConvolveWorkspaces::~ConvolveWorkspaces() { delete prog; }
@@ -29,15 +32,15 @@ using namespace Geometry;
 using namespace Functions;
 
 void ConvolveWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace2D>("Workspace1", "", Direction::Input),
-      "The name of the first input workspace.");
-  declareProperty(
-      new WorkspaceProperty<Workspace2D>("Workspace2", "", Direction::Input),
-      "The name of the second input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "",
+                                                              Direction::Input),
+                  "The name of the first input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "",
+                                                              Direction::Input),
+                  "The name of the second input workspace.");
 
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "",
-                                                     Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 }
 

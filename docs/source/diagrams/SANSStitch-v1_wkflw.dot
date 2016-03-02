@@ -1,0 +1,118 @@
+digraph SansStitch {
+    label="SANSStitch Flowchart";
+    $global_style
+
+    subgraph params {
+        $param_style
+        hABCountsSample [label="HABCountsSample"];
+        lABCountsSample [label="LABCountsSample"];
+        hABNormSample [label="HABNormSample"];
+        lABNormSample [label="LABNormSample"];
+        hABCountsCan [label="HABCountsCan"];
+        lABCountsCan [label="LABCountsCan"];
+        hABNormCan [label="HABNormCan"];
+        lABNormCan [label="LABNormCan"];
+        processCan [label="ProcessCan"];
+        scaleFactor [label="ScaleFactor"];
+        shiftFactor [label="ShiftFactor"];
+        outputWorkspace [label="OutputWorkspace"];
+        outScaleFactor [label="OutScaleFactor"];
+        outShiftFactor [label="OutShiftFactor"];
+        mode [label="Mode"];
+    }
+
+    subgraph decisions {
+        $decision_style
+        checkProcessCan [label="Process the can?"];
+        checkModeForFit [label="Mode Requires Fitting"];
+    }
+
+    subgraph algorithms {
+        $algorithm_style
+        divideHABSample [label="Divide\nHAB sample\ncounts/normalization"];
+        divideLABSample [label="Divide\nLAB sample\ncounts/normalization"];
+        divideHABCan [label="Divide\nHAB can\ncounts/normalization"];
+        divideLABCan [label="Divide\nLAB can\ncounts/normalization"];
+        subtractCanHAB [label="Subtract"];
+        subtractCanLAB [label="Subtract"];
+        sansFitShiftScale [label="SANSFitShiftScale"];
+        subtractMerged [label="Subtract"];
+    }
+
+    subgraph processes {
+        $process_style
+        errorCorrection [label="Error Correction Merged Workspace"];
+        calculateMergedQ [label="Calculate Merged Q"];
+        calculateMergedQCan [label="Calculate Merged Q Can"];
+        readCanInputs [label="Read Can Inputs"];
+        copyShiftFactor [label="Copy Shift Factor"];
+        copyScaleFactor [label="Copy Scale Factor"];
+    }
+
+    subgraph cluster {
+        color=blue;
+        label="Can Processing";
+        node [style=filled];
+        readCanInputs -> hABCountsCan;
+        readCanInputs -> lABCountsCan;
+        readCanInputs -> hABNormCan;
+        readCanInputs -> lABNormCan;
+        hABCountsCan -> divideHABCan;
+        hABNormCan -> divideHABCan;
+        lABCountsCan -> divideLABCan;
+        lABNormCan -> divideLABCan;
+        divideHABCan -> subtractCanHAB;
+        divideLABCan -> subtractCanLAB;
+        hABCountsCan -> calculateMergedQCan;
+        hABNormCan -> calculateMergedQCan;
+        lABCountsCan -> calculateMergedQCan;
+        lABNormCan -> calculateMergedQCan;
+        calculateMergedQCan -> subtractMerged;
+    }
+
+    subgraph values {
+        $value_style
+        valQLAB [label="LAB Normalized"];
+        valQHAB [label="HAB Normalized"];
+        mergedQ [label="Merged"];
+    }
+
+    hABCountsSample -> divideHABSample;
+    hABNormSample -> divideHABSample;
+    lABCountsSample -> divideLABSample;
+    lABNormSample -> divideLABSample;
+    divideLABSample -> valQLAB  [label="If can is not processed."];
+    divideHABSample -> valQHAB  [label="If can is not processed."];
+    processCan -> checkProcessCan;
+    divideHABSample -> subtractCanHAB;
+    divideLABSample -> subtractCanLAB;
+    subtractCanHAB -> valQHAB  [label="If can is processed."];
+    subtractCanLAB -> valQLAB  [label="If can is processed."];
+    checkProcessCan -> readCanInputs  [label="yes"];
+    mode -> checkModeForFit;
+    checkModeForFit -> sansFitShiftScale  [label="yes"];
+    valQHAB -> sansFitShiftScale;
+    valQLAB -> sansFitShiftScale;
+    scaleFactor -> sansFitShiftScale;
+    shiftFactor -> sansFitShiftScale;
+    sansFitShiftScale -> outShiftFactor;
+    sansFitShiftScale -> outScaleFactor;
+    checkModeForFit -> copyScaleFactor  [label="no"];
+    checkModeForFit -> copyShiftFactor  [label="no"];
+    scaleFactor -> copyScaleFactor;
+    shiftFactor -> copyShiftFactor;
+    copyScaleFactor -> outScaleFactor;
+    copyShiftFactor -> outShiftFactor;
+    outScaleFactor -> calculateMergedQ;
+    outShiftFactor -> calculateMergedQ;
+    outScaleFactor -> calculateMergedQCan;
+    hABCountsSample -> calculateMergedQ;
+    hABNormSample -> calculateMergedQ;
+    lABCountsSample -> calculateMergedQ;
+    lABNormSample -> calculateMergedQ;
+    calculateMergedQ -> subtractMerged;
+    calculateMergedQ -> mergedQ  [label="If can is processed."];
+    subtractMerged -> mergedQ  [label="If can is not processed."];
+    mergedQ -> errorCorrection;
+    errorCorrection -> outputWorkspace;
+}

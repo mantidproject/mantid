@@ -1,7 +1,11 @@
 .. _Workspace2D:
 
+===========
 Workspace2D
 ===========
+
+.. contents::
+  :local:
 
 The Workspace2D is a Mantid data type for a
 :ref:`MatrixWorkspace <MatrixWorkspace>`.
@@ -17,6 +21,32 @@ histogram (with X,Y,E values) but preserves the underlying event data.
 
 For more information on what a Workspace2D contains, see 
 :ref:`MatrixWorkspace <MatrixWorkspace>`.
+
+Working with Workspace2Ds in Python
+-----------------------------------
+
+Workspace2D is a :ref:`MatrixWorkspace <MatrixWorkspace>` and does not offer any functionality above that of a Matrix Workspace.
+
+Accessing Workspaces
+####################
+
+The methods for getting a variable to an EventWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+
+If you want to check if a variable points to something that is a Workspace2D you can use this:
+
+.. testcode:: CheckWorkspace2D
+
+    histoWS = CreateSampleWorkspace()
+
+    if histoWS.id() == "Workspace2D":
+        print histoWS.getName() + " is an " + histoWS.id()
+
+Output:
+
+.. testoutput:: CheckWorkspace2D
+    :options: +NORMALIZE_WHITESPACE
+
+    histoWS is an Workspace2D
 
 .. include:: WorkspaceNavigation.txt
 

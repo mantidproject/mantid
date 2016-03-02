@@ -12,6 +12,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "PropertyManagerHelper.h"
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -134,6 +135,37 @@ public:
                       binIndexA);
     TSM_ASSERT_EQUALS("bin index has not been calculated correctly.", 2,
                       binIndexB);
+  }
+
+  /**
+  * Test declaring an input workspace and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    IMDWorkspace_sptr wsInput(new WorkspaceTester());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IMDWorkspace_const_sptr wsConst;
+    IMDWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IMDWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<IMDWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IMDWorkspace_const_sptr wsCastConst;
+    IMDWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

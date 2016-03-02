@@ -11,7 +11,7 @@ class SofQWMomentsTest(unittest.TestCase):
         ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=function, XMin=0, XMax=10, BinWidth=0.01, XUnit="DeltaE")
         ws = ScaleX(ws, -5, "Add") #shift to center on 0
         ws = ScaleX(ws, 0.1) #scale to size
-        LoadInstrument(ws, InstrumentName='IRIS')
+        LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=True)
         return ws
 
     def test_sofqwmoments(self):

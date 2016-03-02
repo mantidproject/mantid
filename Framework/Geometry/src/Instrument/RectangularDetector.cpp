@@ -21,8 +21,8 @@ using Kernel::Matrix;
 /** Empty constructor
  */
 RectangularDetector::RectangularDetector()
-    : CompAssembly(), IObjComponent(NULL), m_rectBase(NULL), m_minDetId(0),
-      m_maxDetId(0) {
+    : CompAssembly(), IObjComponent(nullptr), m_rectBase(nullptr),
+      m_minDetId(0), m_maxDetId(0) {
 
   init();
   setGeometryHandler(new BitmapGeometryHandler(this));
@@ -34,7 +34,7 @@ RectangularDetector::RectangularDetector()
  * */
 RectangularDetector::RectangularDetector(const RectangularDetector *base,
                                          const ParameterMap *map)
-    : CompAssembly(base, map), IObjComponent(NULL), m_rectBase(base),
+    : CompAssembly(base, map), IObjComponent(nullptr), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
   init();
   setGeometryHandler(new BitmapGeometryHandler(this));
@@ -51,7 +51,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
  */
 RectangularDetector::RectangularDetector(const std::string &n,
                                          IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(NULL), m_rectBase(NULL),
+    : CompAssembly(n, reference), IObjComponent(nullptr), m_rectBase(nullptr),
       m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
@@ -70,10 +70,6 @@ void RectangularDetector::init() {
   m_idstepbyrow = 0;
   m_idstep = 0;
 }
-
-/** Destructor
- */
-RectangularDetector::~RectangularDetector() {}
 
 /** Clone method
  *  Make a copy of the component assembly
@@ -455,16 +451,22 @@ int RectangularDetector::maxDetectorID() {
 boost::shared_ptr<const IComponent>
 RectangularDetector::getComponentByName(const std::string &cname,
                                         int nlevels) const {
+  // exact matches
+  if (cname == this->getName())
+    return boost::shared_ptr<const IComponent>(this);
+
   // cache the detector's name as all the other names are longer
-  const std::string NAME = this->getName();
+  // The extra ( is because all children of this have that as the next character
+  // and this prevents Bank11 matching Bank 1
+  const std::string MEMBER_NAME = this->getName() + "(";
 
   // if the component name is too short, just return
-  if (cname.length() <= NAME.length())
+  if (cname.length() <= MEMBER_NAME.length())
     return boost::shared_ptr<const IComponent>();
 
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, NAME.length()).compare(NAME) == 0) {
+  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) == 0) {
     return CompAssembly::getComponentByName(cname, nlevels);
   } else {
     return boost::shared_ptr<const IComponent>();
@@ -663,7 +665,7 @@ unsigned int RectangularDetector::getTextureID() const { return m_textureID; }
 void RectangularDetector::draw() const {
   // std::cout << "RectangularDetector::draw() called for " << this->getName()
   // << "\n";
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   Handle()->Render();
@@ -685,7 +687,7 @@ void RectangularDetector::drawObject() const {
 void RectangularDetector::initDraw() const {
   // std::cout << "RectangularDetector::initDraw() called for " <<
   // this->getName() << "\n";
-  if (Handle() == NULL)
+  if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();

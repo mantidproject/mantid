@@ -19,6 +19,7 @@
 
 #include <Poco/File.h>
 #include <sstream>
+#include <iostream>
 #include <fstream>
 #include <numeric>
 #include <cmath>
@@ -43,20 +44,21 @@ LoadIsawDetCal::~LoadIsawDetCal() {}
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".DetCal"),
       "The input filename of the ISAW DetCal file (East banks for SNAP) ");
 
-  declareProperty(new API::FileProperty("Filename2", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".DetCal"),
-                  "The input filename of the second ISAW DetCal file (West "
-                  "banks for SNAP) ");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
@@ -129,7 +131,7 @@ void LoadIsawDetCal::exec() {
       }
     }
   }
-  std::set<int> uniqueBanks; // for CORELLI and WISH
+  std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
   if (instname.compare("WISH") == 0)
     bankPart = "WISHpanel";
@@ -138,8 +140,8 @@ void LoadIsawDetCal::exec() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
-      std::string bankName = comps[i]->getName();
+    for (auto &comp : comps) {
+      std::string bankName = comp->getName();
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
@@ -165,7 +167,17 @@ void LoadIsawDetCal::exec() {
       if (inputW) {
         API::Run &run = inputW->mutableRun();
         // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-        if (!run.hasProperty("T0")) {
+        if (run.hasProperty("T0")) {
+          double T0IDF = run.getPropertyValueAsType<double>("T0");
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+          alg1->setProperty("Offset", mT0 - T0IDF);
+          alg1->executeAsChildAlg();
+          inputW = alg1->getProperty("OutputWorkspace");
+          // set T0 in the run parameters
+          run.addProperty<double>("T0", mT0, true);
+        } else {
           IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
@@ -234,7 +246,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
@@ -284,8 +295,7 @@ void LoadIsawDetCal::exec() {
     }
     // Loop through tube detectors to match names with number from DetCal file
     idnum = -1;
-    std::set<int>::iterator it;
-    for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
+    for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
       if (*it == id)
         idnum = *it;
     if (idnum < 0)
@@ -330,7 +340,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
@@ -401,7 +410,7 @@ void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
   Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == 0) {
+  if (comp == nullptr) {
     std::ostringstream mess;
     mess << "Component with name " << detname << " was not found.";
     g_log.error(mess.str());

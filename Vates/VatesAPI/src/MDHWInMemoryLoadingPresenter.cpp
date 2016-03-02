@@ -3,12 +3,14 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include <qwt_double_interval.h>
 #include <vtkUnstructuredGrid.h>
+
 
 namespace Mantid {
 namespace VATES {
@@ -23,16 +25,17 @@ Constructor
 @throw invalid_arument if view is null
 */
 MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
-    MDLoadingView *view, WorkspaceProvider *repository, std::string wsName)
-    : MDHWLoadingPresenter(view), m_repository(repository), m_wsName(wsName),
-      m_wsTypeName(""), m_specialCoords(-1) {
+    std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository,
+    std::string wsName)
+    : MDHWLoadingPresenter(std::move(view)), m_repository(repository),
+      m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
   if (NULL == repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (NULL == m_view) {
+  if (nullptr == m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -67,7 +70,7 @@ Executes the underlying algorithm to create the MVP model.
 @param drawingProgressUpdate : Handler for GUI updates while
 vtkDataSetFactory::create occurs.
 */
-vtkDataSet *
+vtkSmartPointer<vtkDataSet>
 MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
                                       ProgressAction &,
                                       ProgressAction &drawingProgressUpdate) {
@@ -81,9 +84,10 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
   // factory->setRecursionDepth(this->m_view->getRecursionDepth());
-  vtkDataSet *visualDataSet = factory->oneStepCreate(
-      m_cachedVisualHistoWs, drawingProgressUpdate); // HACK: progressUpdate should be
-                                             // argument for drawing!
+  auto visualDataSet = factory->oneStepCreate(
+      m_cachedVisualHistoWs,
+      drawingProgressUpdate); // HACK: progressUpdate should be
+                              // argument for drawing!
 
   /*extractMetaData needs to be re-run here because the first execution of this
     from ::executeLoadMetadata will not have ensured that all dimensions
@@ -102,7 +106,12 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   this->extractMetadata(m_cachedVisualHistoWs);
 
   // Transposed workpace is temporary, outside the ADS, and does not have a name. so get it from pre-transposed.
-  this->appendMetadata(visualDataSet, histoWs->getName());
+  // If this fails, create a default name with a time stamp
+  auto name = histoWs->getName();
+  if (name.empty()) {
+    name = createTimeStampedName("HistoWS");
+  }
+  this->appendMetadata(visualDataSet, name);
   return visualDataSet;
 }
 
@@ -138,7 +147,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 }
 
 /// Destructor
-MDHWInMemoryLoadingPresenter::~MDHWInMemoryLoadingPresenter() { delete m_view; }
+MDHWInMemoryLoadingPresenter::~MDHWInMemoryLoadingPresenter() {}
 
 /*
  * Getter for the workspace type name.

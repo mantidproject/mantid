@@ -1,6 +1,5 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 
 #include <boost/lexical_cast.hpp>
@@ -286,7 +285,8 @@ void TomographyIfaceViewQtGUI::menuSaveClicked() {
                                         m_currPlugins);
     std::string csvWorkspaceNames = m_currPlugins->name();
 
-    auto alg = Algorithm::fromString("SaveTomoConfig");
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "SaveTomoConfig");
     alg->initialize();
     alg->setPropertyValue("Filename", m_currentParamPath);
     alg->setPropertyValue("InputWorkspaces", csvWorkspaceNames);
@@ -476,8 +476,8 @@ TomographyIfaceViewQtGUI::pluginParamValString(const Json::Value &jsonVal,
   return s;
 }
 
-void
-TomographyIfaceViewQtGUI::createPluginTreeEntries(ITableWorkspace_sptr table) {
+void TomographyIfaceViewQtGUI::createPluginTreeEntries(
+    ITableWorkspace_sptr table) {
   for (size_t i = 0; i < table->rowCount(); ++i) {
     TableRow r = table->getRow(i);
     createPluginTreeEntry(r);

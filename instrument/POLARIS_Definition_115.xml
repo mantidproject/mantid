@@ -344,11 +344,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone002" is="detector">
@@ -404,11 +399,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone003" is="detector">
@@ -464,11 +454,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone004" is="detector">
@@ -524,11 +509,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone005" is="detector">
@@ -584,11 +564,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone006" is="detector">
@@ -644,11 +619,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone007" is="detector">
@@ -704,11 +674,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone008" is="detector">
@@ -764,11 +729,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone009" is="detector">
@@ -824,11 +784,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone010" is="detector">
@@ -884,11 +839,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone011" is="detector">
@@ -944,11 +894,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone012" is="detector">
@@ -1004,11 +949,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone013" is="detector">
@@ -1064,11 +1004,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone014" is="detector">
@@ -1124,11 +1059,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone015" is="detector">
@@ -1184,11 +1114,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone016" is="detector">
@@ -1244,11 +1169,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone017" is="detector">
@@ -1304,11 +1224,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone018" is="detector">
@@ -1364,11 +1279,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone019" is="detector">
@@ -1424,11 +1334,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone020" is="detector">
@@ -1484,11 +1389,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone021" is="detector">
@@ -1544,11 +1444,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone022" is="detector">
@@ -1604,11 +1499,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone023" is="detector">
@@ -1664,11 +1554,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone024" is="detector">
@@ -1724,11 +1609,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone025" is="detector">
@@ -1784,11 +1664,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone026" is="detector">
@@ -1844,11 +1719,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone027" is="detector">
@@ -1904,11 +1774,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone028" is="detector">
@@ -1964,11 +1829,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone029" is="detector">
@@ -2024,11 +1884,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone030" is="detector">
@@ -2084,11 +1939,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone031" is="detector">
@@ -2144,11 +1994,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone032" is="detector">
@@ -2204,11 +2049,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone033" is="detector">
@@ -2264,11 +2104,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone034" is="detector">
@@ -2334,11 +2169,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone035" is="detector">
@@ -2404,11 +2234,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone036" is="detector">
@@ -2474,11 +2299,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone037" is="detector">
@@ -2544,11 +2364,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone038" is="detector">
@@ -2614,11 +2429,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone039" is="detector">
@@ -2684,11 +2494,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone040" is="detector">
@@ -2754,11 +2559,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone041" is="detector">
@@ -2824,11 +2624,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone042" is="detector">
@@ -2894,11 +2689,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone043" is="detector">
@@ -2964,11 +2754,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone044" is="detector">
@@ -3034,11 +2819,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone045" is="detector">
@@ -3104,11 +2884,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone046" is="detector">
@@ -3174,11 +2949,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone047" is="detector">
@@ -3244,11 +3014,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone048" is="detector">
@@ -3314,11 +3079,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone049" is="detector">
@@ -3384,11 +3144,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone050" is="detector">
@@ -3454,11 +3209,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone051" is="detector">
@@ -3524,11 +3274,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone052" is="detector">
@@ -3594,11 +3339,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone053" is="detector">
@@ -3664,11 +3404,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone054" is="detector">
@@ -3734,11 +3469,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone055" is="detector">
@@ -3804,11 +3534,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
 
@@ -4098,11 +3823,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone057" is="detector">
@@ -4138,11 +3858,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone058" is="detector">
@@ -4178,11 +3893,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone059" is="detector">
@@ -4218,11 +3928,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone060" is="detector">
@@ -4258,11 +3963,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone061" is="detector">
@@ -4298,11 +3998,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone062" is="detector">
@@ -4338,11 +4033,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone063" is="detector">
@@ -4378,11 +4068,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone064" is="detector">
@@ -4418,11 +4103,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone065" is="detector">
@@ -4458,11 +4138,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone066" is="detector">
@@ -4498,11 +4173,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone067" is="detector">
@@ -4538,11 +4208,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone068" is="detector">
@@ -4578,11 +4243,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone069" is="detector">
@@ -4618,11 +4278,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone070" is="detector">
@@ -4658,11 +4313,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone071" is="detector">
@@ -4698,11 +4348,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone072" is="detector">
@@ -4738,11 +4383,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone073" is="detector">
@@ -4778,11 +4418,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone074" is="detector">
@@ -4818,11 +4453,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone075" is="detector">
@@ -4858,11 +4488,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone076" is="detector">
@@ -4898,11 +4523,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone077" is="detector">
@@ -4938,11 +4558,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone078" is="detector">
@@ -4978,11 +4593,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone079" is="detector">
@@ -5018,11 +4628,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone080" is="detector">
@@ -5058,11 +4663,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone081" is="detector">
@@ -5098,11 +4698,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone082" is="detector">
@@ -5138,11 +4733,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone083" is="detector">
@@ -5178,11 +4768,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone084" is="detector">
@@ -5218,11 +4803,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone085" is="detector">
@@ -5258,11 +4838,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone086" is="detector">
@@ -5298,11 +4873,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone087" is="detector">
@@ -5338,11 +4908,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone088" is="detector">
@@ -5378,11 +4943,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone089" is="detector">
@@ -5418,11 +4978,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone090" is="detector">
@@ -5458,11 +5013,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone091" is="detector">
@@ -5498,11 +5048,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone092" is="detector">
@@ -5538,11 +5083,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone093" is="detector">
@@ -5578,11 +5118,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone094" is="detector">
@@ -5618,11 +5153,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone095" is="detector">
@@ -5658,11 +5188,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone096" is="detector">
@@ -5698,11 +5223,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone097" is="detector">
@@ -5738,11 +5258,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone098" is="detector">
@@ -5778,11 +5293,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone099" is="detector">
@@ -5818,11 +5328,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone100" is="detector">
@@ -5858,11 +5363,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone101" is="detector">
@@ -5898,11 +5398,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone102" is="detector">
@@ -5938,11 +5433,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone103" is="detector">
@@ -5978,11 +5468,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone104" is="detector">
@@ -6018,11 +5503,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone105" is="detector">
@@ -6058,11 +5538,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone106" is="detector">
@@ -6098,11 +5573,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone107" is="detector">
@@ -6138,11 +5608,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone108" is="detector">
@@ -6178,11 +5643,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone109" is="detector">
@@ -6218,11 +5678,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone110" is="detector">
@@ -6258,11 +5713,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone111" is="detector">
@@ -6298,11 +5748,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone112" is="detector">
@@ -6338,11 +5783,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone113" is="detector">
@@ -6378,11 +5818,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone114" is="detector">
@@ -6418,11 +5853,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone115" is="detector">
@@ -6458,11 +5888,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone116" is="detector">
@@ -6498,11 +5923,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone117" is="detector">
@@ -6538,11 +5958,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone118" is="detector">
@@ -6578,11 +5993,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone119" is="detector">
@@ -6618,11 +6028,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone120" is="detector">
@@ -6658,11 +6063,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone121" is="detector">
@@ -6698,11 +6098,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone122" is="detector">
@@ -6738,11 +6133,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone123" is="detector">
@@ -6778,11 +6168,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone124" is="detector">
@@ -6818,11 +6203,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone125" is="detector">
@@ -6858,11 +6238,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone126" is="detector">
@@ -6898,11 +6273,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone127" is="detector">
@@ -6938,11 +6308,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone128" is="detector">
@@ -6978,11 +6343,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone129" is="detector">
@@ -7018,11 +6378,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone130" is="detector">
@@ -7058,11 +6413,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone131" is="detector">
@@ -7098,11 +6448,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone132" is="detector">
@@ -7138,11 +6483,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone133" is="detector">
@@ -7178,11 +6518,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone134" is="detector">
@@ -7218,11 +6553,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone135" is="detector">
@@ -7258,11 +6588,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone136" is="detector">
@@ -7298,11 +6623,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone137" is="detector">
@@ -7338,11 +6658,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone138" is="detector">
@@ -7378,11 +6693,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone139" is="detector">
@@ -7418,11 +6728,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone140" is="detector">
@@ -7458,11 +6763,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone141" is="detector">
@@ -7498,11 +6798,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone142" is="detector">
@@ -7538,11 +6833,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone143" is="detector">
@@ -7578,11 +6868,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
 
@@ -8051,11 +7336,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone145" is="detector">
@@ -8116,11 +7396,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone146" is="detector">
@@ -8181,11 +7456,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone147" is="detector">
@@ -8246,11 +7516,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone148" is="detector">
@@ -8311,11 +7576,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone149" is="detector">
@@ -8376,11 +7636,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone150" is="detector">
@@ -8441,11 +7696,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone151" is="detector">
@@ -8506,11 +7756,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone152" is="detector">
@@ -8571,11 +7816,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone153" is="detector">
@@ -8636,11 +7876,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone154" is="detector">
@@ -8701,11 +7936,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone155" is="detector">
@@ -8756,11 +7986,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone156" is="detector">
@@ -8811,11 +8036,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone157" is="detector">
@@ -8866,11 +8086,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone158" is="detector">
@@ -8921,11 +8136,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone159" is="detector">
@@ -8976,11 +8186,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone160" is="detector">
@@ -9031,11 +8236,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone161" is="detector">
@@ -9086,11 +8286,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone162" is="detector">
@@ -9141,11 +8336,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone163" is="detector">
@@ -9196,11 +8386,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone164" is="detector">
@@ -9251,11 +8436,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone165" is="detector">
@@ -9306,11 +8486,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone166" is="detector">
@@ -9371,11 +8546,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone167" is="detector">
@@ -9436,11 +8606,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone168" is="detector">
@@ -9501,11 +8666,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone169" is="detector">
@@ -9566,11 +8726,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone170" is="detector">
@@ -9631,11 +8786,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone171" is="detector">
@@ -9696,11 +8846,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone172" is="detector">
@@ -9761,11 +8906,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone173" is="detector">
@@ -9826,11 +8966,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone174" is="detector">
@@ -9891,11 +9026,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone175" is="detector">
@@ -9956,11 +9086,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone176" is="detector">
@@ -10021,11 +9146,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone177" is="detector">
@@ -10076,11 +9196,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone178" is="detector">
@@ -10131,11 +9246,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone179" is="detector">
@@ -10186,11 +9296,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone180" is="detector">
@@ -10241,11 +9346,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone181" is="detector">
@@ -10296,11 +9396,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone182" is="detector">
@@ -10351,11 +9446,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone183" is="detector">
@@ -10406,11 +9496,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone184" is="detector">
@@ -10461,11 +9546,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone185" is="detector">
@@ -10516,11 +9596,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone186" is="detector">
@@ -10571,11 +9646,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone187" is="detector">
@@ -10626,11 +9696,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone188" is="detector">
@@ -10686,11 +9751,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone189" is="detector">
@@ -10746,11 +9806,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone190" is="detector">
@@ -10806,11 +9861,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone191" is="detector">
@@ -10866,11 +9916,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone192" is="detector">
@@ -10926,11 +9971,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone193" is="detector">
@@ -10986,11 +10026,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone194" is="detector">
@@ -11046,11 +10081,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone195" is="detector">
@@ -11106,11 +10136,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone196" is="detector">
@@ -11166,11 +10191,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone197" is="detector">
@@ -11226,11 +10246,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone198" is="detector">
@@ -11286,11 +10301,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone199" is="detector">
@@ -11336,11 +10346,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone200" is="detector">
@@ -11386,11 +10391,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone201" is="detector">
@@ -11436,11 +10436,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone202" is="detector">
@@ -11486,11 +10481,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone203" is="detector">
@@ -11536,11 +10526,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone204" is="detector">
@@ -11586,11 +10571,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone205" is="detector">
@@ -11636,11 +10616,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone206" is="detector">
@@ -11686,11 +10661,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone207" is="detector">
@@ -11736,11 +10706,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone208" is="detector">
@@ -11786,11 +10751,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone209" is="detector">
@@ -11836,11 +10796,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone210" is="detector">
@@ -11891,11 +10846,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone211" is="detector">
@@ -11946,11 +10896,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone212" is="detector">
@@ -12001,11 +10946,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone213" is="detector">
@@ -12056,11 +10996,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone214" is="detector">
@@ -12111,11 +11046,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone215" is="detector">
@@ -12166,11 +11096,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone216" is="detector">
@@ -12221,11 +11146,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone217" is="detector">
@@ -12276,11 +11196,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone218" is="detector">
@@ -12331,11 +11246,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone219" is="detector">
@@ -12386,11 +11296,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone220" is="detector">
@@ -12441,11 +11346,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone221" is="detector">
@@ -12496,11 +11396,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone222" is="detector">
@@ -12551,11 +11446,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone223" is="detector">
@@ -12606,11 +11496,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone224" is="detector">
@@ -12661,11 +11546,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone225" is="detector">
@@ -12716,11 +11596,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone226" is="detector">
@@ -12771,11 +11646,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone227" is="detector">
@@ -12826,11 +11696,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone228" is="detector">
@@ -12881,11 +11746,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone229" is="detector">
@@ -12936,11 +11796,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone230" is="detector">
@@ -12991,11 +11846,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone231" is="detector">
@@ -13046,11 +11896,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone232" is="detector">
@@ -13101,11 +11946,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone233" is="detector">
@@ -13156,11 +11996,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone234" is="detector">
@@ -13211,11 +12046,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone235" is="detector">
@@ -13266,11 +12096,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone236" is="detector">
@@ -13321,11 +12146,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone237" is="detector">
@@ -13376,11 +12196,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone238" is="detector">
@@ -13431,11 +12246,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone239" is="detector">
@@ -13486,11 +12296,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone240" is="detector">
@@ -13541,11 +12346,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone241" is="detector">
@@ -13596,11 +12396,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone242" is="detector">
@@ -13651,11 +12446,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
 
@@ -14147,11 +12937,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone244" is="detector">
@@ -14207,11 +12992,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone245" is="detector">
@@ -14267,11 +13047,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone246" is="detector">
@@ -14327,11 +13102,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone247" is="detector">
@@ -14387,11 +13157,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone248" is="detector">
@@ -14447,11 +13212,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone249" is="detector">
@@ -14507,11 +13267,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone250" is="detector">
@@ -14567,11 +13322,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone251" is="detector">
@@ -14627,11 +13377,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone252" is="detector">
@@ -14687,11 +13432,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone253" is="detector">
@@ -14747,11 +13487,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone254" is="detector">
@@ -14807,11 +13542,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone255" is="detector">
@@ -14867,11 +13597,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone256" is="detector">
@@ -14927,11 +13652,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone257" is="detector">
@@ -14987,11 +13707,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone258" is="detector">
@@ -15047,11 +13762,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone259" is="detector">
@@ -15107,11 +13817,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone260" is="detector">
@@ -15167,11 +13872,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone261" is="detector">
@@ -15227,11 +13927,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone262" is="detector">
@@ -15287,11 +13982,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone263" is="detector">
@@ -15347,11 +14037,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone264" is="detector">
@@ -15407,11 +14092,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone265" is="detector">
@@ -15462,11 +14142,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone266" is="detector">
@@ -15517,11 +14192,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone267" is="detector">
@@ -15572,11 +14242,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone268" is="detector">
@@ -15627,11 +14292,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone269" is="detector">
@@ -15682,11 +14342,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone270" is="detector">
@@ -15737,11 +14392,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone271" is="detector">
@@ -15792,11 +14442,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone272" is="detector">
@@ -15847,11 +14492,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone273" is="detector">
@@ -15902,11 +14542,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone274" is="detector">
@@ -15957,11 +14592,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone275" is="detector">
@@ -16012,11 +14642,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone276" is="detector">
@@ -16067,11 +14692,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone277" is="detector">
@@ -16122,11 +14742,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone278" is="detector">
@@ -16177,11 +14792,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone279" is="detector">
@@ -16232,11 +14842,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone280" is="detector">
@@ -16287,11 +14892,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone281" is="detector">
@@ -16342,11 +14942,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone282" is="detector">
@@ -16397,11 +14992,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone283" is="detector">
@@ -16452,11 +15042,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone284" is="detector">
@@ -16507,11 +15092,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone285" is="detector">
@@ -16562,11 +15142,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone286" is="detector">
@@ -16617,11 +15192,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone287" is="detector">
@@ -16662,11 +15232,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone288" is="detector">
@@ -16707,11 +15272,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone289" is="detector">
@@ -16752,11 +15312,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone290" is="detector">
@@ -16797,11 +15352,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone291" is="detector">
@@ -16842,11 +15392,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone292" is="detector">
@@ -16887,11 +15432,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone293" is="detector">
@@ -16932,11 +15472,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone294" is="detector">
@@ -16977,11 +15512,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone295" is="detector">
@@ -17022,11 +15552,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone296" is="detector">
@@ -17067,11 +15592,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone297" is="detector">
@@ -17112,11 +15632,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone298" is="detector">
@@ -17157,11 +15672,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone299" is="detector">
@@ -17202,11 +15712,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone300" is="detector">
@@ -17247,11 +15752,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone301" is="detector">
@@ -17292,11 +15792,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone302" is="detector">
@@ -17337,11 +15832,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone303" is="detector">
@@ -17382,11 +15872,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone304" is="detector">
@@ -17427,11 +15912,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone305" is="detector">
@@ -17472,11 +15952,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone306" is="detector">
@@ -17517,11 +15992,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone307" is="detector">
@@ -17562,11 +16032,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone308" is="detector">
@@ -17607,11 +16072,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone309" is="detector">
@@ -17652,11 +16112,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone310" is="detector">
@@ -17697,11 +16152,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone311" is="detector">
@@ -17742,11 +16192,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone312" is="detector">
@@ -17787,11 +16232,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone313" is="detector">
@@ -17832,11 +16272,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone314" is="detector">
@@ -17877,11 +16312,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone315" is="detector">
@@ -17922,11 +16352,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone316" is="detector">
@@ -17967,11 +16392,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone317" is="detector">
@@ -18012,11 +16432,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone318" is="detector">
@@ -18057,11 +16472,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone319" is="detector">
@@ -18102,11 +16512,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone320" is="detector">
@@ -18142,11 +16547,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone321" is="detector">
@@ -18182,11 +16582,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone322" is="detector">
@@ -18222,11 +16617,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone323" is="detector">
@@ -18262,11 +16652,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone324" is="detector">
@@ -18302,11 +16687,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone325" is="detector">
@@ -18342,11 +16722,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone326" is="detector">
@@ -18382,11 +16757,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone327" is="detector">
@@ -18422,11 +16792,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone328" is="detector">
@@ -18462,11 +16827,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone329" is="detector">
@@ -18502,11 +16862,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone330" is="detector">
@@ -18542,11 +16897,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone331" is="detector">
@@ -18582,11 +16932,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone332" is="detector">
@@ -18622,11 +16967,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone333" is="detector">
@@ -18662,11 +17002,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone334" is="detector">
@@ -18702,11 +17037,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone335" is="detector">
@@ -18742,11 +17072,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone336" is="detector">
@@ -18782,11 +17107,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone337" is="detector">
@@ -18822,11 +17142,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone338" is="detector">
@@ -18862,11 +17177,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone339" is="detector">
@@ -18902,11 +17212,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone340" is="detector">
@@ -18942,11 +17247,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone341" is="detector">
@@ -18982,11 +17282,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone342" is="detector">
@@ -19017,11 +17312,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone343" is="detector">
@@ -19052,11 +17342,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone344" is="detector">
@@ -19087,11 +17372,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone345" is="detector">
@@ -19122,11 +17402,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone346" is="detector">
@@ -19157,11 +17432,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone347" is="detector">
@@ -19192,11 +17462,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone348" is="detector">
@@ -19227,11 +17492,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone349" is="detector">
@@ -19262,11 +17522,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone350" is="detector">
@@ -19297,11 +17552,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone351" is="detector">
@@ -19332,11 +17582,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone352" is="detector">
@@ -19367,11 +17612,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
 
@@ -19932,11 +18172,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone354" is="detector">
@@ -20017,11 +18252,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone355" is="detector">
@@ -20102,11 +18332,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone356" is="detector">
@@ -20187,11 +18412,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone357" is="detector">
@@ -20272,11 +18492,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone358" is="detector">
@@ -20357,11 +18572,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone359" is="detector">
@@ -20442,11 +18652,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone360" is="detector">
@@ -20527,11 +18732,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone361" is="detector">
@@ -20612,11 +18812,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone362" is="detector">
@@ -20697,11 +18892,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone363" is="detector">
@@ -20767,11 +18957,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone364" is="detector">
@@ -20837,11 +19022,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone365" is="detector">
@@ -20907,11 +19087,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone366" is="detector">
@@ -20977,11 +19152,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone367" is="detector">
@@ -21047,11 +19217,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone368" is="detector">
@@ -21117,11 +19282,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone369" is="detector">
@@ -21187,11 +19347,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone370" is="detector">
@@ -21257,11 +19412,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone371" is="detector">
@@ -21327,11 +19477,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone372" is="detector">
@@ -21397,11 +19542,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone373" is="detector">
@@ -21467,11 +19607,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone374" is="detector">
@@ -21537,11 +19672,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone375" is="detector">
@@ -21607,11 +19737,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone376" is="detector">
@@ -21677,11 +19802,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone377" is="detector">
@@ -21747,11 +19867,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone378" is="detector">
@@ -21817,11 +19932,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone379" is="detector">
@@ -21887,11 +19997,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone380" is="detector">
@@ -21957,11 +20062,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone381" is="detector">
@@ -22027,11 +20127,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone382" is="detector">
@@ -22097,11 +20192,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone383" is="detector">
@@ -22157,11 +20247,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone384" is="detector">
@@ -22217,11 +20302,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone385" is="detector">
@@ -22277,11 +20357,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone386" is="detector">
@@ -22337,11 +20412,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone387" is="detector">
@@ -22397,11 +20467,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone388" is="detector">
@@ -22457,11 +20522,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone389" is="detector">
@@ -22517,11 +20577,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone390" is="detector">
@@ -22577,11 +20632,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone391" is="detector">
@@ -22637,11 +20687,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone392" is="detector">
@@ -22697,11 +20742,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <!--  Bank 6 ( 4 modules):  7 groups (10 elements/group)  -->
@@ -22789,11 +20829,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone394" is="detector">
@@ -22879,11 +20914,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone395" is="detector">
@@ -22969,11 +20999,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone396" is="detector">
@@ -23059,11 +21084,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone397" is="detector">
@@ -23149,11 +21169,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone398" is="detector">
@@ -23239,11 +21254,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone399" is="detector">
@@ -23329,11 +21339,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone400" is="detector">
@@ -23419,11 +21424,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone401" is="detector">
@@ -23509,11 +21509,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone402" is="detector">
@@ -23599,11 +21594,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14 : s15 : s16" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone403" is="detector">
@@ -23679,11 +21669,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone404" is="detector">
@@ -23759,11 +21744,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone405" is="detector">
@@ -23839,11 +21819,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone406" is="detector">
@@ -23919,11 +21894,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone407" is="detector">
@@ -23999,11 +21969,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone408" is="detector">
@@ -24079,11 +22044,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone409" is="detector">
@@ -24159,11 +22119,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone410" is="detector">
@@ -24239,11 +22194,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone411" is="detector">
@@ -24319,11 +22269,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone412" is="detector">
@@ -24399,11 +22344,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12 : s13 : s14" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone413" is="detector">
@@ -24469,11 +22409,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone414" is="detector">
@@ -24539,11 +22474,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone415" is="detector">
@@ -24609,11 +22539,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone416" is="detector">
@@ -24679,11 +22604,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone417" is="detector">
@@ -24749,11 +22669,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone418" is="detector">
@@ -24819,11 +22734,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone419" is="detector">
@@ -24889,11 +22799,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone420" is="detector">
@@ -24959,11 +22864,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone421" is="detector">
@@ -25029,11 +22929,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone422" is="detector">
@@ -25099,11 +22994,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10 : s11 : s12" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone423" is="detector">
@@ -25159,11 +23049,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone424" is="detector">
@@ -25219,11 +23104,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone425" is="detector">
@@ -25279,11 +23159,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone426" is="detector">
@@ -25339,11 +23214,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone427" is="detector">
@@ -25399,11 +23269,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone428" is="detector">
@@ -25459,11 +23324,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone429" is="detector">
@@ -25519,11 +23379,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone430" is="detector">
@@ -25579,11 +23434,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone431" is="detector">
@@ -25639,11 +23489,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone432" is="detector">
@@ -25699,11 +23544,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09 : s10" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone433" is="detector">
@@ -25754,11 +23594,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone434" is="detector">
@@ -25809,11 +23644,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone435" is="detector">
@@ -25864,11 +23694,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone436" is="detector">
@@ -25919,11 +23744,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone437" is="detector">
@@ -25974,11 +23794,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone438" is="detector">
@@ -26029,11 +23844,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone439" is="detector">
@@ -26084,11 +23894,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone440" is="detector">
@@ -26139,11 +23944,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone441" is="detector">
@@ -26194,11 +23994,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone442" is="detector">
@@ -26249,11 +24044,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08 : s09" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone443" is="detector">
@@ -26299,11 +24089,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone444" is="detector">
@@ -26349,11 +24134,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone445" is="detector">
@@ -26399,11 +24179,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone446" is="detector">
@@ -26449,11 +24224,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone447" is="detector">
@@ -26499,11 +24269,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone448" is="detector">
@@ -26549,11 +24314,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone449" is="detector">
@@ -26599,11 +24359,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone450" is="detector">
@@ -26649,11 +24404,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone451" is="detector">
@@ -26699,11 +24449,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone452" is="detector">
@@ -26749,11 +24494,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06 : s07 : s08" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone453" is="detector">
@@ -26789,11 +24529,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone454" is="detector">
@@ -26829,11 +24564,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone455" is="detector">
@@ -26869,11 +24599,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone456" is="detector">
@@ -26909,11 +24634,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone457" is="detector">
@@ -26949,11 +24669,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone458" is="detector">
@@ -26989,11 +24704,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone459" is="detector">
@@ -27029,11 +24739,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone460" is="detector">
@@ -27069,11 +24774,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone461" is="detector">
@@ -27109,11 +24809,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
   <type name="cone462" is="detector">
@@ -27149,11 +24844,6 @@
       </location>
     </component>
     <algebra val="s01 : s02 : s03 : s04 : s05 : s06" />
-    <bounding-box>
-      <x-min val="-1.15" /> <x-max val="0.05" />
-      <y-min val="-1.15" /> <y-max val="1.15" />
-      <z-min val="-0.005" /> <z-max val="0.005" />
-    </bounding-box>
   </type>
 
 

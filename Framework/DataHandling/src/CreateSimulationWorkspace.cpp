@@ -1,10 +1,13 @@
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -51,24 +54,24 @@ void CreateSimulationWorkspace::init() {
                   "containing an xml extension).",
                   Direction::Input);
 
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
                       "BinParams", boost::make_shared<RebinParamsValidator>(),
                       Direction::Input),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. See Rebin for more details");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The new workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The new workspace");
 
   auto knownUnits = UnitFactory::Instance().getKeys();
   declareProperty("UnitX", "DeltaE",
                   boost::make_shared<ListValidator<std::string>>(knownUnits),
                   "The unit to assign to the X axis", Direction::Input);
 
-  declareProperty(new FileProperty("DetectorTableFilename", "",
-                                   FileProperty::OptionalLoad, "",
-                                   Direction::Input),
+  declareProperty(make_unique<FileProperty>("DetectorTableFilename", "",
+                                            FileProperty::OptionalLoad, "",
+                                            Direction::Input),
                   "An optional filename (currently RAW or ISIS NeXus) that "
                   "contains UDET & SPEC tables to access hardware grouping");
 }
@@ -103,6 +106,7 @@ void CreateSimulationWorkspace::createInstrument() {
   } else {
     loadInstrument->setPropertyValue("InstrumentName", instrProp);
   }
+  loadInstrument->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
   loadInstrument->executeAsChildAlg();
   tempWS = loadInstrument->getProperty("Workspace");
 
@@ -126,8 +130,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   m_outputWS->getAxis(0)->setUnit(getProperty("UnitX"));
   m_outputWS->setYUnit("SpectraNumber");
 
-  m_progress =
-      boost::shared_ptr<Progress>(new Progress(this, 0.5, 0.75, nhistograms));
+  m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
   PARALLEL_FOR1(m_outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
@@ -177,7 +180,7 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
   for (size_t i = 0; i < nhist; ++i) {
     std::set<detid_t> group;
     group.insert(detids[i]);
-    m_detGroups.insert(std::make_pair(static_cast<specid_t>(i + 1), group));
+    m_detGroups.emplace(static_cast<specnum_t>(i + 1), group);
   }
 }
 
@@ -272,7 +275,7 @@ void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable,
     } else {
       std::set<detid_t> group;
       group.insert(static_cast<detid_t>(detID));
-      m_detGroups.insert(std::make_pair(specNo, group));
+      m_detGroups.emplace(specNo, group);
     }
   }
 }
@@ -300,12 +303,12 @@ MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
  */
 void CreateSimulationWorkspace::applyDetectorMapping() {
   size_t wsIndex(0);
-  for (auto iter = m_detGroups.begin(); iter != m_detGroups.end(); ++iter) {
+  for (auto &detGroup : m_detGroups) {
     ISpectrum *spectrum = m_outputWS->getSpectrum(wsIndex);
     spectrum->setSpectrumNo(
-        static_cast<specid_t>(wsIndex + 1)); // Ensure a contiguous mapping
+        static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
     spectrum->clearDetectorIDs();
-    spectrum->addDetectorIDs(iter->second);
+    spectrum->addDetectorIDs(detGroup.second);
     ++wsIndex;
   }
 }

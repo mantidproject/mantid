@@ -119,7 +119,7 @@ public:
     };
 
     QtTreePropertyBrowser(QWidget *parent = 0, const QStringList &options = QStringList(), bool darkTopLevel = true);
-    ~QtTreePropertyBrowser();
+    ~QtTreePropertyBrowser() override;
 
     int indentation() const;
     void setIndentation(int i);
@@ -161,10 +161,14 @@ Q_SIGNALS:
     void expanded(QtBrowserItem *item);
     void optionChanged(QtProperty*, const QString&, bool);
 
+public Q_SLOTS:
+
+  void closeEditor();
+
 protected:
-    virtual void itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem);
-    virtual void itemRemoved(QtBrowserItem *item);
-    virtual void itemChanged(QtBrowserItem *item);
+  void itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem) override;
+  void itemRemoved(QtBrowserItem *item) override;
+  void itemChanged(QtBrowserItem *item) override;
 
 private:
 

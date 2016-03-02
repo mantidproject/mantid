@@ -1,0 +1,55 @@
+digraph MuonProcess {
+  label="MuonProcess Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    Filename
+    DeadTimeTable
+    DetectorGroupingTable
+    TimeZero
+    LoadedTimeZero
+    Xmin
+    Xmax
+    RebinParams
+    OutputType
+    Alpha
+    FirstPairIndex
+    SecondPairIndex
+    GroupIndex
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadMuonNexus
+    ApplyDeadTimeCorr
+    MuonGroupDetectors
+    ChangeBinOffset
+    CropWorkspace
+    Rebin
+    MuonCalculateAsymmetry [label="(Asymmetry calculation)"]
+  }
+
+  Filename               -> LoadMuonNexus
+  LoadMuonNexus          -> ApplyDeadTimeCorr
+  LoadMuonNexus          -> DeadTimeTable
+  LoadMuonNexus          -> DetectorGroupingTable
+  LoadMuonNexus          -> LoadedTimeZero
+  ApplyDeadTimeCorr      -> MuonGroupDetectors
+  MuonGroupDetectors     -> ChangeBinOffset
+  TimeZero               -> ChangeBinOffset
+  LoadedTimeZero         -> ChangeBinOffset
+  ChangeBinOffset        -> CropWorkspace
+  Xmin                   -> CropWorkspace
+  Xmax                   -> CropWorkspace
+  CropWorkspace          -> Rebin
+  RebinParams            -> Rebin
+  Rebin                  -> MuonCalculateAsymmetry
+  OutputType             -> MuonCalculateAsymmetry
+  FirstPairIndex         -> MuonCalculateAsymmetry
+  SecondPairIndex        -> MuonCalculateAsymmetry
+  GroupIndex             -> MuonCalculateAsymmetry
+  Alpha                  -> MuonCalculateAsymmetry
+  MuonCalculateAsymmetry -> OutputWorkspace
+}

@@ -39,3 +39,4 @@ Techniques
    :maxdepth: 1
 
    techniques/calibration
+   techniques/PowderDiffractionISIS-v1

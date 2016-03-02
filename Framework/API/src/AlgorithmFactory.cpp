@@ -7,7 +7,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/StringTokenizer.h"
+#include "MantidKernel/StringTokenizer.h"
 
 namespace Mantid {
 namespace API {
@@ -39,7 +39,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
   if (version < 0) {
     if (version == -1) // get latest version since not supplied
     {
-      VersionMap::const_iterator it = m_vmap.find(name);
+      auto it = m_vmap.find(name);
       if (!name.empty()) {
         if (it == m_vmap.end())
           throw std::runtime_error("Algorithm not registered " + name);
@@ -53,7 +53,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
   try {
     return this->createAlgorithm(name, local_version);
   } catch (Kernel::Exception::NotFoundError &) {
-    VersionMap::const_iterator it = m_vmap.find(name);
+    auto it = m_vmap.find(name);
     if (it == m_vmap.end())
       throw std::runtime_error("algorithm not registered " + name);
     else {
@@ -79,7 +79,7 @@ void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName,
   try {
     Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
     // Update version map accordingly
-    VersionMap::iterator it = m_vmap.find(algorithmName);
+    auto it = m_vmap.find(algorithmName);
     if (it != m_vmap.end()) {
       int highest_version = it->second;
       if (highest_version > 1 &&
@@ -131,7 +131,7 @@ std::string AlgorithmFactoryImpl::createName(const std::string &name,
 */
 std::pair<std::string, int>
 AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
-  std::string::size_type seperatorPosition = mangledName.find("|");
+  std::string::size_type seperatorPosition = mangledName.find('|');
   if (seperatorPosition == std::string::npos) {
     throw std::invalid_argument(
         "Cannot decode a Name string without a \"|\" (bar) character ");
@@ -178,7 +178,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
     return names;
   } else {
     // hidden categories
-    std::set<std::string> hiddenCategories;
+    std::unordered_set<std::string> hiddenCategories;
     fillHiddenCategories(&hiddenCategories);
 
     // strip out any algorithms names where all of the categories are hidden
@@ -223,7 +223,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
  */
 int AlgorithmFactoryImpl::highestVersion(
     const std::string &algorithmName) const {
-  VersionMap::const_iterator viter = m_vmap.find(algorithmName);
+  auto viter = m_vmap.find(algorithmName);
   if (viter != m_vmap.end())
     return viter->second;
   else {
@@ -245,7 +245,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::map<std::string, bool> resultCategories;
 
   // hidden categories - empty initially
-  std::set<std::string> hiddenCategories;
+  std::unordered_set<std::string> hiddenCategories;
   fillHiddenCategories(&hiddenCategories);
 
   // get all of the algorithm keys, including the hidden ones for speed purposes
@@ -287,20 +287,18 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
 * the default is false
 * @returns The category strings
 */
-const std::set<std::string>
+const std::unordered_set<std::string>
 AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
-  std::set<std::string> validCategories;
+  std::unordered_set<std::string> validCategories;
 
   // get all of the information we need
-  std::map<std::string, bool> categoryMap = getCategoriesWithState();
+  auto categoryMap = getCategoriesWithState();
 
   // iterate around the map
-  std::map<std::string, bool>::const_iterator it_end = categoryMap.end();
-  for (std::map<std::string, bool>::const_iterator it = categoryMap.begin();
-       it != it_end; ++it) {
-    bool isHidden = (*it).second;
+  for (auto const &category : categoryMap) {
+    bool isHidden = (category).second;
     if (includeHidden || (!isHidden)) {
-      validCategories.insert((*it).first);
+      validCategories.insert((category).first);
     }
   }
 
@@ -319,20 +317,18 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 std::vector<Algorithm_descriptor>
 AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   // algorithm names
-  std::vector<std::string> sv;
-  sv = getKeys(true);
+  auto sv = getKeys(true);
 
   // hidden categories
-  std::set<std::string> hiddenCategories;
-  if (includeHidden == false) {
+  std::unordered_set<std::string> hiddenCategories;
+  if (!includeHidden) {
     fillHiddenCategories(&hiddenCategories);
   }
 
   // results vector
   std::vector<Algorithm_descriptor> res;
 
-  for (std::vector<std::string>::const_iterator s = sv.begin(); s != sv.end();
-       ++s) {
+  for (auto s = sv.cbegin(); s != sv.cend(); ++s) {
     if (s->empty())
       continue;
     Algorithm_descriptor desc;
@@ -348,7 +344,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       continue;
 
     boost::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
-    std::vector<std::string> categories = alg->categories();
+    auto categories = alg->categories();
     desc.alias = alg->alias();
 
     // For each category
@@ -366,9 +362,8 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 
       // Traverse each parent category, working our way from the top down.
       std::string currentLayer = "";
-      for (auto layerIt = categoryLayers.begin();
-           layerIt != categoryLayers.end(); ++layerIt) {
-        currentLayer.append(*layerIt);
+      for (auto &categoryLayer : categoryLayers) {
+        currentLayer.append(categoryLayer);
 
         if (hiddenCategories.find(currentLayer) != hiddenCategories.end()) {
           // Category is hidden, no need to check any others.
@@ -388,17 +383,15 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 }
 
 void AlgorithmFactoryImpl::fillHiddenCategories(
-    std::set<std::string> *categorySet) const {
+    std::unordered_set<std::string> *categorySet) const {
   std::string categoryString = Kernel::ConfigService::Instance().getString(
       "algorithms.categories.hidden");
-  Poco::StringTokenizer tokenizer(categoryString, ";",
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    categorySet->insert(*h);
-  }
+  Mantid::Kernel::StringTokenizer tokenizer(
+      categoryString, ";",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  std::copy(tokenizer.begin(), tokenizer.end(),
+            std::inserter(*categorySet, categorySet->end()));
 }
 
 /** Extract the name of an algorithm

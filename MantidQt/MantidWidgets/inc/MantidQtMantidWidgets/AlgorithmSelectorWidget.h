@@ -27,6 +27,20 @@ namespace MantidWidgets
   class AlgorithmTreeWidget;
   class FindAlgComboBox;
 
+  /**
+   * Represents the algorithm selected by the user
+   * Contains name and version
+   */
+  struct SelectedAlgorithm {
+    QString name;
+    int version;
+    /// implicit conversion to QString
+    operator QString() { return name; }
+    /// constructor
+    SelectedAlgorithm(const QString nameIn, const int versionIn)
+        : name(nameIn), version(versionIn){};
+  };
+
   //============================================================================
   /** A widget consisting of a ComboBox and a TreeWidget
    * to allow a user to select an algorithm either by category
@@ -41,9 +55,8 @@ namespace MantidWidgets
 
   public:
     AlgorithmSelectorWidget(QWidget *parent);
-    virtual ~AlgorithmSelectorWidget();
-    void getSelectedAlgorithm(QString& algName, int& version);
-    QString getSelectedAlgorithm();
+    ~AlgorithmSelectorWidget() override;
+    SelectedAlgorithm getSelectedAlgorithm();
     void setSelectedAlgorithm(QString & algName);
     bool showExecuteButton() const;
     void showExecuteButton(const bool);
@@ -83,11 +96,11 @@ signals:
     Q_OBJECT
   public:
     AlgorithmTreeWidget(QWidget *w):QTreeWidget(w){}
-    virtual ~AlgorithmTreeWidget() {}
-    void mousePressEvent (QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseDoubleClickEvent(QMouseEvent *e);
-    void getSelectedAlgorithm(QString& algName, int& version);
+    ~AlgorithmTreeWidget() override {}
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    SelectedAlgorithm getSelectedAlgorithm();
 
   public slots:
     void update();
@@ -109,8 +122,8 @@ signals:
   {
     Q_OBJECT
   public:
-    virtual ~FindAlgComboBox() {}
-    void getSelectedAlgorithm(QString& algName, int& version);
+    ~FindAlgComboBox() override {}
+    SelectedAlgorithm getSelectedAlgorithm();
 
   signals:
     void enterPressed();
@@ -119,7 +132,8 @@ signals:
     void update();
 
   protected:
-    void keyPressEvent(QKeyEvent *e);
+    void keyPressEvent(QKeyEvent *e) override;
+
   private:
     typedef std::vector<Mantid::API::Algorithm_descriptor> AlgNamesType;
     void addAliases(AlgNamesType& algNamesList);

@@ -12,6 +12,8 @@
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
 
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <cmath>
 
 // Register the algorithm into the AlgorithmFactory
@@ -30,10 +32,10 @@ MDHistoToWorkspace2D::MDHistoToWorkspace2D()
     : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
 
 void MDHistoToWorkspace2D::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void MDHistoToWorkspace2D::exec() {
@@ -54,7 +56,7 @@ void MDHistoToWorkspace2D::exec() {
           "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
   outWS->setYUnit("Counts");
 
-  coord_t *pos = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  coord_t *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   memset(pos, 0, m_rank * sizeof(coord_t));
   m_currentSpectra = 0;
   recurseData(inWS, outWS, 0, pos);
@@ -96,7 +98,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     }
     outWS->setX(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specid_t>(m_currentSpectra));
+        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper

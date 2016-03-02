@@ -49,26 +49,29 @@ class muParserScripting: public ScriptingEnv
 
   public:
     static const char *langName;
-    muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized=true; }
+    explicit muParserScripting(ApplicationWindow *parent)
+        : ScriptingEnv(parent, langName) {
+      d_initialized = true;
+    }
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
     /// Set the system arguments. Throws an exception as it is not supported
-    void setSysArgs(const QStringList & args);
+    void setSysArgs(const QStringList &args) override;
 
-    Script *newScript(const QString &name, QObject * context, const Script::InteractionType) const
-    {
+    Script *newScript(const QString &name, QObject *context,
+                      const Script::InteractionType) const override {
       return new muParserScript(const_cast<muParserScripting*>(this), name, context);
     }
-    
-    virtual bool supportsEvaluation() { return true; }
+
+    bool supportsEvaluation() override { return true; }
 
     // we do not support global variables
-    bool setQObject(QObject*, const char*) { return false; }
-    bool setInt(int, const char*) { return false; }
-    bool setDouble(double, const char*) { return false; }
+    bool setQObject(QObject *, const char *) override { return false; }
+    bool setInt(int, const char *) override { return false; }
+    bool setDouble(double, const char *) override { return false; }
 
-    const QStringList mathFunctions() const;
-    const QString mathFunctionDoc (const QString &name) const;
+    const QStringList mathFunctions() const override;
+    const QString mathFunctionDoc(const QString &name) const override;
 
     struct mathFunction
     {

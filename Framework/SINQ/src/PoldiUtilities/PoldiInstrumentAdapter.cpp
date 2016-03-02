@@ -5,7 +5,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
-#include "boost/assign.hpp"
 #include "boost/make_shared.hpp"
 
 namespace Mantid {
@@ -20,13 +19,13 @@ const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName =
     "ChopperSpeedTarget";
 
 std::map<std::string, AbstractDoubleValueExtractor_sptr>
-    PoldiInstrumentAdapter::m_extractors = boost::assign::map_list_of(
-        "dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                        boost::make_shared<VectorDoubleValueExtractor>()))(
-        "int list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                        boost::make_shared<VectorIntValueExtractor>()))(
-        "number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
-                      boost::make_shared<NumberDoubleValueExtractor>()));
+    PoldiInstrumentAdapter::m_extractors = {
+        {"dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
+                         boost::make_shared<VectorDoubleValueExtractor>())},
+        {"int list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
+                         boost::make_shared<VectorIntValueExtractor>())},
+        {"number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(
+                       boost::make_shared<NumberDoubleValueExtractor>())}};
 
 /** Constructor with workspace argument
   *
@@ -55,8 +54,6 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(
     const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
   initializeFromInstrumentAndRun(mantidInstrument, runInformation);
 }
-
-PoldiInstrumentAdapter::~PoldiInstrumentAdapter() {}
 
 /** Returns the chopper stored in the adapter
   *

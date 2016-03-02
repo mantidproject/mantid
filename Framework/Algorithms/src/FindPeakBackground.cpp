@@ -37,9 +37,8 @@ FindPeakBackground::~FindPeakBackground() {}
 /** Define properties
   */
 void FindPeakBackground::init() {
-  auto inwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputWorkspace", "Anonymous", Direction::Input);
-  declareProperty(inwsprop,
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "Anonymous", Direction::Input),
                   "Name of input MatrixWorkspace that contains peaks.");
 
   declareProperty("WorkspaceIndex", EMPTY_INT(),
@@ -51,24 +50,21 @@ void FindPeakBackground::init() {
       "Multiplier of standard deviations of the variance for convergence of "
       "peak elimination.  Default is 1.0. ");
 
-  declareProperty(new ArrayProperty<double>("FitWindow"),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Optional: enter a comma-separated list of the minimum and "
                   "maximum X-positions of window to fit.  "
                   "The window is the same for all indices in workspace. The "
                   "length must be exactly two.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   // The found peak in a table
   declareProperty(
-      new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "",
-                                                  Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the TableWorkspace in which to store the background found "
       "for each index.  "
       "Table contains the indices of the beginning and ending of peak "
@@ -140,7 +136,7 @@ void FindPeakBackground::exec() {
 
   double Ymean, Yvariance, Ysigma;
   MantidVec maskedY;
-  MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
+  auto in = std::min_element(inpY.cbegin(), inpY.cend());
   double bkg0 = inpY[in - inpY.begin()];
   for (size_t l = l0; l < n; ++l) {
     maskedY.push_back(inpY[l] - bkg0);
@@ -197,7 +193,7 @@ void FindPeakBackground::exec() {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
         peaks.push_back(cont_peak());
         peaks[peaks.size() - 1].start = l + l0;
-      } else if (peaks.size() > 0) {
+      } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
         if (mask[l] != mask[l - 1] && mask[l] == 0) {
           peaks[ipeak].stop = l + l0;
@@ -209,7 +205,7 @@ void FindPeakBackground::exec() {
     size_t min_peak, max_peak;
     double a0 = 0., a1 = 0., a2 = 0.;
     int goodfit;
-    if (peaks.size() > 0) {
+    if (!peaks.empty()) {
       g_log.debug() << "Peaks' size = " << peaks.size()
                     << " -> esitmate background. \n";
       if (peaks[peaks.size() - 1].stop == 0)
@@ -229,8 +225,8 @@ void FindPeakBackground::exec() {
 
       goodfit = 2;
     }
-    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak,
-                       (peaks.size() > 0), a0, a1, a2);
+    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, (!peaks.empty()),
+                       a0, a1, a2);
 
     // Add a new row
     API::TableRow t = m_outPeakTableWS->getRow(0);

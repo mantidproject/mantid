@@ -130,7 +130,7 @@ void ApplyPaalmanPings::run() {
       if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
         QString text =
             "Binning on sample and container does not match."
-            "Would you like to rebin the sample to match the container?";
+            "Would you like to rebin the container to match the sample?";
 
         int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
                                            QMessageBox::Yes, QMessageBox::No,

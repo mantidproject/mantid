@@ -47,7 +47,8 @@ class InterfaceCategoryModel : public QAbstractListModel
 
 public:
   /// Constructor.
-  InterfaceCategoryModel(const QSet<QString> & allCategories = QSet<QString>());
+  explicit InterfaceCategoryModel(
+      const QSet<QString> &allCategories = QSet<QString>());
 
   /// Required overloaded methods for an editable Qt data model:
 
@@ -87,7 +88,7 @@ class ManageInterfaceCategories : public QDialog
 
 public:
 	/// Only constructor.  We insist on seeing the ApplicationWindow.
-  ManageInterfaceCategories(ApplicationWindow * parent);
+  explicit ManageInterfaceCategories(ApplicationWindow *parent);
 
 private slots:
   /// Slot to open the help web page.

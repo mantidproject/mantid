@@ -20,11 +20,21 @@ You can either specify an absolute position or a relative position. The
 relative position will be applied to the current position, so applying
 this twice will move the detector twice.
 
+If you move a component that is made up of smaller parts (such as a bank is made up of detectors, or a tube is made up of pixels) then the smaller parts will be transated along with the component.
+
 Usage
 -----
 
-Example 1: move a component by name
+Example 1: Move a component by name
 ###################################
+
+.. figure:: ../images/MoveBank.png
+   :alt: MoveBank.png‎
+   :align: center
+   :figwidth: image
+
+
+   Moving a bank through three movements.  All the pixels of the bank move along with the bank component.
 
 .. testcode:: ExByName
 
@@ -40,8 +50,8 @@ Example 1: move a component by name
   # Check the new position of 'bank1'
   print ws.getInstrument().getComponentByName('bank1').getPos()
 
-  # Move the same bank again by the same vector
-  MoveInstrumentComponent( ws, 'bank1', X=1,Y=0,Z=0 )
+  # Move the same bank again by vector (2,0,0)
+  MoveInstrumentComponent( ws, 'bank1', X=2,Y=0,Z=0 )
 
   # Check the new position of 'bank1'
   print ws.getInstrument().getComponentByName('bank1').getPos()
@@ -59,12 +69,21 @@ Output
 
   [0,0,5]
   [1,0,5]
-  [2,0,5]
+  [3,0,5]
   [1,2,3]
 
 
-Example 2: move a detector by ID
+Example 2: Move a detector by ID
 ################################
+
+.. figure:: ../images/DetectorMove.png
+   :alt: DetectorMove.png‎
+   :align: center
+   :figwidth: image
+
+
+   Moving an individual detector using the detector ID.
+
 
 .. testcode:: ExByID
 

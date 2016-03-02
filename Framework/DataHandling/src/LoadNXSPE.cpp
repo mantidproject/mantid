@@ -1,8 +1,10 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -10,15 +12,17 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+
+#include <boost/regex.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -89,14 +93,13 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadNXSPE::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".nxspe");
-  exts.push_back("");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+  const std::vector<std::string> exts{".nxspe", ""};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "An NXSPE file");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace that will be created.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace that will be created.");
 }
 
 //----------------------------------------------------------------------------------------------

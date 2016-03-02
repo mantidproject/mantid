@@ -278,7 +278,7 @@ that the first three detectors (monitors) were not touched and the next three we
   
    import math
    import os
-   
+      
    # printing procedure
    def write_detectors(instr_type,instr,ndet):
        ''' print first ndet detectors from given instrument '''
@@ -362,7 +362,7 @@ that the first three detectors (monitors) were not touched and the next three we
    ws=CreateSampleWorkspace();  
    #--------------------------------------------------------------------------------------      
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI')   
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)   
    inst1=ws.getInstrument();   
    #   
    write_detectors('unCalibrated',inst1,10);

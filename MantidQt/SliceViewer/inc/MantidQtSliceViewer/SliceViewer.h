@@ -1,7 +1,7 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "ColorBarWidget.h"
+#include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
@@ -113,6 +113,7 @@ public:
   void toggleLineMode(bool);
   void setNormalization(Mantid::API::MDNormalization norm, bool update=true);
   Mantid::API::MDNormalization getNormalization() const;
+  void setColorBarAutoScale(bool autoscale);
 
   /// Dynamic Rebinning-related Python bindings
   void setRebinThickness(int dim, double thickness);
@@ -242,6 +243,9 @@ private:
   // Set aspect ratio type.
   void setAspectRatio(AspectRatioType type);
 
+  /// Extracts and applies the color scaling for the current slice
+  void applyColorScalingForCurrentSliceIfRequired();
+
 private:
   
 
@@ -260,7 +264,7 @@ private:
   QHBoxLayout * m_spectLayout;
 
   /// Color bar indicating the color scale
-  ColorBarWidget * m_colorBar;
+  MantidQt::MantidWidgets::ColorBarWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
   std::vector<DimensionSliceWidget *> m_dimWidgets;

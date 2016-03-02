@@ -1,10 +1,11 @@
+#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
 
 #include <algorithm>
 
@@ -47,17 +48,17 @@ const std::string SplineSmoothing::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineSmoothing::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The workspace on which to perform the smoothing algorithm.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calculated points");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv",
-                                                        "", Direction::Output,
-                                                        PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaceDeriv", "", Direction::Output,
+                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = boost::make_shared<BoundedValidator<int>>();
@@ -177,7 +178,7 @@ SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
       WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
-  API::TextAxis *tAxis = new API::TextAxis(size);
+  auto tAxis = new API::TextAxis(size);
   for (int i = 0; i < size; ++i) {
     std::string index = boost::lexical_cast<std::string>(i);
     tAxis->setLabel(i, "Y" + index);
@@ -286,16 +287,15 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
   breakPoints.reserve(num_points);
 
   // set each of the x and y points to redefine the spline
-  std::set<int>::const_iterator pts;
-  for (pts = points.begin(); pts != points.end(); ++pts) {
-    breakPoints.push_back(xs[*pts]);
+  for (auto const &point : points) {
+    breakPoints.push_back(xs[point]);
   }
   m_cspline->setAttribute("BreakPoints",
                           API::IFunction::Attribute(breakPoints));
 
   int i = 0;
-  for (pts = points.begin(); pts != points.end(); ++pts) {
-    m_cspline->setParameter(i, ys[*pts]);
+  for (auto const &point : points) {
+    m_cspline->setParameter(i, ys[point]);
     ++i;
   }
 }
@@ -344,7 +344,7 @@ void SplineSmoothing::selectSmoothingPoints(
   while (resmooth) {
 
     if (incBreaks) {
-      if (smoothPts.size() > (unsigned)(maxBreaks + 2)) {
+      if (smoothPts.size() > static_cast<unsigned>(maxBreaks + 2)) {
         break;
       }
 
@@ -362,10 +362,10 @@ void SplineSmoothing::selectSmoothingPoints(
     m_cspline->function1D(ysmooth.get(), xs.data(), xSize);
 
     // iterate over smoothing points
-    std::set<int>::const_iterator iter = smoothPts.begin();
+    auto iter = smoothPts.cbegin();
     int start = *iter;
 
-    for (++iter; iter != smoothPts.end(); ++iter) {
+    for (++iter; iter != smoothPts.cend(); ++iter) {
       int end = *iter;
 
       // check each point falls within our range of error.

@@ -9,6 +9,14 @@
 
 namespace Mantid {
 
+namespace Geometry {
+class IComponent;
+}
+
+namespace Kernel {
+class Unit;
+}
+
 namespace Algorithms {
 
 /** Estimate all incident energies, used by chopper instrument.
@@ -37,29 +45,29 @@ namespace Algorithms {
 class DLLExport GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
-  virtual ~GetAllEi(){};
+  ~GetAllEi() override{};
 
   /// Algorithms name for identification. @see Algorithm::name
-  virtual const std::string name() const { return "GetAllEi"; };
+  const std::string name() const override { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Analyze the chopper logs and the signal registered by the monitors "
            "to identify energies used as incident energies in an inelastic "
            "experiment.";
   }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Inelastic\\Ei"; };
+  const std::string category() const override { return "Inelastic\\Ei"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
-                                       const std::string &name);
+                                       const std::string &propertyName);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);
   // former lambda function exposed as not evry compiler support this yet
   bool peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
@@ -87,12 +95,12 @@ protected: // for testing, private otherwise.
   /**Get energy of monitor peak if one is present*/
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei,
                        const std::vector<size_t> &monsRangeMin,
-                       const std::vector<size_t> &monsRangeMax, double &energy,
-                       double &height, double &width);
+                       const std::vector<size_t> &monsRangeMax,
+                       double &position, double &height, double &twoSigma);
   /**Find indexes of each expected peak intervals */
   void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
-                     const std::vector<double> &guess_energies,
-                     double Eresolution, std::vector<size_t> &irangeMin,
+                     const std::vector<double> &guess_energy,
+                     double eResolution, std::vector<size_t> &irangeMin,
                      std::vector<size_t> &irangeMax,
                      std::vector<bool> &guessValid);
 
@@ -101,6 +109,10 @@ protected: // for testing, private otherwise.
                                      std::vector<double> &deriv,
                                      std::vector<double> &zeros);
 
+  /**Auxiliary method to print guess chopper energies in debug mode*/
+  void printDebugModeInfo(const std::vector<double> &guess_opening,
+                          const std::pair<double, double> &TOF_range,
+                          boost::shared_ptr<Kernel::Unit> &destUnit);
   /// if true, take derivate of the filter log to identify interval when
   /// instrument is running.
   bool m_FilterWithDerivative;

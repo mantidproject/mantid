@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <mutex>
 
 namespace Mantid {
 namespace API {
@@ -64,11 +64,11 @@ private:
   /// Class cannot be instantiated by normal means
   MemoryManagerImpl();
   /// Destructor
-  ~MemoryManagerImpl();
+  ~MemoryManagerImpl() = default;
   /// Copy constructor
-  MemoryManagerImpl(const MemoryManagerImpl &);
+  MemoryManagerImpl(const MemoryManagerImpl &) = delete;
   /// Standard Assignment operator
-  MemoryManagerImpl &operator=(const MemoryManagerImpl &);
+  MemoryManagerImpl &operator=(const MemoryManagerImpl &) = delete;
 
   /** Amount of memory (in bytes) that has been cleared but perhaps not
    * released.
@@ -76,7 +76,7 @@ private:
    */
   size_t memoryCleared;
   /// Mutex for adding to memoryCleared
-  Kernel::Mutex accumulatorMutex;
+  std::mutex accumulatorMutex;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

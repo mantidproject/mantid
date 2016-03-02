@@ -29,35 +29,39 @@ public:
 
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data);
   MantidQwtIMDWorkspaceData &operator=(const MantidQwtIMDWorkspaceData &);
-  virtual ~MantidQwtIMDWorkspaceData();
+  ~MantidQwtIMDWorkspaceData() override;
 
-  virtual QwtData *copy() const;
+  QwtData *copy() const override;
   virtual MantidQwtIMDWorkspaceData* copy(Mantid::API::IMDWorkspace_sptr workspace) const;
 
-  virtual size_t size() const;
-  virtual double x(size_t i) const;
-  virtual double y(size_t i) const;
+  size_t size() const override;
+  double x(size_t i) const override;
+  double y(size_t i) const override;
 
-  double e(size_t i)const;
-  double ex(size_t i)const;
-  size_t esize()const;
-  double getYMin() const;
-  double getYMax() const;
+  double e(size_t i) const override;
+  double ex(size_t i) const override;
+  size_t esize() const override;
+  double getYMin() const override;
+  double getYMax() const override;
 
   void setPreviewMode(bool preview);
   void setPlotAxisChoice(int choice);
   void setNormalization(Mantid::API::MDNormalization choice);
 
-  QString getXAxisLabel() const;
-  QString getYAxisLabel() const;
+  QString getXAxisLabel() const override;
+  QString getYAxisLabel() const override;
   int currentPlotXAxis() const;
 
 
   /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on);
-  bool logScale()const{return m_logScale;}
-  void saveLowestPositiveValue(const double v);
+  void setLogScale(bool on) override;
+  bool logScale() const override { return m_logScale; }
+  void saveLowestPositiveValue(const double v) override;
   bool setAsDistribution(bool on = true);
+
+  void setXOffset(const double x) override;
+  void setYOffset(const double y) override;
+  void setWaterfallPlot(bool on) override;
 
 private:
 
@@ -122,6 +126,15 @@ private:
   /// This will correspond to -1 (distance)
   /// or the index into the original workspace dimensions
   int m_currentPlotAxis;
+
+  /// Indicates whether or not waterfall plots are enabled
+  bool m_isWaterfall;
+
+  /// x-axis offset for waterfall plots
+  double m_offsetX;
+
+  /// y-axis offset for waterfall plots
+  double m_offsetY;
 
 };
 #endif

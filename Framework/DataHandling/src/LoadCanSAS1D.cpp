@@ -2,13 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -79,11 +80,11 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init() {
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the CanSAS1D file to load");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Kernel::Direction::Output),
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the CanSAS1D file to load");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -128,7 +129,7 @@ void LoadCanSAS1D::exec() {
     outputWork = WS;
     break;
   default:
-    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    auto group = boost::make_shared<WorkspaceGroup>();
     for (unsigned int i = 0; i < numEntries; ++i) {
       std::string runName;
       MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), runName);
@@ -245,7 +246,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   runLoadInstrument(instname, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
-  if (isCommon == true)
+  if (isCommon)
     dataWS->setYUnitLabel(yUnit);
   return dataWS;
 }
@@ -282,8 +283,8 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
   // the following code registers the workspace with the AnalysisDataService and
   // with the workspace group, I'm taking this oone trust I don't know why it's
   // done this way sorry, Steve
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(propName, newWorkName,
-                                                         Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      propName, newWorkName, Direction::Output));
   container->addWorkspace(newWork);
   setProperty(propName, newWork);
 }
@@ -301,6 +302,8 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
     loadInst->setPropertyValue("InstrumentName", inst_name);
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

@@ -38,7 +38,7 @@ public:
 
   TSVSerialiser();
 
-  TSVSerialiser(const std::string& lines);
+  explicit TSVSerialiser(const std::string &lines);
 
   void parseLines(const std::string& lines);
   std::string outputLines() const;

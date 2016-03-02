@@ -46,33 +46,38 @@ class MatrixModel : public QAbstractTableModel
     Q_OBJECT
 
 protected:
-    MatrixModel(QObject *parent);
+  explicit MatrixModel(QObject *parent);
 
 public:
     MatrixModel(int rows = 32, int cols = 32, QObject *parent = 0);
     MatrixModel(const QImage& image, QObject *parent);
-    ~MatrixModel();
+    ~MatrixModel() override;
 
     Matrix *matrix(){return d_matrix;};
 
-	Qt::ItemFlags flags( const QModelIndex & index ) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     virtual bool canResize(int rows, int cols);
 	virtual void setDimensions(int rows, int cols);
 
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	virtual void setRowCount(int rows);
+        int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+        virtual void setRowCount(int rows);
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	virtual void setColumnCount(int cols);
+        int
+        columnCount(const QModelIndex &parent = QModelIndex()) const override;
+        virtual void setColumnCount(int cols);
 
-	virtual bool removeRows(int row, int count, const QModelIndex & parent = QModelIndex());
-	virtual bool insertRows(int row, int count, const QModelIndex & parent = QModelIndex());
+        bool removeRows(int row, int count,
+                        const QModelIndex &parent = QModelIndex()) override;
+        bool insertRows(int row, int count,
+                        const QModelIndex &parent = QModelIndex()) override;
 
-	virtual bool removeColumns(int column, int count, const QModelIndex & parent = QModelIndex());
-	virtual bool insertColumns(int column, int count, const QModelIndex & parent = QModelIndex());
+        bool removeColumns(int column, int count,
+                           const QModelIndex &parent = QModelIndex()) override;
+        bool insertColumns(int column, int count,
+                           const QModelIndex &parent = QModelIndex()) override;
 
-	virtual double x(int col) const;
+        virtual double x(int col) const;
 	virtual double y(int row) const;
 
 	virtual double cell(int row, int col) const;
@@ -85,13 +90,16 @@ public:
 	virtual QImage renderImage();
 
 	virtual double data(int row, int col) const;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	virtual bool setData(const QModelIndex & index, const QVariant & value, int role);
+        QVariant data(const QModelIndex &index,
+                      int role = Qt::DisplayRole) const override;
+        bool setData(const QModelIndex &index, const QVariant &value,
+                     int role) override;
 
     virtual double* dataVector(){return d_data;};
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
-	virtual void setImage(const QImage& image);
+        virtual void setImage(const QImage& image);
 
 	virtual 
     bool importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,

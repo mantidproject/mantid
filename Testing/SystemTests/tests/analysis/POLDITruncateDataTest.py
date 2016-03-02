@@ -17,7 +17,7 @@ class POLDITruncateDataTest(stresstesting.MantidStressTest):
 
     def loadDataFiles(self,):
         LoadSINQFile(Instrument='POLDI',Filename=self.dataFileName + ".hdf",OutputWorkspace=self.dataFileName)
-        LoadInstrument(Workspace=self.dataFileName, InstrumentName="POLDI")
+        LoadInstrument(Workspace=self.dataFileName, InstrumentName="POLDI", RewriteSpectraMap=True)
 
     def workingAnalysis(self):
     # In this method the "normal behavior" is tested, if everything is

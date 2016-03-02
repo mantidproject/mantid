@@ -1,4 +1,5 @@
 #include "MantidCrystal/SetGoniometer.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -34,12 +35,11 @@ SetGoniometer::~SetGoniometer() {}
  */
 void SetGoniometer::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
-  std::vector<std::string> gonOptions;
-  gonOptions.push_back("None, Specify Individually");
-  gonOptions.push_back("Universal");
+  std::vector<std::string> gonOptions{"None, Specify Individually",
+                                      "Universal"};
   declareProperty("Goniometers", gonOptions[0],
                   boost::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "
@@ -51,8 +51,8 @@ void SetGoniometer::init() {
   for (size_t i = 0; i < NUM_AXES; i++) {
     std::ostringstream propName;
     propName << "Axis" << i;
-    declareProperty(new PropertyWithValue<std::string>(propName.str(), "",
-                                                       Direction::Input),
+    declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+                        propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
   }
 }
@@ -97,8 +97,7 @@ void SetGoniometer::exec() {
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
-            Kernel::TimeSeriesProperty<double> *tsp =
-                new Kernel::TimeSeriesProperty<double>(axisName);
+            auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");
             if (ws->mutableRun().hasProperty(axisName)) {

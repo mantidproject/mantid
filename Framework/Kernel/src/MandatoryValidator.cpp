@@ -3,6 +3,7 @@
 //------------------------------------------
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/OptionalBool.h"
 #include <cmath>
 
 namespace Mantid {
@@ -22,10 +23,7 @@ template <> DLLExport bool checkIsEmpty(const std::string &value) {
  * @return True if the value is considered empty, see EmptyValues.h
  */
 template <> DLLExport bool checkIsEmpty(const double &value) {
-  if (std::fabs(value - Mantid::EMPTY_DBL()) < 1e-08)
-    return true;
-  else
-    return false;
+  return std::fabs(value - Mantid::EMPTY_DBL()) < 1e-08;
 }
 /**
  * Specialization of checkIsEmpty for int
@@ -42,6 +40,14 @@ template <> DLLExport bool checkIsEmpty(const int &value) {
  */
 template <> DLLExport bool checkIsEmpty(const long &value) {
   return (value == Mantid::EMPTY_LONG());
+}
+/**
+ * Specialization of checkIsEmpty for OptionalBool
+ * @param value :: A long value
+ * @return True if the value is considered empty, see EmptyValues.h
+ */
+template <> DLLExport bool checkIsEmpty(const OptionalBool &value) {
+  return (value.getValue() == OptionalBool::Unset);
 }
 }
 }

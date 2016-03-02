@@ -11,6 +11,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
 
 #include <Poco/Thread.h>
 
@@ -141,12 +142,9 @@ PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  */
 PyObject *getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
-  PropertyVector::const_iterator iend = properties.end();
   // Build the list
   PyObject *names = PyList_New(0);
-  for (PropertyVector::const_iterator itr = properties.begin(); itr != iend;
-       ++itr) {
-    Property *p = *itr;
+  for (auto p : properties) {
     if (p->direction() == Direction::Output) {
       PyList_Append(names, PyString_FromString(p->name().c_str()));
     }
@@ -206,13 +204,14 @@ std::string createDocString(IAlgorithm &self) {
  * detailed explanation
  */
 struct AllowCThreads {
-  AllowCThreads(const object &algm)
-      : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL), m_tracking(false) {
+  explicit AllowCThreads(const object &algm)
+      : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr),
+        m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
-    PyEval_SetTrace(NULL, NULL);
+    PyEval_SetTrace(nullptr, nullptr);
     if (!isNone(algm)) {
       _trackAlgorithmInThread(curThreadState->thread_id, algm);
       m_tracking = true;
@@ -292,6 +291,18 @@ std::string getWikiSummary(IAlgorithm &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
              ".getWikiSummary() is deprecated. Use .summary() instead.");
   return self.summary();
+}
+
+/**
+ * @param self Reference to the calling object
+ * @return validation error dictionary
+ */
+boost::python::object validateInputs(IAlgorithm &self) {
+  auto map = self.validateInputs();
+  using MapToPyDictionary =
+      Mantid::PythonInterface::Converters::MapToPyDictionary<std::string,
+                                                             std::string>;
+  return MapToPyDictionary(map)();
 }
 }
 
@@ -385,7 +396,7 @@ void export_ialgorithm() {
                                           "executing.")
       .def("initialize", &IAlgorithm::initialize, arg("self"),
            "Initializes the algorithm")
-      .def("validateInputs", &IAlgorithm::validateInputs, arg("self"),
+      .def("validateInputs", &validateInputs, arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")
       .def("execute", &executeProxy, arg("self"),
            "Runs the algorithm and returns whether it has been successful")

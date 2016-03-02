@@ -149,9 +149,8 @@ QwtText ScaleDraw::label(double value) const
 					day = (QDate::shortDayName (val)).left(1);
 				break;
 			}
-			return QwtText(day);
-		break;
-		}
+                        return QwtText(day);
+                }
 
 		case Month:
 		{
@@ -173,9 +172,8 @@ QwtText ScaleDraw::label(double value) const
 					day = (QDate::shortMonthName (val)).left(1);
 				break;
 			}
-			return QwtText(day);
-		break;
-		}
+                        return QwtText(day);
+                }
 
 		case Time:
 			return QwtText(d_date_time_origin.time().addMSecs((int)value).toString(d_format_info));

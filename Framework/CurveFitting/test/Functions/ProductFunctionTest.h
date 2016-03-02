@@ -17,6 +17,7 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;

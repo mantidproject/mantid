@@ -10,7 +10,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MultiThreaded.h"
+
+#include <mutex>
 
 namespace Mantid {
 
@@ -46,26 +47,26 @@ public:
   LoadTOFRawNexus();
 
   // Destructor
-  virtual ~LoadTOFRawNexus() {}
+  ~LoadTOFRawNexus() override {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadTOFRawNexus"; }
+  const std::string name() const override { return "LoadTOFRawNexus"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a NeXus file confirming to the TOFRaw format";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
   static std::string getEntryName(const std::string &filename);
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   void countPixels(const std::string &nexusfilename,
                    const std::string &entry_name,
@@ -78,8 +79,8 @@ public:
   int m_signalNo;
 
 protected:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Validate the optional input properties
   void checkOptionalProperties();
@@ -102,7 +103,7 @@ protected:
   size_t m_numBins;
 
   /// Interval of chunk
-  specid_t m_spec_min, m_spec_max;
+  specnum_t m_spec_min, m_spec_max;
 
   /// Name of the 'data' field to load (depending on Signal)
   std::string m_dataField;
@@ -114,7 +115,7 @@ protected:
   std::string m_xUnits;
 
   /// Mutex to avoid simultaneous file access
-  Kernel::Mutex m_fileMutex;
+  std::mutex m_fileMutex;
 
   /// Flag for whether or not to assume the data is old SNS raw files;
   bool m_assumeOldFile;

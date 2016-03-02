@@ -46,7 +46,7 @@ Output:
 
 .. testoutput:: SpecularReflectionCalculateThetaPointDetectorExample 
  
-   45.0
+   90.0
   
 .. categories::
 

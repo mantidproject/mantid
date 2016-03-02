@@ -25,7 +25,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
   std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
   std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
-  std::vector<detid_t>::iterator endIterator = std::remove_copy_if(
+  auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
       boost::bind<bool>(&PoldiDeadWireDecorator::detectorIsNotMasked,
                         poldiInstrument, _1));
@@ -58,7 +58,7 @@ void PoldiDeadWireDecorator::detectorSetHook() {
 
 std::vector<int>
 PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
-  if (m_deadWireSet.size() > 0) {
+  if (!m_deadWireSet.empty()) {
     if (*m_deadWireSet.rbegin() > rawElements.back()) {
       throw std::runtime_error(
           std::string("Deadwires set contains illegal index."));

@@ -12,12 +12,16 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <string>
+
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "PropertyManagerHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -618,11 +622,9 @@ public:
 
     V3D source(0, 0, 0);
     V3D sample(10, 0, 0);
-    std::vector<V3D> detectorPositions;
-
-    detectorPositions.push_back(V3D(11, 1, 0)); // First detector pos
-    detectorPositions.push_back(
-        V3D(11, 1, 0)); // Second detector sits on the first.
+    // First detector pos
+    // Second detector sits on the first.
+    std::vector<V3D> detectorPositions{{11, 1, 0}, {11, 1, 0}};
 
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         ws, source, sample, detectorPositions);
@@ -794,7 +796,7 @@ public:
       // Vector with 10 bins, 10 wide
       MantidVec X;
       for (size_t j = 0; j < 11; j++)
-        X.push_back(double(j) * 10.0);
+        X.push_back(static_cast<double>(j) * 10.0);
       ew1->setX(i, X);
 
       // Now it should be 20 in that spot
@@ -821,6 +823,68 @@ public:
     EventWorkspace_sptr wksp = createEventWorkspace(true, true, true);
     TS_ASSERT_DELTA(wksp->getEventXMin(), 500, .01);
     TS_ASSERT_DELTA(wksp->getEventXMax(), 1023500, .01);
+  }
+
+  /**
+  * Test declaring an input EventWorkspace and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    EventWorkspace_sptr wsInput(new EventWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    EventWorkspace_const_sptr wsConst;
+    EventWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<EventWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<EventWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    EventWorkspace_const_sptr wsCastConst;
+    EventWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (EventWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (EventWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  /**
+  * Test declaring an input IEventWorkspace and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_IEventWS_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    IEventWorkspace_sptr wsInput(new EventWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IEventWorkspace_const_sptr wsConst;
+    IEventWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IEventWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<IEventWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IEventWorkspace_const_sptr wsCastConst;
+    IEventWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IEventWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IEventWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

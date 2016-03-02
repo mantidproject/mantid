@@ -64,16 +64,16 @@ class ImageMarker : public QwtPlotMarker
 {
 public:
 	//! Construct an image marker from a file name.
-	ImageMarker(const QString& fn);
+  explicit ImageMarker(const QString &fn);
 
-	//! Return bounding rectangle in paint coordinates.
+        //! Return bounding rectangle in paint coordinates.
 	QRect rect() const;
 	//! Set value (position) and #d_size, giving everything in paint coordinates.
 	void setRect(int x, int y, int w, int h);
 
 	//! Return bounding rectangle in plot coordinates.
-	virtual QwtDoubleRect boundingRect() const;
-	//! Set position (xValue() and yValue()), right and bottom values giving everything in plot coordinates.
+        QwtDoubleRect boundingRect() const override;
+        //! Set position (xValue() and yValue()), right and bottom values giving everything in plot coordinates.
 	void setBoundingRect(double left, double top, double right, double bottom);
 
 	double right(){return d_x_right;};
@@ -105,9 +105,10 @@ public:
 
 private:
 	//! Does the actual drawing; see QwtPlotItem::draw.
-	void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const;
-    
-	QPoint d_pos;         //!< The position in paint coordinates.
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &r) const override;
+
+        QPoint d_pos;         //!< The position in paint coordinates.
 	QPixmap d_pic;        //!< The pixmap to be drawn.
 	QSize d_size;         //!< The size (in paint coordinates) to which #d_pic will be scaled in draw().
 	QString d_file_name;  //!< The file from which the image was loaded.

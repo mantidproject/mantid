@@ -72,14 +72,14 @@ public:
    * @param criteria : a vector with a list of pairs: column name, bool;
    *        where bool = true for ascending, false for descending sort.
    */
-  PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
+  explicit PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
       : criteria(criteria) {}
 
   /** Compare two peaks using the stored criteria */
   inline bool operator()(const Peak &a, const Peak &b) {
-    for (size_t i = 0; i < criteria.size(); i++) {
-      std::string &col = criteria[i].first;
-      bool ascending = criteria[i].second;
+    for (auto &name : criteria) {
+      std::string &col = name.first;
+      bool ascending = name.second;
       bool lessThan = false;
       if (col == "BankName") {
         // If this criterion is equal, move on to the next one
@@ -126,6 +126,11 @@ void PeaksWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 /** @return the number of peaks
  */
 int PeaksWorkspace::getNumberPeaks() const { return int(peaks.size()); }
+
+//---------------------------------------------------------------------------------------------
+/** @return the convention
+ */
+std::string PeaksWorkspace::getConvention() const { return convention; }
 
 //---------------------------------------------------------------------------------------------
 /** Removes the indicated peak
@@ -327,7 +332,6 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     oss.clear();
 
     if (peak->findDetector()) {
-      V3D detPos = peak->getDetPos();
       std::pair<std::string, std::string> detpos(
           "Position(x,y,z)",
           boost::lexical_cast<std::string>(peak->getDetPos()));
@@ -514,10 +518,6 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
 }
 
 //---------------------------------------------------------------------------------------------
-/** Destructor */
-PeaksWorkspace::~PeaksWorkspace() {}
-
-//---------------------------------------------------------------------------------------------
 /** Initialize all columns */
 void PeaksWorkspace::initColumns() {
   // Note: The column types are controlled in PeakColumn.cpp
@@ -652,6 +652,11 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // Coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
 
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention = this->getConvention();
+  file->putAttr("QConvention", m_QConvention);
+
   // Detectors column
   file->writeData("column_1", detectorID);
   file->openData("column_1");
@@ -783,7 +788,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->makeData(name, NeXus::CHAR, dims, false);
   file->openData(name);
 
-  char *toNexus = new char[maxShapeJSONLength * np];
+  auto toNexus = new char[maxShapeJSONLength * np];
   for (size_t ii = 0; ii < np; ii++) {
     std::string rowStr = shapes[ii];
     for (size_t ic = 0; ic < rowStr.size(); ic++)
@@ -856,8 +861,9 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -873,8 +879,9 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const PeaksWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }

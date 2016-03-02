@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -30,7 +31,7 @@ DECLARE_ALGORITHM(GetTimeSeriesLogInformation)
  */
 GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
     : API::Algorithm(), m_dataWS(), mRunStartTime(), mFilterT0(), mFilterTf(),
-      m_intInfoMap(), m_dblInfoMap(), m_log(NULL), m_timeVec(), m_valueVec(),
+      m_intInfoMap(), m_dblInfoMap(), m_log(nullptr), m_timeVec(), m_valueVec(),
       m_starttime(), m_endtime(), m_ignoreNegativeTime(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -42,25 +43,23 @@ GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() {}
  */
 void GetTimeSeriesLogInformation::init() {
   declareProperty(
-      new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous",
-                                                  Direction::InOut),
+      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::InOut),
       "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "Dummy", Direction::Output),
                   "Name of the workspace of log delta T distribution. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "InformationWorkspace", "", Direction::Output);
   declareProperty(
-      tablewsprop,
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InformationWorkspace", "", Direction::Output),
       "Name of optional log statistic information output Tableworkspace.");
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
-  std::vector<std::string> timeoptions;
-  timeoptions.push_back("Absolute Time (nano second)");
-  timeoptions.push_back("Relative Time (second)");
+  std::vector<std::string> timeoptions{"Absolute Time (nano second)",
+                                       "Relative Time (second)"};
   declareProperty(
       "TimeRangeOption", "Relative Time (second)",
       boost::make_shared<StringListValidator>(timeoptions),
@@ -164,7 +163,7 @@ void GetTimeSeriesLogInformation::exec() {
  */
 void GetTimeSeriesLogInformation::processTimeRange() {
   // Orignal
-  m_intInfoMap.insert(make_pair("Items", m_log->size()));
+  m_intInfoMap.emplace("Items", m_log->size());
 
   // Input time
   double t0r = this->getProperty("FilterStartTime");
@@ -271,16 +270,15 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 /** Generate statistic information table workspace
   */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
-  TableWorkspace_sptr tablews(new TableWorkspace());
+  auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
 
   // 1. Integer part
-  for (auto intmapiter = m_intInfoMap.begin(); intmapiter != m_intInfoMap.end();
-       ++intmapiter) {
-    string name = intmapiter->first;
-    size_t value = intmapiter->second;
+  for (auto &intmapiter : m_intInfoMap) {
+    string name = intmapiter.first;
+    size_t value = intmapiter.second;
 
     TableRow newrow = tablews->appendRow();
     newrow << name << static_cast<double>(value);
@@ -407,20 +405,18 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
     vecCount[i] = 0;
 
   // 3. Count
-  for (size_t i = 0; i < vecdt.size(); ++i) {
-    double dt = vecdt[i];
+  for (double dt : vecdt) {
     int index;
     if (dt < 0 && m_ignoreNegativeTime) {
       index = 0;
     } else {
-      vector<double>::iterator viter =
-          lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
+      auto viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
       index = static_cast<int>(viter - vecDeltaT.begin());
       if (index >= static_cast<int>(vecDeltaT.size())) {
         // Out of upper boundary
         g_log.error() << "Find index = " << index
                       << " > vecX.size = " << vecDeltaT.size() << ".\n";
-      } else if (vecdt[i] < vecDeltaT[index]) {
+      } else if (dt < vecDeltaT[index]) {
         --index;
       }
 
@@ -455,10 +451,9 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   size_t f = m_timeVec.size()-1;
   */
 
-  m_intInfoMap.insert(make_pair("Number of Time Stamps", m_timeVec.size()));
-  m_intInfoMap.insert(make_pair("Number of Equal Time Stamps", countsame));
-  m_intInfoMap.insert(
-      make_pair("Number of Reversed Time Stamps", countinverse));
+  m_intInfoMap.emplace("Number of Time Stamps", m_timeVec.size());
+  m_intInfoMap.emplace("Number of Equal Time Stamps", countsame);
+  m_intInfoMap.emplace("Number of Reversed Time Stamps", countinverse);
 
   // 2. Average and standard deviation (delta t)
   double runduration_sec = static_cast<double>(m_endtime.totalNanoseconds() -
@@ -507,10 +502,10 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   double std_dt =
       sqrt(sum_deltaT2 / static_cast<double>(numpts - 1) - avg_dt * avg_dt);
 
-  m_dblInfoMap.insert(make_pair("Average(dT)", avg_dt));
-  m_dblInfoMap.insert(make_pair("Sigma(dt)", std_dt));
-  m_dblInfoMap.insert(make_pair("Min(dT)", min_dt));
-  m_dblInfoMap.insert(make_pair("Max(dT)", max_dt));
+  m_dblInfoMap.emplace("Average(dT)", avg_dt);
+  m_dblInfoMap.emplace("Sigma(dt)", std_dt);
+  m_dblInfoMap.emplace("Min(dT)", min_dt);
+  m_dblInfoMap.emplace("Max(dT)", max_dt);
 
   // 3. Count number of time intervals beyond 10% of deviation
   /* Temporarily disabled

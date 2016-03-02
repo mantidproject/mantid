@@ -51,6 +51,12 @@ public:
   // std::string currentReconTool() const {}
   MOCK_CONST_METHOD0(currentReconTool, std::string());
 
+  // std::string astraMethod() const {}
+  MOCK_CONST_METHOD0(astraMethod, std::string());
+
+  // std::string tomopyMethod() const {}
+  MOCK_CONST_METHOD0(tomopyMethod, std::string());
+
   // void updateLoginControls(bool loggedIn) {}
   MOCK_METHOD1(updateLoginControls, void(bool loggedIn));
 
@@ -73,21 +79,43 @@ public:
   MOCK_METHOD1(showImage, void(const std::string &path));
 
   // TomoPathsConfig currentPathsConfig() const {}
-  MOCK_CONST_METHOD0(currentPathsConfig, MantidQt::CustomInterfaces::TomoPathsConfig());
+  MOCK_CONST_METHOD0(currentPathsConfig,
+                     MantidQt::CustomInterfaces::TomoPathsConfig());
+
+  // ImageStackPreParams currentROIEtcParams() const = 0;
+  MOCK_CONST_METHOD0(currentROIEtcParams,
+                     MantidQt::CustomInterfaces::ImageStackPreParams());
 
   // void showToolConfig(const std::string &name) {}
   MOCK_METHOD1(showToolConfig, void(const std::string &name));
 
-  // void updateJobsInfoDisplay(const std::vector<
-  //    Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {}
-  MOCK_METHOD1(updateJobsInfoDisplay,
-               void(const std::vector<
-                   Mantid::API::IRemoteJobManager::RemoteJobInfo> &status));
+  // std::string pathLocalReconScripts() {}
+  MOCK_CONST_METHOD0(pathLocalReconScripts, std::string());
+
+  // std::string externalInterpreterPath() {}
+  MOCK_CONST_METHOD0(externalInterpreterPath, std::string());
+
+  // virtual void updateJobsInfoDisplay( const
+  //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+  //    &status, const
+  //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+  //    localStatus) = 0;
+  MOCK_METHOD2(
+      updateJobsInfoDisplay,
+      void(const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+               &status,
+           const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+               &localStatus));
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
   // reconToolsSettings() const {}
   MOCK_CONST_METHOD0(reconToolsSettings,
                      MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
+
+  // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
+  // prePostProcSettings() const
+  MOCK_CONST_METHOD0(prePostProcSettings,
+                     MantidQt::CustomInterfaces::TomoReconFiltersSettings());
 };
 
 #endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H

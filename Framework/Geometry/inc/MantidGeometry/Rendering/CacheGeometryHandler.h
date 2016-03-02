@@ -56,25 +56,26 @@ private:
       Triangulator; ///< Geometry generator to triangulate Object
 
 public:
-  CacheGeometryHandler(IObjComponent *obj);            ///< Constructor
+  CacheGeometryHandler(IObjComponent *comp);           ///< Constructor
   CacheGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   CacheGeometryHandler(Object *obj);                   ///< Constructor
-  boost::shared_ptr<GeometryHandler> clone() const;
-  ~CacheGeometryHandler(); ///< Destructor
-  GeometryHandler *createInstance(IObjComponent *comp);
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj);
-  GeometryHandler *createInstance(Object *obj);
+  boost::shared_ptr<GeometryHandler> clone() const override;
+  ~CacheGeometryHandler() override; ///< Destructor
+  GeometryHandler *createInstance(IObjComponent *comp) override;
+  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
+  GeometryHandler *createInstance(Object *obj) override;
 
-  void Triangulate();
-  void Render();
-  void Initialize();
-  bool canTriangulate() { return true; }
-  int NumberOfTriangles();
-  int NumberOfPoints();
-  double *getTriangleVertices();
-  int *getTriangleFaces();
+  void Triangulate() override;
+  void Render() override;
+  void Initialize() override;
+  bool canTriangulate() override { return true; }
+  int NumberOfTriangles() override;
+  int NumberOfPoints() override;
+  double *getTriangleVertices() override;
+  int *getTriangleFaces() override;
   /// Sets the geometry cache using the triangulation information provided
-  void setGeometryCache(int noPts, int noFaces, double *pts, int *faces);
+  void setGeometryCache(int noPts, int noFaces, double *pts,
+                        int *faces) override;
 };
 
 } // NAMESPACE Geometry

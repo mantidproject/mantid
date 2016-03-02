@@ -1,8 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
@@ -10,21 +9,23 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <limits>
 #include <sstream>
@@ -46,7 +47,7 @@ IFunction::~IFunction() {
   m_attrs.clear();
   if (m_handler) {
     delete m_handler;
-    m_handler = NULL;
+    m_handler = nullptr;
   }
 }
 
@@ -109,7 +110,7 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  */
 ParameterTie *IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
-  ParameterTie *ti = new ParameterTie(this, parName, expr, isDefault);
+  auto ti = new ParameterTie(this, parName, expr, isDefault);
   addTie(ti);
   this->fix(getParameterIndex(*ti));
   return ti;
@@ -128,13 +129,13 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
   Expression list;
   list.parse(ties);
   list.toList();
-  for (auto t = list.begin(); t != list.end(); ++t) {
-    if (t->name() == "=" && t->size() >= 2) {
-      size_t n = t->size() - 1;
-      const std::string value = (*t)[n].str();
+  for (const auto &t : list) {
+    if (t.name() == "=" && t.size() >= 2) {
+      size_t n = t.size() - 1;
+      const std::string value = t[n].str();
       for (size_t i = n; i != 0;) {
         --i;
-        this->tie((*t)[i].name(), value, isDefault);
+        this->tie(t[i].name(), value, isDefault);
       }
     }
   }
@@ -159,9 +160,8 @@ std::string IFunction::asString() const {
   ostr << "name=" << this->name();
   // print the attributes
   std::vector<std::string> attr = this->getAttributeNames();
-  for (size_t i = 0; i < attr.size(); i++) {
-    std::string attName = attr[i];
-    std::string attValue = this->getAttribute(attr[i]).value();
+  for (const auto &attName : attr) {
+    std::string attValue = this->getAttribute(attName).value();
     if (!attValue.empty() && attValue != "\"\"") {
       ostr << ',' << attName << '=' << attValue;
     }
@@ -222,9 +222,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (auto expr = list.begin(); expr != list.end(); ++expr) {
+  for (const auto &expr : list) {
     IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, *expr, isDefault);
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
     this->addConstraint(c);
   }
 }
@@ -253,17 +253,11 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  std::vector<std::string> res;
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
-  for (; h != tokenizer.end(); ++h) {
-    res.push_back(*h);
-  }
-
-  return res;
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -283,15 +277,17 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string &) const { return "std::string"; }
+  std::string apply(const std::string &) const override {
+    return "std::string";
+  }
   /// Apply if int
-  std::string apply(const int &) const { return "int"; }
+  std::string apply(const int &) const override { return "int"; }
   /// Apply if double
-  std::string apply(const double &) const { return "double"; }
+  std::string apply(const double &) const override { return "double"; }
   /// Apply if bool
-  std::string apply(const bool &) const { return "bool"; }
+  std::string apply(const bool &) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> &) const {
+  std::string apply(const std::vector<double> &) const override {
     return "std::vector<double>";
   }
 };
@@ -308,29 +304,31 @@ namespace {
  */
 class AttValue : public IFunction::ConstAttributeVisitor<std::string> {
 public:
-  AttValue(bool quoteString = false)
+  explicit AttValue(bool quoteString = false)
       : IFunction::ConstAttributeVisitor<std::string>(),
         m_quoteString(quoteString) {}
 
 protected:
   /// Apply if string
-  std::string apply(const std::string &str) const {
+  std::string apply(const std::string &str) const override {
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const {
+  std::string apply(const int &i) const override {
     return boost::lexical_cast<std::string>(i);
   }
   /// Apply if double
-  std::string apply(const double &d) const {
+  std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);
   }
   /// Apply if bool
-  std::string apply(const bool &b) const { return b ? "true" : "false"; }
+  std::string apply(const bool &b) const override {
+    return b ? "true" : "false";
+  }
   /// Apply if vector
-  std::string apply(const std::vector<double> &v) const {
+  std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
-    if (v.size() > 0) {
+    if (!v.empty()) {
       for (size_t i = 0; i < v.size() - 1; ++i) {
         res += boost::lexical_cast<std::string>(v[i]) + ",";
       }
@@ -539,13 +537,13 @@ public:
    * Constructor
    * @param value :: The value to set
    */
-  SetValue(const std::string &value) : m_value(value) {}
+  explicit SetValue(const std::string &value) : m_value(value) {}
 
 protected:
   /// Apply if string
-  void apply(std::string &str) const { str = m_value; }
+  void apply(std::string &str) const override { str = m_value; }
   /// Apply if int
-  void apply(int &i) const {
+  void apply(int &i) const override {
     std::istringstream istr(m_value + " ");
     istr >> i;
     if (!istr.good())
@@ -554,7 +552,7 @@ protected:
                                   m_value);
   }
   /// Apply if double
-  void apply(double &d) const {
+  void apply(double &d) const override {
     std::istringstream istr(m_value + " ");
     istr >> d;
     if (!istr.good())
@@ -563,11 +561,11 @@ protected:
                                   m_value);
   }
   /// Apply if bool
-  void apply(bool &b) const {
+  void apply(bool &b) const override {
     b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
   }
   /// Apply if vector
-  void apply(std::vector<double> &v) const {
+  void apply(std::vector<double> &v) const override {
     if (m_value.empty()) {
       v.clear();
       return;
@@ -579,8 +577,8 @@ protected:
         m_value.erase(m_value.size() - 1);
       }
     }
-    Poco::StringTokenizer tokenizer(m_value, ",",
-                                    Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     v.resize(tokenizer.count());
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
@@ -744,8 +742,8 @@ void IFunction::setMatrixWorkspace(
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
-            if (testWithLocation == NULL ||
-                (fitParam.getLookUpTable().containData() == false &&
+            if (testWithLocation == nullptr ||
+                (!fitParam.getLookUpTable().containData() &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
             } else {
@@ -808,14 +806,13 @@ void IFunction::setMatrixWorkspace(
                 if (!resultUnitStr.empty()) {
                   std::vector<std::string> allUnitStr =
                       Kernel::UnitFactory::Instance().getKeys();
-                  for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++) {
-                    size_t found = resultUnitStr.find(allUnitStr[iUnit]);
+                  for (auto &iUnit : allUnitStr) {
+                    size_t found = resultUnitStr.find(iUnit);
                     if (found != std::string::npos) {
-                      size_t len = allUnitStr[iUnit].size();
+                      size_t len = iUnit.size();
                       std::stringstream readDouble;
                       Kernel::Unit_sptr unt =
-                          Kernel::UnitFactory::Instance().create(
-                              allUnitStr[iUnit]);
+                          Kernel::UnitFactory::Instance().create(iUnit);
                       readDouble << 1.0 / convertValue(1.0, unt, workspace, wi);
                       resultUnitStr.replace(found, len, readDouble.str());
                     }
@@ -937,7 +934,7 @@ void IFunction::convertValue(std::vector<double> &values,
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
-    if (sample == NULL) {
+    if (sample == nullptr) {
       g_log.error()
           << "No sample defined instrument. Cannot convert units for function\n"
           << "Ignore convertion.";
@@ -1009,8 +1006,8 @@ void IFunction::setAttributeValue(const std::string &attName,
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names(nAttributes(), "");
   size_t index(0);
-  for (auto iter = m_attrs.begin(); iter != m_attrs.end(); ++iter) {
-    names[index] = iter->first;
+  for (const auto &attr : m_attrs) {
+    names[index] = attr.first;
     ++index;
   }
   return names;
@@ -1050,7 +1047,7 @@ void IFunction::setAttribute(const std::string &name,
 */
 void IFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_attrs.insert(std::make_pair(name, defaultValue));
+  m_attrs.emplace(name, defaultValue);
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters
@@ -1118,7 +1115,25 @@ IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
     return *prop;
   } else {
     std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IFitFunction.";
+                          " to incorrect type. Expected shared_ptr<IFunction>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+MANTID_API_DLL boost::shared_ptr<const Mantid::API::IFunction>
+IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
+    const std::string &name) const {
+  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
+      dynamic_cast<
+          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IFunction>.";
     throw std::runtime_error(message);
   }
 }

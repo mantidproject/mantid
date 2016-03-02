@@ -82,7 +82,7 @@ void MDWSDescription::buildFromMatrixWS(
 
   // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions
   // coming from additional coordinates
-  m_NDims = nMatrixDim + (unsigned int)m_AddCoord.size();
+  m_NDims = nMatrixDim + static_cast<unsigned int>(m_AddCoord.size());
   this->resizeDimDescriptions(m_NDims);
   // check if all MD dimensions descriptors are set properly
   if (m_NDims != m_DimNames.size() || m_NDims != m_DimMin.size()) {
@@ -142,7 +142,7 @@ Kernel::Matrix<double> MDWSDescription::getGoniometerMatr() const {
 */
 void MDWSDescription::buildFromMDWS(
     const API::IMDEventWorkspace_const_sptr &pWS) {
-  m_NDims = (unsigned int)pWS->getNumDims();
+  m_NDims = static_cast<unsigned int>(pWS->getNumDims());
   // prepare all arrays:
   m_DimNames.resize(m_NDims);
   m_DimIDs.resize(m_NDims);
@@ -181,6 +181,7 @@ void MDWSDescription::setUpMissingParameters(
   m_InWS = SourceMatrWS.m_InWS;
   m_Emode = SourceMatrWS.m_Emode;
   m_LorentzCorr = SourceMatrWS.m_LorentzCorr;
+  m_AbsMin = SourceMatrWS.m_AbsMin;
   this->AlgID = SourceMatrWS.AlgID;
 
   m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),
@@ -242,7 +243,7 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
 MDWSDescription::MDWSDescription(unsigned int nDimensions)
     : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true),
       m_Emode(Kernel::DeltaEMode::Undefined), m_LorentzCorr(false),
-      m_coordinateSystem(Mantid::Kernel::None) {
+      m_AbsMin(0.), m_coordinateSystem(Mantid::Kernel::None) {
 
   this->resizeDimDescriptions(nDimensions);
   m_DimMin.assign(m_NDims, std::numeric_limits<double>::quiet_NaN());
@@ -321,10 +322,8 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 //******************************************************************************************************************************************
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
-  if ((this->AlgID == "|Q|") ||
-      (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice()))
-    return true;
-  return false;
+  return (this->AlgID == "|Q|") ||
+         (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */

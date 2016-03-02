@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/He3TubeEfficiency.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -194,6 +195,7 @@ private:
     loader.setPropertyValue("Filename",
                             "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputWS);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
   }
 
@@ -208,6 +210,7 @@ private:
     loader.setPropertyValue("Filename",
                             "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputEvWS);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
   }
 };

@@ -2,10 +2,8 @@
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 import ui.diffraction.ui_diffraction_adv_setup
@@ -45,8 +43,6 @@ class AdvancedSetupWidget(BaseWidget):
     def initialize_content(self):
         """ Initialize content/UI
         """
-        # FIXME : Fill in the contraints, states and connections to this method ASAP
-
         # Constraints/Validator
         iv4 = QtGui.QIntValidator(self._content.maxchunksize_edit)
         iv4.setBottom(0)
@@ -105,7 +101,7 @@ class AdvancedSetupWidget(BaseWidget):
         self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
                 self._show_help)
         # Hanlder for events
-        # FIXME - Need to add an event hanlder for the change of instrument and facility
+        # TODO - Need to add an event hanlder for the change of instrument and facility
 
         # Validated widgets
 
@@ -135,6 +131,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
 
+        # range of wavelength
+        self._content.cropwavelengthmin_edit.setText(str(state.cropwavelengthmin))
+        self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
+
         return
 
 
@@ -147,8 +147,8 @@ class AdvancedSetupWidget(BaseWidget):
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
-        s.cropwavelengthmin = self._content.cropwavelengthmin_edit.text()
-        s.crop_wavelength_max = str(self._content.lineEdit_croppedWavelengthMax.text())
+        s.cropwavelengthmin = str(self._content.cropwavelengthmin_edit.text())
+        s.cropwavelengthmax = str(self._content.lineEdit_croppedWavelengthMax.text())
         s.removepropmppulsewidth = self._content.removepromptwidth_edit.text()
         s.maxchunksize = self._content.maxchunksize_edit.text()
         s.scaledata = self._content.scaledata_edit.text()

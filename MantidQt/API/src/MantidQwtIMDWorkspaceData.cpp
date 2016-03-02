@@ -43,7 +43,11 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
    m_normalization(normalize),
    m_isDistribution(isDistribution),
    m_transform(NULL),
-   m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance)
+   m_plotAxis(PlotDistance), 
+	m_currentPlotAxis(PlotDistance), 
+	m_isWaterfall(false), 
+	m_offsetX(0), 
+	m_offsetY(0)
 {
   if (start.getNumDims() == 1 && end.getNumDims() == 1)
   {
@@ -120,6 +124,9 @@ MantidQwtIMDWorkspaceData& MantidQwtIMDWorkspaceData::operator=(const MantidQwtI
   m_transform = NULL;
   m_plotAxis = data.m_plotAxis;
   m_currentPlotAxis = data.m_currentPlotAxis;
+  m_offsetX = data.m_offsetX;
+  m_offsetY = data.m_offsetY;
+  m_isWaterfall = data.m_isWaterfall;
   if (data.m_transform)
     m_transform = data.m_transform->clone();
   this->cacheLinePlot();
@@ -161,9 +168,10 @@ MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorks
 /** Cache the X/Y line plot data from this workspace and start/end points */
 void MantidQwtIMDWorkspaceData::cacheLinePlot()
 {
-  m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
-//  std::cout << "MantidQwtIMDWorkspaceData found " << m_Y.size() << " points\n";
-//  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
+  auto line = m_workspace->getLinePlot(m_start, m_end, m_normalization);
+  m_lineX = line.x;
+  m_Y = line.y;
+  m_E = line.e;
 }
 
 //-----------------------------------------------------------------------------
@@ -199,7 +207,7 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
     x = originalCoord[m_currentPlotAxis];
     //std::cout << wsCoord << " -> " << originalCoord << " at index " << i << " is read as " << x << ". m_dimensionIndex is " << m_dimensionIndex <<  std::endl;
   }
-  return x;
+  return m_isWaterfall? x + m_offsetX : x;
 }
 
 /** Return the y value of data point i
@@ -210,15 +218,16 @@ double MantidQwtIMDWorkspaceData::y(size_t i) const
 {
   Mantid::signal_t val = m_Y[i];
   if (m_logScale && val <= 0.)
-    return m_minPositive;
+    return m_isWaterfall? m_minPositive + m_offsetY : m_minPositive;
   else
-    return val;
+    return m_isWaterfall? val + m_offsetY : val;
 }
 
 /// Returns the x position of the error bar for the i-th data point (bin)
 double MantidQwtIMDWorkspaceData::ex(size_t i) const
 {
-  return this->x(i);
+	double err = this->x(i);
+  return m_isWaterfall? err + m_offsetX : err;
 }
 
 /// Returns the error of the i-th data point
@@ -248,9 +257,9 @@ size_t MantidQwtIMDWorkspaceData::esize() const
 double MantidQwtIMDWorkspaceData::getYMin() const
 {
   if (m_logScale)
-    return m_minPositive;
+    return m_isWaterfall? m_minPositive + m_offsetY : m_minPositive;
   else
-    return m_minY;
+    return m_isWaterfall? m_minY + m_offsetY : m_minY;
 }
 
 /**
@@ -260,9 +269,9 @@ double MantidQwtIMDWorkspaceData::getYMin() const
 double MantidQwtIMDWorkspaceData::getYMax() const
 {
   if (m_logScale && m_maxY <= 0)
-    return m_minPositive;
+    return m_isWaterfall ? m_minPositive + m_offsetY : m_minPositive;
   else
-    return m_maxY;
+    return m_isWaterfall ? m_maxY + m_offsetY : m_maxY;
 }
 
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)
@@ -303,6 +312,12 @@ void MantidQwtIMDWorkspaceData::setNormalization(Mantid::API::MDNormalization ch
   m_normalization = choice;
   this->cacheLinePlot();
 }
+
+void MantidQwtIMDWorkspaceData::setXOffset(const double x) { m_offsetX = x; }
+
+void MantidQwtIMDWorkspaceData::setYOffset(const double y) { m_offsetY = y; }
+
+void MantidQwtIMDWorkspaceData::setWaterfallPlot(bool on) { m_isWaterfall = on; }
 
 //-----------------------------------------------------------------------------
 /** Are we in Preview mode?

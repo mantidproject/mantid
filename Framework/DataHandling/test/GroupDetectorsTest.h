@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -19,7 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -73,7 +75,7 @@ public:
 
     TS_ASSERT_EQUALS(props[1]->name(), "SpectraList")
     TS_ASSERT(props[1]->isDefault())
-    TS_ASSERT(dynamic_cast<ArrayProperty<specid_t> *>(props[1]))
+    TS_ASSERT(dynamic_cast<ArrayProperty<specnum_t> *>(props[1]))
 
     TS_ASSERT_EQUALS(props[2]->name(), "DetectorList")
     TS_ASSERT(props[2]->isDefault())

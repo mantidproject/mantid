@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "LoadRaw/isisraw2.h"
@@ -36,17 +37,15 @@ LoadDetectorInfo::LoadDetectorInfo()
 
 void LoadDetectorInfo::init() {
 
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "The name of the workspace to that the detector information "
-                  "will be loaded into.");
-  std::vector<std::string> exts;
-  // each of these allowed extensions must be dealt with in exec() below
-  exts.push_back(".dat");
-  exts.push_back(".raw");
-  exts.push_back(".sca");
-  exts.push_back(".nxs");
   declareProperty(
-      new FileProperty("DataFilename", "", FileProperty::Load, exts),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "The name of the workspace to that the detector information "
+      "will be loaded into.");
+
+  const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
+  declareProperty(
+      Kernel::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
+                                        exts),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "

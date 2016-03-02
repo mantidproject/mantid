@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -27,7 +28,7 @@ ParComponentFactory::createDetector(const IDetector *base,
   const RectangularDetectorPixel *rdp =
       dynamic_cast<const RectangularDetectorPixel *>(base);
   if (rdp)
-    return boost::shared_ptr<Detector>(new RectangularDetectorPixel(rdp, map));
+    return boost::make_shared<RectangularDetectorPixel>(rdp, map);
 
   const Detector *baseDet = dynamic_cast<const Detector *>(base);
   if (baseDet)
@@ -48,7 +49,7 @@ ParComponentFactory::createDetector(const IDetector *base,
 boost::shared_ptr<Instrument>
 ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
                                       boost::shared_ptr<ParameterMap> map) {
-  return boost::shared_ptr<Instrument>(new Instrument(base, map));
+  return boost::make_shared<Instrument>(base, map);
 }
 
 /**
@@ -94,23 +95,23 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   const RectangularDetector *rd =
       dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)
-    return boost::shared_ptr<IComponent>(new RectangularDetector(rd, map));
+    return boost::make_shared<RectangularDetector>(rd, map);
 
   const CompAssembly *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)
-    return boost::shared_ptr<IComponent>(new CompAssembly(ac, map));
+    return boost::make_shared<CompAssembly>(ac, map);
   const ObjCompAssembly *oac =
       dynamic_cast<const ObjCompAssembly *>(base.get());
   if (oac)
-    return boost::shared_ptr<IComponent>(new ObjCompAssembly(oac, map));
+    return boost::make_shared<ObjCompAssembly>(oac, map);
 
   const ObjComponent *oc = dynamic_cast<const ObjComponent *>(base.get());
   if (oc)
-    return boost::shared_ptr<IComponent>(new ObjComponent(oc, map));
+    return boost::make_shared<ObjComponent>(oc, map);
   // Must be a component
   const IComponent *cc = dynamic_cast<const IComponent *>(base.get());
   if (cc)
-    return boost::shared_ptr<IComponent>(new Component(cc, map));
+    return boost::make_shared<Component>(cc, map);
 
   return IComponent_sptr();
 }

@@ -1,8 +1,8 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-from SANSUtility import (bundle_added_event_data_as_group, AddOperation)
+from SANSUtility import (bundle_added_event_data_as_group, AddOperation, transfer_special_sample_logs)
 sanslog = Logger("SANS")
 from shutil import copyfile
 
@@ -126,6 +126,11 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             wsInMonitor = mtd['AddFilesSumTempory_monitors']
             wsOut = mtd['AddFilesSumTempory']
             wsInDetector = mtd['AddFilesSumTempory_Rebin']
+
+            # We loose added sample log information since we reload a single run workspace
+            # and conjoin with the added workspace. In order to preserve some added sample
+            # logs we need to transfer them at this point
+            transfer_special_sample_logs(from_ws = wsInDetector, to_ws = wsOut)
 
             mon_n = wsInMonitor.getNumberHistograms()
             for i in range(mon_n):

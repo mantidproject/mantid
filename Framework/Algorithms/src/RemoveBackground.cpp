@@ -3,9 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBackground.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/GeometryInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -14,6 +17,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,26 +32,26 @@ using namespace API;
 // Public methods
 //---------------------------------------------------------------------------------------------
 
-/** Initialisation method. Declares properties to be used in algorithm.
+/** Initialization method. Declares properties to be used in algorithm.
 *
 */
 void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, sourceValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to give the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to give the output workspace");
 
   auto vsValidator = boost::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
-      new WorkspaceProperty<>("BkgWorkspace", "", Direction::Input,
-                              vsValidator),
+      make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input,
+                                       vsValidator),
       "An optional histogram workspace in the units of TOF defining background "
       "for removal during rebinning."
       "The workspace has to have single value or contain the same number of "
@@ -66,6 +70,14 @@ void RemoveBackground::init() {
                   "The energy conversion mode used to define the conversion "
                   "from the units of the InputWorkspace to TOF",
                   Direction::Input);
+  declareProperty("NullifyNegativeValues", false,
+                  "When background is subtracted, signals in some time "
+                  "channels may become negative.\n"
+                  "If this option is true, signal in such bins is nullified "
+                  "and the module of the removed signal"
+                  "is added to the error. If false, the negative signal and "
+                  "correspondent errors remain unchanged",
+                  Direction::Input);
 }
 
 /** Executes the rebin algorithm
@@ -80,16 +92,7 @@ void RemoveBackground::exec() {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   API::MatrixWorkspace_const_sptr bkgWksp = getProperty("BkgWorkspace");
-
-  // source workspace has to have full instrument defined to perform background
-  // removal using this procedure.
-  auto pInstrument = inputWS->getInstrument();
-  if (pInstrument) {
-    if (!pInstrument->getSample())
-      throw std::invalid_argument(" Workspace: " + inputWS->getName() +
-                                  " does not have properly defined instrument. "
-                                  "Can not remove background");
-  }
+  bool nullifyNegative = getProperty("NullifyNegativeValues");
 
   if (!(bkgWksp->getNumberHistograms() == 1 ||
         inputWS->getNumberHistograms() == bkgWksp->getNumberHistograms())) {
@@ -99,7 +102,6 @@ void RemoveBackground::exec() {
                                 "workspace");
   }
 
-  //
   int eMode; // in convert units emode is still integer
   const std::string emodeStr = getProperty("EMode");
   eMode = static_cast<int>(Kernel::DeltaEMode::fromString(emodeStr));
@@ -115,10 +117,9 @@ void RemoveBackground::exec() {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
 
-  //
   int nThreads = PARALLEL_GET_MAX_THREADS;
   m_BackgroundHelper.initialize(bkgWksp, inputWS, eMode, &g_log, nThreads,
-                                inPlace);
+                                inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
   PARALLEL_FOR2(inputWS, outputWS)
@@ -150,41 +151,43 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), // m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample() {}
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
+      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
+      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+      m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 
 /** The method deletes all units converter allocated*/
 void BackgroundHelper::deleteUnitsConverters() {
-  for (size_t i = 0; i < m_WSUnit.size(); i++) {
-    if (m_WSUnit[i]) {
-      delete m_WSUnit[i];
-      m_WSUnit[i] = NULL;
-    }
+  for (auto &unit : m_WSUnit) {
+    delete unit;
+    unit = nullptr;
   }
 }
 
 /** Initialization method:
-@param bkgWS    -- shared pointer to the workspace which contains background
-@param sourceWS -- shared pointer to the workspace to remove background from
-@param emode    -- energy conversion mode used during internal units conversion
-(0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
-@param pLog     -- pointer to the logger class which would report errors
-@param nThreads -- number of threads to be used for background removal
-@param inPlace  -- if the background removal occurs from the existing workspace
+*@param bkgWS    -- shared pointer to the workspace which contains background
+*@param sourceWS -- shared pointer to the workspace to remove background from
+*@param emode    -- energy conversion mode used during internal units conversion
+*           (0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
+*@param pLog     -- pointer to the logger class which would report errors
+*@param nThreads -- number of threads to be used for background removal
+*@param inPlace  -- if the background removal occurs from the existing workspace
+*@param nullifyNegative -- if true, negative signals are nullified and error is
+*                          modified appropriately
 or target workspace has to be cloned.
 */
 void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                                   const API::MatrixWorkspace_sptr &sourceWS,
                                   int emode, Kernel::Logger *pLog, int nThreads,
-                                  bool inPlace) {
+                                  bool inPlace, bool nullifyNegative) {
   m_bgWs = bkgWS;
   m_wkWS = sourceWS;
   m_Emode = emode;
   m_pgLog = pLog;
   m_inPlace = inPlace;
+  m_nullifyNegative = nullifyNegative;
 
   std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
   if (bgUnits != "TOF")
@@ -203,33 +206,33 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
     throw std::invalid_argument(" Source Workspace: " + sourceWS->getName() +
                                 " should have units");
 
-  Geometry::IComponent_const_sptr source =
-      sourceWS->getInstrument()->getSource();
-  m_Sample = sourceWS->getInstrument()->getSample();
-  if ((!source) || (!m_Sample))
-    throw std::invalid_argument(
-        "Instrument on Source workspace:" + sourceWS->getName() +
-        "is not sufficiently defined: failed to get source and/or sample");
-  m_L1 = source->getDistance(*m_Sample);
+  m_geometryInfoFactory = Kernel::make_unique<GeometryInfoFactory>(*sourceWS);
 
   // just in case.
   this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
-  m_WSUnit.assign(nThreads, NULL);
+  m_WSUnit.assign(nThreads, nullptr);
   for (int i = 0; i < nThreads; i++) {
     m_WSUnit[i] = WSUnit->clone();
   }
 
   m_singleValueBackground = false;
-  if (bkgWS->getNumberHistograms() == 0)
+  if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
-  const MantidVec &dataX = bkgWS->dataX(0);
-  const MantidVec &dataY = bkgWS->dataY(0);
-  // const MantidVec& dataE = bkgWS->dataE(0);
+
+  const MantidVec &dataX = bkgWS->readX(0);
+  const MantidVec &dataY = bkgWS->readY(0);
+  const MantidVec &dataE = bkgWS->readE(0);
   m_NBg = dataY[0];
   m_dtBg = dataX[1] - dataX[0];
-  // m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
+  m_ErrSq = dataE[0] * dataE[0]; // needs further clarification
+
+  m_previouslyRemovedBkgMode = false;
+  if (m_singleValueBackground) {
+    if (m_NBg < 1.e-7 && m_ErrSq < 1.e-7)
+      m_previouslyRemovedBkgMode = true;
+  }
 
   m_Efix = this->getEi(sourceWS);
 }
@@ -248,25 +251,25 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
                                         MantidVec &y_data, MantidVec &e_data,
                                         int threadNum) const {
 
-  double dtBg, IBg;
+  double dtBg, IBg, ErrBgSq;
   if (m_singleValueBackground) {
     dtBg = m_dtBg;
-    // ErrSq = m_ErrSq;
+    ErrBgSq = m_ErrSq;
     IBg = m_NBg;
   } else {
-    const MantidVec &dataX = m_bgWs->dataX(nHist);
-    const MantidVec &dataY = m_bgWs->dataY(nHist);
-    // const MantidVec& dataE = m_bgWs->dataX(nHist);
+    const MantidVec &dataX = m_bgWs->readX(nHist);
+    const MantidVec &dataY = m_bgWs->readY(nHist);
+    const MantidVec &dataE = m_bgWs->readE(nHist);
     dtBg = (dataX[1] - dataX[0]);
     IBg = dataY[0];
-    // ErrSq= dataE[0]*dataE[0]; // Needs further clarification
+    ErrBgSq = dataE[0] * dataE[0]; // Needs further clarification
   }
 
   try {
-    auto detector = m_wkWS->getDetector(nHist);
-    //
-    double twoTheta = m_wkWS->detectorTwoTheta(detector);
-    double L2 = detector->getDistance(*m_Sample);
+    auto geometryInfo = m_geometryInfoFactory->create(nHist);
+    double twoTheta = geometryInfo.getTwoTheta();
+    double L1 = geometryInfo.getL1();
+    double L2 = geometryInfo.getL2();
     double delta(std::numeric_limits<double>::quiet_NaN());
     // get access to source workspace in case if target is different from source
     const MantidVec &XValues = m_wkWS->readX(nHist);
@@ -275,7 +278,7 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
 
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum];
-    unitConv->initialize(m_L1, L2, twoTheta, m_Emode, m_Efix, delta);
+    unitConv->initialize(L1, L2, twoTheta, m_Emode, m_Efix, delta);
 
     x_data[0] = XValues[0];
     double tof1 = unitConv->singleToTOF(x_data[0]);
@@ -284,19 +287,32 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
       double tof2 = unitConv->singleToTOF(X);
       double Jack = std::fabs((tof2 - tof1) / dtBg);
       double normBkgrnd = IBg * Jack;
+      double errBkgSq = ErrBgSq * Jack * Jack;
       tof1 = tof2;
       if (m_inPlace) {
         y_data[i] -= normBkgrnd;
-        // e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); //
+        // e_data[i]  =std::sqrt(ErrSq*Jack*Jack+e_data[i]*e_data[i]); //
         // needs further clarification -- Gaussian error summation?
         //--> assume error for background is sqrt(signal):
-        e_data[i] = std::sqrt(
-            (normBkgrnd + e_data[i] * e_data[i]) /
-            2.); // needs further clarification -- Gaussian error summation?
+        e_data[i] = std::sqrt((errBkgSq + e_data[i] * e_data[i]));
       } else {
         x_data[i + 1] = X;
         y_data[i] = YValues[i] - normBkgrnd;
-        e_data[i] = std::sqrt((normBkgrnd + YErrors[i] * YErrors[i]) / 2.);
+        e_data[i] = std::sqrt((errBkgSq + YErrors[i] * YErrors[i]));
+      }
+      if (m_nullifyNegative && y_data[i] < 0) {
+        if (m_previouslyRemovedBkgMode) {
+          // background have been removed
+          // and not we remove negative signal and estimate errors
+          double prev_rem_bkg = -y_data[i];
+          e_data[i] = e_data[i] > prev_rem_bkg ? e_data[i] : prev_rem_bkg;
+        } else {
+          /** The error estimate must go up in this nonideal situation and the
+              value of background is a good estimate for it. However, don't
+              reduce the error if it was already more than that */
+          e_data[i] = e_data[i] > normBkgrnd ? e_data[i] : normBkgrnd;
+        }
+        y_data[i] = 0;
       }
     }
 

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
+#include <mutex>
 
 #ifndef Q_MOC_RUN
 #include <boost/multi_index_container.hpp>
@@ -94,13 +94,13 @@ public:
    *to be dropped.
    */
   T *insert(T *item) {
-    Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
     auto p = this->il.push_front(item);
 
     if (!p.second) {
       /* duplicate item */
       this->il.relocate(this->il.begin(), p.first); /* put in front */
-      return NULL;
+      return nullptr;
     }
 
     bool exceeding_size;
@@ -117,13 +117,13 @@ public:
       this->il.pop_back();
       return toWrite;
     }
-    return NULL;
+    return nullptr;
   }
 
   //---------------------------------------------------------------------------------------------
   /// Delete all the T's pointed to by the list, and empty the list itself
   void clear() {
-    Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
     for (auto it = this->il.begin(); it != this->il.end(); ++it) {
       delete (*it);
     }
@@ -136,7 +136,7 @@ public:
    * the MRU.
    */
   void deleteIndex(const size_t index) {
-    Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
 
     auto it = il.template get<1>().find((int)index);
     if (it != il.template get<1>().end()) {
@@ -155,11 +155,11 @@ public:
    *  @return The object found, or NULL if not found.
    */
   T *find(const size_t index) const {
-    Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::mutex> _lock(m_mutex);
 
     auto it = il.template get<1>().find(int(index));
     if (it == il.template get<1>().end()) {
-      return NULL;
+      return nullptr;
     } else {
       return *it;
     }
@@ -172,7 +172,7 @@ private:
   MRUList &operator=(MRUList &);
 
   /// Mutex for modifying the MRU list
-  mutable Mutex m_mutex;
+  mutable std::mutex m_mutex;
 };
 
 } // namespace Kernel

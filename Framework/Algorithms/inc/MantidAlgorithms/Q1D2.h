@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,19 +42,19 @@ public:
   /// Default constructor
   Q1D2();
   /// Virtual destructor
-  virtual ~Q1D2() {}
+  ~Q1D2() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Q1D"; }
+  const std::string name() const override { return "Q1D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "SANS 1D reduction. Converts a workspace in wavelength into a "
            "workspace of momentum transfer, assuming elastic scattering";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// the experimental workspace with counts across the detector
@@ -62,9 +62,9 @@ private:
   bool m_doSolidAngle;
 
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   API::MatrixWorkspace_sptr
   setUpOutputWorkspace(const std::vector<double> &binParams) const;
@@ -92,7 +92,7 @@ private:
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,
-                 MantidVec &YOut, MantidVec &errors) const;
+                 MantidVec &counts, MantidVec &errors) const;
 };
 
 } // namespace Algorithms

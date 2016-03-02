@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
-	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
 	src/CatalogSession.cpp
 	src/ChopperModel.cpp
@@ -44,8 +43,11 @@ set ( SRC_FILES
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
+	src/GeometryInfoFactory.cpp
+	src/GeometryInfo.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
+	src/GroupingLoader.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -69,7 +71,6 @@ set ( SRC_FILES
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
-	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
@@ -196,12 +197,16 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
+	inc/MantidAPI/GeometryInfoFactory.h
+	inc/MantidAPI/GeometryInfo.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
+	inc/MantidAPI/GroupingLoader.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
 	inc/MantidAPI/IAlgorithm.h
+	inc/MantidAPI/IAlgorithm_fwd.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
 	inc/MantidAPI/IBoxControllerIO.h
@@ -355,6 +360,9 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	GeometryInfoFactoryTest.h
+	GeometryInfoTest.h
+	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h
 	HistoryViewTest.h

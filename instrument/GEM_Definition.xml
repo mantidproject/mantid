@@ -346,183 +346,138 @@
 
 <type name="arc_B1s_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2985"/><outer-radius val="0.3035"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0127"/><x-max val="0.0025"/><y-min val="-0.0786"/><y-max val="0.0786"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3044"/><outer-radius val="0.3094"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0129"/><x-max val="0.0025"/><y-min val="-0.0801"/><y-max val="0.0801"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3084"/><outer-radius val="0.3134"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0130"/><x-max val="0.0025"/><y-min val="-0.0811"/><y-max val="0.0811"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3143"/><outer-radius val="0.3193"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0132"/><x-max val="0.0025"/><y-min val="-0.0827"/><y-max val="0.0827"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3183"/><outer-radius val="0.3233"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0133"/><x-max val="0.0025"/><y-min val="-0.0837"/><y-max val="0.0837"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3243"/><outer-radius val="0.3293"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0135"/><x-max val="0.0025"/><y-min val="-0.0852"/><y-max val="0.0852"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3281"/><outer-radius val="0.3331"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0137"/><x-max val="0.0025"/><y-min val="-0.0862"/><y-max val="0.0862"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3342"/><outer-radius val="0.3392"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0139"/><x-max val="0.0025"/><y-min val="-0.0878"/><y-max val="0.0878"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3380"/><outer-radius val="0.3430"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0140"/><x-max val="0.0025"/><y-min val="-0.0888"/><y-max val="0.0888"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3441"/><outer-radius val="0.3491"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0142"/><x-max val="0.0025"/><y-min val="-0.0903"/><y-max val="0.0903"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3479"/><outer-radius val="0.3529"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0144"/><x-max val="0.0025"/><y-min val="-0.0913"/><y-max val="0.0913"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3539"/><outer-radius val="0.3589"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0146"/><x-max val="0.0025"/><y-min val="-0.0929"/><y-max val="0.0929"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3577"/><outer-radius val="0.3627"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0147"/><x-max val="0.0025"/><y-min val="-0.0939"/><y-max val="0.0939"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3638"/><outer-radius val="0.3688"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0149"/><x-max val="0.0025"/><y-min val="-0.0955"/><y-max val="0.0955"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3676"/><outer-radius val="0.3726"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0150"/><x-max val="0.0025"/><y-min val="-0.0964"/><y-max val="0.0964"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3737"/><outer-radius val="0.3787"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0152"/><x-max val="0.0025"/><y-min val="-0.0980"/><y-max val="0.0980"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3774"/><outer-radius val="0.3824"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0154"/><x-max val="0.0025"/><y-min val="-0.0990"/><y-max val="0.0990"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3836"/><outer-radius val="0.3886"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0156"/><x-max val="0.0025"/><y-min val="-0.1006"/><y-max val="0.1006"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3872"/><outer-radius val="0.3922"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0157"/><x-max val="0.0025"/><y-min val="-0.1015"/><y-max val="0.1015"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3934"/><outer-radius val="0.3984"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0159"/><x-max val="0.0025"/><y-min val="-0.1031"/><y-max val="0.1031"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_20" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3971"/><outer-radius val="0.4021"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0160"/><x-max val="0.0025"/><y-min val="-0.1041"/><y-max val="0.1041"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_21" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4033"/><outer-radius val="0.4083"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0162"/><x-max val="0.0025"/><y-min val="-0.1057"/><y-max val="0.1057"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_22" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4069"/><outer-radius val="0.4119"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0164"/><x-max val="0.0025"/><y-min val="-0.1066"/><y-max val="0.1066"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_23" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4131"/><outer-radius val="0.4181"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0166"/><x-max val="0.0025"/><y-min val="-0.1082"/><y-max val="0.1082"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_24" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4167"/><outer-radius val="0.4217"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0167"/><x-max val="0.0025"/><y-min val="-0.1091"/><y-max val="0.1091"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_25" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4230"/><outer-radius val="0.4280"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0169"/><x-max val="0.0025"/><y-min val="-0.1108"/><y-max val="0.1108"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_26" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4265"/><outer-radius val="0.4315"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0170"/><x-max val="0.0025"/><y-min val="-0.1117"/><y-max val="0.1117"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_27" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4328"/><outer-radius val="0.4378"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0172"/><x-max val="0.0025"/><y-min val="-0.1133"/><y-max val="0.1133"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_28" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4363"/><outer-radius val="0.4413"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0174"/><x-max val="0.0025"/><y-min val="-0.1142"/><y-max val="0.1142"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_29" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4426"/><outer-radius val="0.4476"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0176"/><x-max val="0.0025"/><y-min val="-0.1159"/><y-max val="0.1159"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_30" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4461"/><outer-radius val="0.4511"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0177"/><x-max val="0.0025"/><y-min val="-0.1168"/><y-max val="0.1168"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_31" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4525"/><outer-radius val="0.4575"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0179"/><x-max val="0.0025"/><y-min val="-0.1184"/><y-max val="0.1184"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_32" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4559"/><outer-radius val="0.4609"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0180"/><x-max val="0.0025"/><y-min val="-0.1193"/><y-max val="0.1193"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_33" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4623"/><outer-radius val="0.4673"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0183"/><x-max val="0.0025"/><y-min val="-0.1209"/><y-max val="0.1209"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_34" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4656"/><outer-radius val="0.4706"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1218"/><y-max val="0.1218"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_35" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4721"/><outer-radius val="0.4771"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0186"/><x-max val="0.0025"/><y-min val="-0.1235"/><y-max val="0.1235"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_36" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4754"/><outer-radius val="0.4804"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0187"/><x-max val="0.0025"/><y-min val="-0.1243"/><y-max val="0.1243"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_37" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4819"/><outer-radius val="0.4869"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0189"/><x-max val="0.0025"/><y-min val="-0.1260"/><y-max val="0.1260"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_38" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4852"/><outer-radius val="0.4902"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0190"/><x-max val="0.0025"/><y-min val="-0.1269"/><y-max val="0.1269"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_39" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4917"/><outer-radius val="0.4967"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0193"/><x-max val="0.0025"/><y-min val="-0.1285"/><y-max val="0.1285"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_40" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4949"/><outer-radius val="0.4999"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0194"/><x-max val="0.0025"/><y-min val="-0.1294"/><y-max val="0.1294"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_41" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5014"/><outer-radius val="0.5064"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0196"/><x-max val="0.0025"/><y-min val="-0.1311"/><y-max val="0.1311"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_42" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5047"/><outer-radius val="0.5097"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0197"/><x-max val="0.0025"/><y-min val="-0.1319"/><y-max val="0.1319"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_43" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5112"/><outer-radius val="0.5162"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0199"/><x-max val="0.0025"/><y-min val="-0.1336"/><y-max val="0.1336"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1s_44" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5144"/><outer-radius val="0.5194"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0200"/><x-max val="0.0025"/><y-min val="-0.1344"/><y-max val="0.1344"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 
 
@@ -592,243 +547,183 @@
 
 <type name="arc_B1l_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2250"/><outer-radius val="0.2300"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0102"/><x-max val="0.0025"/><y-min val="-0.0595"/><y-max val="0.0595"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2300"/><outer-radius val="0.2350"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0103"/><x-max val="0.0025"/><y-min val="-0.0608"/><y-max val="0.0608"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2349"/><outer-radius val="0.2399"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0105"/><x-max val="0.0025"/><y-min val="-0.0621"/><y-max val="0.0621"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2399"/><outer-radius val="0.2449"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0107"/><x-max val="0.0025"/><y-min val="-0.0634"/><y-max val="0.0634"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2449"/><outer-radius val="0.2499"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0108"/><x-max val="0.0025"/><y-min val="-0.0647"/><y-max val="0.0647"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2499"/><outer-radius val="0.2549"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0110"/><x-max val="0.0025"/><y-min val="-0.0660"/><y-max val="0.0660"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2548"/><outer-radius val="0.2598"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0112"/><x-max val="0.0025"/><y-min val="-0.0673"/><y-max val="0.0673"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2598"/><outer-radius val="0.2648"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0114"/><x-max val="0.0025"/><y-min val="-0.0685"/><y-max val="0.0685"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2648"/><outer-radius val="0.2698"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0115"/><x-max val="0.0025"/><y-min val="-0.0698"/><y-max val="0.0698"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2697"/><outer-radius val="0.2747"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0117"/><x-max val="0.0025"/><y-min val="-0.0711"/><y-max val="0.0711"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2747"/><outer-radius val="0.2797"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0119"/><x-max val="0.0025"/><y-min val="-0.0724"/><y-max val="0.0724"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2797"/><outer-radius val="0.2847"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0120"/><x-max val="0.0025"/><y-min val="-0.0737"/><y-max val="0.0737"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2846"/><outer-radius val="0.2896"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0122"/><x-max val="0.0025"/><y-min val="-0.0750"/><y-max val="0.0750"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2896"/><outer-radius val="0.2946"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0124"/><x-max val="0.0025"/><y-min val="-0.0763"/><y-max val="0.0763"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2946"/><outer-radius val="0.2996"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0125"/><x-max val="0.0025"/><y-min val="-0.0775"/><y-max val="0.0775"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2995"/><outer-radius val="0.3045"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0127"/><x-max val="0.0025"/><y-min val="-0.0788"/><y-max val="0.0788"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3045"/><outer-radius val="0.3095"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0129"/><x-max val="0.0025"/><y-min val="-0.0801"/><y-max val="0.0801"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3094"/><outer-radius val="0.3144"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0130"/><x-max val="0.0025"/><y-min val="-0.0814"/><y-max val="0.0814"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3144"/><outer-radius val="0.3194"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0132"/><x-max val="0.0025"/><y-min val="-0.0827"/><y-max val="0.0827"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3194"/><outer-radius val="0.3244"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0134"/><x-max val="0.0025"/><y-min val="-0.0840"/><y-max val="0.0840"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_20" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3243"/><outer-radius val="0.3293"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0136"/><x-max val="0.0025"/><y-min val="-0.0852"/><y-max val="0.0852"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_21" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3293"/><outer-radius val="0.3343"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0137"/><x-max val="0.0025"/><y-min val="-0.0865"/><y-max val="0.0865"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_22" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3342"/><outer-radius val="0.3392"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0139"/><x-max val="0.0025"/><y-min val="-0.0878"/><y-max val="0.0878"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_23" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3392"/><outer-radius val="0.3442"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0141"/><x-max val="0.0025"/><y-min val="-0.0891"/><y-max val="0.0891"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_24" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3441"/><outer-radius val="0.3491"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0142"/><x-max val="0.0025"/><y-min val="-0.0904"/><y-max val="0.0904"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_25" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3491"/><outer-radius val="0.3541"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0144"/><x-max val="0.0025"/><y-min val="-0.0916"/><y-max val="0.0916"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_26" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3540"/><outer-radius val="0.3590"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0146"/><x-max val="0.0025"/><y-min val="-0.0929"/><y-max val="0.0929"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_27" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3590"/><outer-radius val="0.3640"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0147"/><x-max val="0.0025"/><y-min val="-0.0942"/><y-max val="0.0942"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_28" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3639"/><outer-radius val="0.3689"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0149"/><x-max val="0.0025"/><y-min val="-0.0955"/><y-max val="0.0955"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_29" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3688"/><outer-radius val="0.3738"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0151"/><x-max val="0.0025"/><y-min val="-0.0968"/><y-max val="0.0968"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_30" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3738"/><outer-radius val="0.3788"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0152"/><x-max val="0.0025"/><y-min val="-0.0980"/><y-max val="0.0980"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_31" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3787"/><outer-radius val="0.3837"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0154"/><x-max val="0.0025"/><y-min val="-0.0993"/><y-max val="0.0993"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_32" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3836"/><outer-radius val="0.3886"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0156"/><x-max val="0.0025"/><y-min val="-0.1006"/><y-max val="0.1006"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_33" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3886"/><outer-radius val="0.3936"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0157"/><x-max val="0.0025"/><y-min val="-0.1019"/><y-max val="0.1019"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_34" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3935"/><outer-radius val="0.3985"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0159"/><x-max val="0.0025"/><y-min val="-0.1031"/><y-max val="0.1031"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_35" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3984"/><outer-radius val="0.4034"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0161"/><x-max val="0.0025"/><y-min val="-0.1044"/><y-max val="0.1044"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_36" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4034"/><outer-radius val="0.4084"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0162"/><x-max val="0.0025"/><y-min val="-0.1057"/><y-max val="0.1057"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_37" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4083"/><outer-radius val="0.4133"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0164"/><x-max val="0.0025"/><y-min val="-0.1070"/><y-max val="0.1070"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_38" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4132"/><outer-radius val="0.4182"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0166"/><x-max val="0.0025"/><y-min val="-0.1082"/><y-max val="0.1082"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_39" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4181"/><outer-radius val="0.4231"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0167"/><x-max val="0.0025"/><y-min val="-0.1095"/><y-max val="0.1095"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_40" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4231"/><outer-radius val="0.4281"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0169"/><x-max val="0.0025"/><y-min val="-0.1108"/><y-max val="0.1108"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_41" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4280"/><outer-radius val="0.4330"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0171"/><x-max val="0.0025"/><y-min val="-0.1121"/><y-max val="0.1121"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_42" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4329"/><outer-radius val="0.4379"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0173"/><x-max val="0.0025"/><y-min val="-0.1133"/><y-max val="0.1133"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_43" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4378"/><outer-radius val="0.4428"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0174"/><x-max val="0.0025"/><y-min val="-0.1146"/><y-max val="0.1146"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_44" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4427"/><outer-radius val="0.4477"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0176"/><x-max val="0.0025"/><y-min val="-0.1159"/><y-max val="0.1159"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_45" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4476"/><outer-radius val="0.4526"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0178"/><x-max val="0.0025"/><y-min val="-0.1172"/><y-max val="0.1172"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_46" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4525"/><outer-radius val="0.4575"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0179"/><x-max val="0.0025"/><y-min val="-0.1184"/><y-max val="0.1184"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_47" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4575"/><outer-radius val="0.4625"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0181"/><x-max val="0.0025"/><y-min val="-0.1197"/><y-max val="0.1197"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_48" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4624"/><outer-radius val="0.4674"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0183"/><x-max val="0.0025"/><y-min val="-0.1210"/><y-max val="0.1210"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_49" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4673"/><outer-radius val="0.4723"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1222"/><y-max val="0.1222"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_50" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4722"/><outer-radius val="0.4772"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0186"/><x-max val="0.0025"/><y-min val="-0.1235"/><y-max val="0.1235"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_51" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4771"/><outer-radius val="0.4821"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0188"/><x-max val="0.0025"/><y-min val="-0.1248"/><y-max val="0.1248"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_52" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4820"/><outer-radius val="0.4870"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0189"/><x-max val="0.0025"/><y-min val="-0.1260"/><y-max val="0.1260"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_53" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4869"/><outer-radius val="0.4919"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0191"/><x-max val="0.0025"/><y-min val="-0.1273"/><y-max val="0.1273"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_54" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4917"/><outer-radius val="0.4967"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0193"/><x-max val="0.0025"/><y-min val="-0.1286"/><y-max val="0.1286"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_55" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4966"/><outer-radius val="0.5016"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0194"/><x-max val="0.0025"/><y-min val="-0.1298"/><y-max val="0.1298"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_56" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5015"/><outer-radius val="0.5065"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0196"/><x-max val="0.0025"/><y-min val="-0.1311"/><y-max val="0.1311"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_57" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5064"/><outer-radius val="0.5114"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0198"/><x-max val="0.0025"/><y-min val="-0.1324"/><y-max val="0.1324"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_58" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5113"/><outer-radius val="0.5163"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0199"/><x-max val="0.0025"/><y-min val="-0.1336"/><y-max val="0.1336"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B1l_59" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5162"/><outer-radius val="0.5212"/><depth val="0.001"/><arc val="30.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0201"/><x-max val="0.0025"/><y-min val="-0.1349"/><y-max val="0.1349"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 
 
@@ -1631,323 +1526,243 @@
 
 <type name="arc_B6a1_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1755"/><outer-radius val="0.1805"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0069"/><x-max val="0.0025"/><y-min val="-0.0402"/><y-max val="0.0402"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1786"/><outer-radius val="0.1836"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0070"/><x-max val="0.0025"/><y-min val="-0.0409"/><y-max val="0.0409"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1852"/><outer-radius val="0.1902"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0071"/><x-max val="0.0025"/><y-min val="-0.0423"/><y-max val="0.0423"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1884"/><outer-radius val="0.1934"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0072"/><x-max val="0.0025"/><y-min val="-0.0430"/><y-max val="0.0430"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1950"/><outer-radius val="0.2000"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0074"/><x-max val="0.0025"/><y-min val="-0.0445"/><y-max val="0.0445"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.1982"/><outer-radius val="0.2032"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0075"/><x-max val="0.0025"/><y-min val="-0.0452"/><y-max val="0.0452"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2047"/><outer-radius val="0.2097"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0076"/><x-max val="0.0025"/><y-min val="-0.0467"/><y-max val="0.0467"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2080"/><outer-radius val="0.2130"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0077"/><x-max val="0.0025"/><y-min val="-0.0474"/><y-max val="0.0474"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2145"/><outer-radius val="0.2195"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0079"/><x-max val="0.0025"/><y-min val="-0.0488"/><y-max val="0.0488"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2177"/><outer-radius val="0.2227"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0080"/><x-max val="0.0025"/><y-min val="-0.0496"/><y-max val="0.0496"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2243"/><outer-radius val="0.2293"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0081"/><x-max val="0.0025"/><y-min val="-0.0510"/><y-max val="0.0510"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2275"/><outer-radius val="0.2325"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0082"/><x-max val="0.0025"/><y-min val="-0.0517"/><y-max val="0.0517"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2340"/><outer-radius val="0.2390"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0084"/><x-max val="0.0025"/><y-min val="-0.0532"/><y-max val="0.0532"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2373"/><outer-radius val="0.2423"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0084"/><x-max val="0.0025"/><y-min val="-0.0539"/><y-max val="0.0539"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2438"/><outer-radius val="0.2488"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0086"/><x-max val="0.0025"/><y-min val="-0.0554"/><y-max val="0.0554"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2470"/><outer-radius val="0.2520"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0087"/><x-max val="0.0025"/><y-min val="-0.0561"/><y-max val="0.0561"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2536"/><outer-radius val="0.2586"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0089"/><x-max val="0.0025"/><y-min val="-0.0575"/><y-max val="0.0575"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2568"/><outer-radius val="0.2618"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0089"/><x-max val="0.0025"/><y-min val="-0.0583"/><y-max val="0.0583"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2633"/><outer-radius val="0.2683"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0091"/><x-max val="0.0025"/><y-min val="-0.0597"/><y-max val="0.0597"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a1_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.2665"/><outer-radius val="0.2715"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0092"/><x-max val="0.0025"/><y-min val="-0.0604"/><y-max val="0.0604"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3134"/><outer-radius val="0.3184"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0104"/><x-max val="0.0025"/><y-min val="-0.0708"/><y-max val="0.0708"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3157"/><outer-radius val="0.3207"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0104"/><x-max val="0.0025"/><y-min val="-0.0714"/><y-max val="0.0714"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3229"/><outer-radius val="0.3279"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0106"/><x-max val="0.0025"/><y-min val="-0.0730"/><y-max val="0.0730"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3252"/><outer-radius val="0.3302"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0107"/><x-max val="0.0025"/><y-min val="-0.0735"/><y-max val="0.0735"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3324"/><outer-radius val="0.3374"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0108"/><x-max val="0.0025"/><y-min val="-0.0751"/><y-max val="0.0751"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3346"/><outer-radius val="0.3396"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0109"/><x-max val="0.0025"/><y-min val="-0.0756"/><y-max val="0.0756"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3418"/><outer-radius val="0.3468"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0111"/><x-max val="0.0025"/><y-min val="-0.0772"/><y-max val="0.0772"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3441"/><outer-radius val="0.3491"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0111"/><x-max val="0.0025"/><y-min val="-0.0777"/><y-max val="0.0777"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3513"/><outer-radius val="0.3563"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0113"/><x-max val="0.0025"/><y-min val="-0.0793"/><y-max val="0.0793"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3536"/><outer-radius val="0.3586"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0114"/><x-max val="0.0025"/><y-min val="-0.0798"/><y-max val="0.0798"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3608"/><outer-radius val="0.3658"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0115"/><x-max val="0.0025"/><y-min val="-0.0814"/><y-max val="0.0814"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3631"/><outer-radius val="0.3681"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0116"/><x-max val="0.0025"/><y-min val="-0.0819"/><y-max val="0.0819"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3703"/><outer-radius val="0.3753"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0118"/><x-max val="0.0025"/><y-min val="-0.0835"/><y-max val="0.0835"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3726"/><outer-radius val="0.3776"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0118"/><x-max val="0.0025"/><y-min val="-0.0840"/><y-max val="0.0840"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3798"/><outer-radius val="0.3848"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0120"/><x-max val="0.0025"/><y-min val="-0.0856"/><y-max val="0.0856"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3820"/><outer-radius val="0.3870"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0121"/><x-max val="0.0025"/><y-min val="-0.0861"/><y-max val="0.0861"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3892"/><outer-radius val="0.3942"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0123"/><x-max val="0.0025"/><y-min val="-0.0877"/><y-max val="0.0877"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3915"/><outer-radius val="0.3965"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0123"/><x-max val="0.0025"/><y-min val="-0.0882"/><y-max val="0.0882"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.3987"/><outer-radius val="0.4037"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0125"/><x-max val="0.0025"/><y-min val="-0.0898"/><y-max val="0.0898"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a2_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4010"/><outer-radius val="0.4060"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0126"/><x-max val="0.0025"/><y-min val="-0.0903"/><y-max val="0.0903"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4531"/><outer-radius val="0.4581"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0139"/><x-max val="0.0025"/><y-min val="-0.1019"/><y-max val="0.1019"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4546"/><outer-radius val="0.4596"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0139"/><x-max val="0.0025"/><y-min val="-0.1023"/><y-max val="0.1023"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4622"/><outer-radius val="0.4672"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0141"/><x-max val="0.0025"/><y-min val="-0.1040"/><y-max val="0.1040"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4638"/><outer-radius val="0.4688"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0141"/><x-max val="0.0025"/><y-min val="-0.1043"/><y-max val="0.1043"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4714"/><outer-radius val="0.4764"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0143"/><x-max val="0.0025"/><y-min val="-0.1060"/><y-max val="0.1060"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4729"/><outer-radius val="0.4779"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0144"/><x-max val="0.0025"/><y-min val="-0.1063"/><y-max val="0.1063"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4806"/><outer-radius val="0.4856"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0145"/><x-max val="0.0025"/><y-min val="-0.1081"/><y-max val="0.1081"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4821"/><outer-radius val="0.4871"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0146"/><x-max val="0.0025"/><y-min val="-0.1084"/><y-max val="0.1084"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4898"/><outer-radius val="0.4948"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0148"/><x-max val="0.0025"/><y-min val="-0.1101"/><y-max val="0.1101"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4913"/><outer-radius val="0.4963"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0148"/><x-max val="0.0025"/><y-min val="-0.1104"/><y-max val="0.1104"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.4989"/><outer-radius val="0.5039"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0150"/><x-max val="0.0025"/><y-min val="-0.1121"/><y-max val="0.1121"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5004"/><outer-radius val="0.5054"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0150"/><x-max val="0.0025"/><y-min val="-0.1125"/><y-max val="0.1125"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5081"/><outer-radius val="0.5131"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0152"/><x-max val="0.0025"/><y-min val="-0.1142"/><y-max val="0.1142"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5096"/><outer-radius val="0.5146"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0153"/><x-max val="0.0025"/><y-min val="-0.1145"/><y-max val="0.1145"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5173"/><outer-radius val="0.5223"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0155"/><x-max val="0.0025"/><y-min val="-0.1162"/><y-max val="0.1162"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5188"/><outer-radius val="0.5238"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0155"/><x-max val="0.0025"/><y-min val="-0.1166"/><y-max val="0.1166"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5264"/><outer-radius val="0.5314"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0157"/><x-max val="0.0025"/><y-min val="-0.1183"/><y-max val="0.1183"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5280"/><outer-radius val="0.5330"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0157"/><x-max val="0.0025"/><y-min val="-0.1186"/><y-max val="0.1186"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5356"/><outer-radius val="0.5406"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0159"/><x-max val="0.0025"/><y-min val="-0.1203"/><y-max val="0.1203"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a3_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.5371"/><outer-radius val="0.5421"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0160"/><x-max val="0.0025"/><y-min val="-0.1206"/><y-max val="0.1206"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6086"/><outer-radius val="0.6136"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0178"/><x-max val="0.0025"/><y-min val="-0.1365"/><y-max val="0.1365"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6094"/><outer-radius val="0.6144"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0178"/><x-max val="0.0025"/><y-min val="-0.1367"/><y-max val="0.1367"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6174"/><outer-radius val="0.6224"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0180"/><x-max val="0.0025"/><y-min val="-0.1385"/><y-max val="0.1385"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6182"/><outer-radius val="0.6232"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0180"/><x-max val="0.0025"/><y-min val="-0.1387"/><y-max val="0.1387"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6262"/><outer-radius val="0.6312"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0182"/><x-max val="0.0025"/><y-min val="-0.1405"/><y-max val="0.1405"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6270"/><outer-radius val="0.6320"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0182"/><x-max val="0.0025"/><y-min val="-0.1406"/><y-max val="0.1406"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6351"/><outer-radius val="0.6401"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1424"/><y-max val="0.1424"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6359"/><outer-radius val="0.6409"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1426"/><y-max val="0.1426"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6439"/><outer-radius val="0.6489"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0186"/><x-max val="0.0025"/><y-min val="-0.1444"/><y-max val="0.1444"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6447"/><outer-radius val="0.6497"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0187"/><x-max val="0.0025"/><y-min val="-0.1446"/><y-max val="0.1446"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6527"/><outer-radius val="0.6577"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0189"/><x-max val="0.0025"/><y-min val="-0.1464"/><y-max val="0.1464"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6535"/><outer-radius val="0.6585"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0189"/><x-max val="0.0025"/><y-min val="-0.1465"/><y-max val="0.1465"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6615"/><outer-radius val="0.6665"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0191"/><x-max val="0.0025"/><y-min val="-0.1483"/><y-max val="0.1483"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6623"/><outer-radius val="0.6673"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0191"/><x-max val="0.0025"/><y-min val="-0.1485"/><y-max val="0.1485"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6704"/><outer-radius val="0.6754"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0193"/><x-max val="0.0025"/><y-min val="-0.1503"/><y-max val="0.1503"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6712"/><outer-radius val="0.6762"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0193"/><x-max val="0.0025"/><y-min val="-0.1505"/><y-max val="0.1505"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6792"/><outer-radius val="0.6842"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0195"/><x-max val="0.0025"/><y-min val="-0.1522"/><y-max val="0.1522"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6800"/><outer-radius val="0.6850"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0195"/><x-max val="0.0025"/><y-min val="-0.1524"/><y-max val="0.1524"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6880"/><outer-radius val="0.6930"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0198"/><x-max val="0.0025"/><y-min val="-0.1542"/><y-max val="0.1542"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6a4_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.6888"/><outer-radius val="0.6938"/><depth val="0.01"/><arc val="25.7"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0198"/><x-max val="0.0025"/><y-min val="-0.1544"/><y-max val="0.1544"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 
 
@@ -1997,163 +1812,123 @@
   
 <type name="arc_B6b1_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.7838"/><outer-radius val="0.7888"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0144"/><x-max val="0.0025"/><y-min val="-0.1370"/><y-max val="0.1370"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.7839"/><outer-radius val="0.7889"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0144"/><x-max val="0.0025"/><y-min val="-0.1370"/><y-max val="0.1370"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.7922"/><outer-radius val="0.7972"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0145"/><x-max val="0.0025"/><y-min val="-0.1384"/><y-max val="0.1384"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.7923"/><outer-radius val="0.7973"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0145"/><x-max val="0.0025"/><y-min val="-0.1385"/><y-max val="0.1385"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8007"/><outer-radius val="0.8057"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0147"/><x-max val="0.0025"/><y-min val="-0.1399"/><y-max val="0.1399"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8008"/><outer-radius val="0.8058"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0147"/><x-max val="0.0025"/><y-min val="-0.1399"/><y-max val="0.1399"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8091"/><outer-radius val="0.8141"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0148"/><x-max val="0.0025"/><y-min val="-0.1414"/><y-max val="0.1414"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8093"/><outer-radius val="0.8143"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0148"/><x-max val="0.0025"/><y-min val="-0.1414"/><y-max val="0.1414"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8176"/><outer-radius val="0.8226"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0149"/><x-max val="0.0025"/><y-min val="-0.1428"/><y-max val="0.1428"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8177"/><outer-radius val="0.8227"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0149"/><x-max val="0.0025"/><y-min val="-0.1429"/><y-max val="0.1429"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8261"/><outer-radius val="0.8311"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0150"/><x-max val="0.0025"/><y-min val="-0.1443"/><y-max val="0.1443"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8262"/><outer-radius val="0.8312"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0151"/><x-max val="0.0025"/><y-min val="-0.1443"/><y-max val="0.1443"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8345"/><outer-radius val="0.8395"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0152"/><x-max val="0.0025"/><y-min val="-0.1458"/><y-max val="0.1458"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8347"/><outer-radius val="0.8397"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0152"/><x-max val="0.0025"/><y-min val="-0.1458"/><y-max val="0.1458"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8430"/><outer-radius val="0.8480"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0153"/><x-max val="0.0025"/><y-min val="-0.1473"/><y-max val="0.1473"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8431"/><outer-radius val="0.8481"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0153"/><x-max val="0.0025"/><y-min val="-0.1473"/><y-max val="0.1473"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.7964"/><outer-radius val="0.8014"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0146"/><x-max val="0.0025"/><y-min val="-0.1392"/><y-max val="0.1392"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8516"/><outer-radius val="0.8566"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0154"/><x-max val="0.0025"/><y-min val="-0.1487"/><y-max val="0.1487"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8599"/><outer-radius val="0.8649"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0156"/><x-max val="0.0025"/><y-min val="-0.1502"/><y-max val="0.1502"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b1_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.8600"/><outer-radius val="0.8650"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0156"/><x-max val="0.0025"/><y-min val="-0.1502"/><y-max val="0.1502"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_0" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9752"/><outer-radius val="0.9802"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0173"/><x-max val="0.0025"/><y-min val="-0.1702"/><y-max val="0.1702"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_1" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9748"/><outer-radius val="0.9798"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0173"/><x-max val="0.0025"/><y-min val="-0.1701"/><y-max val="0.1701"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_2" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9833"/><outer-radius val="0.9883"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0174"/><x-max val="0.0025"/><y-min val="-0.1716"/><y-max val="0.1716"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_3" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9829"/><outer-radius val="0.9879"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0174"/><x-max val="0.0025"/><y-min val="-0.1715"/><y-max val="0.1715"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_4" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9914"/><outer-radius val="0.9964"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0176"/><x-max val="0.0025"/><y-min val="-0.1730"/><y-max val="0.1730"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_5" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9910"/><outer-radius val="0.9960"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0176"/><x-max val="0.0025"/><y-min val="-0.1730"/><y-max val="0.1730"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_6" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9996"/><outer-radius val="1.0046"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0177"/><x-max val="0.0025"/><y-min val="-0.1744"/><y-max val="0.1744"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_7" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="0.9991"/><outer-radius val="1.0041"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0177"/><x-max val="0.0025"/><y-min val="-0.1744"/><y-max val="0.1744"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_8" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0077"/><outer-radius val="1.0127"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0178"/><x-max val="0.0025"/><y-min val="-0.1758"/><y-max val="0.1758"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_9" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0072"/><outer-radius val="1.0122"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0178"/><x-max val="0.0025"/><y-min val="-0.1758"/><y-max val="0.1758"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_10" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0158"/><outer-radius val="1.0208"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0179"/><x-max val="0.0025"/><y-min val="-0.1773"/><y-max val="0.1773"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_11" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0153"/><outer-radius val="1.0203"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0179"/><x-max val="0.0025"/><y-min val="-0.1772"/><y-max val="0.1772"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_12" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0239"/><outer-radius val="1.0289"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0181"/><x-max val="0.0025"/><y-min val="-0.1787"/><y-max val="0.1787"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_13" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0234"/><outer-radius val="1.0284"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0180"/><x-max val="0.0025"/><y-min val="-0.1786"/><y-max val="0.1786"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_14" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0320"/><outer-radius val="1.0370"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0182"/><x-max val="0.0025"/><y-min val="-0.1801"/><y-max val="0.1801"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_15" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0315"/><outer-radius val="1.0365"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0182"/><x-max val="0.0025"/><y-min val="-0.1800"/><y-max val="0.1800"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_16" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0401"/><outer-radius val="1.0451"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0183"/><x-max val="0.0025"/><y-min val="-0.1815"/><y-max val="0.1815"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_17" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0397"/><outer-radius val="1.0447"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0183"/><x-max val="0.0025"/><y-min val="-0.1814"/><y-max val="0.1814"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_18" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0482"/><outer-radius val="1.0532"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1829"/><y-max val="0.1829"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 <type name="arc_B6b2_19" is="detector"> 
   <slice-of-cylinder-ring id="A"> <inner-radius val="1.0478"/><outer-radius val="1.0528"/><depth val="0.01"/><arc val="20.0"/> </slice-of-cylinder-ring> <algebra val="A"/>
-  <bounding-box><x-min val="-0.0184"/><x-max val="0.0025"/><y-min val="-0.1828"/><y-max val="0.1828"/><z-min val="0.0000"/><z-max val="0.0100"/></bounding-box>
 </type>
 
   

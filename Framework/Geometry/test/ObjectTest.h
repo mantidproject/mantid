@@ -371,7 +371,7 @@ public:
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
     int index = 0;
-    for (Track::LType::const_iterator it = track.begin(); it != track.end();
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
       TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
                       1e-6);
@@ -560,41 +560,23 @@ public:
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0, 0, 0));
     // initial guess not in object, but on x-axis
-    std::vector<std::string> planes;
-    planes.push_back("px 10");
-    planes.push_back("px 11");
-    planes.push_back("py -0.5");
-    planes.push_back("py 0.5");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    std::vector<std::string> planes{"px 10",  "px 11",   "py -0.5",
+                                    "py 0.5", "pz -0.5", "pz 0.5"};
     Object_sptr B = createCuboid(planes);
     TS_ASSERT_EQUALS(B->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(10, 0, 0));
     // on y axis
-    planes.clear();
-    planes.push_back("px -0.5");
-    planes.push_back("px 0.5");
-    planes.push_back("py -22");
-    planes.push_back("py -21");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    planes = {"px -0.5", "px 0.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
     Object_sptr C = createCuboid(planes);
     TS_ASSERT_EQUALS(C->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0, -21, 0));
     // not on principle axis, now works using getBoundingBox
-    planes.clear();
-    planes.push_back("px 0.5");
-    planes.push_back("px 1.5");
-    planes.push_back("py -22");
-    planes.push_back("py -21");
-    planes.push_back("pz -0.5");
-    planes.push_back("pz 0.5");
+    planes = {"px 0.5", "px 1.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
     Object_sptr D = createCuboid(planes);
     TS_ASSERT_EQUALS(D->getPointInObject(pt), 1);
     TS_ASSERT_DELTA(pt.X(), 1.0, 1e-6);
     TS_ASSERT_DELTA(pt.Y(), -21.5, 1e-6);
     TS_ASSERT_DELTA(pt.Z(), 0.0, 1e-6);
-    planes.clear();
     // Test non axis aligned (AA) case - getPointInObject works because the
     // object is on a principle axis
     // However, if not on a principle axis then the getBoundingBox fails to find
@@ -604,32 +586,28 @@ public:
     // for defining non-AA objects. However, BoundingBox is poor for non-AA and
     // needs improvement if these are
     // common
-    planes.push_back("p 1 0 0 -0.5");
-    planes.push_back("p 1 0 0 0.5");
-    planes.push_back("p 0 .70710678118 .70710678118 -1.1");
-    planes.push_back("p 0 .70710678118 .70710678118 -0.1");
-    planes.push_back("p 0 -.70710678118 .70710678118 -0.5");
-    planes.push_back("p 0 -.70710678118 .70710678118 0.5");
+    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+              "p 0 .70710678118 .70710678118 -1.1",
+              "p 0 .70710678118 .70710678118 -0.1",
+              "p 0 -.70710678118 .70710678118 -0.5",
+              "p 0 -.70710678118 .70710678118 0.5"};
     Object_sptr E = createCuboid(planes);
     TS_ASSERT_EQUALS(E->getPointInObject(pt), 1);
     TS_ASSERT_DELTA(pt.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(pt.Y(), -0.1414213562373, 1e-6);
     TS_ASSERT_DELTA(pt.Z(), 0.0, 1e-6);
-    planes.clear();
-    // This test fails to find a point in object, as object not on a principle
-    // axis
-    // and getBoundingBox does not give a useful result in this case.
+    // This test used to fail to find a point in object, as object not on a
+    // principle axis and getBoundingBox did not give a useful result in this
+    // case. Framework has now been updated to support this automatically.
     // Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and
-    // rotated 45deg
-    // to these two axes
-    planes.push_back("p 1 0 0 -0.5");
-    planes.push_back("p 1 0 0 0.5");
-    planes.push_back("p 0  .70710678118 .70710678118 -2");
-    planes.push_back("p 0  .70710678118 .70710678118 -1");
-    planes.push_back("p 0 -.70710678118 .70710678118 -0.5");
-    planes.push_back("p 0 -.70710678118 .70710678118 0.5");
+    // rotated 45deg to these two axes
+    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+              "p 0  .70710678118 .70710678118 -2",
+              "p 0  .70710678118 .70710678118 -1",
+              "p 0 -.70710678118 .70710678118 -0.5",
+              "p 0 -.70710678118 .70710678118 0.5"};
     Object_sptr F = createCuboid(planes);
-    TS_ASSERT_EQUALS(F->getPointInObject(pt), 0);
+    TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
     F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
@@ -1025,10 +1003,8 @@ private:
     if (desired.find("73") != std::string::npos)
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
-    std::vector<SCompT>::const_iterator vc;
-
     // Note that the testObject now manages the "new Plane"
-    for (vc = SurfLine.begin(); vc != SurfLine.end(); vc++) {
+    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
       if (!A) {
         std::cerr << "Failed to process line " << vc->second << std::endl;

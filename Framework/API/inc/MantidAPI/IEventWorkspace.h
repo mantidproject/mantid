@@ -38,14 +38,12 @@ namespace API {
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
   IEventWorkspace() : MatrixWorkspace() {}
-
+  IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
-  std::unique_ptr<IEventWorkspace> clone() const {
-    return std::unique_ptr<IEventWorkspace>(doClone());
-  }
+  IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
 
   /// Return the workspace typeID
-  virtual const std::string id() const { return "IEventWorkspace"; }
+  const std::string id() const override { return "IEventWorkspace"; }
   virtual std::size_t getNumberEvents() const = 0;
   virtual double getTofMin() const = 0;
   virtual double getTofMax() const = 0;
@@ -57,22 +55,20 @@ public:
   getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
   virtual IEventList *getEventListPtr(const std::size_t workspace_index) = 0;
-  virtual void generateHistogram(const std::size_t index, const MantidVec &X,
-                                 MantidVec &Y, MantidVec &E,
-                                 bool skipError = false) const = 0;
+  void generateHistogram(const std::size_t index, const MantidVec &X,
+                         MantidVec &Y, MantidVec &E,
+                         bool skipError = false) const override = 0;
 
   virtual void clearMRU() const = 0;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IEventWorkspace(const IEventWorkspace &other) : MatrixWorkspace(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  IEventWorkspace &operator=(const IEventWorkspace &other);
+  IEventWorkspace(const IEventWorkspace &) = default;
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
 private:
-  virtual IEventWorkspace *doClone() const = 0;
+  IEventWorkspace *doClone() const override = 0;
 };
 }
 }

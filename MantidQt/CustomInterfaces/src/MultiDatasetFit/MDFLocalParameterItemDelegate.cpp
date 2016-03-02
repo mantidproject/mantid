@@ -23,8 +23,12 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog 
 QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex & index) const
 {
   auto row = index.row();
-  m_currentEditor = new LocalParameterEditor(parent,row, owner()->isFixed(row), owner()->getTie(row));
-  connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
+  m_currentEditor = new LocalParameterEditor(
+      parent, row, owner()->getValue(row), owner()->isFixed(row),
+      owner()->getTie(row), owner()->areOthersFixed(row),
+      owner()->areAllOthersFixed(row), owner()->areOthersTied(row));
+  connect(m_currentEditor, SIGNAL(setAllValues(double)), this,
+          SIGNAL(setAllValues(double)));
   connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));
   connect(m_currentEditor,SIGNAL(setAllFixed(bool)),this,SIGNAL(setAllFixed(bool)));
   connect(m_currentEditor,SIGNAL(setTie(int,QString)),this,SIGNAL(setTie(int,QString)));
@@ -34,9 +38,9 @@ QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyle
 }
 
 /// Initialize the editor with the current data in the cell.
-void LocalParameterItemDelegate::setEditorData(QWidget * editor, const QModelIndex & index) const
+void LocalParameterItemDelegate::setEditorData(QWidget*, const QModelIndex&) const
 {
-  QStyledItemDelegate::setEditorData(editor->layout()->itemAt(0)->widget(), index);
+  // Needs to be empty to prevent Qt's default behaviour.
 }
 
 /// Update the data in the cell with the text in the editor.
@@ -73,26 +77,6 @@ void LocalParameterItemDelegate::paint(QPainter * painter, const QStyleOptionVie
   else
   {
     QStyledItemDelegate::paint(painter, option, index);
-
-    if ( owner()->isFixed(index.row()) )
-    {
-      auto rect = option.rect;
-
-      auto text = index.model()->data(index).asString();
-      int textWidth = option.fontMetrics.width(text);
-
-      QString fixedStr(" (fixed)");
-      int fWidth = option.fontMetrics.width(fixedStr);
-      if ( textWidth + fWidth > rect.width() )
-      {
-        fixedStr = "(f)";
-        fWidth = option.fontMetrics.width(fixedStr);
-      }
-
-      auto dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
-      rect.adjust(rect.width() - fWidth, dHeight, 0 ,-dHeight);
-      painter->drawText(rect,fixedStr);
-    }
   }
 }
 

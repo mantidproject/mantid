@@ -117,8 +117,7 @@ public:
   {
     setFocusPolicy(Qt::StrongFocus);
   }
-  void paintEvent (QPaintEvent*)
-  {
+  void paintEvent(QPaintEvent *) override {
       QStyleOptionButton opt;
       auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
       opt.state |= state;
@@ -127,8 +126,7 @@ public:
       QPainter painter(this);
       QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,&painter);
   }
-  void mousePressEvent (QMouseEvent* event)
-  {
+  void mousePressEvent(QMouseEvent *event) override {
     event->accept();
     setChecked( ! isChecked() );
     m_property->setOption( m_optionName, isChecked() );
@@ -180,11 +178,13 @@ public:
     QtBrowserItem *currentItem() const;
     void setCurrentItem(QtBrowserItem *browserItem, bool block);
     void editItem(QtBrowserItem *browserItem);
+    void disableItem(QtBrowserItem *item);
 
     void slotCurrentBrowserItemChanged(QtBrowserItem *item);
     void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem *);
 
     QTreeWidgetItem *editedItem() const;
+    void closeEditor();
 
     const QStringList& options() const {return m_options;}
     void setColumnSizes(int s0, int s1, int s2);
@@ -222,9 +222,10 @@ public:
         { return itemFromIndex(index); }
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+  void keyPressEvent(QKeyEvent *event) override;
+  void mousePressEvent(QMouseEvent *event) override;
+  void drawRow(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
 
 private:
     QtTreePropertyBrowserPrivate *m_editorPrivate;
@@ -333,22 +334,24 @@ public:
         { m_editorPrivate = editorPrivate; }
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-            const QModelIndex &index) const;
+                          const QModelIndex &index) const override;
 
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-            const QModelIndex &index) const;
+    void updateEditorGeometry(QWidget *editor,
+                              const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const override;
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-            const QModelIndex &index) const;
+               const QModelIndex &index) const override;
 
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option,
+                   const QModelIndex &index) const override;
 
     void setModelData(QWidget *, QAbstractItemModel *,
-            const QModelIndex &) const {}
+                      const QModelIndex &) const override {}
 
-    void setEditorData(QWidget *, const QModelIndex &) const {}
+    void setEditorData(QWidget *, const QModelIndex &) const override {}
 
-    bool eventFilter(QObject *object, QEvent *event);
+    bool eventFilter(QObject *object, QEvent *event) override;
     void closeEditor(QtProperty *property);
 
     QTreeWidgetItem *editedItem() const { return m_editedItem; }
@@ -833,12 +836,26 @@ QTreeWidgetItem *QtTreePropertyBrowserPrivate::editedItem() const
     return m_delegate->editedItem();
 }
 
+void QtTreePropertyBrowserPrivate::closeEditor()
+{
+  auto treeItem = editedItem();
+  auto browserItem = m_itemToIndex[treeItem];
+  m_delegate->closeEditor(browserItem->property());
+}
+
 void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
 {
     if (QTreeWidgetItem *treeItem = m_indexToItem.value(browserItem, 0)) {
         m_treeWidget->setCurrentItem (treeItem, 1);
         m_treeWidget->editItem(treeItem, 1);
     }
+}
+
+void QtTreePropertyBrowserPrivate::disableItem(QtBrowserItem * browserItem)
+{
+  if (QTreeWidgetItem *treeItem = m_indexToItem.value(browserItem, 0)) {
+    disableItem(treeItem);
+  }
 }
 
 void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2)
@@ -1216,6 +1233,11 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item)
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2)
 {
   d_ptr->setColumnSizes(s0, s1, s2);
+}
+
+void QtTreePropertyBrowser::closeEditor()
+{
+  d_ptr->closeEditor();
 }
 
 #if QT_VERSION >= 0x040400

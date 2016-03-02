@@ -20,11 +20,11 @@ using namespace API;
 
 /// Initialisation method.
 void DeleteTableRows::init() {
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "TableWorkspace", "", Direction::InOut),
                   "The name of the workspace that will be modified.");
   declareProperty(
-      new ArrayProperty<size_t>("Rows"),
+      make_unique<ArrayProperty<size_t>>("Rows"),
       "A comma-separated list of row numbers. Row numbering starts with 0.");
 }
 
@@ -38,7 +38,7 @@ void DeleteTableRows::exec() {
   std::vector<size_t> rows = getProperty("Rows");
   // sort the row indices in reverse order
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());
-  std::set<size_t, std::greater<size_t>>::iterator it = sortedRows.begin();
+  auto it = sortedRows.begin();
   for (; it != sortedRows.end(); ++it) {
     if (*it >= tw->rowCount())
       continue;

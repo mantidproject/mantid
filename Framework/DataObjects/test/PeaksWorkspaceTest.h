@@ -18,6 +18,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LogManager.h"
+#include "PropertyManagerHelper.h"
 
 #include <Poco/File.h>
 
@@ -416,6 +417,70 @@ public:
 
     // Clean up.
     delete peak;
+  }
+
+  /**
+  * Test declaring an input PeaksWorkspace and retrieving it as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    PeaksWorkspace_sptr wsInput(new PeaksWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    PeaksWorkspace_const_sptr wsConst;
+    PeaksWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<PeaksWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<PeaksWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    PeaksWorkspace_const_sptr wsCastConst;
+    PeaksWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (PeaksWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (PeaksWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  /**
+  * Test declaring an input IPeaksWorkspace and retrieving it as const_sptr or
+  * sptr
+  */
+  void testGetProperty_IPeaksWS_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    IPeaksWorkspace_sptr wsInput(new PeaksWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IPeaksWorkspace_const_sptr wsConst;
+    IPeaksWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IPeaksWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<IPeaksWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IPeaksWorkspace_const_sptr wsCastConst;
+    IPeaksWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IPeaksWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IPeaksWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
 private:

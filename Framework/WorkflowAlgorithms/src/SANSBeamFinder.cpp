@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "Poco/Path.h"
-#include "Poco/String.h"
-#include "Poco/NumberFormatter.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+
+#include "Poco/NumberFormatter.h"
+#include "Poco/Path.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -25,12 +27,10 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSBeamFinder::init() {
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".xml");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "Data filed used to find beam center");
+  const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExts),
+                  "Data filed used to find beam center");
 
   declareProperty("BeamCenterX", EMPTY_DBL(),
                   "Beam position in X pixel coordinates");
@@ -111,7 +111,8 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
       }
     }
     m_reductionManager->declareProperty(
-        new WorkspaceProperty<>(entryName, "", Direction::Output));
+        Kernel::make_unique<WorkspaceProperty<>>(entryName, "",
+                                                 Direction::Output));
     m_reductionManager->setPropertyValue(entryName, finderWSName);
     m_reductionManager->setProperty(entryName, finderWS);
   }
@@ -133,10 +134,9 @@ void SANSBeamFinder::exec() {
   const bool persistent = getProperty("PersistentCorrection");
   if (!m_reductionManager->existsProperty("SANSBeamFinderAlgorithm") &&
       persistent) {
-    AlgorithmProperty *algProp =
-        new AlgorithmProperty("SANSBeamFinderAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
     algProp->setValue(toString());
-    m_reductionManager->declareProperty(algProp);
+    m_reductionManager->declareProperty(std::move(algProp));
   }
 
   m_output_message = "Beam center determination\n";
@@ -210,10 +210,12 @@ void SANSBeamFinder::exec() {
   if (persistent) {
     if (!m_reductionManager->existsProperty("LatestBeamCenterX"))
       m_reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", center_x));
+          make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                 center_x));
     if (!m_reductionManager->existsProperty("LatestBeamCenterY"))
       m_reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", center_y));
+          make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                 center_y));
 
     m_reductionManager->setProperty("LatestBeamCenterX", center_x);
     m_reductionManager->setProperty("LatestBeamCenterY", center_y);
@@ -237,10 +239,12 @@ void SANSBeamFinder::exec() {
  */
 void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
                                int low, int left, int right) {
-  const int nx_pixels = (int)(HFIRInstrument::readInstrumentParameter(
-      "number-of-x-pixels", beamCenterWS));
-  const int ny_pixels = (int)(HFIRInstrument::readInstrumentParameter(
-      "number-of-y-pixels", beamCenterWS));
+  const int nx_pixels =
+      static_cast<int>(HFIRInstrument::readInstrumentParameter(
+          "number-of-x-pixels", beamCenterWS));
+  const int ny_pixels =
+      static_cast<int>(HFIRInstrument::readInstrumentParameter(
+          "number-of-y-pixels", beamCenterWS));
   std::vector<int> IDs;
 
   // Lower edge

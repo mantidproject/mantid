@@ -84,7 +84,7 @@ typedef struct {
 
 /* wait until read len bytes, return <=0 on error */
 static int recv_all(SOCKET s, void *buffer, int len, int flags) {
-  char *cbuffer = (char *)buffer;
+  char *cbuffer = reinterpret_cast<char *>(buffer);
   int n, ntot;
   ntot = 0;
   while (len > 0) {
@@ -108,7 +108,7 @@ static void clear_replies(SOCKET s) {
   while (!done) {
     FD_ZERO(&fds);
     FD_SET(s, &fds);
-    if ((select(FD_SETSIZE, &fds, NULL, NULL, &timeout) > 0) &&
+    if ((select(FD_SETSIZE, &fds, nullptr, nullptr, &timeout) > 0) &&
         FD_ISSET(s, &fds)) {
       recv(s, buffer, sizeof(buffer), 0);
     } else {
@@ -133,7 +133,7 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
   ISISDSDataType data_type;
   int dims_array[10], ndims;
 
-  if ((hostp = gethostbyname(host)) == NULL) {
+  if ((hostp = gethostbyname(host)) == nullptr) {
     return INVALID_SOCKET;
   }
   memset(&address, 0, sizeof(address));
@@ -146,14 +146,16 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  int zero = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char *)&setkeepalive,
-                        sizeof(setkeepalive));
+  int zero =
+      setsockopt(s, SOL_SOCKET, SO_KEEPALIVE,
+                 reinterpret_cast<char *>(&setkeepalive), sizeof(setkeepalive));
   if (0 != zero) {
     closesocket(s);
     return INVALID_SOCKET;
   }
 
-  if (connect(s, (struct sockaddr *)&address, sizeof(address)) == -1) {
+  if (connect(s, reinterpret_cast<struct sockaddr *>(&address),
+              sizeof(address)) == -1) {
     closesocket(s);
     return INVALID_SOCKET;
   }
@@ -167,18 +169,18 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
   strncpy(op.user, "faa", sizeof(op.user));
   strncpy(op.host, "localhost", sizeof(op.host));
   op.len = sizeof(op);
-  if ((send(s, (char *)&op, sizeof(op), 0)) != sizeof(op)) {
+  if ((send(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) != sizeof(op)) {
     closesocket(s);
     return INVALID_SOCKET;
   }
-  comm = NULL;
-  if (isisds_recv_command_alloc(s, &comm, (void **)&comm_data, &data_type,
-                                dims_array, &ndims) <= 0) {
+  comm = nullptr;
+  if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data),
+                                &data_type, dims_array, &ndims) <= 0) {
     closesocket(s);
     free(comm);
     return INVALID_SOCKET;
   }
-  if (comm_data != NULL) {
+  if (comm_data != nullptr) {
     free(comm_data);
   }
   if (!strcmp(comm, "OK")) {
@@ -197,7 +199,8 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
  */
 int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
   isisds_open_t op;
-  if ((recv_all(s, (char *)&op, sizeof(op), 0)) != sizeof(op)) {
+  if ((recv_all(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) !=
+      sizeof(op)) {
     return -1;
   }
   if (op.len != sizeof(op)) {
@@ -206,8 +209,8 @@ int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
   if ((op.ver_major != ISISDS_MAJOR_VER) || (op.ver_minor > ISISDS_MINOR_VER)) {
     return -1;
   }
-  *access_type = (ISISDSAccessMode)op.access_type;
-  return isisds_send_command(s, "OK", NULL, ISISDSUnknown, NULL, 0);
+  *access_type = static_cast<ISISDSAccessMode>(op.access_type);
+  return isisds_send_command(s, "OK", nullptr, ISISDSUnknown, nullptr, 0);
 }
 /*
  * return > 0 on success
@@ -226,7 +229,7 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
   int n, len_data;
   isisds_command_header_t comm;
   memset(&comm, 0, sizeof(comm));
-  if (dims_array == NULL) {
+  if (dims_array == nullptr) {
     comm.ndims = 1;
     comm.dims_array[0] = ndims;
     len_data = ndims * isisds_type_size[type];
@@ -248,9 +251,9 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
   // '\0'
   strncpy(comm.command, command, sizeof(comm.command) - 1);
   clear_replies(s);
-  n = send(s, (char *)&comm, sizeof(comm), 0);
-  if ((n == sizeof(comm)) && (data != NULL) && (len_data > 0)) {
-    n = send(s, (const char *)data, len_data, 0);
+  n = send(s, reinterpret_cast<char *>(&comm), sizeof(comm), 0);
+  if ((n == sizeof(comm)) && (data != nullptr) && (len_data > 0)) {
+    n = send(s, reinterpret_cast<const char *>(data), len_data, 0);
   }
   return n;
 }
@@ -261,11 +264,11 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
                                       int *ndims, int do_alloc) {
   int n, len_data, size_in, i;
   isisds_command_header_t comm;
-  n = recv_all(s, (char *)&comm, sizeof(comm), 0);
+  n = recv_all(s, reinterpret_cast<char *>(&comm), sizeof(comm), 0);
   if (n != sizeof(comm)) {
     return -1;
   }
-  *command = (char *)malloc(sizeof(comm.command) + 1);
+  *command = reinterpret_cast<char *>(malloc(sizeof(comm.command) + 1));
   strncpy(*command, comm.command, sizeof(comm.command));
   (*command)[sizeof(comm.command)] = '\0';
   len_data = comm.len - sizeof(comm); /* in bytes */
@@ -281,7 +284,7 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
    * isisds_type_name[comm.type], comm.ndims); */
   if (do_alloc) {
     *data = malloc(len_data + 1);
-    ((char *)(*data))[len_data] = '\0';
+    (reinterpret_cast<char *>(*data))[len_data] = '\0';
   } else {
     size_in = 1;
     for (i = 0; i < *ndims; i++) {
@@ -294,13 +297,13 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
     }
     if (size_in > len_data) /* only NULL terminate if space */
     {
-      ((char *)(*data))[len_data] = '\0';
+      (reinterpret_cast<char *>(*data))[len_data] = '\0';
     }
   }
   n = recv_all(s, *data, len_data, 0);
   if (n != len_data) {
     free(*data);
-    *data = NULL;
+    *data = nullptr;
     len_data = 0;
     return -1;
   }
@@ -310,7 +313,7 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
     *ndims = comm.ndims;
   }
   if (do_alloc || (*type != comm.type)) {
-    *type = (ISISDSDataType)comm.type;
+    *type = static_cast<ISISDSDataType>(comm.type);
   }
   for (i = 0; i < comm.ndims; i++) {
     dims_array[i] = comm.dims_array[i];
@@ -323,11 +326,11 @@ int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
                         ISISDSDataType *type, int dims_array[], int *ndims) {
   int t_ndims = 1;
   int istat;
-  char *command_temp = NULL;
-  if (type == NULL) {
+  char *command_temp = nullptr;
+  if (type == nullptr) {
     return -1;
   }
-  if (dims_array == NULL || ndims == NULL ||
+  if (dims_array == nullptr || ndims == nullptr ||
       (*ndims <= 1 && dims_array[0] <= 1)) {
     int t_dims[8] = {1, 0, 0, 0, 0, 0, 0, 0};
     /* assume single simple value */
@@ -350,14 +353,14 @@ int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
 int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
                               ISISDSDataType *type, int dims_array[],
                               int *ndims) {
-  if (ndims == NULL || dims_array == NULL || type == NULL) {
+  if (ndims == nullptr || dims_array == nullptr || type == nullptr) {
     return -1;
   }
-  if (data == NULL || command == NULL) {
+  if (data == nullptr || command == nullptr) {
     return -1;
   }
-  *data = NULL;
-  *command = NULL;
+  *data = nullptr;
+  *command = nullptr;
   /* *ndims = 0; */
   dims_array[0] = 0;
   *type = ISISDSUnknown;
@@ -382,7 +385,7 @@ static isisds_error_report_t status_reporter = default_status_reporter;
 
 int isisds_report(int status, int code, const char *format, ...) {
   va_list ap;
-  char *message = (char *)malloc(1024);
+  char *message = reinterpret_cast<char *>(malloc(1024));
   va_start(ap, format);
   vsprintf(message, format, ap);
   va_end(ap);

@@ -8,6 +8,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Kernel;
 
@@ -23,6 +24,7 @@ public:
     dProp = new PropertyWithValue<double>("doubleProp", 9.99);
     sProp = new PropertyWithValue<std::string>("stringProp", "theValue");
     lProp = new PropertyWithValue<long long>("int64Prop", -9876543210987654LL);
+    bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
   ~PropertyWithValueTest() {
@@ -30,6 +32,7 @@ public:
     delete dProp;
     delete sProp;
     delete lProp;
+    delete bProp;
   }
 
   void testConstructor() {
@@ -53,6 +56,11 @@ public:
     TS_ASSERT(!lProp->documentation().compare(""));
     TS_ASSERT(typeid(long long) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
+
+    TS_ASSERT(!bProp->name().compare("boolProp"));
+    TS_ASSERT(!bProp->documentation().compare(""));
+    TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
+    TS_ASSERT(bProp->isDefault());
   }
 
   void testValue() {
@@ -65,6 +73,7 @@ public:
     TS_ASSERT(!dProp->value().substr(0, 4).compare("9.99"));
     TS_ASSERT(!sProp->value().compare("theValue"));
     TS_ASSERT(!lProp->value().compare("-9876543210987654"));
+    TS_ASSERT(!bProp->value().compare("True"));
   }
 
   void testSizeOfSingleValueProperty() {
@@ -368,6 +377,7 @@ public:
     TS_ASSERT(dProp->allowedValues().empty());
     TS_ASSERT(sProp->allowedValues().empty());
     TS_ASSERT(lProp->allowedValues().empty());
+    TS_ASSERT(!bProp->allowedValues().empty())
     // Tests using a ListValidator are below
   }
 
@@ -515,8 +525,8 @@ public:
     PropertyWithValue<std::string> empty(
         "test", "", boost::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS(empty.isValid(), "Select a value");
-    vec.push_back("one");
-    vec.push_back("two");
+    vec.emplace_back("one");
+    vec.emplace_back("two");
     PropertyWithValue<std::string> p(
         "test", "", boost::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS(p.isValid(), "Select a value");
@@ -613,13 +623,7 @@ public:
     delete p2;
 
     // --- Vectors are appennded together ----
-    std::vector<int> v1, v2;
-    v1.push_back(1);
-    v1.push_back(2);
-    v1.push_back(3);
-    v1.push_back(4);
-    v1.push_back(5);
-    v1.push_back(6);
+    std::vector<int> v1{1, 2, 3, 4, 5, 6}, v2;
     p1 = new PropertyWithValue<std::vector<int>>("Prop1", v1);
     p2 = new PropertyWithValue<std::vector<int>>("Prop1", v2);
     (*p1) += p2;
@@ -633,12 +637,8 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues;
-    allowedValues.push_back("Hello");
-    allowedValues.push_back("World");
-    std::map<std::string, std::string> alias;
-    alias["1"] = "Hello";
-    alias["0"] = "World";
+    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
     PropertyWithValue<std::string> prop("String", "", validator);
@@ -657,11 +657,40 @@ public:
     TS_ASSERT_EQUALS(value, "World");
   }
 
+  void test_optional_bool_propert_made_from_optional_bool() {
+    OptionalBool inputValue(OptionalBool::False);
+    PropertyWithValue<OptionalBool> prop("bool_property", inputValue);
+    OptionalBool heldValue = prop();
+    TS_ASSERT_EQUALS(heldValue, inputValue);
+  }
+
+  void test_optional_bool_to_setValue() {
+
+    std::string input = OptionalBool::StrTrue;
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
+                                             Direction::Input);
+    property.setValue(input);
+  }
+
+  void test_optional_bool_allowed_values() {
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
+                                             Direction::Input);
+
+    auto values = property.allowedValues();
+    auto possibilities = OptionalBool::strToEmumMap();
+    TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
+    for (auto it = values.begin(); it != values.end(); ++it) {
+      TSM_ASSERT("value not a known state",
+                 possibilities.find(*it) != possibilities.end());
+    }
+  }
+
 private:
   PropertyWithValue<int> *iProp;
   PropertyWithValue<double> *dProp;
   PropertyWithValue<std::string> *sProp;
   PropertyWithValue<long long> *lProp;
+  PropertyWithValue<OptionalBool> *bProp;
 };
 
 #endif /*PROPERTYWITHVALUETEST_H_*/

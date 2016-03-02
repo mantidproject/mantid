@@ -48,7 +48,7 @@ class LRReflectivityOutput(PythonAlgorithm):
             Check that all the workspaces are on an absolute scale.
             @param workspace_list: list of workspaces to put together
         """
-        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff")
+        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff").value
 
         normalization_available = True
         for ws in workspace_list:
@@ -57,15 +57,18 @@ class LRReflectivityOutput(PythonAlgorithm):
                     try:
                         wl = mtd[ws].getRun().getProperty("LambdaRequest").value[0]
                         # Scaling factor above the wavelength cutoff are assumed to be 1
-                        normalization_available = wl > scaling_cutoff
-                        logger.notice("%s: no normalization for wl=%s" % (ws, str(wl)))
+                        if wl > scaling_cutoff:
+                            logger.notice("%s: no normalization needed for wl=%s" % (ws, str(wl)))
+                        else:
+                            logger.error("%s: normalization missing for wl=%s" % (ws, str(wl)))
+                            normalization_available = False
                     except:
-                        logger.notice("%s: could not find LambdaRequest" % ws)
+                        logger.error("%s: could not find LambdaRequest" % ws)
                         normalization_available = False
                 else:
                     logger.notice("%s: normalization found" % ws)
             else:
-                logger.notice("%s: no normalization info" % ws)
+                logger.error("%s: no normalization info" % ws)
                 normalization_available = False
         return normalization_available
 
@@ -208,8 +211,8 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += '# Q[1/Angstrom] R delta_R Precision\n'
 
         for i in range(len(data_x)):
-            # Skip point where the error is much larger than the reflectivity value
-            if data_y[i] > data_e[i] / 100.0:
+            # Skip point where the error is larger than the reflectivity value
+            if data_y[i] > data_e[i]:
                 content += str(data_x[i])
                 content += ' ' + str(data_y[i])
                 content += ' ' + str(data_e[i])

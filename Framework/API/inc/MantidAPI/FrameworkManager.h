@@ -52,6 +52,8 @@ class Workspace;
  */
 class MANTID_API_DLL FrameworkManagerImpl {
 public:
+  FrameworkManagerImpl(const FrameworkManagerImpl &) = delete;
+  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &) = delete;
   /// Load a set of plugins using a key from the ConfigService
   void loadPluginsUsingKey(const std::string &key);
 
@@ -64,7 +66,8 @@ public:
 
   /// Clears all memory associated with the AlgorithmManager, ADS & IDS
   void clear();
-
+  /// shuts down and performs clean up tasks
+  void shutdown();
   /// Clear memory associated with the AlgorithmManager
   void clearAlgorithms();
 
@@ -76,7 +79,6 @@ public:
 
   /// Clear memory associated with the PropertyManagers
   void clearPropertyManagers();
-
   /// Creates and instance of an algorithm
   IAlgorithm *createAlgorithm(const std::string &algName,
                               const int &version = -1);
@@ -108,10 +110,6 @@ private:
   FrameworkManagerImpl();
   /// Private Destructor
   ~FrameworkManagerImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  FrameworkManagerImpl(const FrameworkManagerImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &);
 
   /// Set up the global locale
   void setGlobalLocaleToAscii();
@@ -119,12 +117,12 @@ private:
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
   void AsynchronousStartupTasks();
+  /// Setup Usage Reporting if enabled
+  void setupUsageReporting();
   /// Update instrument definitions from github
   void UpdateInstrumentDefinitions();
   /// check if a newer version of Mantid is available
   void CheckIfNewerVersionIsAvailable();
-  /// Sends startup usage information
-  void SendStartupUsageInfo();
 
 #ifdef MPI_BUILD
   /** Member variable that initialises the MPI environment on construction (in

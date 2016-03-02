@@ -15,11 +15,11 @@ namespace Kernel {
 ///@cond
 class ChebyshevPolyFitImpl {
 public:
-  ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
+  explicit ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
 
-  std::vector<double> fit(const std::vector<double> &xs,
-                          const std::vector<double> &ys,
-                          const std::vector<double> &wgts);
+  std::vector<double> fit(const std::vector<double> &x,
+                          const std::vector<double> &y,
+                          const std::vector<double> &w);
 
 private:
   const size_t m_order;
@@ -83,7 +83,7 @@ ChebyshevPolyFit::ChebyshevPolyFit(const size_t n)
     : m_impl(new ChebyshevPolyFitImpl(n)) {}
 
 /// Destructor
-ChebyshevPolyFit::~ChebyshevPolyFit() {}
+ChebyshevPolyFit::~ChebyshevPolyFit() = default;
 
 /**
  * Find coefficients of polynomial that minimizes the sum

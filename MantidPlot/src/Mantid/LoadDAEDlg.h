@@ -16,10 +16,10 @@ class loadDAEDlg : public QDialog
 	Q_OBJECT
 	
 public:
-	loadDAEDlg(QWidget *parent = 0);
-	~loadDAEDlg();
+  explicit loadDAEDlg(QWidget *parent = 0);
+  ~loadDAEDlg() override;
 
-	const QString& getHostName() { return m_hostName; }
+        const QString& getHostName() { return m_hostName; }
 	const QString& getWorkspaceName() { return m_workspaceName; }
 	const QString& getSpectrumMin() { return m_spectrum_min; }
 	const QString& getSpectrumMax() { return m_spectrum_max; }

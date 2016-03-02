@@ -13,7 +13,9 @@
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
@@ -108,8 +110,7 @@ public:
     dets.push_back(60);
     dets.push_back(20);
     dets.push_back(90);
-    std::vector<size_t> indices;
-    ws.getIndicesFromDetectorIDs(dets, indices);
+    std::vector<size_t> indices = ws.getIndicesFromDetectorIDs(dets);
     TS_ASSERT_EQUALS(indices.size(), 3);
     TS_ASSERT_EQUALS(indices[0], 6);
     TS_ASSERT_EQUALS(indices[1], 2);
@@ -122,7 +123,8 @@ public:
     const size_t nhist(10);
     testWS.initialize(nhist, 1, 1);
     for (size_t i = 0; i < testWS.getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specid_t(i + 1));
+      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(),
+                       specnum_t(i + 1));
       TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i)));
     }
   }
@@ -131,7 +133,7 @@ public:
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);
 
-    specid_t specs[] = {1, 2, 2, 3};
+    specnum_t specs[] = {1, 2, 2, 3};
     detid_t detids[] = {10, 99, 20, 30};
     TS_ASSERT_THROWS_NOTHING(
         testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)));
@@ -143,7 +145,8 @@ public:
   }
 
   void testDetectorMappingCopiedWhenAWorkspaceIsCopied() {
-    boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);
+    boost::shared_ptr<MatrixWorkspace> parent =
+        boost::make_shared<WorkspaceTester>();
     parent->initialize(1, 1, 1);
     parent->getSpectrum(0)->setSpectrumNo(99);
     parent->getSpectrum(0)->setDetectorID(999);
@@ -602,7 +605,7 @@ public:
     std::vector<size_t> out;
     detid_t offset = -1234;
     TS_ASSERT_THROWS_NOTHING(
-        ws->getDetectorIDToWorkspaceIndexVector(out, offset));
+        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 0);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
@@ -632,7 +635,7 @@ public:
     ws->getSpectrum(66)->clearDetectorIDs();
 
     TS_ASSERT_THROWS_NOTHING(
-        ws->getDetectorIDToWorkspaceIndexVector(out, offset));
+        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 1);
     TS_ASSERT_EQUALS(out.size(), 112);
     TS_ASSERT_EQUALS(out[66 + offset], std::numeric_limits<size_t>::max());
@@ -645,8 +648,8 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING(
-        ws->getSpectrumToWorkspaceIndexVector(out, offset));
+    TS_ASSERT_THROWS_NOTHING(out =
+                                 ws->getSpectrumToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, -1);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
@@ -1257,6 +1260,37 @@ public:
     TS_ASSERT_EQUALS(ws.readE(7)[0], 6);
   }
 
+  /**
+  * Test declaring an input workspace and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    MatrixWorkspace_const_sptr wsConst;
+    MatrixWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<MatrixWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<MatrixWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    MatrixWorkspace_const_sptr wsCastConst;
+    MatrixWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (MatrixWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (MatrixWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
 private:
   Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
     auto image = new Mantid::API::MantidImage(height);
@@ -1272,6 +1306,47 @@ private:
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;
+};
+
+class MatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static MatrixWorkspaceTestPerformance *createSuite() {
+    return new MatrixWorkspaceTestPerformance();
+  }
+  static void destroySuite(MatrixWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  MatrixWorkspaceTestPerformance() : m_workspace(nullptr) {
+    size_t numberOfHistograms = 10000;
+    size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
+  void test_typical() {
+    auto instrument = m_workspace.getInstrument();
+    auto source = instrument->getSource();
+    auto sample = instrument->getSample();
+    auto L1 = source->getDistance(*sample);
+    double result = 0.0;
+    for (size_t i = 0; i < 10000; ++i) {
+      auto detector = m_workspace.getDetector(i);
+      result += L1;
+      result += detector->getDistance(*sample);
+      result += m_workspace.detectorTwoTheta(detector);
+    }
+    // We are computing an using the result to fool the optimizer.
+    TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+  }
+
+private:
+  WorkspaceTester m_workspace;
 };
 
 #endif /*WORKSPACETEST_H_*/

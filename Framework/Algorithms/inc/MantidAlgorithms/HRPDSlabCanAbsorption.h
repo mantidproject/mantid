@@ -72,27 +72,27 @@ public:
   /// (Empty) Constructor
   HRPDSlabCanAbsorption() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~HRPDSlabCanAbsorption() {}
+  ~HRPDSlabCanAbsorption() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "HRPDSlabCanAbsorption"; }
+  const std::string name() const override { return "HRPDSlabCanAbsorption"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates attenuation due to absorption and scattering in an HRPD "
            "'slab' can.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// runs the flat plate absorption
   API::MatrixWorkspace_sptr runFlatPlateAbsorption();

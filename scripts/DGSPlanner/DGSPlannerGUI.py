@@ -167,7 +167,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='msd',LogText='1798.5',LogType='Number Series')
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
-                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",InstrumentName="HYSPEC")
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
             #masking
             if self.masterDict.has_key('maskFilename') and len(self.masterDict['maskFilename'].strip())>0:
                 try:

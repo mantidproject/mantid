@@ -201,7 +201,7 @@ class PoldiLoadRuns(PythonAlgorithm):
     # Execute LoadSINQ, LoadInstrument and PoldiTruncateData
     def loadAndTruncateData(self, workspaceName, year, j):
         LoadSINQ("POLDI", year, j, OutputWorkspace=workspaceName)
-        LoadInstrument(workspaceName, InstrumentName="POLDI")
+        LoadInstrument(workspaceName, InstrumentName="POLDI", RewriteSpectraMap=True)
         PoldiTruncateData(InputWorkspace=workspaceName, OutputWorkspace=workspaceName)
 
     # Automatically determine bad detectors and mask them

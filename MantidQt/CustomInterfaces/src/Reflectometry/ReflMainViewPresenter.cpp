@@ -5,7 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -25,10 +28,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
-
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -147,9 +146,9 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // TODO. Select strategy.
   /*
   std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
   UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
   */
 
   // Initialise options
@@ -157,11 +156,11 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 
   // Set up the instrument selectors
   std::vector<std::string> instruments;
-  instruments.push_back("INTER");
-  instruments.push_back("SURF");
-  instruments.push_back("CRISP");
-  instruments.push_back("POLREF");
-  instruments.push_back("OFFSPEC");
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
@@ -178,10 +177,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
 
-  std::set<std::string> items;
-  items = ads.getObjectNames();
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    const std::string name = *it;
+  auto items = ads.getObjectNames();
+  for (auto const &name : items) {
     Workspace_sptr ws = ads.retrieve(name);
 
     if (isValidModel(ws))
@@ -201,14 +198,13 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // should'nt touch.
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  std::set<std::string> blacklist;
-  blacklist.insert("ThetaIn");
-  blacklist.insert("ThetaOut");
-  blacklist.insert("InputWorkspace");
-  blacklist.insert("OutputWorkspace");
-  blacklist.insert("OutputWorkspaceWavelength");
-  blacklist.insert("FirstTransmissionRun");
-  blacklist.insert("SecondTransmissionRun");
+  std::set<std::string> blacklist{"ThetaIn",
+                                  "ThetaOut",
+                                  "InputWorkspace",
+                                  "OutputWorkspace",
+                                  "OutputWorkspaceWavelength",
+                                  "FirstTransmissionRun",
+                                  "SecondTransmissionRun"};
   m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -228,8 +224,8 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 ReflMainViewPresenter::~ReflMainViewPresenter() {}
 
 /**
- * Finds the first unused group id
- */
+* Finds the first unused group id
+*/
 int ReflMainViewPresenter::getUnusedGroup(std::set<int> ignoredRows) const {
   std::set<int> usedGroups;
 
@@ -328,13 +324,13 @@ void ReflMainViewPresenter::saveNotebook(std::map<int, std::set<int>> groups,
     return;
   }
 
-  std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+  auto notebook = Mantid::Kernel::make_unique<ReflGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(),
       ReflTableSchema::COL_RUNS, ReflTableSchema::COL_TRANSMISSION,
       ReflTableSchema::COL_OPTIONS, ReflTableSchema::COL_ANGLE,
       ReflTableSchema::COL_QMIN, ReflTableSchema::COL_QMAX,
       ReflTableSchema::COL_DQQ, ReflTableSchema::COL_SCALE,
-      ReflTableSchema::COL_GROUP));
+      ReflTableSchema::COL_GROUP);
   std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -597,11 +593,11 @@ ReflMainViewPresenter::prepareRunWorkspace(const std::string &runStr) {
     return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-   * but
-   * that doesn't preserve history nicely, so we'll just take care of tidying up
-   * in
-   * the event of failure.
-   */
+  * but
+  * that doesn't preserve history nicely, so we'll just take care of tidying up
+  * in
+  * the event of failure.
+  */
   IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
   algPlus->initialize();
   algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
@@ -890,7 +886,7 @@ void ReflMainViewPresenter::stitchRows(std::set<int> rows) {
       const std::string runNo = getRunNumber(runWS);
       if (AnalysisDataService::Instance().doesExist("IvsQ_" + runNo)) {
         runs.push_back(runNo);
-        workspaceNames.push_back("IvsQ_" + runNo);
+        workspaceNames.emplace_back("IvsQ_" + runNo);
       }
     }
 
@@ -1113,9 +1109,6 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::GroupRowsFlag:
     groupRows();
     break;
-  case IReflPresenter::OpenTableFlag:
-    openTable();
-    break;
   case IReflPresenter::NewTableFlag:
     newTable();
     break;
@@ -1143,11 +1136,19 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
   case IReflPresenter::SearchFlag:
     search();
     break;
+  case IReflPresenter::ICATSearchCompleteFlag: {
+    auto algRunner = m_view->getAlgorithmRunner();
+    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+    populateSearch(searchAlg);
+  } break;
   case IReflPresenter::TransferFlag:
     transfer();
     break;
   case IReflPresenter::ImportTableFlag:
     importTable();
+    break;
+  case IReflPresenter::OpenTableFlag:
+    openTable();
     break;
   case IReflPresenter::ExportTableFlag:
     exportTable();
@@ -1250,9 +1251,7 @@ void ReflMainViewPresenter::openTable() {
 /**
 Import a table from TBL file
 */
-void ReflMainViewPresenter::importTable() {
-  m_view->showAlgorithmDialog("LoadReflTBL");
-}
+void ReflMainViewPresenter::importTable() { m_view->showImportDialog(); }
 
 /**
 Export a table to TBL file
@@ -1325,9 +1324,9 @@ void ReflMainViewPresenter::afterReplaceHandle(
 }
 
 /** Returns how many rows there are in a given group
-    @param groupId : The id of the group to count the rows of
-    @returns The number of rows in the group
- */
+@param groupId : The id of the group to count the rows of
+@returns The number of rows in the group
+*/
 size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const {
   size_t count = 0;
   for (int i = 0; i < m_model->rowCount(); ++i)
@@ -1405,7 +1404,7 @@ void ReflMainViewPresenter::cutSelected() {
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
- * append new rows */
+* append new rows */
 void ReflMainViewPresenter::pasteSelected() {
   const std::string text = m_view->getClipboard();
   std::vector<std::string> lines;
@@ -1444,8 +1443,6 @@ void ReflMainViewPresenter::pasteSelected() {
 /** Searches for runs that can be used */
 void ReflMainViewPresenter::search() {
   const std::string searchString = m_view->getSearchString();
-  const std::string searchInstr = m_view->getSearchInstrument();
-
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -1453,17 +1450,44 @@ void ReflMainViewPresenter::search() {
   // This is breaking the abstraction provided by IReflSearcher, but provides a
   // nice usability win
   // If we're not logged into a catalog, prompt the user to do so
-  if (CatalogManager::Instance().getActiveSessions().empty())
-    m_view->showAlgorithmDialog("CatalogLogin");
+  if (CatalogManager::Instance().getActiveSessions().empty()) {
+    try {
+      m_view->showAlgorithmDialog("CatalogLogin");
+    } catch (std::runtime_error &e) {
+      m_view->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
+                               "login failed");
+    }
+  }
+  std::string sessionId;
+  // check to see if we have any active sessions for ICAT
+  if (!CatalogManager::Instance().getActiveSessions().empty()) {
+    // we have an active session, so grab the ID
+    sessionId =
+        CatalogManager::Instance().getActiveSessions().front()->getSessionId();
+  } else {
+    // there are no active sessions, we return here to avoid an exception
+    m_view->giveUserInfo(
+        "Error Logging in: Please press 'Search' to try again.",
+        "Login Failed");
+    return;
+  }
+  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  algSearch->initialize();
+  algSearch->setChild(true);
+  algSearch->setLogging(false);
+  algSearch->setProperty("Session", sessionId);
+  algSearch->setProperty("InvestigationId", searchString);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  auto algRunner = m_view->getAlgorithmRunner();
+  algRunner->startAlgorithm(algSearch);
+}
 
-  try {
-    auto results = m_searcher->search(searchString);
-    m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
+void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+  if (searchAlg->isExecuted()) {
+    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
-  } catch (std::runtime_error &e) {
-    m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
-                             "Search Failed");
   }
 }
 
@@ -1472,6 +1496,7 @@ void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
+
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;
@@ -1487,7 +1512,6 @@ void ReflMainViewPresenter::transfer() {
     searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
                                 .toString()
                                 .toStdString();
-
     runs[run] = searchResult;
   }
 
@@ -1495,7 +1519,43 @@ void ReflMainViewPresenter::transfer() {
                         static_cast<int64_t>(selectedRows.size()),
                         this->m_progressView);
 
-  auto newRows = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+
+  auto invalidRuns =
+      results.getErrorRuns(); // grab our invalid runs from the transfer
+
+  // iterate through invalidRuns to set the 'invalid transfers' in the search
+  // model
+  if (!invalidRuns.empty()) { // check if we have any invalid runs
+    for (auto invalidRowIt = invalidRuns.begin();
+         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+      auto &error = *invalidRowIt; // grab row from vector
+      // iterate over row containing run number and reason why it's invalid
+      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+           ++errorRowIt) {
+        const std::string runNumber = errorRowIt->first; // grab run number
+
+        // iterate over rows that are selected in the search table
+        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+             ++rowIt) {
+          const int row = *rowIt;
+          // get the run number from that selected row
+          const auto searchRun =
+              m_searchModel->data(m_searchModel->index(row, 0))
+                  .toString()
+                  .toStdString();
+          if (searchRun == runNumber) { // if search run number is the same as
+                                        // our invalid run number
+
+            // add this error to the member of m_searchModel that holds errors.
+            m_searchModel->m_errors.push_back(error);
+          }
+        }
+      }
+    }
+  }
+
+  auto newRows = results.getTransferRuns();
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
@@ -1514,8 +1574,8 @@ void ReflMainViewPresenter::transfer() {
     }
 
     /* Set the scale to 1.0 for new rows. If there's a columnHeading specified
-       otherwise,
-       it will be overwritten below.
+    otherwise,
+    it will be overwritten below.
     */
     m_model->setData(m_model->index(rowIndex, ReflTableSchema::COL_SCALE), 1.0);
     auto colIndexLookup = ReflTableSchema::makeColumnNameMap();
@@ -1630,15 +1690,15 @@ void ReflMainViewPresenter::showOptionsDialog() {
 }
 
 /** Gets the options used by the presenter
-    @returns The options used by the presenter
- */
+@returns The options used by the presenter
+*/
 const std::map<std::string, QVariant> &ReflMainViewPresenter::options() const {
   return m_options;
 }
 
 /** Sets the options used by the presenter
-    @param options : The new options for the presenter to use
- */
+@param options : The new options for the presenter to use
+*/
 void ReflMainViewPresenter::setOptions(
     const std::map<std::string, QVariant> &options) {
   // Overwrite the given options
@@ -1671,15 +1731,16 @@ void ReflMainViewPresenter::initOptions() {
 }
 
 /**
- * Select and make a transfer strategy on demand based. Pick up the
- *user-provided
- * transfer strategy to do this.
- *
- * @return new TransferStrategy
- */
+* Select and make a transfer strategy on demand based. Pick up the
+*user-provided
+* transfer strategy to do this.
+*
+* @return new TransferStrategy
+*/
 std::unique_ptr<ReflTransferStrategy>
 ReflMainViewPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
+  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
@@ -1687,22 +1748,22 @@ ReflMainViewPresenter::getTransferStrategy() {
         makeCatalogConfigServiceAdapter(ConfigService::Instance()));
 
     // We make a user-based Catalog Info object for the transfer
-    auto catInfo = std::unique_ptr<ICatalogInfo>(new UserCatalogInfo(
+    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
         ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService));
+        *catConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source =
-        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
+    std::unique_ptr<ReflMeasurementItemSource> source =
+        make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflMeasureTransferStrategy(std::move(catInfo), std::move(source)));
+    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+        std::move(catInfo), std::move(source));
+    return rtnStrategy;
   } else if (currentMethod == LegacyTransferMethod) {
-    return std::unique_ptr<ReflTransferStrategy>(
-        new ReflLegacyTransferStrategy);
-
+    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
+    return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              currentMethod);

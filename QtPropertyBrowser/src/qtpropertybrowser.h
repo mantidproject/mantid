@@ -165,7 +165,7 @@ class QT_QTPROPERTYBROWSER_EXPORT QtAbstractPropertyManager : public QObject
 public:
 
     explicit QtAbstractPropertyManager(QObject *parent = 0);
-    ~QtAbstractPropertyManager();
+    ~QtAbstractPropertyManager() override;
 
     QSet<QtProperty *> properties() const;
     void clear() const;
@@ -217,13 +217,12 @@ class QtAbstractEditorFactory : public QtAbstractEditorFactoryBase
 {
 public:
     explicit QtAbstractEditorFactory(QObject *parent) : QtAbstractEditorFactoryBase(parent) {}
-    QWidget *createEditor(QtProperty *property, QWidget *parent)
-    {
+    QWidget *createEditor(QtProperty *property, QWidget *parent) override {
         QSetIterator<PropertyManager *> it(m_managers);
         while (it.hasNext()) {
             PropertyManager *manager = it.next();
             if (manager == property->propertyManager()) {
-                return createEditor(manager, property, parent);
+                return createEditorForManager(manager, property, parent);
             }
         }
         return 0;
@@ -265,11 +264,10 @@ public:
 protected:
     friend class CompositeEditorFactory<PropertyManager>;
     virtual void connectPropertyManager(PropertyManager *manager) = 0;
-    virtual QWidget *createEditor(PropertyManager *manager, QtProperty *property,
+    virtual QWidget *createEditorForManager(PropertyManager *manager, QtProperty *property,
                 QWidget *parent) = 0;
     virtual void disconnectPropertyManager(PropertyManager *manager) = 0;
-    void managerDestroyed(QObject *manager)
-    {
+    void managerDestroyed(QObject *manager) override {
         QSetIterator<PropertyManager *> it(m_managers);
         while (it.hasNext()) {
             PropertyManager *m = it.next();
@@ -280,8 +278,7 @@ protected:
         }
     }
 private:
-    void breakConnection(QtAbstractPropertyManager *manager)
-    {
+  void breakConnection(QtAbstractPropertyManager *manager) override {
         QSetIterator<PropertyManager *> it(m_managers);
         while (it.hasNext()) {
             PropertyManager *m = it.next();
@@ -321,7 +318,7 @@ class QT_QTPROPERTYBROWSER_EXPORT QtAbstractPropertyBrowser : public QWidget
 public:
 
     explicit QtAbstractPropertyBrowser(QWidget *parent = 0);
-    ~QtAbstractPropertyBrowser();
+    ~QtAbstractPropertyBrowser() override;
 
     QList<QtProperty *> properties() const;
     QList<QtBrowserItem *> items(QtProperty *property) const;

@@ -39,26 +39,27 @@ LoadMuonNexus::LoadMuonNexus()
 
 /// Initialisation method.
 void LoadMuonNexus::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "The name of the Nexus file to load");
 
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                Direction::Output),
       "The name of the workspace to be created as the output of the\n"
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(1);
-  declareProperty("SpectrumMin", (int64_t)EMPTY_INT(), mustBePositive,
-                  "Index number of the first spectrum to read\n"
-                  "(default 1)");
-  declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive,
-                  "Index of last spectrum to read\n"
-                  "(default the last spectrum)");
+  declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive, "Index number of the first spectrum to read\n"
+                                  "(default 1)");
+  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+                  mustBePositive, "Index of last spectrum to read\n"
+                                  "(default the last spectrum)");
 
-  declareProperty(new ArrayProperty<specid_t>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
                   "load");
   declareProperty("AutoGroup", false,
@@ -68,15 +69,13 @@ void LoadMuonNexus::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
-  declareProperty("EntryNumber", (int64_t)0, mustBeNonNegative,
+  declareProperty("EntryNumber", static_cast<int64_t>(0), mustBeNonNegative,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
-  std::vector<std::string> FieldOptions;
-  FieldOptions.push_back("Transverse");
-  FieldOptions.push_back("Longitudinal");
+  std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
                   boost::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
@@ -90,14 +89,14 @@ void LoadMuonNexus::init() {
                   "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
 
-  declareProperty(new WorkspaceProperty<Workspace>("DeadTimeTable", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
-                  "Table or a group of tables containing detector dead times");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>(
+          "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
+      "Table or a group of tables containing detector dead times");
 
-  declareProperty(new WorkspaceProperty<Workspace>("DetectorGroupingTable", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "DetectorGroupingTable", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Table or a group of tables with information about the "
                   "detector grouping stored in the file (if any)");
 }
@@ -115,9 +114,9 @@ void LoadMuonNexus::checkOptionalProperties() {
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    const specid_t minlist =
+    const specnum_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
-    const specid_t maxlist =
+    const specnum_t maxlist =
         *max_element(m_spec_list.begin(), m_spec_list.end());
     if (maxlist > m_numberOfSpectra || minlist == 0) {
       g_log.error("Invalid list of spectra");
@@ -145,7 +144,8 @@ void LoadMuonNexus::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrument_name);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

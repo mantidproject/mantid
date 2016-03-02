@@ -9,7 +9,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-  std::vector<std::map<std::string, std::string>>
+  TransferResults
   ReflLegacyTransferStrategy::transferRuns(
       SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
       /*
@@ -66,21 +66,31 @@ namespace MantidQt
       }
 
       //All the data we need is now properly organised, so we can quickly throw out the rows needed
-      std::vector<std::map<std::string,std::string> > output;
+      std::vector<std::map<std::string,std::string> > rows;
+      std::vector<std::map<std::string, std::string> > errors; //will remain empty for now
+      TransferResults results(rows, errors);
       for(auto run = runsByDesc.begin(); run != runsByDesc.end(); ++run)
       {
+        //set up our successful run into table-ready format.
         std::map<std::string,std::string> row;
         row[ReflTableSchema::RUNS] = run->second;
         row[ReflTableSchema::ANGLE] = thetaByDesc[run->first];
         row[ReflTableSchema::GROUP] = groupsByDesc[run->first];
-        output.push_back(row);
+        //add our successful row
+        results.addTransferRow(row);
+
       }
-      std::sort(output.begin(), output.end());
-      return output;
+      std::sort(results.m_transferRuns.begin(), results.m_transferRuns.end());
+      return results;
   }
 
-  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::clone() const {
+  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::doClone() const {
     return new ReflLegacyTransferStrategy(*this);
+  }
+
+  std::unique_ptr<ReflLegacyTransferStrategy>
+  ReflLegacyTransferStrategy::clone() const {
+    return std::unique_ptr<ReflLegacyTransferStrategy>(doClone());
   }
 
   bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(

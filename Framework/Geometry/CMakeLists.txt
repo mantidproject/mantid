@@ -11,10 +11,10 @@ set ( SRC_FILES
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
+	src/Crystal/GroupTransformation.cpp
 	src/Crystal/HKLFilter.cpp
 	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
-	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
@@ -148,12 +148,15 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
+	inc/MantidGeometry/Crystal/GroupTransformation.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
 	inc/MantidGeometry/Crystal/HKLFilterWavelength.h
 	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
+	inc/MantidGeometry/Crystal/MatrixVectorPair.h
+	inc/MantidGeometry/Crystal/MatrixVectorPairParser.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PeakShape.h
@@ -185,8 +188,10 @@ set ( INC_FILES
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
+	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
+	inc/MantidGeometry/Instrument_fwd.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
@@ -308,6 +313,7 @@ set ( TEST_FILES
 	GeneralTest.h
 	GoniometerTest.h
 	GroupTest.h
+	GroupTransformationTest.h
 	HKLFilterTest.h
 	HKLFilterWavelengthTest.h
 	HKLGeneratorTest.h
@@ -332,6 +338,8 @@ set ( TEST_FILES
 	MDPlaneTest.h
 	MapSupportTest.h
 	MathSupportTest.h
+	MatrixVectorPairParserTest.h
+	MatrixVectorPairTest.h
 	NearestNeighboursFactoryTest.h
 	NearestNeighboursTest.h
 	NiggliCellTest.h

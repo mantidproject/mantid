@@ -26,6 +26,25 @@ about these properties until it has been told the filename and found the
 correct loader. Once this has happened the properties of the specific
 Load algorithm are redeclared on to that copy of Load.
 
+Loading Nexus files
+###################
+
+When the file to be loaded is a :ref:`Nexus file<Nexus file>`, 
+the type nexus file loaded is determined by its group structure.
+
+If the nexus file has a group of type ``NXevent_data``,
+then :ref:`algm-LoadEventNexus` will be run.
+Else if the nexus file has a ``/raw_data_1`` path, 
+then :ref:`algm-LoadISISNexus` will be run 
+and it will only load data within the group with this pathname.
+Also a nexus file with certain groups present will be
+loaded by :ref:`algm-LoadMuonNexus`.
+A nexus file with a group of path ``/mantid_workspace_1`` is
+loaded by :ref:`algm-LoadNexusProcessed`.
+See the specific load algorithms for more details. 
+
+
+
 Usage
 -----
 

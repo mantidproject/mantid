@@ -42,33 +42,6 @@ PolyBase::PolyBase(const int iD, const double E)
 */
 {}
 
-PolyBase::PolyBase(const PolyBase &A)
-    : iDegree(A.iDegree), afCoeff(A.afCoeff), Eaccuracy(A.Eaccuracy)
-/**
-  Copy Constructor
-  @param A :: PolyBase to copy
- */
-{}
-
-PolyBase &PolyBase::operator=(const PolyBase &A)
-/**
-  Assignment operator
-  @param A :: PolyBase to copy
-  @return *this
- */
-{
-  if (this != &A) {
-    iDegree = A.iDegree;
-    afCoeff = A.afCoeff;
-    Eaccuracy = A.Eaccuracy;
-  }
-  return *this;
-}
-
-PolyBase::~PolyBase()
-/// Destructor
-{}
-
 void PolyBase::setDegree(const int iD)
 /**
   Set the degree value
@@ -493,7 +466,7 @@ std::vector<std::complex<double>> PolyBase::calcRoots(const double epsilon)
   // WS contains the the hessian matrix if required (eigenvalues/vectors)
   //
   gsl_poly_complex_workspace *WS(gsl_poly_complex_workspace_alloc(iDegree + 1));
-  double *RZ = new double[2 * (iDegree + 1)];
+  auto RZ = new double[2 * (iDegree + 1)];
   gsl_poly_complex_solve(&afCoeff.front(), iDegree + 1, WS, RZ);
   for (int i = 0; i < iDegree; i++)
     Out[i] = std::complex<double>(RZ[2 * i], RZ[2 * i + 1]);

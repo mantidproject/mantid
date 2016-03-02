@@ -23,27 +23,27 @@ namespace Crystal {
 class DLLExport PredictPeaks : public API::Algorithm {
 public:
   PredictPeaks();
-  ~PredictPeaks();
+  ~PredictPeaks() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "PredictPeaks"; };
+  const std::string name() const override { return "PredictPeaks"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Using a known crystal lattice and UB matrix, predict where single "
            "crystal peaks should be found in detector/TOF space. Creates a "
            "PeaksWorkspace containing the peaks at the expected positions.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Crystal\\Peaks"; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   void checkBeamDirection() const;
   void setInstrumentFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
@@ -54,7 +54,7 @@ private:
       std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void fillPossibleHKLsUsingPeaksWorkspace(
-      const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,
+      const DataObjects::PeaksWorkspace_sptr &peaksWorkspace,
       std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);

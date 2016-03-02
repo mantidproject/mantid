@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -33,12 +34,12 @@ FilterByLogValue::~FilterByLogValue() {}
 
 //-----------------------------------------------------------------------
 void FilterByLogValue::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
   declareProperty(
@@ -93,7 +94,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   try {
     ITimeSeriesProperty *log =
         dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
-    if (log == NULL) {
+    if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
       return errors;
     }
@@ -134,7 +135,7 @@ void FilterByLogValue::exec() {
   // Find the start and stop times of the run, but handle it if they are not
   // found.
   DateAndTime run_start(0), run_stop("2100-01-01T00:00:00");
-  double handle_edge_values = false;
+  bool handle_edge_values = false;
   try {
     run_start = inputWS->getFirstPulseTime() - tolerance;
     run_stop = inputWS->getLastPulseTime() + tolerance;

@@ -129,13 +129,13 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             ConvertUnits(InputWorkspace=self._can_ws_name, OutputWorkspace=can1_wave_ws,
                          Target='Wavelength', EMode='Indirect', EFixed=efixed)
             if self._can_scale != 1.0:
-                logger.information('Scaling can by: ' + str(self._can_scale))
+                logger.information('Scaling container by: ' + str(self._can_scale))
                 Scale(InputWorkspace=can1_wave_ws, OutputWorkspace=can1_wave_ws, Factor=self._can_scale, Operation='Multiply')
             CloneWorkspace(InputWorkspace=can1_wave_ws, OutputWorkspace=can2_wave_ws)
 
             can_thickness_1 = self._sample_inner_radius - self._can_inner_radius
             can_thickness_2 = self._can_outer_radius - self._sample_outer_radius
-            logger.information('Can thickness: %f & %f' % (can_thickness_1, can_thickness_2))
+            logger.information('Container thickness: %f & %f' % (can_thickness_1, can_thickness_2))
 
             if self._use_can_corrections:
                 prog.report('Calculating container corrections')
@@ -205,12 +205,12 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                        ('can_outer', self._can_outer_radius)]
 
         if self._can_ws_name is not None:
-            sample_logs.append(('can_filename', self._can_ws_name))
-            sample_logs.append(('can_scale', self._can_scale))
+            sample_logs.append(('container_filename', self._can_ws_name))
+            sample_logs.append(('container_scale', self._can_scale))
             if self._use_can_corrections:
                 sample_log_workspaces.append(self._acc_ws)
-                sample_logs.append(('can_thickness_1', can_thickness_1))
-                sample_logs.append(('can_thickness_2', can_thickness_2))
+                sample_logs.append(('container_thickness_1', can_thickness_1))
+                sample_logs.append(('container_thickness_2', can_thickness_2))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]

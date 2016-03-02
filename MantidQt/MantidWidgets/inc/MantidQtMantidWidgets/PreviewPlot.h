@@ -53,6 +53,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+// forward declaration
+class DisplayCurveFit;
+
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PreviewPlot : public API::MantidWidget {
   Q_OBJECT
 
@@ -197,6 +200,8 @@ private:
   // Persists error bar options when curves of same name are removed and
   // readded
   QMap<QString, bool> m_errorBarOptionCache;
+
+  friend class DisplayCurveFit;
 };
 }
 }

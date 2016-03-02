@@ -44,20 +44,19 @@ public:
                        const std::string &workspacePropertyName,
                        DomainType domainType = Simple);
 
-  virtual ~LatticeDomainCreator() {}
+  ~LatticeDomainCreator() override {}
 
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
-                            size_t i0);
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                    boost::shared_ptr<API::FunctionValues> &values,
+                    size_t i0) override;
 
-  virtual API::Workspace_sptr
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName);
+  API::Workspace_sptr createOutputWorkspace(
+      const std::string &baseName, API::IFunction_sptr function,
+      boost::shared_ptr<API::FunctionDomain> domain,
+      boost::shared_ptr<API::FunctionValues> values,
+      const std::string &outputWorkspacePropertyName) override;
 
-  virtual size_t getDomainSize() const;
+  size_t getDomainSize() const override;
 
 protected:
   void setWorkspaceFromPropertyManager();

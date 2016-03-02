@@ -1,14 +1,14 @@
 #ifndef MANTID_CURVEFITTING_Bk2BkExpConvPVTEST_H_
 #define MANTID_CURVEFITTING_Bk2BkExpConvPVTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
-#include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
@@ -27,87 +27,46 @@ public:
   /*
    * Experiment data for HKL = (2, 1, 0)
    */
-  void getMockData(std::vector<double> &xvalues, std::vector<double> &yvalues) {
-    xvalues.clear();
-    yvalues.clear();
+  Workspace_sptr genMockData() {
 
-    xvalues.push_back(54999.094);
-    yvalues.push_back(2.6283364);
-    xvalues.push_back(55010.957);
-    yvalues.push_back(4.0346470);
-    xvalues.push_back(55022.820);
-    yvalues.push_back(6.1934152);
-    xvalues.push_back(55034.684);
-    yvalues.push_back(9.5072470);
-    xvalues.push_back(55046.547);
-    yvalues.push_back(14.594171);
-    xvalues.push_back(55058.410);
-    yvalues.push_back(22.402889);
-    xvalues.push_back(55070.273);
-    yvalues.push_back(34.389721);
-    xvalues.push_back(55082.137);
-    yvalues.push_back(52.790192);
-    xvalues.push_back(55094.000);
-    yvalues.push_back(81.035973);
-    xvalues.push_back(55105.863);
-    yvalues.push_back(124.39484);
-    xvalues.push_back(55117.727);
-    yvalues.push_back(190.95044);
-    xvalues.push_back(55129.590);
-    yvalues.push_back(293.01022);
-    xvalues.push_back(55141.453);
-    yvalues.push_back(447.60229);
-    xvalues.push_back(55153.320);
-    yvalues.push_back(664.84778);
-    xvalues.push_back(55165.184);
-    yvalues.push_back(900.43817);
-    xvalues.push_back(55177.047);
-    yvalues.push_back(1028.0037);
-    xvalues.push_back(55188.910);
-    yvalues.push_back(965.38873);
-    xvalues.push_back(55200.773);
-    yvalues.push_back(787.02441);
-    xvalues.push_back(55212.637);
-    yvalues.push_back(603.50177);
-    xvalues.push_back(55224.500);
-    yvalues.push_back(456.12289);
-    xvalues.push_back(55236.363);
-    yvalues.push_back(344.13235);
-    xvalues.push_back(55248.227);
-    yvalues.push_back(259.61121);
-    xvalues.push_back(55260.090);
-    yvalues.push_back(195.84842);
-    xvalues.push_back(55271.953);
-    yvalues.push_back(147.74631);
-    xvalues.push_back(55283.816);
-    yvalues.push_back(111.45851);
-    xvalues.push_back(55295.680);
-    yvalues.push_back(84.083313);
-    xvalues.push_back(55307.543);
-    yvalues.push_back(63.431709);
-    xvalues.push_back(55319.406);
-    yvalues.push_back(47.852318);
-    xvalues.push_back(55331.270);
-    yvalues.push_back(36.099365);
-    xvalues.push_back(55343.133);
-    yvalues.push_back(27.233042);
-    xvalues.push_back(55354.996);
-    yvalues.push_back(20.544367);
-    xvalues.push_back(55366.859);
-    yvalues.push_back(15.498488);
-    xvalues.push_back(55378.727);
-    yvalues.push_back(11.690837);
-    xvalues.push_back(55390.590);
-    yvalues.push_back(8.8194647);
-    xvalues.push_back(55402.453);
-    yvalues.push_back(6.6533256);
+    const size_t size = 35;
 
-    return;
+    std::array<double, size> Xs = {
+        {54999.094000, 55010.957000, 55022.820000, 55034.684000, 55046.547000,
+         55058.410000, 55070.273000, 55082.137000, 55094.000000, 55105.863000,
+         55117.727000, 55129.590000, 55141.453000, 55153.320000, 55165.184000,
+         55177.047000, 55188.910000, 55200.773000, 55212.637000, 55224.500000,
+         55236.363000, 55248.227000, 55260.090000, 55271.953000, 55283.816000,
+         55295.680000, 55307.543000, 55319.406000, 55331.270000, 55343.133000,
+         55354.996000, 55366.859000, 55378.727000, 55390.590000, 55402.453000}};
+    std::array<double, size> Ys = {
+        {2.628336, 4.034647, 6.193415, 9.507247, 14.594171, 22.402889,
+         34.389721, 52.790192, 81.035973, 124.394840, 190.950440, 293.010220,
+         447.602290, 664.847780, 900.438170, 1028.003700, 965.388730,
+         787.024410, 603.501770, 456.122890, 344.132350, 259.611210, 195.848420,
+         147.746310, 111.458510, 84.083313, 63.431709, 47.852318, 36.099365,
+         27.233042, 20.544367, 15.498488, 11.690837, 8.819465, 6.653326}};
+
+    Workspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
+    DataObjects::Workspace2D_sptr ws2D =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(ws);
+
+    MantidVec &wsX = ws2D->dataX(0);
+    MantidVec &wsY = ws2D->dataY(0);
+    MantidVec &wsE = ws2D->dataE(0);
+    for (size_t i = 0; i < size; ++i) {
+      wsX[i] = Xs[i];
+      wsY[i] = Ys[i];
+      wsE[i] = std::sqrt(fabs(Ys[i]));
+    }
+
+    return ws;
   }
 
   /*
-   * Test 1
-   */
+* Test 1
+*/
   void test_functionCalculator() {
 
     // 1. Set peak
@@ -130,25 +89,9 @@ public:
     peak.tie("Gamma", "0.0");
 
     // 2. Set workspace
-    std::vector<double> Xs;
-    std::vector<double> Ys;
-    getMockData(Xs, Ys);
-
-    size_t histogramNumber = 1;
-    size_t timechannels = Xs.size();
-    Workspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, timechannels, timechannels);
+    auto ws = genMockData();
     DataObjects::Workspace2D_sptr ws2D =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(ws);
-
-    MantidVec &wsX = ws2D->dataX(0);
-    MantidVec &wsY = ws2D->dataY(0);
-    MantidVec &wsE = ws2D->dataE(0);
-    for (size_t i = 0; i < timechannels; ++i) {
-      wsX[i] = Xs[i];
-      wsY[i] = Ys[i];
-      wsE[i] = std::sqrt(fabs(Ys[i]));
-    }
 
     // put this workspace in the data service
     std::string wsName("Peak210WS");
@@ -166,8 +109,6 @@ public:
     fitalg.setPropertyValue("Function", peak.asString());
     fitalg.setPropertyValue("InputWorkspace", wsName);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
-    fitalg.setProperty("StartX", wsX[0]);
-    fitalg.setProperty("EndX", wsX.back());
     fitalg.setProperty("Minimizer", "Levenberg-MarquardtMD");
     fitalg.setProperty("CostFunction", "Least squares");
     fitalg.setProperty("MaxIterations", 100);

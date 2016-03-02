@@ -24,6 +24,22 @@ namespace Algorithms {
    converted. </LI>
     </UL>
 
+        Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge
+        National Laboratory & European Spallation Source
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -32,11 +48,11 @@ public:
   /// (Empty) Constructor
   ConvertSpectrumAxis2();
   /// Virtual destructor
-  virtual ~ConvertSpectrumAxis2() {}
+  ~ConvertSpectrumAxis2() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertSpectrumAxis"; }
+  const std::string name() const override { return "ConvertSpectrumAxis"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts the axis of a Workspace2D which normally holds spectrum "
            "numbers to one of Q, Q^2 or theta.  'Note': After running this "
            "algorithm, some features will be unavailable on the workspace as "
@@ -45,34 +61,31 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (2); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Transforms\\Units;Transforms\\Axes";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   /// Converting to theta.
-  void createThetaMap(const std::string &target);
+  void createThetaMap(API::Progress &progress, const std::string &targetUnit,
+                      API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Converting to Q and QSquared
-  void createElasticQMap(const std::string &target);
+  void createElasticQMap(API::Progress &progress, const std::string &targetUnit,
+                         API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Creates an output workspace.
-  API::MatrixWorkspace_sptr createOutputWorkspace(const std::string &target);
+  API::MatrixWorkspace_sptr
+  createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
+                        API::MatrixWorkspace_sptr &inputWS, size_t nHist,
+                        size_t nBins, size_t nxBins);
 
-  // Stores the input workspace.
-  API::MatrixWorkspace_const_sptr m_inputWS;
   // Map to which the conversion to the unit is stored.
   std::multimap<double, size_t> m_indexMap;
-  // Stores the number of bins.
-  size_t m_nBins;
-  // Stores the number of x bins.
-  size_t m_nxBins;
-  // Stores the number of histograms.
-  size_t m_nHist;
 
   /// Getting Efixed
   double getEfixed(Geometry::IDetector_const_sptr detector,

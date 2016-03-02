@@ -4,9 +4,14 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
+#include "Poco/ActiveResult.h"
+#include <QApplication>
 
 using namespace Mantid::API;
 
@@ -38,7 +43,15 @@ namespace CustomInterfaces
     fit->setProperty("Function", funcToFit);
     fit->setProperty("InputWorkspace", dataToFit);
     fit->setProperty("CreateOutput", true);
-    fit->execute();
+
+    // Run async so that progress can be shown
+    Poco::ActiveResult<bool> result(fit->executeAsync());
+    while (!result.available()) {
+      QCoreApplication::processEvents();
+    }
+    if (!result.error().empty()) {
+      throw std::runtime_error(result.error());
+    }
 
     MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
     m_parameterTable = fit->getProperty("OutputParameters");

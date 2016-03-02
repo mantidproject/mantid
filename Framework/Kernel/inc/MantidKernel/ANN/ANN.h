@@ -535,7 +535,7 @@ DLL_API ANNpoint annCopyPt(int dim,          // dimension
 
 class DLL_API ANNpointSet {
 public:
-  virtual ~ANNpointSet() {} // virtual distructor
+  virtual ~ANNpointSet() = default; // virtual distructor
 
   virtual void annkSearch( // approx k near neighbor search
       ANNpoint q,          // query point
@@ -545,14 +545,14 @@ public:
       double eps = 0.0     // error bound
       ) = 0;               // pure virtual (defined elsewhere)
 
-  virtual int annkFRSearch(      // approx fixed-radius kNN search
-      ANNpoint q,                // query point
-      ANNdist sqRad,             // squared radius
-      int k = 0,                 // number of near neighbors to return
-      ANNidxArray nn_idx = NULL, // nearest neighbor array (modified)
-      ANNdistArray dd = NULL,    // dist to near neighbors (modified)
-      double eps = 0.0           // error bound
-      ) = 0;                     // pure virtual (defined elsewhere)
+  virtual int annkFRSearch(         // approx fixed-radius kNN search
+      ANNpoint q,                   // query point
+      ANNdist sqRad,                // squared radius
+      int k = 0,                    // number of near neighbors to return
+      ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
+      ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
+      double eps = 0.0              // error bound
+      ) = 0;                        // pure virtual (defined elsewhere)
 
   virtual int theDim() = 0;  // return dimension of space
   virtual int nPoints() = 0; // return number of points
@@ -591,34 +591,32 @@ public:
       int n,            // number of points
       int dd);          // dimension
 
-  ~ANNbruteForce(); // destructor
+  void annkSearch(                // approx k near neighbor search
+      ANNpoint q,                 // query point
+      int k,                      // number of near neighbors to return
+      ANNidxArray nn_idx,         // nearest neighbor array (modified)
+      ANNdistArray dd,            // dist to near neighbors (modified)
+      double eps = 0.0) override; // error bound
 
-  void annkSearch(        // approx k near neighbor search
-      ANNpoint q,         // query point
-      int k,              // number of near neighbors to return
-      ANNidxArray nn_idx, // nearest neighbor array (modified)
-      ANNdistArray dd,    // dist to near neighbors (modified)
-      double eps = 0.0);  // error bound
+  int annkFRSearch(                 // approx fixed-radius kNN search
+      ANNpoint q,                   // query point
+      ANNdist sqRad,                // squared radius
+      int k = 0,                    // number of near neighbors to return
+      ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
+      ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
+      double eps = 0.0) override;   // error bound
 
-  int annkFRSearch(              // approx fixed-radius kNN search
-      ANNpoint q,                // query point
-      ANNdist sqRad,             // squared radius
-      int k = 0,                 // number of near neighbors to return
-      ANNidxArray nn_idx = NULL, // nearest neighbor array (modified)
-      ANNdistArray dd = NULL,    // dist to near neighbors (modified)
-      double eps = 0.0);         // error bound
-
-  int theDim() // return dimension of space
+  int theDim() override // return dimension of space
   {
     return dim;
   }
 
-  int nPoints() // return number of points
+  int nPoints() override // return number of points
   {
     return n_pts;
   }
 
-  ANNpointArray thePoints() // return pointer to points
+  ANNpointArray thePoints() override // return pointer to points
   {
     return pts;
   }
@@ -780,12 +778,12 @@ protected:
   ANNpoint bnd_box_lo; // bounding box low point
   ANNpoint bnd_box_hi; // bounding box high point
 
-  void SkeletonTree(           // construct skeleton tree
-      int n,                   // number of points
-      int dd,                  // dimension
-      int bs,                  // bucket size
-      ANNpointArray pa = NULL, // point array (optional)
-      ANNidxArray pi = NULL);  // point indices (optional)
+  void SkeletonTree(              // construct skeleton tree
+      int n,                      // number of points
+      int dd,                     // dimension
+      int bs,                     // bucket size
+      ANNpointArray pa = nullptr, // point array (optional)
+      ANNidxArray pi = nullptr);  // point indices (optional)
 
 public:
   ANNkd_tree(      // build skeleton tree
@@ -803,14 +801,14 @@ public:
   ANNkd_tree(            // build from dump file
       std::istream &in); // input stream for dump file
 
-  ~ANNkd_tree(); // tree destructor
+  ~ANNkd_tree() override; // tree destructor
 
-  void annkSearch(        // approx k near neighbor search
-      ANNpoint q,         // query point
-      int k,              // number of near neighbors to return
-      ANNidxArray nn_idx, // nearest neighbor array (modified)
-      ANNdistArray dd,    // dist to near neighbors (modified)
-      double eps = 0.0);  // error bound
+  void annkSearch(                // approx k near neighbor search
+      ANNpoint q,                 // query point
+      int k,                      // number of near neighbors to return
+      ANNidxArray nn_idx,         // nearest neighbor array (modified)
+      ANNdistArray dd,            // dist to near neighbors (modified)
+      double eps = 0.0) override; // error bound
 
   void annkPriSearch(     // priority k near neighbor search
       ANNpoint q,         // query point
@@ -819,25 +817,25 @@ public:
       ANNdistArray dd,    // dist to near neighbors (modified)
       double eps = 0.0);  // error bound
 
-  int annkFRSearch(              // approx fixed-radius kNN search
-      ANNpoint q,                // the query point
-      ANNdist sqRad,             // squared radius of query ball
-      int k,                     // number of neighbors to return
-      ANNidxArray nn_idx = NULL, // nearest neighbor array (modified)
-      ANNdistArray dd = NULL,    // dist to near neighbors (modified)
-      double eps = 0.0);         // error bound
+  int annkFRSearch(                 // approx fixed-radius kNN search
+      ANNpoint q,                   // the query point
+      ANNdist sqRad,                // squared radius of query ball
+      int k,                        // number of neighbors to return
+      ANNidxArray nn_idx = nullptr, // nearest neighbor array (modified)
+      ANNdistArray dd = nullptr,    // dist to near neighbors (modified)
+      double eps = 0.0) override;   // error bound
 
-  int theDim() // return dimension of space
+  int theDim() override // return dimension of space
   {
     return dim;
   }
 
-  int nPoints() // return number of points
+  int nPoints() override // return number of points
   {
     return n_pts;
   }
 
-  ANNpointArray thePoints() // return pointer to points
+  ANNpointArray thePoints() override // return pointer to points
   {
     return pts;
   }

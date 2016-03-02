@@ -43,7 +43,7 @@ protected:
     // Do nothing
   }
 
-  QWidget *createEditor(ManagerType *manager, QtProperty *property, QWidget *parent)
+  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property, QWidget *parent)
   {
     if ( !m_secondaryFactory )
     {
@@ -52,10 +52,10 @@ protected:
 
     if ( property->hasOption(m_optionName) && property->checkOption(m_optionName) )
     {
-      return m_secondaryFactory->createEditor( manager, property, parent );
+      return m_secondaryFactory->createEditorForManager( manager, property, parent );
     }
 
-    return m_defaultFactory->createEditor( manager, property, parent );
+    return m_defaultFactory->createEditorForManager( manager, property, parent );
   }
 private:
   FactoryBaseType *m_defaultFactory;

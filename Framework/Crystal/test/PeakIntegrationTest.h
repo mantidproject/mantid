@@ -11,12 +11,16 @@
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+
 #include <math.h>
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -72,6 +76,8 @@ public:
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
     delete loadInst;
     // Populate the instrument parameters in this workspace - this works around

@@ -43,6 +43,7 @@ public:
   MOCK_CONST_METHOD0(redPeriod, std::string());
   MOCK_CONST_METHOD0(greenPeriod, std::string());
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
+  MOCK_CONST_METHOD0(autoString, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
@@ -54,6 +55,8 @@ public:
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(help, void());
+  MOCK_METHOD1(checkBoxAutoChanged, void(int));
+  MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }

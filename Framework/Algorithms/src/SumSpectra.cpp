@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -26,12 +28,13 @@ SumSpectra::SumSpectra()
  *
  */
 void SumSpectra::init() {
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The workspace containing the spectra to be summed.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The workspace containing the spectra to be summed.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the algorithm. "
       " A workspace of this name will be created and stored in the Analysis "
       "Data Service.");
@@ -43,14 +46,15 @@ void SumSpectra::init() {
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "The last Workspace index to be included in the summing");
 
-  declareProperty(new Kernel::ArrayProperty<int>("ListOfWorkspaceIndices"),
-                  "A list of workspace indices as a string with ranges, for "
-                  "example: 5-10,15,20-23. \n"
-                  "Optional: if not specified, then the "
-                  "Start/EndWorkspaceIndex fields are used alone. "
-                  "If specified, the range and the list are combined (without "
-                  "duplicating indices). For example, a range of 10 to 20 and "
-                  "a list '12,15,26,28' gives '10-20,26,28'.");
+  declareProperty(
+      make_unique<Kernel::ArrayProperty<int>>("ListOfWorkspaceIndices"),
+      "A list of workspace indices as a string with ranges, for "
+      "example: 5-10,15,20-23. \n"
+      "Optional: if not specified, then the "
+      "Start/EndWorkspaceIndex fields are used alone. "
+      "If specified, the range and the list are combined (without "
+      "duplicating indices). For example, a range of 10 to 20 and "
+      "a list '12,15,26,28' gives '10-20,26,28'.");
 
   declareProperty("IncludeMonitors", true,
                   "Whether to include monitor spectra in the summation.");
@@ -186,19 +190,19 @@ void SumSpectra::exec() {
  * @param localworkspace The workspace to use.
  * @return The minimum spectrum id for all the spectra being summed.
  */
-specid_t
+specnum_t
 SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
-  specid_t specId =
+  specnum_t specId =
       localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
-  specid_t temp;
-  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
-    if (*(it) < totalSpec) {
-      temp = localworkspace->getSpectrum(*(it))->getSpectrumNo();
+  specnum_t temp;
+  for (auto index : this->m_indices) {
+    if (index < totalSpec) {
+      temp = localworkspace->getSpectrum(index)->getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }
@@ -237,9 +241,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numZeros = 0;
 
   // Loop over spectra
-  std::set<int>::iterator it;
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
+  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= this->m_numberOfSpectra) || (i < 0)) {
@@ -352,9 +355,8 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numZeros = 0;
 
   // Loop over spectra
-  std::set<int>::iterator it;
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = m_indices.begin(); it != m_indices.end(); ++it) {
+  for (auto it = m_indices.begin(); it != m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {
@@ -447,12 +449,11 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   outEL.clearDetectorIDs();
 
   // Loop over spectra
-  std::set<int>::iterator it;
   size_t numSpectra(0);
   size_t numMasked(0);
   size_t numZeros(0);
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (it = indices.begin(); it != indices.end(); ++it) {
+  for (auto it = indices.begin(); it != indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {

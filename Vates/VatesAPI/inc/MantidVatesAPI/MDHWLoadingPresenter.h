@@ -45,16 +45,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MDLoadingView;
 class DLLExport MDHWLoadingPresenter : public MDLoadingPresenter {
 public:
-  MDHWLoadingPresenter(MDLoadingView *view);
-  const std::string &getGeometryXML() const;
-  virtual bool hasTDimensionAvailable() const;
-  virtual std::vector<double> getTimeStepValues() const;
-  virtual std::string getTimeStepLabel() const;
-  virtual void setAxisLabels(vtkDataSet *visualDataSet);
-  virtual ~MDHWLoadingPresenter();
-  virtual const std::string &getInstrument();
-  virtual double getMinValue();
-  virtual double getMaxValue();
+  MDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view);
+  const std::string &getGeometryXML() const override;
+  bool hasTDimensionAvailable() const override;
+  std::vector<double> getTimeStepValues() const override;
+  std::string getTimeStepLabel() const override;
+  void setAxisLabels(vtkDataSet *visualDataSet) override;
+  ~MDHWLoadingPresenter() override;
+  const std::string &getInstrument() override;
+  double getMinValue() override;
+  double getMaxValue() override;
 
   /// Transpose a workspace to push integrated dimensions to the last
   static void transposeWs(
@@ -65,7 +65,7 @@ protected:
   /*---------------------------------------------------------------------------
   Common/shared operations and members for all MDHW file-type loading.
   ---------------------------------------------------------------------------*/
-  MDLoadingView *m_view;
+  std::unique_ptr<MDLoadingView> m_view;
 
   Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy>
       xmlBuilder;

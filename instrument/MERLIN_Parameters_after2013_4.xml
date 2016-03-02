@@ -13,6 +13,8 @@
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
    <value val="det_corr_123.dat"/>
+   <description is = "The file which defines proper (calibrated) detector positions.
+                      If property set to None - this file is undefined."/>
 </parameter>
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
@@ -122,7 +124,6 @@
   It is complex property, dependent on two other properties, namely ei-mon1-spec and ei-mon2-spec, which define spectrum or
   spectra lists for each of two monitors, used in GetEi calculations"/>
 </parameter>
-
 <!-- -->
 <parameter name="spectra_to_monitors_list"  type="string">
   <value val="None"/>
@@ -163,7 +164,17 @@
 <!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
 <parameter name="check_background"  type="bool">
    <value val="False"/>
+   <description is="If True, remove the count rate seen in the regions of the
+     histograms defined as the background regions. 
+     The background region is defined by background_range property."/>
 </parameter>
+<parameter name="nullify_negative_signal"  type="bool">
+  <value val="True"/>
+  <description is="If True and background removed, nullify the negative signal, which
+     may occur at some detectors at some moments of time due to flat background removal and modify errors accordingly.
+     If False, leave signals and errors unchanged. "/>
+</parameter>
+
 
 <!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
 <parameter name="wb-integr-min">
@@ -425,16 +436,17 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
-       motor_log_names = motor_name;       
+       motor_log_names = motor_name;
        van_mass=vanadium-mass;
        check_background = background;
+
        mon1_norm_spec=norm-mon1-spec;
-       mon2_norm_spec=norm-mon2-spec;       
+       mon2_norm_spec=norm-mon2-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
-       monovan_hi_value = monovan-integr-max;       
+       monovan_hi_value = monovan-integr-max;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
        hard_mask_file=hard_mask;
@@ -451,10 +463,10 @@
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
-       bleed_maxrate = diag_bleed_maxrate;
+       bleed_maxrate= diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
        deltaE_mode =  deltaE-mode;
-       ei-mon1-spec=ei_mon1_spec;
+       ei-mon1-spec=ei_mon1_spec;       
        ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />

@@ -92,7 +92,7 @@ public:
     TS_ASSERT_EQUALS(B.getKey(), S1.get());
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
-    A.setLeaves(&B, (Rule *)0);
+    A.setLeaves(B.clone(), std::unique_ptr<Rule>());
     TS_ASSERT(dynamic_cast<Sphere *>(A.getKey()));
     TS_ASSERT_EQUALS(A.getKeyN(), 11);
     TS_ASSERT_EQUALS(A.display(), "11");
@@ -114,7 +114,7 @@ public:
     TS_ASSERT_EQUALS(B.getKey(), S1.get());
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
-    A.setLeaf(&B, 0);
+    A.setLeaf(B.clone(), 0);
     TS_ASSERT(dynamic_cast<Sphere *>(A.getKey()));
     TS_ASSERT_EQUALS(A.getKeyN(), 11);
     TS_ASSERT_EQUALS(A.display(), "11");
@@ -193,13 +193,11 @@ public:
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
-    SurfPoint *B;
-    B = A.clone();
+    auto B = A.clone();
     TS_ASSERT(dynamic_cast<Plane *>(B->getKey()));
     TS_ASSERT_EQUALS(B->getKeyN(), 10);
     TS_ASSERT_EQUALS(B->display(), "10");
     TS_ASSERT_EQUALS(B->getSign(), 1);
-    delete B;
   }
 
   void testAssignment() {

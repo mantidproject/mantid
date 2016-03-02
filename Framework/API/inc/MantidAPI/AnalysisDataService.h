@@ -56,7 +56,7 @@ class WorkspaceGroup;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataServiceImpl
+class DLLExport AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */
@@ -112,12 +112,13 @@ public:
   const std::string isValid(const std::string &name) const;
   /// Overridden add member to attach the name to the workspace when a workspace
   /// object is added to the service
-  virtual void add(const std::string &name,
-                   const boost::shared_ptr<API::Workspace> &workspace);
+  void add(const std::string &name,
+           const boost::shared_ptr<API::Workspace> &workspace) override;
   /// Overridden addOrReplace member to attach the name to the workspace when a
   /// workspace object is added to the service
-  virtual void addOrReplace(const std::string &name,
-                            const boost::shared_ptr<API::Workspace> &workspace);
+  void
+  addOrReplace(const std::string &name,
+               const boost::shared_ptr<API::Workspace> &workspace) override;
   /// Overridden rename member to attach the new name to the workspace when a
   /// workspace object is renamed
   virtual void rename(const std::string &oldName, const std::string &newName);
@@ -156,6 +157,7 @@ public:
 
   /// Return a lookup of the top level items
   std::map<std::string, Workspace_sptr> topLevelItems() const;
+  void shutdown() override;
 
 private:
   /// Checks the name is valid, throwing if not
@@ -165,11 +167,11 @@ private:
   /// Constructor
   AnalysisDataServiceImpl();
   /// Private, unimplemented copy constructor
-  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
-  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
   /// Private destructor
-  virtual ~AnalysisDataServiceImpl();
+  ~AnalysisDataServiceImpl() override = default;
 
   /// The string of illegal characters
   std::string m_illegalChars;

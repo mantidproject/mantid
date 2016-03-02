@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -53,10 +54,10 @@ const std::string ProcessIndirectFitParameters::summary() const {
 void ProcessIndirectFitParameters::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("");
+  unitOptions.emplace_back("");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
@@ -72,8 +73,8 @@ void ProcessIndirectFitParameters::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 }
 
@@ -87,7 +88,8 @@ void ProcessIndirectFitParameters::exec() {
   std::string parameterNamesProp = getProperty("ParameterNames");
   auto parameterNames = listToVector(parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
-  MatrixWorkspace_sptr outputWsName = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+  const std::string outputWsName = getPropertyValue("OutputWorkspace");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
@@ -166,14 +168,13 @@ void ProcessIndirectFitParameters::exec() {
   renamer->setProperty("OutputWorkspace", outputWsName);
   renamer->executeAsChildAlg();
   Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
-  auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
+  outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
 
   // Replace axis on workspaces with text axis
   workflowProg.report("Converting text axis");
   auto axis = new TextAxis(outputWs->getNumberHistograms());
   size_t offset = 0;
-  for (size_t j = 0; j < workspaceNames.size(); j++) {
-    auto peakWs = workspaceNames.at(j);
+  for (auto peakWs : workspaceNames) {
     for (size_t k = 0; k < peakWs.size(); k++) {
       axis->setLabel((k + offset), peakWs.at(k));
     }
@@ -198,12 +199,12 @@ void ProcessIndirectFitParameters::exec() {
 std::vector<std::string>
 ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   auto listVector = std::vector<std::string>();
-  auto pos = commaList.find(",");
+  auto pos = commaList.find(',');
   while (pos != std::string::npos) {
     std::string nextItem = commaList.substr(0, pos);
     listVector.push_back(nextItem);
     commaList = commaList.substr(pos + 1, commaList.size());
-    pos = commaList.find(",");
+    pos = commaList.find(',');
   }
   if (commaList.compare("") != 0) {
     listVector.push_back(commaList);
@@ -257,9 +258,9 @@ ProcessIndirectFitParameters::reorder2DVector(
   auto reorderedVector = std::vector<std::vector<std::string>>();
   for (size_t i = 0; i < maximumLength; i++) {
     std::vector<std::string> temp;
-    for (size_t j = 0; j < original.size(); j++) {
-      if (original.at(j).size() > i) {
-        temp.push_back(original.at(j).at(i));
+    for (const auto &j : original) {
+      if (j.size() > i) {
+        temp.push_back(j.at(i));
       }
     }
     reorderedVector.push_back(temp);

@@ -5,8 +5,11 @@
 
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -78,6 +81,8 @@ public:
     loaderIDF2.setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
+    loaderIDF2.setProperty("RewriteSpectraMap",
+                           Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 

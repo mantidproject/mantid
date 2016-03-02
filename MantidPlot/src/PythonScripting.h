@@ -49,7 +49,7 @@ public:
   /// Factory function
   static ScriptingEnv *constructor(ApplicationWindow *parent);
   /// Destructor
-  ~PythonScripting();
+  ~PythonScripting() override;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
   /// Simulate file-like object (required for IPython)
@@ -60,19 +60,20 @@ public:
   void set_parent(PyObject*) {}
 
   /// Set the argv attribute on the sys module
-  void setSysArgs(const QStringList & args);
+  void setSysArgs(const QStringList &args) override;
 
   /// Create a new script object that can execute code within this enviroment
-  virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const;
+  Script *newScript(const QString &name, QObject *context,
+                    const Script::InteractionType interact) const override;
 
   /// Create a new code lexer for Python
-  QsciLexer * createCodeLexer() const;
-  void redirectStdOut(bool on);
+  QsciLexer *createCodeLexer() const override;
+  void redirectStdOut(bool on) override;
 
   // Python supports progress monitoring
-  bool supportsProgressReporting() const { return true; }
+  bool supportsProgressReporting() const override { return true; }
   /// Does this support abort requests?
-  bool supportsAbortRequests() const { return true; }
+  bool supportsAbortRequests() const override { return true; }
 
   /// Return a string represenation of the given object
   QString toString(PyObject *object, bool decref = false);
@@ -86,23 +87,25 @@ public:
   void raiseAsyncException(long id, PyObject *exc);
 
   ///Return a list of file extensions for Python
-  const QStringList fileExtensions() const;
+  const QStringList fileExtensions() const override;
 
   /// Set a reference to a QObject in the given dictionary
   bool setQObject(QObject*, const char*, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
-  bool setQObject(QObject *val, const char *name) { return setQObject(val,name,NULL); }
+  bool setQObject(QObject *val, const char *name) override {
+    return setQObject(val, name, NULL);
+  }
   /// Set a reference to an int in the global dictionary
-  bool setInt(int, const char*);
+  bool setInt(int, const char *) override;
   bool setInt(int, const char*, PyObject *dict);
   /// Set a reference to a double in the global dictionary
-  bool setDouble(double, const char*);
+  bool setDouble(double, const char *) override;
   bool setDouble(double, const char*, PyObject *dict);
 
   /// Return a list of mathematical functions define by qtiplot
-  const QStringList mathFunctions() const;
+  const QStringList mathFunctions() const override;
   /// Return a doc string for the given function
-  const QString mathFunctionDoc (const QString &name) const;
+  const QString mathFunctionDoc(const QString &name) const override;
   /// Return the global dictionary for this environment
   PyObject *globalDict() { return m_globals; }
   /// Return the sys dictionary for this environment
@@ -110,13 +113,13 @@ public:
 
 private:
   /// Constructor
-  PythonScripting(ApplicationWindow *parent);
+  explicit PythonScripting(ApplicationWindow *parent);
   /// Default constructor
   PythonScripting();
   /// Start the environment
-  bool start();
+  bool start() override;
   /// Shutdown the environment
-  void shutdown();
+  void shutdown() override;
   /// Run execfile on a given file
   bool loadInitFile(const QString &path);
 

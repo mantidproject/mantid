@@ -1,8 +1,9 @@
 #ifndef MANTID_ALGORITHMS_STITCH1D_H_
 #define MANTID_ALGORITHMS_STITCH1D_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
+
 #include <boost/tuple/tuple.hpp>
 
 namespace Mantid {
@@ -36,15 +37,15 @@ public:
   /// Default constructor
   Stitch1D(){};
   /// Destructor
-  virtual ~Stitch1D(){};
+  ~Stitch1D() override{};
   /// Algorithm's name for identification. @see Algorithm::name
-  virtual const std::string name() const { return "Stitch1D"; }
+  const std::string name() const override { return "Stitch1D"; }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const { return 3; }
+  int version() const override { return 3; }
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Reflectometry"; }
+  const std::string category() const override { return "Reflectometry"; }
   /// Summary of algorithm's purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Stitches single histogram matrix workspaces together";
   }
   /// Does the x-axis have non-zero errors
@@ -55,9 +56,9 @@ private:
   /// workspace.
   typedef std::vector<std::vector<size_t>> SpecialTypeIndexes;
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method.
-  void exec();
+  void exec() override;
   /// Get the start overlap
   double getStartOverlap(const double &intesectionMin,
                          const double &intesectionMax) const;
@@ -68,7 +69,7 @@ private:
   /// Get the rebin parameters
   Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
                                    Mantid::API::MatrixWorkspace_sptr &rhsWS,
-                                   const bool scaleRHSWS) const;
+                                   const bool scaleRHS) const;
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr
   rebin(Mantid::API::MatrixWorkspace_sptr &input,

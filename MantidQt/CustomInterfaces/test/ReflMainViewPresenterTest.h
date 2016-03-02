@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 
@@ -1531,7 +1532,7 @@ public:
     NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
-    EXPECT_CALL(mockView, showAlgorithmDialog("LoadReflTBL"));
+    EXPECT_CALL(mockView, showImportDialog());
     presenter.notify(IReflPresenter::ImportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

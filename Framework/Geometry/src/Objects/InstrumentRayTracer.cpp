@@ -45,7 +45,7 @@ InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
  * performance reasons the
  * results are accumulated within the object and can be returned using
  * getResults.
- * @param direction :: A directional vector. The starting point is defined by
+ * @param dir :: A directional vector. The starting point is defined by
  * the instrument source.
  */
 void InstrumentRayTracer::trace(const V3D &dir) const {
@@ -62,7 +62,7 @@ void InstrumentRayTracer::trace(const V3D &dir) const {
  * performance reasons the
  * results are accumulated within the object and can be returned using
  * getResults.
- * @param direction :: A directional vector. The starting point is defined by
+ * @param dir :: A directional vector. The starting point is defined by
  * the instrument source.
  */
 void InstrumentRayTracer::traceFromSample(const V3D &dir) const {
@@ -77,7 +77,7 @@ void InstrumentRayTracer::traceFromSample(const V3D &dir) const {
  * @returns A collection of links defining intersection information
  */
 Links InstrumentRayTracer::getResults() const {
-  Links results(m_resultsTrack.begin(), m_resultsTrack.end());
+  Links results(m_resultsTrack.cbegin(), m_resultsTrack.cend());
   m_resultsTrack.clearIntersectionResults();
   return results;
 }

@@ -62,22 +62,22 @@ public:
   /// Default constructor
   PlotAsymmetryByLogValue();
   /// Destructor
-  virtual ~PlotAsymmetryByLogValue(){};
+  ~PlotAsymmetryByLogValue() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PlotAsymmetryByLogValue"; }
+  const std::string name() const override { return "PlotAsymmetryByLogValue"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates asymmetry for a series of log values";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   // Load run, apply dead time corrections and detector grouping
   API::Workspace_sptr doLoad(size_t runNumber);
   // Analyse loaded run

@@ -39,20 +39,20 @@ public:
   enum MagneticFFDirection { NormalTo_a, NormalTo_b, NormalTo_c, Isotropic };
 
   /// Calculates the intensity for the model for the current parameters.
-  double scatteringIntensity(const API::ExperimentInfo &exptDescr,
-                             const std::vector<double> &point) const;
+  double scatteringIntensity(const API::ExperimentInfo &exptSetup,
+                             const std::vector<double> &point) const override;
   /// Called when an attribute is set
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &attr);
+                    const API::IFunction::Attribute &attr) override;
   /// Returns the type of model
-  ModelType modelType() const { return Broad; }
+  ModelType modelType() const override { return Broad; }
   /// String name of the model
-  std::string name() const { return "MullerAnsatz"; }
+  std::string name() const override { return "MullerAnsatz"; }
   MullerAnsatz();
 
 private:
   /// Setup the model
-  void init();
+  void init() override;
   // direction of the magnetic chain wrt the lattice vectors
   ChainDirection m_ChainDirection;
   // direction of the magnetic form factor wrt the lattice vectors.

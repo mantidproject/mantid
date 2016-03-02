@@ -62,7 +62,7 @@ public:
   /// Constructor
   MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent);
   /// Destructor
-  ~MultiTabScriptInterpreter();
+  ~MultiTabScriptInterpreter() override;
 
   /// Current interpreter
   ScriptFileInterpreter *currentInterpreter();
@@ -179,6 +179,8 @@ public slots:
   void toggleProgressReporting(bool on);
   /// Toggle code folding
   void toggleCodeFolding(bool on);
+  /// Toggle line wrapping
+  void toggleLineWrapping(bool on);
   /// Toggle the whitespace reporting arrow
   void toggleWhitespace(bool state);
   /// Show configuration dialogue for tab whitespace
@@ -206,9 +208,9 @@ private slots:
 
 private:
   /// A context menu event for the tab widget itself
-  void contextMenuEvent(QContextMenuEvent *event);
+  void contextMenuEvent(QContextMenuEvent *event) override;
   /// A custom defined event handler
-  void customEvent(QEvent *event);
+  void customEvent(QEvent *event) override;
   /// Open a script
   void open(bool newtab, const QString &filename = QString());
   /// Sets the tab title & tooltip from the filename
@@ -251,6 +253,8 @@ private:
   QString m_fontFamily;
   // Save the code folding preference
   bool m_codeFolding;
+  // Save the line wrapping preference
+  bool m_LineWrapping;
 };
 
 #endif

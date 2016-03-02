@@ -4,17 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidGeometry/IDetector.h"
-
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::WorkspaceProperty;
-using Mantid::DataObjects::OffsetsWorkspace;
-using Mantid::DataObjects::OffsetsWorkspace_sptr;
-using Mantid::DataObjects::SpecialWorkspace2D;
-using Mantid::DataObjects::SpecialWorkspace2D_sptr;
-using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Kernel::Direction;
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,20 +34,20 @@ namespace Algorithms {
 class DLLExport CalculateDIFC : public API::Algorithm {
 public:
   CalculateDIFC();
-  virtual ~CalculateDIFC();
+  ~CalculateDIFC() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Calculate the DIFC for every pixel
   void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
-                 DataObjects::OffsetsWorkspace_sptr &offsetsWs, double l1,
+                 DataObjects::OffsetsWorkspace_sptr &offsetsWS, double l1,
                  double beamlineNorm, Kernel::V3D &beamline,
                  Kernel::V3D &samplePos, detid2det_map &allDetectors);
 };

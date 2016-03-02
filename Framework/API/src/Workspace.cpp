@@ -7,20 +7,6 @@
 namespace Mantid {
 namespace API {
 
-/// Default constructor
-Workspace::Workspace()
-    : DataItem(), m_title(), m_comment(), m_name(), m_history() {}
-
-/** Copy constructor
- * @param other :: workspace to copy
- */
-Workspace::Workspace(const Workspace &other)
-    : DataItem(other), m_title(other.m_title), m_comment(other.m_comment),
-      m_name(other.m_name), m_history(other.m_history) {}
-
-/// Workspace destructor
-Workspace::~Workspace() {}
-
 /** Set the title of the workspace
  *
  *  @param t :: The title
@@ -99,7 +85,7 @@ IPropertyManager::getValue<Mantid::API::Workspace_sptr>(
     return *prop;
   } else {
     std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected Workspace.";
+                          " to incorrect type. Expected shared_ptr<Workspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -114,8 +100,9 @@ IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const Workspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<Workspace>.";
     throw std::runtime_error(message);
   }
 }

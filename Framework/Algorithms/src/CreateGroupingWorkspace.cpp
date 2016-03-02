@@ -54,22 +54,22 @@ const std::string CreateGroupingWorkspace::category() const {
  */
 void CreateGroupingWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  declareProperty(new PropertyWithValue<std::string>("InstrumentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "InstrumentName", "", Direction::Input),
                   "Optional: Name of the instrument to base the "
                   "GroupingWorkspace on which to base the GroupingWorkspace.");
 
-  declareProperty(new FileProperty("InstrumentFilename", "",
-                                   FileProperty::OptionalLoad, ".xml"),
+  declareProperty(make_unique<FileProperty>("InstrumentFilename", "",
+                                            FileProperty::OptionalLoad, ".xml"),
                   "Optional: Path to the instrument definition file on which "
                   "to base the GroupingWorkspace.");
 
-  declareProperty(new FileProperty("OldCalFilename", "",
-                                   FileProperty::OptionalLoad, ".cal"),
+  declareProperty(make_unique<FileProperty>("OldCalFilename", "",
+                                            FileProperty::OptionalLoad, ".cal"),
                   "Optional: Path to the old-style .cal grouping/calibration "
                   "file (multi-column ASCII). You must also specify the "
                   "instrument.");
@@ -80,12 +80,7 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -100,7 +95,7 @@ void CreateGroupingWorkspace::init() {
   declareProperty("ComponentName", "", "Specify the instrument component to "
                                        "group into a fixed number of groups");
 
-  declareProperty(new WorkspaceProperty<GroupingWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output GroupingWorkspace.");
 
@@ -127,16 +122,16 @@ void CreateGroupingWorkspace::init() {
 /** Read old-style .cal file to get the grouping
  *
  * @param groupingFileName :: path to .cal multi-col ascii
- * @param detIDtoGroup :: map of key=detectorID, value=group number.
  * @param prog :: progress reporter
+ * @returns :: map of key=detectorID, value=group number.
  */
-void readGroupingFile(const std::string &groupingFileName,
-                      std::map<detid_t, int> &detIDtoGroup, Progress &prog) {
+std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
+                                        Progress &prog) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile.is_open()) {
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
-  detIDtoGroup.clear();
+  std::map<detid_t, int> detIDtoGroup;
   std::string str;
   while (getline(grFile, str)) {
     // Comment
@@ -152,7 +147,7 @@ void readGroupingFile(const std::string &groupingFileName,
     prog.report();
   }
   grFile.close();
-  return;
+  return detIDtoGroup;
 }
 
 /** Creates a mapping based on a fixed number of groups for a given instrument
@@ -161,13 +156,15 @@ void readGroupingFile(const std::string &groupingFileName,
  * @param compName Name of component in instrument
  * @param numGroups Number of groups to group detectors into
  * @param inst Pointer to instrument
- * @param detIDtoGroup Map of detector IDs to group number
  * @param prog Progress reporter
+ * @returns :: Map of detector IDs to group number
  */
-void makeGroupingByNumGroups(const std::string compName, int numGroups,
-                             Instrument_const_sptr inst,
-                             std::map<detid_t, int> &detIDtoGroup,
-                             Progress &prog) {
+std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
+                                               int numGroups,
+                                               Instrument_const_sptr inst,
+                                               Progress &prog) {
+  std::map<detid_t, int> detIDtoGroup;
+
   // Get detectors for given instument component
   std::vector<IDetector_const_sptr> detectors;
   inst->getDetectorsInBank(detectors, compName);
@@ -192,6 +189,7 @@ void makeGroupingByNumGroups(const std::string compName, int numGroups,
 
     prog.report();
   }
+  return detIDtoGroup;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -225,13 +223,16 @@ bool groupnumber(std::string groupi, std::string groupj) {
  *
  * @param GroupNames :: comma-sep list of bank names
  * @param inst :: instrument
- * @param detIDtoGroup :: output: map of detID: to group number
  * @param prog :: progress report
  * @param sortnames :: sort names - a boolean
+ * @returns:: map of detID to group number
  */
-void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
-                         std::map<detid_t, int> &detIDtoGroup, Progress &prog,
-                         bool sortnames) {
+std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
+                                           Instrument_const_sptr inst,
+                                           Progress &prog, bool sortnames) {
+  // This will contain the grouping
+  std::map<detid_t, int> detIDtoGroup;
+
   // Split the names of the group and insert in a vector
   std::vector<std::string> vgroups;
   boost::split(vgroups, GroupNames,
@@ -246,10 +247,9 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
   // Trim and assign incremental number to each group
   std::map<std::string, int> group_map;
   int index = 0;
-  for (std::vector<std::string>::iterator it = vgroups.begin();
-       it != vgroups.end(); ++it) {
-    boost::trim(*it);
-    group_map[(*it)] = ++index;
+  for (auto &vgroup : vgroups) {
+    boost::trim(vgroup);
+    group_map[vgroup] = ++index;
   }
 
   // Find Detectors that belong to groups
@@ -269,7 +269,7 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
 
     if (current.get()) {
       top_group = group_map[current->getName()]; // Return 0 if not in map
-      assemblies.push(std::make_pair(current, top_group));
+      assemblies.emplace(current, top_group);
     }
 
     prog.setNumSteps(int(assemblies.size()));
@@ -299,16 +299,15 @@ void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst,
               child_group = group_map[currentchild->getName()];
               if (child_group == 0)
                 child_group = top_group;
-              assemblies.push(std::make_pair(currentchild, child_group));
+              assemblies.emplace(currentchild, child_group);
             }
           }
         }
       }
       prog.report();
     }
-
-    return;
   }
+  return detIDtoGroup;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -355,9 +354,11 @@ void CreateGroupingWorkspace::exec() {
     inst = inWS->getInstrument();
   } else {
     Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
+    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
+    childAlg->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();
@@ -392,20 +393,21 @@ void CreateGroupingWorkspace::exec() {
   }
 
   // --------------------------- Create the output --------------------------
-  GroupingWorkspace_sptr outWS(new GroupingWorkspace(inst));
+  auto outWS = boost::make_shared<GroupingWorkspace>(inst);
   this->setProperty("OutputWorkspace", outWS);
 
   // This will get the grouping
   std::map<detid_t, int> detIDtoGroup;
 
   Progress prog(this, 0.2, 1.0, outWS->getNumberHistograms());
-  // Make the grouping one of two ways:
+  // Make the grouping one of three ways:
   if (!GroupNames.empty())
-    makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
+    detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
   else if (!OldCalFilename.empty())
-    readGroupingFile(OldCalFilename, detIDtoGroup, prog);
+    detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
-    makeGroupingByNumGroups(componentName, numGroups, inst, detIDtoGroup, prog);
+    detIDtoGroup =
+        makeGroupingByNumGroups(componentName, numGroups, inst, prog);
 
   g_log.information() << detIDtoGroup.size()
                       << " entries in the detectorID-to-group map.\n";
@@ -421,7 +423,7 @@ void CreateGroupingWorkspace::exec() {
     // Make the groups, if any
     std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
     std::map<detid_t, int>::const_iterator it;
-    std::set<int> groupCount;
+    std::unordered_set<int> groupCount;
     for (it = detIDtoGroup.begin(); it != it_end; ++it) {
       int detID = it->first;
       int group = it->second;

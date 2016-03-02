@@ -31,9 +31,7 @@ class MANTID_KERNEL_DLL BinFinder {
 public:
   BinFinder(const std::vector<double> &binParams);
 
-  ~BinFinder();
-
-  int bin(double value);
+  int bin(double x);
 
   int lastBinIndex();
 

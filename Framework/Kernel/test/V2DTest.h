@@ -6,10 +6,10 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 #include <cfloat>
+#include <limits>
 
 using Mantid::Kernel::V2D;
 using Mantid::Kernel::V3D;
@@ -108,20 +108,20 @@ public:
   }
 
   void test_Equality_Gives_True_When_Diff_Less_Than_Tolerance() {
-    using Mantid::Kernel::Tolerance;
+    const double tolerance = std::numeric_limits<double>::epsilon();
     V2D first(5, 10);
-    V2D second(5 + 0.5 * Tolerance, 10 - 0.5 * Tolerance);
+    V2D second(5 + 0.5 * tolerance, 10 - 0.5 * tolerance);
     TS_ASSERT_EQUALS(first, second);
     TS_ASSERT(!(first != second));
   }
 
   void test_Equality_Gives_False_When_Diff_More_Than_Tolerance() {
-    using Mantid::Kernel::Tolerance;
+    const double tolerance = std::numeric_limits<double>::epsilon();
     V2D first(5, 10);
-    V2D second(5 + 0.5 * Tolerance, 11);
+    V2D second(5 + 0.5 * tolerance, 11);
     TS_ASSERT(!(first == second));
 
-    second = V2D(6, 10 + 0.5 * Tolerance);
+    second = V2D(6, 10 + 0.5 * tolerance);
     TS_ASSERT(!(first == second));
   }
 
@@ -196,6 +196,14 @@ public:
     TS_ASSERT_DELTA(first.angle(second), M_PI / 3.0, DBL_EPSILON);
     // Symmetric in arguments
     TS_ASSERT_DELTA(second.angle(first), M_PI / 3.0, DBL_EPSILON);
+  }
+
+  void test_Equality_Operator() {
+
+    V2D first(1E-7, 0.1);
+    V2D second(1.5E-7, 0.1);
+
+    TS_ASSERT(first != second);
   }
 };
 

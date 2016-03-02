@@ -37,7 +37,7 @@ the data to be corrected.
 ChildAlgorithms used
 ####################
 
-Uses the algorithm `Fit <algm-Fit>`_ to fit to the calculated
+Uses the algorithm :ref:`Fit <algm-Fit>` to fit to the calculated
 transmission fraction.
 
 .. categories::

@@ -93,6 +93,7 @@ public: // for the time being
 
   /**check if one needs to perform Lorentz corrections */
   bool isLorentsCorrections() const { return m_LorentzCorr; }
+  double absMin() const { return m_AbsMin; }
   void getMinMax(std::vector<double> &min, std::vector<double> &max) const;
   std::vector<double> getTransfMatrix() const { return m_RotMatrix; }
 
@@ -118,17 +119,17 @@ public: // for the time being
   void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
   /// copy some parameters from the input workspace, as target md WS do not have
   /// all information about the algorithm.
-  void setUpMissingParameters(const MDWSDescription &SourceMatrixWorkspace);
+  void setUpMissingParameters(const MDWSDescription &SourceMatrWS);
 
   /// method builds MD Event ws description from a matrix workspace and the
   /// transformations, requested to be performed on the workspace
   void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,
                          const std::string &QMode, const std::string dEMode,
-                         const std::vector<std::string> &dimProperyNames =
+                         const std::vector<std::string> &dimPropertyNames =
                              std::vector<std::string>());
 
   /// compare two descriptions and select the complimentary result.
-  void checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspace);
+  void checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspaceD);
 
   void setMinMax(const std::vector<double> &minVal,
                  const std::vector<double> &maxVal);
@@ -138,6 +139,7 @@ public: // for the time being
   void setDimUnit(unsigned int nDim, const std::string &Unit);
   /** do we need to perform Lorentz corrections */
   void setLorentsCorr(bool On = false) { m_LorentzCorr = On; }
+  void setAbsMin(double absMin) { m_AbsMin = absMin; }
   // static helper functions:
   /// helper function checks if min values are less them max values and are
   /// consistent between each other
@@ -145,9 +147,10 @@ public: // for the time being
                                         const std::vector<double> &maxVal);
   /** function extracts the coordinates from additional workspace properties and
    * places them to AddCoord vector for further usage*/
-  static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,
-                                const std::vector<std::string> &dimProperyNames,
-                                std::vector<coord_t> &AddCoord);
+  static void
+  fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,
+                    const std::vector<std::string> &dimPropertyNames,
+                    std::vector<coord_t> &AddCoord);
 
   static boost::shared_ptr<Geometry::OrientedLattice>
   getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
@@ -163,7 +166,7 @@ public: // for the time being
   Geometry::MDFrame_uptr getFrame(size_t d) const;
 
   /// sets number of bins each dimension is split
-  void setNumBins(const std::vector<int> &nBins);
+  void setNumBins(const std::vector<int> &nBins_toSplit);
 
 protected: // until MDWSDesctiptionDepricatedExist
   /// the variable which describes the number of the dimensions, in the target
@@ -177,6 +180,8 @@ protected: // until MDWSDesctiptionDepricatedExist
   Kernel::DeltaEMode::Type m_Emode;
   /// if one needs to calculate Lorentz corrections
   bool m_LorentzCorr;
+  /// hole near origin of Q
+  double m_AbsMin;
   /// the vector of MD coordinates, which are obtained from workspace
   /// properties.
   std::vector<coord_t> m_AddCoord;
@@ -197,7 +202,7 @@ protected: // until MDWSDesctiptionDepricatedExist
   //********************* internal helpers
   /// helper function to resize all vectors, responsible for MD dimensions in
   /// one go
-  void resizeDimDescriptions(unsigned int Dims, size_t nBins = 10);
+  void resizeDimDescriptions(unsigned int nDimensions, size_t nBins = 10);
 
 private:
   /// Coordinate system.

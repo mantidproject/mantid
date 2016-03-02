@@ -78,7 +78,7 @@ const std::string DllOpen::ConvertToLibName(const std::string &fileName) {
   // take a copy of the input string
   std::string retVal = fileName;
 
-  if ((retVal.find(LIB_PREFIX) == 0) &&
+  if ((retVal.compare(0, LIB_PREFIX.size(), LIB_PREFIX) == 0) &&
       (retVal.find(PATH_SEPERATOR) == std::string::npos)) {
     // found
     retVal =

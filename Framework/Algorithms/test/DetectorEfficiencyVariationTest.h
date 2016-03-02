@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -104,7 +105,7 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
-    boost::shared_ptr<MantidVec> x(new MantidVec(NXs));
+    boost::shared_ptr<MantidVec> x = boost::make_shared<MantidVec>(NXs);
     for (int i = 0; i < NXs; ++i) {
       (*x)[i] = i * 1000;
     }
@@ -119,7 +120,8 @@ public:
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
-    boost::shared_ptr<MantidVec> errors(new MantidVec(ySize, 1));
+    boost::shared_ptr<MantidVec> errors =
+        boost::make_shared<MantidVec>(ySize, 1);
     boost::shared_ptr<MantidVec> forInputA, forInputB;
 
     for (int j = 0; j < Nhist; ++j) {
@@ -162,6 +164,7 @@ public:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_WB1Name);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
     // both workspaces should use the same instrument information
     loader.setPropertyValue("Workspace", m_WB2Name);

@@ -47,10 +47,9 @@ const std::string ImportMDHistoWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void ImportMDHistoWorkspace::init() {
-  std::vector<std::string> fileExtensions(1);
-  fileExtensions[0] = ".txt";
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        fileExtensions),
+  std::vector<std::string> fileExtensions{".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
 
   // Initialize generic dimension properties on the base class.
@@ -104,9 +103,8 @@ void ImportMDHistoWorkspace::exec() {
 
   // Write to the signal and error array from the deque.
   size_t currentBox = 0;
-  for (box_collection::iterator it = box_elements.begin();
-       it != box_elements.end(); it += 2) {
-    box_collection::iterator temp = it;
+  for (auto it = box_elements.begin(); it != box_elements.end(); it += 2) {
+    auto temp = it;
     double signal = atof((*(temp)).c_str());
     double error = atof((*(++temp)).c_str());
     signals[currentBox] = signal;

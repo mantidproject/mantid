@@ -160,11 +160,16 @@ if( "@MAKE_VATES@" == "ON" )
 end
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
-#Fix remaining QT-related linking issues.
-Dir["Contents/PlugIns/**/*.dylib"].each do |library|
-  basename =  File.basename(library)
-  `chmod +w #{library}`
-  `install_name_tool -id @rpath/#{basename} #{library}`
+if Dir.exist?("Contents/PlugIns")
+  #Fix remaining QT-related linking issues.
+  Dir["Contents/PlugIns/**/*.dylib"].each do |library|
+    basename =  File.basename(library)
+    `chmod +w #{library}`
+    `install_name_tool -id @rpath/#{basename} #{library}`
+  end
+else
+  p "Contents/PlugIns not created by macdeployqt."
+  exit 1
 end
 
 #change id of all PyQt4 libraries

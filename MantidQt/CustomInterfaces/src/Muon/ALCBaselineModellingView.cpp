@@ -67,6 +67,7 @@ namespace CustomInterfaces
     m_fitCurve->attach(m_ui.dataPlot);
 
     m_correctedCurve->setStyle(QwtPlotCurve::NoCurve);
+    m_correctedCurve->setPen(QPen(Qt::green));
     m_correctedCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(Qt::green), QSize(7,7)));
     m_correctedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     m_correctedCurve->attach(m_ui.correctedPlot);
@@ -142,7 +143,7 @@ namespace CustomInterfaces
     }
     m_correctedErrorCurve =
         new MantidQt::MantidWidgets::ErrorCurve(m_correctedCurve, errors);
-    m_correctedErrorCurve->attach(m_ui.dataPlot);
+    m_correctedErrorCurve->attach(m_ui.correctedPlot);
 
     // Replot
     m_ui.correctedPlot->replot();

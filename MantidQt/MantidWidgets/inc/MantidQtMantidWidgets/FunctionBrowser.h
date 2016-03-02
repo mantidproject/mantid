@@ -218,6 +218,8 @@ protected:
   bool isIndex(QtProperty* prop) const;
   /// Get the function index for a property
   QString getIndex(QtProperty* prop) const;
+  /// Get name of the parameter for a property
+  QString getParameterName(QtProperty* prop);
   /// Get function property for the index
   QtProperty* getFunctionProperty(const QString& index)const;
   /// Split a qualified parameter name into function index and local parameter name.
@@ -237,6 +239,8 @@ protected:
   bool isTie(QtProperty* prop) const;
   /// Get a tie for a paramater
   std::string getTie(QtProperty* prop) const;
+  /// Remove all tie properties
+  void removeAllTieProperties();
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty* prop, QString constraint);
@@ -294,7 +298,11 @@ protected slots:
   void attributeVectorDoubleChanged(QtProperty*);
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty*);
+  /// Called when button in local parameter editor was clicked
   void parameterButtonClicked(QtProperty*);
+  /// Called when a tie property changes
+  void tieChanged(QtProperty*);
+  /// Called when "Global" check-box was clicked
   void globalChanged(QtProperty*, const QString&, bool);
   /// Set value of an attribute (as a property) to a function
   void setAttributeToFunction(Mantid::API::IFunction& fun, QtProperty* prop);

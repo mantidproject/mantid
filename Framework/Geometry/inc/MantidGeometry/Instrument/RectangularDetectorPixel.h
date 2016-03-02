@@ -47,19 +47,18 @@ class DLLExport RectangularDetectorPixel : public Detector {
 
 public:
   /// A string representation of the component type
-  virtual std::string type() const { return "RectangularDetectorPixel"; }
+  std::string type() const override { return "RectangularDetectorPixel"; }
 
   /// Constructor for parametrized version
   RectangularDetectorPixel(const RectangularDetectorPixel *base,
                            const ParameterMap *map);
-  RectangularDetectorPixel(const std::string &name, int it,
+  RectangularDetectorPixel(const std::string &name, int id,
                            boost::shared_ptr<Object> shape, IComponent *parent,
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();
-  virtual ~RectangularDetectorPixel();
 
-  virtual const Kernel::V3D getRelativePos() const;
+  const Kernel::V3D getRelativePos() const override;
 
 protected:
   /// RectangularDetector that is the parent of this pixel.

@@ -35,7 +35,7 @@ The following small usage example performs a peak fit on the sample data already
 
     # Load data file and instrument, perform correlation analysis
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
-    LoadInstrument(raw_6904, InstrumentName = "POLDI")
+    LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
     correlated_6904 = PoldiAutoCorrelation(raw_6904)
     
     # Run peak search algorithm, store peaks in TableWorkspace

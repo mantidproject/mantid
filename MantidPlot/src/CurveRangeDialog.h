@@ -47,7 +47,7 @@ public:
 
 public slots:
 	void setCurveToModify(Graph *g, int curve);
-	void accept();
+        void accept() override;
 
 private:
 	DataCurve *d_curve;

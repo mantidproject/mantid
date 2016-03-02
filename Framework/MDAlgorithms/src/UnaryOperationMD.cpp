@@ -39,12 +39,12 @@ const std::string UnaryOperationMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void UnaryOperationMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName(), "", Direction::Input),
                   "A MDEventWorkspace or MDHistoWorkspace on which to apply "
                   "the operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(), "",
-                                                      Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }
@@ -69,8 +69,7 @@ void UnaryOperationMD::exec() {
     IAlgorithm_sptr alg = this->createChildAlgorithm(matrixAlg);
     // Copy all properties from THIS to the non-MD version
     std::vector<Property *> props = this->getProperties();
-    for (size_t i = 0; i < props.size(); i++) {
-      Property *prop = props[i];
+    for (auto prop : props) {
       alg->setPropertyValue(prop->name(), prop->value());
     }
     alg->execute();

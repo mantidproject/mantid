@@ -39,17 +39,17 @@ public:
   /// Constructor
   MantidCurve(const QString& wsName, bool error, bool allerror = false);
   /// Default constructor
-  MantidCurve(bool err);
+  explicit MantidCurve(bool err);
   /// Destructor
-  virtual ~MantidCurve();
+  ~MantidCurve() override;
   /// Clone
-  virtual MantidCurve* clone(const Graph* g) const = 0;
+  MantidCurve *clone(const Graph *g) const override = 0;
   /// Get mantid data 
   virtual const MantidQwtWorkspaceData* mantidData() const = 0;
   /// Get mantid data 
   virtual MantidQwtWorkspaceData* mantidData() = 0;
   /// Overriden virtual method
-  void itemChanged();
+  void itemChanged() override;
 
   /// Returns whether the curve has error bars
   bool hasErrorBars() const
@@ -58,7 +58,7 @@ public:
   }
 
   /// Returns the error bar settings for this curve (a MantidCurve has only one set of error bars)
-  virtual QList<ErrorBarSettings*> errorBarSettingsList() const;
+  QList<ErrorBarSettings *> errorBarSettingsList() const override;
 
   /// Invalidates the bounding rect forcing it to be recalculated
   void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
@@ -67,7 +67,7 @@ public:
   Public Base/Common methods
   -------------------------------------------------------------------------------------*/
 
-   QwtDoubleRect boundingRect() const;
+  QwtDoubleRect boundingRect() const override;
 
   /*-------------------------------------------------------------------------------------
   End Public Base/Common methods

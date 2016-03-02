@@ -72,7 +72,6 @@ private slots:
   void rangeSelectorDropped(double, double);
   void doublePropertyChanged(QtProperty *, double);
   void setDefaultInstDetails();
-  void updatePreviewPlot();
   void sliceAlgDone(bool error);
   void
   pbRunEditing(); //< Called when a user starts to type / edit the runs to load.

@@ -130,55 +130,16 @@ void NotebookWriter::headerCode() {
 
   Json::Value import_mantid(Json::arrayValue);
 
-  import_mantid.append(
-      Json::Value("import sys\n"
-                  "import os\n"
-                  "\n"
-                  "#Find where Mantid is installed and tell python.\n"
-                  "def find_path():\n"
-                  "    for r,d,f in os.walk(os.path.abspath(os.sep)):\n"
-                  "        for files in f:\n"
-                  "            if files == 'MantidPlot.exe' or files == "
-                  "'MantidPlot' or files == 'MantidPlot.app':\n"
-                  "                return r\n"
-                  "\n"
-                  "mantidPath = 'C://MantidInstall/bin'\n"
-                  "if os.path.isdir(mantidPath): sys.path.append(mantidPath)\n"
-                  "else: sys.path.append(find_path())\n"
-                  "\n"
-                  "#We can now import Mantid's Python API\n"
-                  "from mantid.simpleapi import *\n"
-                  "#If import fails then replace path on line \"mantidPath = "
-                  "...\" with correct path to the MantidPlot executable"));
+  import_mantid.append(Json::Value(
+      "#Import Mantid's Python API and IPython plotting tools\n"
+      "from mantid.simpleapi import *\n"
+      "from MantidIPython import *\n"
+      "\n"
+      "#Some magic to tell matplotlib how to behave in IPython Notebook. Use "
+      "'%matplotlib nbagg' for interactive plots, if available.\n"
+      "%matplotlib inline"));
 
   codeCell(import_mantid);
-
-  Json::Value check_version(Json::arrayValue);
-
-  check_version.append(Json::Value("import warnings"));
-  check_version.append(Json::Value("import mantid.kernel"));
-  check_version.append(
-      Json::Value("# Check if the version of Mantid being used matches"
-                  " the version which created the notebook."));
-  check_version.append(Json::Value(
-      std::string("if \"") + Mantid::Kernel::MantidVersion::version() +
-      "\" != mantid.kernel.version_str(): warnings.warn(\"Version of Mantid"
-      " being used does not match version which created the notebook.\")"));
-
-  codeCell(check_version);
-
-  Json::Value import_matplotlib(Json::arrayValue);
-
-  import_matplotlib.append(Json::Value(
-      "#Import matplotlib's pyplot interface under the name 'plt'\n"));
-  import_matplotlib.append(Json::Value("import matplotlib.pyplot as plt\n\n"));
-
-  import_matplotlib.append(Json::Value(
-      "#Some magic to tell matplotlib how to behave in IPython Notebook. "
-      "Use '%matplotlib nbagg' for interactive plots, if available.\n"));
-  import_matplotlib.append(Json::Value("%matplotlib inline"));
-
-  codeCell(import_matplotlib);
 }
 
 /**

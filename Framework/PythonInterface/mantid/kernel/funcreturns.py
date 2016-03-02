@@ -1,4 +1,4 @@
-"""
+﻿"""
     Defines functions that can be used to inspect the properties of a
     function call. For example
 
@@ -148,7 +148,6 @@ def process_frame(frame):
     # have the incorrect index at last_i due to the call being passed through
     # an intermediate reference. Currently this method does not provide the
     # correct answer and throws a KeyError. Ticket #4186
-
     output_var_names = []
     max_returns = []
     last_func_offset = call_function_locs[last_i][0]

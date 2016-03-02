@@ -126,5 +126,31 @@ class DNSMergeRunsTest(unittest.TestCase):
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
+    def test_DNSTwoTheta_Groups(self):
+        outputWorkspaceName = "DNSMergeRunsTest_Test3"
+        group = api.GroupWorkspaces(self.workspaces)
+        alg_test = run_algorithm("DNSMergeRuns", WorkspaceNames='group',
+                                 OutputWorkspace=outputWorkspaceName,  HorizontalAxis='2theta')
+
+        self.assertTrue(alg_test.isExecuted())
+        # check whether the data are correct
+        ws = AnalysisDataService.retrieve(outputWorkspaceName)
+        # dimensions
+        self.assertEqual(96, ws.blocksize())
+        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(1,  ws.getNumberHistograms())
+        # data array
+        # read the merged values
+        dataX = ws.extractX()[0]
+        for i in range(len(self.angles)):
+            self.assertAlmostEqual(self.angles[i], dataX[i])
+        # check that the intensity has not been changed
+        dataY = ws.extractY()[0]
+        for i in range(len(dataY)):
+            self.assertAlmostEqual(1.0, dataY[i])
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
+        return
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -16,7 +16,7 @@ class ImportWorkspaceDlg : public QDialog
 
 public:
   ImportWorkspaceDlg(QWidget *parent = 0, size_t num = 0);
-  ~ImportWorkspaceDlg();
+  ~ImportWorkspaceDlg() override;
 
   int getLowerLimit() { return lowerLimit; }
   int getUpperLimit() { return upperLimit; }

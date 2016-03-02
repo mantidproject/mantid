@@ -450,9 +450,7 @@ public:
 
     GroupWorkspaces grpwsalg;
     grpwsalg.initialize();
-    std::vector<std::string> input;
-    input.push_back("ev1");
-    input.push_back("ev2");
+    std::vector<std::string> input{"ev1", "ev2"};
     TS_ASSERT_THROWS_NOTHING(grpwsalg.setProperty("InputWorkspaces", input));
     TS_ASSERT_THROWS_NOTHING(
         grpwsalg.setProperty("OutputWorkspace", "ev1_and_ev2_workspace_group"));

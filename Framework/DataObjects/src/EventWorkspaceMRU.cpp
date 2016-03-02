@@ -4,8 +4,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-using Mantid::Kernel::Mutex;
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -16,22 +14,22 @@ EventWorkspaceMRU::EventWorkspaceMRU() {}
  */
 EventWorkspaceMRU::~EventWorkspaceMRU() {
   // Make sure you free up the memory in the MRUs
-  for (size_t i = 0; i < m_bufferedDataY.size(); i++) {
-    if (m_bufferedDataY[i]) {
-      m_bufferedDataY[i]->clear();
-      delete m_bufferedDataY[i];
+  for (auto &data : m_bufferedDataY) {
+    if (data) {
+      data->clear();
+      delete data;
     }
   }
 
-  for (size_t i = 0; i < m_bufferedDataE.size(); i++) {
-    if (m_bufferedDataE[i]) {
-      m_bufferedDataE[i]->clear();
-      delete m_bufferedDataE[i];
+  for (auto &data : m_bufferedDataE) {
+    if (data) {
+      data->clear();
+      delete data;
     }
   }
 
-  for (size_t i = 0; i < m_markersToDelete.size(); i++) {
-    delete m_markersToDelete[i];
+  for (auto &marker : m_markersToDelete) {
+    delete marker;
   }
 }
 
@@ -41,13 +39,12 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
  * @param thread_num :: thread number that wants a MRU buffer
  */
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
-    m_bufferedDataE.resize(thread_num + 1, NULL);
-    for (size_t i = 0; i < m_bufferedDataE.size(); i++) {
-      if (!m_bufferedDataE[i])
-        m_bufferedDataE[i] =
-            new mru_list(50); // Create a MRU list with this many entries.
+    m_bufferedDataE.resize(thread_num + 1, nullptr);
+    for (auto &data : m_bufferedDataE) {
+      if (!data)
+        data = new mru_list(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -57,13 +54,12 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
  * @param thread_num :: thread number that wants a MRU buffer
  */
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
-    m_bufferedDataY.resize(thread_num + 1, NULL);
-    for (size_t i = 0; i < m_bufferedDataY.size(); i++) {
-      if (!m_bufferedDataY[i])
-        m_bufferedDataY[i] =
-            new mru_list(50); // Create a MRU list with this many entries.
+    m_bufferedDataY.resize(thread_num + 1, nullptr);
+    for (auto &data : m_bufferedDataY) {
+      if (!data)
+        data = new mru_list(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -71,23 +67,23 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
 //---------------------------------------------------------------------------
 /// Clear all the data in the MRU buffers
 void EventWorkspaceMRU::clear() {
-  Mutex::ScopedLock _lock(this->m_toDeleteMutex);
+  std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
 
   // FIXME: don't clear the locked ones!
-  for (size_t i = 0; i < m_markersToDelete.size(); i++)
-    if (!m_markersToDelete[i]->m_locked)
-      delete m_markersToDelete[i];
+  for (auto &marker : m_markersToDelete)
+    if (!marker->m_locked)
+      delete marker;
   m_markersToDelete.clear();
 
   // Make sure you free up the memory in the MRUs
-  for (size_t i = 0; i < m_bufferedDataY.size(); i++)
-    if (m_bufferedDataY[i]) {
-      m_bufferedDataY[i]->clear();
+  for (auto &data : m_bufferedDataY)
+    if (data) {
+      data->clear();
     };
 
-  for (size_t i = 0; i < m_bufferedDataE.size(); i++)
-    if (m_bufferedDataE[i]) {
-      m_bufferedDataE[i]->clear();
+  for (auto &data : m_bufferedDataE)
+    if (data) {
+      data->clear();
     };
 }
 
@@ -100,7 +96,7 @@ void EventWorkspaceMRU::clear() {
  *found.
  */
 MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   return m_bufferedDataY[thread_num]->find(index);
 }
 
@@ -112,7 +108,7 @@ MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
  *found.
  */
 MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   return m_bufferedDataE[thread_num]->find(index);
 }
 
@@ -124,12 +120,12 @@ MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  *needs to be deleted.
  */
 void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexY);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   MantidVecWithMarker *oldData = m_bufferedDataY[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
-      Mutex::ScopedLock _lock(this->m_toDeleteMutex);
+      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
       m_markersToDelete.push_back(oldData);
     } else
       delete oldData;
@@ -144,12 +140,12 @@ void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
  *needs to be deleted.
  */
 void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
-  Mutex::ScopedLock _lock(m_changeMruListsMutexE);
+  std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   MantidVecWithMarker *oldData = m_bufferedDataE[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
-      Mutex::ScopedLock _lock(this->m_toDeleteMutex);
+      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
       m_markersToDelete.push_back(oldData);
     } else
       delete oldData;
@@ -161,14 +157,14 @@ void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
  * @param index :: index to delete.
  */
 void EventWorkspaceMRU::deleteIndex(size_t index) {
-  Mutex::ScopedLock _lock1(m_changeMruListsMutexE);
-  for (size_t i = 0; i < m_bufferedDataE.size(); i++)
-    if (m_bufferedDataE[i])
-      m_bufferedDataE[i]->deleteIndex(index);
-  Mutex::ScopedLock _lock2(m_changeMruListsMutexY);
-  for (size_t i = 0; i < m_bufferedDataY.size(); i++)
-    if (m_bufferedDataY[i])
-      m_bufferedDataY[i]->deleteIndex(index);
+  std::lock_guard<std::mutex> _lock1(m_changeMruListsMutexE);
+  for (auto &data : m_bufferedDataE)
+    if (data)
+      data->deleteIndex(index);
+  std::lock_guard<std::mutex> _lock2(m_changeMruListsMutexY);
+  for (auto &data : m_bufferedDataY)
+    if (data)
+      data->deleteIndex(index);
 }
 
 } // namespace Mantid
