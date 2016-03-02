@@ -760,14 +760,10 @@ void MuonAnalysis::runGroupTablePlotButton() {
 
   int groupNumber = getGroupNumberFromRow(m_groupTableRowInFocus);
   if (groupNumber != -1) {
-    PlotType plotType = parsePlotType(m_uiForm.groupTablePlotChoice);
-
+    setGroupOrPairAndReplot(groupNumber);
     // Update the combo box on the home tab
-    setGroupOrPairToPlot(groupNumber);
     m_uiForm.frontPlotFuncs->setCurrentIndex(
         m_uiForm.groupTablePlotChoice->currentIndex());
-
-    plotItem(Group, m_groupTableRowInFocus, plotType);
   }
 }
 
@@ -849,13 +845,10 @@ void MuonAnalysis::runPairTablePlotButton() {
   }
 
   if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
+    setGroupOrPairAndReplot(numGroups() + m_pairTableRowInFocus);
     // Sync with selectors on the front
-    setGroupOrPairToPlot(numGroups() + m_pairTableRowInFocus);
     m_uiForm.frontPlotFuncs->setCurrentIndex(
         m_uiForm.pairTablePlotChoice->currentIndex());
-
-    PlotType plotType = parsePlotType(m_uiForm.pairTablePlotChoice);
-    plotItem(Pair, m_pairTableRowInFocus, plotType);
   }
 }
 
@@ -1686,7 +1679,7 @@ void MuonAnalysis::updateFrontAndCombo() {
     currentI = 0;
   }
 
-  setGroupOrPairToPlot(currentI);
+  setGroupOrPairAndReplot(currentI);
 }
 
 /**
@@ -2624,7 +2617,7 @@ void MuonAnalysis::syncGroupTablePlotTypeWithHome() {
     // This is not the best solution, but I don't have anything brighter at the
     // moment and it
     // was working like that for some time without anybody complaining.
-    setGroupOrPairToPlot(0);
+    setGroupOrPairAndReplot(0);
   }
 
   m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
@@ -3087,7 +3080,7 @@ void MuonAnalysis::openDirectoryDialog() {
  * The point of using this function is so that the UI is never out of sync
  * @param index :: [input] Index of which group/pair to plot
  */
-void MuonAnalysis::setGroupOrPairToPlot(int index) {
+void MuonAnalysis::setGroupOrPairAndReplot(int index) {
   m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
   // Replot, whichever tab we're currently on
   if (m_loaded && isAutoUpdateEnabled()) {
@@ -3109,7 +3102,7 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
  */
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
-  setGroupOrPairToPlot(defaultIndex);
+  setGroupOrPairAndReplot(defaultIndex);
 }
 
 } // namespace MantidQT

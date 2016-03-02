@@ -97,7 +97,8 @@ public:
   MuonAnalysis(QWidget *parent = 0);
 
   /// Sets index of group or pair to plot
-  void setGroupOrPairToPlot(int index);
+  /// and causes a replot
+  void setGroupOrPairAndReplot(int index);
 
   /// Gets current index of group or pair to plot
   int getGroupOrPairToPlot() const;
