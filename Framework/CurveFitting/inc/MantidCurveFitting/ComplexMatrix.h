@@ -20,12 +20,6 @@ namespace Mantid {
 namespace CurveFitting {
 class ComplexMatrix;
 
-// matrix transpose helper
-//struct Tr {
-//  const ComplexMatrix &matrix;
-//  Tr(const ComplexMatrix &m) : matrix(m) {}
-//};
-
 // mutrix multiplication helper
 struct ComplexMatrixMult2 {
   const ComplexMatrix &m_1;

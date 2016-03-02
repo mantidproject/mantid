@@ -31,18 +31,22 @@ ComplexVector::ComplexVector(const size_t n) {
 /// Copy constructor.
 /// @param v :: The other vector
 ComplexVector::ComplexVector(const ComplexVector &v) {
+  m_vector = gsl_vector_complex_alloc(v.size());
   gsl_vector_complex_memcpy(m_vector, v.gsl());
 }
 
 /// Copy from a gsl vector
 /// @param v :: A vector to copy from.
 ComplexVector::ComplexVector(const gsl_vector_complex *v) {
+  m_vector = gsl_vector_complex_alloc(v->size);
   gsl_vector_complex_memcpy(m_vector, v);
 }
 
 /// Copy assignment operator
 /// @param v :: The other vector
 ComplexVector &ComplexVector::operator=(const ComplexVector &v) {
+  gsl_vector_complex_free(m_vector);
+  m_vector = gsl_vector_complex_alloc(v.size());
   gsl_vector_complex_memcpy(m_vector, v.gsl());
   return *this;
 }
@@ -56,8 +60,13 @@ const gsl_vector_complex *ComplexVector::gsl() const { return m_vector; }
 /// Resize the vector
 /// @param n :: The new length
 void ComplexVector::resize(const size_t n) {
-  gsl_vector_complex_free(m_vector);
+  auto oldVector = m_vector;
   m_vector = gsl_vector_complex_alloc(n);
+  size_t m = oldVector->size < n ? oldVector->size : n;
+  for(size_t i = 0; i < m; ++i) {
+    gsl_vector_complex_set(m_vector, i, gsl_vector_complex_get(oldVector, i));
+  }
+  gsl_vector_complex_free(oldVector);
 }
 
 /// Size of the vector

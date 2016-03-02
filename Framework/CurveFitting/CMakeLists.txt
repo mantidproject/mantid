@@ -347,6 +347,7 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	ComplexVectorTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	IPeakFunctionCentreParameterNameTest.h
