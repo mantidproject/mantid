@@ -124,12 +124,14 @@ class AtomListBuilder(object):
         atomCoordinates = self._getAtomCoordinates(cifData, labels)
         occupancies = self._getOccupancies(cifData, labels)
         atomSymbols = self._getAtomSymbols(cifData, labels)
+
         isotropicUs = self._getIsotropicUs(cifData, labels)
 
         atomLines = []
         for atomLabel in labels:
             stringAtomLine = [str(x) for x in (
-                atomSymbols[atomLabel], atomCoordinates[atomLabel], occupancies[atomLabel], isotropicUs[atomLabel])]
+                atomSymbols[atomLabel], atomCoordinates[atomLabel], occupancies[atomLabel], isotropicUs[atomLabel]) if
+                              x is not None]
 
             cleanLine = [stringAtomLine[0]] + [removeErrorEstimateFromNumber(x) for x in
                                                list(stringAtomLine[1:])]

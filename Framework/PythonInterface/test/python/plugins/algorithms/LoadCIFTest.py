@@ -157,6 +157,13 @@ class AtomListBuilderTest(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
 
+    def test_getAtoms_no_u_or_b(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0;Al 0.34 0.56 0.23 1.0')
+
     def test_getReciprocalLengthMatrix(self):
         cell = UnitCell(1, 2, 3)
 
