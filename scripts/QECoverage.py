@@ -350,20 +350,40 @@ class QECoverageGUI(QtGui.QWidget):
         self.canvas.draw()
 
     def direct_input_check(self, ei_vec):
-        lowest_ei = float(1)
 
-        if len(ei_vec) == 1:
-            if ei_vec[0] < lowest_ei:
-                ei_vec[0] = lowest_ei
-                self.ei_msgbox.show()
-                self.direct_ei_input.setText("1")
+        if len(ei_vec) > 0:
+            ei_str = ""
+            update_ei_str = False
+            insert_comma = True
 
-            if ei_vec[0] < float(self.direct_emin_input.text()):
-                self.ei_emin_msgbox.show()
-                renew_val = str(ei_vec[0] - 1.0)
-                self.direct_emin_input.setText(renew_val)
+            for ei in ei_vec:
+                # if ei is equal to last value in ei_vec
+                if ei_vec[len(ei_vec) - 1] == ei:
+                    insert_comma = False
 
-        elif len(ei_vec) > 1:
+                if ei < 0:
+                    update_ei_str = True
+                    self.ei_msgbox.show()
+                    ei = abs(ei)
+
+                    ei_int = int(ei)
+                    if insert_comma:
+                        ei_str += str(ei_int) + ", "
+                    else:
+                        ei_str += str(ei_int)
+
+                else:
+                    ei_int = int(ei)
+                    if insert_comma:
+                        ei_str += str(ei_int) + ", "
+                    else:
+                        ei_str += str(ei_int)
+
+            if update_ei_str:
+                self.direct_ei_input.setText(ei_str)
+                ei_vec = [float(val) for val in ei_str.split(',')]
+
+            # reset min_emin according to list provided
             min_emin = float(self.direct_emin_input.text())
             minimum = min(ei_vec)
             if minimum <= min_emin:
