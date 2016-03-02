@@ -56,7 +56,7 @@ private:
   void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
                              DataObjects::SpecialWorkspace2D_const_sptr ws);
   void generateDetidToIndex();
-  bool tableHasColumn(const std::string name) const;
+  bool tableHasColumn(const std::string ColumnName) const;
 
   std::size_t m_numValues;
   API::ITableWorkspace_sptr m_calibrationWS;

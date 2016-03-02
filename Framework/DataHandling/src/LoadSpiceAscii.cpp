@@ -445,7 +445,7 @@ void LoadSpiceAscii::setupRunStartTime(
     API::MatrixWorkspace_sptr runinfows,
     const std::vector<std::string> &datetimeprop) {
   // Check if no need to process run start time
-  if (datetimeprop.size() == 0) {
+  if (datetimeprop.empty()) {
     g_log.information("User chooses not to set up run start date and time.");
     return;
   }

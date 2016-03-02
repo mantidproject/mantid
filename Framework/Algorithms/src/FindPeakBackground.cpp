@@ -193,7 +193,7 @@ void FindPeakBackground::exec() {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
         peaks.push_back(cont_peak());
         peaks[peaks.size() - 1].start = l + l0;
-      } else if (peaks.size() > 0) {
+      } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
         if (mask[l] != mask[l - 1] && mask[l] == 0) {
           peaks[ipeak].stop = l + l0;
@@ -205,7 +205,7 @@ void FindPeakBackground::exec() {
     size_t min_peak, max_peak;
     double a0 = 0., a1 = 0., a2 = 0.;
     int goodfit;
-    if (peaks.size() > 0) {
+    if (!peaks.empty()) {
       g_log.debug() << "Peaks' size = " << peaks.size()
                     << " -> esitmate background. \n";
       if (peaks[peaks.size() - 1].stop == 0)
@@ -225,8 +225,8 @@ void FindPeakBackground::exec() {
 
       goodfit = 2;
     }
-    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak,
-                       (peaks.size() > 0), a0, a1, a2);
+    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, (!peaks.empty()),
+                       a0, a1, a2);
 
     // Add a new row
     API::TableRow t = m_outPeakTableWS->getRow(0);

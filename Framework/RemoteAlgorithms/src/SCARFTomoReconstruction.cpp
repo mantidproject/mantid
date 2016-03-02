@@ -1232,7 +1232,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
     setProperty("RemoteJobsCommands", jobCommands);
   } else {
     // Single job query. Here the job ID is an input
-    if (0 == jobIds.size()) {
+    if (jobIds.empty()) {
       setProperty("RemoteJobName", "Unknown!");
       setProperty("RemoteJobStatus", "Unknown!");
       setProperty("RemoteJobCommand", "Unknown!");

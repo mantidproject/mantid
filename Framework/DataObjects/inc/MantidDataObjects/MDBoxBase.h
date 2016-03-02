@@ -46,10 +46,10 @@ TMDE_CLASS
 class DLLExport MDBoxBase : public Mantid::API::IMDNode {
 public:
   //-----------------------------------------------------------------------------------------------
-  MDBoxBase(Mantid::API::BoxController *const BoxController = nullptr,
+  MDBoxBase(Mantid::API::BoxController *const boxController = nullptr,
             const uint32_t depth = 0, const size_t boxID = UNDEF_SIZET);
 
-  MDBoxBase(Mantid::API::BoxController *const BoxController,
+  MDBoxBase(Mantid::API::BoxController *const boxController,
             const uint32_t depth, const size_t boxID,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
                 extentsVector);

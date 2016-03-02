@@ -328,7 +328,7 @@ Determine in the WorkspaceGroup is multiperiod.
 */
 bool WorkspaceGroup::isMultiperiod() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  if (m_workspaces.size() < 1) {
+  if (m_workspaces.empty()) {
     g_log.debug("Not a multiperiod-group with < 1 nested workspace.");
     return false;
   }

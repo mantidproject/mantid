@@ -1973,7 +1973,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
   //---------------------------------
 
   // Do we even have any events to do?
-  if (events.size() > 0) {
+  if (!events.empty()) {
     // Iterate through all events (sorted by tof)
     auto itev = findFirstEvent(events, X[0]);
     auto itev_end = events.cend();
@@ -2167,7 +2167,7 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by pulse time)
     auto itev = findFirstPulseEvent(this->events, X[0]);
     auto itev_end = events.cend(); // cache for speed
@@ -2239,7 +2239,7 @@ void EventList::generateCountsHistogramTimeAtSample(
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by pulse time)
     auto itev =
         findFirstTimeAtSampleEvent(this->events, X[0], tofFactor, tofOffset);
@@ -2311,7 +2311,7 @@ void EventList::generateCountsHistogram(const MantidVec &X,
   //---------------------------------
 
   // Do we even have any events to do?
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by tof)
     std::vector<TofEvent>::const_iterator itev =
         findFirstEvent(this->events, X[0]);
@@ -2407,7 +2407,7 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX,
   sum = 0;
   error = 0;
   // Nothing in the list?
-  if (events.size() == 0)
+  if (events.empty())
     return;
 
   // Iterators for limits - whole range by default
@@ -3986,7 +3986,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Do nothing if there are no entries
-  if (splitter.size() <= 0)
+  if (splitter.empty())
     return;
 
   switch (eventType) {
@@ -4131,7 +4131,7 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Do nothing if there are no entries
-  if (splitter.size() <= 0) {
+  if (splitter.empty()) {
     // 3A. Copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
     // this->duplicate(outputs[-1]);
@@ -4263,7 +4263,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
   std::string debugmessage("");
 
   // Do nothing if there are no entries
-  if (vecgroups.size() == 0) {
+  if (vecgroups.empty()) {
     // Copy all events to group workspace = -1
     (*vec_outputEventList[-1]) = (*this);
     // this->duplicate(outputs[-1]);
@@ -4383,7 +4383,7 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Split
-  if (splitter.size() <= 0) {
+  if (splitter.empty()) {
     // No splitter: copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
   } else {

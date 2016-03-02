@@ -366,11 +366,11 @@ public:
                const double &weight = 1.0);
   void flagMasked(const size_t &spectrumIndex, const size_t &binIndex,
                   const double &weight = 1.0);
-  bool hasMaskedBins(const size_t &spectrumIndex) const;
+  bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
-  const MaskList &maskedBins(const size_t &spectrumIndex) const;
+  const MaskList &maskedBins(const size_t &workspaceIndex) const;
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -470,7 +470,7 @@ protected:
   MatrixWorkspace(const MatrixWorkspace &other);
 
   MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);
+      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.

@@ -553,8 +553,8 @@ void AnvredCorrection::BuildLamdaWeights() {
 
   // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
-  if (m_lamda_weight.size() == 0) // loading spectrum failed so use
-  {                               // array of 1's
+  if (m_lamda_weight.empty()) // loading spectrum failed so use
+  {                           // array of 1's
     //    power = power_ns;                      // This is commented out, so we
     // don't override user specified
     // value.

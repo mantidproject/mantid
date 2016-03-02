@@ -220,7 +220,7 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   std::stringstream messageStream;
 
   // Check named dimensions can be found in workspace
-  for (auto dimension_name : dimensions) {
+  for (const auto &dimension_name : dimensions) {
     try {
       tryFetchDimensionIndex(ws, dimension_name);
     } catch (std::runtime_error) {

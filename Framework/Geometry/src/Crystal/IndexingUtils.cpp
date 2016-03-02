@@ -1087,7 +1087,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   std::vector<V3D> selected_dirs;
   V3D dir_temp;
 
-  for (auto current_dir : full_list) {
+  for (const auto &current_dir : full_list) {
     for (int step = 0; step <= n_steps; step++) {
       dir_temp = current_dir;
       dir_temp *= (min_d + step * delta_d); // increasing size
@@ -1925,7 +1925,7 @@ double IndexingUtils::IndexingError(const DblMatrix &UB,
     total_error += h_error + k_error + l_error;
   }
 
-  if (hkls.size() > 0)
+  if (!hkls.empty())
     return total_error / (3.0 * static_cast<double>(hkls.size()));
   else
     return 0;
@@ -2522,11 +2522,11 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
                                    const std::vector<V3D> direction_list,
                                    double plane_spacing,
                                    double required_tolerance) {
-  if (q_vectors.size() == 0) {
+  if (q_vectors.empty()) {
     throw std::invalid_argument("SelectDirection(): No Q vectors specified");
   }
 
-  if (direction_list.size() == 0) {
+  if (direction_list.empty()) {
     throw std::invalid_argument(
         "SelectDirection(): List of possible directions has zero length");
   }

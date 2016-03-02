@@ -760,7 +760,7 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   }
 
   // Search the archive
-  if (archs.size() != 0) {
+  if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
     std::string path = getArchivePath(archs, filenames, exts);
     try {
