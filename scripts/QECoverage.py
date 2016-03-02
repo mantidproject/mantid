@@ -76,10 +76,12 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_ei_input = QtGui.QLineEdit("55", self.direct_ei)
         self.direct_ei_input.setToolTip("Incident Energy in meV")
         self.direct_ei_grid.addWidget(self.direct_ei_input)
+        self.emptyfield_msgbox = QtGui.QMessageBox()
+        self.emptyfield_msgbox.setText("Ei or Emax cannot be empty")
         self.ei_msgbox = QtGui.QMessageBox()
         self.ei_msgbox.setText("Ei cannot be negative! Please try again")
         self.ei_emin_msgbox = QtGui.QMessageBox()
-        self.ei_emin_msgbox.setText("Ei must be greater than Emin! Please try again")
+        self.ei_emin_msgbox.setText("Emin must be less than all the values provided in Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
         self.direct_plotover = QtGui.QCheckBox("Plot Over", self.tab_direct)
         self.direct_plotover.setToolTip("Hold this plot?")
@@ -288,9 +290,10 @@ class QECoverageGUI(QtGui.QWidget):
         eierr = '-----------------------------------------------------------------------------------\n'
         eierr += 'Error: Invalid input Ei. This must be a number or a comma-separated list of numbers\n'
         eierr += '-----------------------------------------------------------------------------------\n'
+        ei_vec = []
         if ',' not in ei_str:
             try:
-                ei_vec = [float(ei_str)]
+                ei_vec.append(float(ei_str))
                 ei_vec = self.direct_input_check(ei_vec)
 
             except ValueError:
@@ -299,6 +302,7 @@ class QECoverageGUI(QtGui.QWidget):
         else:
             try:
                 ei_vec = [float(val) for val in ei_str.split(',')]
+                ei_vec = self.direct_input_check(ei_vec)
 
             except ValueError:
                 raise ValueError(eierr)
@@ -344,16 +348,26 @@ class QECoverageGUI(QtGui.QWidget):
         self.canvas.draw()
 
     def direct_input_check(self, ei_vec):
-        lowest_ei = [float(1)]
-        if ei_vec < lowest_ei:
-            self.ei_msgbox.show()
-            ei_vec = lowest_ei
-            self.direct_ei_input.setText("1")
+        lowest_ei = float(1)
 
-        if ei_vec < [float(self.direct_emin_input.text())]:
-            self.ei_emin_msgbox.show()
-            renew_val = str(ei_vec[0] - 1)
-            self.direct_emin_input.setText(renew_val)
+        if len(ei_vec) == 1:
+            if ei_vec[0] < lowest_ei:
+                ei_vec[0] = lowest_ei
+                self.ei_msgbox.show()
+                self.direct_ei_input.setText("1")
+
+            if ei_vec[0] < float(self.direct_emin_input.text()):
+                self.ei_emin_msgbox.show()
+                renew_val = str(ei_vec[0] - 1.0)
+                self.direct_emin_input.setText(renew_val)
+
+        elif len(ei_vec) > 1:
+            min_emin = float(self.direct_emin_input.text())
+            minimum = min(ei_vec)
+            if minimum <= min_emin:
+                self.ei_emin_msgbox.show()
+                renew_val = str(minimum - 1)
+                self.direct_emin_input.setText(renew_val)
 
         return ei_vec
 
