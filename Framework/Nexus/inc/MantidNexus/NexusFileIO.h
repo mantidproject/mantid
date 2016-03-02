@@ -86,11 +86,11 @@ public:
 
   /// write table workspace
   int writeNexusTableWorkspace(
-      const API::ITableWorkspace_const_sptr &localworkspace,
+      const API::ITableWorkspace_const_sptr &itableworkspace,
       const char *group_name) const;
 
   int writeNexusProcessedDataEvent(
-      const DataObjects::EventWorkspace_const_sptr &localworkspace);
+      const DataObjects::EventWorkspace_const_sptr &ws);
 
   int writeNexusProcessedDataEventCombined(
       const DataObjects::EventWorkspace_const_sptr &ws,
@@ -110,7 +110,7 @@ public:
   /// find size of open entry data section
   int getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
                        int &numberOfXpoints, bool &uniformBounds,
-                       std::string &axesNames, std::string &yUnits) const;
+                       std::string &axesUnits, std::string &yUnits) const;
   /// read X values for one (or the generic if uniform) spectra
   int getXValues(MantidVec &xValues, const int &spectra) const;
   /// read values and errors for spectra
@@ -217,7 +217,7 @@ private:
 
   /// Writes given vector column to the currently open Nexus file
   template <typename VecType, typename ElemType>
-  void writeNexusVectorColumn(API::Column_const_sptr column,
+  void writeNexusVectorColumn(API::Column_const_sptr col,
                               const std::string &columnName, int nexusType,
                               const std::string &interpret_as) const;
 

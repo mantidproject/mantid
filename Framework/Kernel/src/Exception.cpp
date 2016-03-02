@@ -11,8 +11,8 @@ namespace Exception {
         @param Desc :: Function description
         @param FName :: Filename
 */
-FileError::FileError(const std::string &Desc, std::string FName)
-    : std::runtime_error(Desc), fileName(std::move(FName)) {
+FileError::FileError(const std::string &Description, std::string FileName)
+    : std::runtime_error(Description), fileName(std::move(FileName)) {
   outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
 }
 

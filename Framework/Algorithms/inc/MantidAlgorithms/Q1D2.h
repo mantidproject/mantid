@@ -92,7 +92,7 @@ private:
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,
-                 MantidVec &YOut, MantidVec &errors) const;
+                 MantidVec &counts, MantidVec &errors) const;
 };
 
 } // namespace Algorithms

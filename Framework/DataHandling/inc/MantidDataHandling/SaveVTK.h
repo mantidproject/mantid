@@ -85,9 +85,9 @@ private:
   void checkOptionalProperties();
 
   /// Write a histogram to the file
-  void writeVTKPiece(std::ostream &outXML, const std::vector<double> &dataX,
-                     const std::vector<double> &dataY,
-                     const std::vector<double> &dataE, int index) const;
+  void writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xValue,
+                     const std::vector<double> &yValue,
+                     const std::vector<double> &errors, int index) const;
 
   /// The x-axis minimum
   double m_Xmin;

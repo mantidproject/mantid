@@ -108,7 +108,7 @@ private:
 
   /// Form a map key for the specified q_vector.
   int64_t getHklKey(Mantid::Kernel::V3D const &q_vector);
-  int64_t getHklKey2(Mantid::Kernel::V3D const &q_vector);
+  int64_t getHklKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
   void addEvent(std::pair<double, Mantid::Kernel::V3D> event_Q, bool hkl_integ);

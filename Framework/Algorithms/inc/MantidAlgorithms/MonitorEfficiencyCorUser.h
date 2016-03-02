@@ -38,7 +38,7 @@ private:
   double calculateFormulaValue(const std::string &, double);
   std::string getValFromInstrumentDef(const std::string &);
   void applyMonEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
-                          const MantidVec &eIn, const double coeff,
+                          const MantidVec &eIn, const double effVec,
                           MantidVec &yOut, MantidVec &eOut);
 
   /// The user selected (input) workspace

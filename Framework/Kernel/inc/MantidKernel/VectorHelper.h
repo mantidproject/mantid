@@ -75,7 +75,7 @@ MANTID_KERNEL_DLL std::vector<NumT>
 splitStringIntoVector(std::string listString);
 
 MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins,
-                                  const double X);
+                                  const double value);
 // Linearly interpolate between a set of Y values. Assumes the values are set
 // for the calculated nodes
 MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
@@ -87,9 +87,9 @@ MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
 MANTID_KERNEL_DLL void
 smoothInRange(const std::vector<double> &input, std::vector<double> &output,
               double avrgInterval,
-              std::vector<double> const *const binBoundaris = nullptr,
+              std::vector<double> const *const binBndrs = nullptr,
               size_t startIndex = 0, size_t endIndex = 0,
-              std::vector<double> *const outputBinBoundaries = nullptr);
+              std::vector<double> *const outBins = nullptr);
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),

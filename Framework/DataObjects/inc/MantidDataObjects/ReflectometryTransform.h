@@ -91,7 +91,7 @@ public:
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(
-      Mantid::API::MatrixWorkspace_const_sptr inputWs,
+      Mantid::API::MatrixWorkspace_const_sptr inputWS,
       boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
       bool dumpVertexes, std::string outputDimensions) const;
 
@@ -106,14 +106,14 @@ public:
 
 /// Create a new x-axis for the output workspace
 MANTID_DATAOBJECTS_DLL MantidVec
-createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradQx,
+createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradX,
             const double cxToUnit, const size_t nBins,
             const std::string &caption, const std::string &units);
 
 /// Create a new y(vertical)-axis for the output workspace
 MANTID_DATAOBJECTS_DLL void
 createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
-                   const MantidVec &xAxisVec, const double gradQz,
+                   const MantidVec &xAxisVec, const double gradY,
                    const double cyToUnit, const size_t nBins,
                    const std::string &caption, const std::string &units);
 

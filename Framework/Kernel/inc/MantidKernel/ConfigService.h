@@ -144,7 +144,7 @@ public:
   void launchProcess(const std::string &programFilePath,
                      const std::vector<std::string> &programArguments) const;
   /// Sets a configuration property
-  void setString(const std::string &keyName, const std::string &keyValue);
+  void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
   template <typename T> int getValue(const std::string &keyName, T &out);
   /// Return the local properties filename.
@@ -211,7 +211,7 @@ public:
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
-  void updateFacilities(const std::string &facilityName = "");
+  void updateFacilities(const std::string &fName = "");
   /// Get the list of facilities
   const std::vector<FacilityInfo *> getFacilities() const;
   /// Get the list of facility names

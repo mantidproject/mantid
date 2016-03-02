@@ -88,7 +88,7 @@ protected:
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
   virtual int doSendRequestGetResponse(
-      const Poco::URI &uri, std::ostream &response,
+      const Poco::URI &uri, std::ostream &rss,
       const StringToStringMap &headers = StringToStringMap(),
       const std::string &method = std::string(),
       const std::string &body = "") const;
@@ -156,7 +156,7 @@ private:
   /// fill in output properties with job status and info
   std::vector<IRemoteJobManager::RemoteJobInfo>
   genOutputStatusInfo(const std::string &resp,
-                      const std::string &jobID = std::string()) const;
+                      const std::string &jobIDFilter = std::string()) const;
 
   void getOneJobFile(const std::string &jobId, const std::string &remotePath,
                      const std::string &localPath, const Token &t);

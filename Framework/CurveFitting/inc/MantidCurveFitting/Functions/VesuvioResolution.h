@@ -82,7 +82,7 @@ public:
   /// Cache a copy of the workspace pointer and pull out the parameters
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+                     size_t wsIndex, double startX, double endX) override;
   /// Pre-calculate the resolution components values
   void cacheResolutionComponents(const Algorithms::DetectorParams &detpar,
                                  const ResolutionParams &respar);
@@ -90,7 +90,7 @@ public:
   void disableLogging() { m_log.setEnabled(false); }
   /// Compute Voigt function
   void voigtApprox(std::vector<double> &voigt,
-                   const std::vector<double> &yspace, const double lorentzPos,
+                   const std::vector<double> &xValues, const double lorentzPos,
                    const double lorentzAmp, const double lorentzWidth,
                    const double gaussWidth) const;
   /// Compute Voigt function with cached values

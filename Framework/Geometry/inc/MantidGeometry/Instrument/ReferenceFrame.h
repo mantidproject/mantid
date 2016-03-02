@@ -45,7 +45,7 @@ public:
   ReferenceFrame();
   /// Constructor
   ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                 Handedness handedNess, std::string origin);
+                 Handedness handedness, std::string origin);
   /// Gets the pointing up direction
   PointingAlong pointingUp() const;
   /// Gets the beam pointing along direction

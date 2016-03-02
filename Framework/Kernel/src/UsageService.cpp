@@ -10,7 +10,6 @@
 
 #include <Poco/ActiveMethod.h>
 #include <json/json.h>
-#include <stdlib.h>
 
 namespace Mantid {
 namespace Kernel {

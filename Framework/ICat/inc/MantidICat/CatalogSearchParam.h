@@ -92,7 +92,7 @@ public:
   /// Get the investigation id.
   const std::string &getInvestigationId() const;
   /// Saves the start/end date times to time_t value.
-  time_t getTimevalue(const std::string &sDate);
+  time_t getTimevalue(const std::string &inputDate);
 
 private:
   /// start run number

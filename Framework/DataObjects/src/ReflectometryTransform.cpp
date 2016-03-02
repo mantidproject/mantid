@@ -416,7 +416,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
 /**
  * Execution path for NormalisedPolygon Rebinning
- * @param inputWs : Workspace to be rebinned
+ * @param inputWS : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for
  * debugging purposes or not

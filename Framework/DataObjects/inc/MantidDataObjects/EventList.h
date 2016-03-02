@@ -82,7 +82,7 @@ public:
 
   ~EventList() override;
 
-  void createFromHistogram(const ISpectrum *spec, bool GenerateZeros,
+  void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
                            bool GenerateMultipleEvents, int MaxEventsPerBin);
 
   EventList &operator=(const EventList &);
@@ -391,7 +391,8 @@ private:
 
   template <class T>
   static typename std::vector<T>::const_iterator
-  findFirstPulseEvent(const std::vector<T> &events, const double seek_tof);
+  findFirstPulseEvent(const std::vector<T> &events,
+                      const double seek_pulsetime);
 
   template <class T>
   typename std::vector<T>::const_iterator
@@ -496,7 +497,7 @@ private:
   template <class T>
   std::string splitByFullTimeVectorSplitterHelper(
       const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-      std::map<int, EventList *> outputs, typename std::vector<T> &events,
+      std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
       bool docorrection, double toffactor, double tofshift) const;
   template <class T>
   static void multiplyHelper(std::vector<T> &events, const double value,

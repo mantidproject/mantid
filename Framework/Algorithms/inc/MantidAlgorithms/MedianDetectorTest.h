@@ -91,12 +91,12 @@ private:
   /// Calculates the sum of solid angles of detectors for each histogram
   API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
   /// Mask the outlier values to get a better median value
-  int maskOutliers(const std::vector<double> median,
+  int maskOutliers(const std::vector<double> medianvec,
                    API::MatrixWorkspace_sptr countsWS,
                    std::vector<std::vector<size_t>> indexmap);
   /// Do the tests and mask those that fail
   int doDetectorTests(const API::MatrixWorkspace_sptr countsWS,
-                      const std::vector<double> median,
+                      const std::vector<double> medianvec,
                       std::vector<std::vector<size_t>> indexmap,
                       API::MatrixWorkspace_sptr maskWS);
 

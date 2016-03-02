@@ -94,7 +94,7 @@ crossingPoint(const PolygonEdge &edgeOne, const PolygonEdge &edgeTwo,
               Kernel::V2D &crossPoint);
 /// Return if the edges aim at each other
 MANTID_GEOMETRY_DLL bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
-                                    PointClassification pclass,
+                                    PointClassification aclass,
                                     PolygonEdge::Orientation crossType);
 
 } // namespace Geometry

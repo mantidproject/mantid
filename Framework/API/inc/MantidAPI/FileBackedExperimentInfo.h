@@ -37,7 +37,7 @@ namespace API {
 class MANTID_API_DLL FileBackedExperimentInfo : public ExperimentInfo {
 public:
   /// Constructor
-  FileBackedExperimentInfo(std::string filename, std::string path);
+  FileBackedExperimentInfo( std::string filename, std::string nxpath);
 
   ExperimentInfo *cloneExperimentInfo() const override;
 

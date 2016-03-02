@@ -48,7 +48,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_KERNEL_DLL ComputeResourceInfo {
 public:
   /// constructor - from facility info and the element for this resource
-  ComputeResourceInfo(const FacilityInfo *f, const Poco::XML::Element *elem);
+  ComputeResourceInfo(const FacilityInfo *fac, const Poco::XML::Element *elem);
 
   /// Equality operator
   bool operator==(const ComputeResourceInfo &rhs) const;
