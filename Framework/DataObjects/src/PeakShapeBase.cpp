@@ -7,7 +7,7 @@ namespace DataObjects {
 
 PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
                              std::string algorithmName, int algorithmVersion)
-    : m_frame(frame), m_algorithmName(algorithmName),
+    : m_frame(frame), m_algorithmName(std::move(algorithmName)),
       m_algorithmVersion(algorithmVersion) {}
 
 /**

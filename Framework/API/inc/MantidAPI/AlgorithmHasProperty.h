@@ -47,7 +47,7 @@ class MANTID_API_DLL AlgorithmHasProperty
     : public Kernel::TypedValidator<boost::shared_ptr<IAlgorithm>> {
 public:
   /// Constructor
-  AlgorithmHasProperty(const std::string &propName);
+  AlgorithmHasProperty(std::string propName);
   /**
    * Get a string representation of the type
    * @returns A string containing the validator type

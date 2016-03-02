@@ -36,7 +36,7 @@ namespace Converters {
  */
 template <typename DestElementType> struct DLLExport NDArrayToVector {
   /// Constructor
-  NDArrayToVector(const boost::python::object &value);
+  NDArrayToVector(boost::python::object value);
   /// Do the conversion
   const std::vector<DestElementType> operator()();
 

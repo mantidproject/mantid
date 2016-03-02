@@ -17,7 +17,8 @@ using Kernel::V3D;
 GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
                                      Geometry::IDetector_const_sptr det,
                                      const double extraLength)
-    : m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
+    : m_beamLineNorm(-1), m_det(std::move(det)), m_dropPerAngstrom2(-1),
+      m_cachedDrop(0) {
   m_samplePos = ws->getInstrument()->getSample()->getPos();
   const V3D sourcePos = ws->getInstrument()->getSource()->getPos();
   m_beamLine = m_samplePos - sourcePos;

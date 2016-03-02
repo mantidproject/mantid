@@ -65,9 +65,9 @@ public:
   class GroupWorkspacesNotification : public DataServiceNotification {
   public:
     /// Constructor
-    GroupWorkspacesNotification(const std::vector<std::string> &wsnames)
+    GroupWorkspacesNotification(std::vector<std::string> wsnames)
         : DataServiceNotification("", boost::shared_ptr<API::Workspace>()),
-          m_wsnames(wsnames) {}
+          m_wsnames(std::move(wsnames)) {}
     /// returns the workspace names
     const std::vector<std::string> &inputworkspacenames() const {
       return m_wsnames;

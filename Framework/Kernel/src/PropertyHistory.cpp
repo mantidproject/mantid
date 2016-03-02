@@ -10,12 +10,11 @@ namespace Mantid {
 namespace Kernel {
 
 /// Constructor
-PropertyHistory::PropertyHistory(const std::string &name,
-                                 const std::string &value,
-                                 const std::string &type, const bool isdefault,
+PropertyHistory::PropertyHistory(std::string name, std::string value,
+                                 std::string type, const bool isdefault,
                                  const unsigned int direction)
-    : m_name(name), m_value(value), m_type(type), m_isDefault(isdefault),
-      m_direction(direction) {}
+    : m_name(std::move(name)), m_value(std::move(value)),
+      m_type(std::move(type)), m_isDefault(isdefault), m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
     : // PropertyHistory::PropertyHistory(prop->name(), prop->value(),

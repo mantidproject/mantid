@@ -365,8 +365,8 @@ protected:
     const std::string prop;
 
     /// Constructor
-    TypedValue(const IPropertyManager &p, const std::string &name)
-        : pm(p), prop(name) {}
+    TypedValue(const IPropertyManager &p, std::string name)
+        : pm(p), prop(std::move(name)) {}
 
     // Unfortunately, MSVS2010 can't handle just having a single templated cast
     // operator T()

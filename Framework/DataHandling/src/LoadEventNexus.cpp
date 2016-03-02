@@ -175,14 +175,16 @@ public:
                   boost::shared_ptr<BankPulseTimes> thisBankPulseTimes,
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id)
-      : Task(), alg(alg), entry_name(entry_name),
+      : Task(), alg(alg), entry_name(std::move(entry_name)),
         pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset), prog(prog),
-        event_id(event_id), event_time_of_flight(event_time_of_flight),
-        numEvents(numEvents), startAt(startAt), event_index(event_index),
-        thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
-        event_weight(event_weight), m_min_id(min_event_id),
-        m_max_id(max_event_id) {
+        event_id(std::move(event_id)),
+        event_time_of_flight(std::move(event_time_of_flight)),
+        numEvents(numEvents), startAt(startAt),
+        event_index(std::move(event_index)),
+        thisBankPulseTimes(std::move(thisBankPulseTimes)),
+        have_weight(have_weight), event_weight(std::move(event_weight)),
+        m_min_id(min_event_id), m_max_id(max_event_id) {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
   }
@@ -477,21 +479,21 @@ public:
   * @param scheduler :: the ThreadScheduler that runs this task.
   * @param framePeriodNumbers :: Period numbers corresponding to each frame
   */
-  LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
-                       const std::string &entry_type,
-                       const std::size_t numEvents,
+  LoadBankFromDiskTask(LoadEventNexus *alg, std::string entry_name,
+                       std::string entry_type, const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
                        boost::shared_ptr<std::mutex> ioMutex,
                        ThreadScheduler *scheduler,
-                       const std::vector<int> &framePeriodNumbers)
-      : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
+                       std::vector<int> framePeriodNumbers)
+      : Task(), alg(alg), entry_name(std::move(entry_name)),
+        entry_type(std::move(entry_type)),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
         m_event_id(nullptr), m_event_time_of_flight(nullptr),
         m_have_weight(false), m_event_weight(nullptr),
-        m_framePeriodNumbers(framePeriodNumbers) {
+        m_framePeriodNumbers(std::move(framePeriodNumbers)) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();

@@ -18,9 +18,9 @@ using namespace Kernel;
  * @param group :: Group that contains all symmetry operations (including
  *centering).
  */
-SpaceGroup::SpaceGroup(size_t itNumber, const std::string &hmSymbol,
+SpaceGroup::SpaceGroup(size_t itNumber, std::string hmSymbol,
                        const Group &group)
-    : Group(group), m_number(itNumber), m_hmSymbol(hmSymbol) {}
+    : Group(group), m_number(itNumber), m_hmSymbol(std::move(hmSymbol)) {}
 
 /// Returns the stored space group number
 size_t SpaceGroup::number() const { return m_number; }

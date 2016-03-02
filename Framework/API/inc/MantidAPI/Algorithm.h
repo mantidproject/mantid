@@ -127,10 +127,9 @@ public:
   class ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p,
-                         const std::string &msg, double estimatedTime,
-                         int progressPrecision)
-        : AlgorithmNotification(alg), progress(p), message(msg),
+    ProgressNotification(const Algorithm *const alg, double p, std::string msg,
+                         double estimatedTime, int progressPrecision)
+        : AlgorithmNotification(alg), progress(p), message(std::move(msg)),
           estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
     std::string name() const override {
       return "ProgressNotification";
@@ -147,8 +146,8 @@ public:
   class ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str)
-        : AlgorithmNotification(alg), what(str) {}
+    ErrorNotification(const Algorithm *const alg, std::string str)
+        : AlgorithmNotification(alg), what(std::move(str)) {}
     std::string name() const override {
       return "ErrorNotification";
     }                 ///< class name

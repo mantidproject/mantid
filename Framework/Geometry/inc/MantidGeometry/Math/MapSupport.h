@@ -84,7 +84,7 @@ private:
 
 public:
   /// Set Value to check
-  valEqual(const NumPart &V) : value(V) {}
+  valEqual(NumPart V) : value(std::move(V)) {}
 
   /// Equality operator vs Map second object
   bool operator()(const std::pair<KeyPart, NumPart> &A) const {

@@ -23,8 +23,9 @@ GSLVector::GSLVector(const size_t n)
 
 /// Construct from a std vector
 /// @param v :: A std vector.
-GSLVector::GSLVector(const std::vector<double> &v)
-    : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+GSLVector::GSLVector(std::vector<double> v)
+    : m_data(std::move(v)),
+      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
 /// Copy constructor.
 /// @param v :: The other vector

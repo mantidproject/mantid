@@ -19,11 +19,11 @@ class MANTID_GEOMETRY_DLL MDFrameArgument {
 public:
   const std::string unitString;
   const std::string frameString;
-  MDFrameArgument(const std::string &_frameString,
-                  const std::string &_unitString)
-      : unitString(_unitString), frameString(_frameString) {}
-  MDFrameArgument(const std::string &_frameString)
-      : unitString(""), frameString(_frameString) {}
+  MDFrameArgument(std::string _frameString, std::string _unitString)
+      : unitString(std::move(_unitString)),
+        frameString(std::move(_frameString)) {}
+  MDFrameArgument(std::string _frameString)
+      : unitString(""), frameString(std::move(_frameString)) {}
 };
 
 /** MDFrameFactory.h : Chain of repsonsibility factory for the MDFrameFactory

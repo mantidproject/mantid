@@ -111,9 +111,9 @@ public:
    * objective function
    * at a given pt
    */
-  AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction &objfunc)
-      : m_userfunc(objfunc), m_nparams(nparams), m_neq(0), m_eq(), m_nineq(0),
-        m_ineq(), m_maxIter(500) {}
+  AugmentedLagrangianOptimizer(const size_t nparams, ObjFunction objfunc)
+      : m_userfunc(std::move(objfunc)), m_nparams(nparams), m_neq(0), m_eq(),
+        m_nineq(0), m_ineq(), m_maxIter(500) {}
 
   /**
    * Constructor with constraints
@@ -128,12 +128,12 @@ public:
    * @param inequality A matrix of coefficients, \f$A\f$ such that in the final
    * solution \f$A_{eq} x\geq 0\f$
    */
-  AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction &objfunc,
+  AugmentedLagrangianOptimizer(const size_t nparams, ObjFunction objfunc,
                                const Kernel::DblMatrix &equality,
                                const Kernel::DblMatrix &inequality)
-      : m_userfunc(objfunc), m_nparams(nparams), m_neq(equality.numRows()),
-        m_eq(equality), m_nineq(inequality.numRows()), m_ineq(inequality),
-        m_maxIter(500) {
+      : m_userfunc(std::move(objfunc)), m_nparams(nparams),
+        m_neq(equality.numRows()), m_eq(equality),
+        m_nineq(inequality.numRows()), m_ineq(inequality), m_maxIter(500) {
     checkConstraints(equality, inequality);
   }
 

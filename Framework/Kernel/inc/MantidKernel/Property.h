@@ -184,7 +184,7 @@ public:
 
 protected:
   /// Constructor
-  Property(const std::string &name, const std::type_info &type,
+  Property(std::string name, const std::type_info &type,
            const unsigned int direction = Direction::Input);
   /// Copy constructor
   Property(const Property &right);

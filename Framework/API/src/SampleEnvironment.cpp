@@ -22,8 +22,8 @@ using Kernel::V3D;
  * required by various other users of it
  * @param name :: A name for the environment kit
  */
-SampleEnvironment::SampleEnvironment(const std::string &name)
-    : m_name(name), m_elements() {}
+SampleEnvironment::SampleEnvironment(std::string name)
+    : m_name(std::move(name)), m_elements() {}
 
 /**
  * @return An axis-aligned BoundingBox object that encompasses the whole kit.

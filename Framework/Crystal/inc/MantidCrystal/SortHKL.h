@@ -33,7 +33,7 @@ namespace Crystal {
  */
 class DLLExport UniqueReflection {
 public:
-  UniqueReflection(const Kernel::V3D &hkl) : m_hkl(hkl), m_peaks() {}
+  UniqueReflection(Kernel::V3D hkl) : m_hkl(std::move(hkl)), m_peaks() {}
 
   const Kernel::V3D &getHKL() const { return m_hkl; }
 

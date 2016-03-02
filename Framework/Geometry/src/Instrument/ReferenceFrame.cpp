@@ -16,7 +16,7 @@ namespace Geometry {
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                Handedness handedness, std::string origin)
     : m_up(up), m_alongBeam(alongBeam), m_handedness(handedness),
-      m_origin(origin) {
+      m_origin(std::move(origin)) {
   if (up == alongBeam) {
     throw std::invalid_argument(
         "Cannot have up direction the same as the beam direction");

@@ -30,8 +30,8 @@ namespace API {
 class TableColumnHelper {
 public:
   /// Constructor
-  TableColumnHelper(ITableWorkspace *tw, const std::string &name)
-      : m_workspace(tw), m_name(name) {}
+  TableColumnHelper(ITableWorkspace *tw, std::string name)
+      : m_workspace(tw), m_name(std::move(name)) {}
   ITableWorkspace *m_workspace; ///< Pointer to the TableWorkspace
   std::string m_name;           ///< column namae
 };
@@ -40,8 +40,8 @@ public:
 class TableConstColumnHelper {
 public:
   /// Constructor
-  TableConstColumnHelper(const ITableWorkspace *tw, const std::string &name)
-      : m_workspace(tw), m_name(name) {}
+  TableConstColumnHelper(const ITableWorkspace *tw, std::string name)
+      : m_workspace(tw), m_name(std::move(name)) {}
   const ITableWorkspace *m_workspace; ///< Pointer to the TableWorkspace
   std::string m_name;                 ///< column namae
 };
@@ -350,7 +350,7 @@ public:
     }
   }
   /// Construct directly from column
-  ColumnVector(Column_sptr column) : m_column(column) {
+  ColumnVector(Column_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
       mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
@@ -388,7 +388,7 @@ public:
     }
   }
   /// Construct directly from column
-  ConstColumnVector(Column_const_sptr column) : m_column(column) {
+  ConstColumnVector(Column_const_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
       mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()

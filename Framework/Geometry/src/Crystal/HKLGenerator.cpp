@@ -6,9 +6,10 @@ namespace Geometry {
 using namespace Kernel;
 
 /// Constructs a generator that creates all indices from hklMin to hklMax.
-HKLGenerator::HKLGenerator(const Kernel::V3D &hklMin, const Kernel::V3D &hklMax)
-    : m_hklMin(hklMin), m_hklMax(hklMax), m_size(getSize(m_hklMin, m_hklMax)),
-      m_begin(getBeginIterator()), m_end(getEndIterator()) {}
+HKLGenerator::HKLGenerator(Kernel::V3D hklMin, Kernel::V3D hklMax)
+    : m_hklMin(std::move(hklMin)), m_hklMax(std::move(hklMax)),
+      m_size(getSize(m_hklMin, m_hklMax)), m_begin(getBeginIterator()),
+      m_end(getEndIterator()) {}
 
 /// Constructs a generator that creates all indices from -hklMinMax to
 /// hklMinMax.

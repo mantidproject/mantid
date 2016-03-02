@@ -37,7 +37,7 @@ ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
 */
 ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
                            IComponent *parent, Kernel::Material_sptr material)
-    : IObjComponent(), Component(name, parent), m_shape(shape),
+    : IObjComponent(), Component(name, parent), m_shape(std::move(shape)),
       m_material(material) {}
 
 /** Return the shape of the component

@@ -56,7 +56,7 @@ public:
    * @param cost :: computational cost
    */
   FunctionTask(boost::function<void()> func, double cost = 1.0)
-      : Task(cost), m_voidFunc(func) {}
+      : Task(cost), m_voidFunc(std::move(func)) {}
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */

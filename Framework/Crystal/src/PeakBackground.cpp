@@ -18,7 +18,7 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
                                const Mantid::API::MDNormalization normalisation,
                                const SpecialCoordinateSystem coordinates)
     : HardThresholdBackground(thresholdSignal, normalisation),
-      m_peaksWS(peaksWS), m_radiusEstimate(radiusEstimate),
+      m_peaksWS(std::move(peaksWS)), m_radiusEstimate(radiusEstimate),
       m_mdCoordinates(coordinates) {
 
   if (m_mdCoordinates == QLab) {

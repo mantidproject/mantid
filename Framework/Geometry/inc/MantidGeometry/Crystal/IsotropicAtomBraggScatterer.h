@@ -126,7 +126,7 @@ typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
 
 class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
 public:
-  IsotropicAtomBraggScattererParser(const std::string &scattererString);
+  IsotropicAtomBraggScattererParser(std::string scattererString);
 
   std::vector<BraggScatterer_sptr> operator()() const;
 

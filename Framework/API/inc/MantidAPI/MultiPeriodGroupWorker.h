@@ -50,7 +50,7 @@ public:
   /// Constructor
   MultiPeriodGroupWorker();
   /// Copy constructor
-  MultiPeriodGroupWorker(const std::string &workspacePropertyName);
+  MultiPeriodGroupWorker(std::string workspacePropertyName);
   virtual ~MultiPeriodGroupWorker();
   /// Flag to indicate use of a custom workspace property
   bool useCustomWorkspaceProperty() const;

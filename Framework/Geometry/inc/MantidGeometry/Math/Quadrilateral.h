@@ -39,8 +39,8 @@ namespace Geometry {
 class DLLExport Quadrilateral : public ConvexPolygon {
 public:
   /// Constructor with the four vertices
-  Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight,
-                const Kernel::V2D &upperRight, const Kernel::V2D &upperLeft);
+  Quadrilateral(Kernel::V2D lowerLeft, Kernel::V2D lowerRight,
+                Kernel::V2D upperRight, Kernel::V2D upperLeft);
   /// Special constructor for a rectangle
   Quadrilateral(const double lowerX, const double upperX, const double lowerY,
                 const double upperY);

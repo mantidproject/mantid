@@ -9,10 +9,11 @@ namespace Kernel {
  *  @param nDimensions Number of dimensions of input workspace for algorithm
  *  @param checkIfEmpty Whether validator will check if the axes vector is empty
  */
-MDAxisValidator::MDAxisValidator(const std::vector<int> &axes,
+MDAxisValidator::MDAxisValidator(std::vector<int> axes,
                                  const size_t nDimensions,
                                  const bool checkIfEmpty)
-    : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
+    : m_axes(std::move(axes)), m_wsDimensions(nDimensions),
+      m_emptyCheck(checkIfEmpty) {}
 
 /**
  * @brief Checks the MD axes given against the given number of dimensions of the

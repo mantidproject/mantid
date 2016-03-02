@@ -24,11 +24,12 @@ using Kernel::PropertyHistories;
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
-                                   const Kernel::DateAndTime &start,
+                                   Kernel::DateAndTime start,
                                    const double &duration,
                                    std::size_t uexeccount)
-    : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
+    : m_name(alg->name()), m_version(alg->version()),
+      m_executionDate(std::move(start)), m_executionDuration(duration),
+      m_execCount(uexeccount),
       m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
@@ -55,12 +56,13 @@ AlgorithmHistory::~AlgorithmHistory() {}
    (optional).
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
-                                   const Kernel::DateAndTime &start,
+AlgorithmHistory::AlgorithmHistory(std::string name, int vers,
+                                   Kernel::DateAndTime start,
                                    const double &duration,
                                    std::size_t uexeccount)
-    : m_name(name), m_version(vers), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
+    : m_name(std::move(name)), m_version(vers),
+      m_executionDate(std::move(start)), m_executionDuration(duration),
+      m_execCount(uexeccount),
       m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {}
 
 /**

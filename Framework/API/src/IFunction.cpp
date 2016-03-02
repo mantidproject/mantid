@@ -537,7 +537,7 @@ public:
    * Constructor
    * @param value :: The value to set
    */
-  explicit SetValue(const std::string &value) : m_value(value) {}
+  explicit SetValue(std::string value) : m_value(std::move(value)) {}
 
 protected:
   /// Apply if string

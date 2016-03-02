@@ -8,9 +8,9 @@ namespace Kernel {
 SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
 
 /// Constructor using DateAndTime
-SplittingInterval::SplittingInterval(const DateAndTime &start,
-                                     const DateAndTime &stop, const int index)
-    : m_start(start), m_stop(stop), m_index(index) {}
+SplittingInterval::SplittingInterval(DateAndTime start, DateAndTime stop,
+                                     const int index)
+    : m_start(std::move(start)), m_stop(std::move(stop)), m_index(index) {}
 
 /// Return the start time
 DateAndTime SplittingInterval::start() const { return m_start; }

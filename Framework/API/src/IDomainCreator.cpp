@@ -16,11 +16,11 @@ namespace API {
  * @param domainType :: Type of domain to create: Simple, Sequential, or
  * Parallel.
  */
-IDomainCreator::IDomainCreator(
-    Kernel::IPropertyManager *manager,
-    const std::vector<std::string> &workspacePropertyNames,
-    DomainType domainType)
-    : m_manager(manager), m_workspacePropertyNames(workspacePropertyNames),
+IDomainCreator::IDomainCreator(Kernel::IPropertyManager *manager,
+                               std::vector<std::string> workspacePropertyNames,
+                               DomainType domainType)
+    : m_manager(manager),
+      m_workspacePropertyNames(std::move(workspacePropertyNames)),
       m_domainType(domainType), m_outputCompositeMembers(false),
       m_convolutionCompositeMembers(false), m_ignoreInvalidData(false) {}
 

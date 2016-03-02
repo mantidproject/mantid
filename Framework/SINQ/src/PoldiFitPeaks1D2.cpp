@@ -46,8 +46,8 @@ RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples)
 }
 
 RefinedRange::RefinedRange(double xStart, double xEnd,
-                           const std::vector<PoldiPeak_sptr> &peaks)
-    : m_peaks(peaks) {
+                           std::vector<PoldiPeak_sptr> peaks)
+    : m_peaks(std::move(peaks)) {
 
   setRangeBorders(xStart, xEnd);
 }

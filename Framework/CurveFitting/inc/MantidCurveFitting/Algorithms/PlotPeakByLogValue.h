@@ -59,9 +59,9 @@ class DLLExport PlotPeakByLogValue : public API::Algorithm {
     */
   struct InputData {
     /// Constructor
-    InputData(const std::string &nam, int ix, int s, int p, double st = 0,
+    InputData(std::string nam, int ix, int s, int p, double st = 0,
               double en = 0)
-        : name(nam), i(ix), spec(s), period(p), start(st), end(en) {}
+        : name(std::move(nam)), i(ix), spec(s), period(p), start(st), end(en) {}
     /// Copy constructor
     InputData(const InputData &data)
         : name(data.name), i(data.i), spec(data.spec), period(data.period),

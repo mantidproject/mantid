@@ -35,8 +35,8 @@ operator*(const SymmetryOperation &symOp,
  */
 class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator {
 public:
-  AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
-                              const std::string &generatorInformation);
+  AbstractSpaceGroupGenerator(size_t number, std::string hmSymbol,
+                              std::string generatorInformation);
   virtual ~AbstractSpaceGroupGenerator() = default;
 
   inline size_t getNumber() const { return m_number; }

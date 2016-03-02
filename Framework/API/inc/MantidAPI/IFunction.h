@@ -585,7 +585,7 @@ typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
 class FunctionHandler {
 public:
   /// Constructor
-  FunctionHandler(IFunction_sptr fun) : m_fun(fun) {}
+  FunctionHandler(IFunction_sptr fun) : m_fun(std::move(fun)) {}
   /// Virtual destructor
   virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function

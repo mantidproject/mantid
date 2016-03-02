@@ -148,7 +148,7 @@ public:
     int m_lMin, m_lMax;
   };
 
-  HKLGenerator(const Kernel::V3D &hklMin, const Kernel::V3D &hklMax);
+  HKLGenerator(Kernel::V3D hklMin, Kernel::V3D hklMax);
   HKLGenerator(const Kernel::V3D &hklMinMax);
   HKLGenerator(int hMinMax, int kMinMax, int lMinMax);
   HKLGenerator(const UnitCell &unitCell, double dMin);

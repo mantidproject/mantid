@@ -65,7 +65,7 @@ private:
 
 public:
   Line();
-  Line(const Kernel::V3D &, const Kernel::V3D &);
+  Line(Kernel::V3D, Kernel::V3D);
   Line *clone() const;
 
   Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N

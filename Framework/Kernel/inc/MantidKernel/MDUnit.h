@@ -53,7 +53,7 @@ public:
 class DLLExport ReciprocalLatticeUnit : public QUnit {
 public:
   ReciprocalLatticeUnit();
-  ReciprocalLatticeUnit(const UnitLabel &unitLabel);
+  ReciprocalLatticeUnit(UnitLabel unitLabel);
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   ReciprocalLatticeUnit *clone() const override;
@@ -76,7 +76,7 @@ private:
   UnitLabel m_unitLabel;
 
 public:
-  LabelUnit(const UnitLabel &unitLabel);
+  LabelUnit(UnitLabel unitLabel);
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   bool isQUnit() const override;

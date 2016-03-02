@@ -44,21 +44,23 @@ using namespace Kernel;
 *  @param description :: text description of the parameter
 */
 XMLInstrumentParameter::XMLInstrumentParameter(
-    const std::string &logfileID, const std::string &value,
-    const boost::shared_ptr<Kernel::Interpolation> &interpolation,
-    const std::string &formula, const std::string &formulaUnit,
-    const std::string &resultUnit, const std::string &paramName,
-    const std::string &type, const std::string &tie,
-    const std::vector<std::string> &constraint, std::string &penaltyFactor,
-    const std::string &fitFunc, const std::string &extractSingleValueAs,
-    const std::string &eq, const Geometry::IComponent *comp,
-    double angleConvertConst, const std::string &description)
-    : m_logfileID(logfileID), m_value(value), m_paramName(paramName),
-      m_type(type), m_tie(tie), m_constraint(constraint),
-      m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc),
-      m_formula(formula), m_formulaUnit(formulaUnit), m_resultUnit(resultUnit),
-      m_interpolation(interpolation),
-      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
+    std::string logfileID, std::string value,
+    boost::shared_ptr<Kernel::Interpolation> interpolation, std::string formula,
+    std::string formulaUnit, std::string resultUnit, std::string paramName,
+    std::string type, std::string tie, std::vector<std::string> constraint,
+    std::string &penaltyFactor, std::string fitFunc,
+    std::string extractSingleValueAs, std::string eq,
+    const Geometry::IComponent *comp, double angleConvertConst,
+    const std::string &description)
+    : m_logfileID(std::move(logfileID)), m_value(std::move(value)),
+      m_paramName(std::move(paramName)), m_type(std::move(type)),
+      m_tie(std::move(tie)), m_constraint(std::move(constraint)),
+      m_penaltyFactor(penaltyFactor), m_fittingFunction(std::move(fitFunc)),
+      m_formula(std::move(formula)), m_formulaUnit(std::move(formulaUnit)),
+      m_resultUnit(std::move(resultUnit)),
+      m_interpolation(std::move(interpolation)),
+      m_extractSingleValueAs(std::move(extractSingleValueAs)),
+      m_eq(std::move(eq)), m_component(comp),
       m_angleConvertConst(angleConvertConst), m_description("") {
   if (!description.empty()) { // remove multiple spaces
     boost::regex re("\\s+");

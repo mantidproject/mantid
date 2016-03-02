@@ -68,14 +68,14 @@ public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
   explicit AlgorithmHistory(
       const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      Kernel::DateAndTime start = Kernel::DateAndTime::defaultTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
-      const std::string &name, int vers,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      std::string name, int vers,
+      Kernel::DateAndTime start = Kernel::DateAndTime::defaultTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   void addExecutionInfo(const Kernel::DateAndTime &start,
                         const double &duration);

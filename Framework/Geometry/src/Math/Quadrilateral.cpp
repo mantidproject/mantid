@@ -1,6 +1,8 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include <utility>
+
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidKernel/Exception.h"
 
@@ -11,10 +13,11 @@ using Kernel::V2D;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-Quadrilateral::Quadrilateral(const V2D &lowerLeft, const V2D &lowerRight,
-                             const V2D &upperRight, const V2D &upperLeft)
-    : ConvexPolygon(), m_lowerLeft(lowerLeft), m_lowerRight(lowerRight),
-      m_upperRight(upperRight), m_upperLeft(upperLeft) {}
+Quadrilateral::Quadrilateral(V2D lowerLeft, V2D lowerRight, V2D upperRight,
+                             V2D upperLeft)
+    : ConvexPolygon(), m_lowerLeft(std::move(lowerLeft)),
+      m_lowerRight(std::move(lowerRight)), m_upperRight(std::move(upperRight)),
+      m_upperLeft(std::move(upperLeft)) {}
 
 /**
  *  Special constructor for a rectangle

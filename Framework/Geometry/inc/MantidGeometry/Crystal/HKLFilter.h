@@ -93,7 +93,7 @@ typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
 /// Base class for unary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
 public:
-  HKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter);
+  HKLFilterUnaryLogicOperation(HKLFilter_const_sptr filter);
 
   /// Returns the operand of the function.
   const HKLFilter_const_sptr &getOperand() const { return m_operand; }
@@ -117,8 +117,8 @@ public:
 /// Base class for binary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterBinaryLogicOperation : public HKLFilter {
 public:
-  HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
-                                const HKLFilter_const_sptr &rhs);
+  HKLFilterBinaryLogicOperation(HKLFilter_const_sptr lhs,
+                                HKLFilter_const_sptr rhs);
 
   /// Returns the left-hand side operand of the operation.
   const HKLFilter_const_sptr &getLHS() const { return m_lhs; }

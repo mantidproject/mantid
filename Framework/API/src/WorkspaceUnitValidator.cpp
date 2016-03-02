@@ -12,8 +12,8 @@ namespace API {
   * left empty, the validator will simply check that the workspace is not
   * unitless.
   */
-WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
-    : MatrixWorkspaceValidator(), m_unitID(unitID) {}
+WorkspaceUnitValidator::WorkspaceUnitValidator(std::string unitID)
+    : MatrixWorkspaceValidator(), m_unitID(std::move(unitID)) {}
 
 /**
   * Clone the current state

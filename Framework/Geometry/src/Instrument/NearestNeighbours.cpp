@@ -24,8 +24,8 @@ using Kernel::V3D;
 NearestNeighbours::NearestNeighbours(
     boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
-    : m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8),
-      m_cutoff(-DBL_MAX), m_scale(), m_radius(0),
+    : m_instrument(std::move(instrument)), m_spectraMap(spectraMap),
+      m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
 }
@@ -41,7 +41,7 @@ NearestNeighbours::NearestNeighbours(
 NearestNeighbours::NearestNeighbours(
     int nNeighbours, boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
-    : m_instrument(instrument), m_spectraMap(spectraMap),
+    : m_instrument(std::move(instrument)), m_spectraMap(spectraMap),
       m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_scale(), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);

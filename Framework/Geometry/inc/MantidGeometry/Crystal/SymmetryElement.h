@@ -60,7 +60,7 @@ public:
   std::string hmSymbol() const { return m_hmSymbol; }
 
 protected:
-  SymmetryElement(const std::string &symbol);
+  SymmetryElement(std::string symbol);
 
   std::string m_hmSymbol;
 };
@@ -89,7 +89,7 @@ typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
  */
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
-  SymmetryElementInversion(const V3R &inversionPoint = V3R(0, 0, 0));
+  SymmetryElementInversion(V3R inversionPoint = V3R(0, 0, 0));
 
   SymmetryElement_sptr clone() const override;
 
@@ -111,7 +111,7 @@ typedef boost::shared_ptr<SymmetryElementInversion>
  */
 class MANTID_GEOMETRY_DLL SymmetryElementTranslation : public SymmetryElement {
 public:
-  SymmetryElementTranslation(const V3R &translation);
+  SymmetryElementTranslation(V3R translation);
 
   /// Returns the internally stored translation vector.
   V3R getTranslation() const { return m_translation; }
@@ -142,7 +142,7 @@ public:
 
 protected:
   SymmetryElementWithAxis(const std::string &symbol, const V3R &axis,
-                          const V3R &translation);
+                          V3R translation);
 
   void setAxis(const V3R &axis);
 

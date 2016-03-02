@@ -37,9 +37,9 @@ Component::Component()
 *  @param name :: Component name
 *  @param parent :: parent Component (optional)
 */
-Component::Component(const std::string &name, IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(),
-      m_rot() {}
+Component::Component(std::string name, IComponent *parent)
+    : m_parent(parent), m_base(nullptr), m_map(nullptr),
+      m_name(std::move(name)), m_pos(), m_rot() {}
 
 /** Constructor by value
 *  @param name :: Component name
@@ -47,10 +47,9 @@ Component::Component(const std::string &name, IComponent *parent)
 *  absolute or relative if the parent is defined
 *  @param parent :: parent Component
 */
-Component::Component(const std::string &name, const V3D &position,
-                     IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
-      m_pos(position), m_rot() {}
+Component::Component(std::string name, V3D position, IComponent *parent)
+    : m_parent(parent), m_base(nullptr), m_map(nullptr),
+      m_name(std::move(name)), m_pos(std::move(position)), m_rot() {}
 
 /** Constructor
 *  @param name :: Component name
@@ -58,10 +57,11 @@ Component::Component(const std::string &name, const V3D &position,
 *  @param rotation :: orientation quaternion (relative to parent, if present)
 *  @param parent :: parent Component (optional)
 */
-Component::Component(const std::string &name, const V3D &position,
-                     const Quat &rotation, IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
-      m_pos(position), m_rot(rotation) {}
+Component::Component(std::string name, V3D position, Quat rotation,
+                     IComponent *parent)
+    : m_parent(parent), m_base(nullptr), m_map(nullptr),
+      m_name(std::move(name)), m_pos(std::move(position)),
+      m_rot(std::move(rotation)) {}
 
 //------------------------------------------------------------------------------------------------
 /** Return true if the Component is, in fact, parametrized

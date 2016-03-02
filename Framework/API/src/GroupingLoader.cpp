@@ -17,15 +17,16 @@ namespace API {
 * @param instrument :: [input] Instrument
 */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
-    : m_instrument(instrument) {}
+    : m_instrument(std::move(instrument)) {}
 
 /** Constructor with field direction
 * @param instrument :: [input] Instrument
 * @param mainFieldDirection :: [input] Direction of main field (for MUSR)
 */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
-                               const std::string &mainFieldDirection)
-    : m_instrument(instrument), m_mainFieldDirection(mainFieldDirection) {}
+                               std::string mainFieldDirection)
+    : m_instrument(std::move(instrument)),
+      m_mainFieldDirection(std::move(mainFieldDirection)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

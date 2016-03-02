@@ -22,8 +22,8 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker()
  * multiperiod workspaces.
  */
 MultiPeriodGroupWorker::MultiPeriodGroupWorker(
-    const std::string &workspacePropertyName)
-    : m_workspacePropertyName(workspacePropertyName) {}
+    std::string workspacePropertyName)
+    : m_workspacePropertyName(std::move(workspacePropertyName)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

@@ -20,8 +20,7 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const DateAndTime &start, const DateAndTime &stop,
-                    const int index = 0);
+  SplittingInterval(DateAndTime start, DateAndTime stop, const int index = 0);
 
   DateAndTime start() const;
   DateAndTime stop() const;

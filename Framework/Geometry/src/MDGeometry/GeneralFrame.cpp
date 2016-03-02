@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 namespace Mantid {
@@ -7,13 +9,13 @@ const std::string GeneralFrame::GeneralFrameDistance = "Distance";
 const std::string GeneralFrame::GeneralFrameTOF = "Time of Flight";
 const std::string GeneralFrame::GeneralFrameName = "General Frame";
 
-GeneralFrame::GeneralFrame(const std::string &frameName,
+GeneralFrame::GeneralFrame(std::string frameName,
                            std::unique_ptr<Kernel::MDUnit> unit)
-    : m_unit(unit.release()), m_frameName(frameName) {}
+    : m_unit(unit.release()), m_frameName(std::move(frameName)) {}
 
-GeneralFrame::GeneralFrame(const std::string &frameName,
-                           const Kernel::UnitLabel &unit)
-    : m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(frameName) {}
+GeneralFrame::GeneralFrame(std::string frameName, const Kernel::UnitLabel &unit)
+    : m_unit(new Mantid::Kernel::LabelUnit(unit)),
+      m_frameName(std::move(frameName)) {}
 
 Kernel::UnitLabel GeneralFrame::getUnitLabel() const {
   return m_unit->getUnitLabel();

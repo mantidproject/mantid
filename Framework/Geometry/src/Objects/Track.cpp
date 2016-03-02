@@ -22,8 +22,8 @@ Track::Track() : m_startPoint(), m_unitVector() {}
 * @param startPt :: Initial point
 * @param unitVector :: Directional vector. It must be unit vector.
 */
-Track::Track(const V3D &startPt, const V3D &unitVector)
-    : m_startPoint(startPt), m_unitVector(unitVector) {}
+Track::Track(V3D startPt, V3D unitVector)
+    : m_startPoint(std::move(startPt)), m_unitVector(std::move(unitVector)) {}
 
 /**
  * Resets the track starting point and direction.

@@ -22,8 +22,8 @@ Constructor
 */
 {}
 
-Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
-    : Origin(O), Direct(D)
+Line::Line(Kernel::V3D O, Kernel::V3D D)
+    : Origin(std::move(O)), Direct(std::move(D))
 /**
 Constructor
 */

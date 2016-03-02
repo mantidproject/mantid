@@ -49,13 +49,13 @@ Object::Object()
 *  Construct with original shape xml knowledge.
 *  @param shapeXML : string with original shape xml.
 */
-Object::Object(const std::string &shapeXML)
+Object::Object(std::string shapeXML)
     : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
       AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
-      m_shapeXML(shapeXML), m_material() // empty by default
+      m_shapeXML(std::move(shapeXML)), m_material() // empty by default
 {
   handle = boost::make_shared<CacheGeometryHandler>(this);
 }

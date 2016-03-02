@@ -56,7 +56,7 @@ public:
   Constructor
   @param ws : MDEventWorkspace to add to.
   */
-  MDEventInserter(MDEW_SPTR ws) : m_ws(ws) {}
+  MDEventInserter(MDEW_SPTR ws) : m_ws(std::move(ws)) {}
 
   /**
   Creates an mdevent and adds it to the MDEW. The type of MDEvent generated is

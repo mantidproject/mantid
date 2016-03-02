@@ -10,9 +10,9 @@ namespace PhysicalConstants {
 
 using std::string;
 
-Atom::Atom(const std::string &symbol, const uint16_t z, const uint16_t a,
+Atom::Atom(std::string symbol, const uint16_t z, const uint16_t a,
            const double abundance, const double mass, const double density)
-    : symbol(symbol), z_number(z), a_number(a), abundance(abundance),
+    : symbol(std::move(symbol)), z_number(z), a_number(a), abundance(abundance),
       mass(mass), mass_density(density),
       number_density(density * N_A * 1.e-24 /
                      mass), // Convert from cm^-3 to Angstroms^-3
