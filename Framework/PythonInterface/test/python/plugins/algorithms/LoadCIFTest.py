@@ -138,6 +138,7 @@ class AtomListBuilderTest(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data), 'Fake 1/8 1/8 1/8 1.0 0.01;Fake 0.34 0.56 0.23 1.0 0.02')
 
+        del data[u'_atom_site_label']
         data[u'_atom_site_type_symbol'] = [u'Si', u'Al']
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')

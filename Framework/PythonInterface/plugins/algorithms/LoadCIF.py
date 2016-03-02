@@ -119,12 +119,7 @@ class AtomListBuilder(object):
             self.atomList = self._getAtoms(cifData, unitCell)
 
     def _getAtoms(self, cifData, unitCell=None):
-        labelKey = u'_atom_site_label'
-
-        if labelKey not in cifData.keys():
-            raise RuntimeError('The field \'_atom_site_label\' is not present in the supplied CIF-file. Aborting.')
-
-        labels = cifData[labelKey]
+        labels = self._getLabels(cifData)
 
         atomCoordinates = self._getAtomCoordinates(cifData, labels)
         occupancies = self._getOccupancies(cifData, labels)
@@ -141,6 +136,16 @@ class AtomListBuilder(object):
             atomLines.append(' '.join(cleanLine))
 
         return ';'.join(atomLines)
+
+    def _getLabels(self, cifData):
+        try:
+            return cifData[u'_atom_site_label']
+        except:
+            if u'_atom_site_fract_x' not in cifData.keys():
+                raise RuntimeError(
+                    'Too much information missing from CIF-file. Does it contain a loop_ that defines atoms?')
+
+            return [str(x) for x in range(len(cifData[u'_atom_site_fract_x']))]
 
     def _getAtomCoordinates(self, cifData, labels):
         coordinateFields = [u'_atom_site_fract_x', u'_atom_site_fract_y', u'_atom_site_fract_z']
