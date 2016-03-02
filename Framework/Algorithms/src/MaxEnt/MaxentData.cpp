@@ -11,7 +11,9 @@ namespace Algorithms {
 * use
 */
 MaxentData::MaxentData(MaxentEntropy_sptr entropy)
-    : m_entropy(entropy), m_angle(-1.), m_chisq(-1.) {}
+    : m_data(), m_errors(), m_image(), m_dataCalc(), m_background(1.0),
+      m_angle(-1.), m_chisq(-1.), m_entropy(entropy), m_directionsIm(),
+      m_coeffs() {}
 
 /**
 * Loads a real signal
@@ -183,7 +185,7 @@ std::vector<double> MaxentData::calculateChiGrad() const {
   // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
   std::vector<double> cgrad(size, 0.);
   for (size_t i = 0; i < size; i++) {
-    if (m_errors[i])
+    if (m_errors[i] != 0)
       cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i];
   }
 
@@ -409,7 +411,7 @@ void MaxentData::calculateQuadraticCoefficients() {
       m_coeffs.s2[k][l] = 0.;
       m_coeffs.c2[k][l] = 0.;
       for (size_t i = 0; i < npoints; i++) {
-        if (m_errors[i])
+        if (m_errors[i] != 0)
           m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
                                m_errors[i] / m_errors[i];
         m_coeffs.s2[k][l] -=

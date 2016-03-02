@@ -11,7 +11,7 @@ namespace Algorithms {
 */
 double MaxentEntropyPositiveValues::getDerivative(double value) {
 
-  return (-log(value));
+  return (-std::log(value));
 }
 
 /**

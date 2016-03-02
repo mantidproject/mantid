@@ -299,11 +299,12 @@ void MaxEnt::exec() {
 //----------------------------------------------------------------------------------------------
 
 /** Bisection method to move delta one step closer towards the solution
-* @param dirs :: [input] The current quadratic coefficients
+* @param coeffs :: [input] The current quadratic coefficients
 * @param chiTarget :: [input] The requested Chi target
 * @param chiEps :: [input] Precision required for Chi target
 * @param alphaIter :: [input] Maximum number of iterations in the bisection
 * method (alpha chop)
+* @return : The increment length to be added to the current image
 */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                                  double chiTarget, double chiEps,
@@ -375,7 +376,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
 * solving the matrix equation A*b = B
-* @param dirs :: [input] The quadratic coefficients
+* @param coeffs :: [input] The quadratic coefficients
 * @param a :: [input] The alpha value
 * @param b :: [output] The solution
 * @return :: The calculated chi-square
@@ -526,15 +527,13 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 
 /** Populates the output workspaces
 * @param inWS :: [input] The input workspace
-* @param complex :: [input] Whether or not the input is complex
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
-* @param data :: [input] The reconstructed data
-* @param image :: [input] The reconstructed image
-* @param outData :: [output] The output workspace containing the reconstructed
-* data
-* @param outImage :: [output] The output workspace containing the reconstructed
+* @param result :: [input] The result to be written in the output workspace
+* @param outWS :: [input] The output workspace to populate
+* @param isImage :: [output] Boolean indicating if result corresponds to the
 * image
+* data
 */
 void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
                               size_t nspec, const std::vector<double> &result,

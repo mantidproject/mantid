@@ -12,7 +12,7 @@ namespace Algorithms {
 double MaxentEntropyNegativeValues::getDerivative(double value) {
 
   // First derivative
-  return (-log(value + std::sqrt(value * value + 1)));
+  return (-std::log(value + std::sqrt(value * value + 1)));
 }
 
 /**
@@ -23,7 +23,7 @@ double MaxentEntropyNegativeValues::getDerivative(double value) {
 */
 double MaxentEntropyNegativeValues::getSecondDerivative(double value) {
 
-  return fabs(value);
+  return std::fabs(value);
 }
 
 /**
