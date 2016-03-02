@@ -61,7 +61,7 @@ public:
                          std::string resultUnit, std::string paramName,
                          std::string type, std::string tie,
                          std::vector<std::string> constraint,
-                         std::string &penaltyFactor, std::string fitFunc,
+                         std::string penaltyFactor, std::string fitFunc,
                          std::string extractSingleValueAs, std::string eq,
                          const Geometry::IComponent *comp,
                          double angleConvertConst,
