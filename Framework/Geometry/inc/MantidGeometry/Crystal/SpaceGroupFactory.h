@@ -246,7 +246,7 @@ public:
 protected:
   std::string
   getTransformedSymbolOrthorhombic(const std::string &hmSymbol,
-                                   const std::string &transformations) const;
+                                   const std::string &transformation) const;
 
   SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
   void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);

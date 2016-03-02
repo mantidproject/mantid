@@ -68,7 +68,7 @@ private:
   calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
 
   /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr workspace);
+  void reverse(API::MatrixWorkspace_sptr WS);
 
   /// For conversions to energy transfer, removes bins corresponding to
   /// inaccessible values

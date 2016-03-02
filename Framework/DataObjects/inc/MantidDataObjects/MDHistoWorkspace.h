@@ -96,12 +96,12 @@ public:
   void subtract(const MDHistoWorkspace &b);
   void subtract(const signal_t signal, const signal_t error);
 
-  MDHistoWorkspace &operator*=(const MDHistoWorkspace &b);
-  void multiply(const MDHistoWorkspace &b);
+  MDHistoWorkspace &operator*=(const MDHistoWorkspace &b_ws);
+  void multiply(const MDHistoWorkspace &b_ws);
   void multiply(const signal_t signal, const signal_t error);
 
-  MDHistoWorkspace &operator/=(const MDHistoWorkspace &b);
-  void divide(const MDHistoWorkspace &b);
+  MDHistoWorkspace &operator/=(const MDHistoWorkspace &b_ws);
+  void divide(const MDHistoWorkspace &b_ws);
   void divide(const signal_t signal, const signal_t error);
 
   void log(double filler = 0.0);

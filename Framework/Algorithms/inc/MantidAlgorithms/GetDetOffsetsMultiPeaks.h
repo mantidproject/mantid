@@ -129,7 +129,7 @@ private:
                          double &deltaDovD, double &dev_deltaDovD);
 
   FitPeakOffsetResult
-  calculatePeakOffset(const int wi, std::vector<double> &fittedpeakpositions,
+  calculatePeakOffset(const int wi, std::vector<double> &vec_peakPosFitted,
                       std::vector<double> &vec_peakPosRef);
 
   /// Calculate a spectrum's offset by optimizing offset

@@ -146,7 +146,7 @@ private:
   // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
   /// Calcualte value n for thermal neutron peak profile
-  void calculateThermalNeutronSpecial(API::IFunction_sptr mFunction,
+  void calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
                                       std::vector<double> vec_d,
                                       std::vector<double> &vec_n);
 

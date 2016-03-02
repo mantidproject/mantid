@@ -54,10 +54,10 @@ public:
 
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
-                  Kernel::Logger *pLog = nullptr, int nTreads = 1,
+                  Kernel::Logger *pLog = nullptr, int nThreads = 1,
                   bool inPlace = true, bool nullifyNegative = false);
-  void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
-                        MantidVec &e_data, int tread_num = 0) const;
+  void removeBackground(int nHist, MantidVec &x_data, MantidVec &y_data,
+                        MantidVec &e_data, int threadNum = 0) const;
 
 private:
   // vector of pointers to the units conversion class for the working workspace;

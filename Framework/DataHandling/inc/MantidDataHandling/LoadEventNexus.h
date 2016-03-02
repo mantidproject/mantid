@@ -120,7 +120,7 @@ public:
   template <typename T>
   static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
       const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
-      bool returnpulsetimes, int &size_t,
+      bool returnpulsetimes, int &nPeriods,
       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   template <typename T>

@@ -169,7 +169,7 @@ private:
                              std::vector<double> &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
   std::vector<double> fitOdd(const API::IFunction &f,
-                             std::vector<double> &p) const;
+                             std::vector<double> &pEven) const;
   /// Test an array of Chebyshev coefficients for convergence
   static bool hasConverged(const std::vector<double> &a, double maxA,
                            double tolerance, size_t shift = 0);
