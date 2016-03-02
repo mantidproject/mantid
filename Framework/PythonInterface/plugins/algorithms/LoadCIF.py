@@ -5,7 +5,7 @@ from mantid.api import *
 from mantid.geometry import SpaceGroupFactory, CrystalStructure
 
 import re
-import math
+import numpy as np
 
 
 # pylint: disable=invalid-name
@@ -18,8 +18,15 @@ def removeErrorEstimateFromNumber(numberString):
     return numberString[:errorBegin]
 
 
-def convertBisoToUiso(bIso):
-    return bIso / (8.0 * math.pi * math.pi)
+def getFloatOrNone(strValue):
+    try:
+        return float(strValue)
+    except ValueError:
+        return None
+
+
+def convertBtoU(bIso):
+    return bIso / (8.0 * np.pi * np.pi)
 
 
 class CrystalStructureBuilder(object):
@@ -122,7 +129,7 @@ class CrystalStructureBuilder(object):
         atomLists = [atomSymbols] + atomCoordinates + occupancies
 
         try:
-            isotropicUs = self._getIsotropicUs(cifData)
+            isotropicUs = self._getIsotropicUs(cifData, unitCell)
             atomLists += [isotropicUs]
         # pylint: disable=unused-variable,invalid-name
         except RuntimeError as e:
@@ -165,23 +172,53 @@ class CrystalStructureBuilder(object):
 
     def _getOccupancies(self, cifData, length):
         occupancyField = u'_atom_site_occupancy'
-        if not occupancyField in cifData.keys():
+        if occupancyField not in cifData.keys():
             return [['1.0'] * length]
 
         return [cifData[occupancyField]]
 
-    def _getIsotropicUs(self, cifData):
+    def _getIsotropicUs(self, cifData, unitCell):
+        isotropicUs = None
+
         keyUIso = u'_atom_site_u_iso_or_equiv'
-
-        if keyUIso in cifData.keys():
-            return cifData[keyUIso]
-
         keyBIso = u'_atom_site_b_iso_or_equiv'
 
-        if keyBIso in cifData.keys():
-            return [convertBisoToUiso(float(x)) for x in cifData[keyBIso]]
+        if keyUIso in cifData.keys():
+            isotropicUs = [getFloatOrNone(u) for u in cifData[keyUIso]]
+        elif keyBIso in cifData.keys():
+            isotropicUs = [convertBtoU(getFloatOrNone(b)) if getFloatOrNone(b) else None for b in
+                           cifData[keyBIso]]
 
-        raise RuntimeError('Neither U_iso nor B_iso are defined in the CIF-file.')
+        atomCountWithoutUIso = isotropicUs.count(None)
+        if atomCountWithoutUIso == len(isotropicUs):
+            raise RuntimeError('Neither U_iso nor B_iso are defined in the CIF-file.')
+
+        if atomCountWithoutUIso > 0 and unitCell is not None:
+            equivalentUs = self._getEquivalentUs(cifData, unitCell)
+
+            isotropicUs = [uIso if uIso is not None else uEquiv for uIso, uEquiv in zip(equivalentUs, isotropicUs)]
+
+        return isotropicUs
+
+    def _getEquivalentUs(self, cifData, unitCell):
+        uMatrices = self._getUMatrices(cifData)
+        sumWeights = self._getSumWeights(unitCell)
+
+        return [np.sum(np.multiply(uMatrix, sumWeights)) / 3. if uMatrix is not None else None for uMatrix in uMatrices]
+
+    def _getUMatrices(self):
+        return []
+
+    def _getSumWeights(self, unitCell):
+        metricTensor = unitCell.getG()
+        reciprocalMatrix = self._getReciprocalLengthSquaredMatrix(unitCell)
+
+        return np.multiply(metricTensor, reciprocalMatrix)
+
+    def _getReciprocalLengthSquaredMatrix(self, unitCell):
+        reciprocalLengthVector = np.array([[unitCell.astar(), unitCell.bstar(), unitCell.cstar()]])
+
+        return np.dot(reciprocalLengthVector.transpose(), reciprocalLengthVector)
 
     def _getCleanAtomSymbol(self, atomSymbol):
         nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)

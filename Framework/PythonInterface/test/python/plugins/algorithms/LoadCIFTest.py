@@ -5,6 +5,9 @@ from testhelpers import assertRaisesNothing
 from LoadCIF import UBMatrixBuilder, CrystalStructureBuilder
 
 from mantid.api import AlgorithmFactory
+from mantid.geometry import UnitCell
+
+import numpy as np
 
 
 def merge_dicts(lhs, rhs):
@@ -152,6 +155,37 @@ class CrystalStructureBuilderTestAtoms(unittest.TestCase):
                                    (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])]))
 
         self.assertEqual(self.builder._getAtoms(data), 'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+
+    def test_getReciprocalLengthMatrix(self):
+        cell = UnitCell(1, 2, 3)
+
+        matrix = self.builder._getReciprocalLengthSquaredMatrix(cell)
+
+        expected = np.array([[(1.0 / 1.0 * 1.0 / 1.0), (1.0 / 1.0 * 1.0 / 2.0), (1.0 / 1.0 * 1.0 / 3.0)],
+                             [(1.0 / 2.0 * 1.0 / 1.0), (1.0 / 2.0 * 1.0 / 2.0), (1.0 / 2.0 * 1.0 / 3.0)],
+                             [(1.0 / 3.0 * 1.0 / 1.0), (1.0 / 3.0 * 1.0 / 2.0), (1.0 / 3.0 * 1.0 / 3.0)]])
+
+        self.assertTrue(np.all(matrix == expected))
+
+    def test_getSumWeights_orthorhombic(self):
+        cell = UnitCell(1, 2, 3, 90, 90, 90)
+
+        matrix = self.builder._getSumWeights(cell)
+        expected = np.array([[1.0, 0.0, 0.0],
+                             [0.0, 1.0, 0.0],
+                             [0.0, 0.0, 1.0]])
+
+        self.assertTrue(np.all(np.abs(matrix - expected) < 1.e-9))
+
+    def test_getSumWeights_hexagonal(self):
+        cell = UnitCell(2, 2, 3, 90, 90, 120)
+
+        matrix = self.builder._getSumWeights(cell)
+        expected = np.array([[4. / 3., -2. / 3., 0.0],
+                             [-2. / 3., 4. / 3., 0.0],
+                             [0.0, 0.0, 1.0]])
+
+        self.assertTrue(np.all(np.abs(matrix - expected) < 1.e-9))
 
 
 class UBMatrixBuilderTest(unittest.TestCase):
