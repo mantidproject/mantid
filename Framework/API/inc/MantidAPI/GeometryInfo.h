@@ -3,7 +3,7 @@
 
 #include "MantidAPI/GeometryInfoFactory.h"
 #include <boost/optional.hpp>
-
+#include <mutex>
 namespace Mantid {
 
 namespace Geometry {
@@ -88,11 +88,16 @@ public:
   /// Invalidate the cache
   void invalidateL2Cache();
   /// Disable copy
-  GeometryInfo(const GeometryInfo&) = delete;
+  GeometryInfo(const GeometryInfo &) =
+      delete; // Cannot remove this owing to GeometryInfoFactory::create
   /// Disable assignement
-  GeometryInfo& operator=(const GeometryInfo&) = delete;
+  GeometryInfo &operator=(const GeometryInfo &) =
+      delete; // Cannot remove this owing to GeometryInfoFactory::create
+  ///  Move constructor
+  GeometryInfo(GeometryInfo &&original);
+  ///  Move assignement
+  GeometryInfo &operator=(GeometryInfo &&original);
 
-  GeometryInfo(GeometryInfo&& original) = default;
 private:
   const GeometryInfoFactory &m_factory;
   boost::shared_ptr<const Geometry::IDetector> m_detector;
@@ -100,6 +105,10 @@ private:
   mutable OptionalDouble m_l2;
   mutable OptionalDouble m_twoTheta;
   mutable OptionalDouble m_signedTwoTheta;
+
+  mutable std::mutex m_l2Lock;
+  mutable std::mutex m_twoThetaLock;
+  mutable std::mutex m_signedTwoThetaLock;
 };
 }
 }

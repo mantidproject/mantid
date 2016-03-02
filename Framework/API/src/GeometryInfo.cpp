@@ -46,16 +46,36 @@ double GeometryInfo::getL2() const {
   if (!m_l2) {
     if (!isMonitor()) {
       auto &sample = m_factory.getSample();
-      m_l2 = m_detector->getDistance(sample);
+      std::lock_guard<std::mutex> lock(m_l2Lock);
+      if (!m_l2) {
+        m_l2 = m_detector->getDistance(sample);
+      }
     } else {
       auto &source = m_factory.getSource();
-      m_l2 = m_detector->getDistance(source) - getL1();
+      std::lock_guard<std::mutex> lock(m_l2Lock);
+      if (!m_l2) {
+        m_l2 = m_detector->getDistance(source) - getL1();
+      }
     }
   }
   return m_l2.value();
 }
 
 void GeometryInfo::invalidateL2Cache() { m_l2 = boost::optional<double>{}; }
+
+GeometryInfo::GeometryInfo(GeometryInfo &&original)
+    : m_factory(original.m_factory) {
+  this->m_l2 = std::move(original.m_l2);
+  this->m_twoTheta = std::move(original.m_twoTheta);
+  this->m_signedTwoTheta = std::move(original.m_signedTwoTheta);
+}
+
+GeometryInfo &GeometryInfo::operator=(GeometryInfo &&original) {
+  this->m_l2 = std::move(original.m_l2);
+  this->m_twoTheta = std::move(original.m_twoTheta);
+  this->m_signedTwoTheta = std::move(original.m_signedTwoTheta);
+  return *this;
+}
 
 double GeometryInfo::getTwoTheta() const {
 
@@ -73,7 +93,10 @@ double GeometryInfo::getTwoTheta() const {
 
     // TODO. According to ConvertUnits. two-theta is always set to zero for
     // monitors.
-    m_twoTheta = m_detector->getTwoTheta(samplePos, beamLine);
+    std::lock_guard<std::mutex> lock(m_twoThetaLock);
+    if (!m_twoTheta) {
+      m_twoTheta = m_detector->getTwoTheta(samplePos, beamLine);
+    }
   }
   return m_twoTheta.value();
 }
@@ -95,8 +118,12 @@ double GeometryInfo::getSignedTwoTheta() const {
     // Get the instrument up axis.
     const Kernel::V3D &instrumentUpAxis =
         m_factory.getInstrument().getReferenceFrame()->vecPointingUp();
+
+    std::lock_guard<std::mutex> lock(m_signedTwoThetaLock);
+    if (!m_signedTwoTheta) {
     m_signedTwoTheta =
         m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+    }
   }
   return m_signedTwoTheta.value();
 }
