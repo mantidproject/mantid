@@ -77,11 +77,11 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_ei_input.setToolTip("Incident Energy in meV")
         self.direct_ei_grid.addWidget(self.direct_ei_input)
         self.emptyfield_msgbox = QtGui.QMessageBox()
-        self.emptyfield_msgbox.setText("Ei or Emax cannot be empty")
+        self.emptyfield_msgbox.setText("Invalid input has been provided for Ei or Emin! Please try again")
         self.ei_msgbox = QtGui.QMessageBox()
         self.ei_msgbox.setText("Ei cannot be negative! Please try again")
         self.ei_emin_msgbox = QtGui.QMessageBox()
-        self.ei_emin_msgbox.setText("Emin must be less than all the values provided in Ei! Please try again")
+        self.ei_emin_msgbox.setText("Emin must be less than the values provided for Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
         self.direct_plotover = QtGui.QCheckBox("Plot Over", self.tab_direct)
         self.direct_plotover.setToolTip("Hold this plot?")
@@ -297,6 +297,7 @@ class QECoverageGUI(QtGui.QWidget):
                 ei_vec = self.direct_input_check(ei_vec)
 
             except ValueError:
+                self.emptyfield_msgbox.show()
                 raise ValueError(eierr)
 
         else:
@@ -305,6 +306,7 @@ class QECoverageGUI(QtGui.QWidget):
                 ei_vec = self.direct_input_check(ei_vec)
 
             except ValueError:
+                self.emptyfield_msgbox.show()
                 raise ValueError(eierr)
 
         qe = calcQE(ei_vec, self.tthlims, emin=float(self.direct_emin_input.text()))
