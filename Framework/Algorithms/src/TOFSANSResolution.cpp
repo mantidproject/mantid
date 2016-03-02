@@ -196,7 +196,7 @@ void TOFSANSResolution::exec() {
       const double dwl_over_wl =
           3.9560 * getTOFResolution(wl) / (1000.0 * (L1 + L2) * wl);
       // This term is related to the wavelength binning
-      const double wl_bin_over_wl = wl_bin/wl;
+      const double wl_bin_over_wl = wl_bin / wl;
       const double dq_over_q =
           std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl +
                     wl_bin_over_wl * wl_bin_over_wl);
