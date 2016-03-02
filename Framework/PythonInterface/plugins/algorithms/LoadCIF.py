@@ -2,7 +2,7 @@
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
-from mantid.geometry import SpaceGroupFactory, CrystalStructure
+from mantid.geometry import SpaceGroupFactory, CrystalStructure, UnitCell
 
 import re
 import numpy as np
@@ -119,45 +119,43 @@ class AtomListBuilder(object):
             self.atomList = self._getAtoms(cifData, unitCell)
 
     def _getAtoms(self, cifData, unitCell=None):
-        atomSymbols = self._getAtomSymbols(cifData)
-        atomCoordinates = self._getAtomCoordinates(cifData)
-        occupancies = self._getOccupancies(cifData, len(atomSymbols))
+        labelKey = u'_atom_site_label'
 
-        atomLists = [atomSymbols] + atomCoordinates + occupancies
+        if labelKey not in cifData.keys():
+            raise RuntimeError('The field \'_atom_site_label\' is not present in the supplied CIF-file. Aborting.')
 
-        try:
-            isotropicUs = self._getIsotropicUs(cifData, unitCell)
-            atomLists += [isotropicUs]
-        # pylint: disable=unused-variable,invalid-name
-        except RuntimeError as e:
-            pass
+        labels = cifData[labelKey]
+
+        atomCoordinates = self._getAtomCoordinates(cifData, labels)
+        occupancies = self._getOccupancies(cifData, labels)
+        atomSymbols = self._getAtomSymbols(cifData, labels)
+        isotropicUs = self._getIsotropicUs(cifData, labels)
 
         atomLines = []
-        for atomLine in zip(*atomLists):
-            stringAtomLine = [str(x) for x in atomLine]
+        for atomLabel in labels:
+            stringAtomLine = [str(x) for x in (
+                atomSymbols[atomLabel], atomCoordinates[atomLabel], occupancies[atomLabel], isotropicUs[atomLabel])]
 
-            cleanLine = [self._getCleanAtomSymbol(stringAtomLine[0])] + [removeErrorEstimateFromNumber(x) for x in
-                                                                         list(stringAtomLine[1:])]
+            cleanLine = [stringAtomLine[0]] + [removeErrorEstimateFromNumber(x) for x in
+                                               list(stringAtomLine[1:])]
             atomLines.append(' '.join(cleanLine))
 
         return ';'.join(atomLines)
 
-    def _getAtomCoordinates(self, cifData):
+    def _getAtomCoordinates(self, cifData, labels):
         coordinateFields = [u'_atom_site_fract_x', u'_atom_site_fract_y', u'_atom_site_fract_z']
 
-        atomCoordinates = []
-
         for field in coordinateFields:
-            if field in cifData.keys():
-                atomCoordinates += [cifData[field]]
-            else:
+            if field not in cifData.keys():
                 raise RuntimeError(
                     'Mandatory field {0} not found in CIF-file.' \
                     'Please check the atomic position definitions.'.format(field))
 
-        return atomCoordinates
+        return dict(
+            [(label, ' '.join([removeErrorEstimateFromNumber(c) for c in (x, y, z)])) for label, x, y, z in
+             zip(labels, *[cifData[field] for field in coordinateFields])])
 
-    def _getAtomSymbols(self, cifData):
+    def _getAtomSymbols(self, cifData, labels):
         rawAtomSymbols = [cifData[x] for x in [u'_atom_site_type_symbol', u'_atom_site_label'] if x in
                           cifData.keys()]
 
@@ -165,42 +163,40 @@ class AtomListBuilder(object):
             raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
                                'missing.')
 
-        return [self._getCleanAtomSymbol(x) for x in rawAtomSymbols[0]]
+        return dict(
+            [(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
 
     def _getCleanAtomSymbol(self, atomSymbol):
         nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
 
         return re.sub(nonCharacterRe, '', atomSymbol)
 
-    def _getOccupancies(self, cifData, length):
+    def _getOccupancies(self, cifData, labels):
         occupancyField = u'_atom_site_occupancy'
-        if occupancyField not in cifData.keys():
-            return [['1.0'] * length]
 
-        return [cifData[occupancyField]]
+        occupancies = []
+        if occupancyField in cifData.keys():
+            occupancies += cifData[occupancyField]
+        else:
+            occupancies += ['1.0'] * len(labels)
 
-    def _getIsotropicUs(self, cifData, unitCell):
-        isotropicUs = None
+        return dict(zip(labels, occupancies))
+
+    def _getIsotropicUs(self, cifData, labels):
 
         keyUIso = u'_atom_site_u_iso_or_equiv'
         keyBIso = u'_atom_site_b_iso_or_equiv'
 
+        isotropicUs = []
         if keyUIso in cifData.keys():
-            isotropicUs = [getFloatOrNone(u) for u in cifData[keyUIso]]
+            isotropicUs += [getFloatOrNone(u) for u in cifData[keyUIso]]
         elif keyBIso in cifData.keys():
-            isotropicUs = [convertBtoU(getFloatOrNone(b)) if getFloatOrNone(b) else None for b in
-                           cifData[keyBIso]]
+            isotropicUs += [convertBtoU(getFloatOrNone(b)) if getFloatOrNone(b) else None for b in
+                            cifData[keyBIso]]
+        else:
+            isotropicUs += [None] * len(labels)
 
-        atomCountWithoutUIso = isotropicUs.count(None)
-        if atomCountWithoutUIso == len(isotropicUs):
-            raise RuntimeError('Neither U_iso nor B_iso are defined in the CIF-file.')
-
-        if atomCountWithoutUIso > 0 and unitCell is not None:
-            equivalentUs = self._getEquivalentUs(cifData, unitCell)
-
-            isotropicUs = [uIso if uIso is not None else uEquiv for uIso, uEquiv in zip(equivalentUs, isotropicUs)]
-
-        return isotropicUs
+        return dict(zip(labels, isotropicUs))
 
     def _getEquivalentUs(self, cifData, unitCell):
         uMatrices = self._getUMatrices(cifData)
@@ -238,7 +234,8 @@ class CrystalStructureBuilder(object):
 
             self.spaceGroup = SpaceGroupBuilder(cifData).spaceGroup
             self.unitCell = UnitCellBuilder(cifData).unitCell
-            self.atoms = self._getAtoms(cifData)
+
+            self.atoms = self._getAtoms(cifData, UnitCell(*[' '.split(self.unitCell)]))
 
     def getCrystalStructure(self):
         return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
