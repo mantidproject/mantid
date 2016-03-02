@@ -165,6 +165,7 @@ void TOFSANSResolution::exec() {
 
     for (int j = 0; j < wlLength - 1; j++) {
       const double wl = (XIn[j + 1] + XIn[j]) / 2.0;
+      const double wl_bin = XIn[j + 1] - XIn[j];
       if (!isEmpty(min_wl) && wl < min_wl)
         continue;
       if (!isEmpty(max_wl) && wl > max_wl)
@@ -191,10 +192,14 @@ void TOFSANSResolution::exec() {
                (L2 * L2)) /
           12.0;
 
+      // This term is related to the TOF resolution
       const double dwl_over_wl =
           3.9560 * getTOFResolution(wl) / (1000.0 * (L1 + L2) * wl);
+      // This term is related to the wavelength binning
+      const double wl_bin_over_wl = wl_bin/wl;
       const double dq_over_q =
-          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl);
+          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl +
+                    wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
       // distribution and
