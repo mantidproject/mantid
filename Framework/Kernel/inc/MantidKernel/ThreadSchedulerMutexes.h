@@ -50,7 +50,7 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_supermap.size() > 0) {
+    if (!m_supermap.empty()) {
       // We iterate in reverse as to take the NULL mutex last, even if no mutex
       // is busy
       SuperMap::iterator it = m_supermap.begin();
@@ -63,7 +63,7 @@ public:
           // The mutex of this map is free!
           InnerMap &map = it->second;
 
-          if (map.size() > 0) {
+          if (!map.empty()) {
             // Look for the largest cost item in it.
             InnerMap::iterator it2 = it->second.end();
             it2--;
@@ -81,7 +81,7 @@ public:
         SuperMap::iterator it = m_supermap.begin();
         SuperMap::iterator it_end = m_supermap.end();
         for (; it != it_end; it++) {
-          if (it->second.size() > 0) {
+          if (!it->second.empty()) {
             InnerMap &map = it->second;
             // Use the first one
             temp = map.begin()->second;

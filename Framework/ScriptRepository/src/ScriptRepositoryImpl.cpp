@@ -1427,7 +1427,7 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       if (!isEntryValid(filepath))
         continue;
       Json::Value entry_json = pt.get(filepath, "");
@@ -1492,7 +1492,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       Json::Value entry_json = pt.get(filepath, "");
 
       entry_it = repo.find(filepath);
@@ -1527,7 +1527,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     } // end loop FOREACH entry in local json
 
     // delete the entries to be deleted in json file
-    if (entries_to_delete.size() > 0) {
+    if (!entries_to_delete.empty()) {
 
       // clear the auto_update flag from the folders if the user deleted files
       for (const auto &folder : folders_of_deleted) {

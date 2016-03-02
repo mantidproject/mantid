@@ -252,7 +252,7 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
   }
 
   // Sort the vector
-  if (wsindexvec.size() == 0)
+  if (wsindexvec.empty())
     throw runtime_error("There is no spectrum found for input detectors list.");
 
   sort(wsindexvec.begin(), wsindexvec.end());

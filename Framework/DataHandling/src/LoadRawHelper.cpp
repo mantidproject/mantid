@@ -918,7 +918,7 @@ void LoadRawHelper::checkOptionalProperties() {
   // Check validity of spectra list property, if set
   if (m_list) {
     m_list = true;
-    if (m_spec_list.size() == 0) {
+    if (m_spec_list.empty()) {
       m_list = false;
     } else {
       const int64_t minlist =
@@ -968,7 +968,7 @@ specnum_t LoadRawHelper::calculateWorkspaceSize() {
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<specnum_t>(m_spec_list.size());
       m_total_specs = total_specs;
@@ -1025,7 +1025,7 @@ void LoadRawHelper::calculateWorkspacesizes(
           else
             ++itr;
         }
-        if (m_spec_list.size() == 0) {
+        if (m_spec_list.empty()) {
           g_log.debug() << "normalwsSpecs is " << normalwsSpecs
                         << "  monitorwsSpecs is " << monitorwsSpecs
                         << std::endl;

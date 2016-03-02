@@ -515,7 +515,7 @@ public:
     std::string thisStartTime = "";
     size_t thisNumPulses = 0;
     file.getAttr("offset", thisStartTime);
-    if (file.getInfo().dims.size() > 0)
+    if (!file.getInfo().dims.empty())
       thisNumPulses = file.getInfo().dims[0];
     file.closeData();
 
@@ -2149,7 +2149,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       }
     }
   }
-  if (detList.size() == 0)
+  if (detList.empty())
     return;
   for (auto &det : detList) {
     bool keep = false;

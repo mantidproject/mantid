@@ -166,7 +166,7 @@ void SaveSavuTomoConfig::saveFile(
 
   // Iterate through all plugin entries (number sub groups 0....n-1)
   size_t procCount = 0;
-  for (auto w : wss) {
+  for (const auto &w : wss) {
     // Concatenate table contents, putting pipeline processing steps in the same
     // sequence
     // as they come in the seq of table workspaces

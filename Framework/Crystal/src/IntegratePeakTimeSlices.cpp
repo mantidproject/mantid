@@ -494,7 +494,7 @@ void IntegratePeakTimeSlices::exec() {
               auto XXX =
                   boost::make_shared<DataModeHandler>(*m_AttributeValues);
               m_AttributeValues = XXX;
-              if (X.size() > 0)
+              if (!X.empty())
                 m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
 
             } else // lastAttributeList exists
@@ -2391,7 +2391,7 @@ bool DataModeHandler::IsEnoughData(const double *ParameterValues,
   // Check if flat
   double Varx, Vary, Cov;
 
-  if (StatBase.size() <= 0)
+  if (StatBase.empty())
     return false;
 
   double ncells = static_cast<int>(StatBase[IIntensities]);

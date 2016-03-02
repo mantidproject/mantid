@@ -112,9 +112,9 @@ namespace MantidQt
 
     protected:
       //Method for handling drop events
-      void dropEvent(QDropEvent *);
+      void dropEvent(QDropEvent *) override;
       //called when a drag event enters the class
-      void dragEnterEvent(QDragEnterEvent *);
+      void dragEnterEvent(QDragEnterEvent *) override;
 
     private slots:
       /// Slot called when the current view is changed

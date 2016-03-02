@@ -311,7 +311,7 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 */
 void CalculateFlatBackground::getSpecInds(std::vector<int> &output,
                                           const int workspaceTotal) {
-  if (output.size() > 0) {
+  if (!output.empty()) {
     return;
   }
 

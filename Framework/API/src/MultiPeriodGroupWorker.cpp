@@ -193,7 +193,7 @@ bool MultiPeriodGroupWorker::processGroups(
     Algorithm *const sourceAlg,
     const VecWSGroupType &vecMultiPeriodGroups) const {
   // If we are not processing multiperiod groups, use the base behaviour.
-  if (vecMultiPeriodGroups.size() < 1) {
+  if (vecMultiPeriodGroups.empty()) {
     return false; // Indicates that this is not a multiperiod group workspace.
   }
   Property *outputWorkspaceProperty = sourceAlg->getProperty("OutputWorkspace");

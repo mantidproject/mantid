@@ -216,7 +216,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
 
   double Q;
   if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
-    if (m_qValueCache.size() == 0) {
+    if (m_qValueCache.empty()) {
       throw std::runtime_error(
           "No Q attribute provided and cannot retrieve from worksapce.");
     }

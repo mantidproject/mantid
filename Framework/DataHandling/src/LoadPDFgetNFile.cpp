@@ -309,7 +309,7 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
   */
 void LoadPDFgetNFile::generateDataWorkspace() {
   // 0. Check
-  if (mData.size() == 0) {
+  if (mData.empty()) {
     throw runtime_error("Data set has not been initialized. Quit!");
   }
 
