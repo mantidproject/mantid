@@ -3,7 +3,7 @@
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
-from VesuvioInstrument import VESUVIO #Probably to be replaced with inst_param file
+from vesuvio.instrument import VESUVIO #Probably to be replaced with inst_param file
 
 from mantid import mtd
 from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)

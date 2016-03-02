@@ -5,8 +5,8 @@ the Mantid fitting algorithm will understand
 """
 import ast
 
-import VesuvioBackgrounds as backgrounds
-import VesuvioProfiles as profiles
+import vesuvio.backgrounds as backgrounds
+import vesuvio.profiles as profiles
 
 
 # --------------------------------------------------------------------------------
