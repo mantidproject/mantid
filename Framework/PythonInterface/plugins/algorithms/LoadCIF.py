@@ -125,7 +125,7 @@ class AtomListBuilder(object):
         occupancies = self._getOccupancies(cifData, labels)
         atomSymbols = self._getAtomSymbols(cifData, labels)
 
-        isotropicUs = self._getIsotropicUs(cifData, labels)
+        isotropicUs = self._getIsotropicUs(cifData, labels, unitCell)
 
         atomLines = []
         for atomLabel in labels:
@@ -189,7 +189,7 @@ class AtomListBuilder(object):
 
         return dict(zip(labels, occupancies))
 
-    def _getIsotropicUs(self, cifData, labels):
+    def _getIsotropicUs(self, cifData, labels, unitCell):
 
         keyUIso = u'_atom_site_u_iso_or_equiv'
         keyBIso = u'_atom_site_b_iso_or_equiv'
@@ -203,16 +203,53 @@ class AtomListBuilder(object):
         else:
             isotropicUs += [None] * len(labels)
 
-        return dict(zip(labels, isotropicUs))
+        isotropicUMap = dict(zip(labels, isotropicUs))
 
-    def _getEquivalentUs(self, cifData, unitCell):
-        uMatrices = self._getUMatrices(cifData)
+        if None in isotropicUs:
+            try:
+                equivalentUMap = self._getEquivalentUs(cifData, labels, unitCell)
+                for key, uIso in isotropicUMap.iteritems():
+                    if uIso is None and key in equivalentUMap:
+                        isotropicUMap[key] = equivalentUMap[key]
+
+            except RuntimeError:
+                pass
+
+        return isotropicUMap
+
+    def _getEquivalentUs(self, cifData, labels, unitCell):
+        uMatrices = self._getUMatrices(cifData, labels)
         sumWeights = self._getSumWeights(unitCell)
 
         return [np.sum(np.multiply(uMatrix, sumWeights)) / 3. if uMatrix is not None else None for uMatrix in uMatrices]
 
-    def _getUMatrices(self):
-        return []
+    def _getUMatrices(self, cifData, labels):
+        anisoLabel = u'_atom_site_aniso_label'
+
+        if anisoLabel not in cifData:
+            raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
+
+        try:
+            return self._getTensors(cifData, labels,
+                                    [u'_atom_site_aniso_u_11', u'_atom_site_aniso_u_12', u'_atom_site_aniso_u_13',
+                                     u'_atom_site_aniso_u_22', u'_atom_site_aniso_u_23', u'_atom_site_aniso_u_33'])
+        except RuntimeError:
+            bTensors = self._getTensors(cifData, labels,
+                                        [u'_atom_site_aniso_b_11', u'_atom_site_aniso_b_12', u'_atom_site_aniso_b_13',
+                                         u'_atom_site_aniso_b_22', u'_atom_site_aniso_b_23', u'_atom_site_aniso_b_33'])
+            return dict([(label, convertBtoU(bTensor)) for label, bTensor in bTensors.iteritems()])
+
+    def _getTensors(self, cifData, labels, keys):
+        values = []
+
+        for key in keys:
+            if key not in cifData.keys():
+                raise RuntimeError('Can not construct tensor with missing element \'{0}\'.'.format(key))
+            else:
+                values.append([float(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
+
+        return dict([(label, np.array([[u11, u12, u13], [u12, u22, u23], [u13, u23, u33]])) for
+                     label, u11, u12, u13, u22, u23, u33 in zip(labels, *values)])
 
     def _getSumWeights(self, unitCell):
         metricTensor = unitCell.getG()
