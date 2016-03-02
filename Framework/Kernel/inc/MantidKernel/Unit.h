@@ -83,14 +83,14 @@ public:
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
+   *  @param _l1 ::       The source-sample distance (in metres)
+   *  @param _l2 ::       The sample-detector distance (in metres)
+   *  @param _twoTheta :: The scattering angle (in radians)
+   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
    * meV)
-   *  @param delta ::    Not currently used
+   *  @param _delta ::    Not currently used
    */
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
              const double &_l1, const double &_l2, const double &_twoTheta,
@@ -117,14 +117,14 @@ public:
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
+   *  @param _l1 ::       The source-sample distance (in metres)
+   *  @param _l2 ::       The sample-detector distance (in metres)
+   *  @param _twoTheta :: The scattering angle (in radians)
+   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
    * meV)
-   *  @param delta ::    Not currently used
+   *  @param _delta ::    Not currently used
    */
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                const double &_l1, const double &_l2, const double &_twoTheta,
