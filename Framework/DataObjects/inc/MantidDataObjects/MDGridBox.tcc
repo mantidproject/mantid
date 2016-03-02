@@ -1640,11 +1640,14 @@ TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * after all events have been added.
  *
  * @param event :: reference to a MDLeanEvent to add.
+ * @return 1 if the event was added, 0 otherwise
  * */
-TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
+TMDE(inline size_t MDGridBox)::addEvent(const MDE &event) {
   size_t cindex = calculateChildIndex(event);
   if (cindex < numBoxes)
-    m_Children[cindex]->addEvent(event);
+    return m_Children[cindex]->addEvent(event);
+  else
+    return 0;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1662,11 +1665,14 @@ TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
  * after all events have been added.
  *
  * @param event :: reference to a MDEvent to add.
+ * @return 1 if the event was added, 0 otherwise
  * */
-TMDE(inline void MDGridBox)::addEventUnsafe(const MDE &event) {
+TMDE(inline size_t MDGridBox)::addEventUnsafe(const MDE &event) {
   size_t cindex = calculateChildIndex(event);
   if (cindex < numBoxes)
-    m_Children[cindex]->addEventUnsafe(event);
+    return m_Children[cindex]->addEventUnsafe(event);
+  else
+    return 0;
 }
 
 /**Sets particular child MDgridBox at the index, specified by the input

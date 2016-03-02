@@ -134,8 +134,8 @@ public:
                              size_t &nColumns) const;
   virtual void setEventsData(const std::vector<coord_t> &coordTable);
 
-  virtual void addEvent(const MDE &Evnt);
-  virtual void addEventUnsafe(const MDE &Evnt);
+  virtual size_t addEvent(const MDE &Evnt) override;
+  virtual size_t addEventUnsafe(const MDE &Evnt) override;
 
   // add range of events
   virtual size_t addEvents(const std::vector<MDE> &events);

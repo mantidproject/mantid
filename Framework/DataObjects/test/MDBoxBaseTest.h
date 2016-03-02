@@ -78,13 +78,13 @@ public:
   virtual std::vector<MDE> *getEventsCopy() { return NULL; }
 
   /// Add a single event
-  virtual void addEvent(const MDE & /*point*/) {}
+  virtual size_t addEvent(const MDE & /*point*/) { return 0; }
   /// Add a single event and trace it if the box it has been added may need
   /// splitting
   virtual void addAndTraceEvent(const MDE & /*point*/, size_t /*index */) {}
 
   /// Add a single event
-  virtual void addEventUnsafe(const MDE & /*point*/) {}
+  virtual size_t addEventUnsafe(const MDE & /*point*/) { return 0; }
   virtual size_t
   buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,
                     const std::vector<coord_t> & /*Coord*/,

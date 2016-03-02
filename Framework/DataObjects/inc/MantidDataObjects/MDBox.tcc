@@ -774,12 +774,14 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
 //-----------------------------------------------------------------------------------------------
 /** Add a MDLeanEvent to the box.
  * @param Evnt :: reference to a MDEvent to add.
+ * @return Always returns 1
  * */
-TMDE(void MDBox)::addEvent(const MDE &Evnt) {
+TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
   this->m_dataMutex.lock();
   this->data.push_back(Evnt);
 
   this->m_dataMutex.unlock();
+  return 1;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -788,9 +790,11 @@ TMDE(void MDBox)::addEvent(const MDE &Evnt) {
  * try to add to the same box at the same time.
  *
  * @param Evnt :: reference to a MDEvent to add.
+ * @return Always returns 1
  * */
-TMDE(void MDBox)::addEventUnsafe(const MDE &Evnt) {
+TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
   this->data.push_back(Evnt);
+  return 1;
 }
 
 //-----------------------------------------------------------------------------------------------
