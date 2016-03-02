@@ -2,7 +2,7 @@
 import unittest
 from testhelpers import assertRaisesNothing
 
-from LoadCIF import UBMatrixBuilder, CrystalStructureBuilder
+from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatrixBuilder, CrystalStructureBuilder
 
 from mantid.api import AlgorithmFactory
 from mantid.geometry import UnitCell
@@ -17,9 +17,9 @@ def merge_dicts(lhs, rhs):
     return merged
 
 
-class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
+class SpaceGroupBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = SpaceGroupBuilder()
 
     def test_getSpaceGroupFromString_valid_no_exceptions(self):
         valid_new = {u'_space_group_name_h-m_alt': u'P m -3 m'}
@@ -67,9 +67,9 @@ class CrystalStructureBuilderTestSpaceGroup(unittest.TestCase):
         self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_new)
 
 
-class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
+class UnitCellBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = UnitCellBuilder()
 
     def test_getUnitCell_invalid(self):
         invalid_no_a = {u'_cell_length_b': u'5.6'}
@@ -99,9 +99,9 @@ class CrystalStructureBuilderTestUnitCell(unittest.TestCase):
         self.assertEqual(self.builder._getUnitCell(cell_errors), '5.6 5.6 2.3 90.0 90.0 120.0')
 
 
-class CrystalStructureBuilderTestAtoms(unittest.TestCase):
+class AtomListBuilderTest(unittest.TestCase):
     def setUp(self):
-        self.builder = CrystalStructureBuilder()
+        self.builder = AtomListBuilder()
         self._baseData = dict([
             (u'_atom_site_fract_x', [u'1/8', u'0.34(1)']),
             (u'_atom_site_fract_y', [u'1/8', u'0.56(2)']),

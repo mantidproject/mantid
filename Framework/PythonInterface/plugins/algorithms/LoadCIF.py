@@ -29,25 +29,10 @@ def convertBtoU(bIso):
     return bIso / (8.0 * np.pi * np.pi)
 
 
-class CrystalStructureBuilder(object):
-    '''
-    Helper class that builds a CrystalStructure file from the result
-    of the ReadCif-function provided by PyCifRW.
-
-    For testing purposes, dictionaries with the appropriate data can
-    be passed in as well, so the source of the parsed data is replaceable.
-    '''
-
-    def __init__(self, cifFile=None):
-        if cifFile is not None:
-            cifData = cifFile[cifFile.keys()[0]]
-
+class SpaceGroupBuilder(object):
+    def __init__(self, cifData=None):
+        if cifData is not None:
             self.spaceGroup = self._getSpaceGroup(cifData)
-            self.unitCell = self._getUnitCell(cifData)
-            self.atoms = self._getAtoms(cifData)
-
-    def getCrystalStructure(self):
-        return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
 
     def _getSpaceGroup(self, cifData):
         try:
@@ -98,6 +83,12 @@ class CrystalStructureBuilder(object):
 
         return SpaceGroupFactory.createSpaceGroup(possibleSpaceGroupSymbols[0]).getHMSymbol()
 
+
+class UnitCellBuilder(object):
+    def __init__(self, cifData=None):
+        if cifData is not None:
+            self.unitCell = self._getUnitCell(cifData)
+
     def _getUnitCell(self, cifData):
         unitCellComponents = [u'_cell_length_a', u'_cell_length_b', u'_cell_length_c',
                               u'_cell_angle_alpha', u'_cell_angle_beta', u'_cell_angle_gamma']
@@ -120,6 +111,12 @@ class CrystalStructureBuilder(object):
             in unitCellComponents]
 
         return ' '.join(unitCellValues)
+
+
+class AtomListBuilder(object):
+    def __init__(self, cifData=None, unitCell=None):
+        if cifData is not None:
+            self.atomList = self._getAtoms(cifData, unitCell)
 
     def _getAtoms(self, cifData, unitCell=None):
         atomSymbols = self._getAtomSymbols(cifData)
@@ -169,6 +166,11 @@ class CrystalStructureBuilder(object):
                                'missing.')
 
         return [self._getCleanAtomSymbol(x) for x in rawAtomSymbols[0]]
+
+    def _getCleanAtomSymbol(self, atomSymbol):
+        nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
+
+        return re.sub(nonCharacterRe, '', atomSymbol)
 
     def _getOccupancies(self, cifData, length):
         occupancyField = u'_atom_site_occupancy'
@@ -220,10 +222,26 @@ class CrystalStructureBuilder(object):
 
         return np.dot(reciprocalLengthVector.transpose(), reciprocalLengthVector)
 
-    def _getCleanAtomSymbol(self, atomSymbol):
-        nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
 
-        return re.sub(nonCharacterRe, '', atomSymbol)
+class CrystalStructureBuilder(object):
+    '''
+    Helper class that builds a CrystalStructure file from the result
+    of the ReadCif-function provided by PyCifRW.
+
+    For testing purposes, dictionaries with the appropriate data can
+    be passed in as well, so the source of the parsed data is replaceable.
+    '''
+
+    def __init__(self, cifFile=None):
+        if cifFile is not None:
+            cifData = cifFile[cifFile.keys()[0]]
+
+            self.spaceGroup = SpaceGroupBuilder(cifData).spaceGroup
+            self.unitCell = UnitCellBuilder(cifData).unitCell
+            self.atoms = self._getAtoms(cifData)
+
+    def getCrystalStructure(self):
+        return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
 
 
 class UBMatrixBuilder(object):
