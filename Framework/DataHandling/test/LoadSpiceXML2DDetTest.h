@@ -23,115 +23,30 @@ public:
   }
   static void destroySuite(LoadSpiceXML2DDetTest *suite) { delete suite; }
 
+  ITableWorkspace_sptr scantablews;
+
+  //----------------------------------------------------------------------------------------------
+  /** Test initialization of algorithm
+   * @brief test_Init
+   */
   void test_Init() {
     LoadSpiceXML2DDet testalg;
     testalg.initialize();
     TS_ASSERT(testalg.isInitialized());
-  }
 
-  void test_LoadHB3AXML() {
-    LoadSpiceXML2DDet loader;
-    loader.initialize();
-
-    const std::string filename("HB3A_exp355_scan0001_0522.xml");
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
-    std::vector<size_t> sizelist(2);
-    sizelist[0] = 256;
-    sizelist[1] = 256;
-    loader.setProperty("DetectorGeometry", sizelist);
-    loader.setProperty("LoadInstrument", false);
-
-    loader.execute();
-    TS_ASSERT(loader.isExecuted());
-
-    // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
-    TS_ASSERT(outws);
-
-    size_t numspec = outws->getNumberHistograms();
-    TS_ASSERT_EQUALS(numspec, 256);
-    size_t numx = outws->readX(0).size();
-    size_t numy = outws->readY(0).size();
-    TS_ASSERT_EQUALS(numx, 256);
-    TS_ASSERT_EQUALS(numy, 256);
-
-    // Check the value
-    double totalcounts = 0;
-    for (size_t i = 0; i < numspec; ++i) {
-      const MantidVec &vecY = outws->readY(i);
-      size_t numy = vecY.size();
-      for (size_t j = 0; j < numy; ++j)
-        totalcounts += vecY[j];
-    }
-    TS_ASSERT_DELTA(totalcounts, 8049.00, 0.000001);
-
-    // check max count
-    TS_ASSERT_DELTA(outws->readY(135)[120], 4., 0.000001);
-
-    // Check the sample logs
-    TS_ASSERT(outws->run().hasProperty("_monitor"));
-    int monitorcount =
-        atoi(outws->run().getProperty("_monitor")->value().c_str());
-    TS_ASSERT_EQUALS(monitorcount, 29);
-
-    // Check motor angles
-    TS_ASSERT(outws->run().hasProperty("_2theta"));
-    double _2theta = atof(outws->run().getProperty("_2theta")->value().c_str());
-    TS_ASSERT_DELTA(_2theta, 42.709750, 0.0000001);
-
-    TS_ASSERT(outws->run().hasProperty("_omega"));
-    double _omega = atof(outws->run().getProperty("_omega")->value().c_str());
-    TS_ASSERT_DELTA(_omega, 21.354500, 0.0000001);
-
-    TS_ASSERT(outws->run().hasProperty("_chi"));
-    double _chi = atof(outws->run().getProperty("_chi")->value().c_str());
-    TS_ASSERT_DELTA(_chi, 1.215250, 0.0000001);
-
-    TS_ASSERT(outws->run().hasProperty("_phi"));
-    double _phi = atof(outws->run().getProperty("_phi")->value().c_str());
-    TS_ASSERT_DELTA(_phi, 144.714218, 0.0000001);
-
-    // check start_time and end_time
-    TS_ASSERT(outws->run().hasProperty("start_time"));
-    std::string start_time = outws->run().getProperty("start_time")->value();
-    TS_ASSERT_EQUALS(start_time, "2015-01-17 13:36:45");
-
-    // Clean
-    AnalysisDataService::Instance().remove("Exp0335_S0038");
+    // create SPICE scan table workspace
+    scantablews = createSpiceScanTable();
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test algorithm with loading HB3A
+  /** Test algorithm with loading HB3A with instrument and presense of SPICE scan table
+   *  such that it can be set to zero-2-theta position
    * @brief test_LoadHB3AXML2InstrumentedWS
    * Testing include
-   * (1) 2theta = -15 degree (15 degree in SPICE): distance of 4 corners should
-   * be same. scattering
-   *     angles should be paired;
-   * (2) 2theta = 0 degree: scattering angle of all 4 corners should be same;
-   * (3) 2theta = 15 degree: scattering angles should be symmetric to case 1
+   * 1. 2theta = 0 degree: scattering angle of all 4 corners should be same;
    */
-  void test_LoadHB3AXML2InstrumentedWS() {
-
-    // Set up Spice table workspace for log value
-    ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
-            boost::make_shared<DataObjects::TableWorkspace>());
-    datatablews->addColumn("int", "Pt.");
-    datatablews->addColumn("double", "2theta");
-    datatablews->addColumn("double", "m1");
-    AnalysisDataService::Instance().addOrReplace("SpiceDataTable", datatablews);
-
-    TableRow row0 = datatablews->appendRow();
-    row0 << 1 << 15.0 << -25.8;
-    TableRow row1 = datatablews->appendRow();
-    row1 << 2 << -15.0 << -25.8;
-    TableRow row2 = datatablews->appendRow();
-    row2 << 3 << 0.0 << -25.8;
-
-    // Test 2theta = 15 degree
+  void test_LoadHB3ADataZeroPosition() {
+    // Test 2theta at 0 degree
     LoadSpiceXML2DDet loader;
     loader.initialize();
 
@@ -144,8 +59,9 @@ public:
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
-    loader.setProperty("SpiceTableWorkspace", "SpiceDataTable");
-    loader.setProperty("PtNumber", 1);
+    loader.setProperty("SpiceTableWorkspace", scantablews);
+    loader.setProperty("PtNumber", 3);
+    loader.setProperty("ShiftedDetectorDistance", 0.);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
@@ -163,8 +79,127 @@ public:
     // Instrument
     TS_ASSERT(outws->getInstrument());
 
+    // get source and sample positions
     Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
     Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+
+    // check center of the detector @ (128, 115)
+    size_t center_col =128;
+    size_t center_row = 115;
+    detid_t center_ws_index = (center_row-1) * 256 + (center_col-1);
+    Kernel::V3D det_center = outws->getDetector(center_ws_index)->getPos();
+    // distance to sample
+    double dist_r = det_center.distance(sample);
+    TS_ASSERT_DELTA(dist_r, 0.3750, 0.0001);
+    // center of the detector must be at zero
+    TS_ASSERT_DELTA(det_center.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0001)
+
+    // test the detectors with symmetric to each other
+    // they should have opposite X or Y
+
+    // ll: low-left, lr: low-right, ul: upper-left; ur: upper-right
+    size_t row_ll = 0;
+    size_t col_ll = 2;
+    size_t ws_index_ll = row_ll * 256 + col_ll;
+    Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
+
+    size_t row_lr = 0;
+    size_t col_lr = 2*127-2;
+    size_t ws_index_lr = row_lr * 256 + col_lr;
+    Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
+
+    size_t row_ul = 115*2;
+    size_t col_ul = 2;
+    size_t ws_index_ul = row_ul * 256 + col_ul;
+    Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
+
+    size_t row_ur = 115*2;
+    size_t col_ur = 2*127-2;
+    size_t ws_index_ur = row_ur * 256 + col_ur;
+    Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
+
+    // Check symmetricity
+    TS_ASSERT_DELTA(det_ll_pos.X() + det_lr_pos.Y(), 0., 0.0000001);
+    TS_ASSERT_DELTA(det_ll_pos.X(), -127*0.00019, 0.000001);
+    TS_ASSERT_DELTA(det_ll.pos.Y(), det_lr_pos.Y(), 0.000001);
+    TS_ASSERT_DELTA(del_ll_pos.Y(), -127*0.000019, 0.0000001);
+
+    TS_ASSERT_DELTA(det_ll_pos.X(), det_ul_pos.X(), 0.00001);
+    TS_ASSERT_DELTA(det_ll_pos.Y() + det_ul_pos.Y(), 0., 0.000001);
+
+    TS_ASSERT_DELTA(det_lr_pos.X(), det_ur_pos.X(), 0.00001);
+    TS_ASSERT_DELTA(det_lr_pos.Y() + det_ur_pos.Y(), 0., 0.00001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038");
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Test algorithm with loading HB3A with instrument and presense of SPICE scan table
+   *  such that it can be set to zero-2-theta position
+   * @brief test_LoadHB3AXML2InstrumentedWS
+   * Testing include
+   * (1) 2theta = -15 degree (15 degree in SPICE): distance of 4 corners should
+   * be same. scattering
+   *     angles should be paired;
+   * (2) 2theta = 0 degree: scattering angle of all 4 corners should be same;
+   * (3) 2theta = 15 degree: scattering angles should be symmetric to case 1
+   */
+  void test_LoadHB3ADataSymmetryPosition() {
+    // Set up Spice table workspace for log value
+
+    // Test 2theta = 15 degree
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", true);
+    loader.setProperty("SpiceTableWorkspace", scantablews);
+    loader.setProperty("PtNumber", 3);
+    loader.setProperty("ShiftedDetectorDistance", 0.);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    // Value
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+
+    // Instrument
+    TS_ASSERT(outws->getInstrument());
+
+    // get source and sample positions
+    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
+    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+
+    // check center of the detector @ (128, 115)
+    size_t center_col =128;
+    size_t center_row = 115;
+    detid_t center_ws_index = (center_row-1) * 256 + (center_col-1);
+    Kernel::V3D det_center = outws->getDetector(center_ws_index)->getPos();
+    // distance to sample
+    double dist_r = det_center.distance(sample);
+    TS_ASSERT_DELTA(dist_r, 0.3750, 0.0001);
+
+    // test the detectors with symmetric to each other
+    // they should have 2
+
     Kernel::V3D det0pos = outws->getDetector(0)->getPos();
     Kernel::V3D det255pos = outws->getDetector(255)->getPos();
     Kernel::V3D detlast0 = outws->getDetector(256 * 255)->getPos();
@@ -361,8 +396,9 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 
+
   //----------------------------------------------------------------------------------------------
-  /**
+  /** Test with loading instrument but without SpiceTable
    * @brief test_LoadHB3AXMLInstrumentNoTable
    */
   void test_LoadHB3AXMLInstrumentNoTable() {
@@ -379,6 +415,7 @@ public:
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
+    loader.setProperty("ShiftedDetectorDistance", 0.);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
@@ -395,6 +432,8 @@ public:
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
+
+    // check the center of the detector
 
     Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
     Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
@@ -441,6 +480,86 @@ public:
     TS_ASSERT_DELTA(twotheta_middle, 42.70975, 0.02);
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Sample test load data without instrument
+   * @brief test_LoadHB3AXML
+   */
+  void test_LoadHB3AXML() {
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", false);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    TS_ASSERT(outws);
+
+    size_t numspec = outws->getNumberHistograms();
+    TS_ASSERT_EQUALS(numspec, 256);
+    size_t numx = outws->readX(0).size();
+    size_t numy = outws->readY(0).size();
+    TS_ASSERT_EQUALS(numx, 256);
+    TS_ASSERT_EQUALS(numy, 256);
+
+    // Check the value
+    double totalcounts = 0;
+    for (size_t i = 0; i < numspec; ++i) {
+      const MantidVec &vecY = outws->readY(i);
+      size_t numy = vecY.size();
+      for (size_t j = 0; j < numy; ++j)
+        totalcounts += vecY[j];
+    }
+    TS_ASSERT_DELTA(totalcounts, 8049.00, 0.000001);
+
+    // check max count
+    TS_ASSERT_DELTA(outws->readY(135)[120], 4., 0.000001);
+
+    // Check the sample logs loaded from XML node
+    // monitor counts
+    TS_ASSERT(outws->run().hasProperty("_monitor"));
+    int monitorcount =
+        atoi(outws->run().getProperty("_monitor")->value().c_str());
+    TS_ASSERT_EQUALS(monitorcount, 29);
+
+    // Check motor angles
+    TS_ASSERT(outws->run().hasProperty("_2theta"));
+    double _2theta = atof(outws->run().getProperty("_2theta")->value().c_str());
+    TS_ASSERT_DELTA(_2theta, 42.709750, 0.0000001);
+
+    TS_ASSERT(outws->run().hasProperty("_omega"));
+    double _omega = atof(outws->run().getProperty("_omega")->value().c_str());
+    TS_ASSERT_DELTA(_omega, 21.354500, 0.0000001);
+
+    TS_ASSERT(outws->run().hasProperty("_chi"));
+    double _chi = atof(outws->run().getProperty("_chi")->value().c_str());
+    TS_ASSERT_DELTA(_chi, 1.215250, 0.0000001);
+
+    TS_ASSERT(outws->run().hasProperty("_phi"));
+    double _phi = atof(outws->run().getProperty("_phi")->value().c_str());
+    TS_ASSERT_DELTA(_phi, 144.714218, 0.0000001);
+
+    // check start_time and end_time
+    TS_ASSERT(outws->run().hasProperty("start_time"));
+    std::string start_time = outws->run().getProperty("start_time")->value();
+    TS_ASSERT_EQUALS(start_time, "2015-01-17 13:36:45");
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038");
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test of loading HB3A data with calibrated distance
    * @brief test_loadHB3ACalibratedDetDistance
@@ -478,6 +597,30 @@ public:
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
+  }
+
+  /** Create SPICE scan table workspace
+   * @brief createSpiceScanTable
+   * @return
+   */
+  ITableWorkspace_sptr createSpiceScanTable()
+  {
+    ITableWorkspace_sptr datatablews =
+      boost::dynamic_pointer_cast<ITableWorkspace>(
+          boost::make_shared<DataObjects::TableWorkspace>());
+    datatablews->addColumn("int", "Pt.");
+    datatablews->addColumn("double", "2theta");
+    datatablews->addColumn("double", "m1");
+    AnalysisDataService::Instance().addOrReplace("SpiceDataTable", datatablews);
+
+    TableRow row0 = datatablews->appendRow();
+    row0 << 1 << 15.0 << -25.8;
+    TableRow row1 = datatablews->appendRow();
+    row1 << 2 << -15.0 << -25.8;
+    TableRow row2 = datatablews->appendRow();
+    row2 << 3 << 0.0 << -25.8;
+
+    return datatablews;
   }
 
 };

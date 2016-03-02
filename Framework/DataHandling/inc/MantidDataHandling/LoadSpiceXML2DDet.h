@@ -82,9 +82,11 @@ private:
   void init() override;
   void exec() override;
 
+  /// Process inputs
+  void processInputs();
+
   /// Parse SPICE XML file
-  void parseSpiceXML(const std::string &xmlfilename,
-                     std::vector<SpiceXMLNode> &vecspicenode);
+  std::vector<SpiceXMLNode> parseSpiceXML(const std::string &xmlfilename);
 
   /// Create output MatrixWorkspace
   API::MatrixWorkspace_sptr
@@ -99,6 +101,9 @@ private:
                                     API::ITableWorkspace_sptr spicetablews,
                                     int ptnumber);
 
+  /// Set up sample logs in the output workspace
+  bool setupSampleLogs(API::MatrixWorkspace_sptr outws);
+
   /// Load instrument
   void loadInstrument(API::MatrixWorkspace_sptr matrixws,
                       const std::string &idffilename);
@@ -107,6 +112,27 @@ private:
   bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
 
   void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
+
+  // Class variables
+  // SPICE detector XML file
+  std::string m_detXMLFileName;
+  // XML node name in detector counts file
+  std::string m_detXMLNodeName;
+  //
+  size_t m_numPixelX;
+  size_t m_numPixelY;
+  //
+  bool m_loadInstrument;
+
+  // shift distance from sample to detector center
+  double m_detSampleDistanceShift;
+  //
+  bool m_hasScanTable;
+  ///
+  int m_ptNumber4Log;
+  ///
+  std::string m_idfFileName;
+
 };
 
 } // namespace DataHandling
