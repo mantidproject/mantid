@@ -15,56 +15,26 @@ public:
   static DataBlockTest *createSuite() { return new DataBlockTest(); }
   static void destroySuite(DataBlockTest *suite) { delete suite; }
 
-  void test_that_getting_next_when_next_is_available() {
+  void test_that_data_block_produces_generator_which_generates_range() {
     // Arrange
+    int64_t min = 2;
+    int64_t max = 8;
     DataBlock dataBlock;
-    dataBlock.setMinSpectrumID(2);
-    dataBlock.setMaxSpectrumID(17);
-
     // Act
-    int64_t idToTest = 12;
-    auto next = dataBlock.getNextSpectrumID(idToTest);
-
-    // Assert
-    int64_t expectedNext = 13;
-    TSM_ASSERT_EQUALS("Should return 13.", expectedNext, idToTest);
-  }
-
-  void test_that_getting_next_when_past_range_returns_end_value() {
-    // Arrange
-    DataBlock dataBlock;
-    dataBlock.setMinSpectrumID(2);
-    dataBlock.setMaxSpectrumID(17);
-
-    // Act
-    int64_t idToTest = 19;
-    auto next = dataBlock.getNextSpectrumID(idToTest);
-
-    // Assert
-    int64_t expectedNext = std::numeric_limits<int64_t>::min();
-    TSM_ASSERT_EQUALS("Should return smalles int64_t.", expectedNext, idToTest);
-  }
-
-  void test_that_generation_of_indices_delivers_over_full_range() {
-    // Arrange
-    DataBlock dataBlock;
-    int64_t min = 7;
-    int64_t max = 17;
     dataBlock.setMinSpectrumID(min);
     dataBlock.setMaxSpectrumID(max);
-
-    // Act
     auto generator = dataBlock.getGenerator();
 
     // Assert
-    //void operator++();
-    //bool isDone();
-    //int64_t getCurrent();
-
-    int64_t current = min;
-    for (current; current <= max; ++current){
-      auto dataItem = generator->getCurrent();
+    std::vector<int64_t> expected = {2, 3, 4, 5, 6, 7, 8};
+    size_t index = 0;
+    for (; !generator->isDone(); generator->next(), ++index) {
+      TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval",
+                        expected[index], generator->getValue());
     }
+
+    TSM_ASSERT_EQUALS("Should have been incremented 7 times", index,
+                      expected.size());
   }
 };
 

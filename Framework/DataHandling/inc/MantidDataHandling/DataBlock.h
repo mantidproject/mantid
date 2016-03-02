@@ -14,22 +14,23 @@ public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);
 
+  virtual ~DataBlock();
+
   static const int64_t end;
 
-  int64_t getMinSpectrumID() const;
-  void setMinSpectrumID(int64_t minSpecID);
+  virtual int64_t getMinSpectrumID() const;
+  virtual void setMinSpectrumID(int64_t minSpecID);
 
-  int64_t getMaxSpectrumID() const;
-  void setMaxSpectrumID(int64_t minSpecID);
+  virtual int64_t getMaxSpectrumID() const;
+  virtual void setMaxSpectrumID(int64_t minSpecID);
 
   size_t getNumberOfSpectra() const;
   int getNumberOfPeriods() const;
   size_t getNumberOfChannels() const;
 
   std::unique_ptr<DataBlockGenerator> getGenerator();
-  int64_t getNextSpectrumID(int64_t spectrumID) const;
 
-private:
+protected:
   int m_numberOfPeriods;
   // The number of time channels per spectrum (N histogram bins -1)
   std::size_t m_numberOfChannels;

@@ -2,6 +2,8 @@
 #define MANTID_DATAHANDLING_DATABLOCKGENERATOR_H_
 
 #include "MantidDataHandling/DllConfig.h"
+#include <boost/optional.hpp>
+#include <vector>
 #include <memory>
 
 namespace Mantid {
@@ -11,13 +13,18 @@ class DataBlock;
 
 class DLLExport DataBlockGenerator {
 public:
-  DataBlockGenerator(DataBlock* datablock, int64_t startIndex);
-  void operator++();
+  DataBlockGenerator(const std::vector<std::pair<int64_t, int64_t>>& intervals);
+  class DataBlock;
+  DataBlockGenerator& operator++();
+  DataBlockGenerator operator++(int);
   bool isDone();
-  int64_t getCurrent();
+  int64_t getValue();
+  void next();
 public:
-  int64_t m_currentIndex;
-  DataBlock* m_dataBlock;
+  std::vector<std::pair<int64_t, int64_t>> m_intervals;
+  int64_t m_currentSpectrum;
+
+  boost::optional<size_t> m_currentIntervalIndex;
 };
 
 } // namespace DataHandling
