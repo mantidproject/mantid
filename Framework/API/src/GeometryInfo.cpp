@@ -121,8 +121,8 @@ double GeometryInfo::getSignedTwoTheta() const {
 
     std::lock_guard<std::mutex> lock(m_signedTwoThetaLock);
     if (!m_signedTwoTheta) {
-    m_signedTwoTheta =
-        m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+      m_signedTwoTheta =
+          m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
     }
   }
   return m_signedTwoTheta.value();
