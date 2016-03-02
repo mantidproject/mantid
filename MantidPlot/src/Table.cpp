@@ -465,13 +465,11 @@ void Table::setCommands(const QString &com) {
 }
 
 bool Table::calculate() {
-  // Q3TableSelection sel = getSelection();
-  // bool success = true;
-  // for (int col=sel.leftCol(); col<=sel.rightCol(); col++)
-  //  if (!calculate(col, sel.topRow(), sel.bottomRow()))
-  //    success = false;
-  // return success;
-  return false;
+  bool success = true;
+  for (int col=leftSelectedColumn(); col<=rightSelectedColumn(); col++)
+   if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
+     success = false;
+  return success;
 }
 
 bool Table::muParserCalculate(int col, int startRow, int endRow,

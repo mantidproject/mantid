@@ -568,11 +568,6 @@ PreviewTable::PreviewTable(int numRows, int numCols, QWidget * parent, const cha
   setRowCount(numRows);
   setColumnCount(numCols);
 	setAttribute(Qt::WA_DeleteOnClose);
-	//setSelectionMode(Q3Table::NoSelection);
-	//setReadOnly(true);
-	//setRowMovingEnabled(false);
-	//setColumnMovingEnabled(false);
-	//verticalHeader()->setResizeEnabled(false);
 
 	for (int i=0; i<numCols; i++){
 		comments << "";
@@ -755,7 +750,6 @@ void PreviewTable::setHeader()
     QString label = s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i];
     auto item = new QTableWidgetItem(label);
     setHorizontalHeaderItem(i, item);
-		//head->setLabel(i, s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i]);
 	#endif
 	}
 }
