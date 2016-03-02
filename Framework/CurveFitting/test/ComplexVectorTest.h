@@ -80,21 +80,24 @@ public:
     TS_ASSERT_EQUALS(gv.get(2), c);
   }
 
-  //void xtest_square_brackets() {
-  //  ComplexVector gv(3);
-  //  gv.set(0, 9.9);
-  //  gv.set(1, 7.7);
-  //  gv.set(2, 3.3);
-  //  TS_ASSERT_EQUALS(gv[0], 9.9);
-  //  TS_ASSERT_EQUALS(gv[1], 7.7);
-  //  TS_ASSERT_EQUALS(gv[2], 3.3);
-  //  gv[0] = 3.3;
-  //  gv[1] = 9.9;
-  //  gv[2] = 7.7;
-  //  TS_ASSERT_EQUALS(gv[1], 9.9);
-  //  TS_ASSERT_EQUALS(gv[2], 7.7);
-  //  TS_ASSERT_EQUALS(gv[0], 3.3);
-  //}
+  void test_square_brackets() {
+    auto v = makeVector1();
+    ComplexType a = v[0];
+    ComplexType b = v[1];
+    ComplexType c = v[2];
+    TS_ASSERT_EQUALS(a, v10);
+    TS_ASSERT_EQUALS(b, v11);
+    TS_ASSERT_EQUALS(c, v12);
+    v[0] = v20;
+    v[1] = v21;
+    v[2] = v22;
+    a = v[0];
+    b = v[1];
+    c = v[2];
+    TS_ASSERT_EQUALS(a, v20);
+    TS_ASSERT_EQUALS(b, v21);
+    TS_ASSERT_EQUALS(c, v22);
+  }
 
   void test_gsl() {
     ComplexVector gv(3);
