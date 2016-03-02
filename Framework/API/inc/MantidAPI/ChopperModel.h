@@ -44,7 +44,7 @@ public:
   /// Default constructor required by the factory
   ChopperModel();
   /// Allow inheritance
-  virtual ~ChopperModel() {}
+  virtual ~ChopperModel() = default;
   /// Returns a clone of the current object
   virtual boost::shared_ptr<ChopperModel> clone() const = 0;
 

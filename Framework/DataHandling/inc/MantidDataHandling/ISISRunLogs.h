@@ -7,7 +7,7 @@
 
 #include "MantidAPI/Run.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,8 +46,7 @@ class DLLExport ISISRunLogs {
 public:
   /// Construct this object using a run that has the required ICP event log
   /// and the number of periods
-  ISISRunLogs(const API::Run &icpRun, const int totalNumPeriods);
-
+  ISISRunLogs(const API::Run &icpRun);
   /// Adds the status log to the this run
   void addStatusLog(API::Run &exptRun);
   /// Adds period related logs
@@ -56,12 +55,8 @@ public:
   void addPeriodLog(const int i, API::Run &exptRun);
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs)
-
   /// A LogParser object
-  boost::scoped_ptr<Kernel::LogParser> m_logParser;
-  /// The total number of periods in original data file
-  const int m_numOfPeriods;
+  std::unique_ptr<Kernel::LogParser> m_logParser;
 };
 
 } // namespace DataHandling

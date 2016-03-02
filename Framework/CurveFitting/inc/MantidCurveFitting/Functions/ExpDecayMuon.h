@@ -41,9 +41,6 @@ National Laboratory & European Spallation Source
 class DLLExport ExpDecayMuon : public API::ParamFunction,
                                public API::IFunction1D {
 public:
-  /// Destructor
-  ~ExpDecayMuon() override {}
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "ExpDecayMuon"; }
 

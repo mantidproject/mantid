@@ -38,31 +38,6 @@ Algebra::Algebra()
 */
 {}
 
-Algebra::Algebra(const Algebra &A)
-    : SurfMap(A.SurfMap), F(A.F)
-/**
-  Copy Constructor
-  @param A :: Algebra to copy
-*/
-{}
-
-Algebra &Algebra::operator=(const Algebra &A)
-/**
-  Assignment operator
-  @param A :: object to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    SurfMap = A.SurfMap;
-    F = A.F;
-  }
-  return *this;
-}
-
-/// Destructor
-Algebra::~Algebra() {}
-
 bool Algebra::operator==(const Algebra &A) const
 /**
   Equality operator

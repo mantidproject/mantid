@@ -53,19 +53,18 @@ public:
   boost::shared_ptr<ILiveListener>
   create(const std::string &instrumentName, bool connect,
          const Kernel::IPropertyManager *props = nullptr) const;
+  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
+  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
   bool checkConnection(const std::string &instrumentName) const;
 
 private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;
 
   /// Private constructor for singleton class
-  LiveListenerFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &);
+  LiveListenerFactoryImpl() = default;
+
   /// Private destructor
-  ~LiveListenerFactoryImpl() override;
+  ~LiveListenerFactoryImpl() override = default;
 
   // Unhide the base class method to avoid a warning, but make private.
   using Kernel::DynamicFactory<ILiveListener>::create;

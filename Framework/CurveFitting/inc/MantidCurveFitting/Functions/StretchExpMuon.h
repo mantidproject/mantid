@@ -40,9 +40,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport StretchExpMuon : public API::ParamFunction,
                                  public API::IFunction1D {
 public:
-  /// Destructor
-  ~StretchExpMuon() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "StretchExpMuon"; }
   const std::string category() const override { return "Muon"; }

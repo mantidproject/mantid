@@ -74,11 +74,6 @@ void ReferenceFrame::init() {
   m_vecPointingAlongBeam = directionToVector(m_alongBeam);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReferenceFrame::~ReferenceFrame() {}
-
 /**
 Gets the pointing up direction
 @return axis

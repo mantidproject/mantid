@@ -47,18 +47,18 @@ RebinByTimeBase::~RebinByTimeBase() {}
 /** Initialize the algorithm's properties.
  */
 void RebinByTimeBase::init() {
-  declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace containing TOF events.");
 
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
                   "boundary pairs. Values are in seconds since run start.");
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

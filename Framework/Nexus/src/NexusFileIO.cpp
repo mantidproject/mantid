@@ -760,7 +760,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(
 
   // The array of indices for each event list #
   int dims_array[1] = {static_cast<int>(indices.size())};
-  if (indices.size() > 0) {
+  if (!indices.empty()) {
     if (compress)
       NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array,
                      m_nexuscompression, dims_array);
@@ -919,7 +919,7 @@ int NexusFileIO::writeEventList(const DataObjects::EventList &el,
   NXopengroup(fileID, group_name.c_str(), "NXdata");
 
   // Copy the detector IDs to an array.
-  const std::set<detid_t> &dets = el.getDetectorIDs();
+  const auto &dets = el.getDetectorIDs();
 
   // Write out the detector IDs
   if (!dets.empty()) {

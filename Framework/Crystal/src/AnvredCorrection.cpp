@@ -90,13 +90,13 @@ void AnvredCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output workspace name");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -360,10 +360,9 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    std::set<detid_t> &dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator j;
-    for (j = dets.begin(); j != dets.end(); ++j)
-      correctionFactors->getOrAddEventList(i).addDetectorID(*j);
+    auto &dets = eventW->getEventList(i).getDetectorIDs();
+    for (auto const &det : dets)
+      correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getEventList(i).clear();
@@ -554,8 +553,8 @@ void AnvredCorrection::BuildLamdaWeights() {
 
   // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
-  if (m_lamda_weight.size() == 0) // loading spectrum failed so use
-  {                               // array of 1's
+  if (m_lamda_weight.empty()) // loading spectrum failed so use
+  {                           // array of 1's
     //    power = power_ns;                      // This is commented out, so we
     // don't override user specified
     // value.

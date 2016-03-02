@@ -19,8 +19,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace DynamicPDF {
 
-WorkspaceRecord::WorkspaceRecord(const std::string &workspaceName)
-    : m_name{workspaceName} {
+WorkspaceRecord::WorkspaceRecord(const std::string &workspaceName) :
+  m_name{workspaceName},
+  m_energy{0.0},
+  m_label() {
   m_ws = Mantid::API::AnalysisDataService::Instance()
              .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
 }
@@ -43,7 +45,8 @@ DECLARE_SUBWINDOW(SliceSelector)
 // m_loadedWorkspace{nullptr}, m_BackgroundRemover{nullptr} {
 SliceSelector::SliceSelector(QWidget *parent) :
   UserSubWindow{parent},
-  m_loadedWorkspace() {
+  m_loadedWorkspace(),
+  m_selectedWorkspaceIndex{0} {
 
 }
 

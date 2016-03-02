@@ -63,9 +63,6 @@ Component::Component(const std::string &name, const V3D &position,
     : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
       m_pos(position), m_rot(rotation) {}
 
-/// Destructor
-Component::~Component() {}
-
 //------------------------------------------------------------------------------------------------
 /** Return true if the Component is, in fact, parametrized
 *  (that is - it has a valid parameter map)
@@ -447,7 +444,7 @@ Component::getParameterNamesByComponent() const {
   if (!m_map)
     return retVal;
 
-  std::set<std::string> names = m_map->names(this);
+  auto names = m_map->names(this);
   for (const auto &name : names) {
     retVal.insert(
         std::pair<std::string, ComponentID>(name, this->getComponentID()));

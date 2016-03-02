@@ -61,16 +61,16 @@ class ICatalog;
 */
 class MANTID_API_DLL CatalogFactoryImpl
     : public Kernel::DynamicFactory<ICatalog> {
+public:
+  CatalogFactoryImpl(const CatalogFactoryImpl &) = delete;
+  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &) = delete;
+
 private:
   friend struct Kernel::CreateUsingNew<CatalogFactoryImpl>;
   /// Private Constructor for singleton class
-  CatalogFactoryImpl();
-  /// Private copy constructor
-  CatalogFactoryImpl(const CatalogFactoryImpl &);
-  /// Private assignment operator
-  CatalogFactoryImpl &operator=(const CatalogFactoryImpl &);
+  CatalogFactoryImpl() = default;
   /// Private Destructor
-  ~CatalogFactoryImpl() override;
+  ~CatalogFactoryImpl() override = default;
   /// Stores pointers to already created Catalog instances, with their name as
   /// the key
   mutable std::map<std::string, boost::shared_ptr<ICatalog>> m_createdCatalogs;

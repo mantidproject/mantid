@@ -3,16 +3,13 @@
 #include <iostream>
 #include <sstream>
 #include <complex>
-#include <cmath>
 #include <list>
 #include <vector>
 #include <set>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 #include <boost/multi_array.hpp>
-#include <gsl/gsl_poly.h>
 
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
@@ -37,28 +34,6 @@ Quadratic::Quadratic()
   Constructor
 */
 {}
-
-Quadratic::Quadratic(const Quadratic &A)
-    : Surface(A), BaseEqn(A.BaseEqn)
-/**
-  Copy constructor
-  @param A :: Quadratic to copy
-*/
-{}
-
-Quadratic &Quadratic::operator=(const Quadratic &A)
-/**
-  Assignment operator
-  @param A :: Quadratic to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Surface::operator=(A);
-    BaseEqn = A.BaseEqn;
-  }
-  return *this;
-}
 
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**

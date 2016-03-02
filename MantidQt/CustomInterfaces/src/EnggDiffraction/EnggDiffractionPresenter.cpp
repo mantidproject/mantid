@@ -68,7 +68,8 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..." << std::endl;
+                        "it down immediately..."
+                     << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -177,7 +178,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -210,7 +212,8 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   g_log.notice()
       << "EnggDiffraction GUI: starting cropped calibration. This may "
-         "take a few seconds... " << std::endl;
+         "take a few seconds... "
+      << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -406,7 +409,8 @@ void EnggDiffractionPresenter::processRebinTime() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) with a TOF bin into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -432,7 +436,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) by pulse times into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -468,7 +473,8 @@ void EnggDiffractionPresenter::processStopFocus() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A focus process is currently running, shutting "
-                        "it down as soon as possible..." << std::endl;
+                        "it down as soon as possible..."
+                     << std::endl;
 
       g_abortThread = true;
       g_log.warning() << "Focus Stop has been clicked, please wait until "
@@ -806,11 +812,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. " << std::endl;
+                     "for details. "
+                  << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. " << std::endl;
+           "were not valid. See log messages for details. "
+        << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -928,7 +936,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
 
-  if (specNos != "") {
+  bool specNumUsed = specNos != "";
+  if (specNumUsed) {
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
   } else {
@@ -944,21 +953,14 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNos != "")
+      if (specNumUsed)
         alg->setPropertyValue(g_calibCropIdentifier,
                               boost::lexical_cast<std::string>(specNos));
       else
         alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      // TODO: figure out what should be done about the list of expected peaks
-      // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
-      // should be fixed in a nother ticket/issue
-      alg->setPropertyValue(
-          "ExpectedPeaks",
-          "3.1243, 2.7057, 1.9132, 1.6316, 1.5621, "
-          "1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, "
-          "0.8556, 0.8252, 0.8158, 0.7811");
+
       const std::string outFitParamsTblName =
-          "engggui_calibration_bank_" + boost::lexical_cast<std::string>(i + 1);
+          outFitParamsTblNameGenerator(specNos, i);
       alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
       alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
       alg->execute();
@@ -976,7 +978,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
   }
-
   // Creates appropriate directory
   Poco::Path saveDir = outFilesDir("Calibration");
 
@@ -990,6 +991,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
+
+  // plots the calibrated workspaces.
+  g_plottingCounter++;
+  plotCalibWorkspace(difc, tzero, specNos);
 }
 
 /**
@@ -1232,7 +1237,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     g_lastValidRun = runNo;
 
     g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                      "this directory: " << dir << std::endl;
+                      "this directory: "
+                   << dir << std::endl;
 
     // TODO: this is almost 100% common with doNewCalibrate() - refactor
     EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1275,7 +1281,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
           loadDetectorGroupingCSV(dgFile, bankIDs, specs);
         } catch (std::runtime_error &re) {
           g_log.error() << "Error loading detector grouping file: " + dgFile +
-                               ". Detailed error: " + re.what() << std::endl;
+                               ". Detailed error: " + re.what()
+                        << std::endl;
           bankIDs.clear();
           specs.clear();
         }
@@ -1291,8 +1298,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
           fpath.append(effectiveFilenames[idx]).toString();
       g_log.notice() << "Generating new focused file (bank " +
                             boost::lexical_cast<std::string>(bankIDs[idx]) +
-                            ") for run " + runNo +
-                            " into: " << effectiveFilenames[idx] << std::endl;
+                            ") for run " + runNo + " into: "
+                     << effectiveFilenames[idx] << std::endl;
       try {
         m_focusFinishedOK = false;
         doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1305,8 +1312,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       } catch (std::invalid_argument &ia) {
         g_log.error() << "The focusing failed. Some input properties "
                          "were not valid. "
-                         "See log messages for details. Error: " << ia.what()
-                      << std::endl;
+                         "See log messages for details. Error: "
+                      << ia.what() << std::endl;
       }
     }
 
@@ -1402,7 +1409,8 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: " << g_lastValidRun
+             "run number: "
+          << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << std::endl;
     }
@@ -1481,7 +1489,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
     if (multi_RunNo.size() == 1) {
       g_log.notice() << "Only single file has been listed, the Sum Of Files"
-                        "cannot not be processed" << std::endl;
+                        "cannot not be processed"
+                     << std::endl;
     } else {
       g_log.notice()
           << "Load alogirthm has successfully merged the files provided"
@@ -1583,7 +1592,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 
-  bool saveOutputFiles = m_view->saveOutputFiles();
+  bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
     try {
@@ -1647,7 +1656,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << std::endl;
+                           std::string(ia.what())
+                    << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1656,14 +1666,15 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << std::endl;
+                           std::string(re.what())
+                    << std::endl;
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << std::endl;
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo);
@@ -1897,14 +1908,15 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -2000,14 +2012,15 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -2061,7 +2074,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
-                      "workspace is ready." << std::endl;
+                      "workspace is ready."
+                   << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
@@ -2086,7 +2100,7 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
       if (g_plottingCounter == 1)
         m_view->plotFocusedSpectrum(outWSName);
       else
-        m_view->plotReplacingWindow(outWSName);
+        m_view->plotReplacingWindow(outWSName, "0", "0");
 
     } else if (plotType == PlotMode::WATERFALL) {
       if (g_plottingCounter == 1)
@@ -2097,6 +2111,33 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
     } else if (plotType == PlotMode::MULTIPLE) {
       m_view->plotFocusedSpectrum(outWSName);
     }
+  }
+}
+
+/**
+* Check if the plot calibration check-box is ticked
+* python script is passed on to mantid python window
+* which plots the workspaces with customisation
+*
+* @param difc vector of double passed on to py script
+* @param tzero vector of double to plot graph
+* @param specNos string carrying cropped calib info
+*/
+void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
+                                                  std::vector<double> tzero,
+                                                  std::string specNos) {
+  const bool plotCalibWS = m_view->plotCalibWorkspace();
+  if (plotCalibWS) {
+    if (g_plottingCounter == 1) {
+      m_view->plotVanCurvesCalibOutput();
+    } else {
+      m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
+                                  "2");
+    }
+    const std::string pythonCode =
+        DifcZeroWorkspaceFactory(difc, tzero, specNos) +
+        plotDifcZeroWorkspace();
+    m_view->plotDifcZeroCalibOutput(pythonCode);
   }
 }
 
@@ -2273,6 +2314,155 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+/**
+* Generates the workspace with difc/zero according to the selected bank
+*
+* @param difc vector containing constants difc value of each bank
+* @param tzero vector containing constants tzero value of each bank
+* @param specNo used to set range for Calibration Cropped
+*
+* @return string with a python script
+*/
+std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
+    const std::vector<double> &difc, const std::vector<double> &tzero,
+    const std::string &specNo) const {
+
+  size_t bank1 = size_t(0);
+  size_t bank2 = size_t(1);
+  std::string pyRange;
+  std::string plotSpecNum = "False";
+
+  // sets the range to plot appropriate graph for the particular bank
+  if (specNo == "North") {
+    // only enable script to plot bank 1
+    pyRange = "1, 2";
+  } else if (specNo == "South") {
+    // only enables python script to plot bank 2
+    // as bank 2 data will be located in difc[0] & tzero[0] - refactor
+    pyRange = "2, 3";
+    bank2 = size_t(0);
+  } else if (specNo != "") {
+    pyRange = "1, 2";
+    plotSpecNum = "True";
+  } else {
+    // enables python script to plot bank 1 & 2
+    pyRange = "1, 3";
+  }
+
+  std::string pyCode =
+      "plotSpecNum = " + plotSpecNum + "\n"
+                                       "for i in range(" +
+      pyRange +
+      "):\n"
+
+      " if (plotSpecNum == False):\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_\" + str(i))\n"
+      " else:\n"
+      "  bank_ws = workspace(\"engggui_calibration_bank_cropped\")\n"
+
+      " xVal = []\n"
+      " yVal = []\n"
+      " y2Val = []\n"
+
+      " if (i == 1):\n"
+      "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
+
+                                                              "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+
+      " for irow in range(0, bank_ws.rowCount()):\n"
+      "  xVal.append(bank_ws.cell(irow, 0))\n"
+      "  yVal.append(bank_ws.cell(irow, 5))\n"
+
+      "  y2Val.append(xVal[irow] * difc + tzero)\n"
+
+      " ws1 = CreateWorkspace(DataX=xVal, DataY=yVal, UnitX=\"Expected "
+      "Peaks "
+      " Centre(dSpacing, A)\", YUnitLabel = \"Fitted Peaks Centre(TOF, "
+      "us)\")\n"
+      " ws2 = CreateWorkspace(DataX=xVal, DataY=y2Val)\n";
+  return pyCode;
+}
+
+/**
+* Plot the workspace with difc/zero acordding to selected bank
+*
+* @return string with a python script which will merge with
+*
+
+*/
+std::string EnggDiffractionPresenter::plotDifcZeroWorkspace() const {
+  std::string pyCode =
+      // plotSpecNum is true when SpectrumIDs being used
+      " if (plotSpecNum == False):\n"
+      "  output_ws = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  output_ws = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      // delete workspace if exists within ADS already
+      " if(mtd.doesExist(output_ws)):\n"
+      "  DeleteWorkspace(output_ws)\n"
+
+      // append workspace with peaks data for Peaks Fitted
+      // and Difc/TZero Straight line
+      " AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)\n"
+      " DeleteWorkspace(ws1)\n"
+      " DeleteWorkspace(ws2)\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_bank_\" + str(i)\n"
+      " else:\n"
+      "  DifcZero = \"engggui_difc_zero_peaks_cropped\"\n"
+
+      " DifcZeroWs = workspace(DifcZero)\n"
+      " DifcZeroPlot = plotSpectrum(DifcZeroWs, [0, 1]).activeLayer()\n"
+
+      " if (plotSpecNum == False):\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Bank \" + "
+      "str(i))\n"
+      " else:\n"
+      "  DifcZeroPlot.setTitle(\"Engg Gui Difc Zero Peaks Cropped\")\n"
+
+      // set the legend title
+      " DifcZeroPlot.setCurveTitle(0, \"Peaks Fitted\")\n"
+      " DifcZeroPlot.setCurveTitle(1, \"DifC/TZero Fitted Straight Line\")\n"
+      " DifcZeroPlot.setAxisTitle(Layer.Bottom, \"Expected Peaks "
+      "Centre(dSpacing, "
+      " A)\")\n"
+      " DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)\n";
+
+  return pyCode;
+}
+
+/**
+* Generates appropriate names for table workspaces
+*
+* @param specNos specIDs or bank name to be passed
+* @param bank_i current loop of the bank during calibration
+*/
+std::string
+EnggDiffractionPresenter::outFitParamsTblNameGenerator(std::string specNos,
+                                                       size_t bank_i) {
+  std::string outFitParamsTblName;
+  bool specNumUsed = specNos != "";
+
+  if (specNumUsed) {
+    if (specNos == "North")
+      outFitParamsTblName = "engggui_calibration_bank_1";
+    else if (specNos == "South")
+      outFitParamsTblName = "engggui_calibration_bank_2";
+    else
+      outFitParamsTblName = "engggui_calibration_bank_cropped";
+  } else {
+    outFitParamsTblName = "engggui_calibration_bank_" +
+                          boost::lexical_cast<std::string>(bank_i + 1);
+  }
+  return outFitParamsTblName;
 }
 
 /**

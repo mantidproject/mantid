@@ -41,7 +41,6 @@ class DLLExport NeutronBk2BkExpConvPVoigt
 
 public:
   NeutronBk2BkExpConvPVoigt();
-  ~NeutronBk2BkExpConvPVoigt() override;
 
   /// Overwrite IFunction base class method: name
   std::string name() const override { return "NeutronBk2BkExpConvPVoigt"; }

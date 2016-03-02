@@ -45,10 +45,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(
-        new Kernel::ArrayProperty<specid_t>("SpectraList", ""));
+    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
+        "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
-    std::vector<specid_t> specs;
+    std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
     props.setProperty("SpectraList", specs);
 
@@ -256,7 +256,8 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
@@ -308,8 +309,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     props.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -365,8 +368,10 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     props.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -400,7 +405,8 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.declareProperty(
+        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae

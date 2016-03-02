@@ -71,8 +71,8 @@ private:
   void exec() override;
 
   /// Create the rebin paraeters
-  void createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch,
-                             std::vector<double> &rb_params);
+  std::vector<double>
+  createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch);
 };
 }
 }

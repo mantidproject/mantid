@@ -9,7 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -145,7 +145,7 @@ private:
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

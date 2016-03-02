@@ -65,9 +65,6 @@ public:
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
 
-  //  //! Copy constructor
-  //  RectangularDetector(const RectangularDetector&);
-  ~RectangularDetector() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
 

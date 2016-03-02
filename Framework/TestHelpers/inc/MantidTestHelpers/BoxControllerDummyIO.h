@@ -14,6 +14,7 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
+#include <mutex>
 
 namespace MantidTestHelpers {
 
@@ -54,7 +55,7 @@ public:
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
-  size_t getDataChunk() const { return 1; }
+  size_t getDataChunk() const override { return 1; }
 
   bool openFile(const std::string &fileName, const std::string &mode) override;
   void saveBlock(const std::vector<float> & /* DataBlock */,
@@ -97,7 +98,7 @@ private:
   /// shared pointer to the box controller, which is repsoponsible for this IO
   const Mantid::API::BoxController *m_bc;
 
-  mutable Mantid::Kernel::Mutex m_fileMutex;
+  mutable std::mutex m_fileMutex;
   /// number of bytes in the event coorinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;

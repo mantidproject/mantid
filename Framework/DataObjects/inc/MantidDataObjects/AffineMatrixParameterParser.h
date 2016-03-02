@@ -25,8 +25,6 @@ public:
   createParameter(Poco::XML::Element *parameterElement) override;
   /// Set a successor parser for chain-of-responsibility type reading.
   void setSuccessorParser(ImplicitFunctionParameterParser *) override;
-  /// Destructor
-  ~AffineMatrixParameterParser() override;
 
 private:
   /// Assignment operator

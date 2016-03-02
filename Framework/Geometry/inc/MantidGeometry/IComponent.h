@@ -76,7 +76,7 @@ public:
   //! Return a clone to the current object
   virtual IComponent *clone() const = 0;
   /// Destructor
-  virtual ~IComponent() {}
+  virtual ~IComponent() = default;
   //! Returns the ComponentID - a unique identifier of the component.
   virtual ComponentID getComponentID() const = 0;
   //! Returns const pointer to base component if this component is parametrized

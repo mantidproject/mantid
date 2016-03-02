@@ -51,7 +51,7 @@ getHistoricalDataSources(const API::WorkspaceHistory &ws_history,
 /// historical data sources
 void MANTID_MDALGORITHMS_DLL
 insertDataSources(const std::string &data_sources,
-                  std::set<std::string> &historical_data_sources);
+                  std::unordered_set<std::string> &historical_data_sources);
 
 /// Test if a file with the given full path name exists
 bool fileExists(const std::string &filename);

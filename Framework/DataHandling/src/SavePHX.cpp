@@ -26,11 +26,11 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePHX::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "The input workspace");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "The input workspace");
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The filename to use for the saved data");
 }
 
@@ -38,10 +38,6 @@ void SavePHX::exec() {
 
   // Get the input workspace
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-
-  // Get the sample position
-  const Kernel::V3D samplePos =
-      inputWorkspace->getInstrument()->getSample()->getPos();
 
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");

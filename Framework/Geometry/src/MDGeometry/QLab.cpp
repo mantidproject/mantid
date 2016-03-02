@@ -9,11 +9,6 @@ namespace Geometry {
  */
 QLab::QLab() : m_unit(new Mantid::Kernel::InverseAngstromsUnit) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QLab::~QLab() {}
-
 const std::string QLab::QLabName = "QLab";
 
 Kernel::UnitLabel QLab::getUnitLabel() const {

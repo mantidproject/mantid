@@ -423,7 +423,6 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
       getNewInstrument(m_peaks->getPeak(0));
-  V3D samplePosition = instChange->getSample()->getPos();
 
   //---------------------------- Calculate q and hkl vectors-----------------
 
@@ -460,7 +459,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   //----------------------------------
 
   // determine the OrientedLattice for converting to Q-sample
-  Geometry::OrientedLattice lattice(m_unitCell.get());
+  Geometry::OrientedLattice lattice(*m_unitCell.get());
   try {
     Kernel::Matrix<double> UB(3, 3, false);
     Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
@@ -664,16 +663,12 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     AllBankNames.insert(m_peaks->getPeak(i).getBankName());
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
-  for (auto bankName : AllBankNames) {
-    boost::shared_ptr<const IComponent> panel =
-        instrNew->getComponentByName(bankName);
-    bankDetMap[bankName] = panel;
+  for (const auto &bankName : AllBankNames) {
+    bankDetMap[bankName] = instrNew->getComponentByName(bankName);
   }
 
   boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
 
-  V3D SamplePos = instrNew->getSample()->getPos();
-  V3D SourcePos = instrNew->getSource()->getPos();
   const IPeak &ppeak = m_peaks->getPeak(0);
   L0 = ppeak.getL1();
 
@@ -1164,7 +1159,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
         vmagd /= time[peak];
         v_magdsxsysz.push_back(vmagd);
 
-        V3D samp1(samplePos);
         V3D t1ds = vmagd * (L0 / vMag[peak] / vMag[peak]);
         t1dsxsysz.push_back(t1ds);
       }

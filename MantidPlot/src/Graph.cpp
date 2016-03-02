@@ -1995,7 +1995,7 @@ QString Graph::saveCurveLayout(int index) {
     else
       s += QString::number(-1) + "\t";
 
-    bool filled = c->brush().style() == Qt::NoBrush ? false : true;
+    bool filled = c->brush().style() != Qt::NoBrush;
     s += QString::number(filled) + "\t";
 
     s += QString::number(ColorBox::colorIndex(c->brush().color())) + "\t";
@@ -2093,7 +2093,7 @@ LegendWidget *Graph::insertText(const std::string &type,
                                 const std::string &line) {
   const QStringList list = QString::fromUtf8(line.c_str()).split("\t");
   QStringList fList = list;
-  bool pieLabel = (type == "PieLabel") ? true : false;
+  bool pieLabel = (type == "PieLabel");
   LegendWidget *l = NULL;
   if (pieLabel)
     l = new PieLabel(d_plot);
@@ -3319,12 +3319,9 @@ bool Graph::zoomOn() {
 
 void Graph::zoomed(const QwtDoubleRect &) { emit modifiedGraph(); }
 bool Graph::hasActiveTool() {
-  if (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
-      d_magnifier || d_panner ||
-      (d_range_selector && d_range_selector->isVisible()))
-    return true;
-
-  return false;
+  return (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
+          d_magnifier || d_panner ||
+          (d_range_selector && d_range_selector->isVisible()));
 }
 
 void Graph::zoom(bool on) {

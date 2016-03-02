@@ -1136,7 +1136,7 @@ void ConvFit::plotGuess() {
 void ConvFit::singleFit() {
   // Validate tab before running a single fit
   if (!validate()) {
-	  return;
+    return;
   }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -1390,7 +1390,7 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 
   if (prop == m_properties["UseDeltaFunc"]) {
     updatePlotOptions();
-    if (checked == true) {
+    if (checked) {
       m_properties["DeltaFunction"]->addSubProperty(
           m_properties["DeltaHeight"]);
       m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
@@ -1590,7 +1590,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         if (count == 3) {
           propName = "Lorentzian 2";
         }
-		const QString paramName = QString(*it);
+        const QString paramName = QString(*it);
         const QString fullPropName = propName + "." + *it;
         m_properties[fullPropName] = m_dblManager->addProperty(*it);
 
@@ -1626,9 +1626,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
         if (count < 3) {
-          m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
+          m_properties["FitFunction1"]->addSubProperty(
+              m_properties[fullPropName]);
         } else {
-          m_properties["FitFunction2"]->addSubProperty(m_properties[fullPropName]);
+          m_properties["FitFunction2"]->addSubProperty(
+              m_properties[fullPropName]);
         }
         count++;
       }
@@ -1660,7 +1662,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         }
 
         m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
-        m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
+        m_properties["FitFunction1"]->addSubProperty(
+            m_properties[fullPropName]);
       }
     }
   }

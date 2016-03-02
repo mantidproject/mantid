@@ -57,8 +57,8 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
  */
 void OptimizeExtinctionParameters::init() {
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> corrOptions{
       "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",

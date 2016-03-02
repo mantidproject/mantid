@@ -2,6 +2,7 @@
 
 #include <json/reader.h>
 #include <json/value.h>
+#include <set>
 
 namespace Mantid {
 namespace ICat {

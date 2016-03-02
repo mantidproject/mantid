@@ -39,12 +39,12 @@ const std::string UnaryOperationMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void UnaryOperationMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName(), "", Direction::Input),
                   "A MDEventWorkspace or MDHistoWorkspace on which to apply "
                   "the operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(), "",
-                                                      Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }

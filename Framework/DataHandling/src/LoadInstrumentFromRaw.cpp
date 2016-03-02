@@ -31,16 +31,19 @@ void LoadInstrumentFromRaw::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace in which to store the imported instrument.");
 
+  const std::vector<std::string> exts{".raw", ".s*"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".raw", ".s*"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The filename (including its full or relative path) of an ISIS RAW file. "
       "The file extension must either be .raw or .s??");
-  declareProperty(new ArrayProperty<int>("MonitorList", Direction::Output),
-                  "List of detector ids of monitors loaded into the workspace");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("MonitorList", Direction::Output),
+      "List of detector ids of monitors loaded into the workspace");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

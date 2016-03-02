@@ -128,14 +128,14 @@ public:
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
+  // virtual bool plotCalibWorkspace
+  MOCK_CONST_METHOD0(plotCalibWorkspace, bool());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 
-  // std::string saveOutputFiles
-  MOCK_CONST_METHOD0(saveOutputFiles, bool());
-
-  // virtual void plotFocusedSpectrum();
-  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
+  // virtual bool saveFocusedOutputFiles
+  MOCK_CONST_METHOD0(saveFocusedOutputFiles, bool());
 
   // void plotFocusStatus();
   MOCK_METHOD0(plotFocusStatus, void());
@@ -143,11 +143,22 @@ public:
   // void plotRepChanged();
   MOCK_METHOD1(plotRepChanged, void(int idx));
 
+  // virtual void plotFocusedSpectrum();
+  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
+
   // virtual void plotWaterfallSpectrum
   MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
 
   // virtual void plotReplacingWindow
-  MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
+  MOCK_METHOD3(plotReplacingWindow,
+               void(const std::string &wsName, const std::string &spectrum,
+                    const std::string &type));
+
+  // virtual void plotVanCurvesCalibOutput();
+  MOCK_METHOD0(plotVanCurvesCalibOutput, void());
+
+  // virtual void plotDifcZeroCalibOutput();
+  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

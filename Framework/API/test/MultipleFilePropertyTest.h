@@ -13,6 +13,7 @@
 #include <Poco/File.h>
 
 #include <boost/algorithm/string/join.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -45,11 +46,10 @@ std::string createAbsoluteDirectory(const std::string &dirPath) {
  * @param filenames :: the names of the files to create.
  * @param dirPath   :: the directory in which to create the files.
  */
-void createFilesInDirectory(const std::set<std::string> &filenames,
+void createFilesInDirectory(const std::unordered_set<std::string> &filenames,
                             const std::string &dirPath) {
-  for (auto filename = filenames.begin(); filename != filenames.end();
-       ++filename) {
-    Poco::File file(dirPath + "/" + *filename);
+  for (const auto &filename : filenames) {
+    Poco::File file(dirPath + "/" + filename);
     file.createFile();
   }
 }
@@ -73,7 +73,7 @@ private:
   std::string m_oldDefaultInstrument;
   std::string m_dummyFilesDir;
   std::string m_dirWithWhitespace;
-  std::set<std::string> m_tempDirs;
+  std::unordered_set<std::string> m_tempDirs;
   std::vector<std::string> m_exts;
 
   Mantid::Kernel::ConfigServiceImpl &g_config;
@@ -104,7 +104,7 @@ public:
     m_tempDirs.insert(m_dummyFilesDir);
     m_tempDirs.insert(m_dirWithWhitespace);
 
-    std::set<std::string> dummyFilenames = {
+    std::unordered_set<std::string> dummyFilenames = {
         // Standard raw file runs.
         "TSC00001.raw", "TSC00002.raw", "TSC00003.raw", "TSC00004.raw",
         "TSC00005.raw",
@@ -131,7 +131,8 @@ public:
         // when multifileloading is turned off via the preferences file.
         "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt"};
 
-    std::set<std::string> whiteSpaceDirFilenames = {"file with whitespace.txt"};
+    std::unordered_set<std::string> whiteSpaceDirFilenames = {
+        "file with whitespace.txt"};
 
     createFilesInDirectory(dummyFilenames, m_dummyFilesDir);
     createFilesInDirectory(whiteSpaceDirFilenames, m_dummyFilesDir);
@@ -144,9 +145,8 @@ public:
    */
   ~MultipleFilePropertyTest() {
     // Remove temp dirs.
-    for (auto tempDir = m_tempDirs.begin(); tempDir != m_tempDirs.end();
-         ++tempDir) {
-      Poco::File dir(*tempDir);
+    for (const auto &tempDir : m_tempDirs) {
+      Poco::File dir(tempDir);
       dir.remove(true);
     }
   }

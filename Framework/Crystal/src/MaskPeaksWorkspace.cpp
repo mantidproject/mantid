@@ -35,15 +35,15 @@ MaskPeaksWorkspace::~MaskPeaksWorkspace() {}
  */
 void MaskPeaksWorkspace::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
                   "detectors. Each spectrum needs to correspond to only one "
                   "pixelID (e.g. no grouping or previous calls to "
                   "SumNeighbours).");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "The name of the workspace that will be created. Can replace "
                   "the input workspace.");
   declareProperty(

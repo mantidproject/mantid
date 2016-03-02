@@ -89,13 +89,16 @@ void LoadEventAndCompress::init() {
 
   setPropertySettings(
       "MonitorsAsEvents",
-      new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1"));
-  IPropertySettings *asEventsIsOn =
-      new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
-  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
-  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  auto asEventsIsOn = [] {
+    std::unique_ptr<IPropertySettings> settings =
+        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+    return settings;
+  };
+  setPropertySettings("FilterMonByTofMin", asEventsIsOn());
+  setPropertySettings("FilterMonByTofMax", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStart", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStop", asEventsIsOn());
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);

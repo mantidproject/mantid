@@ -29,7 +29,7 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
  * a "*" wild card in the file extension string passed to it.
  */
 bool doesNotContainWildCard(const std::string &ext) {
-  return std::string::npos == ext.find("*");
+  return std::string::npos == ext.find('*');
 }
 } // anonymous namespace
 
@@ -59,11 +59,6 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
     if (doesNotContainWildCard(ext))
       m_exts.push_back(ext);
 }
-
-/**
- * Destructor
- */
-MultipleFileProperty::~MultipleFileProperty() {}
 
 /**
  * Convert the given propValue into a comma and plus separated list of full
@@ -267,7 +262,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // load a single (and possibly existing) file within a token, but which
       // has unexpected zero
       // padding, or some other anomaly.
-      if (flattenFileNames(f).size() == 0)
+      if (flattenFileNames(f).empty())
         f.push_back(std::vector<std::string>(1, *plusTokenString));
 
       if (plusTokenStrings.size() > 1) {

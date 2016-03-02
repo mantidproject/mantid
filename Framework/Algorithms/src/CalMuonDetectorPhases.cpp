@@ -26,9 +26,9 @@ DECLARE_ALGORITHM(CalMuonDetectorPhases)
  */
 void CalMuonDetectorPhases::init() {
 
-  declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "Name of the reference input workspace");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the reference input workspace");
 
   declareProperty("FirstGoodData", EMPTY_DBL(),
                   "First good data point in units of micro-seconds",
@@ -41,22 +41,24 @@ void CalMuonDetectorPhases::init() {
   declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency",
                   Direction::Input);
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DetectorTable", "", Direction::Output),
                   "Name of the TableWorkspace in which to store the list "
                   "of phases and asymmetries");
 
-  declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
                       "DataFitted", "", Direction::Output),
                   "Name of the output workspace holding fitting results");
 
-  declareProperty(new ArrayProperty<int>("ForwardSpectra", Direction::Input),
-                  "The spectra numbers of the forward group. If not specified "
-                  "will read from file.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
+      "The spectra numbers of the forward group. If not specified "
+      "will read from file.");
 
-  declareProperty(new ArrayProperty<int>("BackwardSpectra", Direction::Input),
-                  "The spectra numbers of the backward group. If not specified "
-                  "will read from file.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
+      "The spectra numbers of the backward group. If not specified "
+      "will read from file.");
 }
 
 //----------------------------------------------------------------------------------------------

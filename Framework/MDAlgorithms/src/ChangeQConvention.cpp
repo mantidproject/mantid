@@ -43,8 +43,8 @@ ChangeQConvention::~ChangeQConvention() {}
 /** Initialize the algorithm's properties.
  */
 void ChangeQConvention::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 }
 

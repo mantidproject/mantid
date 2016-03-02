@@ -54,9 +54,6 @@ public:
       : IPropertySettings(), m_otherPropName(otherPropName),
         m_enabledSetting(enabledSetting) {}
 
-  /// Destructor
-  ~EnabledWhenWorkspaceIsType() override {}
-
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?

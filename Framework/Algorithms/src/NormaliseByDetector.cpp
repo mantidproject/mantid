@@ -60,13 +60,13 @@ void NormaliseByDetector::init() {
       boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input,
-                                                         compositeValidator),
-                  "An input workspace in wavelength");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, compositeValidator),
+      "An input workspace in wavelength");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -182,7 +182,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
 
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.
-  if (m_parallelExecution == true) {
+  if (m_parallelExecution) {
     PARALLEL_FOR2(inWS, denominatorWS)
     for (int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex) {
       PARALLEL_START_INTERUPT_REGION

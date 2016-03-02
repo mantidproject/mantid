@@ -23,7 +23,7 @@ namespace MantidQt
       RenameParDialog(const std::vector<std::string>& old_params,
         const std::vector<std::string>& new_params,
         QWidget *parent=NULL);
-      void setOutput(std::vector<std::string>& out)const;
+      std::vector<std::string> setOutput() const;
     protected slots:
       void uniqueIndexedNames(bool);
       void doNotRename(bool);

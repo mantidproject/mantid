@@ -45,22 +45,6 @@ public:
    * @param size :: size of the block  */
   FreeBlock(uint64_t pos, uint64_t size) : m_filePos(pos), m_size(size) {}
 
-  /** Copy constructor
-   * @param other :: copy this */
-  FreeBlock(const FreeBlock &other)
-      : m_filePos(other.m_filePos), m_size(other.m_size) {}
-
-  /** Assignment operator
-   * @param other :: copy this */
-  FreeBlock &operator=(const FreeBlock &other) {
-    m_filePos = other.m_filePos;
-    m_size = other.m_size;
-    return *this;
-  }
-
-  /// Destructor
-  ~FreeBlock() {}
-
   /// @return the position of the free block in the file
   inline uint64_t getFilePosition() const { return m_filePos; }
 
