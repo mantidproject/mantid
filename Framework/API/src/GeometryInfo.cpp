@@ -58,7 +58,7 @@ double GeometryInfo::getL2() const {
       }
     }
   }
-  return m_l2.value();
+  return *m_l2;
 }
 
 void GeometryInfo::invalidateL2Cache() { m_l2 = boost::optional<double>{}; }
@@ -98,7 +98,7 @@ double GeometryInfo::getTwoTheta() const {
       m_twoTheta = m_detector->getTwoTheta(samplePos, beamLine);
     }
   }
-  return m_twoTheta.value();
+  return *m_twoTheta;
 }
 
 double GeometryInfo::getSignedTwoTheta() const {
@@ -125,7 +125,7 @@ double GeometryInfo::getSignedTwoTheta() const {
           m_detector->getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
     }
   }
-  return m_signedTwoTheta.value();
+  return *m_signedTwoTheta;
 }
 
 boost::shared_ptr<const Geometry::IDetector> GeometryInfo::getDetector() const {
