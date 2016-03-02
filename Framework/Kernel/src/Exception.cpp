@@ -8,8 +8,8 @@ namespace Exception {
 // FileError
 //-------------------------
 /** Constructor
-        @param Desc :: Function description
-        @param FName :: Filename
+        @param Description :: Function description
+        @param FileName :: Filename
 */
 FileError::FileError(const std::string &Description, std::string FileName)
     : std::runtime_error(Description), fileName(std::move(FileName)) {
