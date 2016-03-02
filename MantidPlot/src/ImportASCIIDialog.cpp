@@ -740,7 +740,6 @@ void PreviewTable::updateDecimalSeparators(const QLocale& oldSeparators)
 
 void PreviewTable::setHeader()
 {
-	auto head = horizontalHeader();
 	for (int i=0; i<columnCount(); i++){
     QString s = col_label[i];
 	#ifdef Q_OS_MAC
@@ -748,6 +747,7 @@ void PreviewTable::setHeader()
     auto item = new QTableWidgetItem(label);
     setHorizontalHeaderItem(i, item);
   #else
+    auto head = horizontalHeader();
     int lines = columnWidth(i)/head->fontMetrics().averageCharWidth();
     QString label = s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i];
     auto item = new QTableWidgetItem(label);
