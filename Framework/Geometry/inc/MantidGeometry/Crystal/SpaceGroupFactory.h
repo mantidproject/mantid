@@ -37,7 +37,7 @@ class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator {
 public:
   AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                               const std::string &generatorInformation);
-  virtual ~AbstractSpaceGroupGenerator() {}
+  virtual ~AbstractSpaceGroupGenerator() = default;
 
   inline size_t getNumber() const { return m_number; }
   inline std::string getHMSymbol() const { return m_hmSymbol; }
@@ -71,7 +71,6 @@ class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator
 public:
   AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                  const std::string &generatorInformation);
-  ~AlgorithmicSpaceGroupGenerator() override {}
 
 protected:
   Group_const_sptr generateGroup() const override;
@@ -85,7 +84,6 @@ class MANTID_GEOMETRY_DLL TransformationSpaceGroupGenerator
 public:
   TransformationSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                     const std::string &generatorInformation);
-  ~TransformationSpaceGroupGenerator() override {}
 
 protected:
   Group_const_sptr generateGroup() const override;
@@ -104,7 +102,6 @@ class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator
 public:
   TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                const std::string &generatorInformation);
-  ~TabulatedSpaceGroupGenerator() override {}
 
 protected:
   Group_const_sptr generateGroup() const override;
@@ -158,7 +155,7 @@ protected:
 */
 class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl {
 public:
-  virtual ~SpaceGroupFactoryImpl() {}
+  virtual ~SpaceGroupFactoryImpl() = default;
 
   SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol);
 
@@ -228,7 +225,7 @@ public:
      */
     std::vector<std::string> transformedSpaceGroupSymbols;
 
-    for (auto transformation : transformations) {
+    for (const auto &transformation : transformations) {
       std::string transformedSymbol =
           getTransformedSymbolOrthorhombic(hmSymbol, transformation);
 

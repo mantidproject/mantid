@@ -37,7 +37,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) {
-  return std::string::npos != ext.find("*");
+  return std::string::npos != ext.find('*');
 }
 }
 
@@ -760,7 +760,7 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   }
 
   // Search the archive
-  if (archs.size() != 0) {
+  if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
     std::string path = getArchivePath(archs, filenames, exts);
     try {

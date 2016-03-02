@@ -49,9 +49,11 @@ GeneratePeaks::~GeneratePeaks() {}
 /** Define algorithm's properties
  */
 void GeneratePeaks::init() {
-  auto paramwsprop = new API::WorkspaceProperty<DataObjects::TableWorkspace>(
-      "PeakParametersWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(paramwsprop, "Input TableWorkspace for peak's parameters.");
+  declareProperty(
+      make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+          "PeakParametersWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
+      "Input TableWorkspace for peak's parameters.");
 
   // Peak function properties
   std::vector<std::string> peakNames =
@@ -64,7 +66,7 @@ void GeneratePeaks::init() {
   for (size_t i = 0; i < peakFullNames.size(); ++i)
     g_log.debug() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
 
-  declareProperty(new ArrayProperty<double>("PeakParameterValues"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakParameterValues"),
                   "List of peak parameter values.  They must have a 1-to-1 "
                   "mapping to PeakParameterNames list. ");
 
@@ -77,12 +79,13 @@ void GeneratePeaks::init() {
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
-  declareProperty(new ArrayProperty<double>("BackgroundParameterValues"),
-                  "List of background parameter values.  They must have a "
-                  "1-to-1 mapping to PeakParameterNames list. ");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
+      "List of background parameter values.  They must have a "
+      "1-to-1 mapping to PeakParameterNames list. ");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "InputWorkspace (optional) to take information for the instrument, and "
       "where to evaluate the x-axis.");
@@ -92,7 +95,7 @@ void GeneratePeaks::init() {
                   "It is only applied to the case by input parameter values in "
                   "vector format. ");
 
-  declareProperty(new Kernel::ArrayProperty<double>(
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
                       "BinningParameters",
                       boost::make_shared<Kernel::RebinParamsValidator>(true)),
                   "A comma separated list of first bin boundary, width, last "
@@ -103,7 +106,7 @@ void GeneratePeaks::init() {
 
   declareProperty("NumberWidths", 2.,
                   "Number of peak width to evaluate each peak for. Default=2.");
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output Workspace to put the calculated data.");
 
@@ -745,7 +748,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
 MatrixWorkspace_sptr
 GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   // Check validity
-  if (m_spectraSet.size() == 0)
+  if (m_spectraSet.empty())
     throw std::invalid_argument(
         "Input spectra list is empty. Unable to generate a new workspace.");
 

@@ -30,60 +30,68 @@ PredictFractionalPeaks::PredictFractionalPeaks() : Algorithm() {}
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<IPeaksWorkspace>("Peaks", "", Direction::Input),
+      make_unique<WorkspaceProperty<IPeaksWorkspace>>("Peaks", "",
+                                                      Direction::Input),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      new WorkspaceProperty<IPeaksWorkspace>("FracPeaks", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<IPeaksWorkspace>>("FracPeaks", "",
+                                                      Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("HOffset"), "-0.5,0.0,0.5"),
-      "Offset in the h direction");
-  declareProperty(new Kernel::ArrayProperty<double>(string("KOffset"), "0"),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("HOffset"), "-0.5,0.0,0.5"),
                   "Offset in the h direction");
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("LOffset"), "-0.5,0.5"),
-      "Offset in the h direction");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("KOffset"), "0"),
+                  "Offset in the h direction");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("LOffset"), "-0.5,0.5"),
+                  "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,
                   "If false only offsets from peaks from Peaks are used");
 
-  declareProperty(new PropertyWithValue<double>("Hmin", -8.0, Direction::Input),
-                  "Minimum H value to use");
-  declareProperty(new PropertyWithValue<double>("Hmax", 8.0, Direction::Input),
-                  "Maximum H value to use");
-  declareProperty(new PropertyWithValue<double>("Kmin", -8.0, Direction::Input),
-                  "Minimum K value to use");
-  declareProperty(new PropertyWithValue<double>("Kmax", 8.0, Direction::Input),
-                  "Maximum K value to use");
-  declareProperty(new PropertyWithValue<double>("Lmin", -8.0, Direction::Input),
-                  "Minimum L value to use");
-  declareProperty(new PropertyWithValue<double>("Lmax", 8.0, Direction::Input),
-                  "Maximum L value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Hmin", -8.0, Direction::Input),
+      "Minimum H value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Hmax", 8.0, Direction::Input),
+      "Maximum H value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Kmin", -8.0, Direction::Input),
+      "Minimum K value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Kmax", 8.0, Direction::Input),
+      "Maximum K value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Lmin", -8.0, Direction::Input),
+      "Minimum L value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Lmax", 8.0, Direction::Input),
+      "Maximum L value to use");
 
   setPropertySettings(
-      "Hmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Hmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Kmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Kmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Lmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Lmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Run the algorithm

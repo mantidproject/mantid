@@ -36,10 +36,11 @@ GetAllEi::GetAllEi()
 /// Initialization method.
 void GetAllEi::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "Workspace", "", Kernel::Direction::Input),
-                  "The input workspace containing the monitor's spectra "
-                  "measured after the last chopper");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Kernel::Direction::Input),
+      "The input workspace containing the monitor's spectra "
+      "measured after the last chopper");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
@@ -80,11 +81,11 @@ void GetAllEi::init() {
       "values where the derivative of the log turns zero.\n"
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
-  setPropertySettings(
-      "FilterWithDerivative",
-      new Kernel::EnabledWhenProperty("FilterBaseLog",
-                                      Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                                      "Defined in IDF"));
+  setPropertySettings("FilterWithDerivative",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FilterBaseLog",
+                          Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                          "Defined in IDF"));
 
   auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);
@@ -124,8 +125,8 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"
       "together with total intensity within each peak.");
@@ -191,7 +192,7 @@ void GetAllEi::exec() {
 
   auto phase = m_chopper->getNumberParameter("initial_phase");
 
-  if (phase.size() == 0) {
+  if (phase.empty()) {
     throw std::runtime_error("Can not find initial_phase parameter"
                              " attached to the chopper-position component");
   }
@@ -249,7 +250,7 @@ void GetAllEi::exec() {
   std::vector<double> guess_opening;
 
   this->findGuessOpeningTimes(TOF_range, TOF0, Period, guess_opening);
-  if (guess_opening.size() == 0) {
+  if (guess_opening.empty()) {
     throw std::runtime_error(
         "Can not find any chopper opening time within TOF range: " +
         boost::lexical_cast<std::string>(TOF_range.first) + ':' +
@@ -857,7 +858,7 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
   }
   // if array decreasing rather then increasing, indexes behave differently.
   // Will it still work?
-  if (irangeMax.size() > 0) {
+  if (!irangeMax.empty()) {
     if (irangeMax[0] < irangeMin[0]) {
       irangeMax.swap(irangeMin);
     }
@@ -1021,7 +1022,7 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
         propertyName);
   }
 
-  if (splitter.size() == 0) {
+  if (splitter.empty()) {
     auto TimeStart = inputWS->run().startTime();
     auto TimeEnd = inputWS->run().endTime();
     pTimeSeries->filterByTime(TimeStart, TimeEnd);
@@ -1192,7 +1193,7 @@ bool check_time_series_property(
   if (boost::iequals(LogName, "Defined in IDF")) {
     try {
       auto theLogs = chopper->getStringParameter(prop_name);
-      if (theLogs.size() == 0) {
+      if (theLogs.empty()) {
         if (fail)
           result[prop_name] = "Can not retrieve parameter " + prop_name +
                               " from the instrument definition file.";

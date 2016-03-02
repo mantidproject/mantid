@@ -31,18 +31,19 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSSensitivityCorrection::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {"_event.nxs", ".xml"}),
+  const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExts),
                   "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true, "If true, the dark current subtracted "
                                        "from the sample data will also be "
                                        "subtracted from the flood field.");
-  declareProperty(new API::FileProperty("DarkCurrentFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        {"_event.nxs", ".xml"}),
-                  "The name of the input file to load as dark current.");
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(
+          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
+      "The name of the input file to load as dark current.");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -60,10 +61,10 @@ void SANSSensitivityCorrection::init() {
                   "Beam position in Y pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
 
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty("ReductionProperties", "__sans_reduction_properties");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputSensitivityWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -115,9 +116,9 @@ void SANSSensitivityCorrection::exec() {
   }
 
   if (!reductionManager->existsProperty("SensitivityAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("SensitivityAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   progress.report("Loading sensitivity file");
@@ -312,7 +313,8 @@ void SANSSensitivityCorrection::exec() {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
       reductionManager->declareProperty(
-          new WorkspaceProperty<>(entryName, floodWSName, Direction::InOut));
+          Kernel::make_unique<WorkspaceProperty<>>(entryName, floodWSName,
+                                                   Direction::InOut));
       reductionManager->setPropertyValue(entryName, floodWSName);
       reductionManager->setProperty(entryName, floodWS);
     }

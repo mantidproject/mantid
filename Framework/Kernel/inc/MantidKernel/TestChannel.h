@@ -45,10 +45,6 @@ namespace Mantid {
 class MANTID_KERNEL_DLL TestChannel : public Poco::Channel {
 public:
   typedef std::list<Poco::Message> MsgList;
-
-  TestChannel();
-  ~TestChannel() override;
-
   void log(const Poco::Message &msg) override;
   MsgList &list();
   void clear();

@@ -44,12 +44,12 @@ const std::string SaveZODS::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveZODS::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace in HKL space.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".h5"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
       "The name of the HDF5 file to write, as a full or relative path.");
 }
 

@@ -153,7 +153,7 @@ public:
   HKLGenerator(int hMinMax, int kMinMax, int lMinMax);
   HKLGenerator(const UnitCell &unitCell, double dMin);
 
-  virtual ~HKLGenerator() {}
+  virtual ~HKLGenerator() = default;
 
   /// Returns the number of HKLs to be generated.
   inline size_t size() const { return m_size; }

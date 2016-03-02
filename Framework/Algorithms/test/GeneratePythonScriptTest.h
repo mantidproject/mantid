@@ -37,12 +37,14 @@ public:
   }
 
   void init() {
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "InputWorkspace", "", Kernel::Direction::Input),
-                    "A workspace with units of TOF");
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "OutputWorkspace", "", Kernel::Direction::Output),
-                    "The name to use for the output workspace");
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "InputWorkspace", "", Kernel::Direction::Input),
+        "A workspace with units of TOF");
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "OutputWorkspace", "", Kernel::Direction::Output),
+        "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
   void exec(){

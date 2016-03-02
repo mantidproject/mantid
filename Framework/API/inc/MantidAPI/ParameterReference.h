@@ -51,6 +51,7 @@ public:
   double getParameter() const;
   IFunction *getFunction() const;
   bool isDefault() const;
+  virtual ~ParameterReference() = default;
 
 private:
   IFunction *m_function; ///< pointer to the function

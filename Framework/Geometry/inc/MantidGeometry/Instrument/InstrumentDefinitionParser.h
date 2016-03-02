@@ -65,7 +65,7 @@ public:
                              const IDFObject_const_sptr expectedCacheFile,
                              const std::string &instName,
                              const std::string &xmlText);
-  ~InstrumentDefinitionParser();
+  ~InstrumentDefinitionParser() = default;
 
   /// Caching
   enum CachingOption {

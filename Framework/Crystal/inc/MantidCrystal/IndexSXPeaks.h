@@ -101,7 +101,7 @@ public:
     _hkls = s;
   }
   void setFirst() {
-    if (_hkls.size() > 0) {
+    if (!_hkls.empty()) {
       auto it = _hkls.begin(); // Take the first possiblity
       it++;
       _hkls.erase(it, _hkls.end()); // Erase all others!

@@ -106,8 +106,8 @@ static string getRunnumber(const string &filename) {
   if (runnumber.find("neutron") >= string::npos)
     return "0";
 
-  std::size_t left = runnumber.find("_");
-  std::size_t right = runnumber.find("_", left + 1);
+  std::size_t left = runnumber.find('_');
+  std::size_t right = runnumber.find('_', left + 1);
 
   return runnumber.substr(left + 1, right - left - 1);
 }
@@ -255,23 +255,25 @@ void FilterEventsByLogValuePreNexus::init() {
   // File files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
+      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                        eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(new FileProperty(PULSEID_PARAM, "",
-                                   FileProperty::OptionalLoad, pulseExts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // Pixels to load
-  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -286,8 +288,8 @@ void FilterEventsByLogValuePreNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
   // Loading option
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
@@ -301,12 +303,13 @@ void FilterEventsByLogValuePreNexus::init() {
 
   // the output workspace name
   declareProperty(
-      new WorkspaceProperty<IEventWorkspace>(OUT_PARAM, "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+          OUT_PARAM, "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
   // Optional output table workspace
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "EventLogTableWorkspace", "", PropertyMode::Optional),
                   "Optional output table workspace containing the event log "
                   "(pixel) information. ");
@@ -323,11 +326,11 @@ void FilterEventsByLogValuePreNexus::init() {
   declareProperty("NumberOfEventsToExamine", EMPTY_INT(),
                   "Number of events on the pixel ID to get examined. ");
 
-  declareProperty(new ArrayProperty<int>("LogPixelIDs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("LogPixelIDs"),
                   "Pixel IDs for event log. Must have 2 (or more) entries. ");
 
   declareProperty(
-      new ArrayProperty<std::string>("LogPIxelTags"),
+      Kernel::make_unique<ArrayProperty<std::string>>("LogPIxelTags"),
       "Pixel ID tags for event log. Must have same items as 'LogPixelIDs'. ");
 
   declareProperty("AcceleratorFrequency", 60, "Freuqency of the accelerator at "
@@ -410,7 +413,7 @@ void FilterEventsByLogValuePreNexus::exec() {
   // Save output
   setProperty<IEventWorkspace_sptr>(OUT_PARAM, m_localWorkspace);
   if (m_functionMode == "Filter") {
-    declareProperty(new WorkspaceProperty<IEventWorkspace>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
                         "OutputFilteredWorkspace", "WS_A", Direction::Output),
                     "");
     setProperty<IEventWorkspace_sptr>("OutputFilteredWorkspace",
@@ -505,7 +508,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   // Load partial spectra
   //---------------------------------------------------------------------------
   // For slight speed up
-  m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
+  m_loadOnlySomeSpectra = (!this->m_spectraList.empty());
 
   // Turn the spectra list into a map, for speed of access
   for (auto spectra : m_spectraList)
@@ -785,7 +788,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   }
 
   // determine the instrument parameter file
-  size_t pos = instrument.rfind("_"); // get rid of the run number
+  size_t pos = instrument.rfind('_'); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work

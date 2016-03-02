@@ -44,19 +44,19 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
     valueVec.push_back(boost::lexical_cast<int>(value));
 
   declareProperty(
-      new ArrayProperty<int>("SplitInto", valueVec),
+      Kernel::make_unique<ArrayProperty<int>>("SplitInto", valueVec),
       "A comma separated list of into how many sub-grid elements each "
       "dimension should split; "
       "or just one to split into the same number for all dimensions. Default " +
           SplitInto + ".");
 
   declareProperty(
-      new PropertyWithValue<int>("SplitThreshold", SplitThreshold,
-                                 mustBePositive),
+      make_unique<PropertyWithValue<int>>("SplitThreshold", SplitThreshold,
+                                          mustBePositive),
       "How many events in a box before it should be split. Default " +
           Strings::toString(SplitThreshold) + ".");
 
-  declareProperty(new PropertyWithValue<int>(
+  declareProperty(make_unique<PropertyWithValue<int>>(
                       "MaxRecursionDepth", MaxRecursionDepth, mustBeMoreThen1),
                   "How many levels of box splitting recursion are allowed. "
                   "The smallest box will have each side length :math:`l = "

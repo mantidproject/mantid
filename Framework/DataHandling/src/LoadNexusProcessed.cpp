@@ -217,12 +217,13 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {".nxs", ".nx5", ".xml"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Nexus file to read, as a full or relative path.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service. For multiperiod "
@@ -238,7 +239,7 @@ void LoadNexusProcessed::init() {
                   "Number of first spectrum to read.");
   declareProperty("SpectrumMax", static_cast<int64_t>(Mantid::EMPTY_INT()),
                   mustBePositive, "Number of last spectrum to read.");
-  declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int64_t>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -248,7 +249,8 @@ void LoadNexusProcessed::init() {
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
-      new PropertyWithValue<bool>("FastMultiPeriod", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
+                                           Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
@@ -509,7 +511,7 @@ void LoadNexusProcessed::exec() {
                       1. / nWorkspaceEntries_d);
       }
 
-      declareProperty(new WorkspaceProperty<API::Workspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
           prop_name + os.str(), wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);
@@ -1096,7 +1098,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (auto str : columnNames) {
+  for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();
@@ -1726,11 +1728,11 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   std::string::size_type index1, index2;
   std::string num1, num2;
   // find the number after "_" in algorithm name ( eg:MantidAlogorthm_1)
-  index1 = elem1.nxname.find("_");
+  index1 = elem1.nxname.find('_');
   if (index1 != std::string::npos) {
     num1 = elem1.nxname.substr(index1 + 1, elem1.nxname.length() - index1);
   }
-  index2 = elem2.nxname.find("_");
+  index2 = elem2.nxname.find('_');
   if (index2 != std::string::npos) {
     num2 = elem2.nxname.substr(index2 + 1, elem2.nxname.length() - index2);
   }
@@ -2155,7 +2157,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<int>(m_spec_list.size());
 

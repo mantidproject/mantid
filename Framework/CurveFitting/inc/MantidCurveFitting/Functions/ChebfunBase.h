@@ -83,7 +83,9 @@ class MANTID_CURVEFITTING_DLL ChebfunBase {
 public:
   ChebfunBase(size_t n, double start, double end, double tolerance = 0.0);
   /// Copy constructor
-  ChebfunBase(const ChebfunBase &other);
+  ChebfunBase(const ChebfunBase &) = default;
+  /// Move constructor
+  ChebfunBase(ChebfunBase &&) = default;
   /// Get the polynomial order of this base.
   size_t order() const { return m_n; }
   /// Get the size of the base which is the number of x-points.
@@ -155,7 +157,8 @@ public:
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.
-  ChebfunBase &operator=(const ChebfunBase &other);
+  ChebfunBase &operator=(const ChebfunBase &other) = delete;
+  ChebfunBase &operator=(ChebfunBase &&other) = delete;
   /// Calculate the x-values based on the (start,end) interval.
   void calcX();
   /// Calculate the integration weights

@@ -52,13 +52,14 @@ LoadRawHelper::~LoadRawHelper() {}
 
 /// Initialisation method.
 void LoadRawHelper::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".raw", ".s*", ".add"}),
+  const std::vector<std::string> exts{".raw", ".s*", ".add"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "The name of the RAW file to read, including its full or "
                   "relative path. The file extension must be .raw or .RAW "
                   "(N.B. case sensitive if running on Linux).");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the Analysis Data Service. "
                   "If the input RAW file contains multiple periods higher "
@@ -273,7 +274,7 @@ void LoadRawHelper::createMonitorWorkspace(
     // otherwise  set the workspace as "OutputWorkspace"
     if (nwsSpecs > 0) {
       std::string monitorwsName = wsName + "_monitors";
-      pAlg->declareProperty(new WorkspaceProperty<Workspace>(
+      pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           "MonitorWorkspace", monitorwsName, Direction::Output));
       setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,
                            numberOfPeriods, true, pAlg);
@@ -331,8 +332,8 @@ void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
     outputWorkspace = "OutputWorkspace";
   }
   outws = outputWorkspace + "_" + suffix.str();
-  pAlg->declareProperty(
-      new WorkspaceProperty<Workspace>(outws, wsName, Direction::Output));
+  pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      outws, wsName, Direction::Output));
   pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
 }
@@ -917,7 +918,7 @@ void LoadRawHelper::checkOptionalProperties() {
   // Check validity of spectra list property, if set
   if (m_list) {
     m_list = true;
-    if (m_spec_list.size() == 0) {
+    if (m_spec_list.empty()) {
       m_list = false;
     } else {
       const int64_t minlist =
@@ -967,7 +968,7 @@ specnum_t LoadRawHelper::calculateWorkspaceSize() {
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<specnum_t>(m_spec_list.size());
       m_total_specs = total_specs;
@@ -1024,7 +1025,7 @@ void LoadRawHelper::calculateWorkspacesizes(
           else
             ++itr;
         }
-        if (m_spec_list.size() == 0) {
+        if (m_spec_list.empty()) {
           g_log.debug() << "normalwsSpecs is " << normalwsSpecs
                         << "  monitorwsSpecs is " << monitorwsSpecs
                         << std::endl;
@@ -1165,7 +1166,7 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
   std::string l_filenamePart =
       Poco::Path(l_path.path()).getFileName(); // get filename part only
   if (isAscii(pathToRawFile) &&
-      l_filenamePart.rfind("_") != std::string::npos) {
+      l_filenamePart.rfind('_') != std::string::npos) {
     // then we will assume that the file is an ISIS log file
     potentialLogFiles.insert(pathToRawFile);
   } else {
@@ -1255,7 +1256,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
-  size_t pos = pathToRawFile.find_last_of("/");
+  size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
     pos = pathToRawFile.find_last_of("\\");
   }
@@ -1264,7 +1265,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   }
   while (Mantid::Kernel::Strings::extractToEOL(adstream, str)) {
     std::string fileName;
-    pos = str.find("*");
+    pos = str.find('*');
     if (pos == std::string::npos)
       continue;
     fileName = str.substr(pos + 1, str.length() - pos);

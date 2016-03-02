@@ -42,7 +42,6 @@
 class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
 public:
   SINQHMListener();
-  ~SINQHMListener() override;
 
   std::string name() const override { return "SINQHMListener"; }
   bool supportsHistory() const override { return false; }

@@ -69,14 +69,15 @@ const std::string GenerateGroupingPowder::category() const {
  */
 void GenerateGroupingPowder::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble,
                   "The angle step for grouping");
   declareProperty(
-      new FileProperty("GroupingFilename", "", FileProperty::Save, ".xml"),
+      make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
+                                ".xml"),
       "A grouping file that will be created. The corresponding .par file will "
       "be created as well.");
 }
@@ -137,7 +138,7 @@ void GenerateGroupingPowder::exec() {
       std::copy(groups.at(i).begin(), groups.at(i).end(),
                 std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
-      size_t found = text.rfind(",");
+      size_t found = text.rfind(',');
       if (found != std::string::npos) {
         text.erase(found, 1); // erase the last comma
       }

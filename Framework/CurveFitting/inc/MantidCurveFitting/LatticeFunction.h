@@ -44,7 +44,6 @@ namespace CurveFitting {
 class DLLExport LatticeFunction : public API::ILatticeFunction {
 public:
   LatticeFunction();
-  ~LatticeFunction() override {}
 
   std::string name() const override { return "LatticeFunction"; }
 

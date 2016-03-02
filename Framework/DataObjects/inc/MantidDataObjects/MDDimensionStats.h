@@ -18,9 +18,6 @@ public:
   /// Constructor
   MDDimensionStats() : total(0.0), totalApproxVariance(0.0), numPoints(0) {}
 
-  /// Destructor (empty)
-  ~MDDimensionStats() {}
-
   //---------------------------------------------------------------------------------------
   /** Returns the mean position of events in this dimension */
   coord_t getMean() const { return total / static_cast<coord_t>(numPoints); }

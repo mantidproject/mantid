@@ -44,8 +44,6 @@ public:
   /// Constructor and Destructor
   IPowderDiffPeakFunction();
 
-  ~IPowderDiffPeakFunction() override;
-
   /// Overwrite IFunction base class methods
   // virtual const std::string name() = 0;
   /// Category of function

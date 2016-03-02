@@ -58,7 +58,7 @@ public:
                    const VectorType &vector)
       : m_matrix(matrix), m_vector(vector) {}
 
-  virtual ~MatrixVectorPair() {}
+  virtual ~MatrixVectorPair() = default;
 
   /// Returns a const reference to the internally stored matrix.
   const Kernel::Matrix<MatrixNumericType> &getMatrix() const {

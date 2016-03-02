@@ -1,5 +1,6 @@
 import unittest
 import platform
+import numpy as np
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
@@ -103,6 +104,21 @@ if platform.system() == "Windows":
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_QLr_value_with_resnorm(result, prob, fit_group)
 
+        def test_run_with_zero_at_the_end_of_data(self):
+            """
+            Test that the algorithm handles data with appended zeros correctly
+            """
+            sample = self._create_sample_with_trailing_zero()
+            fit_group, result, prob = BayesQuasi(SampleWorkspace=sample,
+                                                 ResolutionWorkspace=self._res_ws,
+                                                 MinRange=-0.54,
+                                                 MaxRange=0.50,
+                                                 FixedWidth=False,
+                                                 Plot='None')
+
+            self.assertTrue(isinstance(fit_group, WorkspaceGroup))
+            self.assertTrue(isinstance(result, MatrixWorkspace))
+            self.assertTrue(isinstance(prob, MatrixWorkspace))
 
 #--------------------------------Validate results------------------------------------------------
 
@@ -252,6 +268,24 @@ if platform.system() == "Windows":
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
             self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01632)
             self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00908)
+
+#--------------------------------Helper functions--------------------------------------
+
+        def _create_sample_with_trailing_zero(self):
+            """
+            Creates a sample and resolution workspace that have an additional trailing 0
+
+            """
+            x_data = np.append(self._sample_ws.readX(0), 0.5500)
+            y_data1 = np.append(self._sample_ws.readY(0), 0)
+            y_data2 = np.append(self._sample_ws.readY(1), 0)
+            y_data = np.concatenate((y_data1, y_data2), axis=0)
+            e_data1 = np.append(self._sample_ws.readE(0), 0)
+            e_data2 = np.append(self._sample_ws.readE(1), 0)
+            e_data = np.concatenate((e_data1, e_data2), axis=0)
+            sample = CreateWorkspace(x_data, y_data, e_data, NSpec=2, ParentWorkspace=self._sample_ws)
+            return sample
+
 
     if __name__=="__main__":
         unittest.main()

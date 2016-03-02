@@ -262,8 +262,6 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
   valid = true;
 }
 
-ScriptRepositoryImpl::~ScriptRepositoryImpl() throw() {}
-
 /**
  Check the connection with the server through the ::doDownloadFile method.
  @path server : The url that will be used to connect.
@@ -858,7 +856,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // get exception from the read_json parser
       std::string server_reply_str;
       server_reply_str = server_reply.str();
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1179,7 +1177,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
       server_reply_str = server_reply.str();
       // remove the status message from the end of the reply,
       // in order not to get exception from the read_json parser
-      size_t pos = server_reply_str.rfind("}");
+      size_t pos = server_reply_str.rfind('}');
       if (pos != std::string::npos)
         answer << std::string(server_reply_str.begin(),
                               server_reply_str.begin() + pos + 1);
@@ -1429,7 +1427,7 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       if (!isEntryValid(filepath))
         continue;
       Json::Value entry_json = pt.get(filepath, "");
@@ -1494,7 +1492,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
     // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (auto filepath : member_names) {
+    for (const auto &filepath : member_names) {
       Json::Value entry_json = pt.get(filepath, "");
 
       entry_it = repo.find(filepath);
@@ -1529,7 +1527,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     } // end loop FOREACH entry in local json
 
     // delete the entries to be deleted in json file
-    if (entries_to_delete.size() > 0) {
+    if (!entries_to_delete.empty()) {
 
       // clear the auto_update flag from the folders if the user deleted files
       for (const auto &folder : folders_of_deleted) {
@@ -1698,7 +1696,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
 }
 
 std::string ScriptRepositoryImpl::getParentFolder(const std::string &file) {
-  size_t pos = file.rfind("/");
+  size_t pos = file.rfind('/');
   if (pos == file.npos) {
     return "";
   }

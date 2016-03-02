@@ -6,10 +6,6 @@
 
 namespace Mantid {
 namespace Kernel {
-/// constructor
-UserStringParser::UserStringParser() {}
-/// Destructor
-UserStringParser::~UserStringParser() {}
 
 /**This method parses a given string of numbers and returns a vector of vector
   *of numbers.
@@ -21,7 +17,7 @@ UserStringParser::parse(const std::string &userString) {
   std::vector<std::vector<unsigned int>> numbers;
   // first separate commas
   std::vector<std::string> commaseparatedstrings;
-  if (userString.find(",") != std::string::npos) {
+  if (userString.find(',') != std::string::npos) {
     commaseparatedstrings = separateComma(userString);
   }
   if (!commaseparatedstrings.empty()) {

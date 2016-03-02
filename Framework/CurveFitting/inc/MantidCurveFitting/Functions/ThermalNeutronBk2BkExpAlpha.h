@@ -38,9 +38,6 @@ namespace Functions {
 class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public API::IFunction1D,
                                               public API::ParamFunction {
 public:
-  ThermalNeutronBk2BkExpAlpha();
-  ~ThermalNeutronBk2BkExpAlpha() override;
-
   /// Override
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;

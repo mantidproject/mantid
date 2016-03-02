@@ -31,14 +31,6 @@ Constructor
   Direct.normalize();
 }
 
-Line::Line(const Line &A)
-    : Origin(A.Origin), Direct(A.Direct)
-/**
-Copy Constructor
-@param A :: Line to copy
-*/
-{}
-
 Line *Line::clone() const
 /**
 Virtual copy constructor (not currently used)
@@ -47,26 +39,6 @@ Virtual copy constructor (not currently used)
 {
   return new Line(*this);
 }
-
-Line &Line::operator=(const Line &A)
-/**
-Assignment operator
-@param A :: Line to copy
-@return *this
-*/
-{
-  if (this != &A) {
-    Origin = A.Origin;
-    Direct = A.Direct;
-  }
-  return *this;
-}
-
-Line::~Line()
-/**
-Destructor
-*/
-{}
 
 Kernel::V3D Line::getPoint(const double lambda) const
 /**

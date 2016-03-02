@@ -48,8 +48,6 @@ public:
   PeakShapeEllipsoid &operator=(const PeakShapeEllipsoid &other);
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
-  /// Destructor
-  ~PeakShapeEllipsoid() override;
   /// Get radii
   std::vector<double> abcRadii() const;
   /// Get background inner radii

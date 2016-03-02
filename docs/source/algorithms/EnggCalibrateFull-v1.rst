@@ -89,18 +89,18 @@ Usage
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
-   posTable = EnggCalibrateFull(Workspace=ws_name,
-                                VanIntegrationWorkspace=van_integ_ws,
-                                VanCurvesWorkspace=van_curves_ws,
-                                ExpectedPeaks=[1.097, 2.1], Bank='1')
+   pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
+                                             VanIntegrationWorkspace=van_integ_ws,
+                                             VanCurvesWorkspace=van_curves_ws,
+                                             ExpectedPeaks=[1.097, 2.1], Bank='1')
 
-   detID = posTable.column(0)[0]
-   calPos =  posTable.column(2)[0]
-   print "Det ID:", detID
-   print "Calibrated position: (%.3f,%.3f,%.3f)" % (calPos.getX(), calPos.getY(), calPos.getZ())
+   det_id = pos_table.column(0)[0]
+   cal_pos =  pos_table.column(2)[0]
+   print "Det ID:", det_id
+   print "Calibrated position: (%.3f,%.3f,%.3f)" % (cal_pos.getX(), cal_pos.getY(), cal_pos.getZ())
    ws = mtd[ws_name]
-   posInWSInst = ws.getInstrument().getDetector(detID).getPos()
-   print "Is the detector position calibrated now in the original workspace instrument?", (calPos == posInWSInst)
+   posInWSInst = ws.getInstrument().getDetector(det_id).getPos()
+   print "Is the detector position calibrated now in the original workspace instrument?", (cal_pos == posInWSInst)
 
 .. testcleanup:: ExCalFull
 
@@ -132,26 +132,27 @@ Output:
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
-   posTable = EnggCalibrateFull(Workspace=ws_name,
-                                VanIntegrationWorkspace=van_integ_ws,
-                                VanCurvesWorkspace=van_curves_ws,
-                                ExpectedPeaks=[1.097, 2.1], Bank='1',
-                                OutDetPosFilename=pos_filename)
+   pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
+                                             VanIntegrationWorkspace=van_integ_ws,
+                                             VanCurvesWorkspace=van_curves_ws,
+                                             ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                             OutDetPosFilename=pos_filename)
 
-   detID = posTable.column(0)[0]
-   pos =  posTable.column(2)[0]
-   print "Det ID:", detID
-   print "Calibrated position: (%.3f,%.3f,%.3f)" % (pos.getX(),pos.getY(),pos.getZ())
+   det_id = pos_table.column(0)[0]
+   pos =  pos_table.column(2)[0]
+   print "Det ID:", det_id
+   print "Calibrated position: ({0:.3f},{1:.3f},{2:.3f})".format(pos.getX(),pos.getY(),pos.getZ())
+   print "Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount())
    print "Was the file created?", os.path.exists(pos_filename)
    with open(pos_filename) as csvf:
       reader = csv.reader(csvf, dialect='excel')
       reader.next()
       calibOK = True
       for i,row in enumerate(reader):
-         calPos = posTable.column(2)[i]
-         calibOK = calibOK and (abs(float(row[4]) - calPos.getX()) < 1e-6) and\
-                   (abs(float(row[5]) - calPos.getY()) < 1e-6) and\
-                   (abs(float(row[6]) - calPos.getZ()) < 1e-6)
+         cal_pos = pos_table.column(2)[i]
+         calibOK = calibOK and (abs(float(row[4]) - cal_pos.getX()) < 1e-6) and\
+                   (abs(float(row[5]) - cal_pos.getY()) < 1e-6) and\
+                   (abs(float(row[6]) - cal_pos.getZ()) < 1e-6)
          if not calibOK: break
    print "Does the calibration file have the expected values?", calibOK
 
@@ -169,5 +170,6 @@ Output:
 
    Det ID: 100001
    Calibrated position: (1.506,0.000,0.002)
+   Got details on the peaks fitted for 1 detector(s)
    Was the file created? True
    Does the calibration file have the expected values? True

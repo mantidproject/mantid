@@ -59,7 +59,7 @@ public:
     binning.push_back(1.0);
     binning.push_back(0.1);
     binning.push_back(2.0);
-    declareProperty(new ArrayProperty<double>(
+    declareProperty(Mantid::Kernel::make_unique<ArrayProperty<double>>(
         "Binning", binning, boost::make_shared<RebinParamsValidator>()));
   }
   void exec() {}

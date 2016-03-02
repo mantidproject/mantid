@@ -51,6 +51,8 @@ public:
   /// Constructor
   PeakClusterProjection(
       boost::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS);
+  PeakClusterProjection(const PeakClusterProjection &) = delete;
+  PeakClusterProjection &operator=(const PeakClusterProjection &) = delete;
   /// Get the signal value at the peak center
   Mantid::signal_t
   signalAtPeakCenter(const Mantid::Geometry::IPeak &peak,
@@ -59,13 +61,9 @@ public:
   /// Get the peak center
   Mantid::Kernel::V3D peakCenter(const Mantid::Geometry::IPeak &peak) const;
   /// Destructor
-  virtual ~PeakClusterProjection();
+  virtual ~PeakClusterProjection() = default;
 
 private:
-  // Disabled copy and assignment.
-  PeakClusterProjection(const PeakClusterProjection &);
-  PeakClusterProjection &operator=(const PeakClusterProjection &);
-
   /// Image
   boost::shared_ptr<Mantid::API::IMDWorkspace> m_mdWS;
 

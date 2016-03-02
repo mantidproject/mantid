@@ -75,8 +75,9 @@ public:
   void test_Extracting_From_PropertyManager_Succeeds() {
     boost::shared_ptr<PropertyManager> manager =
         boost::make_shared<PropertyManager>();
-    manager->declareProperty(new MatrixProperty<>("Rotation"),
-                             "Rotation matrix"); // Default is null
+    manager->declareProperty(
+        Mantid::Kernel::make_unique<MatrixProperty<>>("Rotation"),
+        "Rotation matrix"); // Default is null
     DblMatrix null = manager->getProperty("Rotation");
     TS_ASSERT_EQUALS(null.numRows(), 0);
     TS_ASSERT_EQUALS(null.numCols(), 0);

@@ -35,13 +35,14 @@ CreateCalFileByNames::CreateCalFileByNames() : API::Algorithm() {}
  */
 void CreateCalFileByNames::init() {
   declareProperty(
-      new WorkspaceProperty<>("InstrumentWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "InstrumentWorkspace", "", Direction::Input,
+          boost::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest. "
       "You can use LoadEmptyInstrument to create such a workspace.");
-  declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Save, ".cal"),
-      "The name of the output CalFile");
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::Save, ".cal"),
+                  "The name of the output CalFile");
   declareProperty(
       "GroupNames", "",
       "A string of the instrument component names to use as separate groups. "

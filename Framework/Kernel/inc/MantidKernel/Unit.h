@@ -49,11 +49,7 @@ public:
   /// (Empty) Constructor
   Unit();
   /// Virtual destructor
-  virtual ~Unit();
-  /// Copy Constructor
-  Unit(const Unit &other);
-  /// Copy assignment operator
-  Unit &operator=(const Unit &rhs);
+  virtual ~Unit() = default;
 
   /// @return a cloned instance of the other
   virtual Unit *clone() const = 0;
@@ -268,8 +264,6 @@ public:
 
   /// Constructor
   Empty() : Unit() {}
-  /// Destructor
-  ~Empty() override {}
 };
 
 //=================================================================================================
@@ -284,9 +278,6 @@ public:
   Label(const std::string &caption, const std::string &label);
   void setLabel(const std::string &cpt, const UnitLabel &lbl = UnitLabel(""));
   Unit *clone() const override;
-
-  /// Destructor
-  ~Label() override {}
 
 private:
   /// Caption
@@ -332,8 +323,6 @@ public:
 
   /// Constructor
   Wavelength();
-  /// Destructor
-  ~Wavelength() override {}
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -361,8 +350,6 @@ public:
 
   /// Constructor
   Energy();
-  /// Destructor
-  ~Energy() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -386,8 +373,6 @@ public:
 
   /// Constructor
   Energy_inWavenumber();
-  /// Destructor
-  ~Energy_inWavenumber() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -411,8 +396,6 @@ public:
 
   /// Constructor
   dSpacing();
-  /// Destructor
-  ~dSpacing() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -435,8 +418,6 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   MomentumTransfer();
-  /// Destructor
-  ~MomentumTransfer() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -460,8 +441,6 @@ public:
 
   /// Constructor
   QSquared();
-  /// Destructor
-  ~QSquared() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -486,8 +465,6 @@ public:
 
   /// Constructor
   DeltaE();
-  /// Destructor
-  ~DeltaE() override {}
 
 protected:
   double factorTo;    ///< Constant factor for to conversion
@@ -511,8 +488,6 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inWavenumber();
-  /// Destructor
-  ~DeltaE_inWavenumber() override {}
 };
 
 //=================================================================================================
@@ -532,8 +507,6 @@ public:
 
   /// Constructor
   Momentum();
-  /// Destructor
-  ~Momentum() override {}
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -560,8 +533,6 @@ public:
 
   /// Constructor
   SpinEchoLength();
-  /// Destructor
-  ~SpinEchoLength() override {}
 };
 
 //=================================================================================================
@@ -581,8 +552,6 @@ public:
 
   /// Constructor
   SpinEchoTime();
-  /// Destructor
-  ~SpinEchoTime() override {}
 };
 
 //=================================================================================================
@@ -602,8 +571,6 @@ public:
 
   /// Constructor
   Time();
-  /// Destructor
-  ~Time() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion

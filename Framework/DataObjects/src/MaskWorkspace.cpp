@@ -27,15 +27,6 @@ const double ERROR_VALUE = 0.;
 //--------------------------------------------------------------------------
 
 /**
- * Constructor - Default.
- * @return MaskWorkspace
- */
-MaskWorkspace::MaskWorkspace() {}
-
-MaskWorkspace::MaskWorkspace(const MaskWorkspace &other)
-    : SpecialWorkspace2D(other), IMaskWorkspace(other) {}
-
-/**
  * Constructor - with a given dimension.
  * @param[in] numvectors Number of vectors/histograms for this workspace.
  * @return MaskWorkspace
@@ -68,13 +59,6 @@ MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
     : SpecialWorkspace2D(parent) {
   this->clearMask();
 }
-
-//--------------------------------------------------------------------------
-
-/**
- * Destructor
- */
-MaskWorkspace::~MaskWorkspace() {}
 
 //--------------------------------------------------------------------------
 

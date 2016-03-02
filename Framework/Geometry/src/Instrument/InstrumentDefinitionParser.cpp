@@ -136,10 +136,6 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
 }
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -421,7 +417,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
         if (!pElem->hasAttribute("idlist")) {
           g_log.error("No detector ID list found for detectors of type " +
                       pElem->getAttribute("type"));
-        } else if (idList.vec.size() == 0) {
+        } else if (idList.vec.empty()) {
           g_log.error("No detector IDs found for detectors in list " +
                       pElem->getAttribute("idlist") + "for detectors of type" +
                       pElem->getAttribute("type"));
@@ -1343,7 +1339,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
                     name);
         throw Kernel::Exception::InstrumentDefinitionError(
             "Detector location element " + name + " has no idlist.", filename);
-      } else if (idList.vec.size() == 0) {
+      } else if (idList.vec.empty()) {
         g_log.error("No detector IDs found for detectors in list " +
                     idList.idname);
       } else {
@@ -1931,10 +1927,10 @@ void InstrumentDefinitionParser::setLogfile(
     std::string tie = "";
 
     if (type.compare("fitting") == 0) {
-      size_t found = paramName.find(":");
+      size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
-        size_t index = paramName.find(":", found + 1);
+        size_t index = paramName.find(':', found + 1);
         if (index != std::string::npos) {
           g_log.error()
               << "Fitting <parameter> in instrument definition file defined "

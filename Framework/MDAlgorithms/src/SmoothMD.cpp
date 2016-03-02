@@ -190,7 +190,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 /** Initialize the algorithm's properties.
  */
 void SmoothMD::init() {
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace to smooth.");
 
@@ -201,8 +201,8 @@ void SmoothMD::init() {
   widthVectorValidator->add(
       boost::make_shared<MandatoryValidator<std::vector<int>>>());
 
-  declareProperty(new ArrayProperty<int>("WidthVector", widthVectorValidator,
-                                         Direction::Input),
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "WidthVector", widthVectorValidator, Direction::Input),
                   "Width vector. Either specify the width in n-pixels for each "
                   "dimension, or provide a single entry (n-pixels) for all "
                   "dimensions.");
@@ -213,18 +213,18 @@ void SmoothMD::init() {
   std::stringstream docBuffer;
   docBuffer << "Smoothing function. Defaults to " << first;
   declareProperty(
-      new PropertyWithValue<std::string>(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
           "Function", first,
           boost::make_shared<ListValidator<std::string>>(allFunctionTypes),
           Direction::Input),
       docBuffer.str());
 
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Multidimensional weighting workspace. Optional.");
 
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output smoothed MDHistoWorkspace.");
 }

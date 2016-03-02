@@ -43,8 +43,6 @@ public:
                           const float *point);
   MDPlaneImplicitFunction(const size_t nd, const double *normal,
                           const double *point);
-  /// Class destructor.
-  ~MDPlaneImplicitFunction() override;
 
   /// Overriding the addPlane for check
   void addPlane(const MDPlane &plane);

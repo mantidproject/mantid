@@ -131,7 +131,7 @@ std::string AlgorithmFactoryImpl::createName(const std::string &name,
 */
 std::pair<std::string, int>
 AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
-  std::string::size_type seperatorPosition = mangledName.find("|");
+  std::string::size_type seperatorPosition = mangledName.find('|');
   if (seperatorPosition == std::string::npos) {
     throw std::invalid_argument(
         "Cannot decode a Name string without a \"|\" (bar) character ");

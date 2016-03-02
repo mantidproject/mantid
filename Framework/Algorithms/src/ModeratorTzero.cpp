@@ -39,13 +39,13 @@ void ModeratorTzero::setFormula(const std::string &formula) {
 void ModeratorTzero::init() {
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
   // declare the output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
@@ -54,11 +54,11 @@ void ModeratorTzero::init() {
                         boost::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
 
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(make_unique<Kernel::PropertyWithValue<double>>(
                       "tolTOF", 0.1, Kernel::Direction::Input),
                   "Tolerance in the calculation of the emission time, in "
                   "microseconds (default:1)");
-  declareProperty(new Kernel::PropertyWithValue<size_t>(
+  declareProperty(make_unique<Kernel::PropertyWithValue<size_t>>(
                       "Niter", 1, Kernel::Direction::Input),
                   "Number of iterations (default:1)");
 } // end of void ModeratorTzero::init()

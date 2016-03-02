@@ -74,18 +74,19 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 /// Initialization method.
 void LoadISISNexus2::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
-      "The name of the Nexus file to load");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  const std::vector<std::string> exts{".nxs", ".n*"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
                   mustBePositive);
-  declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
+  declareProperty(make_unique<ArrayProperty<int64_t>>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -300,7 +301,7 @@ void LoadISISNexus2::exec() {
         // warnings where necessary.
         validateMultiPeriodLogs(local_workspace);
       }
-      declareProperty(new WorkspaceProperty<Workspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           prop_name + os.str(), base_name + os.str(), Direction::Output));
       wksp_group->addWorkspace(local_workspace);
       setProperty(prop_name + os.str(),
@@ -377,7 +378,7 @@ void LoadISISNexus2::exec() {
                 wksp_group->getItem(p - 1));
             data_ws->setMonitorWorkspace(monitor_workspace);
           }
-          declareProperty(new WorkspaceProperty<Workspace>(
+          declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
               monitorPropBase + os.str(), monitorWsNameBase + os.str(),
               Direction::Output));
           monitor_group->addWorkspace(monitor_workspace);
@@ -385,13 +386,13 @@ void LoadISISNexus2::exec() {
                       boost::static_pointer_cast<Workspace>(monitor_workspace));
         }
         // The group is the root property value
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::dynamic_pointer_cast<Workspace>(monitor_group));
 
       } else {
-        declareProperty(new WorkspaceProperty<Workspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::static_pointer_cast<Workspace>(monitor_workspace));
@@ -537,7 +538,7 @@ void LoadISISNexus2::checkOptionalProperties(
       spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range),
                       spec_list.end());
       // combine spectra numbers from ranges and the list
-      if (spec_list.size() > 0) {
+      if (!spec_list.empty()) {
         for (int64_t i = spec_min; i < spec_max + 1; i++) {
           specnum_t spec_num = static_cast<specnum_t>(i);
           // remove excluded spectra now rather then inserting it here and
@@ -581,7 +582,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
 
   int64_t ic(0);
 
-  if (spec_list.size() > 0) {
+  if (!spec_list.empty()) {
     ic = 0;
     auto start_point = spec_list.begin();
     for (auto it = start_point; it != spec_list.end(); it++) {

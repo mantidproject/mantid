@@ -97,7 +97,7 @@ public:
 
   Mantid::API::IMDHistoWorkspace_sptr
   executeMDNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
-  virtual ~ReflectometryTransform();
+  virtual ~ReflectometryTransform() = default;
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
                          double d0Min, double d0Max, const std::string &d1Label,
                          const std::string &d1ID, double d1Min, double d1Max,
