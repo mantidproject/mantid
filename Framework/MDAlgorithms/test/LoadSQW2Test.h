@@ -34,8 +34,8 @@ public:
   static void destroySuite(LoadSQW2Test *suite) { delete suite; }
 
   LoadSQW2Test()
-      : CxxTest::TestSuite(), m_filename("test_horace_reader.sqw"),
-        m_defaultFrame("Q_sample") {}
+      : CxxTest::TestSuite(), m_4DFilename("test_horace_reader.sqw"),
+        m_3DCutFilename("test_horace_reader_3dcut.sqw") {}
 
   //----------------------------------------------------------------------------
   // Success tests
@@ -55,60 +55,61 @@ public:
   void test_SQW_Is_Accepted_Filename() {
     IAlgorithm_uptr alg;
     TS_ASSERT_THROWS_NOTHING(alg = createAlgorithm());
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Filename", m_4DFilename));
   }
 
-  void test_OutputWorkspace_As_Expected_For_Default_Values() {
+  void test_Default_Frame_Is_Q_Sample() {
+    // Empty arguments
     Arguments args;
-    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
 
-    checkGeometryAsExpected(*outputWS, m_defaultFrame);
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(m_4DFilename, args);
+
+    checkGeometryAsExpected(*outputWS, "Q_sample", DataType::SQW);
     checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS, args);
+    checkDataAsExpected(*outputWS, args, DataType::SQW);
   }
 
-  void test_OutputWorkspace_As_Expected_For_HKL_Frame() {
+  void test_Full_4D_As_Expected_For_HKL_Frame() {
     Arguments args;
     args.outputFrame = "HKL";
-    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(m_4DFilename, args);
 
-    checkGeometryAsExpected(*outputWS, args.outputFrame);
+    checkGeometryAsExpected(*outputWS, args.outputFrame, DataType::SQW);
     checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS, args);
+    checkDataAsExpected(*outputWS, args, DataType::SQW);
   }
 
-  void test_OutputWorkspace_As_Expected_For_Lab_Frame() {
-    Arguments args;
-    args.outputFrame = "Q_lab";
-    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
-
-    checkGeometryAsExpected(*outputWS, args.outputFrame);
-    checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS, args);
-  }
-
-  void test_OutputWorkspace_Has_No_Events_When_MetaDataOnly_Selected() {
+  void test_Full_4D_Has_No_Events_When_MetaDataOnly_Selected() {
     Arguments args;
     args.metadataOnly = true;
-    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(m_4DFilename, args);
 
-    checkGeometryAsExpected(*outputWS, m_defaultFrame);
+    checkGeometryAsExpected(*outputWS, "Q_sample", DataType::SQW);
     checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS, args);
+    checkDataAsExpected(*outputWS, args, DataType::SQW);
   }
 
-  void test_OutputWorkspace_Is_File_Backed_When_Requested() {
+  void test_Full_4D_Is_File_Backed_When_Requested() {
     using Poco::TemporaryFile;
 
     Arguments args;
     args.metadataOnly = false;
     TemporaryFile filebacking;
     args.outputFilename = filebacking.path();
-    IMDEventWorkspace_sptr outputWS = runAlgorithm(args);
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(m_4DFilename, args);
 
-    checkGeometryAsExpected(*outputWS, m_defaultFrame);
+    checkGeometryAsExpected(*outputWS, "Q_sample", DataType::SQW);
     checkExperimentInfoAsExpected(*outputWS);
-    checkDataAsExpected(*outputWS, args);
+    checkDataAsExpected(*outputWS, args, DataType::SQW);
+  }
+
+  void test_Cut_File_As_Expected_For_Default_Values() {
+    Arguments args;
+    IMDEventWorkspace_sptr outputWS = runAlgorithm(m_3DCutFilename, args);
+
+    checkGeometryAsExpected(*outputWS, "Q_sample", DataType::Cut3D);
+    checkExperimentInfoAsExpected(*outputWS);
+    checkDataAsExpected(*outputWS, args, DataType::Cut3D);
   }
 
   //----------------------------------------------------------------------------
@@ -141,6 +142,8 @@ private:
     std::string outputFrame;
   };
 
+  enum class DataType { SQW, Cut3D };
+
   struct DimensionProperties {
     typedef std::array<std::string, 4> StringList;
     typedef std::array<double, 8> DoubleList;
@@ -150,9 +153,9 @@ private:
     SizeTList nbins;
   };
 
-  IMDEventWorkspace_sptr runAlgorithm(Arguments args) {
+  IMDEventWorkspace_sptr runAlgorithm(std::string filename, Arguments args) {
     auto algm = createAlgorithm();
-    algm->setProperty("Filename", m_filename);
+    algm->setProperty("Filename", filename);
     algm->setProperty("MetadataOnly", args.metadataOnly);
     algm->setProperty("OutputFilename", args.outputFilename);
     if (!args.outputFrame.empty()) {
@@ -171,9 +174,9 @@ private:
   }
 
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS,
-                               std::string outputFrame) {
+                               std::string outputFrame, DataType dtype) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
-    auto expectedDim = getExpectedDimProperties(outputFrame);
+    auto expectedDim = getExpectedDimProperties(outputFrame, dtype);
     for (size_t i = 0; i < 4; ++i) {
       auto dim = outputWS.getDimension(i);
       TS_ASSERT_EQUALS(expectedDim.ids[i], dim->getDimensionId());
@@ -192,35 +195,45 @@ private:
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
-  DimensionProperties getExpectedDimProperties(std::string outputFrame) {
+  DimensionProperties getExpectedDimProperties(std::string outputFrame,
+                                               DataType dtype) {
     DimensionProperties expected;
     expected.ids = {"qx", "qy", "qz", "en"};
-    expected.nbins = {3, 3, 2, 2};
     if (outputFrame == "HKL") {
       expected.units = {"in 2.189 A^-1", "in 2.189 A^-1", "in 2.189 A^-1",
                         "meV"};
       expected.names = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "en"};
-      expected.ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
-                          -0.7818, -0.5052, 2.5,     147.5};
       expected.frameNames = {"HKL", "HKL", "HKL", "meV"};
-    } else {
+    } else if (outputFrame == "Q_sample") {
       expected.units = {"Angstrom^-1", "Angstrom^-1", "Angstrom^-1", "meV"};
-      if (outputFrame == "Q_sample") {
-        expected.names = {"Q_sample_x", "Q_sample_y", "Q_sample_z", "en"};
-        expected.ulimits = {0.0962,  2.0297,  -1.0169, -0.8811,
-                            -1.7117, -1.1060, 2.5,     147.5};
-        expected.frameNames = {"QSample", "QSample", "QSample", "meV"};
-      } else if (outputFrame == "Q_lab") {
-        expected.names = {"Q_lab_x", "Q_lab_y", "Q_lab_z", "en"};
-        expected.ulimits = {-1.0174, -0.8810, -1.7116, -1.1057,
-                            0.0962,  2.0296,  2.5,     147.5};
-        expected.frameNames = {"QLab", "QLab", "QLab", "meV"};
+      expected.names = {"Q_sample_x", "Q_sample_y", "Q_sample_z", "en"};
+      expected.frameNames = {"QSample", "QSample", "QSample", "meV"};
+    } else {
+      throw std::runtime_error("LoadSQW2Test::getExpectedDimProperties() - "
+                               "Unknown output frame expected.");
+    }
+
+    if (dtype == DataType::SQW) {
+      expected.nbins = {3, 3, 2, 2};
+      if (outputFrame == "HKL") {
+        expected.ulimits = {0.0182,  1.7904,  -3.0131, 3.0221,
+                            -3.0131, 3.0131, 2.5,     147.5};
       } else {
-        TS_FAIL("Unknown output frame: " + outputFrame);
+        expected.ulimits = {0.0399,  3.9198, -6.5966, 6.6162,
+                            -6.5966, 6.5966, 2.5,     147.5};
+      }
+    } else if (dtype == DataType::Cut3D) {
+      expected.nbins = {3, 3, 1, 3};
+      if (outputFrame == "HKL") {
+        expected.ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
+                            -0.7818, -0.5052, 2.5,     147.5};
+      } else {
+        expected.ulimits = {-0.5, 2.5, -3, 3, -1, 1, -17.5, 117.5};
       }
     }
     return expected;
   }
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -284,14 +297,11 @@ private:
     TS_ASSERT_DELTA(0.0, vVec[2], 1e-04);
   }
 
-  void checkDataAsExpected(const IMDEventWorkspace &outputWS, Arguments args) {
+  void checkDataAsExpected(const IMDEventWorkspace &outputWS, Arguments args,
+                           DataType dtype) {
     if (args.metadataOnly) {
       TS_ASSERT_EQUALS(0, outputWS.getNEvents());
     } else {
-      // It is assumed that if the events are not transformed to the output
-      // frame correctly then they will all not register into the workspace
-      // correctly and the number events will be incorrect
-      TS_ASSERT_EQUALS(580, outputWS.getNEvents());
       // equal split between experiments
       size_t nexpt1(0), nexpt2(0);
       // 10 detector Ids split evenly
@@ -314,11 +324,27 @@ private:
           ids[idet - 1] += 1;
         }
       } while (iter->next());
-      TS_ASSERT_EQUALS(290, nexpt1);
-      TS_ASSERT_EQUALS(290, nexpt2);
-      // 58 events in each detector
-      std::vector<int> expectedIds(10, 58);
-      TS_ASSERT_EQUALS(expectedIds, ids);
+      // It is assumed that if the events are not transformed to the output
+      // frame correctly then they will all not register into the workspace
+      // correctly and the number events will be incorrect
+      if (dtype == DataType::SQW) {
+        TS_ASSERT_EQUALS(580, outputWS.getNEvents());
+        TS_ASSERT_EQUALS(290, nexpt1);
+        TS_ASSERT_EQUALS(290, nexpt2);
+        // 58 events in each detector
+        std::vector<int> expectedIds(10, 58);
+        TS_ASSERT_EQUALS(expectedIds, ids);
+      } else if (dtype == DataType::Cut3D) {
+        TS_ASSERT_EQUALS(480, outputWS.getNEvents());
+        TS_ASSERT_EQUALS(240, nexpt1);
+        TS_ASSERT_EQUALS(240, nexpt2);
+        // 48 events in each detector
+        std::vector<int> expectedIds(10, 48);
+        TS_ASSERT_EQUALS(expectedIds, ids);
+      } else {
+        throw std::runtime_error(
+            "LoadSQW2Test::checkDataAsExpected - Unexpected data type.");
+      }
     }
 
     if (!args.outputFilename.empty()) {
@@ -336,8 +362,8 @@ private:
   //----------------------------------------------------------------------------
   // Private data
   //----------------------------------------------------------------------------
-  std::string m_filename;
-  std::string m_defaultFrame;
+  std::string m_4DFilename;
+  std::string m_3DCutFilename;
 };
 
 #endif /* MANTID_MDALGORITHMS_LOADSQW2TEST_H_ */

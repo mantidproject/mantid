@@ -124,7 +124,7 @@ void LoadSQW2::init() {
                                         FileProperty::OptionalSave, {".nxs"}),
                   "If specified, the output workspace will be a file-backed "
                   "MDEventWorkspace");
-  std::vector<std::string> allowed = {"Q_sample", "Q_lab", "HKL"};
+  std::vector<std::string> allowed = {"Q_sample", "HKL"};
   declareProperty("Q3DFrames", allowed[0],
                   boost::make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
@@ -322,8 +322,6 @@ LoadSQW2::calculateOutputTransform(const Kernel::DblMatrix &gonR,
   // File coordinates are in the crystal coordinate system
   if (m_outputFrame == "Q_sample")
     return DblMatrix(3, 3, true);
-  if (m_outputFrame == "Q_lab")
-    return gonR * lattice.getU();
   else if (m_outputFrame == "HKL")
     return lattice.getBinv() * INV_TWO_PI;
   else
@@ -378,51 +376,68 @@ void LoadSQW2::skipDataSectionMetadata() {
  * ulimit entry
  */
 void LoadSQW2::readSQWDimensions() {
-  // dimension labels
+  // Reads the information in the plot axes (pax) and integration axes (iax)
+  // fields to construct the SQW dimensions. The dimension limits are taken
+  // as the first/last entries of the pax/iax fields as required and the
+  // bin boundary values themselves are ignored as we are creating a full
+  // MDEventWorkspace
+
+  // skip dimension labels
   std::vector<int32_t> ulabelShape(2);
   m_reader->read(ulabelShape, 2);
   m_file->seekg(ulabelShape[0] * ulabelShape[1], std::ios_base::cur);
+
   // projection information
-  int32_t npax(0);
-  *m_reader >> npax;
-  int32_t niax(4 - npax);
-  if (niax > 0) {
-    // skip iaxes, iint (2 values per axis)
-    m_file->seekg(niax * sizeof(int32_t) + 2 * niax * sizeof(float),
-                  std::ios_base::cur);
+  int32_t nProjAxes(0);
+  *m_reader >> nProjAxes;
+  int32_t nIntAxes(4 - nProjAxes);
+  std::vector<float> dimLimits(8, 0.f);
+  if (nIntAxes > 0) {
+    // indices of integrated axes (1-based)
+    std::vector<int32_t> indices(nIntAxes, 0);
+    m_reader->read(indices, nIntAxes);
+    // range of integrated axes
+    std::vector<float> ranges(2 * nIntAxes, 0.f);
+    m_reader->read(ranges, 2 * nIntAxes);
+    for (int32_t i = 0; i < nIntAxes; ++i) {
+      auto zeroBasedIdx(indices[i] - 1);
+      dimLimits[2 * zeroBasedIdx] = ranges[2 * i];
+      dimLimits[2 * zeroBasedIdx + 1] = ranges[2 * i + 1];
+    }
   }
-  std::vector<int32_t> nbins(npax, 1);
+  std::vector<int32_t> nbins(4, 1);
   int32_t signalLength(1);
-  if (npax > 0) {
-    // indices (starting at 1) of projection axes
-    std::vector<int32_t> pax;
-    m_reader->read(pax, npax);
-    for (int32_t i = 0; i < npax; ++i) {
-      int32_t np(0);
-      *m_reader >> np;
-      nbins[pax[i] - 1] = np - 1;
-      signalLength *= np - 1;
-      m_file->seekg(np * sizeof(float), std::ios_base::cur);
+  if (nProjAxes > 0) {
+    // indices of projection axes (1-based)
+    std::vector<int32_t> indices(nProjAxes);
+    m_reader->read(indices, nProjAxes);
+    // limits & nbins for each projection axis
+    for (int32_t i = 0; i < nProjAxes; ++i) {
+      int32_t nBinBounds(0);
+      *m_reader >> nBinBounds;
+      auto zeroBasedIdx(indices[i] - 1);
+      nbins[zeroBasedIdx] = nBinBounds - 1;
+      signalLength *= nBinBounds - 1;
+      *m_reader >> dimLimits[2 * zeroBasedIdx];
+      m_file->seekg((nBinBounds - 2) * sizeof(float), std::ios_base::cur);
+      *m_reader >> dimLimits[2 * zeroBasedIdx + 1];
     }
     // skip display axes
-    m_file->seekg(npax * sizeof(int32_t), std::ios_base::cur);
+    m_file->seekg(nProjAxes * sizeof(int32_t), std::ios_base::cur);
   }
   // skip signal(float), error data(float), npix(int64)
   m_file->seekg(2 * signalLength * sizeof(float) +
                     signalLength * sizeof(int64_t),
                 std::ios_base::cur);
-  // dimensions limits
-  Matrix<float> urange;
-  m_reader->read(urange, {int32_t(2), int32_t(4)},
-                 BinaryStreamReader::MatrixOrdering::ColumnMajor);
-  assert(urange.numRows() == 2 && urange.numCols() == 4);
+  // skip data limits
+  m_file->seekg(8 * sizeof(int32_t), std::ios_base::cur);
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Data:\n"
-       << "    ulimits (from file): ";
+       << "    ranges (file): ";
     for (size_t i = 0; i < 4; ++i) {
-      os << "(" << urange[0][i] << "," << urange[1][i] << ") ";
+      os << "(" << dimLimits[2 * i] << "," << dimLimits[2 * i + 1] << ") ";
     }
     os << "\n";
     os << "    nbins: (";
@@ -433,14 +448,22 @@ void LoadSQW2::readSQWDimensions() {
     g_log.debug(os.str());
   }
 
-  transformLimitsToOutputFrame(urange);
+  transformLimitsToOutputFrame(dimLimits);
+  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+    std::stringstream os;
+    os << "    ranges (transformed): ";
+    for (size_t i = 0; i < 4; ++i) {
+      os << "(" << dimLimits[2 * i] << "," << dimLimits[2 * i + 1] << ") ";
+    }
+  }
   // The lattice is assumed to be the same in all contributing files so use
   // the first B matrix to create the axis information (only needed in HKL
   // frame)
   const auto &bmat0 =
       m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
   for (size_t i = 0; i < 4; ++i) {
-    float umin(urange[0][i]), umax(urange[1][i]);
+    float umin(dimLimits[2 * i]), umax(dimLimits[2 * i + 1]);
+    assert(umin <= umax);
     if (i < 3) {
       m_outputWS->addDimension(createQDimension(
           i, umin, umax, static_cast<size_t>(nbins[i]), bmat0));
@@ -459,34 +482,19 @@ void LoadSQW2::readSQWDimensions() {
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
 /**
- * Find the min/max dimension values in the output frame. Takes the min/max
- * values found after testing transforms from all contributing SPE files
- * @param urange On input should contain the matrix of limits in the frame
- * defined by the file (assumed to be 4x4). On output it will contain the
- * limits in the transformed frame that will contain all of the data
+ * Transform the dimension limits to the output frame. We define Q_sample as the
+ * same projection as in the file so no transformation is applied in this case.
+ * For HKL we simply apply the B^1 transformation.
+ * @param urange Limits from the projection/integration fields in the file
  */
-void LoadSQW2::transformLimitsToOutputFrame(Kernel::Matrix<float> &urange) {
-  // Track the global min/max values for X,Y,Z (as min/max pair)
-  std::array<float, 6> globalLimits{FLT_MAX,  -FLT_MAX, FLT_MAX,
-                                    -FLT_MAX, FLT_MAX,  -FLT_MAX};
-  for (const auto &transf : m_outputTransforms) {
-    V3D fileMin(urange[0][0], urange[0][1], urange[0][2]);
-    V3D transMin = transf * fileMin;
-    V3D fileMax(urange[1][0], urange[1][1], urange[1][2]);
-    V3D transMax = transf * fileMax;
-    for (size_t i = 0; i < 3; ++i) {
-      float minf = static_cast<float>(transMin[i]);
-      if (minf < globalLimits[2 * i])
-        globalLimits[2 * i] = minf;
-      float maxf = static_cast<float>(transMax[i]);
-      if (maxf > globalLimits[2 * i + 1])
-        globalLimits[2 * i + 1] = maxf;
-    }
-  }
-  // overwrite input range
-  for (size_t i = 0; i < 3; ++i) {
-    urange[0][i] = globalLimits[2 * i];
-    urange[1][i] = globalLimits[2 * i + 1];
+void LoadSQW2::transformLimitsToOutputFrame(std::vector<float> &urange) {
+  V3D fileMin(urange[0], urange[2], urange[4]);
+  V3D transMin = m_outputTransforms[0] * fileMin;
+  V3D fileMax(urange[1], urange[3], urange[5]);
+  V3D transMax = m_outputTransforms[0] * fileMax;
+  for(size_t i = 0; i < 3; ++i) {
+    urange[2*i] = transMin[i];
+    urange[2*i + 1] = transMax[i];
   }
 }
 

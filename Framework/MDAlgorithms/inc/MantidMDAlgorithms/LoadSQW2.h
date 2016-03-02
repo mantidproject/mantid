@@ -76,7 +76,7 @@ private:
   Geometry::IMDDimension_sptr createQDimension(size_t index, float dimMin,
                                                float dimMax, size_t nbins,
                                                const Kernel::DblMatrix &bmat);
-  void transformLimitsToOutputFrame(Kernel::Matrix<float> &urange);
+  void transformLimitsToOutputFrame(std::vector<float> &urange);
   Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
                                                 size_t nbins);
   void setupBoxController();
