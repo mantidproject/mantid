@@ -208,6 +208,7 @@ class AtomListBuilder(object):
         if None in isotropicUs:
             try:
                 equivalentUMap = self._getEquivalentUs(cifData, labels, unitCell)
+
                 for key, uIso in isotropicUMap.iteritems():
                     if uIso is None and key in equivalentUMap:
                         isotropicUMap[key] = equivalentUMap[key]
@@ -221,12 +222,13 @@ class AtomListBuilder(object):
         uMatrices = self._getUMatrices(cifData, labels)
         sumWeights = self._getSumWeights(unitCell)
 
-        return [np.sum(np.multiply(uMatrix, sumWeights)) / 3. if uMatrix is not None else None for uMatrix in uMatrices]
+        return dict([(label, np.sum(np.multiply(uMatrix, sumWeights)) / 3.)
+                     for label, uMatrix in uMatrices.iteritems() if uMatrix.dtype.type != np.object_])
 
     def _getUMatrices(self, cifData, labels):
         anisoLabel = u'_atom_site_aniso_label'
 
-        if anisoLabel not in cifData:
+        if anisoLabel not in cifData.keys():
             raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
 
         try:
@@ -246,7 +248,7 @@ class AtomListBuilder(object):
             if key not in cifData.keys():
                 raise RuntimeError('Can not construct tensor with missing element \'{0}\'.'.format(key))
             else:
-                values.append([float(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
+                values.append([getFloatOrNone(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
 
         return dict([(label, np.array([[u11, u12, u13], [u12, u22, u23], [u13, u23, u33]])) for
                      label, u11, u12, u13, u22, u23, u33 in zip(labels, *values)])
@@ -279,7 +281,8 @@ class CrystalStructureBuilder(object):
             self.spaceGroup = SpaceGroupBuilder(cifData).spaceGroup
             self.unitCell = UnitCellBuilder(cifData).unitCell
 
-            self.atoms = self._getAtoms(cifData, UnitCell(*[' '.split(self.unitCell)]))
+            self.atoms = AtomListBuilder(cifData, UnitCell(*[float(removeErrorEstimateFromNumber(x)) for x in
+                                                             self.unitCell.split()])).atomList
 
     def getCrystalStructure(self):
         return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
