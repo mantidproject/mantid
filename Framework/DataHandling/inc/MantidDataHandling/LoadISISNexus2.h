@@ -8,6 +8,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include <nexus/NeXusFile.hpp>
@@ -103,32 +104,6 @@ public:
     std::string monName;
   };
 
-  /// The structure describes parameters of a single time-block written in the
-  /// nexus file
-  struct DataBlock {
-    // The number of data periods
-    int numberOfPeriods;
-    // The number of time channels per spectrum (N histogram bins -1)
-    std::size_t numberOfChannels;
-    // The number of spectra
-    size_t numberOfSpectra;
-    // minimal spectra Id (by default 1, undefined -- max_value)
-    int64_t spectraID_min;
-    // maximal spectra Id (by default 1, undefined  -- 0)
-    int64_t spectraID_max;
-
-    DataBlock()
-        : numberOfPeriods(0), numberOfChannels(0), numberOfSpectra(0),
-          spectraID_min(std::numeric_limits<int64_t>::max()), spectraID_max(0) {
-    }
-
-    DataBlock(const NeXus::NXInt &data)
-        : numberOfPeriods(data.dim0()), numberOfChannels(data.dim2()),
-          numberOfSpectra(data.dim1()),
-          spectraID_min(std::numeric_limits<int64_t>::max()),
-          spectraID_max(0){};
-  };
-
 private:
   /// Overwrites Algorithm method.
   void init() override;
@@ -137,11 +112,11 @@ private:
   // Validate the optional input properties
   void checkOptionalProperties(
       const std::map<int64_t, std::string> &ExcludedMonitors);
-  /// Prepare a vector of SpectraBlock structures to simplify loading
+  /// Prepare a vector of SpectraBlock structures to sifmplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
                        const std::map<int64_t, specnum_t> &specInd2specNum_map,
-                       const DataBlock &LoadBlock);
+                       DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
   /// Load in details about the run
@@ -174,7 +149,7 @@ private:
   void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(
-      bool range_supplied, int64_t range_min, int64_t range_max,
+      bool range_supplied, DataBlockComposite& dataBlockComposite,
       const std::vector<int64_t> &spec_list,
       const std::map<int64_t, std::string> &ExcludedMonitors);
 
@@ -187,15 +162,17 @@ private:
 
   // the description of the data block in the file to load.
   // the description of single time-range data block, obtained from detectors
-  DataBlock m_detBlockInfo;
+  DataBlockComposite m_detBlockInfo;
+
   // the description of single time-range data block, obtained from monitors
-  DataBlock m_monBlockInfo;
+  DataBlockComposite m_monBlockInfo;
+
   // description of the block to be loaded may include monitors and detectors
   // with the same time binning if the detectors and monitors are loaded
   // together
   // in single workspace or equal to the detectorBlock if monitors are excluded
   // or monBlockInfo if only monitors are loaded.
-  DataBlock m_loadBlockInfo;
+  DataBlockComposite m_loadBlockInfo;
 
   /// Is there a detector block
   bool m_have_detector;

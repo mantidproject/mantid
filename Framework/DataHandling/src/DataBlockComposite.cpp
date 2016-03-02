@@ -24,7 +24,7 @@ int64_t DataBlockComposite::getMaxSpectrumID() const {
   int64_t max = std::numeric_limits<int64_t>::min();
   for (const auto &child : m_dataBlocks) {
     auto temp = child.getMaxSpectrumID();
-    if (temp < max) {
+    if (temp > max) {
       max = temp;
     }
   }
@@ -35,29 +35,13 @@ void DataBlockComposite::setMaxSpectrumID(int64_t) {
   // DO NOTHING
 }
 
-std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() {
+std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
   std::vector<std::pair<int64_t, int64_t>> intervals;
   for (const auto &dataBlock : m_dataBlocks) {
-    intervals.push_back(
-        std::make_pair(dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
+    intervals.push_back(std::make_pair(dataBlock.getMinSpectrumID(),
+                                       dataBlock.getMaxSpectrumID()));
   }
   return Mantid::Kernel::make_unique<DataBlockGenerator>(intervals);
-}
-
-int64_t DataBlockComposite::getNextSpectrumID(int64_t spectrumID) const {
-  auto isInRange = [spectrumID](std::vector<DataBlock>::const_iterator block) {
-    return (spectrumID >= block->getMinSpectrumID()) &&
-           (spectrumID <= block->getMaxSpectrumID());
-  };
-
-  auto isBetween = [&spectrumID](
-      std::vector<DataBlock>::const_iterator block,
-      std::vector<DataBlock>::const_iterator blockPlus1) { return true; };
-
-  for (auto it = m_dataBlocks.cbegin(); it != m_dataBlocks.cend(); ++it) {
-  }
-
-  return 12;
 }
 
 void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
@@ -68,12 +52,38 @@ void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
 
   // Insert the data block
   m_dataBlocks.push_back(dataBlock);
+}
 
-  // We need to sort the data items. TODO: make this more efficient.
-  auto comparison = [](const DataBlock &first, const DataBlock &second) {
-    return first.getMinSpectrumID() < second.getMinSpectrumID();
+size_t DataBlockComposite::getNumberOfSpectra() const {
+  size_t total = 0;
+  for (const auto &element : m_dataBlocks) {
+    total += element.getNumberOfSpectra();
+  }
+  return total;
+}
+
+DataBlockComposite DataBlockComposite::
+operator+(const DataBlockComposite &other) {
+  DataBlockComposite output;
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
+                             std::begin(m_dataBlocks), std::end(m_dataBlocks));
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
+                             std::begin(other.m_dataBlocks),
+                             std::end(other.m_dataBlocks));
+  return output;
+}
+
+
+std::vector<DataBlock> DataBlockComposite::getIntervals() {
+  // Sort the intervals. We sort them by minimum value
+  auto comparison = [](const DataBlock &el1,
+    const DataBlock &el2) {
+    return el1.getMinSpectrumID() < el2.getMinSpectrumID();
   };
   std::sort(m_dataBlocks.begin(), m_dataBlocks.end(), comparison);
+  return m_dataBlocks;
 }
+
+
 }
 }
