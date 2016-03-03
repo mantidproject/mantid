@@ -31,6 +31,12 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                                     ip_file="Vesuvio_IP_file_test.par",
                                                     spectra="135-136")
 
+    def tearDown(self):
+        workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
+        for name in workspace_names:
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
 
     # -------------- Success cases ------------------
 
@@ -89,11 +95,11 @@ class VesuvioCorrectionsTest(unittest.TestCase):
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self.assertTrue(isinstance(corrections_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrections_wsg), 2)
+        self.assertEqual(len(corrections_wsg), 3)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self.assertTrue(isinstance(corrected_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrected_wsg), 2)
+        self.assertEqual(len(corrected_wsg), 3)
 
         output_ws = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(output_ws, MatrixWorkspace))
@@ -102,7 +108,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self.assertTrue(isinstance(linear_params, ITableWorkspace))
         self.assertEqual(linear_params.columnCount(), 3)
-        self.assertEqual(linear_params.rowCount(), 6)
+        self.assertEqual(linear_params.rowCount(), 7)
 
 
     def test_ms_correct_with_container(self):
@@ -111,18 +117,22 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      GammaBackground=False,
                                      FitParameters=self._create_dummy_fit_parameters(),
                                      Masses=self._create_dummy_masses(),
-                                     MassProfiles=self._create_dummy_profiles())
+                                     MassProfiles=self._create_dummy_profiles(),
+                                     CorrectionWorkspaces='__Correction',
+                                     CorrectedWorkspaces='__Corrected',
+                                     OutputWorkspace='__Output',
+                                     LinearFitResult='__LinearFit')
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self.assertTrue(isinstance(corrections_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrections_wsg), 2)
+        self.assertEqual(len(corrections_wsg), 3)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self.assertTrue(isinstance(corrected_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrected_wsg), 2)
+        self.assertEqual(len(corrected_wsg), 3)
 
         output_ws = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(output_ws, MatrixWorkspace))
@@ -131,7 +141,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self.assertTrue(isinstance(linear_params, ITableWorkspace))
         self.assertEqual(linear_params.columnCount(), 3)
-        self.assertEqual(linear_params.rowCount(), 9)
+        self.assertEqual(linear_params.rowCount(), 7)
 
 
     def test_gamma_and_ms_correct_with_container(self):
@@ -139,7 +149,11 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      ContainerWorkspace=self._test_container_ws,
                                      FitParameters=self._create_dummy_fit_parameters(),
                                      Masses=self._create_dummy_masses(),
-                                     MassProfiles=self._create_dummy_profiles())
+                                     MassProfiles=self._create_dummy_profiles(),
+                                     CorrectionWorkspaces='__Correction',
+                                     CorrectedWorkspaces='__Corrected',
+                                     OutputWorkspace='__Output',
+                                     LinearFitResult='__LinearFit')
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
@@ -147,11 +161,11 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         print corrections_wsg
         self.assertTrue(isinstance(corrections_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrections_wsg), 2)
+        self.assertEqual(len(corrections_wsg), 4)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self.assertTrue(isinstance(corrected_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrected_wsg), 2)
+        self.assertEqual(len(corrected_wsg), 4)
 
         output_ws = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(output_ws, MatrixWorkspace))
@@ -160,7 +174,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self.assertTrue(isinstance(linear_params, ITableWorkspace))
         self.assertEqual(linear_params.columnCount(), 3)
-        self.assertEqual(linear_params.rowCount(), 9)
+        self.assertEqual(linear_params.rowCount(), 10)
 
 
     def test_gamma_and_ms_correct_with_container_fixed_scaling(self):
@@ -171,18 +185,22 @@ class VesuvioCorrectionsTest(unittest.TestCase):
                                      Masses=self._create_dummy_masses(),
                                      MassProfiles=self._create_dummy_profiles(),
                                      ContainerScale=0.1,
-                                     GammaBackgroundScale=0.2)
+                                     GammaBackgroundScale=0.2,
+                                     CorrectionWorkspaces='__Correction',
+                                     CorrectedWorkspaces='__Corrected',
+                                     OutputWorkspace='__Output',
+                                     LinearFitResult='__LinearFit')
 
         alg.execute()
         self.assertTrue(alg.isExecuted())
 
         corrections_wsg = alg.getProperty("CorrectionWorkspaces").value
         self.assertTrue(isinstance(corrections_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrections_wsg), 2)
+        self.assertEqual(len(corrections_wsg), 4)
 
         corrected_wsg = alg.getProperty("CorrectedWorkspaces").value
         self.assertTrue(isinstance(corrected_wsg, WorkspaceGroup))
-        self.assertEqual(len(corrected_wsg), 2)
+        self.assertEqual(len(corrected_wsg), 4)
 
         output_ws = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(output_ws, MatrixWorkspace))
@@ -191,16 +209,16 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         linear_params = alg.getProperty("LinearFitResult").value
         self.assertTrue(isinstance(linear_params, ITableWorkspace))
         self.assertEqual(linear_params.columnCount(), 3)
-        self.assertEqual(linear_params.rowCount(), 9)
+        self.assertEqual(linear_params.rowCount(), 10)
 
-        self.assertAlmostEqual(linear_params.cell(0, 0), 0.1)
-        self.assertAlmostEqual(linear_params.cell(0, 1), 0.0)
-        self.assertAlmostEqual(linear_params.cell(0, 2), 1.0)
-        self.assertAlmostEqual(linear_params.cell(0, 3), 0.2)
-        self.assertAlmostEqual(linear_params.cell(0, 4), 0.0)
-        self.assertAlmostEqual(linear_params.cell(0, 5), 1.0)
-        self.assertAlmostEqual(linear_params.cell(0, 7), 0.0)
-        self.assertAlmostEqual(linear_params.cell(0, 8), 1.0)
+        self.assertAlmostEqual(linear_params.cell(0, 1), 0.1)
+        self.assertAlmostEqual(linear_params.cell(1, 1), 0.0)
+        self.assertAlmostEqual(linear_params.cell(2, 1), 1.0)
+        self.assertAlmostEqual(linear_params.cell(3, 1), 0.2)
+        self.assertAlmostEqual(linear_params.cell(4, 1), 0.0)
+        self.assertAlmostEqual(linear_params.cell(5, 1), 1.0)
+        self.assertAlmostEqual(linear_params.cell(7, 1), 0.0)
+        self.assertAlmostEqual(linear_params.cell(8, 1), 1.0)
 
 
     # -------------- Failure cases ------------------
@@ -233,7 +251,7 @@ class VesuvioCorrectionsTest(unittest.TestCase):
         alg = AlgorithmManager.createUnmanaged("VesuvioCorrections")
         alg.initialize()
         alg.setChild(True)
-        alg.setProperty("OutputWorkspace", "__unused")
+        alg.setProperty("OutputWorkspace", "__Output")
         for key, value in kwargs.iteritems():
             alg.setProperty(key, value)
         return alg
