@@ -63,6 +63,10 @@ void LoadIsawDetCal::init() {
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
 
+namespace {
+const constexpr double DegreesPerRadian = 180.0 / M_PI;
+}
+
 /** Executes the algorithm
 *
 *  @throw runtime_error Thrown if algorithm cannot execute
@@ -212,11 +216,10 @@ void LoadIsawDetCal::exec() {
     }
     boost::shared_ptr<RectangularDetector> det;
     std::string Detbank = "bank" + std::to_string(id);
-    // Loop through detectors to match names with number from DetCal file
     auto matchingDetector = std::find_if(
         detList.begin(), detList.end(),
         [&Detbank](const boost::shared_ptr<RectangularDetector> &detector) {
-          return detector->getName().compare(Detbank) == 0;
+          return detector->getName() == Detbank;
         });
     if (matchingDetector != detList.end()) {
       det = *matchingDetector;
@@ -252,7 +255,7 @@ void LoadIsawDetCal::exec() {
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
-      angle1 *= 180.0 / M_PI;
+      angle1 *= DegreesPerRadian;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
@@ -262,7 +265,7 @@ void LoadIsawDetCal::exec() {
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
       double angle2 = roY.angle(rY);
-      angle2 *= 180.0 / M_PI;
+      angle2 *= DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
@@ -275,13 +278,13 @@ void LoadIsawDetCal::exec() {
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
-        Rot = Rot * rot0;
+        Rot *= rot0;
       }
       boost::shared_ptr<const IComponent> grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
-        Rot = Rot * rot0;
+        Rot *= rot0;
       }
 
       if (inputW) {
@@ -294,7 +297,6 @@ void LoadIsawDetCal::exec() {
         pmap.addQuat(comp.get(), "rot", Rot);
       }
     }
-    // Loop through tube detectors to match names with number from DetCal file
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
       continue;
@@ -345,7 +347,7 @@ void LoadIsawDetCal::exec() {
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
-      angle1 *= 180.0 / M_PI;
+      angle1 *= DegreesPerRadian;
       // TODO: find out why this is needed for WISH
       if (instname == "WISH")
         angle1 += 180.0;
@@ -358,7 +360,7 @@ void LoadIsawDetCal::exec() {
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
       double angle2 = roY.angle(rY);
-      angle2 *= 180.0 / M_PI;
+      angle2 *= DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
@@ -404,7 +406,8 @@ void LoadIsawDetCal::exec() {
  * @param ws :: The workspace
  */
 
-void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
+void LoadIsawDetCal::center(double x, double y, double z,
+                            const std::string &detname,
                             API::Workspace_sptr ws) {
 
   Instrument_sptr inst = getCheckInst(ws);
