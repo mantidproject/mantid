@@ -164,6 +164,102 @@ class AtomListBuilderTest(unittest.TestCase):
         self.assertEqual(self.builder._getAtoms(data),
                          'Si 1/8 1/8 1/8 1.0;Al 0.34 0.56 0.23 1.0')
 
+    def test_getAtoms_invalid_u(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_u_iso_or_equiv', [u'0.01', u'sdfsdfs'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0')
+
+    def test_getAtoms_invalid_b(self):
+        data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                                   (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
+                                   (u'_atom_site_b_iso_or_equiv', [u'1.0', u'sdfsdfs'])]))
+
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0')
+
+    def test_getAtoms_aniso_u_orthogonal(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'], '22': [u'0.01', u'0.02'],
+                     '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        # u_equiv should be (0.01 + 0.01 + 0.04)/3 = 0.02 and (0.2 + 0.2 + 0.5)/3 = 0.03
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.02;Al 0.34 0.56 0.23 1.0 0.03')
+
+    def test_getAtoms_aniso_u_hexagonal(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.01', u'0.01'], '13': [u'0.0', u'0.0'],
+                     '22': [u'0.01', u'0.02'],
+                     '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2, 90, 90, 120)
+
+        # u_equiv should be (4/3*(0.01 + 0.01 - 0.01) + 0.04)/3 = 0.0177... and (4/3*(0.02 + 0.02 - 0.01) + 0.05)/3 = 0.03
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.01778;Al 0.34 0.56 0.23 1.0 0.03')
+
+    def test_getAtoms_aniso_b_orthogonal(self):
+        bElements = {'11': [u'1.0', u'2.0'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
+                     '22': [u'1.0', u'2.0'], '23': [u'0.0', u'0.0'], '33': [u'4.0', u'5.0']}
+
+        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in bElements.iteritems()])
+        bDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al'])
+                           ]))
+
+        data = self._getData(bDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.02533;Al 0.34 0.56 0.23 1.0 0.038')
+
+    def test_getAtoms_aniso_iso_mixed(self):
+        uElements = {'11': [u'0.01'], '12': [u'0.0'], '13': [u'0.0'], '22': [u'0.01'],
+                     '23': [u'0.0'], '33': [u'0.04']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si']),
+                           (u'_atom_site_u_iso_or_equiv', [u'invalid', u'0.01'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.02;Al 0.34 0.56 0.23 1.0 0.01')
+
+    def test_getAtoms_iso_preferred(self):
+        uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
+                     '22': [u'0.01', u'0.02'], '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
+
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
+                           (u'_atom_site_aniso_label', [u'Si', u'Al']),
+                           (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])
+                           ]))
+
+        data = self._getData(uDict)
+        cell = UnitCell(5.4, 4.3, 3.2)
+
+        self.assertEqual(self.builder._getAtoms(data, cell),
+                         'Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0.02')
+
     def test_getReciprocalLengthMatrix(self):
         cell = UnitCell(1, 2, 3)
 

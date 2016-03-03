@@ -222,7 +222,7 @@ class AtomListBuilder(object):
         uMatrices = self._getUMatrices(cifData, labels)
         sumWeights = self._getSumWeights(unitCell)
 
-        return dict([(label, np.sum(np.multiply(uMatrix, sumWeights)) / 3.)
+        return dict([(label, np.around(np.sum(np.multiply(uMatrix, sumWeights)) / 3., decimals=5))
                      for label, uMatrix in uMatrices.iteritems() if uMatrix.dtype.type != np.object_])
 
     def _getUMatrices(self, cifData, labels):
