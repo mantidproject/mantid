@@ -216,11 +216,11 @@ private:
     if (dtype == DataType::SQW) {
       expected.nbins = {3, 3, 2, 2};
       if (outputFrame == "HKL") {
-        expected.ulimits = {0.0182,  1.7904,  -3.0131, 3.0221,
-                            -3.0131, 3.0131, 2.5,     147.5};
+        expected.ulimits = {0.0399,  3.9197, -6.5965, 6.6162,
+                            -6.5965, 6.5965, 2.5,     147.5};
       } else {
-        expected.ulimits = {0.0399,  3.9198, -6.5966, 6.6162,
-                            -6.5966, 6.5966, 2.5,     147.5};
+        expected.ulimits = {0.0873,   8.5813,  -14.4416, 14.4846,
+                            -14.4416, 14.4416, 2.5,      147.5};
       }
     } else if (dtype == DataType::Cut3D) {
       expected.nbins = {3, 3, 1, 3};
@@ -228,7 +228,8 @@ private:
         expected.ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
                             -0.7818, -0.5052, 2.5,     147.5};
       } else {
-        expected.ulimits = {-0.5, 2.5, -3, 3, -1, 1, -17.5, 117.5};
+        expected.ulimits = {-1.0946, 5.4731, -6.5677, 6.5677,
+                            -2.1892, 2.1892, -17.5,   117.5};
       }
     }
     return expected;

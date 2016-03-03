@@ -60,7 +60,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 /// Default constructor
 LoadSQW2::LoadSQW2()
     : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_outputTransforms(), m_progress(),
+      m_outputWS(), m_nspe(0), m_uToRLU(), m_rluToU(), m_progress(),
       m_outputFrame() {}
 
 /// Default destructor
@@ -211,17 +211,17 @@ void LoadSQW2::createOutputWorkspace() {
 
 /**
  * Read all of the SPE headers and fill in the experiment details on the
- * output workspace
+ * output workspace. It also caches the transformations between the crystal
+ * frame & HKL using the same assumption as Horace that the lattice information
+ * is the same for each contributing SPE file.
  */
 void LoadSQW2::readAllSPEHeadersToWorkspace() {
-  m_outputTransforms.reserve(m_nspe);
   for (uint16_t i = 0; i < m_nspe; ++i) {
     auto expt = readSingleSPEHeader();
     m_outputWS->addExperimentInfo(expt);
-    m_outputTransforms.emplace_back(
-        calculateOutputTransform(expt->run().getGoniometerMatrix(),
-                                 expt->sample().getOrientedLattice()));
   }
+  auto expt0 = m_outputWS->getExperimentInfo(0);
+  cacheFrameTransforms(expt0->sample().getOrientedLattice());
 }
 
 /**
@@ -311,23 +311,12 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
 }
 
 /**
- * Return the required transformation to move from the coordinates in the file
- * to the selected output frame
- * @param gonR The goniometer matrix
+ * Cache the transforms between the Q_sample & HKL frames from the given lattice
  * @param lattice A reference to the lattice object
  */
-Kernel::DblMatrix
-LoadSQW2::calculateOutputTransform(const Kernel::DblMatrix &gonR,
-                                   const Geometry::OrientedLattice &lattice) {
-  // File coordinates are in the crystal coordinate system
-  if (m_outputFrame == "Q_sample")
-    return DblMatrix(3, 3, true);
-  else if (m_outputFrame == "HKL")
-    return lattice.getBinv() * INV_TWO_PI;
-  else
-    throw std::logic_error(
-        "LoadSQW2::calculateOutputTransform - Unknown output frame: " +
-        m_outputFrame);
+void LoadSQW2::cacheFrameTransforms(const Geometry::OrientedLattice &lattice) {
+  m_uToRLU = lattice.getBinv() * INV_TWO_PI;
+  m_rluToU = lattice.getB() * 2.0 * M_PI;
 }
 
 /**
@@ -482,19 +471,23 @@ void LoadSQW2::readSQWDimensions() {
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
 /**
- * Transform the dimension limits to the output frame. We define Q_sample as the
- * same projection as in the file so no transformation is applied in this case.
- * For HKL we simply apply the B^1 transformation.
+ * Transform the dimension limits to the output frame if required. The
+ * projection axes in Horace are always in HKL so this simply transforms
+ * to Q_sample if required
  * @param urange Limits from the projection/integration fields in the file
+ * in HKLe
  */
 void LoadSQW2::transformLimitsToOutputFrame(std::vector<float> &urange) {
+  if (m_outputFrame == "HKL")
+    return;
+
   V3D fileMin(urange[0], urange[2], urange[4]);
-  V3D transMin = m_outputTransforms[0] * fileMin;
+  V3D transMin = m_rluToU * fileMin;
   V3D fileMax(urange[1], urange[3], urange[5]);
-  V3D transMax = m_outputTransforms[0] * fileMax;
-  for(size_t i = 0; i < 3; ++i) {
-    urange[2*i] = transMin[i];
-    urange[2*i + 1] = transMax[i];
+  V3D transMax = m_rluToU * fileMax;
+  for (size_t i = 0; i < 3; ++i) {
+    urange[2 * i] = static_cast<float>(transMin[i]);
+    urange[2 * i + 1] = static_cast<float>(transMax[i]);
   }
 }
 
@@ -726,30 +719,31 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
     return 0;
   }
   auto u1(pixel[0]), u2(pixel[1]), u3(pixel[2]), en(pixel[3]);
-  uint16_t runIndex = static_cast<uint16_t>(irun - 1);
-  toOutputFrame(runIndex, u1, u2, u3);
-  const auto idet = static_cast<detid_t>(pixel[5]);
-  // skip energy bin
-  auto signal = pixel[7];
+  toOutputFrame(u1, u2, u3);
   auto error = pixel[8];
-  coord_t centres[4] = {u1, u2, u3, en};
-  m_outputWS->addEvent(
-      MDEvent<4>(signal, error * error, runIndex, idet, centres));
-  return 1;
+  coord_t centers[4] = {u1, u2, u3, en};
+  auto added = m_outputWS->addEvent(
+      MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
+                 static_cast<detid_t>(pixel[5]), centers));
+  // At this point the workspace should be setup so that we always add the
+  // event so dononly do a runtime check in debug mode
+  assert(added == 1);
+  return added;
 }
 
 /**
- * Transform the given coordinates from the file frame to the requested output
- * frame using the cached transformation for the given run
- * @param runIndex Index into the experiment list
+ * Transform the given coordinates to the requested output frame if necessary.
+ * The assumption is that the pixels on input are in the Q_sample (crystal)
+ * frame as they are defined in Horace
  * @param u1 Coordinate parallel to the beam axis
  * @param u2 Coordinate perpendicular to u1 and in the horizontal plane
  * @param u3 The cross-product of u1 & u2
  */
-void LoadSQW2::toOutputFrame(const uint16_t runIndex, float &u1, float &u2,
-                             float &u3) {
+void LoadSQW2::toOutputFrame(float &u1, float &u2, float &u3) {
+  if (m_outputFrame == "Q_sample")
+    return;
   V3D uVec(u1, u2, u3);
-  V3D qout = m_outputTransforms[runIndex] * uVec;
+  V3D qout = m_uToRLU * uVec;
   u1 = static_cast<float>(qout[0]);
   u2 = static_cast<float>(qout[1]);
   u3 = static_cast<float>(qout[2]);

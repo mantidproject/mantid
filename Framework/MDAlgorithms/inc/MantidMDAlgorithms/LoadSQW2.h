@@ -66,9 +66,7 @@ private:
   void createOutputWorkspace();
   void readAllSPEHeadersToWorkspace();
   boost::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();
-  Kernel::DblMatrix
-  calculateOutputTransform(const Kernel::DblMatrix &gonR,
-                           const Geometry::OrientedLattice &lattice);
+  void cacheFrameTransforms(const Geometry::OrientedLattice &lattice);
   void skipDetectorSection();
   void readDataSection();
   void skipDataSectionMetadata();
@@ -85,14 +83,15 @@ private:
   void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);
   size_t addEventFromBuffer(const float *pixel);
-  void toOutputFrame(const uint16_t runIndex, float &u1, float &u2, float &u3);
+  void toOutputFrame(float &u1, float &u2, float &u3);
   void finalize();
 
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
   boost::shared_ptr<SQWWorkspace> m_outputWS;
   uint16_t m_nspe;
-  std::vector<Kernel::DblMatrix> m_outputTransforms;
+  Kernel::DblMatrix m_uToRLU;
+  Kernel::DblMatrix m_rluToU;
   std::unique_ptr<API::Progress> m_progress;
   std::string m_outputFrame;
 };
