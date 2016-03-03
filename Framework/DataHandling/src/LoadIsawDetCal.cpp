@@ -65,6 +65,15 @@ void LoadIsawDetCal::init() {
 
 namespace {
 const constexpr double DegreesPerRadian = 180.0 / M_PI;
+
+std::string getBankName(const std::string &bankPart, int idnum) {
+  std::ostringstream mess;
+  if (bankPart == "WISHpanel" && idnum < 10) {
+    return bankPart + "0" + std::to_string(idnum);
+  } else {
+    return bankPart + std::to_string(idnum);
+  }
+}
 }
 
 /** Executes the algorithm
@@ -215,11 +224,11 @@ void LoadIsawDetCal::exec() {
       }
     }
     boost::shared_ptr<RectangularDetector> det;
-    std::string Detbank = "bank" + std::to_string(id);
+    std::string bankName = getBankName(bankPart, id);
     auto matchingDetector = std::find_if(
         detList.begin(), detList.end(),
-        [&Detbank](const boost::shared_ptr<RectangularDetector> &detector) {
-          return detector->getName() == Detbank;
+        [&bankName](const boost::shared_ptr<RectangularDetector> &detector) {
+          return detector->getName() == bankName;
         });
     if (matchingDetector != detList.end()) {
       det = *matchingDetector;
@@ -302,13 +311,7 @@ void LoadIsawDetCal::exec() {
       continue;
     int idnum = *bank;
 
-    std::ostringstream mess;
-    if (bankPart == "WISHpanel" && idnum < 10)
-      mess << bankPart << "0" << idnum;
-    else
-      mess << bankPart << idnum;
-
-    std::string bankName = mess.str();
+    bankName = getBankName(bankPart, idnum);
     // Retrieve it
     boost::shared_ptr<const IComponent> comp =
         inst->getComponentByName(bankName);
