@@ -264,7 +264,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
 
   m_uiTabCalib.lineEdit_cropped_customise_bank_name->setText(
-      qs.value("user-params-calib-cropped-customise-name", "").toString());
+      qs.value("user-params-calib-cropped-customise-name", "cropped")
+          .toString());
 
   m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
       qs.value("user-param-calib-plot-data", true).toBool());

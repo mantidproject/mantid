@@ -1797,13 +1797,18 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
+  const std::string specNosBank1 = "1-2000";
+  const std::string specNosBank2 = "1201-2400";
+  const std::string northBank = "North";
+  const std::string southBank = "South";
+
   if (specNos != "") {
-    if (specNos == "North") {
+    if (specNos == northBank) {
       // when north bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
-    } else if (specNos == "South") {
+      saveOpenGenie(curvesWSName, specNosBank1, northBank, vanNo);
+    } else if (specNos == southBank) {
       // when south bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+      saveOpenGenie(curvesWSName, specNosBank2, southBank, vanNo);
     } else {
 
       // when spectrumIDs are provided
@@ -1817,8 +1822,8 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     }
   } else {
     // when full calibration is carried; saves both banks
-    saveOpenGenie(curvesWSName, "1-1200", "North", vanNo);
-    saveOpenGenie(curvesWSName, "1201-2400", "South", vanNo);
+    saveOpenGenie(curvesWSName, specNosBank1, northBank, vanNo);
+    saveOpenGenie(curvesWSName, specNosBank2, southBank, vanNo);
   }
 }
 
@@ -2316,8 +2321,8 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
             " Please check also the log messages for details.";
     throw;
   }
-  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
-                 << std::endl;
+  g_log.notice() << "Saves OpenGenieAscii (.his) file written as: "
+                 << saveDir.toString() << std::endl;
 }
 
 /**
