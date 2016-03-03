@@ -353,6 +353,8 @@ class VesuvioCorrections(VesuvioBase):
         params_dict = TableWorkspaceDictionaryFacade(mtd[params_ws_name])
 
         atom_props = list()
+        intensities = list()
+
         for i, mass in enumerate(masses):
             intentisty_prop = 'f%d.Intensity' % i
             c0_prop = 'f%d.C_0' % i
@@ -364,11 +366,27 @@ class VesuvioCorrections(VesuvioBase):
             else:
                 continue
 
+            # The program DINSMS_BATCH uses those sample parameters together with the sigma divided
+            # by the sum absolute of scattering intensities for each detector (detector bank), sigma/int_sum
+            # Thus:
+            # intensity = intensity/intensity_sum
+
+            # In the thin sample limit, 1-exp(-n*dens*sigma) ~ n*dens*sigma, effectively the same scattering
+            # power (ratio of double to single scatt.)  is obtained either by using relative intensities ( sigma/int_sum )
+            # or density divided by the total intensity
+            # However, in the realistic case of thick sample, the SampleDensity, dens,  must be obtained by iterative
+            # numerical solution of the Eq. 1-exp(-n*dens*sigma) = measured scattering power of the sample. For this,
+            # a program like THICK must be used.
+            # The program THICK also uses sigma/int_sum to be consistent with the prgram DINSMS_BATCH
+
             width = params_dict['f%d.Width' % i]
 
             atom_props.append(mass)
             atom_props.append(intentisy)
             atom_props.append(width)
+            intensities.append(intentisy)
+
+        intensity_sum = sum(intensities)
 
         # Create the sample shape
         # Input dimensions are expected in CM
@@ -382,6 +400,22 @@ class VesuvioCorrections(VesuvioBase):
         multi_scatter_correction = str(self._correction_wsg) + "_MultipleScattering"
 
         # Calculation
+        # In the thin sample limit, 1-exp(-n*dens*sigma) ~ n*dens*sigma, effectively the same scattering power
+        #(ratio of double to single scatt.)  is obtained either by using relative intensities ( sigma/int_sum )or
+        # density divided by the total intensity
+        # However, in the realistic case of thick sample, the SampleDensity, dens,  must be obtained by iterative
+        # numerical solution of the Eq. 1-exp(-n*dens*sigma) = measured scattering power of the sample. For this,
+        # a program like THICK must be used.
+        # The program THICK also uses sigma/int_sum to be consistent with the prgram DINSMS_BATCH
+        # The algorithm CalculateMsVesuvio called by the algorithm VesuvioCorrections takes the parameter AtomicProperties
+        # with the absolute intensities, contraty to DINSMS_BATCH which tekes in relative intensities.
+        # To compensate for this, the thickness parameter, dens (SampleDensity),  is divided in by the sum of absolute
+        # intensities in VesuvioCorrections before being passed to CalculateMsVesuvio.
+        # Then, for the modified VesuvioCorrection algorithm one can use the thickenss parameter is as is from the
+        # THICK command, i. e. 43.20552
+        # This works, however, only in the thin sample limit, contrary to the THICK program. Thus, for some detectors
+        # (detector banks) the SampleDensiy parameter may be over(under)estimated.
+
         CalculateMSVesuvio(InputWorkspace=self._output_ws,
                            NoOfMasses=len(atom_props)/3,
                            SampleDensity=self.getProperty("SampleDensity").value,
