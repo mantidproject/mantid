@@ -237,9 +237,9 @@ class AlignComponents(PythonAlgorithm):
         # Check that a position refinement is selected for sample/source
         if ((self.getProperty("FitSourcePosition").value or
              self.getProperty("FitSamplePosition").value) and
-            not (self.getProperty("Xposition").value or
-                 self.getProperty("Yposition").value or
-                 self.getProperty("Zposition").value)):
+                not (self.getProperty("Xposition").value or
+                     self.getProperty("Yposition").value or
+                     self.getProperty("Zposition").value)):
             issues["Xposition"] = "If fitting source or sample, you must calibrate at least one position parameter."
 
         return issues
