@@ -119,6 +119,16 @@ inline ComplexVectorValueConverter& ComplexVectorValueConverter::operator=(const
   return *this;
 }
 
+/// Equality operator
+inline bool operator==(const ComplexType& c, const ComplexVectorValueConverter& conv) {
+  return c == static_cast<ComplexType>(conv);
+}
+
+/// Equality operator
+inline bool operator==(const ComplexVectorValueConverter& conv, const ComplexType& c) {
+  return c == static_cast<ComplexType>(conv);
+}
+
 } // namespace CurveFitting
 } // namespace Mantid
 

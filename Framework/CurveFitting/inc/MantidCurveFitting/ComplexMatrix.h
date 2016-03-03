@@ -1,42 +1,73 @@
 #ifndef MANTID_CURVEFITTING_COMPLEXMATRIX_H_
 #define MANTID_CURVEFITTING_COMPLEXMATRIX_H_
 
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/ComplexVector.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 #include "MantidKernel/Matrix.h"
 
-#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
 
-#include <vector>
-#include <stdexcept>
 #include <iomanip>
+#include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace CurveFitting {
 class ComplexMatrix;
 
+// Complex matrix conjugate transpose helper
+struct CTr {
+  const ComplexMatrix &matrix;
+  CTr(const ComplexMatrix &m) : matrix(m) {}
+};
+
 // mutrix multiplication helper
 struct ComplexMatrixMult2 {
   const ComplexMatrix &m_1;
   const ComplexMatrix &m_2;
-  const bool tr1;
-  const bool tr2;
+  const bool tr1;  // First matrix transposed
+  const bool tr2;  // Second matrix transposed
+  const bool ctr1; // First matrix conjugate transposed
+  const bool ctr2; // Second matrix conjugate transposed
   ComplexMatrixMult2(const ComplexMatrix &m1, const ComplexMatrix &m2)
-      : m_1(m1), m_2(m2), tr1(false), tr2(false) {}
+      : m_1(m1), m_2(m2), tr1(false), tr2(false), ctr1(false), ctr2(false) {}
 
   ComplexMatrixMult2(const Tr<ComplexMatrix> &m1, const ComplexMatrix &m2)
-      : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false) {}
+      : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false), ctr1(false),
+        ctr2(false) {}
 
   ComplexMatrixMult2(const ComplexMatrix &m1, const Tr<ComplexMatrix> &m2)
-      : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true) {}
+      : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true), ctr1(false),
+        ctr2(false) {}
 
   ComplexMatrixMult2(const Tr<ComplexMatrix> &m1, const Tr<ComplexMatrix> &m2)
-      : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(true) {}
+      : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(true), ctr1(false),
+        ctr2(false) {}
+
+  ComplexMatrixMult2(const CTr &m1, const ComplexMatrix &m2)
+      : m_1(m1.matrix), m_2(m2), tr1(false), tr2(false), ctr1(true),
+        ctr2(false) {}
+
+  ComplexMatrixMult2(const ComplexMatrix &m1, const CTr &m2)
+      : m_1(m1), m_2(m2.matrix), tr1(false), tr2(false), ctr1(false),
+        ctr2(true) {}
+
+  ComplexMatrixMult2(const Tr<ComplexMatrix> &m1, const CTr &m2)
+      : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(false), ctr1(false),
+        ctr2(true) {}
+
+  ComplexMatrixMult2(const CTr &m1, const Tr<ComplexMatrix> &m2)
+      : m_1(m1.matrix), m_2(m2.matrix), tr1(false), tr2(true), ctr1(true),
+        ctr2(false) {}
+
+  ComplexMatrixMult2(const CTr &m1, const CTr &m2)
+      : m_1(m1.matrix), m_2(m2.matrix), tr1(false), tr2(false), ctr1(true),
+        ctr2(true) {}
 };
 
 // mutrix multiplication helper
@@ -44,24 +75,35 @@ struct ComplexMatrixMult3 {
   const ComplexMatrix &m_1;
   const ComplexMatrix &m_2;
   const ComplexMatrix &m_3;
-  const bool tr1;
-  const bool tr2;
-  const bool tr3;
+  const bool tr1;  // First matrix transposed
+  const bool tr2;  // Second matrix transposed
+  const bool tr3;  // Third matrix transposed
+  const bool ctr1; // First matrix conjugate transposed
+  const bool ctr2; // Second matrix conjugate transposed
+  const bool ctr3; // Third matrix conjugate transposed
   ComplexMatrixMult3(const ComplexMatrix &m1, const ComplexMatrixMult2 &mm)
-      : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1),
-        tr3(mm.tr2) {}
+      : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1), tr3(mm.tr2),
+        ctr1(false), ctr2(mm.ctr1), ctr3(mm.ctr2) {}
 
   ComplexMatrixMult3(const Tr<ComplexMatrix> &m1, const ComplexMatrixMult2 &mm)
       : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(true), tr2(mm.tr1),
-        tr3(mm.tr2) {}
+        tr3(mm.tr2), ctr1(false), ctr2(mm.ctr1), ctr3(mm.ctr2) {}
 
   ComplexMatrixMult3(const ComplexMatrixMult2 &mm, const ComplexMatrix &m2)
-      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2),
-        tr3(false) {}
+      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2), tr3(false),
+        ctr1(mm.ctr1), ctr2(mm.ctr2), ctr3(false) {}
 
   ComplexMatrixMult3(const ComplexMatrixMult2 &mm, const Tr<ComplexMatrix> &m2)
       : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2),
-        tr3(true) {}
+        tr3(true), ctr1(mm.ctr1), ctr2(mm.ctr2), ctr3(false) {}
+
+  ComplexMatrixMult3(const CTr &m1, const ComplexMatrixMult2 &mm)
+      : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1),
+        tr3(mm.tr2), ctr1(true), ctr2(mm.ctr1), ctr3(mm.ctr2) {}
+
+  ComplexMatrixMult3(const ComplexMatrixMult2 &mm, const CTr &m2)
+      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2),
+        tr3(false), ctr1(mm.ctr1), ctr2(mm.ctr2), ctr3(true) {}
 };
 
 /**
@@ -105,9 +147,9 @@ public:
   ComplexMatrix(const ComplexMatrix &M);
   /// Create a submatrix.
   ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows,
-            size_t nCols);
+                size_t nCols);
   /// Constructor
-  //ComplexMatrix(const Kernel::Matrix<double> &M);
+  // ComplexMatrix(const Kernel::Matrix<double> &M);
   /// Create this matrix from a product of two other matrices
   ComplexMatrix(const ComplexMatrixMult2 &mult2);
   /// Create this matrix from a product of three other matrices
@@ -172,36 +214,81 @@ public:
   /// Calculate the determinant
   ComplexType det();
   /// Calculate the eigensystem of a Hermitian matrix
-  void eigenSystemHermitian(GSLVector &eigenValues, ComplexMatrix &eigenVectors);
+  void eigenSystemHermitian(GSLVector &eigenValues,
+                            ComplexMatrix &eigenVectors);
 
-  Tr<ComplexMatrix> tr() {return Tr<ComplexMatrix>(*this);}
+  /// Get "transposed" matrix to be used in multiplications
+  Tr<ComplexMatrix> tr() { return Tr<ComplexMatrix>(*this); }
+  /// Get "conjugate transposed" matrix to be used in multiplications
+  CTr ctr() { return CTr(*this); }
 };
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix
-inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const ComplexMatrix &m2) {
+inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1,
+                                    const ComplexMatrix &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix
-inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1, const ComplexMatrix &m2) {
+inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1,
+                                    const ComplexMatrix &m2) {
+  return ComplexMatrixMult2(m1, m2);
+}
+
+/// Overloaded operator for matrix multiplication
+/// @param m1 :: First matrix conjugate transposed
+/// @param m2 :: Second matrix
+inline ComplexMatrixMult2 operator*(const CTr &m1, const ComplexMatrix &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix transposed
-inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const Tr<ComplexMatrix> &m2) {
+inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1,
+                                    const Tr<ComplexMatrix> &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix transposed
-inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1, const Tr<ComplexMatrix> &m2) {
+inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1,
+                                    const Tr<ComplexMatrix> &m2) {
+  return ComplexMatrixMult2(m1, m2);
+}
+
+/// Overloaded operator for matrix multiplication
+/// @param m1 :: First matrix conjugate transposed
+/// @param m2 :: Second matrix transposed
+inline ComplexMatrixMult2 operator*(const CTr &m1,
+                                    const Tr<ComplexMatrix> &m2) {
+  return ComplexMatrixMult2(m1, m2);
+}
+
+/// Overloaded operator for matrix multiplication
+/// @param m1 :: First matrix
+/// @param m2 :: Second matrix conjugate transposed
+inline ComplexMatrixMult2 operator*(const ComplexMatrix &m1, const CTr &m2) {
+  return ComplexMatrixMult2(m1, m2);
+}
+
+/// Overloaded operator for matrix multiplication
+/// @param m1 :: First matrix transposed
+/// @param m2 :: Second matrix conjugate transposed
+inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1,
+                                    const CTr &m2) {
+  return ComplexMatrixMult2(m1, m2);
+}
+
+/// Overloaded operator for matrix multiplication
+/// @param m1 :: First matrix conjugate transposed
+/// @param m2 :: Second matrix conjugate transposed
+inline ComplexMatrixMult2 operator*(const CTr &m1, const CTr &m2) {
   return ComplexMatrixMult2(m1, m2);
 }
 
@@ -209,7 +296,8 @@ inline ComplexMatrixMult2 operator*(const Tr<ComplexMatrix> &m1, const Tr<Comple
 /// product of two other matrices.
 /// @param m :: A matrix
 /// @param mm :: Product of two matrices
-inline ComplexMatrixMult3 operator*(const ComplexMatrix &m, const ComplexMatrixMult2 &mm) {
+inline ComplexMatrixMult3 operator*(const ComplexMatrix &m,
+                                    const ComplexMatrixMult2 &mm) {
   return ComplexMatrixMult3(m, mm);
 }
 
@@ -217,7 +305,8 @@ inline ComplexMatrixMult3 operator*(const ComplexMatrix &m, const ComplexMatrixM
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A matrix
-inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const ComplexMatrix &m) {
+inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm,
+                                    const ComplexMatrix &m) {
   return ComplexMatrixMult3(mm, m);
 }
 
@@ -225,7 +314,8 @@ inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const ComplexM
 /// product of two other matrices.
 /// @param m :: A transposed matrix
 /// @param mm :: Product of two matrices
-inline ComplexMatrixMult3 operator*(const Tr<ComplexMatrix> &m, const ComplexMatrixMult2 &mm) {
+inline ComplexMatrixMult3 operator*(const Tr<ComplexMatrix> &m,
+                                    const ComplexMatrixMult2 &mm) {
   return ComplexMatrixMult3(m, mm);
 }
 
@@ -233,7 +323,26 @@ inline ComplexMatrixMult3 operator*(const Tr<ComplexMatrix> &m, const ComplexMat
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A transposed matrix
-inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm, const Tr<ComplexMatrix> &m) {
+inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm,
+                                    const Tr<ComplexMatrix> &m) {
+  return ComplexMatrixMult3(mm, m);
+}
+
+/// Overloaded operator for matrix multiplication. Multiplies a matrix by a
+/// product of two other matrices.
+/// @param m :: A conjugate transposed matrix
+/// @param mm :: Product of two matrices
+inline ComplexMatrixMult3 operator*(const CTr &m,
+                                    const ComplexMatrixMult2 &mm) {
+  return ComplexMatrixMult3(m, mm);
+}
+
+/// Overloaded operator for matrix multiplication. Multiplies a matrix by a
+/// product of two other matrices.
+/// @param mm :: Product of two matrices
+/// @param m :: A conjugate transposed matrix
+inline ComplexMatrixMult3 operator*(const ComplexMatrixMult2 &mm,
+                                    const CTr &m) {
   return ComplexMatrixMult3(mm, m);
 }
 
@@ -243,7 +352,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
   ostr << std::scientific << std::setprecision(6);
   for (size_t i = 0; i < m.size1(); ++i) {
     for (size_t j = 0; j < m.size2(); ++j) {
-      auto value = m.get(i,j);
+      auto value = m.get(i, j);
       ostr << std::setw(28) << value.real() << "+" << value.imag() << "j ";
     }
     ostr << std::endl;

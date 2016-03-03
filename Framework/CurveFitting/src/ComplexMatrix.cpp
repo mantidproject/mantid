@@ -30,19 +30,20 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) {
 /// @param col :: The first column in the submatrix.
 /// @param nRows :: The number of rows in the submatrix.
 /// @param nCols :: The number of columns in the submatrix.
-ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows,
-                     size_t nCols) {
+ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col,
+                             size_t nRows, size_t nCols) {
   if (row + nRows > M.size1() || col + nCols > M.size2()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
-  auto view = gsl_matrix_complex_const_submatrix(M.gsl(), row, col, nRows, nCols);
+  auto view =
+      gsl_matrix_complex_const_submatrix(M.gsl(), row, col, nRows, nCols);
   m_matrix = gsl_matrix_complex_alloc(nRows, nCols);
   gsl_matrix_complex_memcpy(m_matrix, &view.matrix);
 }
 
 /// Constructor
 /// @param M :: A matrix to copy.
-//ComplexMatrix::ComplexMatrix(const Kernel::Matrix<double> &M) {
+// ComplexMatrix::ComplexMatrix(const Kernel::Matrix<double> &M) {
 //  m_matrix = gsl_matrix_complex_alloc(M.numRows(), M.numCols());
 //  for (size_t i = 0; i < size1(); ++i)
 //    for (size_t j = 0; j < size2(); ++j) {
@@ -52,13 +53,15 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, siz
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
-ComplexMatrix::ComplexMatrix(const ComplexMatrixMult2 &mult2) : m_matrix(nullptr) {
+ComplexMatrix::ComplexMatrix(const ComplexMatrixMult2 &mult2)
+    : m_matrix(nullptr) {
   *this = mult2;
 }
 
 /// Create this matrix from a product of three other matrices
 /// @param mult3 :: Matrix multiplication helper object.
-ComplexMatrix::ComplexMatrix(const ComplexMatrixMult3 &mult3) : m_matrix(nullptr) {
+ComplexMatrix::ComplexMatrix(const ComplexMatrixMult3 &mult3)
+    : m_matrix(nullptr) {
   *this = mult3;
 }
 
@@ -111,7 +114,7 @@ void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
 /// @param i :: The row
 /// @param j :: The column
 ComplexType ComplexMatrix::get(size_t i, size_t j) const {
-  if (i < m_matrix->size1 && j < m_matrix->size2){
+  if (i < m_matrix->size1 && j < m_matrix->size2) {
     auto value = gsl_matrix_complex_get(m_matrix, i, j);
     return ComplexType(GSL_REAL(value), GSL_IMAG(value));
   }
@@ -169,11 +172,14 @@ ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrixMult2 &mult2) {
 
   this->resize(n1, n2);
 
-  CBLAS_TRANSPOSE tr1 = mult2.tr1 ? CblasTrans : CblasNoTrans;
-  CBLAS_TRANSPOSE tr2 = mult2.tr2 ? CblasTrans : CblasNoTrans;
+  CBLAS_TRANSPOSE tr1 =
+      mult2.tr1 ? CblasTrans : (mult2.ctr1 ? CblasConjTrans : CblasNoTrans);
+  CBLAS_TRANSPOSE tr2 =
+      mult2.tr2 ? CblasTrans : (mult2.ctr2 ? CblasConjTrans : CblasNoTrans);
 
   // this = m_1 * m_2
-  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult2.m_1.gsl(), mult2.m_2.gsl(), {0.0, 0.0}, gsl());
+  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult2.m_1.gsl(), mult2.m_2.gsl(),
+                 {0.0, 0.0}, gsl());
 
   return *this;
 }
@@ -190,16 +196,20 @@ ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrixMult3 &mult3) {
   // intermediate matrix
   ComplexMatrix AB(n1, mult3.m_2.size2());
 
-  CBLAS_TRANSPOSE tr1 = mult3.tr1 ? CblasTrans : CblasNoTrans;
-  CBLAS_TRANSPOSE tr2 = mult3.tr2 ? CblasTrans : CblasNoTrans;
-  CBLAS_TRANSPOSE tr3 = mult3.tr3 ? CblasTrans : CblasNoTrans;
+  CBLAS_TRANSPOSE tr1 =
+      mult3.tr1 ? CblasTrans : (mult3.ctr1 ? CblasConjTrans : CblasNoTrans);
+  CBLAS_TRANSPOSE tr2 =
+      mult3.tr2 ? CblasTrans : (mult3.ctr2 ? CblasConjTrans : CblasNoTrans);
+  CBLAS_TRANSPOSE tr3 =
+      mult3.tr3 ? CblasTrans : (mult3.ctr3 ? CblasConjTrans : CblasNoTrans);
 
   // AB = m_1 * m_2
-  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult3.m_1.gsl(), mult3.m_2.gsl(), {0.0, 0.0},
-                 AB.gsl());
+  gsl_blas_zgemm(tr1, tr2, {1.0, 0.0}, mult3.m_1.gsl(), mult3.m_2.gsl(),
+                 {0.0, 0.0}, AB.gsl());
 
   // this = AB * m_3
-  gsl_blas_zgemm(CblasNoTrans, tr3, {1.0, 0.0}, AB.gsl(), mult3.m_3.gsl(), {0.0, 0.0}, gsl());
+  gsl_blas_zgemm(CblasNoTrans, tr3, {1.0, 0.0}, AB.gsl(), mult3.m_3.gsl(),
+                 {0.0, 0.0}, gsl());
 
   return *this;
 }
@@ -221,7 +231,8 @@ void ComplexMatrix::solve(const ComplexVector &rhs, ComplexVector &x) {
   x.resize(n);
   int s;
   gsl_permutation *p = gsl_permutation_alloc(n);
-  gsl_linalg_complex_LU_decomp(gsl(), p, &s); // matrix is modified at this moment
+  gsl_linalg_complex_LU_decomp(gsl(), p,
+                               &s); // matrix is modified at this moment
   gsl_linalg_complex_LU_solve(gsl(), p, rhs.gsl(), x.gsl());
   gsl_permutation_free(p);
 }
@@ -260,16 +271,17 @@ ComplexType ComplexMatrix::det() {
 /// matrix.
 /// @param eigenVectors :: Output variable that receives the eigenvectors of
 /// this matrix.
-void ComplexMatrix::eigenSystemHermitian(GSLVector &eigenValues, ComplexMatrix &eigenVectors) {
+void ComplexMatrix::eigenSystemHermitian(GSLVector &eigenValues,
+                                         ComplexMatrix &eigenVectors) {
   size_t n = size1();
   if (n != size2()) {
     throw std::runtime_error("Matrix eigenSystem: the matrix must be square.");
   }
   eigenValues.resize(n);
   eigenVectors.resize(n, n);
-  auto workspace = gsl_eigen_hermv_alloc (n);
-  gsl_eigen_hermv (gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
-  gsl_eigen_hermv_free (workspace);
+  auto workspace = gsl_eigen_hermv_alloc(n);
+  gsl_eigen_hermv(gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
+  gsl_eigen_hermv_free(workspace);
 }
 
 /// Copy a row into a GSLVector
