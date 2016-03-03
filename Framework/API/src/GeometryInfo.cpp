@@ -61,7 +61,14 @@ double GeometryInfo::getL2() const {
   return *m_l2;
 }
 
-void GeometryInfo::invalidateL2Cache() { m_l2 = boost::optional<double>{}; }
+void GeometryInfo::invalidateCache() {
+    std::lock_guard<std::mutex> lock_l2(m_l2Lock);
+    m_l2 = boost::optional<double>{};
+    std::lock_guard<std::mutex> lock_twoTheta(m_twoThetaLock);
+    m_twoTheta = boost::optional<double>{};
+    std::lock_guard<std::mutex> lock_signedTwoTheta(m_signedTwoThetaLock);
+    m_signedTwoTheta = boost::optional<double>{};
+}
 
 GeometryInfo::GeometryInfo(GeometryInfo &&original)
     : m_factory(original.m_factory) {

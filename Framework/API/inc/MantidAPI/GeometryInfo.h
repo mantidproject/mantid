@@ -86,7 +86,7 @@ public:
   /// Returns the detector or detector group associated with the spectrum.
   boost::shared_ptr<const Geometry::IDetector> getDetector() const;
   /// Invalidate the cache
-  void invalidateL2Cache();
+  void invalidateCache();
   /// Disable copy
   GeometryInfo(const GeometryInfo &) =
       delete; // Cannot remove this owing to GeometryInfoFactory::create
