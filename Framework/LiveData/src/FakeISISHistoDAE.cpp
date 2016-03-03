@@ -246,7 +246,7 @@ public:
         } else if (command == "UDET") {
           std::vector<int> udet(m_nSpectra + m_nMonitors);
           for (int i = 0; i < static_cast<int>(udet.size()); ++i) {
-            udet[i] = (i+1);
+            udet[i] = (i + 1);
           }
           sendIntArray(udet);
         } else if (command == "SPEC") {
