@@ -421,7 +421,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QString wsNameQ = QString::fromStdString(wsName);
 
     // Plot the workspace
-    plotSpectrum(wsNameQ, (plotType == Logorithm));
+    plotSpectrum(wsNameQ, (plotType == Logarithm));
     setCurrentDataName(wsNameQ);
   } catch (std::exception &e) {
     g_log.error(e.what());
@@ -450,7 +450,7 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   case Counts:
     plotTypeName = "Counts";
     break;
-  case Logorithm:
+  case Logarithm:
     plotTypeName = "Logs";
     break;
   }
@@ -497,8 +497,8 @@ MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox *selector) {
     return Asymmetry;
   } else if (plotTypeName == "Counts") {
     return Counts;
-  } else if (plotTypeName == "Logorithm") {
-    return Logorithm;
+  } else if (plotTypeName == "Logarithm") {
+    return Logarithm;
   } else {
     throw std::runtime_error("Unknown plot type name: " + plotTypeName);
   }
@@ -573,7 +573,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
 
     switch (plotType) {
     case Counts:
-    case Logorithm:
+    case Logarithm:
       outputType = "GroupCounts";
       break;
     case Asymmetry:

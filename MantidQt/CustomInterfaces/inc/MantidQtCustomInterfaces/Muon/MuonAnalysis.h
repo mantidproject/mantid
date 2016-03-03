@@ -249,7 +249,7 @@ private:
   enum ItemType { Pair, Group };
   
   /// Possible plot types users might request
-  enum PlotType { Asymmetry, Counts, Logorithm };
+  enum PlotType { Asymmetry, Counts, Logarithm };
 
   /// Types of periods
   enum PeriodType { First, Second };
