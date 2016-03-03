@@ -69,7 +69,7 @@ public:
   const std::set<detid_t> &
   getDetectorIDsForSpectrumNo(const specnum_t spectrumNo) const;
   const std::set<detid_t> &
-  getDetectorIDsForSpectrumIndex(const size_t index) const;
+  getDetectorIDsForSpectrumIndex(const size_t spectrumIndex) const;
   const sdmap &getMapping() const;
   bool indexIsSpecNumber() const;
 

@@ -295,7 +295,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
-  if (workspaceList.size() > 0) {
+  if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
     for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
       std::size_t pos = std::distance(workspaceList.begin(), it);

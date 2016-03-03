@@ -30,18 +30,15 @@
 #pragma warning(disable : 4250)
 #endif
 #include <Poco/Logger.h>
-#include <Poco/Channel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
 #include <fstream>
-#include <iostream>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -75,7 +72,7 @@ Logger g_log("ConfigService");
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
-  if (path.find(";") == std::string::npos) { // don't bother tokenizing
+  if (path.find(';') == std::string::npos) { // don't bother tokenizing
     splitted.push_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
@@ -1223,7 +1220,7 @@ std::string getValueFromStdOut(const std::string &orig,
   }
   start += key.size();
 
-  size_t stop = orig.find("\n", start);
+  size_t stop = orig.find('\n', start);
   if (stop == std::string::npos) {
     return std::string();
   }

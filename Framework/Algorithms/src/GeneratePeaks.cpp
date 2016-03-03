@@ -748,7 +748,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
 MatrixWorkspace_sptr
 GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   // Check validity
-  if (m_spectraSet.size() == 0)
+  if (m_spectraSet.empty())
     throw std::invalid_argument(
         "Input spectra list is empty. Unable to generate a new workspace.");
 

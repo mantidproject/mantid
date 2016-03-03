@@ -271,7 +271,7 @@ void Parser::split() {
   // combinations of special characters, for example double commas.)
 
   // Get the extension, if there is one.
-  size_t lastDot = m_multiFileName.find_last_of(".");
+  size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos)
     m_extString = m_multiFileName.substr(lastDot);
 
@@ -282,7 +282,7 @@ void Parser::split() {
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.
-  if (std::string::npos != m_dirString.find(","))
+  if (std::string::npos != m_dirString.find(','))
     throw std::runtime_error("Unable to parse.");
 
   // Slice off the directory and extension.

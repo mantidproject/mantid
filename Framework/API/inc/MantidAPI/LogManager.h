@@ -96,7 +96,7 @@ public:
   /// Does the property exist on the object
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
-  void removeProperty(const std::string &name, bool delproperty = true);
+  void removeProperty(const std::string &name, bool delProperty = true);
   /**
    * Return all of the current properties
    * @returns A vector of the current list of properties

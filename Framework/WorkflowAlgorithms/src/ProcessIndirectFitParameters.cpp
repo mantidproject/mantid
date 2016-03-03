@@ -199,12 +199,12 @@ void ProcessIndirectFitParameters::exec() {
 std::vector<std::string>
 ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   auto listVector = std::vector<std::string>();
-  auto pos = commaList.find(",");
+  auto pos = commaList.find(',');
   while (pos != std::string::npos) {
     std::string nextItem = commaList.substr(0, pos);
     listVector.push_back(nextItem);
     commaList = commaList.substr(pos + 1, commaList.size());
-    pos = commaList.find(",");
+    pos = commaList.find(',');
   }
   if (commaList.compare("") != 0) {
     listVector.push_back(commaList);

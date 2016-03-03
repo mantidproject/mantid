@@ -41,7 +41,7 @@ public:
   /// Construct with a source time series & a filter property
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
                              const TimeSeriesProperty<bool> &filterProp,
-                             const bool transferOwnserhip = false);
+                             const bool transferOwnership = false);
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
 

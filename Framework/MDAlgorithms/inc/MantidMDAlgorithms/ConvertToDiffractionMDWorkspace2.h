@@ -53,7 +53,7 @@ protected: // for testing
   // method to convert the value of the target frame specified for the
   // ConvertToDiffractionMDWorksapce  into the properties names of the
   // ConvertToMD
-  void convertFramePropertyNames(const std::string &ConvToDifrWSPropName,
+  void convertFramePropertyNames(const std::string &TargFrame,
                                  std::string &TargFrameName,
                                  std::string &ScalingName);
   // method to convert the extents specified for the

@@ -702,7 +702,7 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
       }
     }
 
-    if (tieComponents.size() > 0) {
+    if (!tieComponents.empty()) {
       return boost::algorithm::join(tieComponents, ",");
     }
   }

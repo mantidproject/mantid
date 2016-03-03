@@ -174,7 +174,7 @@ void PlotAsymmetryByLogValue::exec() {
   }
 
   // Create the 2D workspace for the output
-  int nplots = m_greenY.size() ? 4 : 1;
+  int nplots = !m_greenY.empty() ? 4 : 1;
   size_t npoints = m_logValue.size();
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
@@ -475,7 +475,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
                                             std::string &fnExt, int &fnZeros) {
 
   // Parse first run's name
-  std::string firstExt = firstFN.substr(firstFN.find_last_of("."));
+  std::string firstExt = firstFN.substr(firstFN.find_last_of('.'));
   firstFN.erase(firstFN.size() - 4);
 
   std::string firstBase = firstFN;
@@ -489,7 +489,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
   firstFN.erase(0, firstBase.size());
 
   // Parse last run's name
-  std::string lastExt = lastFN.substr(lastFN.find_last_of("."));
+  std::string lastExt = lastFN.substr(lastFN.find_last_of('.'));
   lastFN.erase(lastFN.size() - 4);
 
   std::string lastBase = lastFN;
