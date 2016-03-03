@@ -20,7 +20,7 @@ public:
   ~ToyAlgorithmProxy() override {}
   const std::string name() const override {
     return "ToyAlgorithmProxy";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 1;
   } ///< Algorithm's version for identification
@@ -69,7 +69,7 @@ public:
   ~ToyAlgorithmProxyMultipleCategory() override {}
   const std::string name() const override {
     return "ToyAlgorithmProxyMultipleCategory";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 1;
   } ///< Algorithm's version for identification

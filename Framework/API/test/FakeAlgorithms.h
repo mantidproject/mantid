@@ -14,7 +14,7 @@ public:
   ~ToyAlgorithm() override {}
   const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 1;
   } ///< Algorithm's version for identification
@@ -45,7 +45,7 @@ public:
 
   const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 2;
   } ///< Algorithm's version for identification
@@ -76,7 +76,7 @@ public:
 
   const std::string name() const override {
     return "ToyAlgorithm";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 2;
   } ///< Algorithm's version for identification
@@ -98,7 +98,7 @@ public:
 
   const std::string name() const override {
     return "CategoryAlgorithm";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 1;
   } ///< Algorithm's version for identification

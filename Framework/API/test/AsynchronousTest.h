@@ -20,7 +20,7 @@ public:
   ~AsyncAlgorithm() override {}
   const std::string name() const override {
     return "AsyncAlgorithm";
-  }                                 ///< Algorithm's name for identification
+  } ///< Algorithm's name for identification
   int version() const override {
     return 1;
   } ///< Algorithm's version for identification
