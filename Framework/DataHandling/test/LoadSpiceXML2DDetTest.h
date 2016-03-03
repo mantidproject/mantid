@@ -288,6 +288,21 @@ public:
         (sample - source).angle(center_det_pos - sample);
     TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
 
+    size_t ll_ws_index = 0;
+    Kernel::V3D ll_det_pos = outws->getDetector(ll_ws_index)->getPos();
+    double ll_sample_r = sample.distance(ll_det_pos);
+    TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
+
+    size_t lu_ws_index = 255*256; // row = 255, col = 1
+    Kernel::V3D lu_det_pos = outws->getDetector(lu_ws_index)->getPos();
+    double lu_sample_r = sample.distance(lu_det_pos);
+    TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
+
+    TS_ASSERT_DELTA(ll_det_pos.X(), lu_det_pos.X(), 0.000001);
+    TS_ASSERT(ll_det_pos.Y() + lu_det_pos.Y() > 0);
+
+    TS_ASSERT(ll_det_pos.X() > center_det_pos.X());
+
     /*
     Kernel::V3D det0pos = outws->getDetector(0)->getPos();
     Kernel::V3D det255pos = outws->getDetector(255)->getPos();
