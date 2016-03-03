@@ -16,6 +16,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
 namespace Crystal {
@@ -144,8 +145,8 @@ void PeakIntegration::exec() {
     double row = peak.getRow();
 
     // Average integer postion
-    int XPeak = int(col + 0.5);
-    int YPeak = int(row + 0.5);
+    int XPeak = boost::math::iround(col);
+    int YPeak = boost::math::iround(row);
 
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
