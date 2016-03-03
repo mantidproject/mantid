@@ -8,12 +8,30 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-ComplexMatrix::ComplexMatrix() : m_matrix(nullptr) {}
+ComplexMatrix::ComplexMatrix() : m_matrix(nullptr), m_base1(0), m_base2(0) {}
 /// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
-ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) {
+ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) : m_base1(0), m_base2(0) {
   m_matrix = gsl_matrix_complex_alloc(nx, ny);
+}
+/// Construct a ComplexMatrix that has arbitrary index bases.
+/// For example ComplexMatrix(1,5, -2,2) creates a 5 x 5 matrix.
+/// When accessing elements through operator(i,j) the first index
+/// must be in the range 1 <= i <= 5 and the second in the range
+/// -2 <= j <= 2.
+/// The index ranges defined by this constructor apply only to
+/// operator () but not to methods get() and set().
+/// @param iFrom :: Lowest value for the first index
+/// @param iTo :: Highest value for the first index
+/// @param jFrom :: Lowest value for the second index
+/// @param jTo :: Highest value for the second index
+ComplexMatrix::ComplexMatrix(const int iFrom, const int iTo,
+                             const int jFrom, const int jTo) : m_base1(iFrom), m_base2(jFrom) {
+  if (iTo < iFrom || jTo < jFrom) {
+    throw std::invalid_argument("Complex matrix defined with invalid index range.");
+  }
+  m_matrix = gsl_matrix_complex_alloc(iTo - iFrom + 1, jTo - jFrom + 1);
 }
 
 /// Copy constructor
@@ -21,6 +39,8 @@ ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) {
 ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) {
   m_matrix = gsl_matrix_complex_alloc(M.size1(), M.size2());
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
+  m_base1 = M.m_base1;
+  m_base2 = M.m_base2;
 }
 
 /// Create a submatrix. A submatrix is a view into the parent matrix.
@@ -40,16 +60,6 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col,
   m_matrix = gsl_matrix_complex_alloc(nRows, nCols);
   gsl_matrix_complex_memcpy(m_matrix, &view.matrix);
 }
-
-/// Constructor
-/// @param M :: A matrix to copy.
-// ComplexMatrix::ComplexMatrix(const Kernel::Matrix<double> &M) {
-//  m_matrix = gsl_matrix_complex_alloc(M.numRows(), M.numCols());
-//  for (size_t i = 0; i < size1(); ++i)
-//    for (size_t j = 0; j < size2(); ++j) {
-//      set(i, j, M[i][j]);
-//    }
-//}
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
@@ -76,6 +86,8 @@ ComplexMatrix::~ComplexMatrix() {
 ComplexMatrix &ComplexMatrix::operator=(const ComplexMatrix &M) {
   resize(M.size1(), M.size2());
   gsl_matrix_complex_memcpy(m_matrix, M.gsl());
+  m_base1 = M.m_base1;
+  m_base2 = M.m_base2;
   return *this;
 }
 

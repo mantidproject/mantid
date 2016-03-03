@@ -20,6 +20,19 @@ namespace Mantid {
 namespace CurveFitting {
 class ComplexMatrix;
 
+/// Struct helping converting complex values
+/// between ComplexType and internal type of
+/// ComplexMatrix
+struct ComplexMatrixValueConverter {
+  ComplexMatrix &m_matrix;
+  int m_index1;
+  int m_index2;
+  ComplexMatrixValueConverter(ComplexMatrix &vector, int i, int j)
+      : m_matrix(vector), m_index1(i), m_index2(j) {}
+  operator ComplexType() const;
+  ComplexMatrixValueConverter& operator=(const ComplexType& c);
+};
+
 // Complex matrix conjugate transpose helper
 struct CTr {
   const ComplexMatrix &matrix;
@@ -137,12 +150,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_CURVEFITTING_DLL ComplexMatrix {
   /// The pointer to the GSL matrix
   gsl_matrix_complex *m_matrix;
+  /// Base for the first index
+  int m_base1;
+  /// Base for the second index
+  int m_base2;
 
 public:
   /// Constructor
   ComplexMatrix();
   /// Constructor
   ComplexMatrix(const size_t nx, const size_t ny);
+  /// Constructor
+  ComplexMatrix(const int iFrom, const int iTo, const int jFrom, const int jTo);
   /// Copy constructor
   ComplexMatrix(const ComplexMatrix &M);
   /// Create a submatrix.
@@ -177,6 +196,14 @@ public:
   void set(size_t i, size_t j, ComplexType value);
   /// Get an element
   ComplexType get(size_t i, size_t j) const;
+  /// Get a "const reference" to an element.
+  const ComplexMatrixValueConverter operator()(int i, int j) const {
+    return ComplexMatrixValueConverter(const_cast<ComplexMatrix&>(*this), i, j);
+  }
+  /// Get a "reference" to an element.
+  ComplexMatrixValueConverter operator()(int i, int j) {
+    return ComplexMatrixValueConverter(*this, i, j);
+  }
 
   /// Set this matrix to identity matrix
   void identity();
@@ -221,6 +248,8 @@ public:
   Tr<ComplexMatrix> tr() { return Tr<ComplexMatrix>(*this); }
   /// Get "conjugate transposed" matrix to be used in multiplications
   CTr ctr() { return CTr(*this); }
+
+  friend struct ComplexMatrixValueConverter;
 };
 
 /// Overloaded operator for matrix multiplication
@@ -359,6 +388,27 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
   }
   ostr.flags(fflags);
   return ostr;
+}
+
+/// Convert an internal complex value (GSL type) to ComplexType.
+inline ComplexMatrixValueConverter::operator ComplexType() const {
+  return m_matrix.get(m_index1 - m_matrix.m_base1, m_index2 - m_matrix.m_base2);
+}
+
+/// Convert a value of ComplexType to the internal complex value (GSL type).
+inline ComplexMatrixValueConverter& ComplexMatrixValueConverter::operator=(const ComplexType& c) {
+  m_matrix.set(m_index1 - m_matrix.m_base1, m_index2 - m_matrix.m_base2, c);
+  return *this;
+}
+
+/// Equality operator
+inline bool operator==(const ComplexType& c, const ComplexMatrixValueConverter& conv) {
+  return c == static_cast<ComplexType>(conv);
+}
+
+/// Equality operator
+inline bool operator==(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return c == static_cast<ComplexType>(conv);
 }
 
 } // namespace CurveFitting
