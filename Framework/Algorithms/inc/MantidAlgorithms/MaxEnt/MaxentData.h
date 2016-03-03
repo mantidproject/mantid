@@ -77,6 +77,8 @@ public:
   void calculateQuadraticCoefficients();
 
 private:
+  //
+  void initImageSpace(const std::vector<double> &image, double background);
   // Calculates the gradient of chi
   std::vector<double> calculateChiGrad() const;
   // Calculates the entropy

@@ -36,7 +36,7 @@ public:
     MaxentData_sptr maxentData =
         boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
 
-    // Bad image size (should be 2*data.size())
+    // Bad image size (should be at least 2*data.size())
     std::vector<double> dat = {0, 1};
     std::vector<double> err = {1, 1};
     std::vector<double> img = {0, 0};

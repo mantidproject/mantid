@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_linalg.h>
@@ -68,6 +69,15 @@ void MaxEnt::init() {
                                           "must be positive. It can take "
                                           "negative values otherwise");
 
+  auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive->setLower(0);
+  mustBePositive->clearUpper();
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
+                      "DensityFactor", 1, mustBePositive, Direction::Input),
+                  "An integer number indicating the factor by which the number "
+                  "of points will be increased in the image and reconstructed "
+                  "data");
+
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -91,8 +101,9 @@ void MaxEnt::init() {
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
                   "Maximum degree of non-parallelism between S and C");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
+  mustBePositive->clearUpper();
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations");
@@ -154,6 +165,8 @@ void MaxEnt::exec() {
   bool complex = getProperty("ComplexData");
   // Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
+  // Increase the number of points in the image by this factor
+  size_t densityFactor = getProperty("DensityFactor");
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -174,7 +187,7 @@ void MaxEnt::exec() {
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
-  size_t npoints = inWS->blocksize();
+  size_t npoints = inWS->blocksize() * densityFactor;
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
@@ -549,9 +562,11 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
+  double x0 = inWS->readX(spec)[0];
+  double dx = inWS->readX(spec)[1] - x0;
+
   if (isImage) {
 
-    double dx = inWS->readX(spec)[1] - inWS->readX(spec)[0];
     double delta = 1. / dx / npoints;
     int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
 
@@ -565,12 +580,12 @@ void MaxEnt::populateOutputWS(const MatrixWorkspace_sptr &inWS, size_t spec,
       X[npoints] = X[npoints - 1] + delta;
   } else {
     for (int i = 0; i < npoints; i++) {
-      X[i] = inWS->readX(spec)[i];
+      X[i] = x0 + i * dx;
       YR[i] = result[2 * i];
       YI[i] = result[2 * i + 1];
     }
     if (npointsX == npoints + 1)
-      X[npoints] = inWS->readX(spec)[npoints];
+      X[npoints] = x0 + npoints * dx;
   }
   // Reconstructed image
 
