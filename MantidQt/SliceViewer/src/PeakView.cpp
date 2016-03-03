@@ -35,6 +35,8 @@ void PeakView::doPaintPeaks(QPaintEvent *)
     const auto viewWidth
         = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
 
+    QPainter painter(this);
+
     for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
         if (m_viewablePeaks[i]) {
             // Get the peak
@@ -55,7 +57,6 @@ void PeakView::doPaintPeaks(QPaintEvent *)
             peakRepresentationViewInformation.xOriginWindow = xOriginWindow;
             peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
 
-            QPainter painter(this);
             peak->draw(painter, m_foregroundColor, m_backgroundColor,
                        peakRepresentationViewInformation);
         }
@@ -130,10 +131,7 @@ double PeakView::getOccupancyIntoView() const
     return m_cachedOccupancyIntoView;
 }
 
-bool PeakView::positionOnly() const
-{
-    return false;
-}
+bool PeakView::positionOnly() const { return false; }
 
 double PeakView::getRadius() const { return m_largestEffectiveRadius; }
 

@@ -186,7 +186,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../../../../images/images.qrc">
+          <iconset resource="../../../../images/MantidWidgets.qrc">
            <normaloff>:/PickTools/selection-peaks.png</normaloff>:/PickTools/selection-peaks.png</iconset>
          </property>
          <property name="checkable">
@@ -203,7 +203,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../../../../images/images.qrc">
+          <iconset resource="../../../../images/MantidWidgets.qrc">
            <normaloff>:/PickTools/eraser.png</normaloff>:/PickTools/eraser.png</iconset>
          </property>
          <property name="checkable">
@@ -237,7 +237,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>70</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>
@@ -285,6 +285,9 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak marker color for non-shape peaks.</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -313,6 +316,9 @@
              <width>20</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Peak marker color for spherical peaks.</string>
            </property>
            <property name="text">
             <string/>
@@ -343,6 +349,9 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak marker color for ellipsoidal peaks.</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -369,7 +378,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>70</width>
+             <width>120</width>
              <height>0</height>
             </size>
            </property>
@@ -414,6 +423,9 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak background color for spherical peaks.</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -442,6 +454,9 @@
              <width>20</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Peak background color for ellipsoidal peaks.</string>
            </property>
            <property name="text">
             <string/>
@@ -485,7 +500,7 @@
  </widget>
  <resources>
   <include location="../../icons/SliceViewerIcons.qrc"/>
-  <include location="../../../../images/images.qrc"/>
+  <include location="../../../../images/MantidWidgets.qrc"/>
  </resources>
  <connections/>
 </ui>
