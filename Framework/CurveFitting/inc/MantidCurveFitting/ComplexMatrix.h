@@ -167,8 +167,6 @@ public:
   /// Create a submatrix.
   ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows,
                 size_t nCols);
-  /// Constructor
-  // ComplexMatrix(const Kernel::Matrix<double> &M);
   /// Create this matrix from a product of two other matrices
   ComplexMatrix(const ComplexMatrixMult2 &mult2);
   /// Create this matrix from a product of three other matrices
@@ -409,6 +407,26 @@ inline bool operator==(const ComplexType& c, const ComplexMatrixValueConverter& 
 /// Equality operator
 inline bool operator==(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
   return c == static_cast<ComplexType>(conv);
+}
+
+/// Plus operator
+inline ComplexType operator+(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return static_cast<ComplexType>(conv) + c;
+}
+
+/// Minus operator
+inline ComplexType operator-(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return static_cast<ComplexType>(conv) - c;
+}
+
+/// Multiplication operator
+inline ComplexType operator*(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return static_cast<ComplexType>(conv) * c;
+}
+
+/// Division operator
+inline ComplexType operator/(const ComplexMatrixValueConverter& conv, const ComplexType& c) {
+  return static_cast<ComplexType>(conv) / c;
 }
 
 } // namespace CurveFitting

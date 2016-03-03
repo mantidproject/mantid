@@ -14,6 +14,17 @@ namespace Functions {
 
 namespace {
 
+// Get a complex conjugate of the value returned by
+// ComplexMatrix::operator(i,j)
+ComplexType conjg( const ComplexMatrixValueConverter& conv) {
+  return std::conj(static_cast<ComplexType>(conv));
+}
+
+//TODO: these should be input parameters
+const double alpha_euler = 0.0;
+const double beta_euler = 0.0;
+const double gamma_euler = 0.0;
+
 // number of rare earth ions (?)
 const size_t maxNre = 13;
 // [max?] size of the Hamiltonian
@@ -479,6 +490,113 @@ double c_operator_norm(double dimj, int k, int q, const GSLMatrix& sbkq, Complex
   return res;
 }
 
+// c---------------------------------------
+double epsilon(int k, int q) {
+  const std::array<double, 49> eps = {
+      1.00000000000000,   0.707106781186547,  1.00000000000000,
+      -0.707106781186547, 0.612372435695795,  1.22474487139159,
+      0.500000000000000,  -1.22474487139159,  0.612372435695795,
+      0.559016994374947,  1.36930639376292,   0.433012701892219,
+      0.500000000000000,  -0.433012701892219, 1.36930639376292,
+      -0.559016994374947, 0.522912516583797,  1.47901994577490,
+      0.395284707521047,  0.559016994374947,  0.125000000000000,
+      -0.559016994374947, 0.395284707521047,  -1.47901994577490,
+      0.522912516583797,  0.496078370824611,  1.56873754975139,
+      0.369754986443726,  0.603807364424560,  0.114108866146910,
+      0.125000000000000,  -0.114108866146910, 0.603807364424560,
+      -0.369754986443726, 1.56873754975139,   -0.496078370824611,
+      0.474958879799083,  1.64530582263602,   0.350780380010057,
+      0.640434422872475,  0.106739070478746,  0.135015431216830,
+      0.062500000000000,  -0.135015431216830, 0.106739070478746,
+      -0.640434422872475, 0.350780380010057,  -1.64530582263602,
+      0.474958879799083};
+  return eps[k * (k + 1) + q];
+}
+
+//c---------------------------------------
+  double omega(int k, int q) {
+    const std::array<double,49> oma = {
+                                   1.0,
+                              1.0, 1.0, 1.0,
+                          1.0,1.0, 1.0, 1.0,1.0,
+                      1.0,1.0,1.0, 1.0, 1.0,1.0,1.0,
+                  1.0,1.0,1.0,1.0, 1.0, 1.0,1.0,1.0,1.0,
+              1.0,1.0,1.0,3.0,3.0, 1.0, 3.0,3.0,1.0,1.0,1.0,
+          1.0,1.0,1.0,1.0,3.0,3.0, 1.0, 3.0,3.0,1.0,1.0,1.0,1.0 };
+
+    return oma[k*(k+1) + q];
+  }
+
+  // c--------------------------------
+  // c define the delta function
+  // c--------------------------------
+  double delta(double mj, double nj, double j) {
+    if (mj == nj && fabs(mj) <= j && fabs(nj) <= j) {
+      return 1.0;
+    }
+    return 0.0;
+  }
+
+  // c***********************************************************************
+  // c                                                                      *
+  // c                   Function  fac                                      *
+  // c                                                                      *
+  // c***********************************************************************
+  double fac(double n) {
+    int m, i;
+    if (n < 0.0)
+      return 0.0;
+    if (n == 0.0)
+      return 1.0;
+    double f = 1.0;
+    int m = n;
+    for (int i = 1; i <= m; ++i) {
+      f *= i;
+    }
+  }
+
+  // c--------------------------------------------------------
+  // c binom (n over k)
+  // c--------------------------------------------------------
+  double binom(int n, int k) {
+    return fac(double(n)) / fac(double(k)) / fac(double(n - k));
+  }
+
+  // c--------------------------------------------------------
+  // c              (k)
+  // c calculates  D    (a,b,c)
+  // c              ms m
+  // c
+  // c see Lindner A, 'Drehimpulse in der Quantenmechanik',
+  // c ISBN 3-519-03061-6                  (j)
+  // c Stuttgart: Teubner, 1984  page 86 (d    (beta)=...)
+  // c for equation (1)                    m ms
+  // c
+  // c see Buckmaster phys. stat. sol. (a) 13 (1972) 9
+  // c for equation (2)
+  // c
+  // c--------------------------------------------------------
+  ComplexType ddrot(int j, int m, int ms, double a, double b, double c) {
+    // c       equation (1)
+    double d = delta(double(ms), double(m), double(j));
+    ifnull(b);
+    if (b != 0.0) {
+      d = 0.0;
+      for (int n = std::max(0, -(m + ms)); n <= std::min(j - m, j - ms);
+           ++n) { // do n=max(0,-(m+ms)),min(j-m,j-ms)
+        d = d +
+            pow(-1.0, (j - ms - n)) * binom(j - ms, n) *
+                binom(j + ms, j - m - n) * pow(cos(0.5 * b), (2 * n + m + ms)) *
+                pow(sin(0.5 * b), (2 * j - 2 * n - m - ms));
+      }
+      d = d * sqrt(fac(double(j + m)) / fac(double(j + ms)) *
+                   fac(double(j - m)) / fac(double(j - ms)));
+    }
+    // c       equation (2)
+    return ComplexType(cos(m * a), -sin(m * a)) * d *
+           ComplexType(cos(ms * c), -sin(ms * c));
+  }
+
 } // anonymous
 
 void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
@@ -553,45 +671,46 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
 //
 //       one finds:   dk0 = Bk0  and for q<>0: dkq = Bkq/2
 //       ------------------------------------------------------------
-  ComplexMatrix dkq_star(6, 13); // complex*16   dkq_star(6,-6:6)
+  ComplexMatrix dkq_star(1, 6, -6, 6); // complex*16   dkq_star(6,-6:6)
   dkq_star.zero();
   auto i = ComplexType(0.0, 1.0);
-  for (size_t k = 2; k <= 6; k += 2) { // do k=2,6,2
-    for (size_t q = 0; q <= k; ++q) {  //  do q=0,k
-      auto b_kq = bkq.get(k, q);
+  for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
+    for (int q = 0; q <= k; ++q) {  //  do q=0,k
+      ComplexType b_kq = bkq(k, q);
       if (sbkq.get(k, q) == -1) {
         b_kq = i * b_kq;
       }
-      dkq_star.set(k,q, b_kq);
+      dkq_star(k,q) = b_kq;
       if (q != 0) {
-        dkq_star.set(k, q, dkq_star.get(k, q) / 2.0);
+        dkq_star(k, q) = dkq_star(k, q) / 2.0;
       }
-      //              dkq_star(k,-q) = conjg( dkq_star(k,q) )
+      dkq_star(k, -q) = conjg(dkq_star(k, q));
+    }
+  }
+   //c       -------------------------------------------------------------------
+   //c       the parameters are   conjg(D_kq)
+   //c       -------------------------------------------------------------------
+  for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
+    for (int q = -k; q <= k; ++q) { // do q=-k,k
+      dkq_star(k, q) = conjg(dkq_star(k, q));
     }
   }
   // c       -------------------------------------------------------------------
-  // c       the parameters are   conjg(D_kq)
-  // c       -------------------------------------------------------------------
-  //        do k=2,6,2
-  //           do q=-k,k
-  //              dkq_star(k,q) = conjg( dkq_star(k,q) )
-  //           end do
-  //        end do
-  // c       -------------------------------------------------------------------
-  //        a = alpha_euler
-  //        b = beta_euler
-  //        c = gamma_euler
-  //        do k=2,6,2
-  //           do q=-k,k
-  //              rdkq_star(k,q) = cmplx(0.0d0,0.0d0)
-  //              do qs=-k,k
-  //                rdkq_star(k,q)=rdkq_star(k,q)
-  //     *          + dkq_star(k,qs)
-  //     *            * epsilon(k,qs)/epsilon(k,q) * omega(k,qs)/omega(k,q)
-  //     *            * ddrot(k,q,qs,a,b,c)
-  //              end do
-  //           end do
-  //        end do
+  auto a = alpha_euler;
+  auto b = beta_euler;
+  auto c = gamma_euler;
+  ComplexMatrix  rdkq_star(1, 6, -6, 6);
+  for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
+    for (int q = -k; q <= k; ++q) { // do q=-k,k
+      rdkq_star(k, q) = ComplexType(0.0, 0.0);
+      for (int qs = -k; qs <= k; ++qs) { // do qs=-k,k
+        rdkq_star(k, q) = rdkq_star(k, q) +
+                          dkq_star(k, qs) * epsilon(k, qs) / epsilon(k, q) *
+                              omega(k, qs) / omega(k, q) *
+                              ddrot(k, q, qs, a, b, c);
+      }
+    }
+  }
   // c       -------------------------------------------------------------------
   // c       rotate the external magnetic field
   // c       -------------------------------------------------------------------
@@ -717,7 +836,7 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
   // c calculates the transition intensities for a powdered sample
   // c
   //	call
-  //intcalc(pi,r0,gj,occupation_factor,jt2mat,energy,intensity,dim,temp)
+  // intcalc(pi,r0,gj,occupation_factor,jt2mat,energy,intensity,dim,temp)
   // c
   // c end of subroutine cfcalc
   // c
