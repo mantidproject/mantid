@@ -24,8 +24,8 @@ public:
   virtual void setMaxSpectrumID(int64_t minSpecID);
 
   virtual size_t getNumberOfSpectra() const;
-  int getNumberOfPeriods() const;
-  size_t getNumberOfChannels() const;
+  virtual int getNumberOfPeriods() const;
+  virtual size_t getNumberOfChannels() const;
 
   virtual std::unique_ptr<DataBlockGenerator> getGenerator() const;
 
@@ -34,7 +34,7 @@ protected:
   // The number of spectra
   size_t m_numberOfSpectra;
   // The number of time channels per spectrum (N histogram bins -1)
-  std::size_t m_numberOfChannels;
+  size_t m_numberOfChannels;
 
   // minimal spectra Id (by default 1, undefined -- max_value)
   int64_t m_minSpectraID;

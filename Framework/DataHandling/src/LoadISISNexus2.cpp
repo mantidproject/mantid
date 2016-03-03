@@ -631,11 +631,12 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
   } else {
     if (range_supplied) {
       auto generator = dataBlockComposite.getGenerator();
+      int64_t hist = 0;
       for (; !generator->isDone(); generator->next()) {
-        auto spec_index = generator->getValue();
-        specnum_t spec_num = static_cast<specnum_t>(spec_index);
+        specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
         if (SpectraExcluded.find(spec_num) == SpectraExcluded.end()) {
-          m_specInd2specNum_map.insert(std::make_pair(spec_index, spec_num));
+          m_specInd2specNum_map.insert(std::make_pair(hist, spec_num));
+          ++hist;
         }
       }
     }

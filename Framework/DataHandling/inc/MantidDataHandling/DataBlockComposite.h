@@ -16,6 +16,8 @@ public:
   void setMaxSpectrumID(int64_t) override;
 
   size_t getNumberOfSpectra() const override;
+  size_t getNumberOfChannels() const override;
+  int getNumberOfPeriods() const override;
 
   std::unique_ptr<DataBlockGenerator> getGenerator() const override;
 
