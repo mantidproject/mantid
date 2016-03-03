@@ -1502,18 +1502,18 @@ void SCDCalibratePanels::init() {
       "Workspace of Results");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("ColWorkspace", "ColWorkspace",
-                                             Kernel::Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "ColWorkspace", "ColWorkspace", Kernel::Direction::Output),
       "Workspace comparing calculated and theoretical column of each peak.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("RowWorkspace", "RowWorkspace",
-                                             Kernel::Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "RowWorkspace", "RowWorkspace", Kernel::Direction::Output),
       "Workspace comparing calculated and theoretical row of each peak.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("TofWorkspace", "TofWorkspace",
-                                             Kernel::Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "TofWorkspace", "TofWorkspace", Kernel::Direction::Output),
       "Workspace comparing calculated and theoretical TOF of each peak.");
 
   const string OUTPUTS("Outputs");
