@@ -418,7 +418,7 @@ class VesuvioCorrections(VesuvioBase):
 
         CalculateMSVesuvio(InputWorkspace=self._output_ws,
                            NoOfMasses=len(atom_props)/3,
-                           SampleDensity=self.getProperty("SampleDensity").value,
+                           SampleDensity=self.getProperty("SampleDensity").value/intensity_sum,
                            AtomicProperties=atom_props,
                            BeamRadius=self.getProperty("BeamRadius").value,
                            NumEventsPerRun=self.getProperty("NumEvents").value,
