@@ -332,7 +332,7 @@
         <item>
          <widget class="QLabel" name="label_cropped_spec_ids">
           <property name="text">
-           <string>Spectrum IDs:</string>
+           <string>Spectrum Numbers:</string>
           </property>
          </widget>
         </item>
