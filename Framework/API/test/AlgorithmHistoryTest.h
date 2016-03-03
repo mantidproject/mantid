@@ -14,21 +14,23 @@ using namespace Mantid::Kernel;
 class testalg : public Algorithm {
 public:
   testalg() : Algorithm() {}
-  virtual ~testalg() {}
-  const std::string name() const {
+  ~testalg() override {}
+  const std::string name() const override {
     return "testalg";
   }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "Cat";
   } ///< Algorithm's category for identification
-  const std::string summary() const { return "Test summary"; }
+  const std::string summary() const override { return "Test summary"; }
 
-  void init() {
+  void init() override {
     declareProperty("arg1_param", "x", Direction::Input);
     declareProperty("arg2_param", 23);
   }
-  void exec() {}
+  void exec() override {}
 };
 
 class AlgorithmHistoryTest : public CxxTest::TestSuite {

@@ -11,13 +11,13 @@ using namespace Mantid::Kernel;
 
 class MockDataItem : public DataItem {
 public:
-  virtual const std::string id() const { return "MockDataItem"; }
+  const std::string id() const override { return "MockDataItem"; }
   /// The name of the object
-  virtual const std::string name() const { return "Noone"; }
+  const std::string name() const override { return "Noone"; }
   /// Can this object be accessed from multiple threads safely
-  virtual bool threadSafe() const { return true; }
+  bool threadSafe() const override { return true; }
   /// Serializes the object to a string
-  virtual const std::string toString() const { return "Nothing"; }
+  const std::string toString() const override { return "Nothing"; }
   friend class ReadLockTest;
 };
 

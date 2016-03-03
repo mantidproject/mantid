@@ -55,7 +55,7 @@ public:
         "Workspace", "TOPAZ_2010", "RewriteSpectraMap", "True");
   }
 
-  ~InstrumentRayTracerTestPerformance() {
+  ~InstrumentRayTracerTestPerformance() override {
     AnalysisDataService::Instance().remove("TOPAZ_2010");
   }
 

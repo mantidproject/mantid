@@ -45,7 +45,7 @@ public:
         AnalysisDataService::Instance().retrieve(WSName));
   }
 
-  ~IndexSXPeaksTest() {
+  ~IndexSXPeaksTest() override {
     AnalysisDataService::Instance().remove("master_peaks");
   }
 

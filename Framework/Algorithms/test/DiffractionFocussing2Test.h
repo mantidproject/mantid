@@ -306,7 +306,7 @@ public:
     alg->execute();
   }
 
-  ~DiffractionFocussing2TestPerformance() {
+  ~DiffractionFocussing2TestPerformance() override {
     AnalysisDataService::Instance().remove("SNAP_empty");
     AnalysisDataService::Instance().remove("SNAP_group_bank1");
     AnalysisDataService::Instance().remove("SNAP_group_several");

@@ -82,8 +82,7 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp()
-  {
+  void setUp() override {
     m_view = new NiceMock<MockALCDataLoadingView>();
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
@@ -101,8 +100,7 @@ public:
     ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(false));
   }
 
-  void tearDown()
-  {
+  void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     delete m_presenter;
     delete m_view;

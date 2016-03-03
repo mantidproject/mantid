@@ -45,9 +45,7 @@ private:
   }
 
 public:
-
-void setUp()
-{
+  void setUp() override {
     std::remove(getFileBackend(getSuitableFileNamePath()).c_str()); // Clean out any pre-existing backend files.
 }
 

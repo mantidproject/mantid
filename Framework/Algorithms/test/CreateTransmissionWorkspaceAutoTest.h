@@ -61,7 +61,7 @@ public:
     m_dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
   }
 
-  ~CreateTransmissionWorkspaceAutoTest() {}
+  ~CreateTransmissionWorkspaceAutoTest() override {}
 
   void test_Init() {
     CreateTransmissionWorkspaceAuto alg;

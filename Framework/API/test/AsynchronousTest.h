@@ -17,18 +17,20 @@ using namespace std;
 class AsyncAlgorithm : public Algorithm {
 public:
   AsyncAlgorithm() : Algorithm(), throw_exception(false) {}
-  virtual ~AsyncAlgorithm() {}
-  const std::string name() const {
+  ~AsyncAlgorithm() override {}
+  const std::string name() const override {
     return "AsyncAlgorithm";
   }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "Cat";
   } ///< Algorithm's category for identification
-  const std::string summary() const { return "Test summary"; }
+  const std::string summary() const override { return "Test summary"; }
 
-  void init() {}
-  void exec() {
+  void init() override {}
+  void exec() override {
     Poco::Thread *thr = Poco::Thread::current();
     for (int i = 0; i < NofLoops; i++) {
       result = i;

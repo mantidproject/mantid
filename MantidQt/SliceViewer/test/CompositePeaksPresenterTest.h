@@ -22,10 +22,10 @@ private:
   class FakeZoomablePeaksView : public ZoomablePeaksView
   {
   public:
-    void zoomToRectangle(const PeakBoundingBox&){}
-    void resetView(){}
-    void detach(){}
-    virtual ~FakeZoomablePeaksView(){}
+    void zoomToRectangle(const PeakBoundingBox &) override {}
+    void resetView() override {}
+    void detach() override {}
+    ~FakeZoomablePeaksView() override {}
   };
 
   /// Fake zoomable peaks view instance to use as a dummy parameter.

@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Override parent class run().
-  virtual void run() override;
+  void run() override;
 
 private:
   /// Use the specified algorithm and property to find files instead of using
@@ -147,7 +147,7 @@ public:
   MWRunFiles(QWidget *parent = NULL);
 
   /// Destructor
-  ~MWRunFiles();
+  ~MWRunFiles() override;
 
   // property accessors/modifiers
   bool isForRunFiles() const;

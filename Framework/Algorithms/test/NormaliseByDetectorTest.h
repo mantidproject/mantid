@@ -582,7 +582,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     if (!ws) {
       // Load some data
       IAlgorithm *loadalg =

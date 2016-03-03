@@ -157,7 +157,7 @@ private:
   public:
     TestableFunctionDomain1DSpectrumCreator()
         : FunctionDomain1DSpectrumCreator() {}
-    ~TestableFunctionDomain1DSpectrumCreator() {}
+    ~TestableFunctionDomain1DSpectrumCreator() override {}
   };
 };
 
