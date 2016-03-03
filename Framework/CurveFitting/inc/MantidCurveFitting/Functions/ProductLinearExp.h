@@ -37,7 +37,6 @@ class DLLExport ProductLinearExp : public API::ParamFunction,
                                    public API::IFunction1D {
 public:
   ProductLinearExp();
-  ~ProductLinearExp() override;
 
   std::string name() const override { return "ProductLinearExp"; }
 

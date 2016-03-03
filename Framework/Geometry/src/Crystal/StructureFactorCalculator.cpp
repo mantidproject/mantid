@@ -5,8 +5,6 @@
 namespace Mantid {
 namespace Geometry {
 
-StructureFactorCalculator::StructureFactorCalculator() {}
-
 /**
  * Sets the crystal structure for which to calculate structure factors
  *

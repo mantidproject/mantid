@@ -55,18 +55,18 @@ class EXPORT_OPT_MANTIDQT_API AlgorithmDialogFactoryImpl
 public:
   // Unhide the inherited create method
   using Mantid::Kernel::DynamicFactory<AlgorithmDialog>::createUnwrapped;
+  AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl &) = delete;
+  AlgorithmDialogFactoryImpl &
+  operator=(const AlgorithmDialogFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmDialogFactoryImpl>;
 
   /// Private Constructor for singleton class
-  AlgorithmDialogFactoryImpl() {}
-  /// Private copy constructor - NO COPY ALLOWED
-  AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AlgorithmDialogFactoryImpl &operator=(const AlgorithmDialogFactoryImpl &);
-  /// Private Destructor
-  ~AlgorithmDialogFactoryImpl() override {}
+  AlgorithmDialogFactoryImpl() = default;
+
+  ///Private Destructor
+  ~AlgorithmDialogFactoryImpl() override = default;
 };
 
 #ifdef _WIN32
@@ -124,6 +124,9 @@ public:
   }
 
 public:
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
+  UserSubWindowFactoryImpl &
+  operator=(const UserSubWindowFactoryImpl &) = delete;
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
@@ -138,12 +141,8 @@ private:
 
   /// Private Constructor for singleton class
   UserSubWindowFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UserSubWindowFactoryImpl &operator=(const UserSubWindowFactoryImpl &);
-  /// Private Destructor
-  ~UserSubWindowFactoryImpl() override {}
+  ///Private Destructor
+  ~UserSubWindowFactoryImpl() override = default;
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow *createFromAlias(const std::string &name) const;
 

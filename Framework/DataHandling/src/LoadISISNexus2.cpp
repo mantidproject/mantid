@@ -566,7 +566,7 @@ void LoadISISNexus2::checkOptionalProperties(
 #if 0
 
       // combine spectra numbers from ranges and the list
-      if (spec_list.size() > 0) {
+      if (!spec_list.empty()) {
         for (int64_t i = spec_min; i < spec_max + 1; i++) {
           specnum_t spec_num = static_cast<specnum_t>(i);
           // remove excluded spectra now rather then inserting it here and
@@ -617,7 +617,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
 
   int64_t ic(0);
   // TODO when spec list unified with composite remove
-  if (spec_list.size() > 0) {
+  if (!spec_list.empty()) {
     ic = 0;
     auto start_point = spec_list.begin();
     for (auto it = start_point; it != spec_list.end(); it++) {

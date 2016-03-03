@@ -51,8 +51,6 @@ public:
                          boost::shared_ptr<PoldiAbstractDetector> detector =
                              boost::shared_ptr<PoldiAbstractDetector>());
 
-  ~PoldiDeadWireDecorator() override {}
-
   void setDeadWires(std::set<int> deadWires);
   std::set<int> deadWires();
 

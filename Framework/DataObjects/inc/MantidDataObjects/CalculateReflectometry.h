@@ -21,7 +21,7 @@ public:
    */
   CalculateReflectometry() : to_radians_factor(M_PI / 180.0) {}
 
-  virtual ~CalculateReflectometry() {}
+  virtual ~CalculateReflectometry() = default;
 
   /**
    Setter for the final theta value require for the calculation.

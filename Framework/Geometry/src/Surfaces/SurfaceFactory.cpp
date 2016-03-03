@@ -7,7 +7,6 @@
 #include <map>
 #include <list>
 #include <stack>
-#include <string>
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
@@ -17,7 +16,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -52,19 +50,20 @@ SurfaceFactory::SurfaceFactory()
   registerSurface();
 }
 
-SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
-    : ID(A.ID)
-/**
-  Copy constructor
-  @param A :: Object to copy
-*/
-{
-  MapType::const_iterator vc;
-  for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-    SGrid.push_back(MapType::value_type(vc->first, vc->second->clone()));
+SurfaceFactory::SurfaceFactory(const SurfaceFactory &other) : ID(other.ID) {
+  for (const auto &vc : other.SGrid)
+    this->SGrid.emplace_back(vc.first, vc.second->clone());
 }
 
-SurfaceFactory::~SurfaceFactory() {}
+SurfaceFactory &SurfaceFactory::operator=(const SurfaceFactory &other) {
+  if (this != &other) // protect against invalid self-assignment
+  {
+    this->ID = other.ID;
+    for (const auto &vc : other.SGrid)
+      this->SGrid.emplace_back(vc.first, vc.second->clone());
+  }
+  return *this;
+}
 
 void SurfaceFactory::registerSurface()
 /**

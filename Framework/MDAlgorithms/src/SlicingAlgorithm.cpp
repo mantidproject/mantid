@@ -160,19 +160,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // Special case: accept dimension names [x,y,z]
   if (input[0] == '[') {
     // Find the name at the closing []
-    size_t n = input.find_first_of("]", 1);
+    size_t n = input.find_first_of(']', 1);
     if (n == std::string::npos)
       throw std::invalid_argument(
           "No closing ] character in the dimension name of : " + str);
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",", n);
+    n_first_comma = input.find_first_of(',', n);
     if (n_first_comma == std::string::npos)
       throw std::invalid_argument(
           "No comma after the closing ] character in the dimension string: " +
           str);
   } else
     // Find the comma after the name
-    n_first_comma = input.find_first_of(",");
+    n_first_comma = input.find_first_of(',');
 
   if (n_first_comma == std::string::npos)
     throw std::invalid_argument("No comma in the dimension string: " + str);
@@ -464,7 +464,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Find the 3rd comma from the end
     size_t n = std::string::npos;
     for (size_t i = 0; i < 3; i++) {
-      n = input.find_last_of(",", n);
+      n = input.find_last_of(',', n);
       if (n == std::string::npos)
         throw std::invalid_argument("Wrong number of values (4 are expected) "
                                     "in the dimensions string: " +

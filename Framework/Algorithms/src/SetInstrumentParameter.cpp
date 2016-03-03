@@ -106,7 +106,7 @@ void SetInstrumentParameter::exec() {
       addParameter(paramMap, det.get(), paramName, paramType, paramValue);
     }
   } else {
-    if (cmptList.size() > 0) {
+    if (!cmptList.empty()) {
       for (auto &cmpt : cmptList) {
         addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
       }

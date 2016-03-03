@@ -29,8 +29,6 @@ RefAxis::RefAxis(const RefAxis &right,
                  const MatrixWorkspace *const parentWorkspace)
     : NumericAxis(right), m_parentWS(parentWorkspace), m_size(right.m_size) {}
 
-RefAxis::~RefAxis() {}
-
 /** Virtual constructor
  *  @param parentWorkspace :: A pointer to the workspace that will hold the new
  * axis

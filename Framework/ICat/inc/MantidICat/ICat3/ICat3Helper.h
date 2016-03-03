@@ -49,12 +49,12 @@ public:
                ICat3::ns1__searchByAdvancedResponse &response);
 
   /// calls getInvestigationIncludes api's
-  void getDataFiles(long long invId, ICat3::ns1__investigationInclude include,
+  void getDataFiles(long long invstId, ICat3::ns1__investigationInclude include,
                     API::ITableWorkspace_sptr &responsews_sptr);
 
   /// this method calls Icat api getInvestigationIncludes and returns datasets
   /// for the given investigation id.
-  void doDataSetsSearch(long long invId,
+  void doDataSetsSearch(long long invstId,
                         ICat3::ns1__investigationInclude include,
                         API::ITableWorkspace_sptr &responsews_sptr);
 

@@ -62,13 +62,13 @@ public:
   void test_setForegroundColour_does_nothing()
   {
     NullPeaksPresenter presenter;
-    TS_ASSERT_THROWS_NOTHING(presenter.setForegroundColor(Qt::black));
+    TS_ASSERT_THROWS_NOTHING(presenter.setForegroundColor(PeakViewColor()));
   }
 
   void test_setBackgroundColour_does_nothing()
   {
     NullPeaksPresenter presenter;
-    TS_ASSERT_THROWS_NOTHING(presenter.setBackgroundColor(Qt::black));
+    TS_ASSERT_THROWS_NOTHING(presenter.setBackgroundColor(PeakViewColor()));
   }
 
   void test_setShown_does_nothing()

@@ -138,7 +138,7 @@ void GenerateGroupingPowder::exec() {
       std::copy(groups.at(i).begin(), groups.at(i).end(),
                 std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
-      size_t found = text.rfind(",");
+      size_t found = text.rfind(',');
       if (found != std::string::npos) {
         text.erase(found, 1); // erase the last comma
       }

@@ -35,19 +35,17 @@ namespace Kernel {
 */
 class DLLExport MDUnit {
 public:
-  MDUnit();
   virtual UnitLabel getUnitLabel() const = 0;
   virtual bool canConvertTo(const MDUnit &other) const = 0;
   virtual bool isQUnit() const = 0;
   virtual MDUnit *clone() const = 0;
   bool operator==(const MDUnit &other) const;
-  virtual ~MDUnit();
+  virtual ~MDUnit() = default;
 };
 
 /// QUnit base
 class DLLExport QUnit : public MDUnit {
 public:
-  ~QUnit() override;
   bool isQUnit() const override;
 };
 
@@ -59,7 +57,6 @@ public:
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   ReciprocalLatticeUnit *clone() const override;
-  ~ReciprocalLatticeUnit() override;
 
 private:
   bool isSpecialRLUUnitLabel() const;
@@ -72,7 +69,6 @@ public:
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   InverseAngstromsUnit *clone() const override;
-  ~InverseAngstromsUnit() override;
 };
 
 class DLLExport LabelUnit : public MDUnit {
@@ -84,7 +80,6 @@ public:
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   bool isQUnit() const override;
-  ~LabelUnit() override;
   LabelUnit *clone() const override;
 };
 

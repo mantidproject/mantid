@@ -120,7 +120,7 @@ public:
   template <typename T>
   static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
       const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
-      bool returnpulsetimes, int &size_t,
+      bool returnpulsetimes, int &nPeriods,
       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   template <typename T>
@@ -483,7 +483,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // inside ISIS the run_number type is int32
     std::vector<int> value;
     file.getData(value);
-    if (value.size() > 0)
+    if (!value.empty())
       run = boost::lexical_cast<std::string>(value[0]);
   }
   if (!run.empty()) {

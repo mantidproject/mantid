@@ -56,6 +56,8 @@ class Expression;
 class MANTID_API_DLL FunctionFactoryImpl final
     : public Kernel::DynamicFactory<IFunction> {
 public:
+  FunctionFactoryImpl(const FunctionFactoryImpl &) = delete;
+  FunctionFactoryImpl &operator=(const FunctionFactoryImpl &) = delete;
   /**Creates an instance of a function
    * @param type :: The function's type
    * @return A pointer to the created function
@@ -83,13 +85,8 @@ private:
 
   /// Private Constructor for singleton class
   FunctionFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  FunctionFactoryImpl(const FunctionFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  FunctionFactoryImpl &operator=(const FunctionFactoryImpl &);
   /// Private Destructor
-  ~FunctionFactoryImpl() override;
-
+  ~FunctionFactoryImpl() override = default;
   /// These methods shouldn't be used to create functions
   using Kernel::DynamicFactory<IFunction>::create;
   using Kernel::DynamicFactory<IFunction>::createUnwrapped;

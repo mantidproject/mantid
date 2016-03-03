@@ -17,13 +17,6 @@ ISpectrum::ISpectrum(const specnum_t specNo)
     : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Copy constructor
- */
-ISpectrum::ISpectrum(const ISpectrum &other)
-    : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs),
-      refX(other.refX), refDx(other.refDx), m_hasDx(other.m_hasDx) {}
-
-//----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
  *ISpectrum
  *
@@ -34,10 +27,6 @@ void ISpectrum::copyInfoFrom(const ISpectrum &other) {
   detectorIDs = other.detectorIDs;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ISpectrum::~ISpectrum() {}
 /**
  * Return the min/max X values for this spectrum.
  * @returns A pair where the first is the minimum X value
@@ -139,7 +128,7 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  * @param detIDs :: set of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
-  if (detIDs.size() == 0)
+  if (detIDs.empty())
     return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }
@@ -149,7 +138,7 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  * @param detIDs :: vector of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
-  if (detIDs.size() == 0)
+  if (detIDs.empty())
     return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }

@@ -22,11 +22,6 @@ FullprofPolynomial::FullprofPolynomial() : m_n(6), m_bkpos(1.) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FullprofPolynomial::~FullprofPolynomial() {}
-
-//----------------------------------------------------------------------------------------------
 /** Function to calcualteFullprofPolynomial
  */
 void FullprofPolynomial::function1D(double *out, const double *xValues,

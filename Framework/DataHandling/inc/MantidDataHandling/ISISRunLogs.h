@@ -52,7 +52,7 @@ public:
   /// Adds period related logs
   void addPeriodLogs(const int period, API::Run &exptRun);
   /// Add 'period i' log.
-  void addPeriodLog(const int i, API::Run &exptRun);
+  void addPeriodLog(const int period, API::Run &exptRun);
 
 private:
   /// A LogParser object

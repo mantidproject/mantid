@@ -64,7 +64,7 @@ class DLLExport ConnectedComponentLabeling {
 
 public:
   /// Constructor
-  ConnectedComponentLabeling(const size_t &id = 1,
+  ConnectedComponentLabeling(const size_t &startId = 1,
                              const boost::optional<int> nThreads = boost::none);
 
   /// Getter for the start label id
@@ -95,7 +95,7 @@ private:
   /// Calculate the disjoint element tree across the image.
   ConnectedComponentMappingTypes::ClusterMap
   calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws,
-                        BackgroundStrategy *const strategy,
+                        BackgroundStrategy *const baseStrategy,
                         Mantid::API::Progress &progress) const;
 
   /// Start labeling index

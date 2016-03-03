@@ -44,8 +44,6 @@ public:
   /// Constructor and Destructor
   IPowderDiffPeakFunction();
 
-  ~IPowderDiffPeakFunction() override;
-
   /// Overwrite IFunction base class methods
   // virtual const std::string name() = 0;
   /// Category of function
@@ -91,7 +89,7 @@ public:
 
   /// Override setting a new value to a parameter by name
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySe = true) override;
+                    bool explicitlySet = true) override;
 
   /// Check whether a parameter is a profile parameter
   virtual bool hasProfileParameter(std::string paramname);

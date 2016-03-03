@@ -53,7 +53,7 @@ public:
   ~MDGeometryBuilderXML();
 
   /// Add a dimension that is neither considered x, y, z or t.
-  bool addOrdinaryDimension(IMDDimension_const_sptr dimension) const;
+  bool addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const;
 
   /// Add many ordinary dimensions.
   void addManyOrdinaryDimensions(VecIMDDimension_sptr manyDims) const;

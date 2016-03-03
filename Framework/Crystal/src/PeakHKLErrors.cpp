@@ -12,6 +12,8 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -35,8 +37,6 @@ PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D() {
   PeakWorkspaceName = "";
   initMode = 0;
 }
-
-PeakHKLErrors::~PeakHKLErrors() {}
 
 void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
@@ -372,7 +372,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(.5 + xValues[i]);
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
@@ -469,7 +469,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(.5 + xValues[i]);
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
@@ -511,8 +511,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
-
-    V3D hkl = UBinv * peak.getQSampleFrame();
 
     // Deriv wrt chi phi and omega
     if (phiParamNum < nParams()) {
@@ -594,7 +592,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     V3D D = peak.getDetPos() - samplePosition;
     double vmag = (L0 + D.norm()) / peak.getTOF();
     double t1 = peak.getTOF() - L0 / vmag;
-    V3D V = D / t1;
 
     // Derivs wrt sample x, y, z
     // Ddsx =( - 1, 0, 0),  d|D|^2/dsx -> 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2

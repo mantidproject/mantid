@@ -63,13 +63,13 @@ public:
                           const detid_t *const detectorIDs,
                           size_t arrayLengths);
   SpectrumDetectorMapping();
-  virtual ~SpectrumDetectorMapping();
+  virtual ~SpectrumDetectorMapping() = default;
 
   std::set<specnum_t> getSpectrumNumbers() const;
   const std::set<detid_t> &
   getDetectorIDsForSpectrumNo(const specnum_t spectrumNo) const;
   const std::set<detid_t> &
-  getDetectorIDsForSpectrumIndex(const size_t index) const;
+  getDetectorIDsForSpectrumIndex(const size_t spectrumIndex) const;
   const sdmap &getMapping() const;
   bool indexIsSpecNumber() const;
 

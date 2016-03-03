@@ -107,11 +107,6 @@ ReflectometryTransform::ReflectometryTransform(
 }
 
 /**
- * Destructor
- */
-ReflectometryTransform::~ReflectometryTransform() {}
-
-/**
  * Creates an MD workspace
  * @param a : pointer to the first dimension of the MDWorkspace
   *@param b : pointer to the second dimension of the MDWorkspace
@@ -421,7 +416,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
 /**
  * Execution path for NormalisedPolygon Rebinning
- * @param inputWs : Workspace to be rebinned
+ * @param inputWS : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for
  * debugging purposes or not

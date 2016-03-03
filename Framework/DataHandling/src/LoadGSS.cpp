@@ -225,7 +225,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       // If there is, Save the previous to array and initialze new MantiVec for
       // (X, Y, E)
-      if (vecX.size() != 0) {
+      if (!vecX.empty()) {
         std::vector<double> storeX = vecX;
         std::vector<double> storeY = vecY;
         std::vector<double> storeE = vecE;
@@ -297,7 +297,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       double xPrev;
 
       // * Get previous X value
-      if (vecX.size() != 0) {
+      if (!vecX.empty()) {
         xPrev = vecX.back();
       } else if (filetype == 'r') {
         // Except if RALF
@@ -370,7 +370,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   } // ENDWHILE of readling all lines
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
-  if (vecX.size() != 0) { // Put final spectra into data
+  if (!vecX.empty()) { // Put final spectra into data
     gsasDataX.push_back(vecX);
     gsasDataY.push_back(vecY);
     gsasDataE.push_back(vecE);

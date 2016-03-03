@@ -430,7 +430,7 @@ bool File::append(const std::string &path, const std::string &name,
   if (!good)
     return false;
 
-  if (targetPosition == -1)
+  if (targetPosition < 0)
     targetPosition = lastHeaderPosition;
 
   // empty buffer

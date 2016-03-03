@@ -59,8 +59,8 @@ private:
   Cylinder *doClone() const override;
 
 protected:
-  Cylinder(const Cylinder &);
-  Cylinder &operator=(const Cylinder &);
+  Cylinder(const Cylinder &) = default;
+  Cylinder &operator=(const Cylinder &) = default;
 
 public:
   /// Public identifer

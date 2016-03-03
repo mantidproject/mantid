@@ -10,6 +10,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 namespace Mantid {
 namespace Crystal {
 
@@ -100,8 +102,8 @@ void MaskPeaksWorkspace::exec() {
     // get the peak location on the detector
     double col = peak.getCol();
     double row = peak.getRow();
-    int xPeak = int(col + 0.5) - 1;
-    int yPeak = int(row + 0.5) - 1;
+    int xPeak = boost::math::iround(col) - 1;
+    int yPeak = boost::math::iround(row) - 1;
     g_log.debug() << "Generating information for peak at x=" << xPeak
                   << " y=" << yPeak << "\n";
 

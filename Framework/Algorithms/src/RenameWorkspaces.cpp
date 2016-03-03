@@ -53,11 +53,11 @@ void RenameWorkspaces::exec() {
   std::string suffix = getPropertyValue("Suffix");
 
   // Check properties
-  if (newWsName.size() == 0 && prefix == "" && suffix == "") {
+  if (newWsName.empty() && prefix == "" && suffix == "") {
     throw std::invalid_argument(
         "No list of Workspace names, prefix or suffix has been supplied.");
   }
-  if (newWsName.size() > 0 && (prefix != "" || suffix != "")) {
+  if (!newWsName.empty() && (prefix != "" || suffix != "")) {
     throw std::invalid_argument("Both a list of workspace names and a prefix "
                                 "or suffix has been supplied.");
   }
@@ -73,7 +73,7 @@ void RenameWorkspaces::exec() {
   }
 
   size_t nWs = inputWsName.size();
-  if (newWsName.size() > 0) {
+  if (!newWsName.empty()) {
     // We are using a list of new names
     if (nWs > newWsName.size()) {
       nWs = newWsName.size();

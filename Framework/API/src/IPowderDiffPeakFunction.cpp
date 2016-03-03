@@ -36,11 +36,6 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Desctructor
-  */
-IPowderDiffPeakFunction::~IPowderDiffPeakFunction() {}
-
-//----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
   * @param i :: parameter index in function;
   * @param value :: parameter name

@@ -111,7 +111,7 @@ private:
   void exec() override;
   // Validate the optional input properties
   void checkOptionalProperties(
-      const std::map<int64_t, std::string> &ExcludedMonitors);
+      const std::map<int64_t, std::string> &SpectraExcluded);
   /// Prepare a vector of SpectraBlock structures to sifmplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
@@ -140,7 +140,7 @@ private:
   void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize,
                  int64_t period, int64_t start, int64_t &hist,
                  int64_t &spec_num,
-                 DataObjects::Workspace2D_sptr &localWorkspace);
+                 DataObjects::Workspace2D_sptr &local_workspace);
 
   // Create period logs
   void createPeriodLogs(int64_t period,
@@ -151,7 +151,7 @@ private:
   void buildSpectraInd2SpectraNumMap(
       bool range_supplied, DataBlockComposite& dataBlockComposite,
       const std::vector<int64_t> &spec_list,
-      const std::map<int64_t, std::string> &ExcludedMonitors);
+      const std::map<int64_t, std::string> &SpectraExcluded);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -218,7 +218,7 @@ private:
       NeXus::NXEntry &entry, boost::shared_array<int> &spectrum_index,
       int64_t ndets, int64_t n_vms_compat_spectra,
       std::map<int64_t, std::string> &monitors, bool excludeMonitors,
-      bool separateMonitors, std::map<int64_t, std::string> &ExcludedMonitors);
+      bool separateMonitors, std::map<int64_t, std::string> &OvelapMonitors);
 };
 
 } // namespace DataHandling

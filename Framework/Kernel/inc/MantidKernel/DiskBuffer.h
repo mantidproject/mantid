@@ -75,14 +75,16 @@ public:
 
   DiskBuffer();
   DiskBuffer(uint64_t m_writeBufferSize);
-  virtual ~DiskBuffer();
+  DiskBuffer(const DiskBuffer &) = delete;
+  DiskBuffer &operator=(const DiskBuffer &) = delete;
+  virtual ~DiskBuffer() = default;
 
   void toWrite(ISaveable *item);
   void flushCache();
   void objectDeleted(ISaveable *item);
 
   // Free space map methods
-  void freeBlock(uint64_t const pos, uint64_t const fileSize);
+  void freeBlock(uint64_t const pos, uint64_t const size);
   void defragFreeBlocks();
 
   // Allocating
@@ -166,10 +168,6 @@ protected:
   mutable uint64_t m_fileLength;
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  DiskBuffer(const DiskBuffer &);
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  DiskBuffer &operator=(const DiskBuffer &);
 };
 
 } // namespace Kernel

@@ -27,12 +27,6 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl()
   g_log.debug() << "WorkspaceFactory created." << std::endl;
 }
 
-/** Private destructor
- *  Prevents client from calling 'delete' on the pointer handed
- *  out by Instance
- */
-WorkspaceFactoryImpl::~WorkspaceFactoryImpl() {}
-
 /** Create a new instance of the same type of workspace as that given as
  * argument.
  *  If the optional size parameters are given, the workspace will be initialised

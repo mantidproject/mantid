@@ -32,11 +32,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport TOFSANSResolutionByPixelCalculator {
 public:
   double getWavelengthIndependentFactor(double r1, double r2, double deltaR,
-                                        double l1, double l2) const;
+                                        double lCollim, double l2) const;
   double getSigmaQValue(double moderatorValue,
                         double wavlengthIndependentFactor, double q,
-                        double wavelength, double deltaWavelength,
-                        double lCollim, double l2) const;
+                        double wavelength, double deltaWavelength, double l1,
+                        double l2) const;
 };
 }
 }

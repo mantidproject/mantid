@@ -115,9 +115,9 @@ public:
       EdgeY = newsize;
   }
 
-  void CalcVariancesFromData(double background, double row, double col,
-                             double &Varx, double &Vary, double &Varxy,
-                             std::vector<double> &ParameterValues);
+  void CalcVariancesFromData(double background, double meanx, double meany,
+                             double &Varxx, double &Varxy, double &Varyy,
+                             std::vector<double> &StatBase);
 
   bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
 
@@ -143,7 +143,7 @@ public:
 
   bool CalcVariances();
 
-  std::vector<double> GetParams(double background);
+  std::vector<double> GetParams(double b);
 
   double StatBaseVals(int index) {
     if (index < 0 || index >= (int)StatBase.size())
@@ -308,12 +308,12 @@ private:
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.
    */
-  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
               std::vector<std::string> &names, std::vector<double> &params,
               std::vector<double> &errs, double lastRow, double lastCol,
               double neighborRadius);
 
-  void Fit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+  void Fit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
            std::vector<std::string> &names, std::vector<double> &params,
            std::vector<double> &errs, double lastRow, double lastCol,
            double neighborRadius);
@@ -322,12 +322,12 @@ private:
 
   bool isGoodFit(std::vector<double> const &params,
                  std::vector<double> const &errs,
-                 std::vector<std::string> const &names, double chisq);
+                 std::vector<std::string> const &names, double chisqOverDOF);
   // returns last row added
   int UpdateOutputWS(DataObjects::TableWorkspace_sptr &TabWS, const int dir,
                      const double chan, std::vector<double> const &params,
                      std::vector<double> const &errs,
-                     std::vector<std::string> const &names, const double chisq,
+                     std::vector<std::string> const &names, const double Chisq,
                      const double time, std::string spec_idList);
 
   void updatePeakInformation(std::vector<double> const &params,
@@ -336,7 +336,7 @@ private:
                              double &TotVariance, double &TotIntensity,
                              double const TotSliceIntensity,
                              double const TotSliceVariance,
-                             double const chisqdivDOF, const int ncelss);
+                             double const chisqdivDOF, const int ncells);
 
   void updateStats(const double intensity, const double variance,
                    const double row, const double col,
@@ -348,7 +348,7 @@ private:
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
                                      const double ChiSqOverDOF,
-                                     const double TotIntensity,
+                                     const double TotVariance,
                                      const int ncells);
 
   void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,

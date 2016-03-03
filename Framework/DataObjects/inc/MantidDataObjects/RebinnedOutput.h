@@ -40,15 +40,12 @@ namespace DataObjects {
 */
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
-  /// Class constructor.
-  RebinnedOutput();
-  /// Class destructor.
-  ~RebinnedOutput() override;
-
+  RebinnedOutput() = default;
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
   }
+  RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Get the workspace ID.
   const std::string id() const override;
@@ -70,9 +67,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  RebinnedOutput(const RebinnedOutput &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  RebinnedOutput &operator=(const RebinnedOutput &other);
+  RebinnedOutput(const RebinnedOutput &) = default;
 
   /// Called by initialize() in MatrixWorkspace
   void init(const std::size_t &NVectors, const std::size_t &XLength,

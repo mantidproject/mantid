@@ -38,9 +38,7 @@ public:
   OptionalBool();
   OptionalBool(bool arg);
   OptionalBool(Value arg);
-  virtual ~OptionalBool();
-  OptionalBool(const OptionalBool &other);
-  OptionalBool &operator=(const OptionalBool &other);
+  virtual ~OptionalBool() = default;
   bool operator==(const OptionalBool &other) const;
   Value getValue() const;
 

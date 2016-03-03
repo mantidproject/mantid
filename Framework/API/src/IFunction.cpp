@@ -328,7 +328,7 @@ protected:
   /// Apply if vector
   std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
-    if (v.size() > 0) {
+    if (!v.empty()) {
       for (size_t i = 0; i < v.size() - 1; ++i) {
         res += boost::lexical_cast<std::string>(v[i]) + ",";
       }

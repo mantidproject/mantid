@@ -46,11 +46,6 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
- *  Destructor.
- */
-Integrate3DEvents::~Integrate3DEvents() {}
-
-/**
  * Add the specified event Q's to lists of events near peaks.  An event is
  * added to at most one list.  First the nearest h,k,l for that event Q vector
  * is calculated.  If a peak with that h,k,l was specified when this object
@@ -381,7 +376,7 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
  *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
  *  values.
  *
- *  @param q_vector  The q_vector to be mapped to h,k,l
+ *  @param hkl  The q_vector to be mapped to h,k,l
  */
 int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
   int h = boost::math::iround<double>(hkl[0]);
@@ -534,7 +529,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     axes_radii.push_back(r1 * sigmas[i]);
   }
 
-  if (E1Vec.size() > 0) {
+  if (!E1Vec.empty()) {
     double h3 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundOuterRadii);
     // scaled from area of circle minus segment when r normalized to 1
     double m3 = std::sqrt(

@@ -14,12 +14,6 @@ IMDEventWorkspace::IMDEventWorkspace()
     : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
 
 //-----------------------------------------------------------------------------------------------
-/** Copy constructor */
-IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace &other)
-    : IMDWorkspace(other), MultipleExperimentInfos(other),
-      m_fileNeedsUpdating(other.m_fileNeedsUpdating) {}
-
-//-----------------------------------------------------------------------------------------------
 /** @return the marker set to true when a file-backed workspace needs its
  * back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
  */

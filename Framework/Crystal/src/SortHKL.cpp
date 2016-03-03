@@ -82,7 +82,7 @@ void SortHKL::exec() {
   const std::vector<Peak> &inputPeaks = inputPeaksWorkspace->getPeaks();
   std::vector<Peak> peaks = getNonZeroPeaks(inputPeaks);
 
-  if (peaks.size() == 0) {
+  if (peaks.empty()) {
     g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
@@ -237,7 +237,7 @@ std::map<V3D, UniqueReflection> SortHKL::getPossibleUniqueReflections(
 
   // Generate map of UniqueReflection-objects with reflection family as key.
   std::map<V3D, UniqueReflection> uniqueHKLs;
-  for (auto hkl : generator) {
+  for (const auto &hkl : generator) {
     if (filter->isAllowed(hkl)) {
       V3D hklFamily = pointGroup->getReflectionFamily(hkl);
       uniqueHKLs.emplace(hklFamily, UniqueReflection(hklFamily));
@@ -329,7 +329,7 @@ double PeaksStatistics::getRMS(const std::vector<double> &data) const {
 /// Returns the lowest and hights wavelength in the peak list.
 std::pair<double, double>
 PeaksStatistics::getLambdaLimits(const std::vector<Peak> &peaks) const {
-  if (peaks.size() == 0) {
+  if (peaks.empty()) {
     return std::make_pair(0.0, 0.0);
   }
 
@@ -502,7 +502,7 @@ void UniqueReflection::removeOutliers(double sigmaCritical) {
       }
     }
 
-    if (outlierIndices.size() > 0) {
+    if (!outlierIndices.empty()) {
       for (auto it = outlierIndices.rbegin(); it != outlierIndices.rend();
            ++it) {
         m_peaks.erase(m_peaks.begin() + (*it));
