@@ -87,6 +87,24 @@ public:
     TS_ASSERT_DELTA(0.0114435282, values.getCalculated(2), tol);
   }
 
+  void test_Build_S2_Cache()
+  {
+    auto func = createFunctionWithParamsSet();
+    func->setAttributeValue("IntegrationSteps", 35);
+
+    std::vector<double> s2;
+    func->buildS2Cache(s2);
+
+    TS_ASSERT_EQUALS(1296, s2.size());
+
+    const double tol(1e-3);
+    TS_ASSERT_DELTA(36.0, s2[0], tol);
+    TS_ASSERT_DELTA(36.0, s2[35], tol);
+    TS_ASSERT_DELTA(35.8606, s2[36], tol);
+    TS_ASSERT_DELTA(35.8606, s2[71], tol);
+    TS_ASSERT_DELTA(15.04823, s2[740], tol);
+  }
+
 private:
   boost::shared_ptr<MultivariateGaussianComptonProfile>
   createFunctionWithParamsSet() {

@@ -153,7 +153,7 @@ double MultivariateGaussianComptonProfile::integratePhi(
 double MultivariateGaussianComptonProfile::calculateIntegrand(
     int idx, std::vector<double> &s2Cache, double y) const {
   double s2 = s2Cache[idx];
-  double i = s2 * exp(-(y * y) / (2 * s2));
+  double i = s2 * exp(-(y * y) / (2.0 * s2));
   return i;
 }
 
@@ -173,23 +173,23 @@ void MultivariateGaussianComptonProfile::buildS2Cache(
   sigmaY2 *= sigmaY2;
   sigmaZ2 *= sigmaZ2;
 
-  const double num = sigmaX2 * sigmaY2 * sigmaZ2;
-
   for (int i = 0; i <= m_integrationSteps; i++) {
     const double theta = m_thetaStep * i;
     for (int j = 0; j <= m_integrationSteps; j++) {
       const double phi = m_phiStep * j;
 
-      double x = sin(theta) * cos(phi);
-      double y = sin(theta) * sin(phi);
-      double z = cos(theta);
+      double sinTheta2 = pow(sin(theta), 2);
+      double sinPhi2 = pow(sin(phi), 2);
+      double cosTheta2 = pow(cos(theta), 2);
+      double cosPhi2 = pow(cos(phi), 2);
 
-      double denom = (x * sigmaY2 * sigmaZ2) + (sigmaX2 * y * sigmaZ2) +
-                     (sigmaX2 * sigmaY2 * z);
+      double x = (sinTheta2 * cosPhi2) / sigmaX2;
+      double y = (sinTheta2 * sinPhi2) / sigmaY2;
+      double z = cosTheta2 / sigmaZ2;
 
-      double s2 = 0.0;
-      if (denom != 0.0)
-        s2 = num / denom;
+      double s2 = x + y + z;
+
+      s2 = 1.0 / s2;
 
       s2Cache.push_back(s2);
     }

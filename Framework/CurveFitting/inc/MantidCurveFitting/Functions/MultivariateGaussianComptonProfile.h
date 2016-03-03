@@ -42,6 +42,8 @@ public:
   /// Default constructor required for factory
   MultivariateGaussianComptonProfile();
 
+  void buildS2Cache(std::vector<double> &s2Cache) const;
+
 private:
   /// A string identifier for this function
   std::string name() const;
@@ -68,8 +70,6 @@ private:
   double integratePhi(int idx, std::vector<double> &s2Cache, double y) const;
   double calculateIntegrand(int idx, std::vector<double> &s2Cache,
                             double y) const;
-
-  void buildS2Cache(std::vector<double> &s2Cache) const;
 
   int m_integrationSteps; //!< Number of steps to perform during integration
   double m_thetaStep;     //!< Delta theta in integration
