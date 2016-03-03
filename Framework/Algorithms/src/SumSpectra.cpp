@@ -297,9 +297,9 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   if (m_calculateWeightedSum) {
     numZeros = 0;
     for (size_t i = 0; i < Weight.size(); i++) {
-      if (nZeros[i] == 0)
-        YSum[i] *= double(numSpectra) / Weight[i];
-      else
+      if (numSpectra > nZeros[i])
+        YSum[i] *= double(numSpectra - nZeros[i]) / Weight[i];
+      if (nZeros[i] != 0)
         numZeros += nZeros[i];
     }
   }
@@ -416,9 +416,9 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   if (m_calculateWeightedSum) {
     numZeros = 0;
     for (size_t i = 0; i < Weight.size(); i++) {
-      if (nZeros[i] == 0)
-        YSum[i] *= double(numSpectra) / Weight[i];
-      else
+      if (numSpectra > nZeros[i])
+        YSum[i] *= double(numSpectra - nZeros[i]) / Weight[i];
+      if (nZeros[i] != 0)
         numZeros += nZeros[i];
     }
   }
