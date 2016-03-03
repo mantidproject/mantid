@@ -106,6 +106,7 @@ void vtkMDHexFactory::doCreate(
 
   vtkNew<vtkIdList> hexPointList;
   hexPointList->SetNumberOfIds(8);
+  auto hexPointList_ptr = hexPointList->WritePointer(0, 8);
 
   NormFuncIMDNodePtr normFunction =
       makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
@@ -153,32 +154,22 @@ void vtkMDHexFactory::doCreate(
     for (size_t i = 0; i < boxes.size(); i++) {
       if (useBox[i]) {
         // The bare point ID
-        vtkIdType pointIds = i * 8;
+        vtkIdType pointId = i * 8;
 
         // Add signal
         *signalsPtr = signalCache[i];
         std::advance(signalsPtr, 1);
 
-        hexPointList->SetId(0, pointIds + 0); // xyx
-        hexPointList->SetId(1, pointIds + 1); // dxyz
-        hexPointList->SetId(2, pointIds + 3); // dxdyz
-        hexPointList->SetId(3, pointIds + 2); // xdyz
-        hexPointList->SetId(4, pointIds + 4); // xydz
-        hexPointList->SetId(5, pointIds + 5); // dxydz
-        hexPointList->SetId(6, pointIds + 7); // dxdydz
-        hexPointList->SetId(7, pointIds + 6); // xdydz
+        const std::array<vtkIdType, 8> idList{{0, 1, 3, 2, 4, 5, 7, 6}};
+
+        std::transform(
+            idList.begin(), idList.end(), hexPointList_ptr,
+            std::bind(std::plus<vtkIdType>(), std::placeholders::_1, pointId));
 
         // Add cells
         visualDataSet->InsertNextCell(VTK_HEXAHEDRON,
                                       hexPointList.GetPointer());
 
-        double bounds[6];
-
-        visualDataSet->GetCellBounds(imageSizeActual, bounds);
-
-        if (bounds[0] < -10 || bounds[2] < -10 || bounds[4] < -10) {
-          std::string msg = "";
-        }
         imageSizeActual++;
       }
     } // for each box.
