@@ -40,6 +40,7 @@ Improved
 -  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
    An appropriate labelling has now been implemented
   `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
+-  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
 
 Deprecated
 ##########
