@@ -60,7 +60,7 @@ private:
   /// Run the algorithm;
   void exec() override;
   double getEg(double mosaic);
-  double getEgLaue(double Eb, double twoth, double wl, double divBeam,
+  double getEgLaue(double Eg, double twoth, double wl, double divBeam,
                    double betaBeam);
   double getXqt(double Eg, double cellV, double wl, double twoth, double tbar,
                 double fsq);

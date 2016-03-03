@@ -87,7 +87,7 @@ private:
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name,
-                                 const std::string &base_name, int64_t wsIndex,
+                                 const std::string &baseName, int64_t wsIndex,
                                  bool commonStem);
 
   /// Add an index to the name if it already exists in the workspace
@@ -154,7 +154,7 @@ private:
   void getWordsInString(const std::string &words3, std::string &w1,
                         std::string &w2, std::string &w3);
   /// Splits a string of exactly four words into the separate words
-  void getWordsInString(const std::string &words3, std::string &w1,
+  void getWordsInString(const std::string &words4, std::string &w1,
                         std::string &w2, std::string &w3, std::string &w4);
 
   /// Read the bin masking information
@@ -202,7 +202,7 @@ private:
   Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(
       Mantid::NeXus::NXRoot &root, const std::string &entryName,
       Mantid::API::MatrixWorkspace_sptr &tempMatrixWorkspace,
-      const int64_t nWorkspaceEntries, const int64_t i);
+      const int64_t nWorkspaceEntries, const int64_t p);
 
   /// Does the current workspace have uniform binning
   bool m_shared_bins;

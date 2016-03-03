@@ -47,7 +47,7 @@ public:
   Mantid::API::ImplicitFunctionParameter *
   createParameter(Poco::XML::Element *parameterElement) override;
   void setSuccessorParser(
-      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
+      Mantid::API::ImplicitFunctionParameterParser *parser) override;
 
 protected:
   ImplicitFunctionParameterParser::SuccessorType m_successor;

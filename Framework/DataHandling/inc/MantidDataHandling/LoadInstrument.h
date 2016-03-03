@@ -109,7 +109,7 @@ private:
 
   /// Search directory for Parameter file, return full path name if found, else
   /// "".
-  std::string getFullPathParamIDF(std::string directory);
+  std::string getFullPathParamIDF(std::string directoryName);
 
   /// The name and path of the input file
   std::string m_filename;

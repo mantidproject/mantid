@@ -12,6 +12,7 @@ Muon Analysis
 #############
 
 - "Load current data" now works for ARGUS `#15474 <https://github.com/mantidproject/mantid/pull/15474>`_
+- A bug was fixed where the user's choice of which group (or pair of groups) to plot was changed unexpectedly when the grouping table was updated `#15504 <https://github.com/mantidproject/mantid/pull/15504>`_
 
 Algorithms
 ----------
@@ -24,7 +25,7 @@ Algorithms
   property AcceptXRoundingErrors to true, meaning the algorithm will accept workspaces whose bin widths differ
   slightly. Large deviations will still produce a warning message or, if very large, an error.
   `#15325 <https://github.com/mantidproject/mantid/pull/15325>`_
-- :ref:`AsymmetryCalc <algm-AsymmetryCalc>`: a bug was fixed where the algorithm failed to run on input WorkspaceGroups. 15404
+- :ref:`AsymmetryCalc <algm-AsymmetryCalc>`: a bug was fixed where the algorithm failed to run on input WorkspaceGroups. `#15404 <https://github.com/mantidproject/mantid/pull/15404>`_
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt now handles positive images `#15494 <https://github.com/mantidproject/mantid/pull/15494>`_
 
 Fit Functions

@@ -37,6 +37,9 @@ Improved
    now works correctly for 'distribution' data in a :ref:`MatrixWorkspace <MatrixWorkspace>` in
    in-place mode (``InputWorkspace`` = ``OutputWorkspace``).
    `#15489 <https://github.com/mantidproject/mantid/pull/15489>`_
+-  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
+   An appropriate labelling has now been implemented
+  `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
 
 Deprecated
 ##########

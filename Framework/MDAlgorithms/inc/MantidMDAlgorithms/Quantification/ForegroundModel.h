@@ -75,7 +75,7 @@ public:
 
   /// Set a reference to the convolved fitting function. Needed as we need a
   /// default constructor
-  void setFunctionUnderMinimization(const API::IFunction &fitFunction);
+  void setFunctionUnderMinimization(const API::IFunction &fittingFunction);
   /// Declares the parameters
   void declareParameters() override;
   /// Called when an attribute value is set
