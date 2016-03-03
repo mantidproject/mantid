@@ -119,7 +119,8 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test algorithm with loading HB3A with instrument and presense of SPICE scan table
+  /** Test algorithm with loading HB3A with instrument and presense of SPICE
+   * scan table
    *  such that it can be set to zero-2-theta position
    * @brief test_LoadHB3AXML2InstrumentedWS
    * Testing include
@@ -153,7 +154,7 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
-    TS_ASSERT_DELTA(outws->readY(255*256)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
     TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
 
     // Instrument
@@ -163,9 +164,9 @@ public:
     Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
 
     // check center of the detector @ (128, 115)
-    size_t center_col =128;
+    size_t center_col = 128;
     size_t center_row = 115;
-    size_t center_ws_index = (center_row-1) * 256 + (center_col-1);
+    size_t center_ws_index = (center_row - 1) * 256 + (center_col - 1);
     Kernel::V3D det_center = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = det_center.distance(sample);
@@ -184,17 +185,17 @@ public:
     Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
 
     size_t row_lr = 0;
-    size_t col_lr = 2*127-2;
+    size_t col_lr = 2 * 127 - 2;
     size_t ws_index_lr = row_lr * 256 + col_lr;
     Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
 
-    size_t row_ul = 114*2;
+    size_t row_ul = 114 * 2;
     size_t col_ul = 2;
     size_t ws_index_ul = row_ul * 256 + col_ul;
     Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
 
-    size_t row_ur = 114*2;
-    size_t col_ur = 2*127-2;
+    size_t row_ur = 114 * 2;
+    size_t col_ur = 2 * 127 - 2;
     size_t ws_index_ur = row_ur * 256 + col_ur;
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
@@ -204,9 +205,9 @@ public:
 
     // Check symmetricity
     TS_ASSERT_DELTA(det_ll_pos.X() + det_lr_pos.X(), 0., 0.0000001);
-    TS_ASSERT_DELTA(det_ll_pos.X(), (127-2)*pixel_size, 0.000001);
+    TS_ASSERT_DELTA(det_ll_pos.X(), (127 - 2) * pixel_size, 0.000001);
     TS_ASSERT_DELTA(det_ll_pos.Y(), det_lr_pos.Y(), 0.000001);
-    TS_ASSERT_DELTA(det_ll_pos.Y(), -114*pixel_size, 0.0000001);
+    TS_ASSERT_DELTA(det_ll_pos.Y(), -114 * pixel_size, 0.0000001);
 
     TS_ASSERT_DELTA(det_ll_pos.X(), det_ul_pos.X(), 0.00001);
     TS_ASSERT_DELTA(det_ll_pos.Y() + det_ul_pos.Y(), 0., 0.000001);
@@ -251,14 +252,15 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
-    TS_ASSERT_DELTA(outws->readY(255*256)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
     TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
 
     // get 2theta from workspace
-    double twotheta_raw = atof(outws->run().getProperty("_2theta")->value().c_str());
+    double twotheta_raw =
+        atof(outws->run().getProperty("_2theta")->value().c_str());
 
     Kernel::Property *raw_property = outws->run().getProperty("2theta");
     Kernel::TimeSeriesProperty<double> *twotheta_property =
@@ -274,16 +276,17 @@ public:
     Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
 
     // check the center position
-    size_t center_row = 115-1;
-    size_t center_col = 128-1;
+    size_t center_row = 115 - 1;
+    size_t center_col = 128 - 1;
     size_t center_ws_index = 256 * center_row + center_col;
     Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
     double sample_center_distance = sample.distance(center_det_pos);
     // TS_ASSERT_DELTA(center_det_pos.X(), )
     TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
-    double sample_center_angle = (sample-source).angle(center_det_pos-sample);
-    TS_ASSERT_DELTA(sample_center_angle * 180./ M_PI, twotheta_log, 0.0001);
+    double sample_center_angle =
+        (sample - source).angle(center_det_pos - sample);
+    TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
 
     /*
     Kernel::V3D det0pos = outws->getDetector(0)->getPos();
@@ -333,13 +336,11 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038C");
   }
 
-
   //----------------------------------------------------------------------------------------------
   /** Test of loading HB3A data with calibrated distance
    * @brief test_loadHB3ACalibratedDetDistance
    */
-  void Ntest_loadHB3ACalibratedDetDistance()
-  {
+  void Ntest_loadHB3ACalibratedDetDistance() {
     // Test 2theta = 15 degree
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -377,11 +378,10 @@ public:
    * @brief createSpiceScanTable
    * @return
    */
-  ITableWorkspace_sptr createSpiceScanTable()
-  {
+  ITableWorkspace_sptr createSpiceScanTable() {
     ITableWorkspace_sptr datatablews =
-      boost::dynamic_pointer_cast<ITableWorkspace>(
-          boost::make_shared<DataObjects::TableWorkspace>());
+        boost::dynamic_pointer_cast<ITableWorkspace>(
+            boost::make_shared<DataObjects::TableWorkspace>());
     datatablews->addColumn("int", "Pt.");
     datatablews->addColumn("double", "2theta");
     datatablews->addColumn("double", "m1");
@@ -396,7 +396,6 @@ public:
 
     return datatablews;
   }
-
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_ */

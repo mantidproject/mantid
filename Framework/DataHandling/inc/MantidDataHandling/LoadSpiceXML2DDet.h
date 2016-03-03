@@ -132,7 +132,6 @@ private:
   int m_ptNumber4Log;
   ///
   std::string m_idfFileName;
-
 };
 
 } // namespace DataHandling

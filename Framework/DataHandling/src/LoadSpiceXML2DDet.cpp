@@ -194,9 +194,10 @@ void LoadSpiceXML2DDet::init() {
       "Output workspace will be an X by Y Workspace2D if instrument "
       "is not loaded. ");
 
-  declareProperty("DetectorLogName", "Detector",
-                  "Log name (i.e., XML node name) for detector counts in XML file."
-                  "By default, the name is 'Detector'");
+  declareProperty(
+      "DetectorLogName", "Detector",
+      "Log name (i.e., XML node name) for detector counts in XML file."
+      "By default, the name is 'Detector'");
 
   declareProperty(
       make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
@@ -224,17 +225,17 @@ void LoadSpiceXML2DDet::init() {
   declareProperty("PtNumber", 0,
                   "Pt. value for the row to get sample log from. ");
 
-  declareProperty("ShiftedDetectorDistance", 0.,
-                  "Amount of shift of the distance between source and detector centre."
-                  "It is used to apply instrument calibration.");
+  declareProperty(
+      "ShiftedDetectorDistance", 0.,
+      "Amount of shift of the distance between source and detector centre."
+      "It is used to apply instrument calibration.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Process inputs arguments
  * @brief processInputs
  */
-void LoadSpiceXML2DDet::processInputs()
-{
+void LoadSpiceXML2DDet::processInputs() {
   m_detXMLFileName = getPropertyValue("Filename");
   m_detXMLNodeName = getPropertyValue("DetectorLogName");
   std::vector<size_t> vec_pixelgeom = getProperty("DetectorGeometry");
@@ -251,7 +252,7 @@ void LoadSpiceXML2DDet::processInputs()
 
   // Retreive sample environment data from SPICE scan table workspace
   std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
-  if (spicetablewsname.size()> 0)
+  if (spicetablewsname.size() > 0)
     m_hasScanTable = true;
   else
     m_hasScanTable = false;
@@ -261,25 +262,22 @@ void LoadSpiceXML2DDet::processInputs()
   return;
 }
 
-
 /** Set up sample logs especially 2theta and diffr for loading instrument
  * 2theta will be obtained from SPICE scan table workspace if it
  * @brief LoadSpiceXML2DDet::setupSampleLogs
  * @return
  */
-bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws)
-{
+bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   // With given spice scan table, 2-theta is read from there.
-  if (m_hasScanTable)
-  {
+  if (m_hasScanTable) {
     ITableWorkspace_sptr spicetablews = getProperty("SpiceTableWorkspace");
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
   // Process 2theta
   bool return_true = true;
-  if (!outws->run().hasProperty("2theta") && outws->run().hasProperty("_2theta"))
-  {
+  if (!outws->run().hasProperty("2theta") &&
+      outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
     Kernel::DateAndTime anytime(1000);
     double logvalue =
@@ -288,11 +286,10 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws)
         new TimeSeriesProperty<double>("2theta");
     newlogproperty->addValue(anytime, logvalue);
     outws->mutableRun().addProperty(newlogproperty);
-    g_log.information() << "Set 2theta from _2theta (as XML node) with value " << logvalue
-                        << "\n";
-  }
-  else if (!outws->run().hasProperty("2theta") && !outws->run().hasProperty("_2theta"))
-  {
+    g_log.information() << "Set 2theta from _2theta (as XML node) with value "
+                        << logvalue << "\n";
+  } else if (!outws->run().hasProperty("2theta") &&
+             !outws->run().hasProperty("_2theta")) {
     // Neither 2theta nor _2theta
     g_log.warning("No 2theta is set up for loading instrument.");
     return_true = false;
@@ -322,8 +319,8 @@ void LoadSpiceXML2DDet::exec() {
 
   // Create output workspace
   MatrixWorkspace_sptr outws;
-  outws = createMatrixWorkspace(vec_xmlnode, m_numPixelX, m_numPixelY, m_detXMLNodeName,
-                                m_loadInstrument);
+  outws = createMatrixWorkspace(vec_xmlnode, m_numPixelX, m_numPixelY,
+                                m_detXMLNodeName, m_loadInstrument);
 
   // Set up log for loading instrument
   bool can_set_instrument = setupSampleLogs(outws);
@@ -344,10 +341,12 @@ void LoadSpiceXML2DDet::exec() {
 /** Parse SPICE XML file for one Pt./measurement
  * @brief LoadSpiceXML2DDet::parseSpiceXML
  * @param xmlfilename :: name of the XML file to parse
- * @return vecspicenode :: [output] vector of SpiceXMLNode containing information
+ * @return vecspicenode :: [output] vector of SpiceXMLNode containing
+ * information
  * in XML file
  */
-std::vector<SpiceXMLNode> LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
+std::vector<SpiceXMLNode>
+LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
   // Declare output
   std::vector<SpiceXMLNode> vecspicenode;
 
@@ -507,7 +506,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         std::vector<std::string> veccounts;
         boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
 
-        // check number of counts per column should not exceeds number of pixels in Y direction
+        // check number of counts per column should not exceeds number of pixels
+        // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
           errss << "Row " << icol << " contains " << veccounts.size()
