@@ -144,7 +144,8 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        new Kernel::PropertyWithValue<std::string>(name, ""), value);
+        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        value);
   else
     settings->setProperty(name, value);
 }
@@ -1463,12 +1464,10 @@ bool SANSRunWindow::workspaceExists(const QString &ws_name) const {
  * @returns A list of the currently available workspaces
  */
 QStringList SANSRunWindow::currentWorkspaceList() const {
-  auto ws_list =
-      AnalysisDataService::Instance().getObjectNames();
+  auto ws_list = AnalysisDataService::Instance().getObjectNames();
   auto iend = ws_list.end();
   QStringList current_list;
-  for (auto itr = ws_list.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = ws_list.begin(); itr != iend; ++itr) {
     current_list.append(QString::fromStdString(*itr));
   }
   return current_list;
@@ -1677,7 +1676,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
-  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
+  const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try {
     monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   } catch (std::runtime_error &) {
@@ -3666,8 +3665,7 @@ void SANSRunWindow::cleanup() {
       Mantid::API::AnalysisDataService::Instance();
   auto workspaces = ads.getObjectNames();
   auto iend = workspaces.end();
-  for (auto itr = workspaces.begin();
-       itr != iend; ++itr) {
+  for (auto itr = workspaces.begin(); itr != iend; ++itr) {
     QString name = QString::fromStdString(*itr);
     if (name.endsWith("_raw") || name.endsWith("_nxs")) {
       ads.remove(*itr);

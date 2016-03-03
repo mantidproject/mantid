@@ -52,7 +52,7 @@ public:
       : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
 
   /// Destructor
-  virtual ~ThreadScheduler() {}
+  virtual ~ThreadScheduler() = default;
 
   //-----------------------------------------------------------------------------------
   /** Add a Task to the queue.
@@ -169,7 +169,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.front();
       m_queue.pop_front();
@@ -222,7 +222,7 @@ class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.back();
       m_queue.pop_back();
@@ -274,7 +274,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_map.size() > 0) {
+    if (!m_map.empty()) {
       // Since the map is sorted by cost, we want the LAST item.
       std::multimap<double, Task *>::iterator it = m_map.end();
       it--;

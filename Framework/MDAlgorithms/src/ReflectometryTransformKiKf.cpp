@@ -27,10 +27,5 @@ ReflectometryTransformKiKf::ReflectometryTransformKiKf(
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReflectometryTransformKiKf::~ReflectometryTransformKiKf() {}
-
 } // namespace Mantid
 } // namespace MDAlgorithms

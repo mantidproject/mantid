@@ -28,17 +28,17 @@ ConjoinWorkspaces::~ConjoinWorkspaces() {}
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace1", "", Direction::InOut,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the first input workspace");
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The name of the second input workspace");
-  declareProperty(
-      new PropertyWithValue<bool>("CheckOverlapping", true, Direction::Input),
-      "Verify that the supplied data do not overlap");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace1", "", Direction::InOut,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the first input workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace2", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The name of the second input workspace");
+  declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
+                                                       Direction::Input),
+                  "Verify that the supplied data do not overlap");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -116,12 +116,12 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
                                         bool checkSpectra) const {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to
   // a set
-  std::set<specid_t> spectra;
+  std::set<specnum_t> spectra;
   std::set<detid_t> detectors;
   const size_t &nhist1 = ws1->getNumberHistograms();
   for (size_t i = 0; i < nhist1; ++i) {
     const ISpectrum *spec = ws1->getSpectrum(i);
-    const specid_t spectrum = spec->getSpectrumNo();
+    const specnum_t spectrum = spec->getSpectrumNo();
     spectra.insert(spectrum);
     const auto &dets = spec->getDetectorIDs();
     for (auto const &det : dets) {
@@ -134,7 +134,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
   const size_t &nhist2 = ws2->getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j) {
     const ISpectrum *spec = ws2->getSpectrum(j);
-    const specid_t spectrum = spec->getSpectrumNo();
+    const specnum_t spectrum = spec->getSpectrumNo();
     if (checkSpectra) {
       if (spectrum > 0 && spectra.find(spectrum) != spectra.end()) {
         g_log.error()
@@ -183,23 +183,23 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
     return;
 
   // is everything possibly ok?
-  specid_t min;
-  specid_t max;
+  specnum_t min;
+  specnum_t max;
   getMinMax(output, min, max);
-  if (max - min >= static_cast<specid_t>(
+  if (max - min >= static_cast<specnum_t>(
                        output->getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
-  specid_t ws1min;
-  specid_t ws1max;
+  specnum_t ws1min;
+  specnum_t ws1max;
   getMinMax(ws1, ws1min, ws1max);
 
   // change the axis by adding the maximum existing spectrum number to the
   // current value
   for (size_t i = ws1->getNumberHistograms(); i < output->getNumberHistograms();
        i++) {
-    specid_t origid;
+    specnum_t origid;
     origid = output->getSpectrum(i)->getSpectrumNo();
     output->getSpectrum(i)->setSpectrumNo(origid + ws1max);
   }

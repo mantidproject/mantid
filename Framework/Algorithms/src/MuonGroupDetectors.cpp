@@ -41,17 +41,17 @@ const std::string MuonGroupDetectors::category() const { return "Muon"; }
 /** Initialize the algorithm's properties.
  */
 void MuonGroupDetectors::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Workspace to apply grouping to.");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable",
-                                                        "", Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "DetectorGroupingTable", "", Direction::Input),
                   "Table with detector grouping information. Check wiki page "
                   "for table format expected.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Workspace with detectors grouped.");
 }
 
@@ -73,11 +73,11 @@ void MuonGroupDetectors::exec() {
 
   // First pass to determine how many non-empty groups we have
   for (size_t row = 0; row < table->rowCount(); ++row) {
-    if (table->cell<std::vector<int>>(row, 0).size() != 0)
+    if (!table->cell<std::vector<int>>(row, 0).empty())
       nonEmptyRows.push_back(row);
   }
 
-  if (nonEmptyRows.size() == 0)
+  if (nonEmptyRows.empty())
     throw std::invalid_argument(
         "Detector Grouping Table doesn't contain any non-empty groups");
 
@@ -127,7 +127,7 @@ void MuonGroupDetectors::exec() {
     outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
     outWS->getSpectrum(groupIndex)
-        ->setSpectrumNo(static_cast<specid_t>(groupIndex + 1));
+        ->setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
   }
 
   setProperty("OutputWorkspace", outWS);

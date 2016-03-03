@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, bad-builtin
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
@@ -6,14 +6,16 @@
 # Check whether Mantid is available
 try:
     from mantid.kernel import ConfigService, Logger, version_str
+
     HAS_MANTID = True
-except:
+except (ImportError, ImportWarning):
     HAS_MANTID = False
 
 try:
     import mantidplot
+
     HAS_MANTIDPLOT = True
-except:
+except(ImportError, ImportWarning):
     HAS_MANTIDPLOT = False
 
 import xml.dom.minidom
@@ -22,6 +24,7 @@ import time
 import platform
 import re
 import os
+
 
 class BaseScriptElement(object):
     """
@@ -63,7 +66,7 @@ class BaseScriptElement(object):
         """
         return ""
 
-    def from_xml(self, xml_str):
+    def from_xml(self, _xml_str):
         """
             Parse the input text as XML to populate the data members
             of this object
@@ -89,13 +92,13 @@ class BaseScriptElement(object):
         # If we have two sub-strings separated by a dash, treat
         # it as a range if the two sub-strings can be converted
         # to integers
-        if len(toks)==2:
+        if len(toks) == 2:
             try:
                 r_min = int(toks[0])
                 r_max = int(toks[1])
-                if r_max>r_min:
-                    return [str(i) for i in range(r_min, r_max+1)]
-            except:
+                if r_max > r_min:
+                    return [str(i) for i in range(r_min, r_max + 1)]
+            except (StopIteration, StandardError, Warning):
                 # Can't convert to run numbers, just skip
                 pass
         return [range_str]
@@ -114,7 +117,7 @@ class BaseScriptElement(object):
     @classmethod
     def getContent(cls, dom, tag):
         element_list = dom.getElementsByTagName(tag)
-        if len(element_list)>0:
+        if len(element_list) > 0:
             return BaseScriptElement.getText(element_list[0].childNodes)
         else:
             return None
@@ -127,10 +130,11 @@ class BaseScriptElement(object):
         else:
             return default
 
+    # pylint: disable = dangerous-default-value
     @classmethod
     def getIntList(cls, dom, tag, default=[]):
         value = BaseScriptElement.getContent(dom, tag)
-        if value is not None and len(value.strip())>0:
+        if value is not None and len(value.strip()) > 0:
             return map(int, value.split(','))
         else:
             return default
@@ -146,7 +150,7 @@ class BaseScriptElement(object):
     @classmethod
     def getFloatList(cls, dom, tag, default=[]):
         value = BaseScriptElement.getContent(dom, tag)
-        if value is not None and len(value.strip())>0:
+        if value is not None and len(value.strip()) > 0:
             return map(float, value.split(','))
         else:
             return default
@@ -160,10 +164,10 @@ class BaseScriptElement(object):
             return default
 
     @classmethod
-    def getStringList(cls, dom, tag, default=[]):
+    def getStringList(cls, dom, tag, _default=[]):
         elem_list = []
         element_list = dom.getElementsByTagName(tag)
-        if len(element_list)>0:
+        if len(element_list) > 0:
             for l in element_list:
                 elem_list.append(BaseScriptElement.getText(l.childNodes).strip())
         return elem_list
@@ -172,7 +176,7 @@ class BaseScriptElement(object):
     def getBoolElement(cls, dom, tag, true_tag='true', default=False):
         value = BaseScriptElement.getContent(dom, tag)
         if value is not None:
-            return value.lower()==true_tag.lower()
+            return value.lower() == true_tag.lower()
         else:
             return default
 
@@ -183,10 +187,10 @@ class BaseScriptElement(object):
             is <release>.<sub-version>.<commit number>
         """
         element_list = dom.getElementsByTagName("mantid_version")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             version_str = BaseScriptElement.getText(element_list[0].childNodes)
             version_list = version_str.split('.')
-            if len(version_list)==3:
+            if len(version_list) == 3:
                 change_set = int(version_list[2])
                 return change_set
         return -1
@@ -204,7 +208,7 @@ class BaseScriptElement(object):
             prop = algorithm.getProperty(property_name)
             # If we have a number and it's very close to the maximum value we
             # can handle, treat is as an EMPTY_DBL
-            if prop.type=='number' and prop.value>sys.float_info.max/10.0:
+            if prop.type == 'number' and prop.value > sys.float_info.max / 10.0:
                 return default
             return prop.value
         return default
@@ -222,7 +226,7 @@ class BaseScriptElement(object):
         xml_str = "<tmp>%s</tmp>" % xml_str
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName(parent_name)
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             child = dom.createElement(tag)
             if content is not None:
@@ -235,12 +239,13 @@ class BaseScriptElement(object):
         output_str = ""
         for item in dom.getElementsByTagName("tmp")[0].childNodes:
             uglyxml = item.toprettyxml(indent='  ', newl='\n')
-            text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
-            prettierxml = text_re.sub('>\g<1></', uglyxml)
+            text_re = re.compile('>\n\\s+([^<>\\s].*?)\n\\s+</', re.DOTALL)
+            prettierxml = text_re.sub('>\\g<1></', uglyxml)
 
-            text_re = re.compile('((?:^)|(?:</[^<>\s].*?>)|(?:<[^<>\s].*?>)|(?:<[^<>\s].*?/>))\s*\n+', re.DOTALL)
-            output_str += text_re.sub('\g<1>\n', prettierxml)
+            text_re = re.compile('((?:^)|(?:</[^<>\\s].*?>)|(?:<[^<>\\s].*?>)|(?:<[^<>\\s].*?/>))\\s*\n+', re.DOTALL)
+            output_str += text_re.sub('\\g<1>\n', prettierxml)
         return output_str
+
 
 class BaseReductionScripter(object):
     """
@@ -278,7 +283,8 @@ class BaseReductionScripter(object):
 
             # check that the object class is consistent with what was initially stored
             elif not self._state.__class__ == self._state_cls:
-                raise RuntimeError, "State class changed at runtime, was %s, now %s" % (self._state_cls, self._state.__class__)
+                raise RuntimeError, "State class changed at runtime, was %s, now %s" % (
+                    self._state_cls, self._state.__class__)
 
         def push(self):
             """
@@ -305,7 +311,6 @@ class BaseReductionScripter(object):
             else:
                 raise RuntimeError, "State reset called without a valid initialized state"
 
-
     def __init__(self, name="", facility=""):
         self.instrument_name = name
         self.facility_name = facility
@@ -314,10 +319,10 @@ class BaseReductionScripter(object):
         if HAS_MANTID:
             config = ConfigService.Instance()
             try:
-                head, tail = os.path.split(config.getUserFilename())
+                head, _tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):
                     self._output_directory = head
-            except:
+            except (StopIteration, StandardError, Warning):
                 Logger("scripter").debug("Could not get user filename")
 
     def clear(self):
@@ -360,7 +365,7 @@ class BaseReductionScripter(object):
         xml_str = f.read()
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Reduction")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             found_name = BaseScriptElement.getStringElement(instrument_dom,
                                                             "instrument_name",
@@ -368,7 +373,7 @@ class BaseReductionScripter(object):
             # If we have an ID element and it can't be found, return None
             if id_element is not None:
                 id_list = dom.getElementsByTagName(id_element)
-                if len(id_list)==0:
+                if len(id_list) == 0:
                     return None
             return found_name
         else:
@@ -382,8 +387,8 @@ class BaseReductionScripter(object):
         """
         try:
             instr = self.verify_instrument(file_name, id_element=id_element)
-            return instr==self.instrument_name
-        except:
+            return instr == self.instrument_name
+        except (StandardError, Warning):
             # Could not load file or identify it's instrument
             pass
         return False
@@ -484,7 +489,7 @@ class BaseReductionScripter(object):
                         # Things might be broken, so update what we can
                         try:
                             item.state().update()
-                        except:
+                        except (StopIteration, StandardError, Warning):
                             pass
                 raise RuntimeError, sys.exc_value
         else:
@@ -517,20 +522,20 @@ class BaseReductionScripter(object):
                 lower_case_instr = self.instrument_name.lower()
                 job_name_lower = job_name.lower()
                 _job_name = job_name
-                if job_name is None or len(job_name)==0:
+                if job_name is None or len(job_name) == 0:
                     _job_name = lower_case_instr
-                elif job_name_lower.find(lower_case_instr)>=0:
+                elif job_name_lower.find(lower_case_instr) >= 0:
                     _job_name = job_name.strip()
                 else:
                     _job_name = "%s_%s" % (lower_case_instr, job_name.strip())
 
                 # Make sure we have unique job names
-                if len(scripts)>1:
+                if len(scripts) > 1:
                     _job_name += "_%s" % i
                 # Submit the job
                 # Note: keeping version 1 for now. See comment about
                 # versions in cluster_status.py
-                submit_cmd =  "Authenticate(Version=1, ComputeResource='%s', " % resource
+                submit_cmd = "Authenticate(Version=1, ComputeResource='%s', " % resource
                 submit_cmd += "UserName='%s', Password='%s')\n" % (user, pwd)
 
                 # Note: keeping version 1 for now. See comment about
@@ -564,12 +569,9 @@ class BaseReductionScripter(object):
         else:
             exec script
 
-
     def reset(self):
         """
             Reset reduction state to default
         """
         for item in self._observers:
             item.reset()
-
-

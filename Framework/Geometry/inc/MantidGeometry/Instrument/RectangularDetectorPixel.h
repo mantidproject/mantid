@@ -52,12 +52,11 @@ public:
   /// Constructor for parametrized version
   RectangularDetectorPixel(const RectangularDetectorPixel *base,
                            const ParameterMap *map);
-  RectangularDetectorPixel(const std::string &name, int it,
+  RectangularDetectorPixel(const std::string &name, int id,
                            boost::shared_ptr<Object> shape, IComponent *parent,
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();
-  ~RectangularDetectorPixel() override;
 
   const Kernel::V3D getRelativePos() const override;
 

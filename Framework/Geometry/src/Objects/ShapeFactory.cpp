@@ -46,9 +46,6 @@ const V3D DEFAULT_AXIS(0, 0, 1);
 Logger g_log("ShapeFactory");
 }
 
-/// Empty default constructor
-ShapeFactory::ShapeFactory() {}
-
 /** Creates a geometric object directly from a XML shape string
  *
  *  @param shapeXML :: XML shape string
@@ -399,11 +396,7 @@ std::string ShapeFactory::parseInfiniteCylinder(
   // create infinite-cylinder
   auto pCylinder = boost::make_shared<Cylinder>();
   pCylinder->setCentre(parsePosition(pElemCentre));
-
-  V3D dummy1 = pCylinder->getCentre();
-
   pCylinder->setNorm(parsePosition(pElemAxis));
-  V3D dummy2 = pCylinder->getNormal();
 
   pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;

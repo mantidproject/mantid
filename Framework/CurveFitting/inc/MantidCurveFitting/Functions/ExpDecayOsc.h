@@ -42,9 +42,6 @@ National Laboratory & European Spallation Source
 class DLLExport ExpDecayOsc : public API::ParamFunction,
                               public API::IFunction1D {
 public:
-  /// Destructor
-  ~ExpDecayOsc() override {}
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "ExpDecayOsc"; }
 

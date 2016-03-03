@@ -49,7 +49,6 @@ public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
                 bool warnAboutMasked = false);
-  ~DetectorGroup() override;
 
   void addDetector(IDetector_const_sptr det, bool &warn);
 

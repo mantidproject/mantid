@@ -48,7 +48,7 @@ public:
 
   /// Create a domain from the input workspace
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+                    boost::shared_ptr<API::FunctionValues> &ivalues,
                     size_t i0 = 0) override;
   /// Create the output workspace
   boost::shared_ptr<API::Workspace> createOutputWorkspace(

@@ -43,7 +43,7 @@ class MatrixWorkspace;
 class MANTID_API_DLL Axis {
 public:
   Axis();
-  virtual ~Axis();
+  virtual ~Axis() = default;
 
   /// Virtual constructor
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace) = 0;
@@ -87,8 +87,8 @@ public:
   /// Find the index of the given double value
   virtual size_t indexOfValue(const double value) const = 0;
 
-  /// Get the spectrum index
-  virtual specid_t spectraNo(const std::size_t &index) const;
+  /// Get the spectrum number
+  virtual specnum_t spectraNo(const std::size_t &index) const;
 
   /// Get the length of the axis
   virtual std::size_t length() const = 0;
@@ -101,11 +101,11 @@ public:
   virtual std::string label(const std::size_t &index) const = 0;
 
 protected:
-  Axis(const Axis &right);
+  Axis(const Axis &) = default;
 
 private:
   /// Private, undefined copy assignment operator
-  const Axis &operator=(const Axis &);
+  const Axis &operator=(const Axis &) = delete;
 
   /// The user-defined title for this axis
   std::string m_title;

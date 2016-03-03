@@ -73,10 +73,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
-  ShapeFactory();
-  /// Destructor
-  ~ShapeFactory() {}
-
   boost::shared_ptr<Object> createShape(Poco::XML::Element *pElem);
   boost::shared_ptr<Object> createShape(std::string shapeXML,
                                         bool addTypeTag = true);

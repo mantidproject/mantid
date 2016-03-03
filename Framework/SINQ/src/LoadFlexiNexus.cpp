@@ -28,14 +28,16 @@ using namespace ::NeXus;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
-      "A NeXus file");
-  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load,
-                                   {".txt", ".dic", ""}),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load,
+                      std::vector<std::string>{".hdf", ".h5", ""}),
+                  "A NeXus file");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Dictionary", "", FileProperty::Load,
+                      std::vector<std::string>{".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void LoadFlexiNexus::exec() {
@@ -168,7 +170,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     ws->setX(wsIndex, xData);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
-        ->setSpectrumNo(static_cast<specid_t>(yData[wsIndex]));
+        ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
         ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }

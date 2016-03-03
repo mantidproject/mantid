@@ -36,13 +36,13 @@ SaveCanSAS1D::~SaveCanSAS1D() {}
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
-      "The name of the xml file to save");
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, ".xml"),
+                  "The name of the xml file to save");
 
   std::vector<std::string> radiation_source{
       "Spallation Neutron Source", "Pulsed Reactor Neutron Source",

@@ -33,14 +33,14 @@ void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),

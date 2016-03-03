@@ -15,11 +15,12 @@ DECLARE_ALGORITHM(LoadMappingTable)
 LoadMappingTable::LoadMappingTable() : Algorithm() {}
 
 void LoadMappingTable::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load),
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load),
                   "The name of the RAW file from which to obtain the mapping "
                   "information, including its full or relative path.");
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "Anonymous", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("Workspace", "Anonymous",
+                                       Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
 }

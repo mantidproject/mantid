@@ -222,22 +222,22 @@ const std::string AccumulateMD::summary() const {
  * Initialize the algorithm's properties.
 */
 void AccumulateMD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace to append data to.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDEventWorkspace with new data appended.");
 
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "DataSources",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
@@ -247,48 +247,49 @@ void AccumulateMD::init() {
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Alatt",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Angdeg",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(new ArrayProperty<double>("Psi", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Psi", Direction::Input),
                   "Psi rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gl", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gl", Direction::Input),
                   "gl rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gs", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gs", Direction::Input),
                   "gs rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      new PropertyWithValue<bool>("InPlace", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
 
-  declareProperty(new PropertyWithValue<bool>("Clean", false, Direction::Input),
-                  "Create workspace from fresh rather than appending to "
-                  "existing workspace data.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("Clean", false, Direction::Input),
+      "Create workspace from fresh rather than appending to "
+      "existing workspace data.");
 }
 
 /*

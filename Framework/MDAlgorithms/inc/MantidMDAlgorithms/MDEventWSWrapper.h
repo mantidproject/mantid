@@ -58,7 +58,7 @@ typedef void (MDEventWSWrapper::*fpCreateWS)(const MDWSDescription &mwsd);
 class DLLExport MDEventWSWrapper {
 public:
   MDEventWSWrapper();
-  virtual ~MDEventWSWrapper(){};
+  virtual ~MDEventWSWrapper() = default;
   /// get maximal number of dimensions, allowed for the algorithm and embedded
   /// in algorithm during compilation time.
   static size_t getMaxNDim() { return MAX_N_DIM; }
@@ -71,9 +71,9 @@ public:
   API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
   /// add the data to the internal workspace. The workspace has to exist and be
   /// initiated
-  void addMDData(std::vector<float> &sig_err, std::vector<uint16_t> &run_index,
-                 std::vector<uint32_t> &det_id, std::vector<coord_t> &Coord,
-                 size_t data_size) const;
+  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &runIndex,
+                 std::vector<uint32_t> &detId, std::vector<coord_t> &Coord,
+                 size_t dataSize) const;
   /// releases the shared pointer to the MD workspace, stored by the class and
   /// makes the class instance undefined;
   void releaseWorkspace();
@@ -121,8 +121,8 @@ private:
   // internal function tempates to generate as function of dimensions and
   // assightn to function pointers
   template <size_t nd>
-  void addMDDataND(float *sig_err, uint16_t *run_index, uint32_t *det_id,
-                   coord_t *Coord, size_t data_size) const;
+  void addMDDataND(float *sigErr, uint16_t *runIndex, uint32_t *detId,
+                   coord_t *Coord, size_t dataSize) const;
   template <size_t nd>
   void addAndTraceMDDataND(float *sig_err, uint16_t *run_index,
                            uint32_t *det_id, coord_t *Coord,

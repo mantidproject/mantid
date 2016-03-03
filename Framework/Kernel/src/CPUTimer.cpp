@@ -13,11 +13,6 @@ CPUTimer::CPUTimer() {
   reset();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CPUTimer::~CPUTimer() {}
-
 /// Explicitly reset the timer.
 void CPUTimer::reset() {
 #ifdef _WIN32

@@ -10,7 +10,6 @@
 
 #include <Poco/ActiveMethod.h>
 #include <json/json.h>
-#include <stdlib.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -72,11 +71,6 @@ UsageServiceImpl::UsageServiceImpl()
       m_application("python") {
   setInterval(60);
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UsageServiceImpl::~UsageServiceImpl() {}
 
 void UsageServiceImpl::setApplication(const std::string &name) {
   m_application = name;

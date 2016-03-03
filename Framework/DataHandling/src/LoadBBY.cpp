@@ -13,6 +13,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 #include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
@@ -128,23 +130,24 @@ void LoadBBY::init() {
   // file to load.
   exts.clear();
   exts.emplace_back(".tar");
-  declareProperty(
-      new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      FilenameStr, "", API::FileProperty::Load, exts),
+                  "The input filename of the stored data");
 
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  declareProperty(
-      new API::FileProperty(MaskStr, "", API::FileProperty::OptionalLoad, exts),
-      "The input filename of the mask data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      MaskStr, "", API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the mask data");
 
   // OutputWorkspace
-  declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
-      "OutputWorkspace", "", Kernel::Direction::Output));
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output));
 
   // FilterByTofMin
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMinStr, 0, Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -152,7 +155,7 @@ void LoadBBY::init() {
                   "blank to load all events.");
 
   // FilterByTofMax
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMaxStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -161,26 +164,26 @@ void LoadBBY::init() {
 
   // FilterByTimeStart
   declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTimeStartStr, 0.0,
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStartStr, 0.0, Kernel::Direction::Input),
       "Optional: To only include events after the provided start time, in "
       "seconds (relative to the start of the run).");
 
   // FilterByTimeStop
   declareProperty(
-      new Kernel::PropertyWithValue<double>(FilterByTimeStopStr, EMPTY_DBL(),
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStopStr, EMPTY_DBL(), Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
   // period and phase
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PeriodMasterStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PeriodSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       PhaseSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional");
 
@@ -542,7 +545,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
         instrumentInfo.bm_counts = tmp_int32;
       if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
         instrumentInfo.att_pos =
-            static_cast<int32_t>(tmp_float + 0.5f); // [1.0, 2.0, ..., 5.0]
+            boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
 
       if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
@@ -597,8 +600,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("bm1_counts"))
       instrumentInfo.bm_counts = conf->getInt("bm1_counts");
     if (conf->hasProperty("att_pos"))
-      instrumentInfo.att_pos =
-          static_cast<int32_t>(conf->getDouble("att_pos") + 0.5f);
+      instrumentInfo.att_pos = boost::math::iround(conf->getDouble("att_pos"));
 
     if (conf->hasProperty("master_chopper_freq"))
       instrumentInfo.period_master =

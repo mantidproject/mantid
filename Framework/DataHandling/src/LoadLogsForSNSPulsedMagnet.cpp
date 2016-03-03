@@ -45,30 +45,33 @@ LoadLogsForSNSPulsedMagnet::~LoadLogsForSNSPulsedMagnet() {
  */
 void LoadLogsForSNSPulsedMagnet::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace in which to attach the pulsed "
                   "magnet log information.");
 
   declareProperty(
-      new FileProperty("DelayTimeFilename", "", FileProperty::Load, ".dat"),
+      make_unique<FileProperty>("DelayTimeFilename", "", FileProperty::Load,
+                                ".dat"),
       "The name (including its full or relative path) of the log file to\n"
       "attempt to load the pulsed magnet log. The file extension must either "
       "be\n"
       ".dat or .DAT");
 
   declareProperty(
-      new FileProperty("PulseIDFilename", "", FileProperty::Load, ".dat"),
+      make_unique<FileProperty>("PulseIDFilename", "", FileProperty::Load,
+                                ".dat"),
       "The name (including its full or relative path) of the log file to\n"
       "attempt to load the PulseID. The file extension must either be\n"
       ".dat or .DAT");
 
-  declareProperty(
-      new PropertyWithValue<bool>("OldFormat", false, Direction::Input),
-      "Delay time file have an old format");
+  declareProperty(make_unique<PropertyWithValue<bool>>("OldFormat", false,
+                                                       Direction::Input),
+                  "Delay time file have an old format");
 
   declareProperty(
-      new PropertyWithValue<int64_t>("NumberOfChoppers", 4, Direction::Input),
+      make_unique<PropertyWithValue<int64_t>>("NumberOfChoppers", 4,
+                                              Direction::Input),
       "Number of choppers used in data acquisition.  It is not required for "
       "new format Delay time file.");
 

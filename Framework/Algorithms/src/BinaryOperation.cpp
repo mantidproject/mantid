@@ -44,19 +44,19 @@ BinaryOperation::~BinaryOperation() {
  */
 void BinaryOperation::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(inputPropName1(), "",
-                                             Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          inputPropName1(), "", Direction::Input),
       "The name of the input workspace on the left hand side of the operation");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(), "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      inputPropName2(), "", Direction::Input),
                   "The name of the input workspace on the right hand side of "
                   "the operation");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(), "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "The name to call the output workspace");
   declareProperty(
-      new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false,
-                                  Direction::Input),
+      make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra", false,
+                                           Direction::Input),
       "Are workspaces with different number of spectra allowed? "
       "For example, the LHSWorkspace might have one spectrum per detector, "
       "but the RHSWorkspace could have its spectra averaged per bank. If true, "
@@ -66,7 +66,8 @@ void BinaryOperation::init() {
       "apply the RHS spectrum to the LHS.");
 
   declareProperty(
-      new PropertyWithValue<bool>("ClearRHSWorkspace", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
+                                           Direction::Input),
       "For EventWorkspaces only. This will clear out event lists "
       "from the RHS workspace as the binary operation is applied. "
       "This can prevent excessive memory use, e.g. when subtracting "

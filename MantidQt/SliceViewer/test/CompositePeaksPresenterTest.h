@@ -374,17 +374,17 @@ public:
 
   void test_default_palette()
   {
-    PeakPalette actualDefaultPalette;
+    PeakPalette<PeakViewColor> actualDefaultPalette;
 
     CompositePeaksPresenter presenter(&_fakeZoomableView);
-    PeakPalette presenterDefaultPalette = presenter.getPalette();
+    auto presenterDefaultPalette = presenter.getPalette();
 
     TSM_ASSERT_EQUALS("CompositePeaksPresenter should be using a default palette until changed.", actualDefaultPalette, presenterDefaultPalette);
   }
 
-  void test_set_background_colour()
+  void test_set_background_color()
   {
-    const QColor newColour = Qt::red;
+    const PeakViewColor newColor(Qt::red, Qt::red, Qt::red);
 
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
@@ -393,26 +393,26 @@ public:
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
-    EXPECT_CALL(*pSubject, setBackgroundColor(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, setBackgroundColor(newColor)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
-    // Set a background colour on the composite.
+    // Set a background color on the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
     EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
-    composite.setBackgroundColour(peaksWS, newColour);
+    composite.setBackgroundColor(peaksWS, newColor);
 
     // Check that the internal palette has been correctly updated.
-    PeakPalette updatedPalette = composite.getPalette();
-    TS_ASSERT_EQUALS(newColour, updatedPalette.backgroundIndexToColour(0));
+    PeakPalette<PeakViewColor> updatedPalette = composite.getPalette();
+    TS_ASSERT_EQUALS(newColor, updatedPalette.backgroundIndexToColour(0));
 
-    // Check that the colour was correctly set on the subject presenter.
+    // Check that the color was correctly set on the subject presenter.
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
   }
 
-  void test_set_foreground_colour()
+  void test_set_foreground_color()
   {
-    const QColor newColour = Qt::red;
+    const PeakViewColor newColor(Qt::red, Qt::red, Qt::red);
 
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
@@ -421,18 +421,18 @@ public:
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
-    EXPECT_CALL(*pSubject, setForegroundColor(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, setForegroundColor(newColor)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Set a background colour on the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
     EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
-    composite.setForegroundColour(peaksWS, newColour);
+    composite.setForegroundColor(peaksWS, newColor);
 
     // Check that the internal palette has been correctly updated.
-    PeakPalette updatedPalette = composite.getPalette();
-    TS_ASSERT_EQUALS(newColour, updatedPalette.foregroundIndexToColour(0));
+    PeakPalette<PeakViewColor> updatedPalette = composite.getPalette();
+    TS_ASSERT_EQUALS(newColor, updatedPalette.foregroundIndexToColour(0));
 
     // Check that the colour was correctly set on the subject presenter.
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
@@ -571,16 +571,26 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
   }
 
-  void test_getBackroundColour_default()
+  void test_getBackroundColoor_default()
   {
-    CompositePeaksPresenter composite(&_fakeZoomableView);
-    TSM_ASSERT_THROWS("Cannot fetch background colours until nested presenters have been added.", composite.getBackgroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error&);
+      CompositePeaksPresenter composite(&_fakeZoomableView);
+      TSM_ASSERT_THROWS(
+          "Cannot fetch background colors until nested presenters have been "
+          "added.",
+          composite.getBackgroundPeakViewColor(
+              boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
+          std::runtime_error &);
   }
 
-  void test_getForegroundColour_default()
+  void test_getForegroundColor_default()
   {
-    CompositePeaksPresenter composite(&_fakeZoomableView);
-    TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error&);
+      CompositePeaksPresenter composite(&_fakeZoomableView);
+      TSM_ASSERT_THROWS(
+          "Cannot fetch foreground colours until nested presenters have been "
+          "added.",
+          composite.getForegroundPeakViewColor(
+              boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
+          std::runtime_error &);
   }
 
   void test_zoomToPeak()
@@ -961,7 +971,7 @@ public:
     EXPECT_CALL(*pSubjectB, presentedWorkspaces()).WillRepeatedly(Return(setB));
     EXPECT_CALL(*pSubjectB, contentsDifferent(_)).WillOnce(Return(true));
 
-    // Set a background colour on the composite.
+    // Set a background color on the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);

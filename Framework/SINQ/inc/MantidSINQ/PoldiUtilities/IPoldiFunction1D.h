@@ -46,8 +46,7 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL IPoldiFunction1D {
 public:
-  IPoldiFunction1D();
-  virtual ~IPoldiFunction1D() {}
+  virtual ~IPoldiFunction1D() = default;
 
   virtual void poldiFunction1D(const std::vector<int> &indices,
                                const API::FunctionDomain1D &domain,

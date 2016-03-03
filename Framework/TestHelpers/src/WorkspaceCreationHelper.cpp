@@ -373,7 +373,7 @@ create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
   ws->getAxis(0)->setUnit("dSpacing");
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
     ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels * numPixels + wi));
-    ws->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
+    ws->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
   }
 
   return ws;
@@ -1026,7 +1026,7 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
           outputWS->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }

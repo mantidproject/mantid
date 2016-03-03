@@ -121,7 +121,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
-	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
 )
@@ -197,6 +196,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
 	inc/MantidMDAlgorithms/MDTransfFactory.h
+	inc/MantidMDAlgorithms/MDTransfInterface.h
 	inc/MantidMDAlgorithms/MDTransfModQ.h
 	inc/MantidMDAlgorithms/MDTransfNoQ.h
 	inc/MantidMDAlgorithms/MDTransfQ3D.h

@@ -37,14 +37,15 @@ ApplyDetailedBalance::~ApplyDetailedBalance() {}
 void ApplyDetailedBalance::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
-  declareProperty(
-      new PropertyWithValue<string>("Temperature", "", Direction::Input),
+      make_unique<PropertyWithValue<string>>("Temperature", "",
+                                             Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
 }
 

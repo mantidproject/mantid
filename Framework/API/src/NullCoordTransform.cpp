@@ -14,9 +14,6 @@ CoordTransform *NullCoordTransform::clone() const {
   return new NullCoordTransform(m_ndims);
 }
 
-/// Destructor
-NullCoordTransform::~NullCoordTransform() {}
-
 /** Serialize to a string.
 @throw runtime_error if used.
 */

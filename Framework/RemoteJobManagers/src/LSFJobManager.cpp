@@ -1096,9 +1096,9 @@ LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
 const std::string
 LSFJobManager::filterPACFilename(const std::string &PACName) const {
   // discard up to last / (path)
-  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  std::string name = PACName.substr(PACName.rfind('/') + 1);
   // remove trailing parameters
-  size_t ast = name.find("*");
+  size_t ast = name.find('*');
   if (std::string::npos != ast)
     name.replace(ast, std::string::npos, "");
   return name;
@@ -1354,7 +1354,7 @@ bool LSFJobManager::findTransaction(const std::string &id) const {
 *
 */
 void LSFJobManager::addJobInTransaction(const std::string &jobID) {
-  if (g_transactions.size() <= 0)
+  if (g_transactions.empty())
     return;
   auto &jobs = g_transactions.rbegin()->second.jobIDs;
   auto it = std::find(jobs.begin(), jobs.end(), jobID);

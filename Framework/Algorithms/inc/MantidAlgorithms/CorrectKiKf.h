@@ -87,12 +87,12 @@ private:
   void execEvent();
   /**
    * Execute CorrectKiKf for event lists
-   * @param events the list of events to correct
+   * @param wevector the list of events to correct
    * @param efixed the value of the fixed energy
    * @param emodeStr the energy mode description
    */
   template <class T>
-  void correctKiKfEventHelper(std::vector<T> &events, double efixed,
+  void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
                               const std::string emodeStr);
 };
 

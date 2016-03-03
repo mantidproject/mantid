@@ -50,7 +50,7 @@ public:
   // calc target coordinates interface:
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &k0, std::vector<coord_t> &Coord, double &s,
+  bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s,
                        double &err) const override;
   // constructor;
   MDTransfNoQ();

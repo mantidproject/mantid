@@ -40,10 +40,15 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       mustBePositive->setLower(0);
       declareProperty("PositiveIntValue", 0, mustBePositive);
       declareProperty("PositiveIntValue1", 0, mustBePositive);
-      declareProperty(new Mantid::Kernel::ArrayProperty<int>("IntArray"));
-      declareProperty(new Mantid::Kernel::ArrayProperty<double>("DoubleArray"));
       declareProperty(
-          new Mantid::Kernel::ArrayProperty<std::string>("StringArray"));
+          Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<int>>(
+              "IntArray"));
+      declareProperty(
+          Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<double>>(
+              "DoubleArray"));
+      declareProperty(
+          Mantid::Kernel::make_unique<
+              Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
     void exec() { return; };
   };

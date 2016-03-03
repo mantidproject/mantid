@@ -70,7 +70,7 @@ class ParameterMap;
 class MANTID_GEOMETRY_DLL Parameter {
 public:
   /// Virtual destructor
-  virtual ~Parameter() {}
+  virtual ~Parameter() = default;
 
   /// Parameter type
   const std::string &type() const { return m_type; }

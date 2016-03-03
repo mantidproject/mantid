@@ -48,8 +48,6 @@ class DLLExport CostFuncRwp : public CostFuncLeastSquares {
 public:
   /// Constructor
   CostFuncRwp();
-  /// Virtual destructor
-  ~CostFuncRwp() override {}
 
   /// Get name of minimizer
   std::string name() const override { return "Rwp"; }

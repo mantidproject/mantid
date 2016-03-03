@@ -43,7 +43,7 @@ double PoldiResidualCorrelationCore::reduceChopperSlitList(
 /// Calculates the average of the values in a vector.
 double PoldiResidualCorrelationCore::calculateAverage(
     const std::vector<double> &values) const {
-  if (values.size() == 0) {
+  if (values.empty()) {
     throw std::runtime_error("Cannot calculate average of 0 values.");
   }
 

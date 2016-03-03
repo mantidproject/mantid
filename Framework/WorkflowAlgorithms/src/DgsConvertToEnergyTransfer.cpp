@@ -61,37 +61,38 @@ const std::string DgsConvertToEnergyTransfer::category() const {
  */
 void DgsConvertToEnergyTransfer::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "A sample data workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
   this->declareProperty(
       "IncidentEnergyGuess", EMPTY_DBL(),
       "This is the starting point for the incident energy calculation.");
-  this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium",
-                                                "", Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "IntegratedDetectorVanadium", "", Direction::Input,
+                            PropertyMode::Optional),
                         "A workspace containing the "
                         "integrated detector vanadium.");
   this->declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A mask workspace");
   this->declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A grouping workspace");
   this->declareProperty(
       "AlternateGroupingTag", "",
       "Allows modification to the OldGroupingFile property name");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name for the output workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputTibWorkspace", "", Direction::Output),
-      "The name for the output TIB workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The name for the output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputTibWorkspace",
+                                                         "", Direction::Output),
+                        "The name for the output TIB workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
 }
@@ -154,10 +155,10 @@ void DgsConvertToEnergyTransfer::exec() {
 
   double incidentEnergy = 0.0;
   double monPeak = 0.0;
-  specid_t eiMon1Spec =
-      static_cast<specid_t>(reductionManager->getProperty("Monitor1SpecId"));
-  specid_t eiMon2Spec =
-      static_cast<specid_t>(reductionManager->getProperty("Monitor2SpecId"));
+  specnum_t eiMon1Spec =
+      static_cast<specnum_t>(reductionManager->getProperty("Monitor1SpecId"));
+  specnum_t eiMon2Spec =
+      static_cast<specnum_t>(reductionManager->getProperty("Monitor2SpecId"));
 
   if ("SNS" == facility) {
     // SNS wants to preserve events until the last
@@ -251,8 +252,8 @@ void DgsConvertToEnergyTransfer::exec() {
     getei->executeAsChildAlg();
 
     monPeak = getei->getProperty("FirstMonitorPeak");
-    const specid_t monIndex =
-        static_cast<const specid_t>(getei->getProperty("FirstMonitorIndex"));
+    const specnum_t monIndex =
+        static_cast<const specnum_t>(getei->getProperty("FirstMonitorIndex"));
     // Why did the old way get it from the log?
     incidentEnergy = getei->getProperty("IncidentEnergy");
 

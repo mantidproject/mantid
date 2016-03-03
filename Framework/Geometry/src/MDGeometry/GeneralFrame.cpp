@@ -15,11 +15,6 @@ GeneralFrame::GeneralFrame(const std::string &frameName,
                            const Kernel::UnitLabel &unit)
     : m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(frameName) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GeneralFrame::~GeneralFrame() {}
-
 Kernel::UnitLabel GeneralFrame::getUnitLabel() const {
   return m_unit->getUnitLabel();
 }

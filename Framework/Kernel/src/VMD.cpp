@@ -81,7 +81,7 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
 template <typename TYPE>
 VMDBase<TYPE>
 VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
-  if (vectors.size() <= 0)
+  if (vectors.empty())
     throw std::invalid_argument(
         "VMDBase::getNormalVector: Must give at least 1 vector");
   size_t nd = vectors[0].getNumDims();

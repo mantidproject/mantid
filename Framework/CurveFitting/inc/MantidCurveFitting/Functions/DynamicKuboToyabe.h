@@ -47,9 +47,6 @@ public:
   /// Constructor
   DynamicKuboToyabe();
 
-  /// Destructor
-  ~DynamicKuboToyabe() override {}
-
   /// overwrite base class methods
   std::string name() const override { return "DynamicKuboToyabe"; }
   const std::string category() const override { return "Muon"; }

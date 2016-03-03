@@ -35,14 +35,14 @@ void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
   // moment
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input workspaces as a comma-separated list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
 
@@ -133,7 +133,7 @@ void MergeRuns::exec() {
  * Throws an error if there is any incompatibility.
  */
 void MergeRuns::buildAdditionTables() {
-  if (m_inEventWS.size() <= 0)
+  if (m_inEventWS.empty())
     throw std::invalid_argument("MergeRuns: No workspaces found to merge.");
 
   // This'll hold the addition tables.
