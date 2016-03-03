@@ -11,7 +11,7 @@ class VesuvioPreFit(VesuvioBase):
         return "Apply preprocessing steps to loaded vesuvio data"
 
     def category(self):
-        return "Inelastic\\Indirect"
+        return "Inelastic\\Indirect\\Vesuvio"
 
 #------------------------------------------------------------------------------------------------
 

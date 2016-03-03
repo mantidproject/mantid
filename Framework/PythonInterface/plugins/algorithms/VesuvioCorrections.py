@@ -40,7 +40,7 @@ class VesuvioCorrections(VesuvioBase):
         return "Apply post fitting steps to vesuvio data"
 
     def category(self):
-        return "Inelastic\\Indirect"
+        return "Inelastic\\Indirect\\Vesuvio"
 
 #------------------------------------------------------------------------------
 

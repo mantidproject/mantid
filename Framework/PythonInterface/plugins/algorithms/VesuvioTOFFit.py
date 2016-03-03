@@ -17,7 +17,7 @@ class VesuvioTOFFit(VesuvioBase):
         return "Processes runs for Vesuvio at ISIS"
 
     def category(self):
-        return "Inelastic\\Indirect"
+        return "Inelastic\\Indirect\\Vesuvio"
 
     def PyInit(self):
         # Inputs
