@@ -110,8 +110,6 @@ void export_VMD() {
            (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
-      // cppcheck-suppress duplicateExpression
       .def(self / self)
-      // cppcheck-suppress duplicateExpression
       .def(self /= self);
 }

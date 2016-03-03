@@ -70,15 +70,12 @@ void export_V3D() {
            (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
-      // cppcheck-suppress duplicateExpression
       .def(self / self)
-      // cppcheck-suppress duplicateExpression
       .def(self /= self)
       .def(self * int())
       .def(self *= int())
       .def(self * double())
       .def(self *= double())
-      // cppcheck-suppress duplicateExpression
       .def(self < self)
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
