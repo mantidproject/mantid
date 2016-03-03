@@ -164,8 +164,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins = static_cast<size_t>(
-      (pMax - pMin) / width + 0.5); // round up to a whole number of bins.
+  numberOfBins =
+      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 }
 
