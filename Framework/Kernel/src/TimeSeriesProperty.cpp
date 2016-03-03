@@ -339,7 +339,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
                 << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (auto splitter : splittervec) {
+  for (const auto &splitter : splittervec) {
     Kernel::DateAndTime t_start = splitter.start();
     Kernel::DateAndTime t_stop = splitter.stop();
 
@@ -824,7 +824,7 @@ TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
   // 2. Data Strcture
   std::map<DateAndTime, TYPE> asMap;
 
-  if (m_values.size() > 0) {
+  if (!m_values.empty()) {
     for (size_t i = 0; i < m_values.size(); i++)
       asMap[m_values[i].time()] = m_values[i].value();
   }
@@ -860,7 +860,7 @@ std::multimap<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
   std::multimap<DateAndTime, TYPE> asMultiMap;
 
-  if (m_values.size() > 0) {
+  if (!m_values.empty()) {
     for (size_t i = 0; i < m_values.size(); i++)
       asMultiMap.insert(
           std::make_pair(m_values[i].time(), m_values[i].value()));
@@ -987,7 +987,7 @@ void TimeSeriesProperty<TYPE>::addValues(
     }
   }
 
-  if (values.size() > 0)
+  if (!values.empty())
     m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
 
   return;
@@ -1012,7 +1012,7 @@ void TimeSeriesProperty<TYPE>::replaceValues(
  */
 template <typename TYPE>
 DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("lastTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1028,7 +1028,7 @@ DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("firstValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1045,7 +1045,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
  */
 template <typename TYPE>
 DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("firstTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1062,7 +1062,7 @@ DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("lastValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1156,7 +1156,7 @@ std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
   // 2. Build map
 
   std::map<DateAndTime, TYPE> asMap;
-  if (m_values.size() == 0)
+  if (m_values.empty())
     return asMap;
 
   TYPE d = m_values[0].value();
@@ -1288,7 +1288,7 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
  */
 template <typename TYPE>
 TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1337,7 +1337,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
 template <typename TYPE>
 TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
                                               int &index) const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1393,7 +1393,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
 template <typename TYPE>
 TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
   // 0. Throw exception
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthInterval(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1407,7 +1407,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
 
   Kernel::TimeInterval deltaT;
 
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // I. No filter
     if (n >= static_cast<int>(m_values.size()) ||
         (n == static_cast<int>(m_values.size()) - 1 && m_values.size() == 1)) {
@@ -1512,7 +1512,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   TYPE value;
 
   // 1. Throw error if property is empty
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1522,7 +1522,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sort();
 
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // 3. Situation 1:  No filter
     if (static_cast<size_t>(n) < m_values.size()) {
       TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(n)];
@@ -1568,7 +1568,7 @@ template <typename TYPE>
 Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
   sort();
 
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1683,7 +1683,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearFilter() {
  * Updates size()
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // 1. Not filter
     m_size = int(m_values.size());
   } else {
@@ -1883,7 +1883,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
 template <typename TYPE>
 int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
   // 0. Return with an empty container
-  if (m_values.size() == 0)
+  if (m_values.empty())
     return 0;
 
   // 1. Sort
@@ -1965,7 +1965,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
   // 1. Check and reset
   if (m_filterApplied)
     return;
-  if (m_filter.size() == 0)
+  if (m_filter.empty())
     return;
 
   m_filterQuickRef.clear();
@@ -1985,7 +1985,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
       if (icurlog < 0) {
         // i. If it is out of lower boundary, add filter time, add 0 time
-        if (m_filterQuickRef.size() > 0)
+        if (!m_filterQuickRef.empty())
           throw std::logic_error(
               "return log index < 0 only occurs with the first log entry");
 
@@ -2004,7 +2004,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
       } else {
         // iii. The returned value is in the boundary.
         size_t numintervals = 0;
-        if (m_filterQuickRef.size() > 0) {
+        if (!m_filterQuickRef.empty()) {
           numintervals = m_filterQuickRef.back().second;
         }
         if (m_filter[ift].first <
@@ -2084,7 +2084,7 @@ size_t TimeSeriesProperty<TYPE>::findNthIndexFromQuickRef(int n) const {
   // 1. Do check
   if (n < 0)
     throw std::invalid_argument("Unable to take into account negative index. ");
-  else if (m_filterQuickRef.size() == 0)
+  else if (m_filterQuickRef.empty())
     throw std::runtime_error("Quick reference is not established. ");
 
   // 2. Return...

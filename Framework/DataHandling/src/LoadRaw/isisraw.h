@@ -347,7 +347,7 @@ public:
   ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT);
   int updateFromCRPT();
 
-  virtual int ioRAW(FILE *file, bool from_file, bool do_data = true);
+  virtual int ioRAW(FILE *file, bool from_file, bool read_data = true);
   int ioRAW(FILE *file, HDR_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, ADD_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, USER_STRUCT *s, int len, bool from_file);
@@ -360,15 +360,15 @@ public:
   int ioRAW(FILE *file, DDES_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_STRUCT *s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file);
-  int ioRAW(FILE *file, char *val, int len, bool from_file);
-  int ioRAW(FILE *file, int *val, int len, bool from_file);
-  int ioRAW(FILE *file, uint32_t *val, int len, bool from_file);
-  int ioRAW(FILE *file, float *val, int len, bool from_file);
+  int ioRAW(FILE *file, char *s, int len, bool from_file);
+  int ioRAW(FILE *file, int *s, int len, bool from_file);
+  int ioRAW(FILE *file, uint32_t *s, int len, bool from_file);
+  int ioRAW(FILE *file, float *s, int len, bool from_file);
   // allocate
-  int ioRAW(FILE *file, char **val, int len, bool from_file);
-  int ioRAW(FILE *file, int **val, int len, bool from_file);
-  int ioRAW(FILE *file, uint32_t **val, int len, bool from_file);
-  int ioRAW(FILE *file, float **val, int len, bool from_file);
+  int ioRAW(FILE *file, char **s, int len, bool from_file);
+  int ioRAW(FILE *file, int **s, int len, bool from_file);
+  int ioRAW(FILE *file, uint32_t **s, int len, bool from_file);
+  int ioRAW(FILE *file, float **s, int len, bool from_file);
   int ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file);
   int ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file);
   int ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file);

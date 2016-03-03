@@ -3,16 +3,13 @@
 #include <iostream>
 #include <sstream>
 #include <complex>
-#include <cmath>
 #include <list>
 #include <vector>
 #include <set>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 #include <boost/multi_array.hpp>
-#include <gsl/gsl_poly.h>
 
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"

@@ -101,7 +101,7 @@ public:
     _hkls = s;
   }
   void setFirst() {
-    if (_hkls.size() > 0) {
+    if (!_hkls.empty()) {
       auto it = _hkls.begin(); // Take the first possiblity
       it++;
       _hkls.erase(it, _hkls.end()); // Erase all others!
@@ -173,7 +173,7 @@ public:
 
 private:
   // Helper method to cull potential hkls off each peak.
-  void cullHKLs(std::vector<PeakCandidate> &peaksCandidates,
+  void cullHKLs(std::vector<PeakCandidate> &peakCandidates,
                 Mantid::Geometry::UnitCell &unitcell);
   // Helper method used to check that not all peaks are colinear.
   void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;

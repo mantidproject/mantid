@@ -253,7 +253,7 @@ double CreateTransmissionWorkspaceAuto::checkForDefault(
   auto algProperty = this->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() == 0) {
+    if (defaults.empty()) {
       throw std::runtime_error("No data could be retrieved from the parameters "
                                "and argument wasn't provided: " +
                                propName);

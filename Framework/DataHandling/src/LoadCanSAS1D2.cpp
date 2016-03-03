@@ -57,7 +57,7 @@ void LoadCanSAS1D2::exec() {
   if (!loadTrans)
     return; // all done. It is not to load the transmission, nor check if it
             // exists.
-  if (trans_gp.size() == 0 && trans_can_gp.size() == 0) {
+  if (trans_gp.empty() && trans_can_gp.empty()) {
     return; // all done, not transmission inside
   }
 

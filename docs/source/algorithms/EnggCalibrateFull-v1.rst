@@ -141,8 +141,8 @@ Output:
    det_id = pos_table.column(0)[0]
    pos =  pos_table.column(2)[0]
    print "Det ID:", det_id
-   print "Calibrated position: (%.3f,%.3f,%.3f)" % (pos.getX(),pos.getY(),pos.getZ())
-   print "Got details on the peaks fitted for {:d} detector(s)".format(peaks_info.rowCount())
+   print "Calibrated position: ({0:.3f},{1:.3f},{2:.3f})".format(pos.getX(),pos.getY(),pos.getZ())
+   print "Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount())
    print "Was the file created?", os.path.exists(pos_filename)
    with open(pos_filename) as csvf:
       reader = csv.reader(csvf, dialect='excel')

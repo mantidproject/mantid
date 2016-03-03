@@ -1409,12 +1409,12 @@ void GroupDetectors2::translateInstructions(const std::string &instructions,
 
     // Look for the various operators in the string. If one is found then
     // do the necessary translation into groupings.
-    if (groupStr.find("+") != std::string::npos) {
+    if (groupStr.find('+') != std::string::npos) {
       // add a group with the given spectra
       translateAdd(groupStr, outGroups);
-    } else if (groupStr.find("-") != std::string::npos) {
+    } else if (groupStr.find('-') != std::string::npos) {
       translateSumRange(groupStr, outGroups);
-    } else if (groupStr.find(":") != std::string::npos) {
+    } else if (groupStr.find(':') != std::string::npos) {
       translateRange(groupStr, outGroups);
     } else if (!groupStr.empty()) {
       // contains no instructions, just add this spectrum as a new group

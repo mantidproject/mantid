@@ -132,7 +132,7 @@ void LoadGSASInstrumentFile::exec() {
   vector<size_t> bankStartIndex;
   scanBanks(lines, bankStartIndex);
 
-  if (bankStartIndex.size() == 0) {
+  if (bankStartIndex.empty()) {
     throw std::runtime_error("No nanks found in file. \n");
   }
 
@@ -172,7 +172,7 @@ void LoadGSASInstrumentFile::exec() {
     map<int, size_t> workspaceOfBank;
 
     // Deal with bankIds
-    if (bankIds.size()) {
+    if (!bankIds.empty()) {
       // If user provided a list of banks, check that they exist in the .prm
       // file
       for (auto bankId : bankIds) {

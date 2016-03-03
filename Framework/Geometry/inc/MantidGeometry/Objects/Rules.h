@@ -266,7 +266,7 @@ public:
   int type() const override { return 0; } ///< Effective name
 
   void setKeyN(const int Ky); ///< set keyNumber
-  void setKey(const boost::shared_ptr<Surface> &key);
+  void setKey(const boost::shared_ptr<Surface> &Spoint);
   bool isValid(const Kernel::V3D &) const override;
   bool isValid(const std::map<int, int> &) const override;
   int getSign() const { return sign; } ///< Get Sign

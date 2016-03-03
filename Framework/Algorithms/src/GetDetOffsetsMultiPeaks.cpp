@@ -293,7 +293,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
 
   // the peak positions and where to fit
   m_peakPositions = getProperty("DReference");
-  if (m_peakPositions.size() == 0)
+  if (m_peakPositions.empty())
     throw std::runtime_error("There is no input referenced peak position.");
   std::sort(m_peakPositions.begin(), m_peakPositions.end());
 
@@ -324,7 +324,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
 
     g_log.information(infoss.str());
 
-    if (m_fitWindows.size() == 0)
+    if (m_fitWindows.empty())
       g_log.warning() << "Input FitWindowMaxWidth = " << maxwidth
                       << "  No FitWidows will be generated."
                       << "\n";
@@ -423,7 +423,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
     if (spec < 0 && founduniversal) {
       throw std::runtime_error("There are more than 1 universal spectrum (spec "
                                "< 0) in TableWorkspace.");
-    } else if (spec >= 0 && m_vecFitWindow[spec].size() != 0) {
+    } else if (spec >= 0 && !m_vecFitWindow[spec].empty()) {
       std::stringstream ess;
       ess << "Peak fit windows at row " << i << " has spectrum " << spec
           << ", which appears before in fit window table workspace. ";
@@ -455,7 +455,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
   } else if (founduniversal) {
     // Fill the universal
     for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i)
-      if (m_vecFitWindow[i].size() == 0)
+      if (m_vecFitWindow[i].empty())
         m_vecFitWindow[i] = vec_univFitWindow;
   }
 

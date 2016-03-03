@@ -16,7 +16,7 @@ MDImplicitFunction::MDImplicitFunction() : m_nd(0), m_numPlanes(0) {}
  */
 void MDImplicitFunction::addPlane(const MDPlane &plane) {
   // Number of dimensions must match
-  if (m_planes.size() > 0) {
+  if (!m_planes.empty()) {
     if (m_nd != plane.getNumDims())
       throw std::invalid_argument("MDImplicitFunction::addPlane(): cannot add "
                                   "a plane with different number of dimensions "

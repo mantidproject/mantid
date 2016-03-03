@@ -51,7 +51,7 @@ private:
   std::vector<double> loadMetaData();
   void setMetaDataAsWorkspaceProperties(const std::vector<double> &metadata);
   void loadDataIntoTheWorkspace(
-      const std::map<uint32_t, std::vector<uint32_t>> &pos_tof_map);
+      const std::map<uint32_t, std::vector<uint32_t>> &eventMap);
   void setTimeAxis();
   void loadInstrument();
   void placeDetectorInSpace();

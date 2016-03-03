@@ -6,6 +6,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/DllConfig.h"
 
+#include <mutex>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -67,13 +69,24 @@ public:
   double getL1() const;
 
 private:
+  // These cache init functions are not thread-safe! Use only in combination
+  // with std::call_once!
+  void cacheSource() const;
+  void cacheSample() const;
+  void cacheL1() const;
+
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  boost::shared_ptr<const Geometry::IComponent> m_source;
-  boost::shared_ptr<const Geometry::IComponent> m_sample;
-  Kernel::V3D m_sourcePos;
-  Kernel::V3D m_samplePos;
-  double m_L1;
+  // The following variables are mutable, since they are initialized (cached)
+  // only on demand, by const getters.
+  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
+  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
+  mutable Kernel::V3D m_sourcePos;
+  mutable Kernel::V3D m_samplePos;
+  mutable double m_L1;
+  mutable std::once_flag m_sourceCached;
+  mutable std::once_flag m_sampleCached;
+  mutable std::once_flag m_L1Cached;
 };
 }
 }

@@ -552,7 +552,7 @@ void LoadTOFRawNexus::exec() {
 
   // Load each bank sequentially
   // PARALLEL_FOR1(WS)
-  for (auto bankName : bankNames) {
+  for (const auto &bankName : bankNames) {
     //    PARALLEL_START_INTERUPT_REGION
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << std::endl;

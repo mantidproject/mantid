@@ -54,7 +54,7 @@ private:
       std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void fillPossibleHKLsUsingPeaksWorkspace(
-      const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,
+      const DataObjects::PeaksWorkspace_sptr &peaksWorkspace,
       std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);

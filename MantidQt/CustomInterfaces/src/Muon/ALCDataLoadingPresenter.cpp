@@ -57,7 +57,7 @@ std::string getMostRecentFile(const std::string &path) {
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view) {}
+    : m_view(view), m_directoryChanged(false), m_timerID() {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();

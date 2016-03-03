@@ -82,7 +82,7 @@ private:
   void exec() override;
 
   API::MatrixWorkspace_sptr
-  rangeFilterEventWorkspace(API::MatrixWorkspace_sptr eventWorkspace,
+  rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
                             double minRange, double maxRange);
 
   /// Get the input workspace
