@@ -274,7 +274,7 @@ class AtomListBuilderTest(unittest.TestCase):
     def test_getSumWeights_orthorhombic(self):
         cell = UnitCell(1, 2, 3, 90, 90, 90)
 
-        matrix = self.builder._getSumWeights(cell)
+        matrix = self.builder._getMetricDependentWeights(cell)
         expected = np.array([[1.0, 0.0, 0.0],
                              [0.0, 1.0, 0.0],
                              [0.0, 0.0, 1.0]])
@@ -284,7 +284,7 @@ class AtomListBuilderTest(unittest.TestCase):
     def test_getSumWeights_hexagonal(self):
         cell = UnitCell(2, 2, 3, 90, 90, 120)
 
-        matrix = self.builder._getSumWeights(cell)
+        matrix = self.builder._getMetricDependentWeights(cell)
         expected = np.array([[4. / 3., -2. / 3., 0.0],
                              [-2. / 3., 4. / 3., 0.0],
                              [0.0, 0.0, 1.0]])

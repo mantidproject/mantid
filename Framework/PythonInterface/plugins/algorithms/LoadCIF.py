@@ -30,6 +30,13 @@ def convertBtoU(bIso):
 
 
 class SpaceGroupBuilder(object):
+    """
+    Helper class that extracts the space group from CIF data provided by PyCifRW.
+
+    For testing purposes, dictionaries with the appropriate data can
+    be passed in as well, so the source of the parsed data is replaceable.
+    """
+
     def __init__(self, cifData=None):
         if cifData is not None:
             self.spaceGroup = self._getSpaceGroup(cifData)
@@ -85,6 +92,13 @@ class SpaceGroupBuilder(object):
 
 
 class UnitCellBuilder(object):
+    """
+    Helper class that builds a unit cell from CIF data provided by PyCifRW.
+
+    For testing purposes, dictionaries with the appropriate data can
+    be passed in as well, so the source of the parsed data is replaceable.
+    """
+
     def __init__(self, cifData=None):
         if cifData is not None:
             self.unitCell = self._getUnitCell(cifData)
@@ -114,6 +128,13 @@ class UnitCellBuilder(object):
 
 
 class AtomListBuilder(object):
+    """
+    Helper class that builds a list of atoms from CIF data provided by PyCifRW.
+
+    For testing purposes, dictionaries with the appropriate data can
+    be passed in as well, so the source of the parsed data is replaceable.
+    """
+
     def __init__(self, cifData=None, unitCell=None):
         if cifData is not None:
             self.atomList = self._getAtoms(cifData, unitCell)
@@ -142,7 +163,8 @@ class AtomListBuilder(object):
     def _getLabels(self, cifData):
         try:
             return cifData[u'_atom_site_label']
-        except:
+        except KeyError:
+            # If there are no atomic coordinates specified, there is really no point in continuing with replacement labels.
             if u'_atom_site_fract_x' not in cifData.keys():
                 raise RuntimeError(
                     'Too much information missing from CIF-file. Does it contain a loop_ that defines atoms?')
@@ -158,25 +180,10 @@ class AtomListBuilder(object):
                     'Mandatory field {0} not found in CIF-file.' \
                     'Please check the atomic position definitions.'.format(field))
 
+        # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
         return dict(
             [(label, ' '.join([removeErrorEstimateFromNumber(c) for c in (x, y, z)])) for label, x, y, z in
              zip(labels, *[cifData[field] for field in coordinateFields])])
-
-    def _getAtomSymbols(self, cifData, labels):
-        rawAtomSymbols = [cifData[x] for x in [u'_atom_site_type_symbol', u'_atom_site_label'] if x in
-                          cifData.keys()]
-
-        if len(rawAtomSymbols) == 0:
-            raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
-                               'missing.')
-
-        return dict(
-            [(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
-
-    def _getCleanAtomSymbol(self, atomSymbol):
-        nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
-
-        return re.sub(nonCharacterRe, '', atomSymbol)
 
     def _getOccupancies(self, cifData, labels):
         occupancyField = u'_atom_site_occupancy'
@@ -189,11 +196,29 @@ class AtomListBuilder(object):
 
         return dict(zip(labels, occupancies))
 
+    def _getAtomSymbols(self, cifData, labels):
+        rawAtomSymbols = [cifData[x] for x in [u'_atom_site_type_symbol', u'_atom_site_label'] if x in
+                          cifData.keys()]
+
+        if len(rawAtomSymbols) == 0:
+            raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
+                               'missing.')
+
+        # Return a dict like { 'label1': 'Element1', ... } extracted from either _atom_site_type_symbol or _atom_site_label
+        return dict(
+            [(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
+
+    def _getCleanAtomSymbol(self, atomSymbol):
+        nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
+
+        return re.sub(nonCharacterRe, '', atomSymbol)
+
     def _getIsotropicUs(self, cifData, labels, unitCell):
 
         keyUIso = u'_atom_site_u_iso_or_equiv'
         keyBIso = u'_atom_site_b_iso_or_equiv'
 
+        # Try to get a list of isotropic U-values, replace invalid ones by None
         isotropicUs = []
         if keyUIso in cifData.keys():
             isotropicUs += [getFloatOrNone(u) for u in cifData[keyUIso]]
@@ -205,6 +230,7 @@ class AtomListBuilder(object):
 
         isotropicUMap = dict(zip(labels, isotropicUs))
 
+        # If there are None-objects in the list, try to get the equivalent U-values
         if None in isotropicUs:
             try:
                 equivalentUMap = self._getEquivalentUs(cifData, labels, unitCell)
@@ -216,21 +242,25 @@ class AtomListBuilder(object):
             except RuntimeError:
                 pass
 
+        # Return dict like { 'label1': 'U_iso_or_equiv', ... }
         return isotropicUMap
 
     def _getEquivalentUs(self, cifData, labels, unitCell):
-        uMatrices = self._getUMatrices(cifData, labels)
-        sumWeights = self._getSumWeights(unitCell)
+        anisotropicParameters = self._getAnisotropicParametersU(cifData, labels)
+        sumWeights = self._getMetricDependentWeights(unitCell)
 
+        # Return U_equiv calculated according to [Fischer & Tillmanns, Acta Cryst C44, p775, 10.1107/S0108270187012745]
+        # in a dict like { 'label1': 'U_equiv1' ... }. Invalid matrices (containing None) are excluded.
         return dict([(label, np.around(np.sum(np.multiply(uMatrix, sumWeights)) / 3., decimals=5))
-                     for label, uMatrix in uMatrices.iteritems() if uMatrix.dtype.type != np.object_])
+                     for label, uMatrix in anisotropicParameters.iteritems() if uMatrix.dtype.type != np.object_])
 
-    def _getUMatrices(self, cifData, labels):
+    def _getAnisotropicParametersU(self, cifData, labels):
         anisoLabel = u'_atom_site_aniso_label'
 
         if anisoLabel not in cifData.keys():
             raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
 
+        # Try to extract U or if that fails, B.
         try:
             return self._getTensors(cifData, labels,
                                     [u'_atom_site_aniso_u_11', u'_atom_site_aniso_u_12', u'_atom_site_aniso_u_13',
@@ -250,10 +280,11 @@ class AtomListBuilder(object):
             else:
                 values.append([getFloatOrNone(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
 
+        # Return a 3x3-matrix for each label based on the assumption that u_j,i == u_i,j
         return dict([(label, np.array([[u11, u12, u13], [u12, u22, u23], [u13, u23, u33]])) for
                      label, u11, u12, u13, u22, u23, u33 in zip(labels, *values)])
 
-    def _getSumWeights(self, unitCell):
+    def _getMetricDependentWeights(self, unitCell):
         metricTensor = unitCell.getG()
         reciprocalMatrix = self._getReciprocalLengthSquaredMatrix(unitCell)
 
@@ -266,13 +297,10 @@ class AtomListBuilder(object):
 
 
 class CrystalStructureBuilder(object):
-    '''
-    Helper class that builds a CrystalStructure file from the result
-    of the ReadCif-function provided by PyCifRW.
-
-    For testing purposes, dictionaries with the appropriate data can
-    be passed in as well, so the source of the parsed data is replaceable.
-    '''
+    """
+    This helper class simplifies the creation of CrystalStructure-objects from CIF-files. It uses the helper classes
+    defined above.
+    """
 
     def __init__(self, cifFile=None):
         if cifFile is not None:
