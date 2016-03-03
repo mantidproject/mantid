@@ -47,6 +47,20 @@ def EQSANS(keep_events=False, property_manager=None):
     if property_manager is not None:
         ReductionSingleton().set_reduction_table_name(property_manager)
 
+def SWANS(keep_events=False, property_manager=None):
+    '''
+    Copy from EQSANS with respective changes
+    '''
+    Clear()
+    ReductionSingleton().set_instrument("SWANS",
+                                        "SetupSWANSReduction",
+                                        "SANSReduction")
+    ReductionSingleton().reduction_properties["PreserveEvents"]=keep_events
+    SolidAngle()
+    AzimuthalAverage()
+    if property_manager is not None:
+        ReductionSingleton().set_reduction_table_name(property_manager)
+
 def SetBeamCenter(x,y):
     if x==0 and y==0:
         ReductionSingleton().reduction_properties["UseConfigBeam"]=True
