@@ -56,8 +56,8 @@ ChangeTimeZero::~ChangeTimeZero() {}
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
                           "A relative time offset in seconds.");
@@ -66,8 +66,8 @@ void ChangeTimeZero::init() {
                   "An absolute time offset as an ISO8601 string "
                   "(YYYY-MM-DDTHH:MM::SS, eg 2013-10-25T13:58:03).");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 

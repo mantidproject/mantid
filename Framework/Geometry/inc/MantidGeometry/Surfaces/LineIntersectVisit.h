@@ -60,9 +60,6 @@ private:
 
 public:
   LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
-  /// Destructor
-  ~LineIntersectVisit() override {}
-
   void Accept(const Surface &) override;
   void Accept(const Quadratic &);
   void Accept(const Plane &) override;

@@ -6,13 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Runnable.h>
+#include <mutex>
 
 namespace Mantid {
 namespace LiveData {
@@ -110,7 +110,7 @@ private:
 
   int m_runNumber;
 
-  Poco::FastMutex m_mutex; // protects m_eventBuffer & m_status
+  std::mutex m_mutex; // protects m_eventBuffer & m_status
   Poco::Thread m_thread;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits

@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -162,13 +162,16 @@ std::ostream &operator<<(std::ostream &os, const FitParameter &f) {
 */
 std::istream &operator>>(std::istream &in, FitParameter &f) {
 
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
-  tokenizer tokens(str, ",", tokenizer::TOK_TRIM);
-  std::vector<std::string> values(tokens.begin(), tokens.end());
 
-  if (values.size() <= 2) {
+  // allow a comma in the final position.
+  tokenizer tokens(str, ",", tokenizer::TOK_TRIM |
+                                 tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+  auto values = tokens.asVector();
+
+  if (values.size() < 3) {
     g_log.warning()
         << "Expecting a comma separated list of at each three entries"
         << " (any of which may be empty strings) to set information about a "
@@ -182,7 +185,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   } catch (boost::bad_lexical_cast &) {
     f.setValue(0.0);
 
-    if (!values[0].empty()) {
+    if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
                       << " fitting parameter: " << values[1] << ":" << values[2]
                       << std::endl;
@@ -216,6 +219,5 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   return in;
 }
-
 } // namespace Geometry
 } // namespace Mantid

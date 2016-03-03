@@ -21,6 +21,14 @@
 %Import QtGui/QtGuimod.sip
 %Include qwttypes.sip
 
+%ModuleHeaderCode
+#include <MantidQtAPI/WorkspaceObserver.h>
+%End
+
+%InitialisationCode
+qRegisterMetaType<Mantid::API::Workspace_sptr>();
+qRegisterMetaType<std::string>();
+%End
 /***************************************************************************/
 /**************** Exceptions ***********************************************/
 /***************************************************************************/

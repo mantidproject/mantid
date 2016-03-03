@@ -54,7 +54,7 @@ public:
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string &, IComponent *reference = 0);
+  RectangularDetector(const std::string &, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
@@ -65,9 +65,6 @@ public:
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
 
-  //  //! Copy constructor
-  //  RectangularDetector(const RectangularDetector&);
-  ~RectangularDetector() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
 

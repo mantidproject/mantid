@@ -90,7 +90,7 @@ private:
   std::string m_filename;
 
   /// The number of spectra in the raw file
-  specid_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
 
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;

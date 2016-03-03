@@ -46,18 +46,18 @@ const std::string BinaryOperationMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void BinaryOperationMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName1(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName1(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the left-hand side of the "
                   "operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(inputPropName2(), "",
-                                                      Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      inputPropName2(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the right-hand side of the "
                   "operation.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(), "",
-                                                      Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }

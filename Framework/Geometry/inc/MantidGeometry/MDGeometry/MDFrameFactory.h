@@ -51,10 +51,7 @@ public:
 */
 class MANTID_GEOMETRY_DLL MDFrameFactory
     : public Kernel::ChainableFactory<MDFrameFactory, MDFrame,
-                                      MDFrameArgument> {
-public:
-  ~MDFrameFactory() override {}
-};
+                                      MDFrameArgument> {};
 
 /// Helper typedef
 typedef std::unique_ptr<MDFrameFactory> MDFrameFactory_uptr;

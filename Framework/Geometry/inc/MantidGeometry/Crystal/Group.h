@@ -158,10 +158,7 @@ public:
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
-  Group(const Group &other);
-  Group &operator=(const Group &other);
-
-  virtual ~Group() {}
+  virtual ~Group() = default;
 
   size_t order() const;
   CoordinateSystem getCoordinateSystem() const;

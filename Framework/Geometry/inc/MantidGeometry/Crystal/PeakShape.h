@@ -47,7 +47,7 @@ public:
   /// Shape name
   virtual std::string shapeName() const = 0;
   /// Destructor
-  virtual ~PeakShape() {}
+  virtual ~PeakShape() = default;
 };
 
 typedef boost::shared_ptr<PeakShape> PeakShape_sptr;

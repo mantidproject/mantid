@@ -40,33 +40,33 @@ using namespace DataObjects;
 
 void RefReduction::init() {
   declareProperty("DataRun", "", "Run number of the data set to be reduced");
-  declareProperty(new ArrayProperty<int>("SignalPeakPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("SignalPeakPixelRange"),
                   "Pixel range for the signal peak");
 
   declareProperty(
       "SubtractSignalBackground", false,
       "If true, the background will be subtracted from the signal peak");
-  declareProperty(new ArrayProperty<int>("SignalBackgroundPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("SignalBackgroundPixelRange"),
                   "Pixel range for background around the signal peak");
 
   declareProperty(
       "CropLowResDataAxis", false,
       "If true, the low-resolution pixel range will be limited to the"
       " range given by the LowResDataAxisPixelRange property");
-  declareProperty(new ArrayProperty<int>("LowResDataAxisPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("LowResDataAxisPixelRange"),
                   "Pixel range for the signal peak in the low-res direction");
 
   declareProperty("PerformNormalization", true,
                   "If true, the normalization will be performed");
   declareProperty("NormalizationRun", "",
                   "Run number of the normalization data set");
-  declareProperty(new ArrayProperty<int>("NormPeakPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("NormPeakPixelRange"),
                   "Pixel range for the normalization peak");
 
   declareProperty("SubtractNormBackground", false,
                   "It true, the background will be subtracted"
                   " from the normalization peak");
-  declareProperty(new ArrayProperty<int>("NormBackgroundPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("NormBackgroundPixelRange"),
                   "Pixel range for background around the normalization peak");
 
   declareProperty("CropLowResNormAxis", false,
@@ -74,7 +74,7 @@ void RefReduction::init() {
                   " will be limited to be the range given by the "
                   "LowResNormAxisPixelRange property");
   declareProperty(
-      new ArrayProperty<int>("LowResNormAxisPixelRange"),
+      make_unique<ArrayProperty<int>>("LowResNormAxisPixelRange"),
       "Pixel range for the normalization peak in the low-res direction");
 
   declareProperty("Theta", EMPTY_DBL(),
@@ -95,18 +95,18 @@ void RefReduction::init() {
                                          "polarization states in the data set");
   setPropertySettings(
       "ReflectivityPixel",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DetectorAngle", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DetectorAngle", make_unique<VisibleWhenProperty>(
                                            "Instrument", IS_EQUAL_TO, "REF_M"));
   setPropertySettings(
       "DetectorAngle0",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DirectPixel", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DirectPixel", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_M"));
 
   declareProperty("AngleOffset", EMPTY_DBL(),
                   "Scattering angle offset in degrees");
-  setPropertySettings("AngleOffset", new VisibleWhenProperty(
+  setPropertySettings("AngleOffset", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
   std::vector<std::string> instrOptions{"REF_L", "REF_M"};
@@ -307,9 +307,9 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization,
-                                          "Lambda_" + polarization,
-                                          Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      Direction::Output));
   setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
 
   // Conversion to Q
@@ -341,20 +341,21 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
 
   const std::string prefix = getPropertyValue("OutputWorkspacePrefix");
   if (polarization.compare(PolStateNone) == 0) {
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", prefix, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace", prefix, Direction::Output));
     setProperty("OutputWorkspace", outputWS);
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2D", "2D_" + prefix,
-                                            Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D", "2D_" + prefix, Direction::Output));
     setProperty("OutputWorkspace2D", output2DWS);
   } else {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace_" + polarization,
-                                            wsName, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace_" + polarization, wsName, Direction::Output));
     setProperty("OutputWorkspace_" + polarization, outputWS);
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2D_" + polarization,
-                                            "2D_" + wsName, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D_" + polarization, "2D_" + wsName,
+        Direction::Output));
     setProperty("OutputWorkspace2D_" + polarization, output2DWS);
   }
   m_output_message += "Reflectivity calculation completed\n";

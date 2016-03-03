@@ -88,7 +88,7 @@ protected:
   double m_tofMax;
 
   // methods
-  virtual void addEventImpl(size_t id, double tof); // override
+  void addEventImpl(size_t id, double tof) override;
 
 public:
   // construction
@@ -110,7 +110,7 @@ protected:
   std::vector<EventVector_pt> &m_eventVectors;
 
   // methods
-  virtual void addEventImpl(size_t id, double tof) override;
+  void addEventImpl(size_t id, double tof) override;
 
 public:
   // construction
@@ -139,7 +139,7 @@ public:
   // methods
   void close();
   bool read(void *buffer, uint32_t size);
-  bool seek(int64_t offset, int whence, int64_t *newPosition = NULL);
+  bool seek(int64_t offset, int whence, int64_t *newPosition = nullptr);
 };
 
 namespace Tar {

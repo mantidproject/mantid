@@ -1,3 +1,6 @@
+.. _interface-isis-refl:
+
+=====================================
 ISIS Reflectometry (Polref) Interface
 =====================================
 
@@ -333,6 +336,8 @@ behaviour of this is as follows:
 - Any runs with the same description, including their theta value, will be
   merged into a single row, with all the runs listed in the **Run(s)** column
   in the format, ``123+124+125``.
+
+.. _interface-isis-refl-measure-based-search-transfer:
 
 Measure Based Search Transfer
 ==============================

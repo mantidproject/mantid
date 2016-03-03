@@ -90,9 +90,9 @@ protected: // for testing, otherwise private:
   createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr);
 
   bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
-                                const std::string &Q_mod_req,
-                                const std::string &dEModeRequested,
-                                const std::vector<std::string> &other_dim_names,
+                                const std::string &QModReq,
+                                const std::string &dEModReq,
+                                const std::vector<std::string> &otherDimNames,
                                 std::vector<double> &dimMin,
                                 std::vector<double> &dimMax,
                                 const std::string &QFrame,

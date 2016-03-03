@@ -20,17 +20,18 @@ LoadNexusMonitors::~LoadNexusMonitors() {}
 /// Initialization method.
 void LoadNexusMonitors::init() {
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+      Kernel::make_unique<API::FileProperty>("Filename", "",
+                                             API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                 Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("MonitorsAsEvents", true,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "MonitorsAsEvents", true, Kernel::Direction::Input),
                   "If enabled (by default), load the monitors as events (into "
                   "an EventWorkspace), as long as there is event data. If "
                   "disabled, load monitors as spectra (into a Workspace2D, "
@@ -75,7 +76,7 @@ void LoadNexusMonitors::exec() {
       ssPropName << "OutputWorkspace"
                  << "_" << i + 1;
       declareProperty(
-          new API::WorkspaceProperty<API::Workspace>(
+          Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
               ssPropName.str(), ssWsName.str(), Kernel::Direction::Output),
           "Additional output workspace for multi period monitors.");
       setProperty(ssPropName.str(), ws_group->getItem(i));

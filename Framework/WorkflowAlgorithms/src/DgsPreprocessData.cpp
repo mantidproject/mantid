@@ -57,15 +57,16 @@ const std::string DgsPreprocessData::category() const {
  */
 void DgsPreprocessData::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name for the output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The name for the output workspace.");
   this->declareProperty("TofRangeOffset", 0.0,
                         "An addition to the TOF axis for monitor integration.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -124,7 +125,7 @@ void DgsPreprocessData::exec() {
           "MonitorIntRangeHigh", reductionManager, "norm-mon1-max", inputWS);
       rangeMax += rangeOffset;
 
-      specid_t monSpec = static_cast<specid_t>(
+      specnum_t monSpec = static_cast<specnum_t>(
           inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
       if ("ISIS" == facility) {
         norm->setProperty("MonitorSpectrum", monSpec);

@@ -35,12 +35,14 @@ public:
   }
 
   void init() {
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "InputWorkspace", "", Kernel::Direction::Input),
-                    "A workspace with units of TOF");
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                        "OutputWorkspace", "", Kernel::Direction::Output),
-                    "The name to use for the output workspace");
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "InputWorkspace", "", Kernel::Direction::Input),
+        "A workspace with units of TOF");
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+            "OutputWorkspace", "", Kernel::Direction::Output),
+        "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
   void exec(){
@@ -82,24 +84,21 @@ public:
     std::string filename = alg.getProperty("Filename");
     std::ifstream file(filename.c_str(), std::ifstream::in);
     std::string notebookLine;
-    int lineCount = 0;
 
+    int lineCount = 0;
+    std::vector<std::string> notebookLines;
     while (std::getline(file, notebookLine)) {
+      notebookLines.push_back(notebookLine);
       if (lineCount < 8) {
-        TS_ASSERT_EQUALS(result[lineCount], notebookLine)
-      } else if (lineCount == 88) {
-        TS_ASSERT_EQUALS("               \"input\" : "
-                         "\"Power(InputWorkspace='testGenerateIPythonNotebook',"
-                         " OutputWorkspace='testGenerateIPythonNotebook', "
-                         "Exponent=1.5)\",",
-                         notebookLine)
-      } else if (lineCount == 64) {
-        TS_ASSERT_EQUALS(
-            "               \"input\" : \"NonExistingAlgorithm()\",",
-            notebookLine)
+        TS_ASSERT_EQUALS(result[lineCount], notebookLine);
+        lineCount++;
       }
-      // else if (lineCount == )
-      lineCount++;
+    }
+
+    // Check that the expected lines do appear in the output
+    for (auto const expected_line : result) {
+      TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
+                          expected_line) != notebookLines.cend())
     }
 
     // Verify that if we set the content of NotebookText that it is set

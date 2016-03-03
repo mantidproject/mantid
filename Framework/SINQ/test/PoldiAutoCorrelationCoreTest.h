@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <boost/assign.hpp>
 
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
@@ -316,10 +315,8 @@ public:
   void testFinalizeCalculation() {
     TestablePoldiAutoCorrelationCore core(m_log);
 
-    MantidVec dValues = boost::assign::list_of(0.5)(0.6)(0.7)(0.8)
-                            .convert_to_container<MantidVec>();
-    MantidVec intensities = boost::assign::list_of(1.0)(2.0)(3.0)(4.0)
-                                .convert_to_container<MantidVec>();
+    MantidVec dValues = {0.5, 0.6, 0.7, 0.8};
+    MantidVec intensities = {1.0, 2.0, 3.0, 4.0};
 
     DataObjects::Workspace2D_sptr output =
         core.finalizeCalculation(intensities, dValues);

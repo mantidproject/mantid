@@ -37,7 +37,7 @@ const std::string AverageLogData::category() const {
 /** Initialize the algorithm's properties.
  */
 void AverageLogData::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace that contains a Sample log property, and "
                   "a proton charge property.");

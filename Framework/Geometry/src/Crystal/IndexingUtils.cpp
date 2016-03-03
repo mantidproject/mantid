@@ -1087,7 +1087,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
   std::vector<V3D> selected_dirs;
   V3D dir_temp;
 
-  for (auto current_dir : full_list) {
+  for (const auto &current_dir : full_list) {
     for (int step = 0; step <= n_steps; step++) {
       dir_temp = current_dir;
       dir_temp *= (min_d + step * delta_d); // increasing size
@@ -1925,7 +1925,7 @@ double IndexingUtils::IndexingError(const DblMatrix &UB,
     total_error += h_error + k_error + l_error;
   }
 
-  if (hkls.size() > 0)
+  if (!hkls.empty())
     return total_error / (3.0 * static_cast<double>(hkls.size()));
   else
     return 0;
@@ -1948,10 +1948,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   for (size_t row = 0; row < 3; row++)
     for (size_t col = 0; col < 3; col++) {
-      if ((boost::math::isnan)(UB[row][col])) {
-        return false;
-      }
-      if ((boost::math::isinf)(UB[row][col])) {
+      if ((boost::math::isnan)(UB[row][col]) ||
+          (boost::math::isinf)(UB[row][col])) {
         return false;
       }
     }
@@ -1959,12 +1957,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
   double det = UB.determinant();
 
   double abs_det = fabs(det);
-  if (abs_det > 10 || abs_det < 1e-12) // UB not found correctly
-  {
-    return false;
-  }
 
-  return true;
+  return !(abs_det > 10 || abs_det < 1e-12);
 }
 
 /**
@@ -2528,11 +2522,11 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
                                    const std::vector<V3D> direction_list,
                                    double plane_spacing,
                                    double required_tolerance) {
-  if (q_vectors.size() == 0) {
+  if (q_vectors.empty()) {
     throw std::invalid_argument("SelectDirection(): No Q vectors specified");
   }
 
-  if (direction_list.size() == 0) {
+  if (direction_list.empty()) {
     throw std::invalid_argument(
         "SelectDirection(): List of possible directions has zero length");
   }

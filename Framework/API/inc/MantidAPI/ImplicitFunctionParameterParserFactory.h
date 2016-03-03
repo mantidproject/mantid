@@ -42,9 +42,12 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionParameterParserFactoryImpl
     : public Kernel::DynamicFactory<ImplicitFunctionParameterParser> {
 public:
+  ImplicitFunctionParameterParserFactoryImpl(
+      const ImplicitFunctionParameterParserFactoryImpl &) = delete;
+  ImplicitFunctionParameterParserFactoryImpl &
+  operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   boost::shared_ptr<ImplicitFunctionParameterParser>
   create(const std::string &xmlString) const override;
-
   ImplicitFunctionParameterParser *createImplicitFunctionParameterParserFromXML(
       Poco::XML::Element *parametersElement) const;
 
@@ -53,15 +56,10 @@ private:
       ImplicitFunctionParameterParserFactoryImpl>;
 
   /// Private Constructor for singleton class
-  ImplicitFunctionParameterParserFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionParameterParserFactoryImpl(
-      const ImplicitFunctionParameterParserFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionParameterParserFactoryImpl &
-  operator=(const ImplicitFunctionParameterParserFactoryImpl &);
+  ImplicitFunctionParameterParserFactoryImpl() = default;
+
   /// Private Destructor
-  ~ImplicitFunctionParameterParserFactoryImpl() override;
+  ~ImplicitFunctionParameterParserFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

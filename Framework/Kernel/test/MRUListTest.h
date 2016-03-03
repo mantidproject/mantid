@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MRUList.h"
+#include "MantidKernel/MultiThreaded.h"
 
 using namespace Mantid::Kernel;
 

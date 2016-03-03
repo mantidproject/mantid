@@ -58,29 +58,31 @@ const std::string ConvertEmptyToTof::category() const {
 void ConvertEmptyToTof::init() {
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Empty");
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(
+  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
-  declareProperty(new Kernel::ArrayProperty<int>("ListOfSpectraIndices"),
-                  "A list of spectra indices as a string with ranges; e.g. "
-                  "5-10,15,20-23. \n"
-                  "Optional: if not specified, then the Start/EndIndex fields "
-                  "are used alone. "
-                  "If specified, the range and the list are combined (without "
-                  "duplicating indices). For example, a range of 10 to 20 and "
-                  "a list '12,15,26,28' gives '10-20,26,28'.");
+  declareProperty(
+      make_unique<Kernel::ArrayProperty<int>>("ListOfSpectraIndices"),
+      "A list of spectra indices as a string with ranges; e.g. "
+      "5-10,15,20-23. \n"
+      "Optional: if not specified, then the Start/EndIndex fields "
+      "are used alone. "
+      "If specified, the range and the list are combined (without "
+      "duplicating indices). For example, a range of 10 to 20 and "
+      "a list '12,15,26,28' gives '10-20,26,28'.");
 
-  declareProperty(new Kernel::ArrayProperty<int>("ListOfChannelIndices"),
-                  "A list of spectra indices as a string with ranges; e.g. "
-                  "5-10,15,20-23. \n"
-                  "Optional: if not specified, then the Start/EndIndex fields "
-                  "are used alone. "
-                  "If specified, the range and the list are combined (without "
-                  "duplicating indices). For example, a range of 10 to 20 and "
-                  "a list '12,15,26,28' gives '10-20,26,28'.");
+  declareProperty(
+      make_unique<Kernel::ArrayProperty<int>>("ListOfChannelIndices"),
+      "A list of spectra indices as a string with ranges; e.g. "
+      "5-10,15,20-23. \n"
+      "Optional: if not specified, then the Start/EndIndex fields "
+      "are used alone. "
+      "If specified, the range and the list are combined (without "
+      "duplicating indices). For example, a range of 10 to 20 and "
+      "a list '12,15,26,28' gives '10-20,26,28'.");
 
   // OR Specify EPP
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -163,7 +165,7 @@ void ConvertEmptyToTof::exec() {
  */
 void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
   auto nHist = m_inputWS->getNumberHistograms();
-  if (v.size() == 0) {
+  if (v.empty()) {
     g_log.information("No spectrum index given. Using all spectra to calculate "
                       "the elastic peak.");
     // use all spectra indices
@@ -188,7 +190,7 @@ void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v) {
  */
 void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
   auto blockSize = m_inputWS->blocksize() + 1;
-  if (v.size() == 0) {
+  if (v.empty()) {
     g_log.information("No channel index given. Using all channels (full "
                       "spectrum!) to calculate the elastic peak.");
     // use all channel indices
@@ -376,13 +378,8 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   center = gaussianpeak->centre();
   height = gaussianpeak->height();
   double fwhm = gaussianpeak->fwhm();
-  if (fwhm <= 0.0) {
-    return false;
-  }
-  //    sigma = fwhm*2;
-  //  sigma = fwhm/2.35;
 
-  return true;
+  return fwhm > 0.0;
 }
 
 /**

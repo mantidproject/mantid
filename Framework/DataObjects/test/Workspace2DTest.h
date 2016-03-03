@@ -301,7 +301,7 @@ public:
     CPUTimer tim;
     for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
       const ISpectrum *spec = ws1->getSpectrum(i);
-      const std::set<detid_t> &detIDs = spec->getDetectorIDs();
+      const auto &detIDs = spec->getDetectorIDs();
       detid_t oneDetId = *detIDs.begin();
       UNUSED_ARG(oneDetId)
     }

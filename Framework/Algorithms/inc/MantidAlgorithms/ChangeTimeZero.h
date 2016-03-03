@@ -54,7 +54,7 @@ private:
 
   /// Time shift the log of a double series property
   void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
-                                   Mantid::Kernel::Property *logEntry,
+                                   Mantid::Kernel::Property *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(

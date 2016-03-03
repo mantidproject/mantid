@@ -15,26 +15,6 @@ PeakTransformQLab::PeakTransformQLab(const std::string &xPlotLabel,
     : PeakTransform(xPlotLabel, yPlotLabel, regex("^Q_lab_x.*$"),
                     regex("^Q_lab_y.*$"), regex("^Q_lab_z.*$")) {}
 
-PeakTransformQLab::PeakTransformQLab(const PeakTransformQLab &other)
-    : PeakTransform(other) {}
-
-PeakTransformQLab &PeakTransformQLab::
-operator=(const PeakTransformQLab &other) {
-  if (this != &other) {
-    m_xPlotLabel = other.m_xPlotLabel;
-    m_yPlotLabel = other.m_yPlotLabel;
-    m_indexOfPlotX = other.m_indexOfPlotX;
-    m_indexOfPlotY = other.m_indexOfPlotY;
-    m_indexOfPlotZ = other.m_indexOfPlotZ;
-    m_FirstRegex = other.m_FirstRegex;
-    m_SecondRegex = other.m_SecondRegex;
-    m_ThirdRegex = other.m_ThirdRegex;
-  }
-  return *this;
-}
-
-PeakTransformQLab::~PeakTransformQLab() {}
-
 /**
 Clone the PeakTransformQLab.
 */

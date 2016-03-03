@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/assign.hpp>
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -18,34 +16,28 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
-class ALCPeakFittingModelTest : public CxxTest::TestSuite
-{
-  ALCPeakFittingModel* m_model;
+class ALCPeakFittingModelTest : public CxxTest::TestSuite {
+  ALCPeakFittingModel *m_model;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCPeakFittingModelTest *createSuite() { return new ALCPeakFittingModelTest(); }
-  static void destroySuite( ALCPeakFittingModelTest *suite ) { delete suite; }
+  static ALCPeakFittingModelTest *createSuite() {
+    return new ALCPeakFittingModelTest();
+  }
+  static void destroySuite(ALCPeakFittingModelTest *suite) { delete suite; }
 
-  ALCPeakFittingModelTest()
-  {
+  ALCPeakFittingModelTest() {
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp()
-  {
-    m_model = new ALCPeakFittingModel();
-  }
+  void setUp() { m_model = new ALCPeakFittingModel(); }
 
-  void tearDown()
-  {
-    delete m_model;
-  }
+  void tearDown() { delete m_model; }
 
-  void test_setData()
-  {
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  void test_setData() {
+    MatrixWorkspace_sptr data =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
@@ -55,56 +47,51 @@ public:
     TS_ASSERT_EQUALS(m_model->data(), data);
   }
 
-  void test_fit()
-  {
-    std::vector<double> x = boost::assign::list_of(1.00)(2.00)(3.00)(4.00)(5.00)(6.00)(7.00)(8.00);
-    std::vector<double> y = boost::assign::list_of(0.00)(0.01)(0.02)(0.37)(1.00)(0.37)(0.01)(0.00);
+  void test_fit() {
+    std::vector<double> x = {1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00};
+    std::vector<double> y = {0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00};
 
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, y.size(), y.size());
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, y.size(), y.size());
     data->dataY(0) = y;
     data->dataX(0) = x;
 
     m_model->setData(data);
 
-    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground");
+    IFunction_const_sptr func =
+        FunctionFactory::Instance().createInitialized("name=FlatBackground");
 
     TS_ASSERT_THROWS_NOTHING(m_model->fitPeaks(func));
 
     IFunction_const_sptr fittedFunc = m_model->fittedPeaks();
     TS_ASSERT(fittedFunc);
 
-    if (fittedFunc)
-    {
+    if (fittedFunc) {
       TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
-      TS_ASSERT_DELTA (fittedFunc->getParameter("A0"), 0.2225, 1E-4);
+      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 0.2225, 1E-4);
     }
 
     ITableWorkspace_sptr parameters = m_model->parameterTable();
     TS_ASSERT(parameters);
 
-    if (parameters)
-    {
+    if (parameters) {
       // Check table dimensions
       TS_ASSERT_EQUALS(parameters->rowCount(), 2);
       TS_ASSERT_EQUALS(parameters->columnCount(), 3);
 
       // Check table entries
-      TS_ASSERT_EQUALS(parameters->String(0,0), "A0");
-      TS_ASSERT_DELTA (parameters->Double(0,1), 0.2225, 1E-4);
-      TS_ASSERT_DELTA (parameters->Double(0,2), 0.3535, 1E-4);
-      TS_ASSERT_EQUALS(parameters->String(1,0), "Cost function value");
-      TS_ASSERT_DELTA (parameters->Double(1,1), 0.1254, 1E-4);
-      TS_ASSERT_DELTA (parameters->Double(1,2), 0.0000, 1E-4);
+      TS_ASSERT_EQUALS(parameters->String(0, 0), "A0");
+      TS_ASSERT_DELTA(parameters->Double(0, 1), 0.2225, 1E-4);
+      TS_ASSERT_DELTA(parameters->Double(0, 2), 0.3535, 1E-4);
+      TS_ASSERT_EQUALS(parameters->String(1, 0), "Cost function value");
+      TS_ASSERT_DELTA(parameters->Double(1, 1), 0.1254, 1E-4);
+      TS_ASSERT_DELTA(parameters->Double(1, 2), 0.0000, 1E-4);
     }
-
   }
 
-  void test_exportWorkspace()
-  {
-    TS_ASSERT_THROWS_NOTHING (m_model->exportWorkspace());
+  void test_exportWorkspace() {
+    TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace());
   }
-
 };
-
 
 #endif /* MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODELTEST_H_ */

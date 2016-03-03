@@ -702,9 +702,8 @@ namespace MantidQt
 			return false;
 		}
 
-		void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
-		{
-			pixels.clear();
+		QList<QPoint> Shape2DCollection::getMaskedPixels() const {
+			QList<QPoint> pixels;
 			QTransform inv = m_transform.inverted();
 			for (int i = m_viewport.left(); i <= m_viewport.right(); ++i)
 			{
@@ -721,6 +720,7 @@ namespace MantidQt
 					}
 				}
 			}
+      return pixels;
 		}
 
 		/**

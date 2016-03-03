@@ -65,7 +65,7 @@ public:
                              const IDFObject_const_sptr expectedCacheFile,
                              const std::string &instName,
                              const std::string &xmlText);
-  ~InstrumentDefinitionParser();
+  ~InstrumentDefinitionParser() = default;
 
   /// Caching
   enum CachingOption {
@@ -82,8 +82,8 @@ public:
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
   void setComponentLinks(boost::shared_ptr<Geometry::Instrument> &instrument,
-                         Poco::XML::Element *pElem,
-                         Kernel::ProgressBase *progress = NULL);
+                         Poco::XML::Element *pRootElem,
+                         Kernel::ProgressBase *progress = nullptr);
 
   std::string getMangledName();
 
@@ -154,7 +154,7 @@ private:
   };
 
   /// Method for populating IdList
-  void populateIdList(Poco::XML::Element *pElem, IdList &idList);
+  void populateIdList(Poco::XML::Element *pE, IdList &idList);
 
   std::vector<std::string>
   buildExcludeList(const Poco::XML::Element *const location);
@@ -232,7 +232,7 @@ private:
 
   /// Write out a cache file.
   CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
-                                   IDFObject_const_sptr usedCache);
+                                   IDFObject_const_sptr fallBackCache);
 
   /// This method returns the parent appended which its child components and
   /// also name of type of the last child component

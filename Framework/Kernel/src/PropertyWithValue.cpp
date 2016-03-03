@@ -1,5 +1,4 @@
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/OptionalBool.h"
 
 namespace Mantid {
 

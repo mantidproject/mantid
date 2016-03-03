@@ -41,8 +41,6 @@ class DLLExport ExpDecay : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   ExpDecay();
-  /// Destructor
-  ~ExpDecay() override {}
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "ExpDecay"; }

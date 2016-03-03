@@ -71,10 +71,6 @@ void RectangularDetector::init() {
   m_idstep = 0;
 }
 
-/** Destructor
- */
-RectangularDetector::~RectangularDetector() {}
-
 /** Clone method
  *  Make a copy of the component assembly
  *  @return new(*this)

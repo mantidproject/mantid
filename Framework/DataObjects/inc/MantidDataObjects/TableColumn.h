@@ -94,9 +94,9 @@ public:
   TableColumn() {
     int length = sizeof(Type);
     std::string name = std::string(typeid(Type).name());
-    if ((name.find("i") != std::string::npos) ||
-        (name.find("l") != std::string::npos) ||
-        (name.find("x") != std::string::npos)) {
+    if ((name.find('i') != std::string::npos) ||
+        (name.find('l') != std::string::npos) ||
+        (name.find('x') != std::string::npos)) {
       if (length == 4) {
         this->m_type = "int";
       }
@@ -104,13 +104,13 @@ public:
         this->m_type = "int64";
       }
     }
-    if (name.find("f") != std::string::npos) {
+    if (name.find('f') != std::string::npos) {
       this->m_type = "float";
     }
-    if (name.find("d") != std::string::npos) {
+    if (name.find('d') != std::string::npos) {
       this->m_type = "double";
     }
-    if (name.find("u") != std::string::npos) {
+    if (name.find('u') != std::string::npos) {
       if (length == 4) {
         this->m_type = "uint32_t";
       }
@@ -124,8 +124,6 @@ public:
   }
 
   // TableColumn();
-  /// Virtual destructor.
-  ~TableColumn() override {}
   /// Number of individual elements in the column.
   size_t size() const override { return m_data.size(); }
   /// Type id of the data in the column
@@ -330,7 +328,7 @@ inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value) {
   m_data[i] = value != 0.0;
 }
 
-/// Shared pointer to a column with aoutomatic type cast and data type check.
+/// Shared pointer to a column with automatic type cast and data type check.
 /// Can be created with TableWorkspace::getColumn(...)
 template <class T>
 class TableColumn_ptr : public boost::shared_ptr<TableColumn<T>> {
@@ -341,7 +339,7 @@ public:
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : boost::shared_ptr<TableColumn<T>>(
             boost::dynamic_pointer_cast<TableColumn<T>>(c)) {
-    if (this->get() == NULL) {
+    if (!this->get()) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(T).name();
       throw std::runtime_error(str);
@@ -357,7 +355,7 @@ public:
     */
   TableColumn_ptr(boost::shared_ptr<API::Column> c)
       : TableColumn_ptr<API::Boolean>(c) {
-    if (this->get() == NULL) {
+    if (!this->get()) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(API::Boolean).name();
       throw std::runtime_error(str);

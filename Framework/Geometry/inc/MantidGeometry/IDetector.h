@@ -106,10 +106,9 @@ public:
   /// single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
 
-  /// (Empty) Constructor
-  IDetector() {}
-  /// Virtual destructor
-  ~IDetector() override {}
+  /// (Empty) Constructor.
+  /// prevent Warning C4436
+  IDetector(){};
 };
 
 /// Shared pointer to IDetector

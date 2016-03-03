@@ -55,10 +55,6 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL UserStringParser {
 public:
-  /// constructor
-  UserStringParser();
-  // destructor
-  ~UserStringParser();
   /// parses a given string  into a vector of  vector of numbers
   std::vector<std::vector<unsigned int>> parse(const std::string &userString);
 
@@ -72,7 +68,7 @@ private:
   /// separate delimiter string from input string and return a vector of numbers
   /// created from the separated string
   std::vector<unsigned int> separateDelimiters(const std::string &input,
-                                               const std::string &symbol);
+                                               const std::string &delimiters);
 
   /// converts a string to int.
   unsigned int toUInt(const std::string &input);
@@ -81,7 +77,7 @@ private:
 
   /// This method removes the separator string from the input string and
   /// converts the tokens to unisgned int
-  void Tokenize(const std::string &input, const std::string &separator,
+  void Tokenize(const std::string &input, const std::string &delimiter,
                 unsigned int &start, unsigned int &end, unsigned int &step);
 
   /// convert the string into numbers

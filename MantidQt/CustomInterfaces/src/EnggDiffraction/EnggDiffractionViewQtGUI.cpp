@@ -260,6 +260,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
+  m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
+      qs.value("user-param-calib-plot-data", true).toBool());
+
   // user params - focusing
   m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
@@ -364,6 +367,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());
+
+  qs.setValue("user-param-calib-plot-data",
+              m_uiTabCalib.checkBox_PlotData_Calib->isChecked());
 
   // user params - focusing
   qs.setValue("user-params-focus-runno",
@@ -531,6 +537,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
   m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
   m_ui.pushButton_close->setEnabled(enable);
+  m_uiTabCalib.checkBox_PlotData_Calib->setEnabled(enable);
 
   // focus
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
@@ -600,15 +607,42 @@ void EnggDiffractionViewQtGUI::plotWaterfallSpectrum(
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName) {
-  std::string pyCode =
-      "plotSpectrum('" + wsName +
-      "', 0, error_bars=False, type=0, window=win, clearWindow=True)";
+void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName,
+                                                   const std::string &spectrum,
+                                                   const std::string &type) {
+  std::string pyCode = "win=plotSpectrum('" + wsName + "', " + spectrum +
+                       ", error_bars=False, type=" + type +
+                       ", window=win, clearWindow=True)";
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
   m_logMsgs.emplace_back("Plotted output focused data, with status string " +
                          status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
+void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
+  std::string pyCode =
+      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
+      "win = plotSpectrum(van_curves_ws, [0, 1, 2])";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+
+  m_logMsgs.push_back(
+      "Plotted output calibration vanadium curves, with status string " +
+      status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
+void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
+    const std::string &pyCode) {
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+
+  m_logMsgs.push_back(
+      "Plotted output calibration ceria peaks, with status string " + status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -893,7 +927,11 @@ bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
   return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
-bool EnggDiffractionViewQtGUI::saveOutputFiles() const {
+bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
+  return m_uiTabCalib.checkBox_PlotData_Calib->checkState();
+}
+
+bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
   return m_uiTabFocus.checkBox_SaveOutputFiles->checkState();
 }
 

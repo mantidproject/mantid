@@ -69,8 +69,6 @@ public:
 public:
   /// Create given the icpevent log property
   LogParser(const Kernel::Property *log);
-  /// Destructor
-  ~LogParser();
 
   /// Number of periods
   int nPeriods() const { return m_nOfPeriods; }
@@ -121,7 +119,7 @@ private:
   CommandMap createCommandMap(bool newStyle) const;
 
   /// Try to parse period data.
-  void tryParsePeriod(const std::string &com, const DateAndTime &time,
+  void tryParsePeriod(const std::string &scom, const DateAndTime &time,
                       std::istringstream &idata,
                       Kernel::TimeSeriesProperty<int> *const periods);
 };

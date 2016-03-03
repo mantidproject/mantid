@@ -7,6 +7,7 @@ set ( SRC_FILES
     src/ColorBarWidget.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
+    src/DisplayCurveFit.cpp
     src/DoubleDialogEditor.cpp
     src/DoubleSpinBox.cpp
     src/ErrorCurve.cpp
@@ -106,6 +107,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+    inc/MantidQtMantidWidgets/DisplayCurveFit.h
     inc/MantidQtMantidWidgets/DoubleDialogEditor.h
     inc/MantidQtMantidWidgets/DoubleSpinBox.h
     inc/MantidQtMantidWidgets/FilenameDialogEditor.h
@@ -237,6 +239,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/ColorBarWidget.ui
+    inc/MantidQtMantidWidgets/DisplayCurveFit.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
@@ -279,6 +282,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
@@ -288,7 +292,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
-add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} ${RES_FILES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

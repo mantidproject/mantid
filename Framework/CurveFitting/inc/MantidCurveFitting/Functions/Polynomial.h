@@ -35,7 +35,6 @@ namespace Functions {
 class DLLExport Polynomial : public BackgroundFunction {
 public:
   Polynomial();
-  ~Polynomial() override;
 
   /// Overwrite IFunction base class
   std::string name() const override { return "Polynomial"; }

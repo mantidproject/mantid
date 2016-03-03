@@ -45,7 +45,7 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_API_DLL ParameterTie : public ParameterReference {
+class MANTID_API_DLL ParameterTie final : public ParameterReference {
 public:
   /// Constructor
   ParameterTie(IFunction *funct, const std::string &parName,
@@ -57,7 +57,7 @@ public:
   /// Evaluate the expression
   virtual double eval();
   /// Return the string that can be used to recreate this tie
-  virtual std::string asString(const IFunction *fun = NULL) const;
+  virtual std::string asString(const IFunction *fun = nullptr) const;
 
   /// Check if the tie has any references to certain parameters
   bool findParametersOf(const IFunction *fun) const;

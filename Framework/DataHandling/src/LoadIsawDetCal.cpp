@@ -44,20 +44,21 @@ LoadIsawDetCal::~LoadIsawDetCal() {}
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".DetCal"),
       "The input filename of the ISAW DetCal file (East banks for SNAP) ");
 
-  declareProperty(new API::FileProperty("Filename2", "",
-                                        API::FileProperty::OptionalLoad,
-                                        ".DetCal"),
-                  "The input filename of the second ISAW DetCal file (West "
-                  "banks for SNAP) ");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
@@ -130,7 +131,7 @@ void LoadIsawDetCal::exec() {
       }
     }
   }
-  std::set<int> uniqueBanks; // for CORELLI and WISH
+  std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
   if (instname.compare("WISH") == 0)
     bankPart = "WISHpanel";
@@ -245,7 +246,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
@@ -295,8 +295,7 @@ void LoadIsawDetCal::exec() {
     }
     // Loop through tube detectors to match names with number from DetCal file
     idnum = -1;
-    std::set<int>::iterator it;
-    for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
+    for (auto it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
       if (*it == id)
         idnum = *it;
     if (idnum < 0)
@@ -341,7 +340,6 @@ void LoadIsawDetCal::exec() {
       // These are the original axes
       V3D oX = V3D(1., 0., 0.);
       V3D oY = V3D(0., 1., 0.);
-      V3D oZ = V3D(0., 0., 1.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);

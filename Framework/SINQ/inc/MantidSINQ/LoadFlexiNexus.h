@@ -91,7 +91,7 @@ private:
   Mantid::Geometry::MDHistoDimension_sptr makeDimension(NeXus::File *fin,
                                                         int index, int length);
 
-  std::set<std::string> populateSpecialMap();
+  std::unordered_set<std::string> populateSpecialMap();
 
   void addMetaData(NeXus::File *fin, Mantid::API::Workspace_sptr ws,
                    Mantid::API::ExperimentInfo_sptr info);

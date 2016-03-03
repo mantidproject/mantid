@@ -66,7 +66,7 @@ public:
   const std::string id() const override { return "PeaksWorkspace"; }
 
   PeaksWorkspace();
-
+  PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to
@@ -85,8 +85,6 @@ public:
   API::LogManager_const_sptr getLogs() const override {
     return API::LogManager_const_sptr(new API::LogManager(this->run()));
   }
-
-  ~PeaksWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<PeaksWorkspace> clone() const {
@@ -108,7 +106,7 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  Geometry::IPeak *createPeak(Kernel::V3D QFrame,
+  Geometry::IPeak *createPeak(Kernel::V3D QLabFrame,
                               boost::optional<double> detectorDistance =
                                   boost::optional<double>()) const override;
   std::vector<std::pair<std::string, std::string>>
@@ -184,8 +182,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   PeaksWorkspace(const PeaksWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  PeaksWorkspace &operator=(const PeaksWorkspace &other);
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }

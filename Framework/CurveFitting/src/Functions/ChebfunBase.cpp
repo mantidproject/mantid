@@ -61,15 +61,6 @@ ChebfunBase::ChebfunBase(size_t n, double start, double end, double tolerance)
 }
 
 /**
- * Copy constructor
- * @param other :: A base to copy from.
- */
-ChebfunBase::ChebfunBase(const ChebfunBase &other)
-    : m_tolerance(other.m_tolerance), m_n(other.m_n), m_start(other.m_start),
-      m_end(other.m_end), m_x(other.m_x), m_bw(other.m_bw),
-      m_integrationWeights(other.m_integrationWeights) {}
-
-/**
  * Return the integration weights that can be used in function manipulations
  * involving integration.
  */

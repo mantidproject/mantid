@@ -9,7 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -82,7 +82,7 @@ public:
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
   /// Check if a workspace is included in this group or any nested groups.
-  bool isInGroup(const Workspace &workspace, size_t level = 0) const;
+  bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
 
@@ -100,7 +100,7 @@ public:
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;
   /// Does a workspace exist within the group
-  bool contains(const Workspace_sptr &wsName) const;
+  bool contains(const Workspace_sptr &workspace) const;
   /// Add the members of the group to the given list
   void reportMembers(std::set<Workspace_sptr> &memberList) const;
   /// Returns the names of workspaces that make up this group. Note that this
@@ -122,11 +122,11 @@ private:
   }
   /// ADS removes a member of this group using this method. It doesn't send
   /// notifications in contrast to remove(name).
-  void removeByADS(const std::string &name);
+  void removeByADS(const std::string &wsName);
   /// Turn ADS observations on/off
   void observeADSNotifications(const bool observeADS);
   /// Check if a workspace is included in any child groups and groups in them.
-  bool isInChildGroup(const Workspace &workspace) const;
+  bool isInChildGroup(const Workspace &workspaceToCheck) const;
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(
       Mantid::API::WorkspacePostDeleteNotification_ptr notice);
@@ -145,7 +145,7 @@ private:
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

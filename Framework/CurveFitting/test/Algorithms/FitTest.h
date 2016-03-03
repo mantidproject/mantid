@@ -22,9 +22,10 @@ public:
   /// Constructor setting a value for the relative error acceptance
   /// (default=0.01)
   TestMinimizer() {
-    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                        "SomeOutput", "abc", Kernel::Direction::Output),
-                    "Name of the output Workspace holding some output.");
+    declareProperty(
+        Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+            "SomeOutput", "abc", Kernel::Direction::Output),
+        "Name of the output Workspace holding some output.");
   }
 
   /// Overloading base class methods.

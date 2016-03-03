@@ -5,8 +5,8 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <functional>
+#include <vector>
 
 namespace Mantid {
 
@@ -83,7 +83,9 @@ class MANTID_CURVEFITTING_DLL ChebfunBase {
 public:
   ChebfunBase(size_t n, double start, double end, double tolerance = 0.0);
   /// Copy constructor
-  ChebfunBase(const ChebfunBase &other);
+  ChebfunBase(const ChebfunBase &) = default;
+  /// Move constructor
+  ChebfunBase(ChebfunBase &&) = default;
   /// Get the polynomial order of this base.
   size_t order() const { return m_n; }
   /// Get the size of the base which is the number of x-points.
@@ -155,7 +157,8 @@ public:
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.
-  ChebfunBase &operator=(const ChebfunBase &other);
+  ChebfunBase &operator=(const ChebfunBase &other) = delete;
+  ChebfunBase &operator=(ChebfunBase &&other) = delete;
   /// Calculate the x-values based on the (start,end) interval.
   void calcX();
   /// Calculate the integration weights
@@ -166,7 +169,7 @@ private:
                              std::vector<double> &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
   std::vector<double> fitOdd(const API::IFunction &f,
-                             std::vector<double> &p) const;
+                             std::vector<double> &pEven) const;
   /// Test an array of Chebyshev coefficients for convergence
   static bool hasConverged(const std::vector<double> &a, double maxA,
                            double tolerance, size_t shift = 0);
@@ -206,10 +209,14 @@ boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
     std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
-  for (double tol = tolerance; tol < 0.1; tol *= 100) {
+
+  double tol = tolerance;
+  while (tol < 0.1) {
     auto base = bestFit(start, end, f, p, a, maxA, tol, maxSize);
-    if (base)
+    if (base) {
       return base;
+    }
+    tol *= 100.0;
   }
   return ChebfunBase_sptr();
 }

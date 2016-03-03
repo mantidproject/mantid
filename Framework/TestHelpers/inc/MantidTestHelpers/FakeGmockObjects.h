@@ -32,12 +32,12 @@ public:
 };
 
 // Helper typedef and type for mocking NearestNeighbour map usage.
-typedef std::map<Mantid::specid_t, Mantid::Kernel::V3D> SpectrumDistanceMap;
+typedef std::map<Mantid::specnum_t, Mantid::Kernel::V3D> SpectrumDistanceMap;
 class MockNearestNeighbours : public Mantid::Geometry::INearestNeighbours {
 public:
   MOCK_CONST_METHOD2(neighboursInRadius,
-                     SpectrumDistanceMap(specid_t spectrum, double radius));
-  MOCK_CONST_METHOD1(neighbours, SpectrumDistanceMap(specid_t spectrum));
+                     SpectrumDistanceMap(specnum_t spectrum, double radius));
+  MOCK_CONST_METHOD1(neighbours, SpectrumDistanceMap(specnum_t spectrum));
   MOCK_METHOD0(die, void());
   virtual ~MockNearestNeighbours() { die(); }
 };

@@ -197,12 +197,11 @@ public:
   void getIntegratedSpectra(std::vector<double> &out, const double minX,
                             const double maxX,
                             const bool entireRange) const override;
+  EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   EventWorkspace(const EventWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  EventWorkspace &operator=(const EventWorkspace &other);
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }

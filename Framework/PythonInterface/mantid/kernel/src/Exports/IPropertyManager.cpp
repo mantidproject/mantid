@@ -49,9 +49,9 @@ void setProperty(IPropertyManager &self, const std::string &name,
  */
 void declareProperty(IPropertyManager &self, const std::string &name,
                      boost::python::object value) {
-  Mantid::Kernel::Property *p =
-      Registry::PropertyWithValueFactory::create(name, value, 0);
-  self.declareProperty(p);
+  auto p = std::unique_ptr<Mantid::Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, value, 0));
+  self.declareProperty(std::move(p));
 }
 
 /**
@@ -82,7 +82,8 @@ void declareOrSetProperty(IPropertyManager &self, const std::string &name,
  */
 void setPropertySettings(IPropertyManager &self, const std::string &propName,
                          IPropertySettings *settingsManager) {
-  self.setPropertySettings(propName, settingsManager->clone());
+  self.setPropertySettings(
+      propName, std::unique_ptr<IPropertySettings>(settingsManager->clone()));
 }
 
 void deleteProperty(IPropertyManager &self, const std::string &propName) {
