@@ -83,7 +83,7 @@ class BASISReduction(PythonAlgorithm):
                              doc="Do we normalize by the vanadium intensity?")
         self.setPropertyGroup("DivideByVanadium", titleDivideByVanadium)
         ifDivideByVanadium = EnabledWhenProperty("DivideByVanadium",
-                                        PropertyCriterion.IsNotDefault)
+                                                 PropertyCriterion.IsNotDefault)
 
         normalization_types = ["by Q slice", "by detector ID"]
         self.declareProperty("NormalizationType", "by Q slice",
@@ -356,8 +356,8 @@ class BASISReduction(PythonAlgorithm):
         is rescaled to 1
         @param wsName: name of the workspace to rescale
         """
-        ws = mtd[wsName]
-        maximumYvalue = ws.dataY(0).max()
+        workspace = mtd[wsName]
+        maximumYvalue = workspace.dataY(0).max()
         api.Scale(InputWorkspace=wsName,
                   OutputWorkspace=wsName,
                   Factor=1./maximumYvalue, Operation="Multiply",)
