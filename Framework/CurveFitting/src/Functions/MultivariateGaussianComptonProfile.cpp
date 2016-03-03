@@ -61,7 +61,7 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
                                " attribute must be positive and non-zero");
 
     m_integrationSteps = steps;
-    m_thetaStep = 1.0 / steps;
+    m_thetaStep = (M_PI / 2.0) / steps;
     m_phiStep = (M_PI / 2.0) / steps;
   }
 }
