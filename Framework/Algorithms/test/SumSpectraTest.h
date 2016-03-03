@@ -320,6 +320,7 @@ public:
     TS_ASSERT_DELTA(y[38], double(nSignals - 1) * y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], double(nSignals) * y0[72], 1.e-6);
     TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
+    TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
     TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
     TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
 
