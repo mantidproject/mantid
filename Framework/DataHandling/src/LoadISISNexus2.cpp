@@ -530,29 +530,41 @@ void LoadISISNexus2::checkOptionalProperties(
     if (spec_list.back() > m_loadBlockInfo.getMaxSpectrumID()) {
       std::string err =
           "A spectra number in the spectra list exceeds maximal spectra ID:  " +
-          boost::lexical_cast<std::string>(m_loadBlockInfo.getMaxSpectrumID()) +
+          std::to_string(m_loadBlockInfo.getMaxSpectrumID()) +
           " in the file ";
       throw std::invalid_argument(err);
     }
-
     if (spec_list.front() < m_loadBlockInfo.getMinSpectrumID()) {
       std::string err =
           "A spectra number in the spectra list smaller then minimal spectra "
           "ID:  " +
-          boost::lexical_cast<std::string>(m_loadBlockInfo.getMinSpectrumID()) +
+          std::to_string(m_loadBlockInfo.getMinSpectrumID()) +
           " in the file";
       throw std::invalid_argument(err);
     }
 
     range_check in_range(spec_min, spec_max);
-    // If we have the 
     if (range_supplied) {
-      // TODO mangle the current index handling with the spectrm lsit
-      // Could add as ranges and check for overlapping regions
+      // First remove all entries which are outside of the min and max spectrum
+      auto isInRange = [&spec_min, &spec_max](int64_t x) {
+        return (spec_min <= x) && (x <= spec_max);
+      };
 
-#if 0
-      spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range),
+      spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), isInRange),
                       spec_list.end());
+
+      // Create DataBlocks from the spectrum list
+      DataBlockComposite composite;
+      populateDataBlockCompositeWithContainer(
+          composite, spec_list, spec_list.size(),
+          m_loadBlockInfo.getNumberOfPeriods(),
+          m_loadBlockInfo.getNumberOfChannels(),
+          m_loadBlockInfo.getNumberOfSpectra());
+
+      m_loadBlockInfo = composite;
+      range_supplied = false;
+#if 0
+
       // combine spectra numbers from ranges and the list
       if (spec_list.size() > 0) {
         for (int64_t i = spec_min; i < spec_max + 1; i++) {
@@ -653,7 +665,6 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
     const std::map<int64_t, specnum_t> &specInd2specNum_map,
     DataBlockComposite &LoadBlock) {
   std::vector<int64_t> includedMonitors;
-
 
   // fill in the data block descriptor vector
   if (!specInd2specNum_map.empty()) {
@@ -1296,12 +1307,20 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     return separateMonitors;
   }
 
-// TODO: eheck with abuts. could be that  new  implementation fixes this
+  // It appears that the sanity test above has failed. There might
+  // be several reasons for this. Currenlty we can only handle:
+  // 1. The case when the monitor indices exist in the
+  // "raw_data_1/detector_1/spectrum_index
+  // The solution is to remove the monitors from the detblock section
+  // and the loadblock section.
+  m_detBlockInfo.removeSpectra(m_monBlockInfo);
+  m_loadBlockInfo.removeSpectra(m_monBlockInfo);
+
+
 #if 0
   // something is wrong and we need to analyze spectra map.  Currently we can
   // identify and manage the case when all monitor's spectra are written
-  // together with detectors
-  // make settings for this situation
+  // together with detectors make settings for this situation
   m_detBlockInfo.numberOfSpectra -= m_monBlockInfo.numberOfSpectra;
   m_loadBlockInfo.numberOfSpectra -= m_monBlockInfo.numberOfSpectra;
 

@@ -22,6 +22,7 @@ public:
   void addDataBlock(DataBlock dataBlock);
   std::vector<DataBlock> getIntervals();
   DataBlockComposite operator+(const DataBlockComposite&  other);
+  void removeSpectra(DataBlockComposite& toRemove);
 
 private:
   std::vector<DataBlock> m_dataBlocks;
@@ -41,7 +42,7 @@ private:
 template<typename T>
 void DLLExport populateDataBlockCompositeWithContainer(
   DataBlockComposite &dataBlockComposite, T &indexContainer,
-  int64_t nArray, int numberOfPeriods, size_t numberOfChannels, size_t numberOfSpectra) {
+  int64_t nArray, int numberOfPeriods,  size_t numberOfSpectra, size_t numberOfChannels) {
   // Find all intervals among the index array (this assumes that spectrum index
   // increases monotonically, else we would have to sort first)
   int64_t startValue = indexContainer[0];
@@ -51,7 +52,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
     auto isSequential = (indexContainer[arrayIndex] - previousValue) == 1;
     if (!isSequential) {
       // We must have completed an interval, we create a DataBlock and add it
-      DataBlock dataBlock(numberOfPeriods, numberOfChannels, numberOfSpectra);
+      DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
       dataBlock.setMinSpectrumID(startValue);
       dataBlock.setMaxSpectrumID(previousValue);
       dataBlockComposite.addDataBlock(dataBlock);
@@ -65,7 +66,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
   }
 
   // The last interval would not have been added
-  DataBlock dataBlock(numberOfPeriods, numberOfChannels, numberOfSpectra);
+  DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
   dataBlock.setMinSpectrumID(startValue);
   dataBlock.setMaxSpectrumID(previousValue);
   dataBlockComposite.addDataBlock(dataBlock);
