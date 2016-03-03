@@ -6,6 +6,7 @@ import numpy as np
 import mantid
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from scipy import constants
 
@@ -156,6 +157,7 @@ class QECoverageGUI(QtGui.QWidget):
         self.indirect_grid.addWidget(self.indirect_createws)
         self.indirect_createws.stateChanged.connect(self.onIndirectCreateWSChanged)
         self.indirect_emax = QtGui.QFrame(self.tab_direct)
+        self.indirect_emax = QtGui.QFrame(self.tab_indirect)
         self.indirect_emax_grid = QtGui.QHBoxLayout()
         self.indirect_emax.setLayout(self.indirect_emax_grid)
         self.indirect_emax_label = QtGui.QLabel("Emax", self.indirect_emax)
@@ -171,7 +173,10 @@ class QECoverageGUI(QtGui.QWidget):
         self.tabs.addTab(self.tab_indirect, "Indirect")
         self.mainframe_grid.addWidget(self.tabs)
         self.tabs.currentChanged.connect(self.onTabChange)
-        # Right panel, matplotlib figure to show Q-E plot
+        # Right panel, matplotlib figure to show Q-E
+        self.figure_frame = QtGui.QFrame(self.mainframe)
+        self.figure_grid = QtGui.QVBoxLayout()
+        self.figure_frame.setLayout(self.figure_grid)
         self.figure = Figure()
         self.figure.patch.set_facecolor('white')
         self.canvas = FigureCanvas(self.figure)
@@ -180,11 +185,17 @@ class QECoverageGUI(QtGui.QWidget):
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.mainframe_grid.addWidget(self.canvas)
+        self.figure_grid.addWidget(self.canvas)
+        self.figure_controls = NavigationToolbar(self.canvas, self.figure_frame)
+        self.figure_grid.addWidget(self.figure_controls)
+        self.mainframe_grid.addWidget(self.figure_frame)
         self.grid.addWidget(self.mainframe)
         self.helpbtn = QtGui.QPushButton("?", self)
         self.helpbtn.setMaximumWidth(30)
         self.helpbtn.clicked.connect(self.onHelp)
         self.grid.addWidget(self.helpbtn)
+        # Matplotlib does seem to rescale x-axis properly after axes.clear()
+        self.xlim = 0
 
     def onHelp(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
@@ -217,7 +228,8 @@ class QECoverageGUI(QtGui.QWidget):
             self.tthlims = [2.373, 135.955]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
-        # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either side of center.
+        # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either
+        #  side of center.
         elif Inst == 'HYSPEC':
             self.tthlims = [0, 60]
             # reset s2
@@ -309,8 +321,14 @@ class QECoverageGUI(QtGui.QWidget):
                 self.emptyfield_msgbox.show()
                 raise ValueError(eierr)
 
-        qe = calcQE(ei_vec, self.tthlims, emin=float(self.direct_emin_input.text()))
+        try:
+            Emin = float(self.direct_emin_input.text())
+        except ValueError:
+            Emin = -max(ei_vec)
+        qe = calcQE(ei_vec, self.tthlims, emin=Emin)
+
         if not overplot:
+            self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color='k')
         self.axes.hold(True)
@@ -319,9 +337,12 @@ class QECoverageGUI(QtGui.QWidget):
             name = Inst + '_Ei=' + str(ei_vec[n])
             line, = self.axes.plot(qe[n][0], qe[n][1])
             line.set_label(name)
+            if max(qe[n][0]) > self.xlim:
+                self.xlim = max(qe[n][0])
             if createws:
                 mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1,
                                                  OutputWorkspace=str('QECoverage_' + name))
+        self.axes.set_xlim([0, self.xlim])
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.axes.legend()
@@ -333,17 +354,26 @@ class QECoverageGUI(QtGui.QWidget):
         inst = str(self.indirect_inst_box.currentText())
         ana = str(self.indirect_ef_input.currentText())
         ef = self.indirect_analysers[inst][ana]
-        qe = calcQE([-ef], self.tthlims, emax=float(self.indirect_emax_input.text()))
+
+        try:
+            Emax = float(self.indirect_emax_input.text())
+        except ValueError:
+            Emax = abs(ef)
+        qe = calcQE([-ef], self.tthlims, emax=Emax)
         if not overplot:
+            self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color='k')
         else:
             self.axes.hold(True)
         line, = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + '_' + ana)
+        if max(qe[0][0]) > self.xlim:
+            self.xlim = max(qe[0][0])
         if createws:
             mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1,
                                              OutputWorkspace=str('QECoverage_' + inst + '_' + ana))
+        self.axes.set_xlim([0, self.xlim])
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.axes.legend()
