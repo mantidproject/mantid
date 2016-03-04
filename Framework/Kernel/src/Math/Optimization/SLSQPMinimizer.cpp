@@ -8,7 +8,8 @@
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+#pragma clang diagnostic ignored                                               \
+    "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
 #endif
 
 namespace Mantid {
