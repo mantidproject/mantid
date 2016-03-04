@@ -180,8 +180,6 @@ fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
   CMAKE_GENERATOR=""
 fi
-echo "CMAKE_GENERATOR ${CMAKE_GENERATOR}"
-exit -1
 
 ###############################################################################
 # Work in the build directory
