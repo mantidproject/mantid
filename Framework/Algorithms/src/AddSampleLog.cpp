@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
+
 #include <string>
 
 namespace {
@@ -31,9 +34,9 @@ using namespace Kernel;
 using namespace API;
 
 void AddSampleLog::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "Workspace to add the log entry to");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "", Direction::InOut),
+                  "Workspace to add the log entry to");
   declareProperty("LogName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");

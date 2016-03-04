@@ -41,12 +41,11 @@ namespace Kernel {
 class MANTID_KERNEL_DLL DirectoryValidator : public FileValidator {
 public:
   explicit DirectoryValidator(bool testDirectoryExists = true);
-  virtual ~DirectoryValidator();
-  virtual std::vector<std::string> allowedValues() const;
-  IValidator_sptr clone() const;
+  std::vector<std::string> allowedValues() const override;
+  IValidator_sptr clone() const override;
 
 private:
-  virtual std::string checkValidity(const std::string &value) const;
+  std::string checkValidity(const std::string &value) const override;
 };
 
 } // namespace Kernel

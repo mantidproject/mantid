@@ -5,13 +5,15 @@
 *      Author: ruth
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
-//#include "MantidKernel/Strings.h"
+#include <boost/math/special_functions/round.hpp>
+
 namespace Mantid {
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -29,60 +31,68 @@ PredictFractionalPeaks::PredictFractionalPeaks() : Algorithm() {}
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<IPeaksWorkspace>("Peaks", "", Direction::Input),
+      make_unique<WorkspaceProperty<IPeaksWorkspace>>("Peaks", "",
+                                                      Direction::Input),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      new WorkspaceProperty<IPeaksWorkspace>("FracPeaks", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<IPeaksWorkspace>>("FracPeaks", "",
+                                                      Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("HOffset"), "-0.5,0.0,0.5"),
-      "Offset in the h direction");
-  declareProperty(new Kernel::ArrayProperty<double>(string("KOffset"), "0"),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("HOffset"), "-0.5,0.0,0.5"),
                   "Offset in the h direction");
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("LOffset"), "-0.5,0.5"),
-      "Offset in the h direction");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("KOffset"), "0"),
+                  "Offset in the h direction");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      string("LOffset"), "-0.5,0.5"),
+                  "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,
                   "If false only offsets from peaks from Peaks are used");
 
-  declareProperty(new PropertyWithValue<double>("Hmin", -8.0, Direction::Input),
-                  "Minimum H value to use");
-  declareProperty(new PropertyWithValue<double>("Hmax", 8.0, Direction::Input),
-                  "Maximum H value to use");
-  declareProperty(new PropertyWithValue<double>("Kmin", -8.0, Direction::Input),
-                  "Minimum K value to use");
-  declareProperty(new PropertyWithValue<double>("Kmax", 8.0, Direction::Input),
-                  "Maximum K value to use");
-  declareProperty(new PropertyWithValue<double>("Lmin", -8.0, Direction::Input),
-                  "Minimum L value to use");
-  declareProperty(new PropertyWithValue<double>("Lmax", 8.0, Direction::Input),
-                  "Maximum L value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Hmin", -8.0, Direction::Input),
+      "Minimum H value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Hmax", 8.0, Direction::Input),
+      "Maximum H value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Kmin", -8.0, Direction::Input),
+      "Minimum K value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Kmax", 8.0, Direction::Input),
+      "Maximum K value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Lmin", -8.0, Direction::Input),
+      "Minimum L value to use");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Lmax", 8.0, Direction::Input),
+      "Maximum L value to use");
 
   setPropertySettings(
-      "Hmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Hmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Hmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Kmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Kmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Kmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
-      "Lmin", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmin", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
-      "Lmax", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                                              Kernel::IS_EQUAL_TO, "1"));
+      "Lmax", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Run the algorithm
@@ -135,8 +145,8 @@ void PredictFractionalPeaks::exec() {
 
   int N = NPeaks;
   if (includePeaksInRange) {
-    N = static_cast<int>(
-        (Hmax - Hmin + 1) * (Kmax - Kmin + 1) * (Lmax - Lmin + 1) + .5);
+    N = boost::math::iround((Hmax - Hmin + 1) * (Kmax - Kmin + 1) *
+                            (Lmax - Lmin + 1));
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
@@ -159,16 +169,16 @@ void PredictFractionalPeaks::exec() {
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   while (!done) {
-    for (size_t hoffset = 0; hoffset < hOffsets.size(); hoffset++)
-      for (size_t koffset = 0; koffset < kOffsets.size(); koffset++)
-        for (size_t loffset = 0; loffset < lOffsets.size(); loffset++)
+    for (double hOffset : hOffsets) {
+      for (double kOffset : kOffsets) {
+        for (double lOffset : lOffsets) {
           try {
             V3D hkl1(hkl);
             ErrPos = 0;
 
-            hkl1[0] += hOffsets[hoffset];
-            hkl1[1] += kOffsets[koffset];
-            hkl1[2] += lOffsets[loffset];
+            hkl1[0] += hOffset;
+            hkl1[1] += kOffset;
+            hkl1[2] += lOffset;
 
             Kernel::V3D Qs = UB * hkl1;
             Qs *= 2.0;
@@ -185,11 +195,10 @@ void PredictFractionalPeaks::exec() {
 
             if (Qs[2] > 0 && peak->findDetector()) {
               ErrPos = 2;
-              vector<int> SavPk;
-              SavPk.push_back(RunNumber);
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[0] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[1] + .5)));
-              SavPk.push_back(static_cast<int>(floor(1000 * hkl1[2] + .5)));
+              vector<int> SavPk{RunNumber,
+                                boost::math::iround(1000.0 * hkl1[0]),
+                                boost::math::iround(1000.0 * hkl1[1]),
+                                boost::math::iround(1000.0 * hkl1[2])};
 
               // TODO keep list sorted so searching is faster?
               auto it =
@@ -208,6 +217,9 @@ void PredictFractionalPeaks::exec() {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
               throw new std::invalid_argument("Invalid data at this point");
           }
+        }
+      }
+    }
     if (includePeaksInRange) {
       hkl[0]++;
       if (hkl[0] > Hmax) {

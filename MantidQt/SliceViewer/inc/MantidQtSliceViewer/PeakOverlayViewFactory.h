@@ -62,8 +62,6 @@ namespace MantidQt
       virtual std::string getPlotXLabel() const = 0;
       /// Get the plot y-axis label
       virtual std::string getPlotYLabel() const = 0;
-      /// Get the Figure Of Merit for this factory
-      virtual int FOM() const = 0;
       /// Same factory settings for a different peaks workspace
       virtual void swapPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) = 0;
     };

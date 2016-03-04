@@ -35,20 +35,20 @@ namespace DataHandling {
 class DLLExport RotateSource : public API::Algorithm {
 public:
   RotateSource(){};
-  virtual ~RotateSource(){};
+  ~RotateSource() override{};
 
-  virtual const std::string name() const { return "RotateSource"; };
-  virtual int version() const { return 1; };
-  virtual const std::string category() const {
+  const std::string name() const override { return "RotateSource"; };
+  int version() const override { return 1; };
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   };
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Rotates the source by a given angle";
   };
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace DataHandling

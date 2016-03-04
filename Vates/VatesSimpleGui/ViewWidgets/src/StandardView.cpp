@@ -229,6 +229,11 @@ void StandardView::render()
 }
 
 void StandardView::onCutButtonClicked() {
+  // check that has active source
+  if (!hasActiveSource()) {
+    return;
+  }
+
   // Apply cut to currently viewed data
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
@@ -239,6 +244,11 @@ void StandardView::onCutButtonClicked() {
 }
 
 void StandardView::onScaleButtonClicked() {
+  // check that has active source
+  if (!hasActiveSource()) {
+    return;
+  }
+
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_scaler = builder->createFilter(
       "filters", "MantidParaViewScaleWorkspace", this->getPvActiveSrc());

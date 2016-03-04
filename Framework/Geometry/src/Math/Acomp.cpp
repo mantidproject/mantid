@@ -59,41 +59,6 @@ Standard Constructor
 */
 {}
 
-Acomp::Acomp(const Acomp &A)
-    : Intersect(A.Intersect), Units(A.Units)
-/**
-Copy constructor
-@param A :: Acomp object to copy
-*/
-{
-  std::vector<Acomp>::const_iterator vc;
-  for (vc = A.Comp.begin(); vc != A.Comp.end(); ++vc)
-    Comp.push_back(*vc);
-}
-
-Acomp &Acomp::operator=(const Acomp &A)
-/**
-The assignment operator carries out a
-down level deletion of the Comp vector
-@param A :: Object to copy
-@return *this
-*/
-{
-  if (this != &A) {
-    Intersect = A.Intersect;
-    Units = A.Units;
-    Comp = A.Comp;
-  }
-  return *this;
-}
-
-Acomp::~Acomp()
-/**
-Destructor deletes each Comp Unit and
-down the chain.
-*/
-{}
-
 bool Acomp::operator!=(const Acomp &A) const
 /**
 Inequality operator
@@ -160,15 +125,11 @@ Order (low first)
   const int TS = isSingle(); // is this one component
   const int AS = A.isSingle();
   if (TS != AS)
-    return (TS > AS) ? true : false;
+    return TS > AS;
   // PROCESS Intersection/Union
   if (!TS && Intersect != A.Intersect) {
     // Union==0 therefore this > A
-    if (Intersect > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return Intersect > 0;
   }
 
   // PROCESS Units. (order : then size)
@@ -192,10 +153,7 @@ Order (low first)
     if (*ax != *ux)
       return (*ux < *ax);
   }
-  if (uc != Units.end())
-    return true;
-  // everything idential or A.comp bigger:
-  return false;
+  return uc != Units.end();
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)
@@ -475,17 +433,17 @@ Units are sorted after this function is returned.
   int bextra = 0;
   // find first Component to add
   //  std::cerr<<"Process Union:"<<Ln<<std::endl;
-  for (unsigned int iu = 0; iu < Ln.length(); iu++) {
+  for (char iu : Ln) {
     if (blevel) // we are in a bracket then...
     {
-      if (Ln[iu] == ')') // maybe closing outward..
+      if (iu == ')') // maybe closing outward..
         blevel--;
-      else if (Ln[iu] == '(')
+      else if (iu == '(')
         blevel++;
       if (blevel || bextra)
-        Express += Ln[iu];
+        Express += iu;
     } else {
-      if (Ln[iu] == '+') {
+      if (iu == '+') {
         Acomp AX;
         try {
           AX.setString(Express);
@@ -495,7 +453,7 @@ Units are sorted after this function is returned.
         }
         Express.erase(); // reset string
         addComp(AX);     // add components
-      } else if (Ln[iu] == '(') {
+      } else if (iu == '(') {
         blevel++;
         if (Express.length()) {
           Express += '(';
@@ -503,7 +461,7 @@ Units are sorted after this function is returned.
         } else
           bextra = 0;
       } else
-        Express += Ln[iu];
+        Express += iu;
     }
   }
   if (Express.size() > 0) {
@@ -578,7 +536,7 @@ A. This will make the form DNF.
 {
   Units.clear();
   deleteComp();
-  if (A.size() == 0)
+  if (A.empty())
     return;
 
   if (A.size() == 1) // special case for single intersection
@@ -608,7 +566,7 @@ A. This will make the form DNF.
 {
   Units.clear();
   deleteComp();
-  if (A.size() == 0)
+  if (A.empty())
     return;
 
   if (A.size() == 1) // special case for single union
@@ -705,7 +663,7 @@ int Acomp::isNull() const
 @return 1 if there are no memebers
 */
 {
-  return ((!Units.size() && !Comp.size()) ? 1 : 0);
+  return ((Units.empty() && Comp.empty()) ? 1 : 0);
 }
 
 int Acomp::isDNF() const
@@ -768,7 +726,7 @@ literals
     if (mc != literalMap.end())
       mc->second++;
     else
-      literalMap.insert(std::pair<int, int>(V, 1));
+      literalMap.emplace(V, 1);
   }
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc)
@@ -792,7 +750,7 @@ literals
     if (mc != literalMap.end())
       mc->second++;
     else
-      literalMap.insert(std::pair<int, int>(*uc, 1));
+      literalMap.emplace(*uc, 1);
   }
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc) {
@@ -930,7 +888,7 @@ It is set on exit (to the EPI)
 */
 {
   const int debug(0);
-  if (!PIform.size())
+  if (PIform.empty())
     return 0;
 
   std::vector<BnId> EPI; // Created Here.
@@ -1171,17 +1129,15 @@ component)
   to calculate the DNF but just use it
   */
   if (isDNF()) {
-    std::vector<int>::const_iterator vc;
-    std::vector<Acomp>::const_iterator xc;
-
     Parts.clear();
-    for (vc = Units.begin(); vc != Units.end(); ++vc) {
+    for (const auto &item : Units) {
       Acomp Aitem(1); // Intersection (doesn't matter since 1 object)
-      Aitem.addUnitItem(*vc);
+      Aitem.addUnitItem(item);
       Parts.push_back(Aitem);
     }
-    for (xc = Comp.begin(); xc != Comp.end(); ++xc)
-      Parts.push_back(*xc);
+    for (const auto &item : Comp) {
+      Parts.push_back(item);
+    }
     return static_cast<int>(Parts.size());
   }
 
@@ -1189,10 +1145,9 @@ component)
   std::vector<BnId> DNFobj;
   if (!getDNFobject(keyNumbers, DNFobj)) {
     if (makePI(DNFobj)) {
-      std::vector<BnId>::const_iterator vc;
-      for (vc = DNFobj.begin(); vc != DNFobj.end(); ++vc) {
+      for (auto &obj : DNFobj) {
         Acomp Aitem(1); // make an intersection and add components
-        Aitem.addUnit(keyNumbers, *vc);
+        Aitem.addUnit(keyNumbers, obj);
         Parts.push_back(Aitem);
       }
     }
@@ -1403,7 +1358,7 @@ singles exist and up-promotes them.
     const Acomp *Lower = itemC(0); // returns pointer
     Units.clear();
     Intersect = Lower->Intersect;
-    if (Lower->Units.size()) {
+    if (!Lower->Units.empty()) {
       Units.resize(Lower->Units.size());
       copy(Lower->Units.begin(), Lower->Units.end(), Units.begin());
     }
@@ -1554,7 +1509,7 @@ Assessor function to get a Comp points
 */
 {
   if (Index < 0 || Index >= static_cast<int>(Comp.size()))
-    return 0;
+    return nullptr;
   return &Comp[Index];
 }
 

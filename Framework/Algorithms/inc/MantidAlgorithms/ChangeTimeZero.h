@@ -14,27 +14,27 @@ namespace Algorithms {
 class DLLExport ChangeTimeZero : public API::Algorithm {
 public:
   ChangeTimeZero();
-  ~ChangeTimeZero();
+  ~ChangeTimeZero() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "ChangeTimeZero"; };
+  const std::string name() const override { return "ChangeTimeZero"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The algorithm adjusts the zero time of a workspace.";
   }
   /// Check the inputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Create the output workspace
   Mantid::API::MatrixWorkspace_sptr
   createOutputWS(Mantid::API::MatrixWorkspace_sptr input, double startProgress,
@@ -54,7 +54,7 @@ private:
 
   /// Time shift the log of a double series property
   void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
-                                   Mantid::Kernel::Property *logEntry,
+                                   Mantid::Kernel::Property *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(

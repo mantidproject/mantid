@@ -48,7 +48,7 @@ public:
   /// Return the next number in the sequence
   virtual double nextValue() = 0;
   /// Generates the next point
-  virtual void generateNextPoint();
+  void generateNextPoint() override;
 
 private:
   DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator)

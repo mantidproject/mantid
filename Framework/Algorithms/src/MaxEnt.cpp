@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/MaxEnt.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/shared_array.hpp>
@@ -54,7 +55,7 @@ const std::string MaxEnt::summary() const {
 void MaxEnt::init() {
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -65,49 +66,51 @@ void MaxEnt::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(new PropertyWithValue<double>("A", 0.4, mustBeNonNegative,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "A", 0.4, mustBeNonNegative, Direction::Input),
                   "A maximum entropy constant");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
                   "Target value of Chi-square");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
                   "Required precision for Chi-square");
 
-  declareProperty(new PropertyWithValue<double>("DistancePenalty", 0.1,
-                                                mustBeNonNegative,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1,
+                                                         mustBeNonNegative,
+                                                         Direction::Input),
                   "Distance penalty applied to the current image");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
                   "Maximum degree of non-parallelism between S and C");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
-  declareProperty(new PropertyWithValue<size_t>(
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations");
 
-  declareProperty(new PropertyWithValue<size_t>("AlphaChopIterations", 500,
-                                                mustBePositive,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
+                                                         500, mustBePositive,
+                                                         Direction::Input),
                   "Maximum number of iterations in alpha chop");
 
-  declareProperty(new WorkspaceProperty<>("EvolChi", "", Direction::Output),
-                  "Output workspace containing the evolution of Chi-sq");
-  declareProperty(new WorkspaceProperty<>("EvolAngle", "", Direction::Output),
-                  "Output workspace containing the evolution of "
-                  "non-paralellism between S and C");
   declareProperty(
-      new WorkspaceProperty<>("ReconstructedImage", "", Direction::Output),
-      "The output workspace containing the reconstructed image.");
+      make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
+      "Output workspace containing the evolution of Chi-sq");
   declareProperty(
-      new WorkspaceProperty<>("ReconstructedData", "", Direction::Output),
-      "The output workspace containing the reconstructed data.");
+      make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
+      "Output workspace containing the evolution of "
+      "non-paralellism between S and C");
+  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
+                                                   Direction::Output),
+                  "The output workspace containing the reconstructed image.");
+  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedData", "",
+                                                   Direction::Output),
+                  "The output workspace containing the reconstructed data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -239,13 +242,13 @@ void MaxEnt::exec() {
 
       // Apply distance penalty (SB eq. 33)
       double sum = 0.;
-      for (size_t i = 0; i < image.size(); i++)
-        sum += fabs(image[i]);
+      for (double point : image)
+        sum += fabs(point);
 
       double dist = distance(dirs.s2, beta);
       if (dist > distEps * sum / background) {
-        for (size_t k = 0; k < beta.size(); k++) {
-          beta[k] *= sqrt(sum / dist / background);
+        for (double &k : beta) {
+          k *= sqrt(sum / dist / background);
         }
       }
 

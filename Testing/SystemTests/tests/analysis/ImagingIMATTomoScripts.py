@@ -264,6 +264,8 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         pre = cfgs.PreProcConfig()
         self.assertEquals(pre.input_dir, None)
+        self.assertEquals(pre.input_dir_flat, None)
+        self.assertEquals(pre.input_dir_dark, None)
         self.assertEquals(pre.max_angle, 360)
         self.assertEquals(pre.normalize_flat_dark, True)
         self.assertEquals(pre.crop_coords, None)

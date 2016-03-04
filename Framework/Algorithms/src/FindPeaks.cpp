@@ -8,15 +8,17 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/algorithm/string.hpp>
-#include <numeric>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <numeric>
 
 #include <fstream>
 
@@ -38,7 +40,7 @@ DECLARE_ALGORITHM(FindPeaks)
   */
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
-      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL), m_dataWS(),
+      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(nullptr), m_dataWS(),
       m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
@@ -55,7 +57,7 @@ FindPeaks::FindPeaks()
    */
 void FindPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -77,12 +79,12 @@ void FindPeaks::init() {
                                        "candidates,\n"
                                        "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(new ArrayProperty<double>("PeakPositions"),
+  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
 
-  declareProperty(new ArrayProperty<double>("FitWindows"),
+  declareProperty(make_unique<ArrayProperty<double>>("FitWindows"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of windows to fit. The number of values must be "
                   "exactly double the number of specified peaks.");
@@ -92,10 +94,7 @@ void FindPeaks::init() {
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames));
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -124,7 +123,7 @@ void FindPeaks::init() {
                   "option is turned off.");
 
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PeaksList", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of peaks found");
@@ -146,8 +145,8 @@ void FindPeaks::init() {
       "integer counts.");
 
   std::vector<std::string> costFuncOptions;
-  costFuncOptions.push_back("Chi-Square");
-  costFuncOptions.push_back("Rwp");
+  costFuncOptions.emplace_back("Chi-Square");
+  costFuncOptions.emplace_back("Rwp");
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
@@ -255,7 +254,7 @@ void FindPeaks::processAlgorithmProperties() {
 
   // Specified peak positions, which is optional
   m_vecPeakCentre = getProperty("PeakPositions");
-  if (m_vecPeakCentre.size() > 0)
+  if (!m_vecPeakCentre.empty())
     std::sort(m_vecPeakCentre.begin(), m_vecPeakCentre.end());
   m_vecFitWindows = getProperty("FitWindows");
 
@@ -451,7 +450,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   // Calculate n1 (Mariscotti eqn. 18)
   const double kz =
       1.22; // This kz corresponds to z=5 & w=0.6*fwhm - see Mariscotti Fig. 8
-  const int n1 = static_cast<int>(kz * m_inputPeakFWHM + 0.5);
+  const int n1 = boost::math::iround(kz * m_inputPeakFWHM);
   // Can't calculate n2 or n3 yet because they need i0
   const int tolerance = getProperty("Tolerance");
 
@@ -565,10 +564,10 @@ void FindPeaks::findPeaksUsingMariscotti() {
           continue;
         }
         // Calculate n2 (Mariscotti eqn. 20)
-        int n2 = abs(
-            static_cast<int>(0.5 * (F[i0] / S[i0]) * (n1 + tolerance) + 0.5));
-        const int n2b = abs(
-            static_cast<int>(0.5 * (F[i0] / S[i0]) * (n1 - tolerance) + 0.5));
+        int n2 = std::abs(
+            boost::math::iround(0.5 * (F[i0] / S[i0]) * (n1 + tolerance)));
+        const int n2b = std::abs(
+            boost::math::iround(0.5 * (F[i0] / S[i0]) * (n1 - tolerance)));
         if (n2b > n2)
           n2 = n2b;
         // Mariscotti eqn. (21)
@@ -578,10 +577,10 @@ void FindPeaks::findPeaksUsingMariscotti() {
           continue;
         }
         // Calculate n3 (Mariscotti eqn. 22)
-        int n3 = abs(static_cast<int>(
-            (n1 + tolerance) * (1 - 2 * (F[i0] / S[i0])) + 0.5));
-        const int n3b = abs(static_cast<int>(
-            (n1 - tolerance) * (1 - 2 * (F[i0] / S[i0])) + 0.5));
+        int n3 = std::abs(
+            boost::math::iround((n1 + tolerance) * (1 - 2 * (F[i0] / S[i0]))));
+        const int n3b = std::abs(
+            boost::math::iround((n1 - tolerance) * (1 - 2 * (F[i0] / S[i0]))));
         if (n3b < n3)
           n3 = n3b;
         // Mariscotti eqn. (23)

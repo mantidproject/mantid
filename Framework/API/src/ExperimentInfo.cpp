@@ -24,7 +24,6 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
-#include <Poco/ScopedLock.h>
 #include <nexus/NeXusException.hpp>
 
 using namespace Mantid::Geometry;
@@ -45,11 +44,6 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExperimentInfo::~ExperimentInfo() {}
 
 //---------------------------------------------------------------------------------------
 /**
@@ -73,9 +67,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
   m_choppers.clear();
-  for (auto iter = other->m_choppers.begin(); iter != other->m_choppers.end();
-       ++iter) {
-    m_choppers.push_back((*iter)->clone());
+  for (const auto &chopper : other->m_choppers) {
+    m_choppers.push_back(chopper->clone());
   }
 }
 
@@ -106,9 +99,8 @@ const std::string ExperimentInfo::toString() const {
 
   // parameter files loaded
   auto paramFileVector = this->instrumentParameters().getParameterFilenames();
-  for (auto itFilename = paramFileVector.begin();
-       itFilename != paramFileVector.end(); ++itFilename) {
-    out << "Parameters from: " << *itFilename;
+  for (auto &itFilename : paramFileVector) {
+    out << "Parameters from: " << itFilename;
     out << "\n";
   }
 
@@ -170,7 +162,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
 
   // enter the critical region if absolutely necessary
   if (!m_parmap.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
@@ -449,7 +441,7 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 * @return const reference to Sample object
 */
 const Sample &ExperimentInfo::sample() const {
-  Poco::Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_sample;
 }
 
@@ -463,7 +455,7 @@ Sample &ExperimentInfo::mutableSample() {
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_sample.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_sample.unique()) {
@@ -479,7 +471,7 @@ Sample &ExperimentInfo::mutableSample() {
 * @return const reference to run object
 */
 const Run &ExperimentInfo::run() const {
-  Poco::Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_run;
 }
 
@@ -493,7 +485,7 @@ Run &ExperimentInfo::mutableRun() {
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_run.unique()) {
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_run.unique()) {
@@ -688,25 +680,25 @@ public:
 
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  virtual void startElement(const XMLString &, const XMLString &localName,
-                            const XMLString &, const Attributes &attrList) {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
     if (localName == "instrument") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  virtual void endElement(const XMLString &, const XMLString &,
-                          const XMLString &) {}
-  virtual void startDocument() {}
-  virtual void endDocument() {}
-  virtual void characters(const XMLChar[], int, int) {}
-  virtual void endPrefixMapping(const XMLString &) {}
-  virtual void ignorableWhitespace(const XMLChar[], int, int) {}
-  virtual void processingInstruction(const XMLString &, const XMLString &) {}
-  virtual void setDocumentLocator(const Locator *) {}
-  virtual void skippedEntity(const XMLString &) {}
-  virtual void startPrefixMapping(const XMLString &, const XMLString &) {}
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -792,18 +784,14 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
 
 //---------------------------------------------------------------------------------------
 /** A given instrument may have multiple IDFs associated with it. This method
-*return an
-*  identifier which identify a given IDF for a given instrument. An IDF filename
-*is
-*  required to be of the form IDFname + _Definition + Identifier + .xml, the
-*identifier
-*  then is the part of a filename that identifies the IDF valid at a given date.
+*return an identifier which identify a given IDF for a given instrument.
+* An IDF filename is required to be of the form IDFname + _Definition +
+*Identifier + .xml, the identifier then is the part of a filename that
+*identifies the IDF valid at a given date.
 *
 *  If several IDF files are valid at the given date the file with the most
-*recent from
-*  date is selected. If no such files are found the file with the latest from
-*date is
-*  selected.
+*recent from date is selected. If no such files are found the file with the
+*latest from date is selected.
 *
 *  If no file is found for the given instrument, an empty string is returned.
 *
@@ -851,11 +839,9 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
                                                       // starting matching IDF
-  for (auto instDirs_itr = directoryNames.begin();
-       instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+  for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
-    std::string directoryName = *instDirs_itr;
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
       if (!Poco::File(dir_itr->path()).isFile())
@@ -1076,7 +1062,7 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
       instr = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }
@@ -1134,21 +1120,21 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
 
-  int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  options += Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer splitter(parameterStr, "|", options);
+  int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+  options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
   auto iend = splitter.end();
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
-    Poco::StringTokenizer tokens(*itr, ";");
+    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
       int detID = atoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
@@ -1194,7 +1180,7 @@ void ExperimentInfo::populateWithParameter(
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
 
-  const std::string *pDescription = NULL;
+  const std::string *pDescription = nullptr;
   if (!paramInfo.m_description.empty())
     pDescription = &paramInfo.m_description;
 

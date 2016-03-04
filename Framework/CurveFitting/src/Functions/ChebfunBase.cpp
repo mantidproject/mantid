@@ -61,15 +61,6 @@ ChebfunBase::ChebfunBase(size_t n, double start, double end, double tolerance)
 }
 
 /**
- * Copy constructor
- * @param other :: A base to copy from.
- */
-ChebfunBase::ChebfunBase(const ChebfunBase &other)
-    : m_tolerance(other.m_tolerance), m_n(other.m_n), m_start(other.m_start),
-      m_end(other.m_end), m_x(other.m_x), m_bw(other.m_bw),
-      m_integrationWeights(other.m_integrationWeights) {}
-
-/**
  * Return the integration weights that can be used in function manipulations
  * involving integration.
  */
@@ -170,8 +161,8 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   if (a.empty())
     return true;
   if (maxA == 0.0) {
-    for (auto it = a.begin(); it != a.end(); ++it) {
-      double tmp = fabs(*it);
+    for (double coeff : a) {
+      double tmp = fabs(coeff);
       if (tmp > maxA) {
         maxA = tmp;
       }
@@ -186,10 +177,7 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   for (auto i = a.rbegin() + shift; i != a.rend() - 1; ++i) {
     if (*i == 0.0)
       continue;
-    if ((fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance)
-      return true;
-    else
-      return false;
+    return (fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance;
   }
   return false;
 }
@@ -400,8 +388,8 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
     a = base.calcA(p2);
     if (calcMaxA) {
       maxA = 0.0;
-      for (auto it = a.begin(); it != a.end(); ++it) {
-        double tmp = fabs(*it);
+      for (double coeff : a) {
+        double tmp = fabs(coeff);
         if (tmp > maxA) {
           maxA = tmp;
         }
@@ -492,8 +480,8 @@ std::vector<double> ChebfunBase::linspace(size_t n) const {
   std::vector<double> space(n);
   double x = m_start;
   const double dx = width() / double(n - 1);
-  for (auto s = space.begin(); s != space.end(); ++s) {
-    *s = x;
+  for (double &s : space) {
+    s = x;
     x += dx;
   }
   space.back() = m_end;

@@ -6,7 +6,9 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
@@ -36,8 +38,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       wsValidator),
       "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
@@ -45,12 +47,11 @@ void FindDetectorsPar::init() {
                   "detector's ranges (dx,dy) rather then angular ranges "
                   "(dAzimuthal,dPolar)");
   // optional par or phx file
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".par";
-  fileExts[1] = ".phx";
+  const std::vector<std::string> fileExts{".par", ".phx"};
 
-  declareProperty(new FileProperty("ParFile", "not_used.par",
-                                   FileProperty::OptionalLoad, fileExts),
+  declareProperty(Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
+                                                    FileProperty::OptionalLoad,
+                                                    fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
@@ -67,7 +68,7 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == NULL) {
+  if (inputWS.get() == nullptr) {
     throw(Kernel::Exception::NotFoundError(
         "can not obtain InoputWorkspace for the algorithm to work", ""));
   }
@@ -155,7 +156,7 @@ void FindDetectorsPar::setOutputTable() {
     return;
   // Store the result in a table workspace
   try {
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputParTableWS", "", Direction::Output));
   } catch (std::exception &err) {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "
@@ -378,16 +379,16 @@ void FindDetectorsPar::extractAndLinearize(
   this->detID.resize(nDetectors);
 
   nDetectors = 0;
-  for (size_t i = 0; i < detPar.size(); i++) {
-    if (detPar[i].detID < 0)
+  for (const auto &parameter : detPar) {
+    if (parameter.detID < 0)
       continue;
 
-    azimuthal[nDetectors] = detPar[i].azimutAngle;
-    polar[nDetectors] = detPar[i].polarAngle;
-    azimuthalWidth[nDetectors] = detPar[i].azimWidth;
-    polarWidth[nDetectors] = detPar[i].polarWidth;
-    secondaryFlightpath[nDetectors] = detPar[i].secondaryFlightPath;
-    detID[nDetectors] = static_cast<size_t>(detPar[i].detID);
+    azimuthal[nDetectors] = parameter.azimutAngle;
+    polar[nDetectors] = parameter.polarAngle;
+    azimuthalWidth[nDetectors] = parameter.azimWidth;
+    polarWidth[nDetectors] = parameter.polarWidth;
+    secondaryFlightpath[nDetectors] = parameter.secondaryFlightPath;
+    detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
   // store caluclated value

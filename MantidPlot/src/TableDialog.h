@@ -55,8 +55,8 @@ private slots:
 	void showPrecisionBox(int item);
 	void updatePrecision(int prec);
 	void setPlotDesignation(int i);
-	void accept();
-	void apply();
+        void accept() override;
+        void apply();
 	void updateDisplay(int item);
 	void enablePrecision(int f);
 	void setNumericFormat(int type, int prec, bool allRightColumns);
@@ -71,7 +71,7 @@ signals:
 private:
     void setDateTimeFormat(int type, const QString& format, bool allRightColumns);
 	void setTextFormat(bool allRightColumns);
-    void closeEvent( QCloseEvent *);
+        void closeEvent(QCloseEvent *) override;
 
     Table * d_table;
 

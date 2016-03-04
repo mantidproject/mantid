@@ -55,7 +55,7 @@ public:
   /// @param iActiveP :: the index of the parameter
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
-  void addNumberToColumn(const double &value, const size_t &iActiveP) {
+  void addNumberToColumn(const double &value, const size_t &iActiveP) override {
     if (iActiveP < m_J->size2) {
       // add penalty to first and last point and every 10th point in between
       m_J->data[iActiveP] += value;
@@ -68,13 +68,13 @@ public:
     }
   }
   /// overwrite base method
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     int j = m_index[iP];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);
   }
   /// overwrite base method
-  double get(size_t iY, size_t iP) {
+  double get(size_t iY, size_t iP) override {
     int j = m_index[iP];
     if (j >= 0)
       return gsl_matrix_get(m_J, iY, j);

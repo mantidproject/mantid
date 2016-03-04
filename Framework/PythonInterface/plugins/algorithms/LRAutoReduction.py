@@ -43,6 +43,7 @@ class LRAutoReduction(PythonAlgorithm):
         # ---------------------------------------------------------------------
 
         self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
+        self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
         self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
@@ -51,7 +52,10 @@ class LRAutoReduction(PythonAlgorithm):
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
 
-    def _get_series_info(self, filename, run_number):
+        self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
+                             "Run sequence information (run number, sequence ID, sequence number).")
+
+    def _get_series_info(self, filename):
         """
             Retrieve the information about the scan series so
             that we know how to put all the pieces together.
@@ -62,6 +66,7 @@ class LRAutoReduction(PythonAlgorithm):
         # Load meta data to decide what to do
         self.event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
         meta_data_run = self.event_data.getRun()
+        run_number = self.event_data.getRunNumber()
 
         # Deal with a forced sequence number
         force_value = self.getProperty("ForceSequenceNumber").value
@@ -87,7 +92,8 @@ class LRAutoReduction(PythonAlgorithm):
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
             do_reduction = not is_direct_beam
 
-        return first_run_of_set, sequence_number, do_reduction, is_direct_beam
+        self.setProperty("SequenceInfo", [int(run_number), int(first_run_of_set), int(sequence_number)])
+        return run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
 
     def _parse_title(self, meta_data_run, run_number):
@@ -353,8 +359,9 @@ class LRAutoReduction(PythonAlgorithm):
         m = 1.675e-27  # kg
         wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         chopper_speed = self.event_data.getRun().getProperty('SpeedRequest1').value[0]
-        tof_min = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
-        tof_max = source_detector_distance / h * m * (wl + 0.5 * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
+        wl_offset = self.getProperty("WavelengthOffset").value
+        tof_min = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
+        tof_max = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
         return [tof_min, tof_max]
 
 
@@ -497,11 +504,9 @@ class LRAutoReduction(PythonAlgorithm):
 
     def PyExec(self):
         filename = self.getProperty("Filename").value
-        event_file = os.path.split(filename)[-1]
-        run_number = event_file.split('_')[2]
 
         # Determine where we are in the scan
-        first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename, run_number)
+        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
 
         # Get the reduction parameters for this run
         data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)

@@ -2,8 +2,9 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -155,8 +156,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   yvalB.assign(xRef.size(), 0.0);
 
   if (N < 4) // If not well indexed
-    return boost::shared_ptr<DataObjects::Workspace2D>(
-        new DataObjects::Workspace2D);
+    return boost::make_shared<DataObjects::Workspace2D>();
 
   MatrixWorkspace_sptr mwkspc =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
@@ -183,8 +183,7 @@ void SCDCalibratePanels::CalculateGroups(
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
-    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-      string bankName = (*it);
+    for (const auto &bankName : AllBankNames) {
       vector<string> vbankName;
       vbankName.push_back(bankName);
       Groups.push_back(vbankName);
@@ -193,9 +192,7 @@ void SCDCalibratePanels::CalculateGroups(
   } else if (Grouping == "AllPanelsInOneGroup") {
     vector<string> vbankName;
 
-    for (auto it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
-      string bankName = (*it);
-
+    for (const auto &bankName : AllBankNames) {
       vbankName.push_back(bankName);
     }
 
@@ -208,9 +205,7 @@ void SCDCalibratePanels::CalculateGroups(
     boost::split(GroupA, bankingCode, boost::is_any_of("]"));
     set<string> usedInts;
 
-    for (size_t Gr = 0; Gr < GroupA.size(); ++Gr) {
-      string S = GroupA[Gr];
-
+    for (auto S : GroupA) {
       boost::trim(S);
 
       if (S.empty())
@@ -226,9 +221,7 @@ void SCDCalibratePanels::CalculateGroups(
       boost::split(GroupB, S, boost::is_any_of(","));
 
       vector<string> Group0;
-      for (size_t panelRange = 0; panelRange < GroupB.size(); ++panelRange) {
-        string rangeOfBanks = GroupB[panelRange];
-
+      for (auto rangeOfBanks : GroupB) {
         boost::trim(rangeOfBanks);
 
         vector<string> StrtStopStep;
@@ -315,10 +308,9 @@ boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
   bool xml = (preprocessCommand == "C)Apply a LoadParameter.xml type file");
 
   boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
-  boost::shared_ptr<ParameterMap> pmap1(new ParameterMap());
+  auto pmap1 = boost::make_shared<ParameterMap>();
 
-  for (auto vit = AllBankNames.begin(); vit != AllBankNames.end(); ++vit) {
-    string bankName = (*vit);
+  for (const auto &bankName : AllBankNames) {
     updateBankParams(instrument->getComponentByName(bankName), pmap1, pmap0);
   }
 
@@ -618,8 +610,8 @@ void SCDCalibratePanels::exec() {
     PARALLEL_START_INTERUPT_REGION
     auto group = Groups.begin() + iGr;
     vector<string> banksVec;
-    for (auto bankName = group->begin(); bankName != group->end(); ++bankName) {
-      banksVec.push_back(*bankName);
+    for (auto &bankName : *group) {
+      banksVec.push_back(bankName);
     }
     if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
       g_log.warning() << "**** Indexing is NOT compatible with given lattice "
@@ -908,11 +900,11 @@ void SCDCalibratePanels::exec() {
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
 
-      boost::shared_ptr<ParameterMap> pmap(new ParameterMap());
+      auto pmap = boost::make_shared<ParameterMap>();
       boost::shared_ptr<const ParameterMap> pmapOld =
           instrument->getParameterMap();
-      boost::shared_ptr<const Instrument> NewInstrument(
-          new Instrument(instrument->baseInstrument(), pmap));
+      boost::shared_ptr<const Instrument> NewInstrument =
+          boost::make_shared<Instrument>(instrument->baseInstrument(), pmap);
 
       boost::shared_ptr<const RectangularDetector> bank_rect;
       double rotx, roty, rotz;
@@ -1162,7 +1154,6 @@ void SCDCalibratePanels::LoadISawDetCal(
     // These are the original axes
     V3D oX = V3D(1., 0., 0.);
     V3D oY = V3D(0., 1., 0.);
-    V3D oZ = V3D(0., 0., 1.);
 
     // Axis that rotates X
     V3D ax1 = oX.cross_prod(rX);
@@ -1236,9 +1227,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
 
   // determine the field names, the leading '_' is the break point
   vector<string> TableFieldNames;
-  for (size_t p = 0; p < names.size(); ++p) {
-    string fieldName = names[p];
-
+  for (auto fieldName : names) {
     size_t dotPos = fieldName.find('_');
     if (dotPos < fieldName.size())
       fieldName = fieldName.substr(dotPos + 1);
@@ -1326,14 +1315,12 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeakWorkspace", "", Kernel::Direction::Input),
                   "Workspace of Indexed Peaks");
 
-  vector<string> choices;
-  choices.push_back("OnePanelPerGroup");
-  choices.push_back("AllPanelsInOneGroup");
-  choices.push_back("SpecifyGroups");
+  vector<string> choices{"OnePanelPerGroup", "AllPanelsInOneGroup",
+                         "SpecifyGroups"};
   declareProperty(string("PanelGroups"), string("OnePanelPerGroup"),
                   boost::make_shared<Kernel::StringListValidator>(choices),
                   "Select grouping of Panels");
@@ -1381,21 +1368,18 @@ void SCDCalibratePanels::init() {
   declareProperty("SampleZoffset", 0.0, "Specify Sample z offset");
 
   // ---------- preprocessing
-  vector<string> preProcessOptions;
-  preProcessOptions.push_back(string("A)No PreProcessing"));
-  preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
-  preProcessOptions.push_back("C)Apply a LoadParameter.xml type file");
+  vector<string> preProcessOptions{"A)No PreProcessing",
+                                   "B)Apply a ISAW.DetCal File",
+                                   "C)Apply a LoadParameter.xml type file"};
 
   declareProperty(
       string("PreProcessInstrument"), string("A)No PreProcessing"),
       boost::make_shared<Kernel::StringListValidator>(preProcessOptions),
       "Select PreProcessing info");
 
-  vector<string> exts2;
-  exts2.push_back(".DetCal");
-  exts2.push_back(".xml");
-  declareProperty(new FileProperty("PreProcFilename", "",
-                                   FileProperty::OptionalLoad, exts2),
+  const vector<string> exts2{".DetCal", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "PreProcFilename", "", FileProperty::OptionalLoad, exts2),
                   "Path to file with preprocessing information");
 
   declareProperty("InitialTimeOffset", 0.0,
@@ -1407,23 +1391,25 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("InitialTimeOffset", PREPROC);
 
   // ---------- outputs
-  declareProperty(new FileProperty("DetCalFilename", "",
-                                   FileProperty::OptionalSave,
-                                   {".DetCal", ".Det_Cal"}),
+  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
+  declareProperty(Kernel::make_unique<FileProperty>("DetCalFilename", "",
+                                                    FileProperty::OptionalSave,
+                                                    detcalExts),
                   "Path to an ISAW-style .detcal file to save.");
 
   declareProperty(
-      new FileProperty("XmlFilename", "", FileProperty::OptionalSave, {".xml"}),
+      Kernel::make_unique<FileProperty>("XmlFilename", "",
+                                        FileProperty::OptionalSave, ".xml"),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "ResultWorkspace", "ResultWorkspace", Kernel::Direction::Output),
       "Workspace of Results");
 
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>(
+      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "QErrorWorkspace", "QErrorWorkspace", Kernel::Direction::Output),
       "Workspace of Errors in Q");
 
@@ -1460,30 +1446,30 @@ void SCDCalibratePanels::init() {
                   Kernel::Direction::Output);
   declareProperty("DOF", -1, "Degrees of Freedom", Kernel::Direction::Output);
   setPropertySettings("PanelNamePrefix",
-                      new EnabledWhenProperty(
+                      Kernel::make_unique<EnabledWhenProperty>(
                           "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
-  setPropertySettings("Grouping", new EnabledWhenProperty("PanelGroups",
-                                                          Kernel::IS_EQUAL_TO,
-                                                          "SpecifyGroups"));
+  setPropertySettings("Grouping",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 
   setPropertySettings("PreProcFilename",
-                      new EnabledWhenProperty("PreProcessInstrument",
-                                              Kernel::IS_NOT_EQUAL_TO,
-                                              "A)No PreProcessing"));
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO,
+                          "A)No PreProcessing"));
 
-  setPropertySettings(
-      "InitialTimeOffset",
-      new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_EQUAL_TO,
-                              "C)Apply a LoadParameter.xml type file"));
+  setPropertySettings("InitialTimeOffset",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "PreProcessInstrument", Kernel::IS_EQUAL_TO,
+                          "C)Apply a LoadParameter.xml type file"));
 
-  setPropertySettings(
-      "MaxSamplePositionChangeMeters",
-      new EnabledWhenProperty("AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxSamplePositionChangeMeters",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "AllowSampleShift", Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "MaxRotationChangeDegrees",
-      new EnabledWhenProperty("usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxRotationChangeDegrees",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "usePanelOrientation", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /**
@@ -1645,9 +1631,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
   boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
-  for (auto it1 = bankNames.cbegin(); it1 != bankNames.cend(); ++it1) {
-
-    const string bankName = (*it1);
+  for (const auto &bankName : bankNames) {
 
     boost::shared_ptr<const IComponent> bank1 =
         NewInstrument->getComponentByName(bankName);
@@ -1731,8 +1715,8 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (auto it = Groups.begin(); it != Groups.end(); ++it) {
-    for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
+  for (const auto &Group : Groups) {
+    for (auto it1 = Group.begin(); it1 != Group.end(); ++it1) {
       string bankName = (*it1);
 
       oss3 << "<component-link name=\"" << bankName << "\">" << endl;

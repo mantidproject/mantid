@@ -43,7 +43,6 @@ public:
   }
 
   MDHistoDimensionBuilder();
-  ~MDHistoDimensionBuilder();
   void setName(std::string name);
   void setId(std::string id);
   void setUnits(const Kernel::UnitLabel &units);
@@ -55,8 +54,6 @@ public:
   size_t getNumBins() const { return m_nbins; }
   MDHistoDimension *createRaw();
   IMDDimension_sptr create();
-  MDHistoDimensionBuilder(const MDHistoDimensionBuilder &);
-  MDHistoDimensionBuilder &operator=(const MDHistoDimensionBuilder &);
 
 private:
   /// Cached name

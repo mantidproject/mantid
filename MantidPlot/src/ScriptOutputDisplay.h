@@ -21,11 +21,11 @@ public:
   /// Add actions applicable to an edit menu
   void populateEditMenu(QMenu &editMenu);
   ///Capture key presses
-  virtual void keyPressEvent(QKeyEvent* event);
+  void keyPressEvent(QKeyEvent *event) override;
   //squash dragging ability
-  void mouseMoveEvent(QMouseEvent * e);
+  void mouseMoveEvent(QMouseEvent *e) override;
   /// capture ctrl_up or down to zoom
-  void wheelEvent(QWheelEvent *e);
+  void wheelEvent(QWheelEvent *e) override;
   //sets the zoom to a specific level
   void setZoom(int value);
   /// zooms the text size

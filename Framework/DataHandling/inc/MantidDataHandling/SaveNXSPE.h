@@ -38,25 +38,25 @@ public:
   /// Constructor
   SaveNXSPE();
   /// Virtual dtor
-  virtual ~SaveNXSPE() {}
-  virtual const std::string name() const { return "SaveNXSPE"; }
+  ~SaveNXSPE() override {}
+  const std::string name() const override { return "SaveNXSPE"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Writes a MatrixWorkspace to a file in the NXSPE format.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic\\DataHandling";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   // Some constants to be written for masked values.
   /// Value for data if pixel is masked

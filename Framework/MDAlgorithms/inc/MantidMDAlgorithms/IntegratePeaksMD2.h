@@ -19,26 +19,26 @@ namespace MDAlgorithms {
 class DLLExport IntegratePeaksMD2 : public API::Algorithm {
 public:
   IntegratePeaksMD2();
-  ~IntegratePeaksMD2();
+  ~IntegratePeaksMD2() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "IntegratePeaksMD"; };
+  const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Integrate single-crystal peaks in reciprocal space, for "
            "MDEventWorkspaces.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 2; };
+  int version() const override { return 2; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
+  const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   template <typename MDE, size_t nd>
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
@@ -48,7 +48,7 @@ private:
 
   /// Calculate if this Q is on a detector
   void calculateE1(Geometry::Instrument_const_sptr inst);
-  double detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
+  double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);
 

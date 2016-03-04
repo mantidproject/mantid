@@ -53,7 +53,7 @@ public:
   PoldiPeakCollection(const Geometry::CrystalStructure &crystalStructure,
                       double dMin, double dMax);
 
-  virtual ~PoldiPeakCollection() {}
+  virtual ~PoldiPeakCollection() = default;
 
   PoldiPeakCollection_sptr clone();
 

@@ -1,10 +1,16 @@
 #ifndef MANTID_DATAHANDLING_LoadHelper_H_
 #define MANTID_DATAHANDLING_LoadHelper_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+}
+
 namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files
@@ -68,7 +74,7 @@ public:
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
                                        std::string &parent_name,
-                                       std::string &parent_class, int indent);
+                                       std::string &parent_class, int level);
 };
 }
 // namespace DataHandling

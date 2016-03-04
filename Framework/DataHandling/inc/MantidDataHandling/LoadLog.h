@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 
@@ -77,28 +78,28 @@ public:
   LoadLog();
 
   /// Destructor
-  ~LoadLog() {}
+  ~LoadLog() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadLog"; };
+  const std::string name() const override { return "LoadLog"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load ISIS log file(s) into a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 
   /// SNS text
   bool LoadSNSText();
 
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// The name and path of an input file. This may be the filename of a raw
   /// datafile or the name of a specific log file.
@@ -114,7 +115,7 @@ private:
   std::string stringToLower(std::string strToConvert);
 
   /// Checks if the file is an ASCII file
-  bool isAscii(const std::string &filenamePart);
+  bool isAscii(const std::string &filename);
 
   /// Check if first 19 characters of a string is data-time string according to
   /// yyyy-mm-ddThh:mm:ss
@@ -122,7 +123,7 @@ private:
 
   /// Checks if a log file name was provided (e.g. through setPropertyValue). If
   /// not it creates one based on provided path.
-  std::string extractLogName(const std::vector<std::string> &logFileName);
+  std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
   bool SNSTextFormatColumns(const std::string &str,

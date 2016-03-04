@@ -35,25 +35,25 @@ namespace Algorithms {
 class DLLExport ResetNegatives : public API::Algorithm {
 public:
   ResetNegatives();
-  virtual ~ResetNegatives();
+  ~ResetNegatives() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Reset negative values to something else.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void pushMinimum(API::MatrixWorkspace_const_sptr minWS,
                    API::MatrixWorkspace_sptr wksp, API::Progress &prog);
   void changeNegatives(API::MatrixWorkspace_const_sptr minWS,
-                       const double value, API::MatrixWorkspace_sptr wksp,
-                       API::Progress &prog);
+                       const double spectrumNegativeValues,
+                       API::MatrixWorkspace_sptr wksp, API::Progress &prog);
 };
 
 } // namespace Algorithms

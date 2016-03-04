@@ -3,6 +3,8 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -46,6 +48,8 @@ public:
     c1 = Kernel::DblMatrix(dim, 1);
     s2 = Kernel::DblMatrix(dim, dim);
     c2 = Kernel::DblMatrix(dim, dim);
+    chisq = 0.0;
+    angle = 0.0;
   };
   Kernel::DblMatrix xIm;  // Search directions in image space
   Kernel::DblMatrix xDat; // Search directions in data space
@@ -64,24 +68,24 @@ public:
   /// Constructor
   MaxEnt();
   /// Destructor
-  virtual ~MaxEnt();
+  ~MaxEnt() override;
 
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
   /// Algorithm's category
-  virtual const std::string category() const;
+  const std::string category() const override;
   /// Algorithm's summary
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
 private:
   /// Initialise the algorithm's properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Validate the input properties
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   /// Transforms from image space to data space
   std::vector<double> transformImageToData(const std::vector<double> &input);
   /// Transforms from data space to image space
@@ -103,8 +107,8 @@ private:
                                              const std::vector<double> &image,
                                              double background);
   // Calculates chi-square by solving the matrix equation A*x = b
-  double calculateChi(const SearchDirections &coeffs, double a,
-                      std::vector<double> &beta);
+  double calculateChi(const SearchDirections &dirs, double a,
+                      std::vector<double> &b);
   // Calculates the SVD of the input matrix A
   std::vector<double> solveSVD(const Kernel::DblMatrix &A,
                                const Kernel::DblMatrix &B);

@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -497,8 +498,8 @@ void PawleyFunction::setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
                               double height) {
   clearPeaks();
 
-  for (size_t i = 0; i < hkls.size(); ++i) {
-    addPeak(hkls[i], fwhm, height);
+  for (const auto &hkl : hkls) {
+    addPeak(hkl, fwhm, height);
   }
 }
 

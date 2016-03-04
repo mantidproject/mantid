@@ -26,9 +26,6 @@ WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
   isDistribution(true);
 }
 
-/// Destructor
-WorkspaceSingleValue::~WorkspaceSingleValue() {}
-
 /** Does nothing in this case
 *  @param NVectors :: This value can only be equal to one, otherwise exception
 * is thrown

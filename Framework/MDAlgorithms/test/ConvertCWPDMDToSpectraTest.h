@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
-#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;
@@ -251,11 +253,8 @@ public:
    */
   void test_ExcludeDetectors() {
     // Set up
-    std::vector<int> vecExcludedDetID;
-    vecExcludedDetID.push_back(10);
-    for (int i = 20; i < 30; ++i)
-      vecExcludedDetID.push_back(i);
-    vecExcludedDetID.push_back(49);
+    std::vector<int> vecExcludedDetID{10, 20, 21, 22, 23, 24,
+                                      25, 26, 27, 28, 29, 49};
 
     // Init
     ConvertCWPDMDToSpectra alg;

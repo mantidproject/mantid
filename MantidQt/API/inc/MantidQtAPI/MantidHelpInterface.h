@@ -45,7 +45,7 @@ public:
   /// Default constructor
   MantidHelpInterface();
   /// Default destructor.
-  virtual ~MantidHelpInterface();
+  ~MantidHelpInterface() override;
 
   virtual void showPage(const std::string & url=std::string());
   virtual void showPage(const QString & url);

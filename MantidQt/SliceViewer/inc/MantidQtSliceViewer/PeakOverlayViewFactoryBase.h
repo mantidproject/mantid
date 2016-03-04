@@ -41,15 +41,15 @@ namespace MantidQt
     protected:
       QwtPlot * m_plot;
       QWidget * m_parent;
-      QColor m_peakColour;
-      QColor m_backColour;
+      PeakViewColor m_foregroundViewColor;
+      PeakViewColor m_backgroundViewColor;
       const int m_plotXIndex;
       const int m_plotYIndex;
     public:
       PeakOverlayViewFactoryBase(QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber=0);
-      virtual ~PeakOverlayViewFactoryBase();
-      virtual std::string getPlotXLabel() const;
-      virtual std::string getPlotYLabel() const;
+      ~PeakOverlayViewFactoryBase() override;
+      std::string getPlotXLabel() const override;
+      std::string getPlotYLabel() const override;
     };
   }
 }

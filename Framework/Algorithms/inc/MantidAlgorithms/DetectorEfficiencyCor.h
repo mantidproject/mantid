@@ -3,11 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/V3D.h"
-#include <climits>
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -86,9 +82,9 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm {
 public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "DetectorEfficiencyCor"; }
+  const std::string name() const override { return "DetectorEfficiencyCor"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm adjusts the binned data in a workspace for detector "
            "efficiency, calculated from the neutrons' kinetic energy, the gas "
            "filled detector's geometry and gas pressure. The data are then "
@@ -96,9 +92,9 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";
   }
 
@@ -106,7 +102,7 @@ private:
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(int64_t spectraIndex);
+  void correctForEfficiency(int64_t spectraIn);
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
@@ -146,8 +142,8 @@ private:
   std::list<int64_t> m_spectraSkipped;
 
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

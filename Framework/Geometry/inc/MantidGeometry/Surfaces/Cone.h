@@ -47,28 +47,28 @@ private:
   double alpha;       ///< Angle (degrees)
   double cangle;      ///< Cos(angle)
 
-  void rotate(const Kernel::Matrix<double> &);
-  void displace(const Kernel::V3D &);
-  Cone *doClone() const;
+  void rotate(const Kernel::Matrix<double> &) override;
+  void displace(const Kernel::V3D &) override;
+  Cone *doClone() const override;
 
 protected:
-  Cone(const Cone &);
-  Cone &operator=(const Cone &);
+  Cone(const Cone &) = default;
+  Cone &operator=(const Cone &) = default;
 
 public:
   /// Public identifer
-  virtual std::string className() const { return "Cone"; }
+  std::string className() const override { return "Cone"; }
   Cone();
   std::unique_ptr<Cone> clone() const;
   int operator==(const Cone &) const;
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
-  int side(const Kernel::V3D &R) const;
+  int side(const Kernel::V3D &R) const override;
   /// Calculate if the point R is on the cone(1=on the surface, 0=not)
-  int onSurface(const Kernel::V3D &R) const;
+  int onSurface(const Kernel::V3D &R) const override;
 
   /// Accept visitor for line calculation
-  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
+  void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
 
   /// Return centre point
   Kernel::V3D getCentre() const { return Centre; }
@@ -77,10 +77,10 @@ public:
   /// Edge Angle
   double getCosAngle() const { return cangle; }
   /// This method returns the distance of the point from the cone
-  double distance(const Kernel::V3D &) const;
+  double distance(const Kernel::V3D &) const override;
 
   /// This method sets the cone surface using the input string in MCNPx format
-  int setSurface(const std::string &);
+  int setSurface(const std::string &) override;
   /// This method sets the centre of the cone
   void setCentre(const Kernel::V3D &);
   /// This method sets the cone normal
@@ -91,20 +91,20 @@ public:
   /// MCNPX format
   void setTanAngle(double const);
   /// This method generates the quadratic equation for cone
-  void setBaseEqn();
+  void setBaseEqn() override;
   /// This method will write the cone equation in MCNP geometry format
-  void write(std::ostream &) const;
+  void write(std::ostream &) const override;
 
   /// This will get the bounding box for the cone
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin);
+                      double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cone
   static int g_nslices;
   /// The number of stacks to approximate a cone
   static int g_nstacks;
 #ifdef ENABLE_OPENCASCADE
-  virtual TopoDS_Shape createShape();
+  TopoDS_Shape createShape() override;
 #endif
 };
 

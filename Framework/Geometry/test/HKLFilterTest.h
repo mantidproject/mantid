@@ -72,7 +72,8 @@ public:
   }
 
   void testHKLFilterNot() {
-    boost::shared_ptr<const MockHKLFilter> filter(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> filter =
+        boost::make_shared<MockHKLFilter>();
 
     EXPECT_CALL(*filter, isAllowed(_))
         .WillOnce(Return(true))
@@ -100,13 +101,15 @@ public:
   }
 
   void testHKLFilterAnd() {
-    boost::shared_ptr<const MockHKLFilter> lhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> lhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
 
-    boost::shared_ptr<const MockHKLFilter> rhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> rhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
@@ -139,14 +142,16 @@ public:
   }
 
   void testHKLFilterOr() {
-    boost::shared_ptr<const MockHKLFilter> lhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> lhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
 
-    boost::shared_ptr<const MockHKLFilter> rhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> rhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(false))
         .WillOnce(Return(true));

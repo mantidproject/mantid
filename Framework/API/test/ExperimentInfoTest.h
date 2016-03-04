@@ -26,6 +26,7 @@
 #include <Poco/DirectoryIterator.h>
 
 #include <set>
+#include <unordered_map>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -77,7 +78,7 @@ public:
 
   void test_GetSetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -274,7 +275,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -291,7 +292,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -308,7 +309,7 @@ public:
     ws.mutableSample().setName("test");
     OrientedLattice latt(1, 2, 3, 90, 90, 90);
     ws.mutableSample().setOrientedLattice(&latt);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
     ws.setModeratorModel(new FakeSource);
@@ -418,10 +419,8 @@ public:
     TS_ASSERT(det);
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
-    Mantid::det2group_map mapping;
-    mapping.insert(std::make_pair(1, group));
+    std::vector<Mantid::detid_t> group{1, 2};
+    Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
     TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
@@ -446,7 +445,7 @@ public:
   test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
     std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
-    mappings.insert(std::make_pair(1, std::vector<Mantid::detid_t>(1, 2)));
+    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
     expt.cacheDetectorGroupings(mappings);
 
     std::vector<Mantid::detid_t> ids;
@@ -466,8 +465,8 @@ public:
 
     // Collect all IDF filenames and put them in a multimap where the instrument
     // identifier is the key
-    std::multimap<std::string, fromToEntry> idfFiles;
-    std::set<std::string> idfIdentifiers;
+    std::unordered_multimap<std::string, fromToEntry> idfFiles;
+    std::unordered_set<std::string> idfIdentifiers;
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
@@ -494,19 +493,17 @@ public:
         else
           ft.to.setFromISO8601("2100-01-01T00:00:00");
 
-        idfFiles.insert(std::pair<std::string, fromToEntry>(
-            l_filenamePart.substr(0, found), ft));
+        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
         idfIdentifiers.insert(l_filenamePart.substr(0, found));
       }
     }
 
     // iterator to browse through the multimap: paramInfoFromIDF
-    std::multimap<std::string, fromToEntry>::const_iterator it1, it2;
-    std::pair<std::multimap<std::string, fromToEntry>::iterator,
-              std::multimap<std::string, fromToEntry>::iterator> ret;
+    std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
+    std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
+              std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    std::set<std::string>::iterator setIt;
-    for (setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
+    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
          setIt++) {
       ret = idfFiles.equal_range(*setIt);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
@@ -567,7 +564,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("GEM");
     inst1->setFilename("GEM_Definition.xml");
     inst1->setXmlText("");
@@ -593,7 +590,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("");
     inst1->setFilename("");
     inst1->setXmlText("");
@@ -763,7 +760,7 @@ private:
 
   ExperimentInfo_sptr createTestInfoWithChopperPoints(const size_t npoints) {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    boost::shared_ptr<Instrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     auto source = new ObjComponent("source");
     inst1->add(source);

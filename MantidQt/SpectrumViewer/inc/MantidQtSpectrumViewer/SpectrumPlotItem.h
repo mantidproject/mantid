@@ -53,7 +53,7 @@ public:
   /// Construct basic plot item with NO data to plot.
   SpectrumPlotItem();
 
-  virtual ~SpectrumPlotItem();
+  ~SpectrumPlotItem() override;
 
   /// Specify the data to be plotted and the color table to use
   void setData( DataArray_const_sptr dataArray,
@@ -64,10 +64,8 @@ public:
   void setIntensityTable( std::vector<double>*  intensityTable );
 
   /// Draw the image (this is called by QWT and must not be called directly.)
-  virtual void draw(      QPainter    * painter,
-                    const QwtScaleMap & xMap,
-                    const QwtScaleMap & yMap,
-                    const QRect       & canvasRect) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &canvasRect) const override;
 
 protected:
   int m_bufferID;       // set to 0 or 1 to select buffer

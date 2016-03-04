@@ -61,15 +61,15 @@ public:
   // Constructor
   GenericDialog(QWidget* parent = 0);
   // Destructor
-  virtual ~GenericDialog();
+  ~GenericDialog() override;
 
 protected slots:
-  virtual void accept();
+  void accept() override;
 
 private:
-  virtual void initLayout();
+  void initLayout() override;
 
-  void parseInput();
+  void parseInput() override;
 
   /// Widget containing all the PropertyWidgets
   AlgorithmPropertiesWidget * m_algoPropertiesWidget;

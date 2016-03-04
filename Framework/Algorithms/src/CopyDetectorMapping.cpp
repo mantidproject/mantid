@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyDetectorMapping.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 namespace Mantid {
@@ -13,15 +14,15 @@ using namespace Kernel;
 using namespace API;
 
 void CopyDetectorMapping::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WorkspaceToMatch", "",
-                                                         Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "WorkspaceToMatch", "", Direction::Input));
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WorkspaceToRemap", "",
-                                                         Direction::InOut));
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "WorkspaceToRemap", "", Direction::InOut));
 
   declareProperty(
-      new PropertyWithValue<bool>("IndexBySpectrumNumber", false,
-                                  Direction::Input),
+      make_unique<PropertyWithValue<bool>>("IndexBySpectrumNumber", false,
+                                           Direction::Input),
       "Will use mapping indexed by spectrum number rather than the default of"
       "spectrum index (recommended when both workspaces have a vertical axis "
       "in spectrum number).");
@@ -48,12 +49,12 @@ std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   // Check that the workspaces actually are MatrixWorkspaces
   bool validWorkspaces = true;
 
-  if (wsToMatch == NULL) {
+  if (wsToMatch == nullptr) {
     issues["WorkspaceToMatch"] = "Must be a MatrixWorkspace";
     validWorkspaces = false;
   }
 
-  if (wsToRemap == NULL) {
+  if (wsToRemap == nullptr) {
     issues["WorkspaceToRemap"] = "Must be a MatrixWorkspace";
     validWorkspaces = false;
   }

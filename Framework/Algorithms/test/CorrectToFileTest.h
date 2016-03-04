@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

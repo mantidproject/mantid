@@ -18,11 +18,6 @@ Cluster::Cluster(const size_t &label)
 }
 
 /**
- * Destructor
- */
-Cluster::~Cluster() {}
-
-/**
  * Get the label
  * @return : Return label.
  */
@@ -59,9 +54,9 @@ void Cluster::addIndex(const size_t &index) { m_indexes.push_back(index); }
  */
 void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const {
   const size_t label = this->getLabel();
-  for (size_t i = 0; i < m_indexes.size(); ++i) {
-    ws->setSignalAt(m_indexes[i], static_cast<Mantid::signal_t>(label));
-    ws->setErrorSquaredAt(m_indexes[i], 0);
+  for (auto index : m_indexes) {
+    ws->setSignalAt(index, static_cast<Mantid::signal_t>(label));
+    ws->setErrorSquaredAt(index, 0);
   }
 }
 
@@ -75,9 +70,9 @@ Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
   double errorIntSQ = 0;
   double sigInt = 0;
   // Integrate accross indexes owned by this workspace.
-  for (size_t i = 0; i < m_indexes.size(); ++i) {
-    sigInt += ws->getSignalAt(m_indexes[i]);
-    double errorSQ = ws->getErrorAt(m_indexes[i]);
+  for (auto index : m_indexes) {
+    sigInt += ws->getSignalAt(index);
+    double errorSQ = ws->getErrorAt(index);
     errorSQ *= errorSQ;
     errorIntSQ += errorSQ;
   }
@@ -89,7 +84,7 @@ Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
  * @param disjointSet
  */
 void Cluster::toUniformMinimum(VecElements &disjointSet) {
-  if (m_indexes.size() > 0) {
+  if (!m_indexes.empty()) {
     size_t parentIndex = m_rootCluster->getRepresentitiveIndex();
 
     for (size_t i = 1; i < m_indexes.size(); ++i) {

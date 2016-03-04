@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
@@ -41,7 +42,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-Poco::Mutex LoadInstrument::m_mutex;
+std::recursive_mutex LoadInstrument::m_mutex;
 
 /// Empty default constructor
 LoadInstrument::LoadInstrument() : Algorithm() {}
@@ -51,26 +52,28 @@ LoadInstrument::LoadInstrument() : Algorithm() {}
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalLoad, ".xml"),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(new ArrayProperty<detid_t>("MonitorList", Direction::Output),
-                  "Will be filled with a list of the detector ids of any "
-                  "monitors loaded in to the workspace.");
+  declareProperty(
+      make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
+      "Will be filled with a list of the detector ids of any "
+      "monitors loaded in to the workspace.");
   declareProperty(
       "InstrumentName", "",
       "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
   declareProperty(
-      new PropertyWithValue<OptionalBool>(
+      make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
           boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If true then a 1:1 map between the spectrum numbers and "
@@ -168,7 +171,7 @@ void LoadInstrument::exec() {
   // Check whether the instrument is already in the InstrumentDataService
   {
     // Make InstrumentService access thread-safe
-    Poco::Mutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there
@@ -222,11 +225,9 @@ void LoadInstrument::runLoadParameterFile() {
     std::vector<std::string> directoryNames =
         configService.getInstrumentDirectories();
 
-    for (auto instDirs_itr = directoryNames.begin();
-         instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+    for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first beat file
-      std::string directoryName = *instDirs_itr;
       fullPathParamIDF = getFullPathParamIDF(directoryName);
       // stop when you find the first one
       if (!fullPathParamIDF.empty())
@@ -290,15 +291,16 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   // Assemble parameter file name
   std::string fullPathParamIDF =
       directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, so look for file based on instrument ID
-               // given by the prefix
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, so look
+                                                // for file based on instrument
+                                                // ID
+                                                // given by the prefix
     fullPathParamIDF =
         directoryPath.setFileName(prefix + "_Parameters.xml").toString();
   }
 
-  if (Poco::File(fullPathParamIDF).exists() ==
-      false) { // No such file exists, indicate none found in this directory.
+  if (!Poco::File(fullPathParamIDF).exists()) { // No such file exists, indicate
+                                                // none found in this directory.
     fullPathParamIDF = "";
   }
 

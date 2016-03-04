@@ -203,12 +203,12 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
       // push back empty strings just so all the array properties have the
       // same
       // number of elements
-      submitDates.push_back("");
-      startDates.push_back("");
-      completionDates.push_back("");
+      submitDates.emplace_back("");
+      startDates.emplace_back("");
+      completionDates.emplace_back("");
     }
     // see comment in queryRemoteJob
-    cmdLines.push_back("Not available");
+    cmdLines.emplace_back("Not available");
 
     ++it;
   }
@@ -255,8 +255,8 @@ std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
     JSONArray files;
     std::string oneFile;
     resp["Files"].getValue(files);
-    for (unsigned int i = 0; i < files.size(); i++) {
-      files[i].getValue(oneFile);
+    for (auto &file : files) {
+      file.getValue(oneFile);
       filenames.push_back(oneFile);
     }
 

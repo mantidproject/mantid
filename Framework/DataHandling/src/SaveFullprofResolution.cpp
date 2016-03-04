@@ -39,14 +39,13 @@ SaveFullprofResolution::~SaveFullprofResolution() {}
   */
 void SaveFullprofResolution::init() {
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
-                                            Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Input TableWorkspace containing the parameters for .irf file.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".irf");
-  declareProperty(new API::FileProperty("OutputFilename", "",
-                                        API::FileProperty::Save, exts),
+  std::vector<std::string> exts{".irf"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "OutputFilename", "", API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
 
   boost::shared_ptr<BoundedValidator<int>> bankboundval =
@@ -58,7 +57,7 @@ void SaveFullprofResolution::init() {
   vector<string> supportedfunctions;
   supportedfunctions.push_back(
       "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
-  supportedfunctions.push_back("Jason Hodge's function (profile 10)");
+  supportedfunctions.emplace_back("Jason Hodge's function (profile 10)");
   auto funcvalidator =
       boost::make_shared<StringListValidator>(supportedfunctions);
   declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)",
@@ -166,8 +165,8 @@ void SaveFullprofResolution::parseTableWorkspace() {
   size_t numcols = colnames.size();
 
   stringstream dbmsgss("Input table's column names: ");
-  for (size_t i = 0; i < colnames.size(); ++i) {
-    dbmsgss << setw(20) << colnames[i];
+  for (auto &colname : colnames) {
+    dbmsgss << setw(20) << colname;
   }
   g_log.debug(dbmsgss.str());
 
@@ -224,7 +223,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   for (size_t ir = 0; ir < numpars; ++ir) {
     double parvalue =
         m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
-    m_profileParamMap.insert(std::make_pair(vec_parnames[ir], parvalue));
+    m_profileParamMap.emplace(vec_parnames[ir], parvalue);
   }
 
   // Debug output

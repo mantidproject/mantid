@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/ResampleX.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <sstream>
 
 namespace Mantid {
@@ -48,17 +51,17 @@ const std::string ResampleX::alias() const { return ""; }
  */
 void ResampleX::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 
   declareProperty(
-      new ArrayProperty<double>("XMin"),
+      make_unique<ArrayProperty<double>>("XMin"),
       "A comma separated list of the XMin for every spectrum. (Optional)");
   declareProperty(
-      new ArrayProperty<double>("XMax"),
+      make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -66,7 +69,7 @@ void ResampleX::init() {
   declareProperty("NumberBins", 0, min,
                   "Number of bins to split up each spectrum into.");
   declareProperty("LogBinning", false,
-                  "Use logorithmic binning. If false use constant step sizes.");
+                  "Use logarithmic binning. If false use constant step sizes.");
 
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
@@ -130,7 +133,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
   }
@@ -318,25 +321,16 @@ void ResampleX::exec() {
   // start doing actual work
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
-      EventWorkspace_sptr outputEventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
       if (inPlace) {
         g_log.debug() << "Rebinning event workspace in place\n";
       } else {
         g_log.debug() << "Rebinning event workspace out of place\n";
-
-        // copy the event workspace to a new EventWorkspace
-        outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-        // copy geometry over.
-        API::WorkspaceFactory::Instance().initializeFromParent(
-            inputEventWS, outputEventWS, false);
-        // copy over the data as well.
-        outputEventWS->copyDataFrom((*inputEventWS));
+        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
       }
+      auto outputEventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same
@@ -365,10 +359,6 @@ void ResampleX::exec() {
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
-
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS));
     }    // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
     {
@@ -428,10 +418,9 @@ void ResampleX::exec() {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", outputWS);
     }
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace", outputWS);
     return;
   } else // (inputeventWS != NULL)
   {

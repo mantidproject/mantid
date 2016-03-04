@@ -2,21 +2,25 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
-#include <sstream>
-#include <numeric>
-#include <cmath>
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/tokenizer.hpp>
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
-#include <boost/tokenizer.hpp>
-#include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -35,7 +39,7 @@ using API::Jacobian;
 class JacobianImpl : public Jacobian {
 public:
   /// Default constructor
-  JacobianImpl() : Jacobian(), m_J(NULL){};
+  JacobianImpl() : Jacobian(), m_J(nullptr){};
 
   /// The index map
   std::map<int, int> m_map;
@@ -45,7 +49,7 @@ public:
   * of fixed parameters in a particular fit.
   *   @param value :: The derivative value.
   */
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);
@@ -55,7 +59,7 @@ public:
   *   @param iP :: The index of the parameter. It does not depend on the number
   * of fixed parameters in a particular fit.
   */
-  double get(size_t iY, size_t iP) {
+  double get(size_t iY, size_t iP) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
       return gsl_matrix_get(m_J, iY, j);
@@ -273,8 +277,8 @@ void Fit1D::modifyFinalFittedParameters(std::vector<double> &fittedParameter) {
 /** Initialisation method
  */
 void Fit1D::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -329,7 +333,7 @@ void Fit1D::exec() {
 
   // check if derivative defined in derived class
   bool isDerivDefined = true;
-  gsl_matrix *M = NULL;
+  gsl_matrix *M = nullptr;
   try {
     const std::vector<double> inTest(m_parameterNames.size(), 1.0);
     std::vector<double> outTest(m_parameterNames.size());
@@ -505,7 +509,7 @@ void Fit1D::exec() {
   // set-up remaining GSL machinery for least squared
 
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-  gsl_multifit_fdfsolver *s = NULL;
+  gsl_multifit_fdfsolver *s = nullptr;
   if (isDerivDefined) {
     s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
     gsl_multifit_fdfsolver_set(s, &f, initFuncArg);
@@ -515,8 +519,8 @@ void Fit1D::exec() {
 
   const gsl_multimin_fminimizer_type *simplexType =
       gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *simplexMinimizer = NULL;
-  gsl_vector *simplexStepSize = NULL;
+  gsl_multimin_fminimizer *simplexMinimizer = nullptr;
+  gsl_vector *simplexStepSize = nullptr;
   if (!isDerivDefined) {
     simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
     simplexStepSize = gsl_vector_alloc(l_data.p);
@@ -603,7 +607,7 @@ void Fit1D::exec() {
   if (!output.empty()) {
     // calculate covariance matrix if derivatives available
 
-    gsl_matrix *covar(NULL);
+    gsl_matrix *covar(nullptr);
     std::vector<double> standardDeviations;
     std::vector<double> sdExtended;
     if (isDerivDefined) {
@@ -624,7 +628,7 @@ void Fit1D::exec() {
           standardDeviations.push_back(sdExtended[i]);
 
       declareProperty(
-          new WorkspaceProperty<API::ITableWorkspace>(
+          make_unique<WorkspaceProperty<API::ITableWorkspace>>(
               "OutputNormalisedCovarianceMatrix", "", Direction::Output),
           "The name of the TableWorkspace in which to store the final "
           "covariance matrix");
@@ -662,13 +666,13 @@ void Fit1D::exec() {
       setProperty("OutputNormalisedCovarianceMatrix", m_covariance);
     }
 
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                         "OutputParameters", "", Direction::Output),
                     "The name of the TableWorkspace in which to store the "
                     "final fit parameters");
     declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                               Direction::Output),
+        make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                        Direction::Output),
         "Name of the output Workspace holding resulting simlated spectrum");
 
     setPropertyValue("OutputParameters", output + "_Parameters");
@@ -765,8 +769,8 @@ void Fit1D::exec() {
  *   @param fixed :: A list of comma separated names of the fixed parameters.
  */
 FitData::FitData(Fit1D *fit, const std::string &fixed)
-    : n(0), X(NULL), Y(NULL), sigmaData(NULL), fit1D(fit),
-      forSimplexLSwrap(NULL), parameters(NULL) {
+    : n(0), X(nullptr), Y(nullptr), sigmaData(nullptr), fit1D(fit),
+      forSimplexLSwrap(nullptr), parameters(nullptr) {
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> sep(",");
   boost::tokenizer<boost::char_separator<char>> names(fixed, sep);

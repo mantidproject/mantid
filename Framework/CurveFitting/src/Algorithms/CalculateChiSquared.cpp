@@ -322,7 +322,7 @@ void CalculateChiSquared::estimateErrors() {
   if (baseName.empty()) {
     baseName = "CalculateChiSquared";
   }
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "PDFs", "", Kernel::Direction::Output),
                   "The name of the TableWorkspace in which to store the "
                   "pdfs of fit parameters");
@@ -339,7 +339,7 @@ void CalculateChiSquared::estimateErrors() {
   auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error");
   auto chiMinColumn = errorsTable->addColumn("double", "Chi2 Min");
   errorsTable->setRowCount(nParams);
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "Errors", "", Kernel::Direction::Output),
                   "The name of the TableWorkspace in which to store the "
                   "values and errors of fit parameters");
@@ -467,14 +467,14 @@ void CalculateChiSquared::estimateErrors() {
     // If there are more than 1, find the one with the smallest chi^2.
     double chiMin = std::numeric_limits<double>::max();
     double parMin = par0;
-    for (size_t i = 0; i < minima.size(); ++i) {
-      double value = base->eval(minima[i], P);
+    for (double minimum : minima) {
+      double value = base->eval(minimum, P);
       if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-        g_log.debug() << minima[i] << " (" << value << ") ";
+        g_log.debug() << minimum << " (" << value << ") ";
       }
       if (value < chiMin) {
         chiMin = value;
-        parMin = minima[i];
+        parMin = minimum;
       }
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
@@ -514,8 +514,8 @@ void CalculateChiSquared::estimateErrors() {
 
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Roots: ";
-      for (size_t i = 0; i < roots.size(); ++i) {
-        g_log.debug() << roots[i] << ' ';
+      for (double root : roots) {
+        g_log.debug() << root << ' ';
       }
       g_log.debug() << std::endl;
     }
@@ -668,8 +668,8 @@ void CalculateChiSquared::unfixParameters() {
 
 /// Restore the "fixed" status of previously unfixed paramters.
 void CalculateChiSquared::refixParameters() {
-  for (auto i = m_fixedParameters.begin(); i != m_fixedParameters.end(); ++i) {
-    m_function->fix(*i);
+  for (auto &fixedParameter : m_fixedParameters) {
+    m_function->fix(fixedParameter);
   }
 }
 

@@ -49,29 +49,29 @@ public:
   /// Default constructor
   LoadRaw3();
   /// Destructor
-  ~LoadRaw3();
+  ~LoadRaw3() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadRaw"; }
+  const std::string name() const override { return "LoadRaw"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a data file in ISIS  RAW format and stores it in a 2D "
            "workspace (Workspace2D class).";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 3; }
+  int version() const override { return 3; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Raw"; }
+  const std::string category() const override { return "DataHandling\\Raw"; }
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// returns true if the given spectrum is a monitor
-  bool isMonitor(const std::vector<specid_t> &monitorIndexes,
-                 specid_t spectrumNum);
+  bool isMonitor(const std::vector<specnum_t> &monitorIndexes,
+                 specnum_t spectrumNum);
 
   /// validate workspace sizes
   void validateWorkspaceSizes(bool bexcludeMonitors, bool bseparateMonitors,
@@ -80,7 +80,7 @@ private:
 
   /// creates output workspace, monitors excluded from this workspace
   void excludeMonitors(FILE *file, const int &period,
-                       const std::vector<specid_t> &monitorList,
+                       const std::vector<specnum_t> &monitorList,
                        DataObjects::Workspace2D_sptr ws_sptr);
 
   /// creates output workspace whcih includes monitors
@@ -90,7 +90,7 @@ private:
   /// creates two output workspaces none normal workspace and separate one for
   /// monitors
   void separateMonitors(FILE *file, const int64_t &period,
-                        const std::vector<specid_t> &monitorList,
+                        const std::vector<specnum_t> &monitorList,
                         DataObjects::Workspace2D_sptr ws_sptr,
                         DataObjects::Workspace2D_sptr mws_sptr);
 
@@ -113,7 +113,7 @@ private:
   std::string m_filename;
 
   /// The number of spectra in the raw file
-  specid_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;
   /// A map for storing the time regime for each spectrum

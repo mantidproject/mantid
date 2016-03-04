@@ -80,15 +80,17 @@ LoadNexusLogs::LoadNexusLogs() {}
 /// Initialisation method.
 void LoadNexusLogs::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace that will be filled with the logs.");
+  const std::vector<std::string> exts{".nxs", ".n*"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "Path to the .nxs file to load. Can be an EventNeXus or a "
+                  "histogrammed NeXus.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".n*"}),
-      "Path to the .nxs file to load. Can be an EventNeXus or a "
-      "histogrammed NeXus.");
-  declareProperty(
-      new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
+                                           Direction::Input),
       "If true then existing logs will be overwritten, if false they will "
       "not.");
 }
@@ -229,9 +231,9 @@ void LoadNexusLogs::exec() {
       ptime.reserve(event_frame_number.size());
       std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
-      for (size_t i = 0; i < event_frame_number.size(); ++i) {
-        ptime.push_back(plogt[event_frame_number[i]]);
-        pval.push_back(plogv[event_frame_number[i]]);
+      for (auto number : event_frame_number) {
+        ptime.push_back(plogt[number]);
+        pval.push_back(plogv[number]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");
@@ -431,7 +433,7 @@ void LoadNexusLogs::loadSELog(
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
-  Kernel::Property *logValue(NULL);
+  Kernel::Property *logValue(nullptr);
   std::map<std::string, std::string> entries = file.getEntries();
   if (entries.find("value_log") != entries.end()) {
     try {

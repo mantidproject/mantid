@@ -48,7 +48,7 @@ namespace API
 
   public:
     SyncedCheckboxes(QAction * menu, QAbstractButton * button, bool checked = false);
-    virtual ~SyncedCheckboxes();
+    ~SyncedCheckboxes() override;
     void toggle(bool val);
     void setEnabled(bool val);
     void setVisible(bool val);

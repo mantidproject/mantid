@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/LibraryManager.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <sstream>
 
 namespace Mantid {
@@ -21,8 +21,6 @@ FunctionFactoryImpl::FunctionFactoryImpl()
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
-
-FunctionFactoryImpl::~FunctionFactoryImpl() {}
 
 IFunction_sptr
 FunctionFactoryImpl::createFunction(const std::string &type) const {
@@ -217,8 +215,8 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     }
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
-    for (auto att = pAttributes.begin(); att != pAttributes.end(); ++att) {
-      cfun->setLocalAttributeValue(i, att->first, att->second);
+    for (auto &pAttribute : pAttributes) {
+      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
     }
   }
 
@@ -249,8 +247,8 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addConstraint(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addConstraint(fun, constraint);
     }
   } else {
     addConstraint(fun, expr);
@@ -279,8 +277,8 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
   if (expr.name() == "=") {
     addTie(fun, expr);
   } else if (expr.name() == ",") {
-    for (size_t i = 0; i < expr.size(); i++) {
-      addTie(fun, expr[i]);
+    for (const auto &constraint : expr) {
+      addTie(fun, constraint);
     }
   }
 }

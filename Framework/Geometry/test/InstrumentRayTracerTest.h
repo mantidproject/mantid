@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
@@ -28,7 +29,8 @@ public:
   }
 
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
-    boost::shared_ptr<Instrument> testInst(new Instrument("empty"));
+    boost::shared_ptr<Instrument> testInst =
+        boost::make_shared<Instrument>("empty");
     ObjComponent *source = new ObjComponent("moderator", NULL);
     testInst->add(source);
     testInst->markAsSource(source);

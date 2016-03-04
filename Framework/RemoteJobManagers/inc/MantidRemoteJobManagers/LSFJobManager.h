@@ -46,37 +46,37 @@ class DLLExport LSFJobManager : public Mantid::API::IRemoteJobManager {
 public:
   /// We currently do not have a (tested) implementation of authenticate for LSF
   /// Platform
-  virtual void authenticate(const std::string &username,
-                            const std::string &password) = 0;
+  void authenticate(const std::string &username,
+                    const std::string &password) override = 0;
 
   /// Most likely the logout method specific to SCARFLSF would be valid here
-  virtual void logout(const std::string &username) = 0;
+  void logout(const std::string &username) override = 0;
 
-  virtual void abortRemoteJob(const std::string &jobID);
+  void abortRemoteJob(const std::string &jobID) override;
 
-  virtual std::string
+  std::string
   submitRemoteJob(const std::string &transactionID, const std::string &runnable,
                   const std::string &param, const std::string &taskName = "",
-                  const int numNodes = 0, const int coresPerNode = 0);
+                  const int numNodes = 0, const int coresPerNode = 0) override;
 
-  virtual void downloadRemoteFile(const std::string &transactionID,
-                                  const std::string &remoteFileName,
-                                  const std::string &localFileName);
+  void downloadRemoteFile(const std::string &transactionID,
+                          const std::string &remoteFileName,
+                          const std::string &localFileName) override;
 
-  virtual std::vector<RemoteJobInfo> queryAllRemoteJobs() const;
+  std::vector<RemoteJobInfo> queryAllRemoteJobs() const override;
 
-  virtual std::vector<std::string>
-  queryRemoteFile(const std::string &transactionID) const;
+  std::vector<std::string>
+  queryRemoteFile(const std::string &transactionID) const override;
 
-  virtual RemoteJobInfo queryRemoteJob(const std::string &jobID) const;
+  RemoteJobInfo queryRemoteJob(const std::string &jobID) const override;
 
-  virtual std::string startRemoteTransaction();
+  std::string startRemoteTransaction() override;
 
-  virtual void stopRemoteTransaction(const std::string &transactionID);
+  void stopRemoteTransaction(const std::string &transactionID) override;
 
-  virtual void uploadRemoteFile(const std::string &transactionID,
-                                const std::string &remoteFileName,
-                                const std::string &localFileName);
+  void uploadRemoteFile(const std::string &transactionID,
+                        const std::string &remoteFileName,
+                        const std::string &localFileName) override;
 
 protected:
   /// define the "application type" (or "submission form" in the LSF web portal)
@@ -88,7 +88,7 @@ protected:
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
   virtual int doSendRequestGetResponse(
-      const Poco::URI &uri, std::ostream &response,
+      const Poco::URI &uri, std::ostream &rss,
       const StringToStringMap &headers = StringToStringMap(),
       const std::string &method = std::string(),
       const std::string &body = "") const;
@@ -156,7 +156,7 @@ private:
   /// fill in output properties with job status and info
   std::vector<IRemoteJobManager::RemoteJobInfo>
   genOutputStatusInfo(const std::string &resp,
-                      const std::string &jobID = std::string()) const;
+                      const std::string &jobIDFilter = std::string()) const;
 
   void getOneJobFile(const std::string &jobId, const std::string &remotePath,
                      const std::string &localPath, const Token &t);

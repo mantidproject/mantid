@@ -1,11 +1,15 @@
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -31,32 +35,30 @@ ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() {}
 //----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputMonitorWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores monitor "
                   "counts from a constant-wave powder diffraciton experiment.");
 
   declareProperty(
-      new ArrayProperty<double>("BinningParams"),
+      make_unique<ArrayProperty<double>>("BinningParams"),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
-  std::vector<std::string> vecunits;
-  vecunits.push_back("2theta");
-  vecunits.push_back("dSpacing");
-  vecunits.push_back("Momentum Transfer (Q)");
+  std::vector<std::string> vecunits{"2theta", "dSpacing",
+                                    "Momentum Transfer (Q)"};
   auto unitval = boost::make_shared<ListValidator<std::string>>(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
@@ -74,7 +76,7 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
-  declareProperty(new ArrayProperty<int>("ExcludedDetectorIDs"),
+  declareProperty(make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
                   "A comma separated list of integers to indicate the IDs of "
                   "the detectors that will be excluded from binning.");
 
@@ -144,7 +146,7 @@ void ConvertCWPDMDToSpectra::exec() {
               << " must exist for run " << runid << ".";
         throw std::runtime_error(errss.str());
       }
-      map_runWavelength.insert(std::make_pair(runid, thislambda));
+      map_runWavelength.emplace(runid, thislambda);
     }
   }
 
@@ -359,7 +361,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     // Get source and sample position
     std::vector<detid_t> vec_detid =
         dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
-    if (vec_detid.size() == 0) {
+    if (vec_detid.empty()) {
       g_log.information() << "Run " << runnumber << " has no detectors."
                           << "\n";
       continue;
@@ -695,8 +697,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   const Run &srcrun = lastexpinfo->run();
 
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
-  for (size_t i = 0; i < vec_srcprop.size(); ++i) {
-    Property *p = vec_srcprop[i];
+  for (auto p : vec_srcprop) {
     targetrun.addProperty(p->clone());
     g_log.debug() << "Cloned property " << p->name() << "\n";
   }

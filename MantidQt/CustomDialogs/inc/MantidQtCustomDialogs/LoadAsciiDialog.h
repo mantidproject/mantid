@@ -56,11 +56,11 @@ public:
   /// Constructor
   LoadAsciiDialog(QWidget *parent = 0);
   /// Destruktor
-  ~LoadAsciiDialog();
+  ~LoadAsciiDialog() override;
 
 protected:
   /// This does the work and must be overridden in each deriving class
-  void initLayout();
+  void initLayout() override;
 
 protected slots:
   void browseClicked();

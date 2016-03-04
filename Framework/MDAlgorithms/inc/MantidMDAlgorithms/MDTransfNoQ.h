@@ -46,24 +46,24 @@ class DLLExport MDTransfNoQ : public MDTransfInterface {
 public:
   /// the name, this ChildAlgorithm is known to users (will appear in selection
   /// list)
-  const std::string transfID() const; // {return "NoQ"; }
-                                      // calc target coordinates interface:
-  bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
-  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i);
-  bool calcMatrixCoord(const double &k0, std::vector<coord_t> &Coord, double &s,
-                       double &err) const;
+  const std::string transfID() const override; // {return "NoQ"; }
+  // calc target coordinates interface:
+  bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
+  bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
+  bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s,
+                       double &err) const override;
   // constructor;
   MDTransfNoQ();
   /* clone method allowing to provide the copy of the particular class */
-  MDTransfInterface *clone() const { return new MDTransfNoQ(*this); }
+  MDTransfInterface *clone() const override { return new MDTransfNoQ(*this); }
   // initializes the contents of the class
-  void initialize(const MDWSDescription &ConvParams);
+  void initialize(const MDWSDescription &ConvParams) override;
 
   /**This transformation dos nothing with the workspace ranges, so extremum
    * points for this transformation coordinates are the
    * coordinates themselves */
-  virtual std::vector<double>
-  getExtremumPoints(const double xMin, const double xMax, size_t det_num) const;
+  std::vector<double> getExtremumPoints(const double xMin, const double xMax,
+                                        size_t det_num) const override;
 
   // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL
@@ -73,22 +73,24 @@ public:
      workspace.
       Depending on ws axis units, the numebr here is either 1 or 2* and is
      independent on emode*/
-  unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                    API::MatrixWorkspace_const_sptr inWS) const;
+  unsigned int
+  getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+                       API::MatrixWorkspace_const_sptr inWS) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      here it is usually input ws units, which are independent on emode */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type mode,
-               API::MatrixWorkspace_const_sptr inWS) const;
+               API::MatrixWorkspace_const_sptr inWS) const override;
   std::vector<std::string>
   getDefaultDimID(Kernel::DeltaEMode::Type mode,
-                  API::MatrixWorkspace_const_sptr inWS) const;
-  const std::string inputUnitID(Kernel::DeltaEMode::Type mode,
-                                API::MatrixWorkspace_const_sptr inWS) const;
+                  API::MatrixWorkspace_const_sptr inWS) const override;
+  const std::string
+  inputUnitID(Kernel::DeltaEMode::Type mode,
+              API::MatrixWorkspace_const_sptr inWS) const override;
 
-  virtual void setDisplayNormalization(
+  void setDisplayNormalization(
       Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const;
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
 private:
   unsigned int m_NMatrixDim;

@@ -43,17 +43,18 @@ SaveMD::~SaveMD() {}
 /** Initialize the algorithm's properties.
  */
 void SaveMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", new EnabledWhenProperty("UpdateFileBackEnd",
-                                                          IS_EQUAL_TO, "0"));
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
       "UpdateFileBackEnd", false,
@@ -62,7 +63,7 @@ void SaveMD::init() {
       "to reflect the current data structure. Filename parameter is ignored.");
   setPropertySettings(
       "UpdateFileBackEnd",
-      new EnabledWhenProperty("MakeFileBacked", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
@@ -70,7 +71,7 @@ void SaveMD::init() {
                   "file-backed one.");
   setPropertySettings(
       "MakeFileBacked",
-      new EnabledWhenProperty("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -155,12 +156,12 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // saveable and that the boxes were not saved.
       BoxFlatStruct.setBoxesFilePositions(true);
       prog->resetNumSteps(boxes.size(), 0.06, 0.90);
-      for (size_t i = 0; i < boxes.size(); i++) {
-        auto saveableTag = boxes[i]->getISaveable();
+      for (auto &boxe : boxes) {
+        auto saveableTag = boxe->getISaveable();
         if (saveableTag) // only boxes can be saveable
         {
           // do not spend time on empty boxes
-          if (boxes[i]->getDataInMemorySize() == 0)
+          if (boxe->getDataInMemorySize() == 0)
             continue;
           // save boxes directly using the boxes file postion, precalculated in
           // boxFlatStructure.

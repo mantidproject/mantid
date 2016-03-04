@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
-#include "MantidKernel/System.h"
+
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -25,12 +27,13 @@ void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace. If you use the default vanadium peak "
       "positions are used, the workspace must be in units of d-spacing.");
 
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the "
       "algorithm.\n"
       "If the input workspace is an EventWorkspace, then the output must be "
@@ -49,9 +52,7 @@ void StripVanadiumPeaks2::init() {
                                        "candidates. Passed through to "
                                        "FindPeaks. Default 4.");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "The type of background of the histogram. Present choices "

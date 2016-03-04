@@ -39,17 +39,17 @@ public:
   /// (Empty) Constructor
   CreateLogPropertyTable() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~CreateLogPropertyTable() {}
+  ~CreateLogPropertyTable() override {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CreateLogPropertyTable"; };
+  const std::string name() const override { return "CreateLogPropertyTable"; };
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "  Takes a list of workspaces and a list of log property names.  "
            "For each workspace, the Run info is inspected and "
            "all log property values are used to populate a resulting output "
@@ -58,9 +58,9 @@ public:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

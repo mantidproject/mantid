@@ -1,12 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <sstream>
-#include <numeric>
+#include "MantidAlgorithms/GeneralisedSecondDifference.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "MantidAlgorithms/GeneralisedSecondDifference.h"
-#include "MantidKernel/BoundedValidator.h"
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,12 +31,12 @@ GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
 void GeneralisedSecondDifference::init() {
 
   // Input and output workspaces
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

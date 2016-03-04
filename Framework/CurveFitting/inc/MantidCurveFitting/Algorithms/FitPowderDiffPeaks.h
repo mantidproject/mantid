@@ -61,26 +61,26 @@ namespace Algorithms {
 class DLLExport FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
-  virtual ~FitPowderDiffPeaks();
+  ~FitPowderDiffPeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FitPowderDiffPeaks"; }
+  const std::string name() const override { return "FitPowderDiffPeaks"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fit peaks in powder diffraction pattern. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Process input properties
   void processInputProperties();
@@ -100,7 +100,7 @@ private:
 
   /// Import instrument parameters from (input) table workspace
   void importInstrumentParameterFromTable(
-      DataObjects::TableWorkspace_sptr m_profileTable);
+      DataObjects::TableWorkspace_sptr parameterWS);
 
   /// Import Bragg peak table workspace
   void
@@ -125,7 +125,7 @@ private:
   bool
   fitSinglePeakRobust(Functions::BackToBackExponential_sptr peak,
                       Functions::BackgroundFunction_sptr backgroundfunction,
-                      double leftdev, double rightdev,
+                      double peakleftbound, double peakrightbound,
                       std::map<std::string, double> rightpeakparammap,
                       double &finalchi2);
 
@@ -287,13 +287,15 @@ private:
             double guessedfwhm);
 
   /// Fit background-removed peak by Gaussian
-  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, size_t m_wsIndex,
-                         double in_center, double leftfwhm, double rightfwhm,
-                         double &center, double &sigma, double &height);
+  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
+                         size_t workspaceindex, double in_center,
+                         double leftfwhm, double rightfwhm, double &center,
+                         double &sigma, double &height);
 
   /// Create a Workspace2D for fitted peaks (pattern)
   DataObjects::Workspace2D_sptr
-  genOutputFittedPatternWorkspace(std::vector<double> pattern, int m_wsIndex);
+  genOutputFittedPatternWorkspace(std::vector<double> pattern,
+                                  int workspaceindex);
 
   /// Calcualte the value of a single peak in a given range.
   void calculate1PeakGroup(std::vector<size_t> peakindexes,

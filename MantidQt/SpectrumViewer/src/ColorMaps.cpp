@@ -17,87 +17,73 @@ namespace SpectrumView
  * @param n_colors     The number of colors to use when forming the
  *                     color map.  The number of colors must be at least 7
  *                     for some of the constructed color maps.
- * @param color_table  Vector of colors that will be cleard and filled out
+ * @returns :: color table vector of colors that will be filled out
  *                     with the requested color map.
  */
-void ColorMaps::GetColorMap( ColorScale          name,
-                             size_t              n_colors,
-                             std::vector<QRgb> & color_table )
-{
-  if ( name == HEAT )
-  {
-    double base_red[]    = { 40, 127, 230, 255, 255 };
-    double base_green[]  = { 20,   0, 127, 180, 255 };
-    double base_blue[]   = { 20,   0,   0,  77, 255 };
-    size_t n_base_colors = 5;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+std::vector<QRgb> ColorMaps::GetColorMap(ColorScale name, size_t n_colors) {
+  std::vector<double> base_red, base_green, base_blue;
+  size_t n_base_colors(0);
+  switch (name) {
+  case HEAT: {
+    base_red = {40, 127, 230, 255, 255};
+    base_green = {20, 0, 127, 180, 255};
+    base_blue = {20, 0, 0, 77, 255};
+    n_base_colors = 5;
+    break;
   }
-  else if ( name == GRAY )
-  {
-    double base_red[]   = { 30 , 255 };
-    double base_green[] = { 30 , 255 };
-    double base_blue[]  = { 30 , 255 };
-    size_t n_base_colors = 2;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case GRAY: {
+    base_red = {30, 255};
+    base_green = {30, 255};
+    base_blue = {30, 255};
+    n_base_colors = 2;
+    break;
   }
-  else if ( name == NEGATIVE_GRAY )
-  {
-    double base_red[]   = { 255, 30 };
-    double base_green[] = { 255, 30 };
-    double base_blue[]  = { 255, 30 };
-    size_t n_base_colors = 2;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case NEGATIVE_GRAY: {
+    base_red = {255, 30};
+    base_green = {255, 30};
+    base_blue = {255, 30};
+    n_base_colors = 2;
+    break;
   }
-  else if ( name == GREEN_YELLOW )
-  {
-    double base_red[]   = { 40, 255 };
-    double base_green[] = { 80, 255 };
-    double base_blue[]  = {  0,   0 };
-    size_t n_base_colors = 2;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case GREEN_YELLOW: {
+    base_red = {40, 255};
+    base_green = {80, 255};
+    base_blue = {0, 0};
+    n_base_colors = 2;
+    break;
   }
-  else if ( name == RAINBOW )
-  {
-    double base_red[]   = {  0,   0,   0, 153, 255, 255, 255 };
-    double base_green[] = {  0,   0, 255, 255, 255, 153,   0 };
-    double base_blue[]  = { 77, 204, 255,  77,   0,   0,   0 };
-    size_t n_base_colors = 7;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case RAINBOW: {
+    base_red = {0, 0, 0, 153, 255, 255, 255};
+    base_green = {0, 0, 255, 255, 255, 153, 0};
+    base_blue = {77, 204, 255, 77, 0, 0, 0};
+    n_base_colors = 7;
+    break;
   }
-  else if ( name == OPTIMAL )
-  {
-    double base_red[]   = { 30, 200, 230,  30, 255 };
-    double base_green[] = { 30,  30, 230,  30, 255 };
-    double base_blue[]  = { 30,  30,  30, 255, 255 };
-    size_t n_base_colors = 5;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case OPTIMAL: {
+    base_red = {30, 200, 230, 30, 255};
+    base_green = {30, 30, 230, 30, 255};
+    base_blue = {30, 30, 30, 255, 255};
+    n_base_colors = 5;
+    break;
   }
-  else if ( name == MULTI )
-  {
-    double base_red[]   = { 30,  30,  30, 230, 245, 255 };
-    double base_green[] = { 30,  30, 200,  30, 245, 255 };
-    double base_blue[]  = { 30, 200,  30,  30,  30, 255 };
-    size_t n_base_colors = 6;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case MULTI: {
+    base_red = {30, 30, 30, 230, 245, 255};
+    base_green = {30, 30, 200, 30, 245, 255};
+    base_blue = {30, 200, 30, 30, 30, 255};
+    n_base_colors = 6;
+    break;
   }
-  else if ( name == SPECTRUM )
-  {
-    double base_red[]   = { 100, 235,   0, 130 };
-    double base_green[] = {   0, 255, 235,   0 };
-    double base_blue[]  = {   0,   0, 255, 130 };
-    size_t n_base_colors = 4;
-    InterpolateColorScale( base_red, base_green, base_blue,
-                           n_base_colors, n_colors, color_table );
+  case SPECTRUM: {
+    base_red = {100, 235, 0, 130};
+    base_green = {0, 255, 235, 0};
+    base_blue = {0, 0, 255, 130};
+    n_base_colors = 4;
+    break;
   }
+  }
+  return InterpolateColorScale(base_red.data(), base_green.data(),
+                               base_blue.data(), n_base_colors, n_colors);
 }
-
 
 /**
  * Get an intensity lookup table to adjust the apparent brightness of a
@@ -116,14 +102,12 @@ void ColorMaps::GetColorMap( ColorScale          name,
  *                         should be quite large (10,000-100,000) to preserve
  *                         smooth color transitions even a lower intensity
  *                         values, when the control parameter is large.
- * @param intensity_table
+ * @returns :: intensity lookup table
  */
-void ColorMaps::GetIntensityMap( double                control_s,
-                                 size_t                n_entries,
-                                 std::vector<double> & intensity_table )
-{
+std::vector<double> ColorMaps::GetIntensityMap(double control_s,
+                                               size_t n_entries) {
 
-  intensity_table.clear();
+  std::vector<double> intensity_table;
   intensity_table.resize( n_entries );
                                         // restrict control range to [0,100]
   double MAX_CONTROL = 100.0;
@@ -160,38 +144,36 @@ void ColorMaps::GetIntensityMap( double                control_s,
                                            // further, but due to rounding
                                            // errors, it might exceed 1.
   }
+  return intensity_table;
 }
 
+/**
+ *  Build a color table by interpolating between a base set of colors.
+ *  The "base" color arrays must all be of the same length ( the length
+ *  being the number of base colors given.  The base color values must
+ *  be between 0 and 255.  The arrays of base colors must be of length
+ *  two or more.
+ *  The calling routine must provide red, green and blue arrays, each
+ *  of the same length (n_colors) to hold the color table being
+ *  constructed.
+ *
+ *  @param base_red       Red components of the base colors to interpolate.
+ *  @param base_green     Green components of the base colors to interpolate.
+ *  @param base_blue      Blue components of the base colors to interpolate.
+ *  @param n_base_colors  The number of key colors that will be interpolated
+ *                        form the color table.
+ *  @param n_colors       The number of colors to be created in the output
+ *                        color table.
+ *  @returns :: color table vector containing n_colors qRgb colors,
+ *                        interpolated from the specified base colors.
+ */
 
-  /**
-   *  Build a color table by interpolating between a base set of colors.
-   *  The "base" color arrays must all be of the same length ( the length
-   *  being the number of base colors given.  The base color values must
-   *  be between 0 and 255.  The arrays of base colors must be of length
-   *  two or more.
-   *  The calling routine must provide red, green and blue arrays, each
-   *  of the same length (n_colors) to hold the color table being
-   *  constructed.
-   *
-   *  @param base_red       Red components of the base colors to interpolate.
-   *  @param base_green     Green components of the base colors to interpolate.
-   *  @param base_blue      Blue components of the base colors to interpolate.
-   *  @param n_base_colors  The number of key colors that will be interpolated
-   *                        form the color table.
-   *  @param n_colors       The number of colors to be created in the output
-   *                        color table.
-   *  @param color_table    Vector containing n_colors qRgb colors,
-   *                        interpolated from the specified base colors.
-   */
-
-void ColorMaps::InterpolateColorScale( double base_red[],
-                                       double base_green[],
-                                       double base_blue[],
-                                       size_t n_base_colors,
-                                       size_t n_colors,
-                                       std::vector<QRgb> & color_table )
-{
-  color_table.clear();
+std::vector<QRgb> ColorMaps::InterpolateColorScale(double base_red[],
+                                                   double base_green[],
+                                                   double base_blue[],
+                                                   size_t n_base_colors,
+                                                   size_t n_colors) {
+  std::vector<QRgb> color_table;
   color_table.resize( n_colors );
                                       // first output color is first base color
   color_table[0] = qRgb( (unsigned char)base_red[0],
@@ -226,6 +208,7 @@ void ColorMaps::InterpolateColorScale( double base_red[],
                      (unsigned char) ( (1.0-t) * base_blue[base_index]+
                                           t    * base_blue[base_index + 1] ) );
   }
+  return color_table;
 }
 
 } // namespace SpectrumView

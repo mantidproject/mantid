@@ -56,7 +56,7 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
    * @param value :: A boost python object that stores the value
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const {
+           const boost::python::object &value) const override {
     alg->setProperty<ValueType>(name, boost::python::extract<ValueType>(value));
   }
   /**
@@ -73,10 +73,10 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
   Kernel::Property *create(const std::string &name,
                            const boost::python::object &defaultValue,
                            const boost::python::object &validator,
-                           const unsigned int direction) const {
+                           const unsigned int direction) const override {
     using boost::python::extract;
     const ValueType valueInC = extract<ValueType>(defaultValue)();
-    Kernel::Property *valueProp(NULL);
+    Kernel::Property *valueProp(nullptr);
     if (isNone(validator)) {
       valueProp =
           new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
@@ -112,7 +112,7 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
    * @param value :: A boost python object that stores the value
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const {
+           const boost::python::object &value) const override {
     alg->setProperty<HeldType>(
         name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
@@ -131,11 +131,11 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
   Kernel::Property *create(const std::string &name,
                            const boost::python::object &defaultValue,
                            const boost::python::object &validator,
-                           const unsigned int direction) const {
+                           const unsigned int direction) const override {
     using boost::python::extract;
     const PropertyValueType valueInC =
         extract<PropertyValueType>(defaultValue)();
-    Kernel::Property *valueProp(NULL);
+    Kernel::Property *valueProp(nullptr);
     if (isNone(validator)) {
       valueProp = new Kernel::PropertyWithValue<PropertyValueType>(
           name, valueInC, direction);

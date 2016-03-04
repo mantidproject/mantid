@@ -63,21 +63,21 @@ public:
   /// Construct the generator with an initial seed and range.
   MersenneTwister(const size_t seedValue, const double start, const double end);
   /// Destructor
-  ~MersenneTwister();
+  ~MersenneTwister() override;
   /// Set the random number seed
-  virtual void setSeed(const size_t seed);
+  void setSeed(const size_t seedValue) override;
   /// Sets the range of the subsequent calls to next
-  virtual void setRange(const double start, const double end);
+  void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range,
   /// (default=[0.0,1.0]).
-  virtual double nextValue();
+  double nextValue() override;
   /// Resets the generator
-  virtual void restart();
+  void restart() override;
   /// Saves the current state of the generator
-  virtual void save();
+  void save() override;
   /// Restores the generator to the last saved point, or the beginning if
   /// nothing has been saved
-  virtual void restore();
+  void restore() override;
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(MersenneTwister)

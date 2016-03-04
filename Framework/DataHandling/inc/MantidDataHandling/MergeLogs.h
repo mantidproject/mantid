@@ -37,24 +37,24 @@ namespace DataHandling {
 class DLLExport Merge2WorkspaceLogs : public API::Algorithm {
 public:
   Merge2WorkspaceLogs();
-  virtual ~Merge2WorkspaceLogs();
+  ~Merge2WorkspaceLogs() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "MergeLogs"; };
+  const std::string name() const override { return "MergeLogs"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Merge 2 TimeSeries logs in a given Workspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Logs"; }
+  const std::string category() const override { return "DataHandling\\Logs"; }
 
 private:
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 
   void mergeLogs(std::string ilogname1, std::string ilogname2,
                  std::string ologname, bool resetlogvalue, double logvalue1,

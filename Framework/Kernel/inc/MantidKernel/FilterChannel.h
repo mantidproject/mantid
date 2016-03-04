@@ -34,25 +34,22 @@
 #define Foundation_FilterChannel_INCLUDED
 
 #include "MantidKernel/DllConfig.h"
-
 #include <Poco/Foundation.h>
 #include <Poco/Channel.h>
-#include <Poco/Mutex.h>
 #include <vector>
+#include <mutex>
 
 namespace Poco {
 
 /// This channel sends a message to multiple
 /// channels simultaneously.
-class MANTID_KERNEL_DLL FilterChannel : public Channel
-
-                                        {
+class MANTID_KERNEL_DLL FilterChannel : public Channel {
 public:
   /// Creates the SplitterChannel.
   FilterChannel();
 
   /// destructor
-  ~FilterChannel();
+  ~FilterChannel() override;
 
   /// Attaches a channel, which may not be null.
   void addChannel(Channel *pChannel);
@@ -69,13 +66,13 @@ public:
   unsigned int getPriority() const { return _priority; }
 
   /// Sends the given Message to the attached channel.
-  void log(const Message &msg);
+  void log(const Message &msg) override;
 
   /// Sets or changes a configuration property.
-  void setProperty(const std::string &name, const std::string &value);
+  void setProperty(const std::string &name, const std::string &value) override;
 
   /// Removes all channels.
-  void close();
+  void close() override;
 
 protected:
 private:
@@ -84,7 +81,7 @@ private:
   /// The priority used to filter messages
   int _priority;
   /// A mutex lock to prevent race conditions
-  mutable FastMutex _mutex;
+  mutable std::mutex _mutex;
 };
 
 } // namespace Poco

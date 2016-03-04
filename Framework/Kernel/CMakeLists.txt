@@ -91,6 +91,7 @@ set ( SRC_FILES
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
 	src/Strings.cpp
+	src/StringTokenizer.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
@@ -100,7 +101,6 @@ set ( SRC_FILES
 	src/Timer.cpp
 	src/Unit.cpp
 	src/UnitConversion.cpp
-	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
 	src/UsageService.cpp
@@ -144,6 +144,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
+        inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -246,6 +247,7 @@ set ( INC_FILES
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
 	inc/MantidKernel/Strings.h
+	inc/MantidKernel/StringTokenizer.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
@@ -374,6 +376,7 @@ set ( TEST_FILES
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
 	StringsTest.h
+        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h
