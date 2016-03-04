@@ -102,8 +102,8 @@ public:
     ew3.getBoxController()->setSplitThreshold(1);
     const coord_t centers[3] = {1.0f, 2.0f, 3.0f};
     TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(1.0, 1.0, centers)));
-    TS_ASSERT_EQUALS(1,ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers)));
-    TS_ASSERT_EQUALS(1,ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(2.0, 2.0, centers)));
+    TS_ASSERT_EQUALS(1, ew3.addEvent(MDLeanEvent<3>(3.0, 3.0, centers)));
     ew3.splitBox();
 
     ExperimentInfo_sptr ei(new ExperimentInfo);
