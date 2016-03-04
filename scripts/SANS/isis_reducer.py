@@ -809,7 +809,7 @@ class ISISReducer(Reducer):
             instrument = None
         return instrument
 
-   def add_dark_run_setting(self, dark_run_setting):
+    def add_dark_run_setting(self, dark_run_setting):
         '''
         Adds a dark run setting to the dark run subtraction
         @param dark_run_setting: a dark run setting
