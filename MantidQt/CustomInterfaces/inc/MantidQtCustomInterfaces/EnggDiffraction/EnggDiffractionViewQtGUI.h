@@ -120,7 +120,7 @@ public:
 
   virtual std::vector<bool> focusingBanks() const;
 
-  virtual std::string focusingCroppedSpectrumIDs() const;
+  virtual std::string focusingCroppedSpectrumNos() const;
 
   virtual std::string focusingTextureGroupingFile() const;
 
@@ -187,7 +187,7 @@ private slots:
   void RBNumberChanged();
 
   // slot of the cropped calibration part of the interface
-  void calibSpecIdChanged(int idx);
+  void calibspecNoChanged(int idx);
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
@@ -202,7 +202,7 @@ private slots:
   void updateCroppedCalibRun();
 
   // enables the text field when appropriate bank name is selected
-  void enableSpecIds();
+  void enableSpecNos();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
