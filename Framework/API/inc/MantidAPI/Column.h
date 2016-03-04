@@ -52,7 +52,7 @@ public:
   Column() : m_type("int"), m_plotType(-1000), m_isReadOnly(true){};
 
   /// Virtual destructor
-  virtual ~Column() {}
+  virtual ~Column() = default;
 
   /// Name (caption) of the column.
   const std::string &name() const { return m_name; }

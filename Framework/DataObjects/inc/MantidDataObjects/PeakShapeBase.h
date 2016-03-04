@@ -44,8 +44,6 @@ public:
   PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
                 std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
-  /// Destructor
-  ~PeakShapeBase() override;
   /// Get the coordinate frame
   Kernel::SpecialCoordinateSystem frame() const override;
   /// Get the name of the algorithm used to make this shape
@@ -57,10 +55,10 @@ public:
 
 protected:
   /// Copy constructor
-  PeakShapeBase(const PeakShapeBase &other);
+  PeakShapeBase(const PeakShapeBase &) = default;
 
   /// Assignment operator
-  PeakShapeBase &operator=(const PeakShapeBase &other);
+  PeakShapeBase &operator=(const PeakShapeBase &) = default;
 
   /// Special coordinate system
   Mantid::Kernel::SpecialCoordinateSystem m_frame;

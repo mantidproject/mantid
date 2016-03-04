@@ -92,7 +92,7 @@ private:
   /// given fraction of the range
   double areaToTimeFunction(const double fraction) const;
   /// Returns the area of the IKeda-Carpenter function for the given time value
-  double area(const double t) const;
+  double area(const double x) const;
 
   /// The value of the 1/fast decay coefficient
   double m_tau_f;

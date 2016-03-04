@@ -171,8 +171,8 @@ loaded.  The second calibration file, Filename2, is currently only
 used for the second panel of detectors on the SNAP instrument at the
 SNS.
 
-Check that the maximum |Q| to load is appropriate for the current
-sample and instrument settings.  The max |Q| sets a limit on the
+Check that the maximum \|Q\| to load is appropriate for the current
+sample and instrument settings.  The max \|Q\| sets a limit on the
 sample-frame x,y and z components of the data that is loaded. The
 Apply Lorentz Correction option should also be set at this stage for
 small molecules.  Applying the Lorentz correction helps find the peaks

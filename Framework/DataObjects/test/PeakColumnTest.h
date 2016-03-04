@@ -106,6 +106,16 @@ public:
     TS_ASSERT_EQUALS(qlab1, m_peaks[1].getQLabFrame());
   }
 
+  void test_get_read_only_returns_correct_value() {
+    PeakColumn pc1(m_peaks, "h");
+    auto readOnly = pc1.getReadOnly();
+    TS_ASSERT(!readOnly);
+
+    PeakColumn pc2(m_peaks, "DetID");
+    readOnly = pc2.getReadOnly();
+    TS_ASSERT(readOnly);
+  }
+
 private:
   Mantid::Geometry::Instrument_sptr m_inst;
   std::vector<Peak> m_peaks;

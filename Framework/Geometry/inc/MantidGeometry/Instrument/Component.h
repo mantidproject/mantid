@@ -89,9 +89,6 @@ public:
   Component(const std::string &name, const Kernel::V3D &position,
             const Kernel::Quat &rotation, IComponent *parent = nullptr);
 
-  ///  destructor
-  ~Component() override;
-
   IComponent *clone() const override;
 
   //! Returns the ComponentID - a unique identifier of the component.

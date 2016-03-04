@@ -66,7 +66,6 @@ public:
       const std::string &name, Object_const_sptr shape,
       IComponent *parent = nullptr,
       Kernel::Material_sptr material = Kernel::Material_sptr());
-  ~ObjComponent() override;
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent

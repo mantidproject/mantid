@@ -42,7 +42,7 @@ public:
   /// Default constructor required by the factory
   ModeratorModel();
   /// Allow inheritance
-  virtual ~ModeratorModel();
+  virtual ~ModeratorModel() = default;
   /// Returns a clone of the current object
   virtual boost::shared_ptr<ModeratorModel> clone() const = 0;
 

@@ -55,10 +55,6 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL UserStringParser {
 public:
-  /// constructor
-  UserStringParser();
-  // destructor
-  ~UserStringParser();
   /// parses a given string  into a vector of  vector of numbers
   std::vector<std::vector<unsigned int>> parse(const std::string &userString);
 

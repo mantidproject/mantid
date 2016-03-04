@@ -38,14 +38,12 @@ namespace API {
 class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
-  IMDHistoWorkspace();
-  ~IMDHistoWorkspace() override;
-
+  IMDHistoWorkspace() = default;
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
   }
-
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
   virtual signal_t *getSignalArray() const = 0;
@@ -91,11 +89,9 @@ public:
   virtual size_t getLinearIndex(size_t index1, size_t index2, size_t index3,
                                 size_t index4) const = 0;
 
-  virtual void getLineData(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const = 0;
+  virtual LinePlot
+  getLineData(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+              Mantid::API::MDNormalization normalize) const = 0;
 
   virtual double &operator[](const size_t &index) = 0;
 
@@ -107,9 +103,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDHistoWorkspace(const IMDHistoWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other);
+  IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
 
   const std::string toString() const override;
 

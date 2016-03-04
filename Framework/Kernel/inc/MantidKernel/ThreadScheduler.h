@@ -4,7 +4,6 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <vector>
 #include <deque>
 #include <map>
@@ -53,7 +52,7 @@ public:
       : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
 
   /// Destructor
-  virtual ~ThreadScheduler() {}
+  virtual ~ThreadScheduler() = default;
 
   //-----------------------------------------------------------------------------------
   /** Add a Task to the queue.
@@ -124,7 +123,7 @@ protected:
   /// Accumulated cost of tasks that have been executed (popped)
   double m_costExecuted;
   /// Mutex to prevent simultaneous access to the queue.
-  Mutex m_queueLock;
+  std::mutex m_queueLock;
   /// The exception that aborted the run.
   std::runtime_error m_abortException;
   /// The run was aborted due to an exception
@@ -150,7 +149,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    std::lock_guard<std::mutex> _lock(m_queueLock);
     return m_queue.empty();
   }
 
@@ -170,7 +169,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.front();
       m_queue.pop_front();
@@ -223,7 +222,7 @@ class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_queue.size() > 0) {
+    if (!m_queue.empty()) {
       // TODO: Would a try/catch block be smart here?
       temp = m_queue.back();
       m_queue.pop_back();
@@ -255,7 +254,7 @@ public:
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
-    Mutex::ScopedLock _lock(m_queueLock);
+    std::lock_guard<std::mutex> _lock(m_queueLock);
     return m_map.empty();
   }
 
@@ -275,7 +274,7 @@ public:
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
-    if (m_map.size() > 0) {
+    if (!m_map.empty()) {
       // Since the map is sorted by cost, we want the LAST item.
       std::multimap<double, Task *>::iterator it = m_map.end();
       it--;

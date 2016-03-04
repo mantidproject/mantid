@@ -43,7 +43,7 @@ public:
   /// Constructor
   WeightingStrategy();
   /// Destructor
-  virtual ~WeightingStrategy();
+  virtual ~WeightingStrategy() = default;
   /**
   Calculate the weight at distance from epicenter.
   @param distance : difference between the central detector location and the
@@ -72,8 +72,6 @@ Flat (no weighting) strategy. Concrete WeightingStrategy
 */
 class DLLExport FlatWeighting : public WeightingStrategy {
 public:
-  FlatWeighting();
-  ~FlatWeighting() override;
   double weightAt(const double &, const double &, const double &,
                   const double &) override;
   double weightAt(const Mantid::Kernel::V3D &) override;
@@ -85,7 +83,6 @@ Linear weighting strategy.
 class DLLExport LinearWeighting : public WeightingStrategy {
 public:
   LinearWeighting(const double cutOff);
-  ~LinearWeighting() override;
   double weightAt(const Mantid::Kernel::V3D &) override;
   double weightAt(const double &adjX, const double &ix, const double &adjY,
                   const double &iy) override;
@@ -97,7 +94,6 @@ Parabolic weighting strategy.
 class DLLExport ParabolicWeighting : public WeightingStrategy {
 public:
   ParabolicWeighting(const double cutOff);
-  ~ParabolicWeighting() override;
   double weightAt(const Mantid::Kernel::V3D &) override;
   double weightAt(const double &adjX, const double &ix, const double &adjY,
                   const double &iy) override;
@@ -108,8 +104,6 @@ Null weighting strategy.
 */
 class DLLExport NullWeighting : public WeightingStrategy {
 public:
-  NullWeighting();
-  ~NullWeighting() override;
   double weightAt(const Mantid::Kernel::V3D &) override;
   double weightAt(const double &, const double &, const double &,
                   const double &) override;
@@ -123,7 +117,6 @@ y = exp(-0.5*((r./p(1)).^2) where p = sqtr(2)*sigma
 class DLLExport GaussianWeightingnD : public WeightingStrategy {
 public:
   GaussianWeightingnD(double cutOff, double sigma);
-  ~GaussianWeightingnD() override;
   double weightAt(const Mantid::Kernel::V3D &) override;
   double weightAt(const double &, const double &, const double &,
                   const double &) override;

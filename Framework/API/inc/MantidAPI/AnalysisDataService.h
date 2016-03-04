@@ -56,7 +56,7 @@ class WorkspaceGroup;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataServiceImpl
+class DLLExport AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */
@@ -167,11 +167,11 @@ private:
   /// Constructor
   AnalysisDataServiceImpl();
   /// Private, unimplemented copy constructor
-  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl(const AnalysisDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
-  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &);
+  AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
   /// Private destructor
-  ~AnalysisDataServiceImpl() override;
+  ~AnalysisDataServiceImpl() override = default;
 
   /// The string of illegal characters
   std::string m_illegalChars;

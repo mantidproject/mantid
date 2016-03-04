@@ -69,8 +69,6 @@ public:
 public:
   /// Create given the icpevent log property
   LogParser(const Kernel::Property *log);
-  /// Destructor
-  ~LogParser();
 
   /// Number of periods
   int nPeriods() const { return m_nOfPeriods; }

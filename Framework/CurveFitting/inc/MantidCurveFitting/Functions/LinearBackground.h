@@ -45,9 +45,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LinearBackground : public BackgroundFunction {
 public:
-  /// Destructor
-  ~LinearBackground() override{};
-
   /// overwrite IFunction base class methods
   std::string name() const override { return "LinearBackground"; }
   void function1D(double *out, const double *xValues,

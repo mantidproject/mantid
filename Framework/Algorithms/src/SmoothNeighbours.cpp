@@ -47,12 +47,12 @@ SmoothNeighbours::SmoothNeighbours()
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
@@ -78,8 +78,8 @@ void SmoothNeighbours::init() {
   declareProperty(
       "Sigma", 0.5, mustBePositiveDouble,
       "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings(
-      "Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
+  setPropertySettings("Sigma", make_unique<EnabledWhenProperty>(
+                                   "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty(
       "IgnoreMaskedDetectors", true,
@@ -355,7 +355,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     // We want to skip monitors
     try {
       // Get the list of detectors in this pixel
-      const std::set<detid_t> &dets = inWS->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = inWS->getSpectrum(wi)->getDetectorIDs();
       det = inst->getDetector(*dets.begin());
       if (det->isMonitor())
         continue; // skip monitor
@@ -375,7 +375,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
       continue; // skip missing detector
     }
 
-    specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
+    specnum_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
 
     // Step one - Get the number of specified neighbours
     SpectraDistanceMap insideGrid =
@@ -396,7 +396,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     // Convert from spectrum numbers to workspace indices
     for (auto &specDistance : neighbSpectra) {
-      specid_t spec = specDistance.first;
+      specnum_t spec = specDistance.first;
 
       // Use the weighting strategy to calculate the weight.
       double weight = WeightedSum->weightAt(specDistance.second);
@@ -713,7 +713,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
 
       const ISpectrum *inSpec = inWS->getSpectrum(inWI);
 
-      std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+      auto thesedetids = inSpec->getDetectorIDs();
       outSpec->addDetectorIDs(thesedetids);
 
     } //(each neighbour)
@@ -748,7 +748,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     ISpectrum *inSpec = inWS->getSpectrum(outWIi);
     MantidVec &inX = inSpec->dataX();
 
-    std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+    auto thesedetids = inSpec->getDetectorIDs();
     ISpectrum *outSpec2 = outws2->getSpectrum(outWIi);
     MantidVec &outX = outSpec2->dataX();
     outX = inX;

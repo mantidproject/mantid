@@ -26,6 +26,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidDataObjects/MDEvent.h"
+#include <mutex>
 
 namespace Mantid {
 namespace API {
@@ -91,7 +92,7 @@ private:
                                 API::FunctionValues &functionValues) const;
 
   /// Mutex to protect storing the function values
-  mutable Poco::FastMutex m_valuesMutex;
+  mutable std::mutex m_valuesMutex;
   /// Flag that marks if this is a simulation store each event
   bool m_simulation;
   /// The meat of the calculation for each MD point

@@ -18,24 +18,21 @@ namespace DataObjects {
  */
 class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
 public:
-  OffsetsWorkspace();
+  OffsetsWorkspace() = default;
   OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
-  ~OffsetsWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<OffsetsWorkspace> clone() const {
     return std::unique_ptr<OffsetsWorkspace>(doClone());
   }
-
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "OffsetsWorkspace"; }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  OffsetsWorkspace(const OffsetsWorkspace &other) : SpecialWorkspace2D(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &other);
+  OffsetsWorkspace(const OffsetsWorkspace &) = default;
 
 private:
   OffsetsWorkspace *doClone() const override {

@@ -171,7 +171,7 @@ public:
     TS_ASSERT_EQUALS(e4[1].name(), "+");
 
     std::vector<std::string> bin_ops{"="};
-    std::set<std::string> un_ops{"!", "%%"};
+    std::unordered_set<std::string> un_ops{"!", "%%"};
 
     Expression e5(bin_ops, un_ops);
     TS_ASSERT_THROWS_NOTHING(e5.parse("x=!1"));
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_EQUALS(e8[1].name(), "%%");
 
     std::vector<std::string> bin_ops1{"=="};
-    std::set<std::string> un_ops1{"!", "%%"};
+    std::unordered_set<std::string> un_ops1{"!", "%%"};
 
     Expression e9(bin_ops1, un_ops1);
     TS_ASSERT_THROWS_NOTHING(e9.parse("x==!1"));
@@ -247,7 +247,7 @@ public:
     TS_ASSERT_THROWS(e14.parse("x==%% "), std::runtime_error);
 
     std::vector<std::string> bin_ops2{"-", "--"};
-    std::set<std::string> un_ops2{"-", "--"};
+    std::unordered_set<std::string> un_ops2{"-", "--"};
 
     Expression e15(bin_ops2, un_ops2);
     TS_ASSERT_THROWS_NOTHING(e15.parse("x--1"));
@@ -339,7 +339,7 @@ public:
   void testGetVariables() {
     Expression e;
     e.parse("a+b*sin(x)*fun1(fun2(a+c))");
-    std::set<std::string> vars = e.getVariables();
+    std::unordered_set<std::string> vars = e.getVariables();
     TS_ASSERT_EQUALS(vars.size(), 4);
     TS_ASSERT(vars.find("a") != vars.end());
     TS_ASSERT(vars.find("b") != vars.end());

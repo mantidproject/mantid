@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -53,6 +54,12 @@ public:
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
 
   /** Constructor
+   *  @param values :: An unordered set of values consisting of the valid values
+   */
+  explicit ListValidator(const std::unordered_set<TYPE> &values)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
+
+  /** Constructor
    *  @param values :: A vector of the valid values
    *  @param aliases :: Optional aliases for the valid values.
    */
@@ -72,8 +79,6 @@ public:
       }
     }
   }
-  /// Destructor
-  ~ListValidator() override{};
   /// Clone the validator
   IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);

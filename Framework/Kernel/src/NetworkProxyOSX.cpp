@@ -249,11 +249,6 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_osx") {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NetworkProxy::~NetworkProxy() {}
-
 ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
   return findHttpProxy(targetURLString, m_logger);
 }

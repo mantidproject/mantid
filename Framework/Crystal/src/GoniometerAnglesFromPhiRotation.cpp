@@ -31,11 +31,11 @@ GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
 GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace1", "", Kernel::Direction::Input),
                   "Input Peaks Workspace for Run 1");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace2", "", Kernel::Direction::InOut),
                   "Input Peaks Workspace for Run 2");
 
@@ -214,7 +214,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
   std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
   int Npeaks = PeaksRun2->getNumberPeaks();
 
-  std::vector<double> MinData(5); // n indexed, av err, phi, chi,omega
+  // n indexed, av err, phi, chi,omega
+  std::array<double, 5> MinData = {{0., 0., 0., 0., 0.}};
   MinData[0] = 0.0;
   std::vector<V3D> directionList = IndexingUtils::MakeHemisphereDirections(50);
 

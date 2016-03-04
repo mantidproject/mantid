@@ -71,7 +71,7 @@ set ( SRC_FILES
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
-        src/LoadNexusMonitors2.cpp
+	src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
@@ -99,6 +99,7 @@ set ( SRC_FILES
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
+	src/LoadSwans.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -233,7 +234,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
-        inc/MantidDataHandling/LoadNexusMonitors2.h
+	inc/MantidDataHandling/LoadNexusMonitors2.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
@@ -256,6 +257,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
+	inc/MantidDataHandling/LoadSwans.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -408,6 +410,7 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h
+	LoadSwansTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h

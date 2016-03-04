@@ -22,12 +22,6 @@ MemoryManagerImpl::MemoryManagerImpl() : memoryCleared(0) {
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 
-/** Private destructor
- *  Prevents client from calling 'delete' on the pointer handed
- *  out by Instance
- */
-MemoryManagerImpl::~MemoryManagerImpl() {}
-
 MemoryInfo MemoryManagerImpl::getMemoryInfo() {
   Kernel::MemoryStats mem_stats;
   MemoryInfo info;

@@ -69,9 +69,9 @@ public:
   /// get investigationtypes list
   virtual void listInvestigationTypes(std::vector<std::string> &invstTypes);
   /// get file location strings
-  virtual const std::string getFileLocation(const long long &fileid);
+  virtual const std::string getFileLocation(const long long &fileID);
   /// get urls
-  virtual const std::string getDownloadURL(const long long &fileid);
+  virtual const std::string getDownloadURL(const long long &fileID);
   /// get URL of where to PUT (publish) files.
   virtual const std::string
   getUploadURL(const std::string &investigationID,

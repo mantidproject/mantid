@@ -26,9 +26,10 @@ const std::string DeleteLog::category() const { return "DataHandling\\Logs"; }
 /** Initialize the algorithm's properties.
  */
 void DeleteLog::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "In/out workspace containing the logs. The workspace is "
-                  "modified in place");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "In/out workspace containing the logs. The workspace is "
+      "modified in place");
   declareProperty("Name", "",
                   boost::make_shared<MandatoryValidator<std::string>>(), "",
                   Direction::Input);

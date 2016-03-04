@@ -50,8 +50,6 @@ private:
 public:
   typedef OptionalBool HeldType;
 
-  ~OptionalBoolPropertyValueHandler() override {}
-
   /**
    * Set function to handle Python -> C++ calls and get the correct type
    */

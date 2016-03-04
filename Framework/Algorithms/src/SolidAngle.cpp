@@ -30,7 +30,7 @@ SolidAngle::~SolidAngle() {}
 
 /// Initialisation method
 void SolidAngle::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "This workspace is used to identify the instrument to use "
@@ -40,7 +40,7 @@ void SolidAngle::init() {
                   "not provided one solid angle will be created for each "
                   "spectra in the input\n"
                   "workspace");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "

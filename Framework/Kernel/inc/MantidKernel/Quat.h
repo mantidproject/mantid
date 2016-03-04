@@ -60,13 +60,10 @@ public:
   // not unit or the same length vectors, so quat would be not consistent
   Quat(const V3D &src, const V3D &des);
   Quat(const V3D &rX, const V3D &rY, const V3D &rZ);
-  Quat(const Quat &_q);
-  Quat &operator=(const Quat &q);
   //! Set quaternion form an angle in degrees and an axis
   Quat(const double _deg, const V3D &_axis);
   // set a quaternion from a rotational matrix;
   Quat(const DblMatrix &RotMat);
-  ~Quat();
   void operator()(const Quat &);
   void operator()(const double ww, const double aa, const double bb,
                   const double cc);

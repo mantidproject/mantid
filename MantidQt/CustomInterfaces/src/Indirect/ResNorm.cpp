@@ -55,8 +55,10 @@ bool ResNorm::validate() {
   UserInputValidator uiv;
   QString errors("");
 
-  const bool vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  const bool resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+  const bool vanValid =
+      uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
+  const bool resValid =
+      uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
     // Check vanadium input is _red ws
@@ -117,7 +119,6 @@ void ResNorm::run() {
 
   QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
-
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
   resNorm->setProperty("VanadiumWorkspace", vanWsName.toStdString());
@@ -126,7 +127,8 @@ void ResNorm::run() {
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
   resNorm->setProperty("OutputWorkspace", outputWsName.toStdString());
-  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit").toStdString());
+  resNorm->setProperty("OutputWorkspaceTable",
+                       (outputWsName + "_Fit").toStdString());
   m_batchAlgoRunner->addAlgorithm(resNorm);
 
   // Handle saving
@@ -136,7 +138,6 @@ void ResNorm::run() {
 
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
-
 }
 
 /**

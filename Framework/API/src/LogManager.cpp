@@ -29,35 +29,6 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-LogManager::LogManager() : m_manager(), m_singleValueCache() {}
-
-/**
- * Destructor
- */
-LogManager::~LogManager() {}
-
-/**
- * Copy constructor
- * @param copy :: The object to initialize the copy from
- */
-LogManager::LogManager(const LogManager &copy)
-    : m_manager(copy.m_manager), m_singleValueCache(copy.m_singleValueCache) {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const LogManager &LogManager::operator=(const LogManager &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  return *this;
-}
 
 /**
 * Set the run start and end
@@ -202,7 +173,7 @@ void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
        prop->name() == "run_title")) {
     removeProperty(name);
   }
-  m_manager.declareProperty(prop.release(), "");
+  m_manager.declareProperty(std::move(prop), "");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -400,12 +371,13 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
-      Property *prop = PropertyNexus::loadProperty(file, name_class.first);
+      auto prop = std::unique_ptr<Property>(
+          PropertyNexus::loadProperty(file, name_class.first));
       if (prop) {
         if (m_manager.existsProperty(prop->name())) {
           m_manager.removeProperty(prop->name());
         }
-        m_manager.declareProperty(prop);
+        m_manager.declareProperty(std::move(prop));
       }
     }
   }

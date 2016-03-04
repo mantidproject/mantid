@@ -15,7 +15,7 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <vector>
 #include "MantidKernel/IPropertySettings.h"
 
@@ -149,7 +149,7 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
   // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
@@ -165,7 +165,7 @@ template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer tokens(strvalue, outerDelimiter,
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
@@ -199,7 +199,7 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   template <>                                                                  \
   inline void toValue<type>(const std::string &strvalue,                       \
                             std::vector<type> &value) {                        \
-    typedef Poco::StringTokenizer tokenizer;                                   \
+    typedef Mantid::Kernel::StringTokenizer tokenizer;                         \
     tokenizer values(strvalue, ",",                                            \
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
     value.clear();                                                             \
@@ -345,9 +345,6 @@ public:
   PropertyWithValue<TYPE> *clone() const override {
     return new PropertyWithValue<TYPE>(*this);
   }
-
-  /// Virtual destructor
-  ~PropertyWithValue() override {}
 
   /** Get the value of the property as a string
    *  @return The property's value

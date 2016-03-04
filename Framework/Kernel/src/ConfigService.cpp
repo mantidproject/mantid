@@ -19,7 +19,7 @@
 #include <Poco/LoggingFactory.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -30,18 +30,15 @@
 #pragma warning(disable : 4250)
 #endif
 #include <Poco/Logger.h>
-#include <Poco/Channel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
 #include <fstream>
-#include <iostream>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -70,26 +67,25 @@ Logger g_log("ConfigService");
  * Split the supplied string on semicolons.
  *
  * @param path The path to split.
- * @param splitted vector to put the splitted path into.
+ * @returns vector containing the splitted path.
  */
-void splitPath(const std::string &path, std::vector<std::string> &splitted) {
-  if (path.find(";") == std::string::npos) { // don't bother tokenizing
+std::vector<std::string> splitPath(const std::string &path) {
+  std::vector<std::string> splitted;
+
+  if (path.find(';') == std::string::npos) { // don't bother tokenizing
     splitted.push_back(path);
-    return;
-  }
-
-  int options =
-      Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-
-  splitted.clear();
-  Poco::StringTokenizer tokenizer(path, ";,", options);
-  auto iend = tokenizer.end();
-  splitted.reserve(tokenizer.count());
-  for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
-    if (!itr->empty()) {
-      splitted.push_back(*itr);
+  } else {
+    int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
+                  Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+    Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
+    auto iend = tokenizer.end();
+    for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
+      if (!itr->empty()) {
+        splitted.push_back(*itr);
+      }
     }
   }
+  return splitted;
 }
 
 } // end of anonymous namespace
@@ -115,9 +111,6 @@ public:
   WrappedObject(const WrappedObject<T> &A) : T(A) {
     m_pPtr = static_cast<T *>(this);
   }
-
-  /// Virtual destructor
-  ~WrappedObject() override {}
 
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
@@ -506,11 +499,9 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   std::string converted;
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos) {
-    std::vector<std::string> splitted;
-    splitPath(dir, splitted);
-    std::vector<std::string>::const_iterator iend = splitted.end();
-    for (std::vector<std::string>::const_iterator itr = splitted.begin();
-         itr != iend;) {
+    auto splitted = splitPath(dir);
+    auto iend = splitted.cend();
+    for (auto itr = splitted.begin(); itr != iend;) {
       std::string absolute = makeAbsolute(*itr, key);
       if (absolute.empty()) {
         ++itr;
@@ -581,12 +572,12 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
  * The value of the key should be a semi-colon separated list of directories
  */
 void ConfigServiceImpl::cacheDataSearchPaths() {
-  m_DataSearchDirs.clear();
   std::string paths = getString("datasearch.directories");
-  // Nothing to do
-  if (paths.empty())
-    return;
-  splitPath(paths, m_DataSearchDirs);
+  if (paths.empty()) {
+    m_DataSearchDirs.clear();
+  } else {
+    m_DataSearchDirs = splitPath(paths);
+  }
 }
 
 /**
@@ -597,10 +588,11 @@ void ConfigServiceImpl::cacheDataSearchPaths() {
 void ConfigServiceImpl::cacheUserSearchPaths() {
   m_UserSearchDirs.clear();
   std::string paths = getString("usersearch.directories");
-  // Nothing to do
-  if (paths.empty())
-    return;
-  splitPath(paths, m_UserSearchDirs);
+  if (paths.empty()) {
+    m_UserSearchDirs.clear();
+  } else {
+    m_UserSearchDirs = splitPath(paths);
+  }
 }
 
 /**
@@ -1228,7 +1220,7 @@ std::string getValueFromStdOut(const std::string &orig,
   }
   start += key.size();
 
-  size_t stop = orig.find("\n", start);
+  size_t stop = orig.find('\n', start);
   if (stop == std::string::npos) {
     return std::string();
   }
@@ -1888,7 +1880,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
       setString("default.facility", facilityName);
     }
   }
-  if (found == false) {
+  if (!found) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
     throw Exception::NotFoundError("Facilities", facilityName);

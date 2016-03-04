@@ -43,13 +43,11 @@ public:
 
   WorkspaceSingleValue(double value = 0.0, double error = 0.0);
 
-  ~WorkspaceSingleValue() override;
-
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {
     return std::unique_ptr<WorkspaceSingleValue>(doClone());
   }
-
+  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return 1; }
 
@@ -77,8 +75,6 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   WorkspaceSingleValue(const WorkspaceSingleValue &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
 
 private:
   WorkspaceSingleValue *doClone() const override {

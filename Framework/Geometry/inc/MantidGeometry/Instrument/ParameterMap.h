@@ -4,7 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IDTypes.h" //For specid_t
+#include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -149,7 +149,7 @@ public:
   }
   /// Method for adding a parameter providing shared pointer to it. The class
   /// stores share pointer and increment ref count to it
-  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &param,
+  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &par,
            const std::string *const pDescription = nullptr);
 
   /** @name Helper methods for adding and updating parameter types  */

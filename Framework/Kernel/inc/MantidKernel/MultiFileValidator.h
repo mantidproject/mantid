@@ -48,7 +48,6 @@ public:
   MultiFileValidator();
   MultiFileValidator(const MultiFileValidator &mfv);
   explicit MultiFileValidator(const std::vector<std::string> &extensions);
-  ~MultiFileValidator() override;
 
   IValidator_sptr clone() const override;
 

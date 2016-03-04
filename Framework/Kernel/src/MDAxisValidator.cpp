@@ -14,11 +14,6 @@ MDAxisValidator::MDAxisValidator(const std::vector<int> &axes,
                                  const bool checkIfEmpty)
     : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MDAxisValidator::~MDAxisValidator() {}
-
 /**
  * @brief Checks the MD axes given against the given number of dimensions of the
  * input workspace.

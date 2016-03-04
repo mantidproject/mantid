@@ -7,7 +7,6 @@
 #include "MantidLiveData/ADARA/ADARAParser.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
@@ -149,7 +148,7 @@ private:
   bool m_isConnected;
 
   Poco::Thread m_thread;
-  Poco::FastMutex m_mutex; // protects m_buffer & m_status
+  std::mutex m_mutex; // protects m_buffer & m_status
   bool m_pauseNetRead;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits

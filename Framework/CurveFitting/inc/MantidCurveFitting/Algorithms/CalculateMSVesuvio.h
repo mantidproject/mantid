@@ -114,7 +114,7 @@ private:
   // single-event helpers
   Kernel::V3D generateSrcPos(const double l1) const;
   double generateE0(const double l1, const double t2, double &weight) const;
-  double generateTOF(const double gaussTOF, const double dtof,
+  double generateTOF(const double en0, const double dtof,
                      const double dl1) const;
   bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
                        double &weight, Kernel::V3D &scatterPt) const;

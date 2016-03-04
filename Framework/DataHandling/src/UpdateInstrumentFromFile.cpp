@@ -17,7 +17,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <nexus/NeXusException.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <fstream>
 
@@ -42,11 +42,12 @@ void UpdateInstrumentFromFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "Anonymous",
-                                             Direction::InOut),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+                                                      Direction::InOut),
       "The name of the workspace in which to store the imported instrument");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".raw", ".nxs", ".s*"}),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load,
+                      std::vector<std::string>{".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"
                   "Currently supports RAW, ISIS NeXus, DAT & multi-column (at "
                   "least 2) ascii files");
@@ -311,7 +312,8 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
                                 "property is empty, cannot interpret columns");
   }
 
-  Poco::StringTokenizer splitter(header, ",", Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer splitter(
+      header, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   headerInfo.colCount = splitter.count();
   auto it =
       splitter.begin(); // First column must be spectrum number or detector ID

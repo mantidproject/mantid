@@ -67,9 +67,6 @@ public:
     return new FunctionProperty(*this);
   }
 
-  /// Virtual destructor
-  ~FunctionProperty() override;
-
   /// Get the function definition string
   std::string value() const override;
 

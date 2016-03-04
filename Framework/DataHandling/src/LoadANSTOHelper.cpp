@@ -388,7 +388,7 @@ bool File::append(const std::string &path, const std::string &name,
   std::unique_ptr<FILE, decltype(&fclose)> handle(fopen(path.c_str(), "rb+"),
                                                   fclose);
 
-  bool good = handle != NULL;
+  bool good = handle != nullptr;
   int64_t lastHeaderPosition = 0;
   int64_t targetPosition = -1;
 
@@ -430,7 +430,7 @@ bool File::append(const std::string &path, const std::string &name,
   if (!good)
     return false;
 
-  if (targetPosition == -1)
+  if (targetPosition < 0)
     targetPosition = lastHeaderPosition;
 
   // empty buffer

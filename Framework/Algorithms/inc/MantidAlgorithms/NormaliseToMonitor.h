@@ -101,7 +101,7 @@ protected: // for testing
                          int &spectra_num);
   API::MatrixWorkspace_sptr
   getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace,
-                      int &workspaceIndex);
+                      int &wsID);
   API::MatrixWorkspace_sptr
   extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
                          std::size_t index);

@@ -6,21 +6,21 @@
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1125
+#pragma warning disable 1125
 #elif defined(__GNUC__)
-  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
-    #pragma GCC diagnostic push
-  #endif
-  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic push
+#endif
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "DoubleEditorFactory.h"
 #include "qteditorfactory.h"
 #if defined(__INTEL_COMPILER)
-  #pragma warning enable 1125
+#pragma warning enable 1125
 #elif defined(__GNUC__)
-  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
-    #pragma GCC diagnostic pop
-  #endif
+#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -39,49 +39,45 @@
 #include <QMessageBox>
 #include <QAction>
 
+namespace MantidQt {
+namespace MantidWidgets {
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-
-  using namespace Mantid::API;
+using namespace Mantid::API;
 
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
 */
-MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent, QObject* mantidui)
-  :FitPropertyBrowser(parent, mantidui)
-{}
-
+MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
+                                               QObject *mantidui)
+    : FitPropertyBrowser(parent, mantidui) {}
 
 /**
 * Initialise the muon fit property browser.
 */
-void MuonFitPropertyBrowser::init()
-{
-  QWidget* w = new QWidget(this);
+void MuonFitPropertyBrowser::init() {
+  QWidget *w = new QWidget(this);
 
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
 
   /* Create function group */
-  QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty* settingsGroup(NULL);
-  
+  QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
+  QtProperty *settingsGroup(NULL);
+
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
-    
-  // Have slightly different names as requested by the muon scientists. 
-  m_startX = addDoubleProperty(QString("Start (%1s)" ).arg(QChar(0x03BC))); //(mu); 
-  m_endX = addDoubleProperty(QString("End (%1s)" ).arg(QChar(0x03BC)));
 
-  //m_workspace = m_enumManager->addProperty("Workspace");
+  // Have slightly different names as requested by the muon scientists.
+  m_startX =
+      addDoubleProperty(QString("Start (%1s)").arg(QChar(0x03BC))); //(mu);
+  m_endX = addDoubleProperty(QString("End (%1s)").arg(QChar(0x03BC)));
+
+  // m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_output = m_stringManager->addProperty("Output");
-  m_minimizer = m_enumManager->addProperty("Minimizer");  
+  m_minimizer = m_enumManager->addProperty("Minimizer");
   m_minimizers << "Levenberg-Marquardt"
                << "Simplex"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
@@ -91,35 +87,36 @@ void MuonFitPropertyBrowser::init()
   m_costFunction = m_enumManager->addProperty("Cost function");
   m_costFunctions << "Least squares"
                   << "Ignore positive peaks";
-  m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
+  m_enumManager->setEnumNames(m_costFunction, m_costFunctions);
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
-  bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
-  m_boolManager->setValue(m_plotDiff,plotDiff);
-  
+  bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
+  m_boolManager->setValue(m_plotDiff, plotDiff);
+
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
-  
+
   /* Create editors and assign them to the managers */
   createEditors(w);
 
   updateDecimals();
-  
+
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   // Custom settings that are specific and asked for by the muon scientists.
-  QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
+  QtProperty *customSettingsGroup = m_groupManager->addProperty("Settings");
 
   m_rawData = m_boolManager->addProperty("Fit To Raw Data");
-  bool data = settings.value("Fit To Raw Data",QVariant(false)).toBool();
-  m_boolManager->setValue(m_rawData,data);
+  bool data = settings.value("Fit To Raw Data", QVariant(false)).toBool();
+  m_boolManager->setValue(m_rawData, data);
 
   m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
   // XXX: showParamErrors is true by default for Muons
-  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), true).toBool();
+  bool showParamErrors =
+      settings.value(m_showParamErrors->propertyName(), true).toBool();
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
@@ -134,206 +131,170 @@ void MuonFitPropertyBrowser::init()
   initLayout(w);
 }
 
-
 /**
 * Set the input workspace name
 */
-void MuonFitPropertyBrowser::setWorkspaceName(const QString& wsName)
-{
+void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   int i = m_workspaceNames.indexOf(wsName);
-  if (i < 0)
-  {
-    // workspace may not be found because add notification hasn't been processed yet
+  if (i < 0) {
+    // workspace may not be found because add notification hasn't been processed
+    // yet
     populateWorkspaceNames();
     i = m_workspaceNames.indexOf(wsName);
   }
   if (i >= 0)
-    m_enumManager->setValue(m_workspace,i);
+    m_enumManager->setValue(m_workspace, i);
 }
 
-
 /** Called when a double property changed
- * @param prop :: A pointer to the property 
+ * @param prop :: A pointer to the property
  */
-void MuonFitPropertyBrowser::doubleChanged(QtProperty* prop)
-{
-  if ( ! m_changeSlotsEnabled ) return;
+void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
+  if (!m_changeSlotsEnabled)
+    return;
 
   double value = m_doubleManager->value(prop);
-  if (prop == m_startX )
-  {
+  if (prop == m_startX) {
     // call setWorkspace to change maxX in functions
     setWorkspace(m_compositeFunction);
-    getHandler()->setAttribute(QString("Start (%1s)" ).arg(QChar(0x03BC)), value); // (mu)
+    getHandler()->setAttribute(QString("Start (%1s)").arg(QChar(0x03BC)),
+                               value); // (mu)
     emit startXChanged(startX());
     emit xRangeChanged(startX(), endX());
     return;
-  }
-  else if (prop == m_endX )
-  {
+  } else if (prop == m_endX) {
     // call setWorkspace to change minX in functions
     setWorkspace(m_compositeFunction);
-    getHandler()->setAttribute(QString("End (%1s)" ).arg(QChar(0x03BC)), value); 
+    getHandler()->setAttribute(QString("End (%1s)").arg(QChar(0x03BC)), value);
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());
     return;
-  }
-  else
-  {// check if it is a constraint
-    MantidQt::MantidWidgets::PropertyHandler* h = getHandler()->findHandler(prop);
-    if (!h) return;
+  } else { // check if it is a constraint
+    MantidQt::MantidWidgets::PropertyHandler *h =
+        getHandler()->findHandler(prop);
+    if (!h)
+      return;
 
-    QtProperty* parProp = h->getParameterProperty(prop);
-    if (parProp)
-    {
-      if (prop->propertyName() == "LowerBound")
-      {
+    QtProperty *parProp = h->getParameterProperty(prop);
+    if (parProp) {
+      if (prop->propertyName() == "LowerBound") {
         double loBound = m_doubleManager->value(prop);
-        h->addConstraint(parProp,true,false,loBound,0);
-      }
-      else if (prop->propertyName() == "UpperBound")
-      {
+        h->addConstraint(parProp, true, false, loBound, 0);
+      } else if (prop->propertyName() == "UpperBound") {
         double upBound = m_doubleManager->value(prop);
-        h->addConstraint(parProp,false,true,0,upBound);
+        h->addConstraint(parProp, false, true, 0, upBound);
       }
-    }
-    else
-    {// it could be an attribute
+    } else { // it could be an attribute
       h->setAttribute(prop);
     }
   }
 }
 
-
 /**
 *Get the registered function names
 */
-void MuonFitPropertyBrowser::populateFunctionNames()
-{
+void MuonFitPropertyBrowser::populateFunctionNames() {
   const std::vector<std::string> names = FunctionFactory::Instance().getKeys();
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();
-  for(size_t i=0;i<names.size();i++)
-  {
+  for (size_t i = 0; i < names.size(); i++) {
     std::string fnName = names[i];
     QString qfnName = QString::fromStdString(fnName);
-    if (qfnName == "MultiBG") continue;
-    
+    if (qfnName == "MultiBG")
+      continue;
+
     auto f = FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
-    for (size_t j=0; j<categories.size(); ++j)
-    {
-      if ((categories[j] == "Muon") || (categories[j] == "General") || (categories[j] == "Background"))
+    for (size_t j = 0; j < categories.size(); ++j) {
+      if ((categories[j] == "Muon") || (categories[j] == "General") ||
+          (categories[j] == "Background"))
         muon = true;
     }
-    if (muon == true)
-    {
+    if (muon) {
       m_registeredFunctions << qfnName;
     }
-    IPeakFunction* pf = dynamic_cast<IPeakFunction*>(f.get());
-    //CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f.get());
-    if (pf)
-    {
+    IPeakFunction *pf = dynamic_cast<IPeakFunction *>(f.get());
+    // CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f.get());
+    if (pf) {
       m_registeredPeaks << qfnName;
-    }
-    else if (dynamic_cast<IBackgroundFunction*>(f.get()))
-    {
+    } else if (dynamic_cast<IBackgroundFunction *>(f.get())) {
       m_registeredBackgrounds << qfnName;
-    }
-    else
-    {
+    } else {
       m_registeredOther << qfnName;
     }
   }
 }
 
-
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
-void MuonFitPropertyBrowser::fit()
-{
+void MuonFitPropertyBrowser::fit() {
   std::string wsName = workspaceName();
 
-  if (wsName.empty())
-  {
-    QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
+  if (wsName.empty()) {
+    QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
-  try
-  {
+  try {
     m_initialParameters.resize(compositeFunction()->nParams());
-    for(size_t i=0;i<compositeFunction()->nParams();i++)
-    {
+    for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
     }
     m_fitActionUndoFit->setEnabled(true);
 
     std::string funStr;
-    if (m_compositeFunction->name() == "MultiBG")
-    {
+    if (m_compositeFunction->name() == "MultiBG") {
       funStr = "";
-    }
-    else if (m_compositeFunction->nFunctions() > 1)
-    {
+    } else if (m_compositeFunction->nFunctions() > 1) {
       funStr = m_compositeFunction->asString();
-    }
-    else
-    {
+    } else {
       funStr = (m_compositeFunction->getFunction(0))->asString();
     }
 
-    if ( AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
-    {
-      FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
+    if (AnalysisDataService::Instance().doesExist(
+            wsName + "_NormalisedCovarianceMatrix")) {
+      FrameworkManager::Instance().deleteWorkspace(
+          wsName + "_NormalisedCovarianceMatrix");
     }
-    if ( AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
-    {
-      FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
+    if (AnalysisDataService::Instance().doesExist(wsName + "_Parameters")) {
+      FrameworkManager::Instance().deleteWorkspace(wsName + "_Parameters");
     }
-    if ( AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
-    {
-      FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
+    if (AnalysisDataService::Instance().doesExist(wsName + "_Workspace")) {
+      FrameworkManager::Instance().deleteWorkspace(wsName + "_Workspace");
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-    alg->initialize();    
-    alg->setPropertyValue("Function",funStr);
+    alg->initialize();
+    alg->setPropertyValue("Function", funStr);
     if (rawData())
-      alg->setPropertyValue("InputWorkspace",wsName + "_Raw");
+      alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
     else
-      alg->setPropertyValue("InputWorkspace",wsName);
-    alg->setProperty("WorkspaceIndex",workspaceIndex());
-    alg->setProperty("StartX",startX());
-    alg->setProperty("EndX",endX());
-    alg->setPropertyValue("Output",outputName());
-    alg->setPropertyValue("Minimizer",minimizer());
-    alg->setPropertyValue("CostFunction",costFunction());
+      alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setProperty("WorkspaceIndex", workspaceIndex());
+    alg->setProperty("StartX", startX());
+    alg->setProperty("EndX", endX());
+    alg->setPropertyValue("Output", outputName());
+    alg->setPropertyValue("Minimizer", minimizer());
+    alg->setPropertyValue("CostFunction", costFunction());
     observeFinish(alg);
     alg->executeAsync();
-  }
-  catch(std::exception& e)
-  {
-    QString msg = "Fit algorithm failed.\n\n"+QString(e.what())+"\n";
-    QMessageBox::critical(this,"Mantid - Error", msg);
+  } catch (std::exception &e) {
+    QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
+    QMessageBox::critical(this, "Mantid - Error", msg);
   }
 }
 
 /**
  * Show sequential fit dialog.
  */
-void MuonFitPropertyBrowser::sequentialFit()
-{
-  emit sequentialFitRequested();
-}
+void MuonFitPropertyBrowser::sequentialFit() { emit sequentialFitRequested(); }
 
 /**
  * Connect to the AnalysisDataServis when shown
  */
-void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
-{
+void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   (void)e;
   observePostDelete();
   populateWorkspaceNames();
@@ -343,31 +304,27 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
   * MatrixWorkspaces same size and that it isn't the generated raw file.
   * @param ws :: The workspace
   */
-bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws)const
-{
-  QString workspaceName(QString::fromStdString(ws->name() ) );
+bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
+  QString workspaceName(QString::fromStdString(ws->name()));
 
-  if ( (workspaceName.contains("_Raw") ) || (workspaceName.contains("MuonAnalysis") ) )
+  if ((workspaceName.contains("_Raw")) ||
+      (workspaceName.contains("MuonAnalysis")))
     return false;
 
   // Exclude fitting results
-  if ( workspaceName.endsWith("_Workspace") )
+  if (workspaceName.endsWith("_Workspace"))
     return false;
 
-  if (dynamic_cast<MatrixWorkspace*>(ws.get()) != 0)
-    return true;
-  else
-    return false;
+  return dynamic_cast<MatrixWorkspace *>(ws.get()) != 0;
 }
 
-void MuonFitPropertyBrowser::finishHandle(const IAlgorithm* alg)
-{
+void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
   // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
   auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-    static_cast<std::string>( alg->getProperty("InputWorkspace") ) );
+      static_cast<std::string>(alg->getProperty("InputWorkspace")));
 
   auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-    outputName() + "_Workspace");
+      outputName() + "_Workspace");
 
   if (inWs && outWs)
     outWs->copyExperimentInfoFrom(inWs.get());

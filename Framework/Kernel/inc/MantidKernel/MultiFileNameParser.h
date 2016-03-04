@@ -89,7 +89,7 @@ public:
   /// Constructor
   Parser();
   /// Destructor
-  ~Parser();
+  ~Parser() = default;
 
   /// Parse the given multiFileNameString.
   void parse(const std::string &multiFileName);

@@ -47,32 +47,32 @@ ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() {}
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Input Peaks Workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "PeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Input Peaks Workspace");
 
   declareProperty(
-      new ArrayProperty<double>("UBMatrix"),
+      make_unique<ArrayProperty<double>>("UBMatrix"),
       "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
       "... (2,1),(2,2)");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace in HKL-space.");
 
-  declareProperty(
-      new FileProperty("QSampleFileName", "", API::FileProperty::OptionalSave),
-      "Name of file for sample sample.");
+  declareProperty(make_unique<FileProperty>("QSampleFileName", "",
+                                            API::FileProperty::OptionalSave),
+                  "Name of file for sample sample.");
 
-  declareProperty(
-      new FileProperty("HKLFileName", "", API::FileProperty::OptionalSave),
-      "Name of file for HKL.");
+  declareProperty(make_unique<FileProperty>("HKLFileName", "",
+                                            API::FileProperty::OptionalSave),
+                  "Name of file for HKL.");
 }
 
 //----------------------------------------------------------------------------------------------

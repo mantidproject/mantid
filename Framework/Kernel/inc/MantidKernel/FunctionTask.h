@@ -22,7 +22,7 @@ namespace Kernel {
  * @author Janik Zikovsky, SNS
  * @date Feb 8, 2011
  */
-class DLLExport FunctionTask : public Task {
+class DLLExport FunctionTask final : public Task {
 public:
   /// Typedef for a function with no arguments and no return
   typedef void (*voidFunction)();
