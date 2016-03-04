@@ -262,9 +262,10 @@ void LoadSpiceXML2DDet::processInputs() {
   return;
 }
 
+//----------------------------------------------------------------------------------------------
 /** Set up sample logs especially 2theta and diffr for loading instrument
- * 2theta will be obtained from SPICE scan table workspace if it
- * @brief LoadSpiceXML2DDet::setupSampleLogs
+ * @brief LoadSpiceXML2DDet::Set up sample logs to output workspace
+ * @param outws
  * @return
  */
 bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
