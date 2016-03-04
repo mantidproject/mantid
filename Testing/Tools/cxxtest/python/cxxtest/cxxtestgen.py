@@ -380,7 +380,7 @@ def writeTestDescriptions( output, suite ):
 
 def writeTestDescription( output, suite, test ):
     '''Write test description object'''
-    output.write( 'static class %s : public CxxTest::RealTestDescription {\n' % test['class'] )
+    output.write( 'static class %s final : public CxxTest::RealTestDescription {\n' % test['class'] )
     output.write( 'public:\n' )
     if not options.noStaticInit:
         output.write( ' %s() : CxxTest::RealTestDescription( %s, %s, %s, "%s" ) {}\n' %
