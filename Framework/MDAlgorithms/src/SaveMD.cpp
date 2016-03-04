@@ -270,7 +270,8 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
-  assert(sizeof(signal_t) == sizeof(double));
+  static_assert(sizeof(signal_t) == sizeof(double),
+                "signal_t typedef has been changed!");
 
   // Number of data points
   int nPoints = static_cast<int>(ws->getNPoints());

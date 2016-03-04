@@ -695,7 +695,7 @@ void FindPeaks::calculateStandardDeviation(
     const API::MatrixWorkspace_sptr &smoothed, const int &w) {
   // Guard against anyone changing the value of z, which would mean different
   // phi values were needed (see Marriscotti p.312)
-  assert(g_z == 5);
+  static_assert(g_z == 5, "Value of z has changed!");
   // Have to adjust for fact that I normalise Si (unlike the paper)
   const int factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
 

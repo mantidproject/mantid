@@ -459,7 +459,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   //----------------------------------
 
   // determine the OrientedLattice for converting to Q-sample
-  Geometry::OrientedLattice lattice(*m_unitCell.get());
+  Geometry::OrientedLattice lattice(*m_unitCell);
   try {
     Kernel::Matrix<double> UB(3, 3, false);
     Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);

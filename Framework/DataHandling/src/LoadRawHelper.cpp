@@ -1258,7 +1258,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
-    pos = pathToRawFile.find_last_of("\\");
+    pos = pathToRawFile.find_last_of('\\');
   }
   if (pos != std::string::npos) {
     path = pathToRawFile.substr(0, pos);
