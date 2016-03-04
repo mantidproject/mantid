@@ -310,7 +310,7 @@
          <widget class="QComboBox" name="comboBox_calib_cropped_bank_name">
           <item>
            <property name="text">
-            <string>Enable Spectrum-IDs</string>
+            <string>Enable Spectrum-Nos</string>
            </property>
           </item>
           <item>
