@@ -37,17 +37,18 @@ SaveIsawDetCal::~SaveIsawDetCal() {}
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".DetCal"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
       "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
-  declareProperty(new ArrayProperty<string>("BankNames", Direction::Input),
-                  "Optional: Only select the specified banks");
+  declareProperty(
+      make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
+      "Optional: Only select the specified banks");
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 }
@@ -91,8 +92,8 @@ void SaveIsawDetCal::exec() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
-      std::string bankName = comps[i]->getName();
+    for (auto &comp : comps) {
+      std::string bankName = comp->getName();
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
@@ -103,8 +104,7 @@ void SaveIsawDetCal::exec() {
       uniqueBanks.insert(bank);
     }
   } else {
-    for (size_t i = 0; i < bankNames.size(); i++) {
-      std::string bankName = bankNames[i];
+    for (auto bankName : bankNames) {
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;

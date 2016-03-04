@@ -76,20 +76,20 @@ public:
   /// Default constructor
   LoadISISNexus2();
   /// Destructor
-  virtual ~LoadISISNexus2() {}
+  ~LoadISISNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadISISNexus"; }
+  const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a file in ISIS NeXus format.";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /// Spectra block descriptor
   struct SpectraBlock {
@@ -131,16 +131,16 @@ public:
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   // Validate the optional input properties
   void checkOptionalProperties(
-      const std::map<int64_t, std::string> &ExcludedMonitors);
+      const std::map<int64_t, std::string> &SpectraExcluded);
   /// Prepare a vector of SpectraBlock structures to simplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
-                       const std::map<int64_t, specid_t> &specInd2specNum_map,
+                       const std::map<int64_t, specnum_t> &specInd2specNum_map,
                        const DataBlock &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
@@ -165,7 +165,7 @@ private:
   void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize,
                  int64_t period, int64_t start, int64_t &hist,
                  int64_t &spec_num,
-                 DataObjects::Workspace2D_sptr &localWorkspace);
+                 DataObjects::Workspace2D_sptr &local_workspace);
 
   // Create period logs
   void createPeriodLogs(int64_t period,
@@ -176,7 +176,7 @@ private:
   void buildSpectraInd2SpectraNumMap(
       bool range_supplied, int64_t range_min, int64_t range_max,
       const std::vector<int64_t> &spec_list,
-      const std::map<int64_t, std::string> &ExcludedMonitors);
+      const std::map<int64_t, std::string> &SpectraExcluded);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -203,7 +203,7 @@ private:
   /// if true, a spectra list or range of spectra is supplied
   bool m_load_selected_spectra;
   /// map of spectra Index to spectra Number (spectraID)
-  std::map<int64_t, specid_t> m_specInd2specNum_map;
+  std::map<int64_t, specnum_t> m_specInd2specNum_map;
   /// spectra Number to detector ID (multi)map
   API::SpectrumDetectorMapping m_spec2det_map;
 
@@ -241,7 +241,7 @@ private:
       NeXus::NXEntry &entry, boost::shared_array<int> &spectrum_index,
       int64_t ndets, int64_t n_vms_compat_spectra,
       std::map<int64_t, std::string> &monitors, bool excludeMonitors,
-      bool separateMonitors, std::map<int64_t, std::string> &ExcludedMonitors);
+      bool separateMonitors, std::map<int64_t, std::string> &OvelapMonitors);
 };
 
 } // namespace DataHandling

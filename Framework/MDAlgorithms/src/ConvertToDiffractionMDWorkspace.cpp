@@ -1,7 +1,13 @@
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -14,11 +20,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -43,8 +46,8 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
       Append(true), // append data to existing target MD workspace if one exist
       LorentzCorrection(false), // not doing Lorents
       l1(1.), beamline_norm(1.), failedDetectorLookupCount(0),
-      m_extentsMin(NULL),
-      m_extentsMax(NULL) // will be allocated in exec using nDims
+      m_extentsMin(nullptr),
+      m_extentsMax(nullptr) // will be allocated in exec using nDims
 {}
 
 //----------------------------------------------------------------------------------------------
@@ -55,35 +58,34 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
 void ConvertToDiffractionMDWorkspace::init() {
   // Input units must be TOF
   auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, validator),
                   "An input workspace in time-of-flight. If you specify a "
                   "Workspace2D, it gets converted to "
                   "an EventWorkspace using ConvertToEventWorkspace.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
   declareProperty(
-      new PropertyWithValue<bool>("Append", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
       "Append events to the output workspace. The workspace is replaced if "
       "unchecked.");
-  declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("ClearInputWorkspace",
+                                                       false, Direction::Input),
                   "Clear the events from the input workspace during "
                   "conversion, to save memory.");
 
   declareProperty(
-      new PropertyWithValue<bool>("OneEventPerBin", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OneEventPerBin", false,
+                                           Direction::Input),
       "Use the histogram representation (event for event workspaces).\n"
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
-      "Warning! This can use signficantly more memory!");
+      "Warning! This can use significantly more memory!");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
+                                       "HKL"};
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
       boost::make_shared<StringListValidator>(propOptions),
@@ -93,17 +95,17 @@ void ConvertToDiffractionMDWorkspace::init() {
       "the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(
-      new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
-      "Correct the weights of events with by multiplying by the Lorentz "
-      "formula: sin(theta)^2 / lambda^4");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LorentzCorrection",
+                                                       false, Direction::Input),
+                  "Correct the weights of events by multiplying by the Lorentz "
+                  "formula: sin(theta)^2 / lambda^4");
 
   // Box controller properties. These are the defaults
   this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
 
   declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 0),
+      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of "
@@ -113,13 +115,12 @@ void ConvertToDiffractionMDWorkspace::init() {
       "order to merge them later\n");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  std::vector<double> extents(2, 0);
-  extents[0] = -50;
-  extents[1] = +50;
-  declareProperty(new ArrayProperty<double>("Extents", extents),
-                  "A comma separated list of min, max for each dimension,\n"
-                  "specifying the extents of each dimension. Optional, default "
-                  "+-50 in each dimension.");
+  std::vector<double> extents{-50, +50};
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
+      "A comma separated list of min, max for each dimension,\n"
+      "specifying the extents of each dimension. Optional, default "
+      "+-50 in each dimension.");
   setPropertyGroup("Extents", getBoxSettingsGroupName());
 }
 
@@ -189,7 +190,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
   DataObjects::MDBoxBase<DataObjects::MDLeanEvent<3>, 3> *box = ws->getBox();
 
   // Get the position of the detector there.
-  const std::set<detid_t> &detectors = el.getDetectorIDs();
+  const auto &detectors = el.getDetectorIDs();
   if (!detectors.empty()) {
     // Get the detector (might be a detectorGroup for multiple detectors)
     // or might return an exception if the detector is not in the instrument
@@ -215,6 +216,12 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     //  = input beam direction (normalized to 1) - output beam direction
     //  (normalized to 1)
     V3D Q_dir_lab_frame = beamDir - detDir;
+    double qSign = -1.0;
+    std::string convention =
+        ConfigService::Instance().getString("Q.convention");
+    if (convention == "Crystallography")
+      qSign = 1.0;
+    Q_dir_lab_frame *= qSign;
 
     // Multiply by the rotation matrix to convert to Q in the sample frame (take
     // out goniometer rotation)
@@ -306,8 +313,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
       el.clear();
       // For Linux with tcmalloc, make sure memory goes back, if you've cleared
       // 200 Megs
-      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared,
-                                                               (size_t)2e8);
+      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(
+          memoryCleared, static_cast<size_t>(2e8));
     }
   }
   prog->reportIncrement(numEvents, "Adding Events");
@@ -432,11 +439,12 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // ---------------- Get the extents -------------
     std::vector<double> extents = getProperty("Extents");
     // Replicate a single min,max into several
-    if (extents.size() == 2)
+    if (extents.size() == 2) {
       for (size_t d = 1; d < nd; d++) {
         extents.push_back(extents[0]);
         extents.push_back(extents[1]);
       }
+    }
     if (extents.size() != nd * 2)
       throw std::invalid_argument(
           "You must specify either 2 or 6 extents (min,max).");
@@ -616,8 +624,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
                         << " events. This took " << cputimtotal
                         << " in total.\n";
     std::vector<std::string> stats = ws->getBoxControllerStats();
-    for (size_t i = 0; i < stats.size(); ++i)
-      g_log.information() << stats[i] << "\n";
+    for (auto &stat : stats)
+      g_log.information() << stat << "\n";
     g_log.information() << std::endl;
   }
 

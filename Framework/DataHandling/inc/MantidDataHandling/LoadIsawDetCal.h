@@ -46,11 +46,11 @@ public:
   /// Default constructor
   LoadIsawDetCal();
   /// Destructor
-  virtual ~LoadIsawDetCal();
+  ~LoadIsawDetCal() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadIsawDetCal"; }
+  const std::string name() const override { return "LoadIsawDetCal"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Since ISAW already has the capability to calibrate the instrument "
            "using single crystal peaks, this algorithm leverages this in "
            "mantid. It loads in a detcal file from ISAW and moves all of the "
@@ -59,19 +59,19 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
   /// Function to optimize
-  void center(double x, double y, double z, std::string detname,
+  void center(double x, double y, double z, const std::string &detname,
               API::Workspace_sptr ws);
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
 };

@@ -34,8 +34,6 @@ SINQHMListener::SINQHMListener()
   rank = 0;
 }
 
-SINQHMListener::~SINQHMListener() {}
-
 bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
   std::string host = address.toString();
   std::string::size_type i = host.find(':');
@@ -106,7 +104,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
 
   readHMData(ws);
@@ -115,7 +113,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
 }
 
 void SINQHMListener::setSpectra(
-    const std::vector<Mantid::specid_t> & /*specList*/) {
+    const std::vector<Mantid::specnum_t> & /*specList*/) {
   /**
    * Nothing to do: we always go for the full data.
    * SINQHM would do subsampling but this cannot easily
@@ -190,14 +188,14 @@ void SINQHMListener::doSpecialDim() {
   }
 }
 int SINQHMListener::calculateCAddress(coord_t *pos) {
-  int result = (int)pos[rank - 1];
+  int result = static_cast<int>(pos[rank - 1]);
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;
     for (int j = rank - 1; j > i; j--) {
       mult *= dim[j];
     }
-    if ((int)pos[i] < dim[i] && (int)pos[i] > 0) {
-      result += mult * (int)pos[i];
+    if (static_cast<int>(pos[i]) < dim[i] && static_cast<int>(pos[i]) > 0) {
+      result += mult * static_cast<int>(pos[i]);
     }
   }
   return result;
@@ -221,7 +219,7 @@ void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws,
 }
 
 void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
-  int *data = NULL, length = 1;
+  int *data = nullptr, length = 1;
   coord_t *idx;
 
   for (int i = 0; i < rank; i++) {
@@ -231,11 +229,11 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
   pathBuffer << "/admin/readhmdata.egi?bank=0&start=0&end=" << length;
   std::istream &istr = httpRequest(pathBuffer.str());
 
-  data = (int *)malloc(length * sizeof(int));
-  if (data == NULL) {
+  data = reinterpret_cast<int *>(malloc(length * sizeof(int)));
+  if (data == nullptr) {
     throw std::runtime_error("Out of memory reading HM data");
   }
-  istr.read((char *)data, length * sizeof(int));
+  istr.read(reinterpret_cast<char *>(data), length * sizeof(int));
   if (!istr.good()) {
     std::cout << "Encountered Problem before reading all SINQHM data"
               << std::endl;
@@ -250,7 +248,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
    * Mantid MD arrays are in F77 storage order. Only the holy cucumber knows
    * why....
    */
-  idx = (coord_t *)malloc(rank * sizeof(coord_t));
+  idx = reinterpret_cast<coord_t *>(malloc(rank * sizeof(coord_t)));
   recurseDim(data, ws, 0, idx);
 
   free(data);

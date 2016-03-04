@@ -36,16 +36,16 @@ namespace Algorithms {
 class DLLExport ConvolutionFitSequential : public API::DataProcessorAlgorithm {
 public:
   ConvolutionFitSequential();
-  virtual ~ConvolutionFitSequential();
+  ~ConvolutionFitSequential() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   bool checkForTwoLorentz(const std::string &);
   std::vector<std::string> findValuesFromFunction(const std::string &);
@@ -53,8 +53,7 @@ private:
                                               const std::vector<std::string> &);
   std::vector<double> squareVector(std::vector<double>);
   std::vector<double> cloneVector(const std::vector<double> &);
-  API::MatrixWorkspace_sptr convertInputToElasticQ(API::MatrixWorkspace_sptr &,
-                                                   const std::string &);
+  void convertInputToElasticQ(API::MatrixWorkspace_sptr &, const std::string &);
   void calculateEISF(API::ITableWorkspace_sptr &);
   std::string convertBackToShort(const std::string &);
   std::string convertFuncToShort(const std::string &);

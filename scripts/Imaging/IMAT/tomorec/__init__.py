@@ -25,16 +25,22 @@ format conversion routines.
 
 """
 
+IMPORT_ERR_MSG = ("Inconsistency found. Could not import {0} which should be "
+                  "available in this package. Details/reason: {1}")
 try:
     from . import io
 except ImportError as exc:
-    raise ImportError("Inconsistency found. Could not import 'io' (input/output "
-                      "routines) which should be available in this package. "
-                      "Details/reason: {0}".format(exc))
+    raise ImportError(IMPORT_ERR_MSG.format("'io' (input/output routines)", exc))
+
+try:
+    from . import configs
+except ImportError as exc:
+    raise ImportError(IMPORT_ERR_MSG.format("'configs' (tomographic reconstruction "
+                                            "configuration definitions)", exc))
 
 try:
     from . import tool_imports
 except ImportError as exc:
-    raise ImportError("Inconsistency found. Could not import 'tool_imports' (for third "
-                      "party tools such as Tomopy and Astra) which should be available "
-                      "in this package. Details/reason: {0}".format(exc))
+    raise ImportError(IMPORT_ERR_MSG.format("'tool_imports' (for third party "
+                                            "tools such as Tomopy and Astra)",
+                                            exc))

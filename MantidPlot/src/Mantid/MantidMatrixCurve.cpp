@@ -3,8 +3,9 @@
 #include <qpainter.h>
 #include <qwt_symbol.h>
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/QwtWorkspaceBinData.h"

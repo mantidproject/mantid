@@ -164,8 +164,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins = static_cast<size_t>(
-      (pMax - pMin) / width + 0.5); // round up to a whole number of bins.
+  numberOfBins =
+      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 }
 
@@ -213,7 +213,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
 
 /**
  * Perform a weighted sum at the iterator position. This function does not
- * increment the iterator.
+ * increment the iterator. Masked bins do not contribute.
  * @param iterator : Iterator to use in sum
  * @param box : Box implicit function defining valid region.
  * @param sumSignal : Accumlation in/out ref.
@@ -223,11 +223,13 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
 void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
                         MDBoxImplicitFunction &box, double &sumSignal,
                         double &sumSQErrors, double &sumNEvents) {
-  const double weight = box.fraction(iterator->getBoxExtents());
-  sumSignal += weight * iterator->getSignal();
-  const double error = iterator->getError();
-  sumSQErrors += weight * (error * error);
-  sumNEvents += weight * double(iterator->getNumEventsFraction());
+  if (!iterator->getIsMasked()) {
+    const double weight = box.fraction(iterator->getBoxExtents());
+    sumSignal += weight * iterator->getSignal();
+    const double error = iterator->getError();
+    sumSQErrors += weight * (error * error);
+    sumNEvents += weight * double(iterator->getNumEventsFraction());
+  }
 }
 
 namespace Mantid {
@@ -273,23 +275,28 @@ const std::string IntegrateMDHistoWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateMDHistoWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   const std::vector<double> defaultBinning;
-  declareProperty(new ArrayProperty<double>("P1Bin", defaultBinning),
-                  "Projection 1 binning.");
-  declareProperty(new ArrayProperty<double>("P2Bin", defaultBinning),
-                  "Projection 2 binning.");
-  declareProperty(new ArrayProperty<double>("P3Bin", defaultBinning),
-                  "Projection 3 binning.");
-  declareProperty(new ArrayProperty<double>("P4Bin", defaultBinning),
-                  "Projection 4 binning.");
-  declareProperty(new ArrayProperty<double>("P5Bin", defaultBinning),
-                  "Projection 5 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
+      "Projection 1 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
+      "Projection 2 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
+      "Projection 3 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
+      "Projection 4 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
+      "Projection 5 binning.");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -352,11 +359,10 @@ void IntegrateMDHistoWorkspace::exec() {
     const int nThreads = Mantid::API::FrameworkManager::Instance()
                              .getNumOMPThreads(); // NThreads to Request
 
-    auto outIterators = outWS->createIterators(nThreads, NULL);
+    auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) {
-
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
@@ -408,8 +414,8 @@ void IntegrateMDHistoWorkspace::exec() {
         // calculated what the width vector would need to be.
         auto neighbourIndexes =
             inIterator->findNeighbourIndexesByWidth(widthVector);
-        for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
-          inIterator->jumpTo(neighbourIndexes[i]); // Go to that neighbour
+        for (auto neighbourIndex : neighbourIndexes) {
+          inIterator->jumpTo(neighbourIndex); // Go to that neighbour
           performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                              sumNEvents);
         }
@@ -445,7 +451,7 @@ Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {
     std::vector<double> binning = this->getProperty(propertyName);
     std::string result = checkBinning(binning);
     if (!result.empty()) {
-      errors.insert(std::make_pair(propertyName, result));
+      errors.emplace(propertyName, result);
     }
   }
   return errors;

@@ -36,22 +36,16 @@ TOFExtinction::~TOFExtinction() {}
 /** Initialize the algorithm's properties.
  */
 void TOFExtinction::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output));
-  std::vector<std::string> corrOptions;
-  corrOptions.push_back("Type I Zachariasen");
-  corrOptions.push_back("Type I Gaussian");
-  corrOptions.push_back("Type I Lorentzian");
-  corrOptions.push_back("Type II Zachariasen");
-  corrOptions.push_back("Type II Gaussian");
-  corrOptions.push_back("Type II Lorentzian");
-  corrOptions.push_back("Type I&II Zachariasen");
-  corrOptions.push_back("Type I&II Gaussian");
-  corrOptions.push_back("Type I&II Lorentzian");
-  corrOptions.push_back("None, Scaling Only");
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      "OutputWorkspace", "", Direction::Output));
+  std::vector<std::string> corrOptions{
+      "Type I Zachariasen",    "Type I Gaussian",    "Type I Lorentzian",
+      "Type II Zachariasen",   "Type II Gaussian",   "Type II Lorentzian",
+      "Type I&II Zachariasen", "Type I&II Gaussian", "Type I&II Lorentzian",
+      "None, Scaling Only"};
   declareProperty("ExtinctionCorrectionType", corrOptions[0],
                   boost::make_shared<StringListValidator>(corrOptions),
                   "Select the type of extinction correction.");
@@ -392,7 +386,7 @@ double TOFExtinction::absor_sphere(double &twoth, double &wl) {
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
 
-  i = (int)(theta / 5.);
+  i = static_cast<int>(theta / 5.);
   astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
 
   i = i + 1;
@@ -413,7 +407,7 @@ double TOFExtinction::absor_sphere(double &twoth, double &wl) {
   if (mu == 0.0)
     tbar = 0.0;
   else
-    tbar = -(double)std::log(trans) / mu;
+    tbar = -std::log(trans) / mu;
 
   return tbar;
 }

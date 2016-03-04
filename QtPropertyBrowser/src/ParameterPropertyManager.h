@@ -63,7 +63,7 @@ public Q_SLOTS:
 
 protected:
   /// Text representation of the property
-  virtual QString valueText(const QtProperty* property) const;
+  QString valueText(const QtProperty *property) const override;
 
 private Q_SLOTS:
   /// Updates the tooltip of the property

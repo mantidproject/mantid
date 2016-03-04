@@ -4,26 +4,30 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/function.hpp>
-#include <functional>
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidKernel/Timer.h"
+#include <functional>
 
 using std::endl;
 using std::map;
@@ -57,9 +61,9 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
   // from the logs, get all the properties that don't overwrite any
   // prop. already set in the sink workspace (like 'filename').
   auto props = from->mutableRun().getLogData();
-  for (size_t j = 0; j < props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
+  for (auto &prop : props) {
+    if (!to->mutableRun().hasProperty(prop->name())) {
+      to->mutableRun().addLogData(prop->clone());
     }
   }
 }
@@ -111,7 +115,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 *  Handles a zero-sized vector */
 BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
   numPulses = times.size();
-  pulseTimes = NULL;
+  pulseTimes = nullptr;
   if (numPulses == 0)
     return;
   pulseTimes = new DateAndTime[numPulses];
@@ -186,7 +190,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
   */
-  void run() {
+  void run() override {
     // Local tof limits
     double my_shortest_tof =
         static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -394,7 +398,7 @@ public:
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
     {
-      Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
+      std::lock_guard<std::mutex> _lock(alg->m_tofMutex);
       if (my_shortest_tof < alg->shortest_tof) {
         alg->shortest_tof = my_shortest_tof;
       }
@@ -477,7 +481,7 @@ public:
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
-                       boost::shared_ptr<Mutex> ioMutex,
+                       boost::shared_ptr<std::mutex> ioMutex,
                        ThreadScheduler *scheduler,
                        const std::vector<int> &framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
@@ -485,8 +489,9 @@ public:
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-        m_event_id(NULL), m_event_time_of_flight(NULL), m_have_weight(false),
-        m_event_weight(NULL), m_framePeriodNumbers(framePeriodNumbers) {
+        m_event_id(nullptr), m_event_time_of_flight(nullptr),
+        m_have_weight(false), m_event_weight(nullptr),
+        m_framePeriodNumbers(framePeriodNumbers) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -510,15 +515,15 @@ public:
     std::string thisStartTime = "";
     size_t thisNumPulses = 0;
     file.getAttr("offset", thisStartTime);
-    if (file.getInfo().dims.size() > 0)
+    if (!file.getInfo().dims.empty())
       thisNumPulses = file.getInfo().dims[0];
     file.closeData();
 
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
-    for (size_t i = 0; i < alg->m_bankPulseTimes.size(); i++) {
-      if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime)) {
-        thisBankPulseTimes = alg->m_bankPulseTimes[i];
+    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+      if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+        thisBankPulseTimes = bankPulseTime;
         return;
       }
     }
@@ -791,7 +796,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
-  void run() {
+  void run() override {
     // The vectors we will be filling
     auto event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> &event_index = *event_index_ptr;
@@ -802,9 +807,9 @@ public:
     m_loadSize.resize(1, 0);
 
     // Data arrays
-    m_event_id = NULL;
-    m_event_time_of_flight = NULL;
-    m_event_weight = NULL;
+    m_event_id = nullptr;
+    m_event_time_of_flight = nullptr;
+    m_event_weight = nullptr;
 
     m_loadError = false;
     m_have_weight = alg->m_haveWeights;
@@ -1020,7 +1025,7 @@ LoadEventNexus::LoadEventNexus()
       compressTolerance(0), eventVectors(), m_eventVectorMutex(),
       eventid_max(0), pixelID_to_wi_vector(), pixelID_to_wi_offset(),
       m_bankPulseTimes(), m_allBanksPulseTimes(), m_top_entry_name(),
-      m_file(NULL), splitProcessing(false), m_haveWeights(false),
+      m_file(nullptr), splitProcessing(false), m_haveWeights(false),
       weightedEventVectors(), m_instrument_loaded_correctly(false),
       loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
 }
@@ -1054,41 +1059,42 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
 */
 void LoadEventNexus::init() {
+  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
       "sensitive if running on Linux).");
 
   this->declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                Direction::Output),
       "The name of the output EventWorkspace or WorkspaceGroup in which to "
       "load the EventNexus file.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the minimum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTimeStart",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events after the provided start "
                   "time, in seconds (relative to the start of the run).");
 
-  declareProperty(new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
@@ -1099,36 +1105,38 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterByTimeStop", grp1);
 
   declareProperty(
-      new PropertyWithValue<string>("NXentryName", "", Direction::Input),
+      make_unique<PropertyWithValue<string>>("NXentryName", "",
+                                             Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 
-  declareProperty(new ArrayProperty<string>("BankName", Direction::Input),
-                  "Optional: To only include events from one bank. Any bank "
-                  "whose name does not match the given string will have no "
-                  "events.");
+  declareProperty(
+      make_unique<ArrayProperty<string>>("BankName", Direction::Input),
+      "Optional: To only include events from one bank. Any bank "
+      "whose name does not match the given string will have no "
+      "events.");
 
-  declareProperty(new PropertyWithValue<bool>("SingleBankPixelsOnly", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("SingleBankPixelsOnly",
+                                                       true, Direction::Input),
                   "Optional: Only applies if you specified a single bank to "
                   "load with BankName. "
                   "Only pixels in the specified bank will be created if true; "
                   "all of the instrument's pixels will be created otherwise.");
-  setPropertySettings("SingleBankPixelsOnly",
-                      new VisibleWhenProperty("BankName", IS_NOT_DEFAULT));
+  setPropertySettings("SingleBankPixelsOnly", make_unique<VisibleWhenProperty>(
+                                                  "BankName", IS_NOT_DEFAULT));
 
   std::string grp2 = "Loading a Single Bank";
   setPropertyGroup("BankName", grp2);
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
-      new PropertyWithValue<bool>("Precount", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Precount", true, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory "
       "(optional, default False). "
       "This can significantly reduce memory use and memory fragmentation; it "
       "may also speed up loading.");
 
-  declareProperty(new PropertyWithValue<double>("CompressTolerance", -1.0,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "CompressTolerance", -1.0, Direction::Input),
                   "Run CompressEvents while loading (optional, leave blank or "
                   "negative to not do). "
                   "This specified the tolerance to use (in microseconds) when "
@@ -1145,8 +1153,8 @@ void LoadEventNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
@@ -1154,48 +1162,52 @@ void LoadEventNexus::init() {
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
-  declareProperty(
-      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-      "Load the monitors from the file (optional, default False).");
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadMonitors", false,
+                                                       Direction::Input),
+                  "Load the monitors from the file (optional, default False).");
 
   declareProperty(
-      new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("MonitorsAsEvents", false,
+                                           Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTofMin",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the minimum accepted value in microseconds.");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTofMax",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the maximum accepted value in microseconds.");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTimeStart",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors after the "
                   "provided start time, in seconds (relative to the start of "
                   "the run).");
 
-  declareProperty(new PropertyWithValue<double>("FilterMonByTimeStop",
-                                                EMPTY_DBL(), Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors before the "
                   "provided stop time, in seconds (relative to the start of "
                   "the run).");
 
   setPropertySettings(
       "MonitorsAsEvents",
-      new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1"));
-  IPropertySettings *asEventsIsOn =
-      new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
-  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
-  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  auto asEventsIsOn = [] {
+    std::unique_ptr<IPropertySettings> prop =
+        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+    return prop;
+  };
+  setPropertySettings("FilterMonByTofMin", asEventsIsOn());
+  setPropertySettings("FilterMonByTofMax", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStart", asEventsIsOn());
+  setPropertySettings("FilterMonByTimeStop", asEventsIsOn());
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
@@ -1205,19 +1217,20 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  declareProperty("SpectrumMin", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMin", EMPTY_INT(), mustBePositive,
                   "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", (int32_t)EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
-  declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
+  declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
 
   declareProperty(
-      new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("MetaDataOnly", false,
+                                           Direction::Input),
       "If true, only the meta data and sample logs will be loaded.");
 
   declareProperty(
-      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
 }
 
@@ -1379,11 +1392,11 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   if (this->event_id_is_spec) {
     // Find max spectrum no
     Axis *ax1 = m_ws->getAxis(1);
-    specid_t maxSpecNo =
-        -std::numeric_limits<specid_t>::max(); // So that any number will be
-                                               // greater than this
+    specnum_t maxSpecNo =
+        -std::numeric_limits<specnum_t>::max(); // So that any number will be
+                                                // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
-      specid_t spec = ax1->spectraNo(i);
+      specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)
         maxSpecNo = spec;
     }
@@ -1394,7 +1407,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // possible spectrum number
     eventid_max = maxSpecNo;
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, NULL);
+      vectors[i].resize(maxSpecNo + 1, nullptr);
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
@@ -1414,7 +1427,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     // Make an array where index = pixel ID
     // Set the value to NULL by default
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, NULL);
+      vectors[i].resize(eventid_max + 1, nullptr);
     }
 
     for (size_t j = size_t(pixelID_to_wi_offset);
@@ -1485,11 +1498,11 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset);
+    pixelID_to_wi_vector =
+        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
   else
-    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                              pixelID_to_wi_offset, true);
+    pixelID_to_wi_vector =
+        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -1630,8 +1643,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log"));
+  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
@@ -1660,7 +1672,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       nPeriods, periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
-  if (m_allBanksPulseTimes == NULL) {
+  if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
     // m_allBanksPulseTimes = new BankPulseTimes(temp);
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
@@ -1802,27 +1814,24 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
   if ((!someBanks.empty()) && (!monitors)) {
     // check that all of the requested banks are in the file
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank) {
+    for (auto &someBank : someBanks) {
       bool foundIt = false;
-      for (auto bankName = bankNames.begin(); bankName != bankNames.end();
-           ++bankName) {
-        if ((*bankName) == (*someBank) + "_events") {
+      for (auto &bankName : bankNames) {
+        if (bankName == someBank + "_events") {
           foundIt = true;
           break;
         }
       }
       if (!foundIt) {
-        throw std::invalid_argument("No entry named '" + (*someBank) +
+        throw std::invalid_argument("No entry named '" + someBank +
                                     "' was found in the .NXS file.\n");
       }
     }
 
     // change the number of banks to load
     bankNames.clear();
-    for (auto someBank = someBanks.begin(); someBank != someBanks.end();
-         ++someBank)
-      bankNames.push_back((*someBank) + "_events");
+    for (auto &someBank : someBanks)
+      bankNames.push_back(someBank + "_events");
 
     // how many events are in a bank
     bankNumEvents.clear();
@@ -1874,7 +1883,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make the thread pool
   ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<Mutex>();
+  auto diskIOMutex = boost::make_shared<std::mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -2140,15 +2149,14 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       }
     }
   }
-  if (detList.size() == 0)
+  if (detList.empty())
     return;
-  for (int i = 0; i < static_cast<int>(detList.size()); i++) {
+  for (auto &det : detList) {
     bool keep = false;
-    boost::shared_ptr<RectangularDetector> det = detList[i];
     std::string det_name = det->getName();
-    for (int j = 0; j < static_cast<int>(bankNames.size()); j++) {
-      size_t pos = bankNames[j].find("_events");
-      if (det_name.compare(bankNames[j].substr(0, pos)) == 0)
+    for (auto &bankName : bankNames) {
+      size_t pos = bankName.find("_events");
+      if (det_name.compare(bankName.substr(0, pos)) == 0)
         keep = true;
       if (keep)
         break;
@@ -2160,21 +2168,20 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
-      for (int col = 0; col < static_cast<int>(children.size()); col++) {
+      for (auto &col : children) {
         boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                children[col]);
+            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
         std::vector<Geometry::IComponent_const_sptr> grandchildren;
         asmb2->getChildren(grandchildren, false);
 
-        for (int row = 0; row < static_cast<int>(grandchildren.size()); row++) {
-          Detector *d = dynamic_cast<Detector *>(
-              const_cast<IComponent *>(grandchildren[row].get()));
+        for (auto &row : grandchildren) {
+          Detector *d =
+              dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(detList[i].get());
+      IComponent *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }
@@ -2203,12 +2210,12 @@ void LoadEventNexus::createSpectraMapping(
   if (!monitorsOnly && !bankNames.empty()) {
     std::vector<IDetector_const_sptr> allDets;
 
-    for (auto name = bankNames.begin(); name != bankNames.end(); ++name) {
+    for (const auto &bankName : bankNames) {
       // Only build the map for the single bank
       std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, (*name));
+      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
       if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + (*name) +
+        throw std::runtime_error("Could not find the bank named '" + bankName +
                                  "' as a component assembly in the instrument "
                                  "tree; or it did not contain any detectors."
                                  " Try unchecking SingleBankPixelsOnly.");
@@ -2334,8 +2341,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
     this->declareProperty(
-        new WorkspaceProperty<IEventWorkspace>("MonitorWorkspace", mon_wsname,
-                                               Direction::Output),
+        Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+            "MonitorWorkspace", mon_wsname, Direction::Output),
         "Monitors from the Event NeXus file");
     this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace",
                                             m_ws->getSingleHeldWorkspace());
@@ -2375,10 +2382,10 @@ void LoadEventNexus::runLoadMonitors() {
                                    this->getProperty("MonitorsAsEvents"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<Workspace>("MonitorWorkspace",
-                                                           mon_wsname,
-                                                           Direction::Output),
-                          "Monitors from the Event NeXus file");
+    this->declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            "MonitorWorkspace", mon_wsname, Direction::Output),
+        "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", monsOut);
     // The output will either be a group workspace or a matrix workspace
     MatrixWorkspace_sptr mons =
@@ -2400,7 +2407,7 @@ void LoadEventNexus::runLoadMonitors() {
           ssPropName << "MonitorWorkspace"
                      << "_" << i + 1;
           this->declareProperty(
-              new WorkspaceProperty<MatrixWorkspace>(
+              Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                   ssPropName.str(), ssWsName.str(), Direction::Output),
               "Monitors from the Event NeXus file");
           this->setProperty(ssPropName.str(), monsGrp->getItem(i));
@@ -2490,7 +2497,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        const specid_t &specNo = spec[it - udet.begin()];
+        const specnum_t &specNo = spec[it - udet.begin()];
         m_ws->setSpectrumNumberForAllPeriods(i, specNo);
         m_ws->setDetectorIdsForAllPeriods(i, id);
       }
@@ -2506,11 +2513,11 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
     if (!m_specList.empty()) {
       int i = 0;
       std::vector<int32_t> spec_temp, udet_temp;
-      for (auto it = spec.begin(); it != spec.end(); it++) {
-        if (find(m_specList.begin(), m_specList.end(), *it) !=
+      for (auto &element : spec) {
+        if (find(m_specList.begin(), m_specList.end(), element) !=
             m_specList.end()) // spec element *it is not in spec_list
         {
-          spec_temp.push_back(*it);
+          spec_temp.push_back(element);
           udet_temp.push_back(udet.at(i));
         }
         i++;
@@ -2741,9 +2748,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
         // spread the events uniformly inside the bin
         boost::uniform_real<> distribution(left, right);
         std::vector<double> random_numbers(m);
-        for (auto it = random_numbers.begin(); it != random_numbers.end();
-             ++it) {
-          *it = distribution(rand_gen);
+        for (double &random_number : random_numbers) {
+          random_number = distribution(rand_gen);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();

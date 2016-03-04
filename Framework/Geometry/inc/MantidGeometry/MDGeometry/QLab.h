@@ -37,16 +37,15 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL QLab : public MDFrame {
 public:
   QLab();
-  virtual ~QLab();
-  Mantid::Kernel::UnitLabel getUnitLabel() const;
-  const Mantid::Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
-  bool isQ() const;
-  bool isSameType(const MDFrame &frame) const;
-  virtual std::string name() const;
-  QLab *clone() const;
+  Mantid::Kernel::UnitLabel getUnitLabel() const override;
+  const Mantid::Kernel::MDUnit &getMDUnit() const override;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const override;
+  bool isQ() const override;
+  bool isSameType(const MDFrame &frame) const override;
+  std::string name() const override;
+  QLab *clone() const override;
   Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
+  equivalientSpecialCoordinateSystem() const override;
 
   // Type name
   static const std::string QLabName;

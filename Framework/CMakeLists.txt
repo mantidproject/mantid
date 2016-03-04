@@ -119,7 +119,6 @@ endif ()
 
 # Unit test helper packages
 if ( CXXTEST_FOUND )
-  add_subdirectory ( UserAlgorithms )
   add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
@@ -168,7 +167,7 @@ if ( WIN32 ) # General windows environment
               PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
   endif ()
     # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
-    file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
+    file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
     install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
   else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build

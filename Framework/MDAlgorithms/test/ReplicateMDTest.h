@@ -11,7 +11,6 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
@@ -185,10 +184,10 @@ public:
 
   void test_replicate_1d_vertical() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(10);
+    std::vector<int> shapeShape = {10, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(1)(10);
+    std::vector<int> dataShape = {1, 10};
     auto dataWS = makeHistoWorkspace(dataShape);
     for (int i = 0; i < dataShape[1]; ++i) {
       dataWS->setSignalAt(i, i); // Vertically increasing.
@@ -225,10 +224,10 @@ public:
 
   void test_replicate_1d_horizontal() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(10);
+    std::vector<int> shapeShape = {10, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(10)(1);
+    std::vector<int> dataShape = {10, 1};
     auto dataWS = makeHistoWorkspace(dataShape);
     for (int i = 0; i < dataShape[0]; ++i) {
       dataWS->setSignalAt(i, i); // Horizontally increasing.
@@ -253,20 +252,20 @@ public:
     // increasing
 
     TSM_ASSERT_EQUALS(
-        "Neighours vertical. Should be the same.", outWS->getSignalAt(0),
-        outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
-    TSM_ASSERT_DIFFERS("Neighours horizontal. Should be different.",
+        "Neighbours vertical. Should be the same.", outWS->getSignalAt(0),
+        outWS->getSignalAt(shapeShape[0] /*one row vertically down*/));
+    TSM_ASSERT_DIFFERS("Neighbours horizontal. Should be different.",
                        outWS->getSignalAt(0), outWS->getSignalAt(1));
-    TSM_ASSERT_EQUALS("Horzontal points should be same in data and output",
+    TSM_ASSERT_EQUALS("Horizontal points should be same in data and output",
                       dataWS->getSignalAt(1), outWS->getSignalAt(1));
   }
 
   void test_auto_transpose_2d() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(20)(10);
+    std::vector<int> shapeShape = {10, 20, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShapePreTranspose = boost::assign::list_of(10)(20);
+    std::vector<int> dataShapePreTranspose = {10, 20};
     auto dataWSTranspose = makeHistoWorkspace(
         dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
 
@@ -302,10 +301,10 @@ public:
 
   void test_performance() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(1000)(1000);
+    std::vector<int> shapeShape = {1000, 1000};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(1000)(1);
+    std::vector<int> dataShape = {1000, 1};
     auto dataWS = makeHistoWorkspace(dataShape);
 
     ReplicateMD alg;

@@ -40,20 +40,20 @@ namespace Algorithms {
 class DLLExport SetInstrumentParameter : public API::Algorithm {
 public:
   SetInstrumentParameter();
-  virtual ~SetInstrumentParameter();
+  ~SetInstrumentParameter() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Add or replace an parameter attached to an instrument component.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void addParameter(Mantid::Geometry::ParameterMap &pmap,
                     const Mantid::Geometry::IComponent *cmptId,

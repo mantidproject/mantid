@@ -11,33 +11,21 @@ vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false), m_bCheckDimensio
 {
 }
 
-vtkDataSetFactory::~vtkDataSetFactory()
-{
-}
-
 /**
- Set the successor factory for the chain-of-responsibility.
- @param pSuccessor :: pointer to the successor. Note RAII is used.
- @return true if addition was successful.
+ * Checks the successor and throws if invalid.
+ * @throw std::runtime_error if types are the same
+ * @throw std::invalid_argument if successor is nullptr
  */
-void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory* pSuccessor)
-{ 
-  //Assigment peformed first (RAII) to guarentee no side effects.
-  m_successor = vtkDataSetFactory::SuccessorType(pSuccessor);
-  //Unless overriden, successors should not be the same type as the present instance.
-  if(pSuccessor->getFactoryTypeName() == this->getFactoryTypeName())
-  {
-    throw std::runtime_error("Cannot assign a successor to vtkDataSetFactory with the same type as the present vtkDataSetFactory type.");
+void vtkDataSetFactory::checkSuccessor() const {
+  if (m_successor) {
+    if (m_successor->getFactoryTypeName() == this->getFactoryTypeName()) {
+      throw std::runtime_error("Cannot assign a successor to vtkDataSetFactory "
+                               "with the same type as the present "
+                               "vtkDataSetFactory type.");
+    }
+  } else {
+    throw std::invalid_argument("Null pointer passed as successor");
   }
-}
-
-/**
- Determine when a successor is available.
- @return true if a successor is available.
- */
-bool vtkDataSetFactory::hasSuccessor() const
-{
-  return NULL != m_successor.get();
 }
 
 /*
@@ -66,8 +54,9 @@ Convenience function. Creates an output visualisation data set in one-shot.
 @param progressUpdater : object used to update the progress action.
 @result vtkDataSet* interpreted from input.
 */
-vtkDataSet* vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws, ProgressAction& progressUpdater)
-{
+vtkSmartPointer<vtkDataSet>
+vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
+                                 ProgressAction &progressUpdater) {
   this->initialize(ws);
   return this->create(progressUpdater);
 }

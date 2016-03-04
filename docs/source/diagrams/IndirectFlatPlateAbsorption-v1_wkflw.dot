@@ -1,0 +1,110 @@
+digraph IndirectFlatePlateAbsorption {
+  label="IndirectFlatePlateAbsorption Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    SampleWorkspace1        [label="SampleWorkspace"]
+    SampleWorkspace2        [label="SampleWorkspace"]
+    SampleWorkspace_Wave
+    SampleWorkspace_Wave2   [label="SampleWorkspace_Wave"]
+    SampleWorkspace_Wave3   [label="SampleWorkspace_Wave"]
+    SampleChemicalFormula
+    SampleNumberDensity
+    SampleHeight1           [label="SampleHeight"]
+    SampleWidth1            [label="SampleWidth"]
+    SampleThickness
+    AbsWorkspace1           [label="AbsorptionWorkspace"]
+    AbsWorkspace2           [label="AbsorptionWorkspace"]
+    CanWorkspace
+    CanWorkspace_Wave
+    CanScale
+    CanChemicalFormula
+    CanNumberDensity
+    CanFrontThickness
+    CanBackThickness
+    CanScale
+    ElementSize1            [label="ElementSize"]
+    SampleLogs
+    EFixed1                 [label="eFixed"]
+    EFixed2                 [label="eFixed"]
+    OutputWorkspace
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    GetEFixed
+    ConvertUnits1           [label="ConvertUnits"]
+    ConvertUnits2           [label="ConvertUnits"]
+    ConvertUnits3           [label="ConvertUnits"]
+    SetSampleMaterial1      [label="SetSampleMaterial"]
+    SetSampleMaterial2      [label="SetSampleMaterial"]
+    FlatPlateAbsorption1    [label="FlatePlatAbsorption"]
+    FlatPlateAbsorption2    [label="FlatePlatAbsorption"]
+    Scale
+    Divide1                 [label="Divide"]
+    Divide2                 [label="Divide"]
+    Divide3                 [label="Divide"]
+    Minus1                  [label="Minus"]
+    Minus2                  [label="Minus"]
+    AddSampleLogMultiple
+    GroupWorkspaces
+  }
+  
+  subgraph decisions {
+    $decision_style
+    canGiven          [label="Can Workspace?"]
+    canScale          [label="Can Scale?"]
+    useCorrections    [label="Can Corrections?"]
+  }
+
+  SampleWorkspace1                   	-> GetEFixed
+  GetEFixed                         	-> EFixed1
+  EFixed1                           	-> ConvertUnits1
+  SampleWorkspace1                   	-> ConvertUnits1
+  ConvertUnits1                     	-> SampleWorkspace_Wave        	    [label="Convert input workspace into Wavelength"]
+  SampleWorkspace_Wave                  -> SetSampleMaterial1
+  SampleChemicalFormula                 -> SetSampleMaterial1
+  SampleNumberDensity                   -> SetSampleMaterial1
+  SetSampleMaterial1               	    -> FlatPlateAbsorption1
+  SampleHeight1                      	-> FlatPlateAbsorption1
+  SampleWidth1                       	-> FlatPlateAbsorption1
+  SampleThickness                  	    -> FlatPlateAbsorption1
+  ElementSize1                       	-> FlatPlateAbsorption1
+  EFixed1                           	-> FlatPlateAbsorption1
+  FlatPlateAbsorption1              	-> AbsWorkspace1
+  AbsWorkspace1                     	-> canGiven
+  canGiven                    	        -> CanWorkspace           		    [label="Yes"]
+    CanWorkspace                	        -> ConvertUnits2
+    EFixed2                           	    -> ConvertUnits2
+    ConvertUnits2                     	    -> CanWorkspace_Wave            [label="Convert can workspace into Wavelength"]
+    CanWorkspace_Wave                       -> canScale
+    canScale                    	        -> Scale                        [label="Not equal to 1"]
+        CanScale                                -> Scale
+        Scale                             	    -> useCorrections           
+    canScale                    	        -> useCorrections               [label="Equal to 1"]
+    useCorrections                    	    -> SetSampleMaterial2           [label="Yes"]
+        CanChemicalFormula                      -> SetSampleMaterial2
+        CanNumberDensity                        -> SetSampleMaterial2
+        SetSampleMaterial2                      -> FlatPlateAbsorption2
+        CanFrontThickness                       -> FlatPlateAbsorption2
+        CanBackThickness                        -> FlatPlateAbsorption2
+        FlatPlateAbsorption2                    -> Divide1
+        SetSampleMaterial2                      -> Divide1
+        Divide1                                 -> Minus1
+        SampleWorkspace2                        -> Minus1
+    useCorrections                    	    -> Minus2                       [label="No"]
+        SampleWorkspace2                        -> Minus2
+        Minus2                                  -> Divide2
+        AbsWorkspace2                           -> Divide2
+  canGiven                    	        -> Divide3                       	[label="No"]
+  SampleWorkspace_Wave3                 -> Divide3
+  Minus1                                -> SampleWorkspace_Wave2
+  Divide2                               -> SampleWorkspace_Wave2
+  Divide3                               -> SampleWorkspace_Wave2
+  SampleWorkspace_Wave2                 -> ConvertUnits3                    [label="Convert back to DeltaE"]
+  ConvertUnits3                         -> AddSampleLogMultiple
+  SampleLogs                            -> AddSampleLogMultiple
+  AddSampleLogMultiple                  -> GroupWorkspaces
+  GroupWorkspaces                       -> OutputWorkspace
+}

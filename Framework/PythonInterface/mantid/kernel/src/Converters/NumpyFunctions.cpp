@@ -6,15 +6,15 @@ namespace Converters {
 namespace Impl {
 
 PyObject *func_PyArray_IterNew(PyArrayObject *arr) {
-  return PyArray_IterNew((PyObject *)arr);
+  return PyArray_IterNew(reinterpret_cast<PyObject *>(arr));
 }
 
 PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
                                          Py_intptr_t *dims) {
-  return (PyArrayObject *)PyArray_NewFromDescr(
+  return reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
       &PyArray_Type, PyArray_DescrFromType(datatype), ndims, // rank
       dims, // Length in each dimension
-      NULL, NULL, 0, NULL);
+      nullptr, NULL, 0, nullptr));
 }
 }
 }

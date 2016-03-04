@@ -2,7 +2,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidKernel/LibraryManager.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 namespace Mantid {
 namespace API {
@@ -14,8 +14,6 @@ ConstraintFactoryImpl::ConstraintFactoryImpl()
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
-
-ConstraintFactoryImpl::~ConstraintFactoryImpl() {}
 
 /**Creates an instance of a Constraint initialized using an expression
  * @param fun :: The function
@@ -43,7 +41,7 @@ IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
 IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
                                                       const Expression &expr,
                                                       bool isDefault) const {
-  IConstraint *c = 0;
+  IConstraint *c = nullptr;
   if (expr.name() == "==") {
     c = createUnwrapped("BoundaryConstraint");
   } else {

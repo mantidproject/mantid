@@ -61,24 +61,15 @@ public:
                  const Mantid::API::MDNormalization normalisation,
                  const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
-  /// Copy constructor
-  PeakBackground(const PeakBackground &other);
-
-  /// Assignment operator
-  PeakBackground &operator=(const PeakBackground &other);
-
   /// Overriden is background function
-  virtual bool isBackground(Mantid::API::IMDIterator *iterator) const;
+  bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
   /// Overriden configure iterator function.
-  virtual void
-  configureIterator(Mantid::API::IMDIterator *const iterator) const;
+  void
+  configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virutal constructor
-  virtual PeakBackground *clone() const;
-
-  /// Destructor
-  virtual ~PeakBackground();
+  PeakBackground *clone() const override;
 };
 
 } // namespace Crystal

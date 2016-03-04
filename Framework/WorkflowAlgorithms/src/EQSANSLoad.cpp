@@ -2,26 +2,31 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidAPI/FileFinder.h>
-#include <MantidAPI/FileProperty.h>
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
+
 #include "Poco/DirectoryIterator.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+
 #include <iostream>
 #include <fstream>
 #include <istream>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -35,21 +40,21 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void EQSANSLoad::init() {
-  declareProperty(new API::FileProperty("Filename", "",
-                                        API::FileProperty::OptionalLoad,
-                                        "_event.nxs"),
-                  "The name of the input event Nexus file to load");
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      "The name of the input event Nexus file to load");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),
                   "Input event workspace. Assumed to be unmodified events "
                   "straight from LoadEventNexus");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Then name of the output EventWorkspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Then name of the output EventWorkspace");
   declareProperty(
       "NoBeamCenter", false,
       "If true, the detector will not be moved according to the beam center");
@@ -128,8 +133,8 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   std::string config_file = "";
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
-  for (auto it = searchPaths.cbegin(); it != searchPaths.cend(); ++it) {
-    Poco::DirectoryIterator file_it(*it);
+  for (const auto &searchPath : searchPaths) {
+    Poco::DirectoryIterator file_it(searchPath);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it) {
       if (boost::regex_search(file_it.name(), matches, re1)) {
@@ -274,7 +279,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit1Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit1 = (int)dp->getStatistics().mean;
+  int slit1 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
@@ -284,7 +289,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit2Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit2 = (int)dp->getStatistics().mean;
+  int slit2 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
@@ -294,7 +299,7 @@ void EQSANSLoad::getSourceSlitSize() {
                              slit3Name + " as a time series property with "
                                          "floating point values.");
   }
-  int slit3 = (int)dp->getStatistics().mean;
+  int slit3 = static_cast<int>(dp->getStatistics().mean);
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
     m_output_message += "   Could not determine source aperture diameter\n";
@@ -330,18 +335,16 @@ void EQSANSLoad::moveToBeamCenter() {
   // default beam center
   if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.information() << "Setting beam center to ["
-                        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(m_center_y, 1) << "]"
-                        << std::endl;
+    g_log.information() << "Setting beam center to [" << m_center_x << ", "
+                        << m_center_y << "]" << std::endl;
     return;
   }
 
   // Check that the center of the detector really is at (0,0)
-  int nx_pixels = (int)(dataWS->getInstrument()->getNumberParameter(
-      "number-of-x-pixels")[0]);
-  int ny_pixels = (int)(dataWS->getInstrument()->getNumberParameter(
-      "number-of-y-pixels")[0]);
+  int nx_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  int ny_pixels = static_cast<int>(
+      dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
   V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);
@@ -375,8 +378,8 @@ void EQSANSLoad::moveToBeamCenter() {
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
   m_output_message += "   Beam center: " +
-                      Poco::NumberFormatter::format(m_center_x, 1) + ", " +
-                      Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+                      Poco::NumberFormatter::format(m_center_x) + ", " +
+                      Poco::NumberFormatter::format(m_center_y) + "\n";
 }
 
 /// Read a config file
@@ -425,8 +428,8 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
   dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut,
                                    "microsecond", true);
   m_output_message +=
-      "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1) +
-      " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) +
+      "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut) +
+      " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut) +
       " microsec\n";
 
   if (m_moderator_position != 0) {
@@ -478,16 +481,17 @@ void EQSANSLoad::exec() {
   }
 
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    AlgorithmProperty *loadProp = new AlgorithmProperty("LoadAlgorithm");
+    auto loadProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
     setPropertyValue("InputWorkspace", "");
     setProperty("NoBeamCenter", false);
     loadProp->setValue(toString());
-    reductionManager->declareProperty(loadProp);
+    reductionManager->declareProperty(std::move(loadProp));
   }
 
   if (!reductionManager->existsProperty("InstrumentName")) {
     reductionManager->declareProperty(
-        new PropertyWithValue<std::string>("InstrumentName", "EQSANS"));
+        make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                    "EQSANS"));
   }
 
   // Output log
@@ -523,8 +527,8 @@ void EQSANSLoad::exec() {
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
       }
-      declareProperty(new WorkspaceProperty<>("MonitorWorkspace", mon_wsname,
-                                              Direction::Output),
+      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                          "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
       setProperty("MonitorWorkspace", monWS);
     }
@@ -633,7 +637,7 @@ void EQSANSLoad::exec() {
     g_log.information() << "Moving moderator to " << m_moderator_position
                         << std::endl;
     m_output_message += "   Moderator position: " +
-                        Poco::NumberFormatter::format(m_moderator_position, 3) +
+                        Poco::NumberFormatter::format(m_moderator_position) +
                         " m\n";
     mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
     mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
@@ -661,13 +665,13 @@ void EQSANSLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", m_center_x));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterX", m_center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", m_center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", m_center_y));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterY", m_center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }
@@ -716,8 +720,8 @@ void EQSANSLoad::exec() {
                                      true);
     wl_combined_max = wl_max;
     m_output_message += "   Wavelength range: " +
-                        Poco::NumberFormatter::format(wl_min, 1) + " - " +
-                        Poco::NumberFormatter::format(wl_max, 1);
+                        Poco::NumberFormatter::format(wl_min) + " - " +
+                        Poco::NumberFormatter::format(wl_max);
     if (frame_skipping) {
       const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
       const double wl_max2 = tofAlg->getProperty("WavelengthMaxFrame2");
@@ -726,8 +730,8 @@ void EQSANSLoad::exec() {
                                        "Angstrom", true);
       dataWS->mutableRun().addProperty("wavelength_max_frame2", wl_max2,
                                        "Angstrom", true);
-      m_output_message += " and " + Poco::NumberFormatter::format(wl_min2, 1) +
-                          " - " + Poco::NumberFormatter::format(wl_max2, 1) +
+      m_output_message += " and " + Poco::NumberFormatter::format(wl_min2) +
+                          " - " + Poco::NumberFormatter::format(wl_max2) +
                           " Angstrom\n";
     } else
       m_output_message += " Angstrom\n";
@@ -766,9 +770,13 @@ void EQSANSLoad::exec() {
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");
   const double wl_step = getProperty("WavelengthStep");
-  std::string params = Poco::NumberFormatter::format(wl_min, 2) + "," +
-                       Poco::NumberFormatter::format(wl_step, 2) + "," +
-                       Poco::NumberFormatter::format(wl_combined_max, 2);
+
+  const double wl_min_rounded = round(wl_min * 100.0) / 100.0;
+  const double wl_max_rounded = round(wl_combined_max * 100.0) / 100.0;
+  std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," +
+                       Poco::NumberFormatter::format(wl_step) + "," +
+                       Poco::NumberFormatter::format(wl_max_rounded, 2);
+  g_log.information() << "Rebin parameters: " << params << std::endl;
   IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents)

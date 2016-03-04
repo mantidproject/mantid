@@ -154,12 +154,12 @@ soap_instantiate_SOAP_ENV__Fault(struct soap *, int, const char *, const char *,
 
 inline struct SOAP_ENV__Fault *soap_new_SOAP_ENV__Fault(struct soap *soap,
                                                         int n = -1) {
-  return soap_instantiate_SOAP_ENV__Fault(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_SOAP_ENV__Fault(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Fault *soap_new_req_SOAP_ENV__Fault(struct soap *soap) {
   struct SOAP_ENV__Fault *_p =
-      soap_instantiate_SOAP_ENV__Fault(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Fault(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Fault(soap, _p);
   }
@@ -172,7 +172,7 @@ inline struct SOAP_ENV__Fault *soap_new_set_SOAP_ENV__Fault(
     struct SOAP_ENV__Reason *SOAP_ENV__Reason, char *SOAP_ENV__Node,
     char *SOAP_ENV__Role, struct SOAP_ENV__Detail *SOAP_ENV__Detail) {
   struct SOAP_ENV__Fault *_p =
-      soap_instantiate_SOAP_ENV__Fault(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Fault(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Fault(soap, _p);
     _p->faultcode = faultcode;
@@ -246,13 +246,13 @@ soap_instantiate_SOAP_ENV__Reason(struct soap *, int, const char *,
 
 inline struct SOAP_ENV__Reason *soap_new_SOAP_ENV__Reason(struct soap *soap,
                                                           int n = -1) {
-  return soap_instantiate_SOAP_ENV__Reason(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_SOAP_ENV__Reason(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Reason *
 soap_new_req_SOAP_ENV__Reason(struct soap *soap) {
   struct SOAP_ENV__Reason *_p =
-      soap_instantiate_SOAP_ENV__Reason(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Reason(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Reason(soap, _p);
   }
@@ -262,7 +262,7 @@ soap_new_req_SOAP_ENV__Reason(struct soap *soap) {
 inline struct SOAP_ENV__Reason *
 soap_new_set_SOAP_ENV__Reason(struct soap *soap, char *SOAP_ENV__Text) {
   struct SOAP_ENV__Reason *_p =
-      soap_instantiate_SOAP_ENV__Reason(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Reason(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Reason(soap, _p);
     _p->SOAP_ENV__Text = SOAP_ENV__Text;
@@ -328,13 +328,13 @@ soap_instantiate_SOAP_ENV__Detail(struct soap *, int, const char *,
 
 inline struct SOAP_ENV__Detail *soap_new_SOAP_ENV__Detail(struct soap *soap,
                                                           int n = -1) {
-  return soap_instantiate_SOAP_ENV__Detail(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_SOAP_ENV__Detail(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Detail *
 soap_new_req_SOAP_ENV__Detail(struct soap *soap, int __type, void *fault) {
   struct SOAP_ENV__Detail *_p =
-      soap_instantiate_SOAP_ENV__Detail(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Detail(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Detail(soap, _p);
     _p->__type = __type;
@@ -348,7 +348,7 @@ inline struct SOAP_ENV__Detail *soap_new_set_SOAP_ENV__Detail(struct soap *soap,
                                                               int __type,
                                                               void *fault) {
   struct SOAP_ENV__Detail *_p =
-      soap_instantiate_SOAP_ENV__Detail(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Detail(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Detail(soap, _p);
     _p->__any = __any;
@@ -416,12 +416,12 @@ soap_instantiate_SOAP_ENV__Code(struct soap *, int, const char *, const char *,
 
 inline struct SOAP_ENV__Code *soap_new_SOAP_ENV__Code(struct soap *soap,
                                                       int n = -1) {
-  return soap_instantiate_SOAP_ENV__Code(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_SOAP_ENV__Code(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Code *soap_new_req_SOAP_ENV__Code(struct soap *soap) {
   struct SOAP_ENV__Code *_p =
-      soap_instantiate_SOAP_ENV__Code(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Code(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Code(soap, _p);
   }
@@ -432,7 +432,7 @@ inline struct SOAP_ENV__Code *
 soap_new_set_SOAP_ENV__Code(struct soap *soap, char *SOAP_ENV__Value,
                             struct SOAP_ENV__Code *SOAP_ENV__Subcode) {
   struct SOAP_ENV__Code *_p =
-      soap_instantiate_SOAP_ENV__Code(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Code(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Code(soap, _p);
     _p->SOAP_ENV__Value = SOAP_ENV__Value;
@@ -499,13 +499,13 @@ soap_instantiate_SOAP_ENV__Header(struct soap *, int, const char *,
 
 inline struct SOAP_ENV__Header *soap_new_SOAP_ENV__Header(struct soap *soap,
                                                           int n = -1) {
-  return soap_instantiate_SOAP_ENV__Header(soap, n, NULL, NULL, NULL);
+  return soap_instantiate_SOAP_ENV__Header(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Header *
 soap_new_req_SOAP_ENV__Header(struct soap *soap) {
   struct SOAP_ENV__Header *_p =
-      soap_instantiate_SOAP_ENV__Header(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Header(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Header(soap, _p);
   }
@@ -515,7 +515,7 @@ soap_new_req_SOAP_ENV__Header(struct soap *soap) {
 inline struct SOAP_ENV__Header *
 soap_new_set_SOAP_ENV__Header(struct soap *soap) {
   struct SOAP_ENV__Header *_p =
-      soap_instantiate_SOAP_ENV__Header(soap, -1, NULL, NULL, NULL);
+      soap_instantiate_SOAP_ENV__Header(soap, -1, nullptr, nullptr, nullptr);
   if (_p) {
     soap_default_SOAP_ENV__Header(soap, _p);
   }

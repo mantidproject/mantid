@@ -37,12 +37,11 @@ public :
   void testClone()
   {
     Mantid::VATES::UserDefinedThresholdRange original(1, 2);
-    Mantid::VATES::UserDefinedThresholdRange* cloned = original.clone();
+    auto cloned = std::unique_ptr<Mantid::VATES::UserDefinedThresholdRange>(
+        original.clone());
 
     TS_ASSERT_EQUALS(original.getMaximum(), cloned->getMaximum());
     TS_ASSERT_EQUALS(original.getMinimum(), cloned->getMinimum());
-
-    delete cloned;
   }
 
   void testInRange()

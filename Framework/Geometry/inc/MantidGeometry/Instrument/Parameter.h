@@ -70,7 +70,7 @@ class ParameterMap;
 class MANTID_GEOMETRY_DLL Parameter {
 public:
   /// Virtual destructor
-  virtual ~Parameter() {}
+  virtual ~Parameter() = default;
 
   /// Parameter type
   const std::string &type() const { return m_type; }
@@ -136,16 +136,16 @@ private:
 template <class Type> class DLLExport ParameterType : public Parameter {
 public:
   /// Returns the value of the property as a string
-  std::string asString() const;
+  std::string asString() const override;
   /// Set the value of the property via a string
-  void fromString(const std::string &value);
+  void fromString(const std::string &value) override;
 
   /// Returns the value of the parameter
   inline const Type &value() const { return m_value; }
   /// Get the value of the parameter
   inline const Type &operator()() const { return m_value; }
 
-  Parameter *clone() const { return new ParameterType(*this); }
+  Parameter *clone() const override { return new ParameterType(*this); }
 
 private:
   friend class ParameterMap;

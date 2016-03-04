@@ -49,11 +49,11 @@ public:
     sendInitialSetup();
   }
   /// Destructor.
-  ~TestServerConnection() {}
+  ~TestServerConnection() override {}
   /// Sends an OK message when there is nothing to send or an error occured
   void sendOK() {
     std::string comm = "OK";
-    socket().sendBytes(comm.c_str(), (int)comm.size());
+    socket().sendBytes(comm.c_str(), static_cast<int>(comm.size()));
   }
 
   /// Send initial setup header
@@ -61,13 +61,13 @@ public:
     TCPStreamEventDataSetup setup;
     setup.head_setup.run_number = 1234;
     strcpy(setup.head_setup.inst_name, "MUSR");
-    socket().sendBytes(&setup, (int)sizeof(setup));
+    socket().sendBytes(&setup, static_cast<int>(sizeof(setup)));
   }
 
   /**
   * Main method that sends out the data.
   */
-  void run() {
+  void run() override {
     Kernel::MersenneTwister tof(0, 10000.0, 20000.0);
     Kernel::MersenneTwister spec(1234, 0.0, static_cast<double>(m_nSpectra));
     Kernel::MersenneTwister period(0, 0.0, static_cast<double>(m_nPeriods));
@@ -82,8 +82,8 @@ public:
       data.head_n.nevents = m_nEvents;
       data.head_n.period = static_cast<uint32_t>(period.nextValue());
 
-      socket().sendBytes(&data.head, (int)sizeof(data.head));
-      socket().sendBytes(&data.head_n, (int)sizeof(data.head_n));
+      socket().sendBytes(&data.head, static_cast<int>(sizeof(data.head)));
+      socket().sendBytes(&data.head_n, static_cast<int>(sizeof(data.head_n)));
 
       for (uint32_t i = 0; i < data.head_n.nevents; ++i) {
         TCPStreamEventNeutron neutron;
@@ -141,14 +141,14 @@ public:
   * @param socket :: The socket.
   */
   Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) {
+  createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
                                     m_nEvents, m_prog);
   }
 };
 
 /// (Empty) Constructor
-FakeISISEventDAE::FakeISISEventDAE() : m_server(NULL) {}
+FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}
 
 /// Destructor
 FakeISISEventDAE::~FakeISISEventDAE() {
@@ -162,17 +162,22 @@ FakeISISEventDAE::~FakeISISEventDAE() {
 * Declare the algorithm properties
 */
 void FakeISISEventDAE::init() {
-  declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),
-                  "Number of periods.");
-  declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),
-                  "Number of spectra.");
-  declareProperty(new PropertyWithValue<int>("Rate", 20, Direction::Input),
-                  "Rate of sending the data: stream of NEvents events is sent "
-                  "every Rate milliseconds.");
-  declareProperty(new PropertyWithValue<int>("NEvents", 1000, Direction::Input),
-                  "Number of events in each packet.");
-  declareProperty(new PropertyWithValue<int>("Port", 59876, Direction::Input),
-                  "The port to broadcast on (default 59876, ISISDAE 10000).");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      "Number of periods.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
+      "Number of spectra.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
+      "Rate of sending the data: stream of NEvents events is sent "
+      "every Rate milliseconds.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("NEvents", 1000, Direction::Input),
+      "Number of events in each packet.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
+      "The port to broadcast on (default 59876, ISISDAE 10000).");
 }
 
 /**
@@ -198,7 +203,7 @@ void FakeISISEventDAE::exec() {
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  Mutex::ScopedLock lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
   m_server = new Poco::Net::TCPServer(
@@ -222,7 +227,7 @@ void FakeISISEventDAE::exec() {
   histoDAEHandle.wait();
   if (m_server) {
     m_server->stop();
-    m_server = NULL;
+    m_server = nullptr;
   }
   socket.close();
 

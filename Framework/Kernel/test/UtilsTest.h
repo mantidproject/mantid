@@ -150,13 +150,12 @@ public:
     numBins[1] = 20;
     numBins[2] = 5;
 
-    std::vector<size_t> indexes;
     size_t ic(0);
 
     for (size_t k = 0; k < numBins[2]; k++) {
       for (size_t j = 0; j < numBins[1]; j++) {
         for (size_t i = 0; i < numBins[0]; i++) {
-          Utils::getIndicesFromLinearIndex(ic, numBins, indexes);
+          auto indexes = Utils::getIndicesFromLinearIndex(ic, numBins);
           ic++;
 
           TS_ASSERT_EQUALS(indexes[0], i);
@@ -172,13 +171,12 @@ public:
     numBins[1] = 1; // there can not be 0, shluld be at least 1
     numBins[2] = 5;
 
-    std::vector<size_t> indexes;
     size_t ic(0);
 
     for (size_t k = 0; k < numBins[2]; k++) {
       for (size_t j = 0; j < numBins[1]; j++) {
         for (size_t i = 0; i < numBins[0]; i++) {
-          Utils::getIndicesFromLinearIndex(ic, numBins, indexes);
+          auto indexes = Utils::getIndicesFromLinearIndex(ic, numBins);
           ic++;
 
           TS_ASSERT_EQUALS(indexes[0], i);

@@ -17,30 +17,30 @@ public:
   SaveOpenGenieAscii();
 
   //// Virtual destructor
-  virtual ~SaveOpenGenieAscii() {}
+  ~SaveOpenGenieAscii() override {}
 
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveOpenGenieAscii"; }
+  const std::string name() const override { return "SaveOpenGenieAscii"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Saves a focused data set into an OpenGenie ASCII file ";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   // write file header
   void writeFileHeader(std::ofstream &outfile);

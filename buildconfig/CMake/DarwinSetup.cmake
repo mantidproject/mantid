@@ -63,7 +63,7 @@ endif ()
 # Force 64-bit compiler as that's all we support
 ###########################################################################
 
-set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register -Wno-deprecated-declarations")
+set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Wconversion -Wno-sign-conversion -Winit-self -Wpointer-arith -Wcast-qual -fno-common -Wno-deprecated-declarations")
 
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)
@@ -196,6 +196,29 @@ endif ()
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
+
+# Add launcher script for mantid python
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+          DESTINATION MantidPlot.app/Contents/MacOS/ 
+          RENAME mantidpython )
+# Add launcher application for a Mantid IPython console
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidPython )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
+          DESTINATION MantidPython\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
+          DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
+# Add launcher application for Mantid IPython notebooks
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
+          RENAME MantidNotebook )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
+          RENAME Info.plist )
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)

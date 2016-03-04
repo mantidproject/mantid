@@ -2,6 +2,7 @@
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h"
+#include "MantidKernel/make_unique.h"
 
 #include <sstream>
 #include <fstream>
@@ -49,10 +50,7 @@ std::string
 ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups,
                                        std::set<int> rows) {
 
-  std::unique_ptr<Mantid::API::NotebookWriter> notebook(
-      new Mantid::API::NotebookWriter());
-
-  notebook->codeCell(plotsFunctionString());
+  auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName));
 
@@ -139,9 +137,9 @@ std::string plotsString(const std::vector<std::string> &unstitched_ws,
   // Plot I vs Q and I vs Lambda graphs
   plot_string << "#Plot workspaces\n";
   std::vector<std::string> workspaceList;
-  workspaceList.push_back("unstitchedGroupWS");
+  workspaceList.emplace_back("unstitchedGroupWS");
   workspaceList.push_back(stitched_wsStr);
-  workspaceList.push_back("IvsLamGroupWS");
+  workspaceList.emplace_back("IvsLamGroupWS");
 
   plot_string << plot1DString(
       workspaceList,
@@ -199,15 +197,6 @@ std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums,
 }
 
 /**
-  Create string of python code for plotting functions
-  @return string containing the python code
-  */
-std::string plotsFunctionString() {
-  return "#Import some useful tools for plotting\n"
-         "from MantidIPython import *";
-}
-
-/**
   Create string of python code to stitch workspaces in the same group
   @param rows : rows in the stitch group
   @param instrument : name of the instrument
@@ -249,7 +238,7 @@ stitchGroupString(const std::set<int> &rows, const std::string &instrument,
 
     const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
     runs.push_back(runNo);
-    workspaceNames.push_back("IvsQ_" + runNo);
+    workspaceNames.emplace_back("IvsQ_" + runNo);
 
     startOverlaps.push_back(qmin);
     endOverlaps.push_back(qmax);

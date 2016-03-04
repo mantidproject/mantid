@@ -321,29 +321,9 @@ public:
     TSM_ASSERT_DELTA(
         "Value ignoring mask is 1.0",
         ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
-    TSM_ASSERT_DELTA(
-        "Masked returns 0",
-        ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization),
-        0.0, 1e-5);
-  }
-
-  //-------------------------------------------------------------------------------------
-  /** hasMask should return true when the workspace has a mask */
-  void test_hasMask() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
-
-    TSM_ASSERT("Should return false as the workspace does not have a mask",
-               !ew->hasMask());
-
-    std::vector<coord_t> min{0, 0, 0};
-    std::vector<coord_t> max{1.5, 1.5, 1.5};
-
-    // Create a function to mask some of the workspace.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ew->setMDMasking(function);
-
-    TSM_ASSERT("Should return true as the workspace has a mask", ew->hasMask());
+    TSM_ASSERT("Masked returns NaN",
+               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+                   coords1, Mantid::API::NoNormalization)));
   }
 
   //-------------------------------------------------------------------------------------
@@ -571,19 +551,19 @@ public:
 
     Mantid::Kernel::VMD start(0, 0, 0);
     Mantid::Kernel::VMD end(2, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_EQUALS(y[i], signal);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
+    TS_ASSERT_EQUALS(line.y.size(), 500);
+    TS_ASSERT_EQUALS(line.x.size(), 500);
+    for (size_t i = 0; i < line.y.size(); i += 10) {
+      TS_ASSERT_EQUALS(line.y[i], signal);
     }
-    ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
+    line = ew->getLinePlot(start, end, VolumeNormalization);
+    for (size_t i = 0; i < line.y.size(); i += 10) {
+      TS_ASSERT_DELTA(line.y[i], signal / volume, 1e-7);
     }
-    ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
-    for (size_t i = 0; i < y.size(); i += 10) {
-      TS_ASSERT_EQUALS(y[i], 1.0);
+    line = ew->getLinePlot(start, end, NumEventsNormalization);
+    for (size_t i = 0; i < line.y.size(); i += 10) {
+      TS_ASSERT_EQUALS(line.y[i], 1.0);
     }
   }
 
@@ -601,13 +581,13 @@ public:
     ew->refreshCache();
 
     Mantid::Kernel::VMD start(0, 0, 0);
-    Mantid::Kernel::VMD end(2, 0, 0);
-    std::vector<coord_t> x;
-    std::vector<signal_t> y, e;
-    ew->getLinePlot(start, end, NoNormalization, x, y, e);
-    TS_ASSERT_EQUALS(y.size(), 200);
-    TS_ASSERT_EQUALS(y[60], 0.0);  // Masked data is zero
-    TS_ASSERT_EQUALS(y[180], 3.0); // Unmasked data
+    Mantid::Kernel::VMD end(5, 0, 0);
+    auto line = ew->getLinePlot(start, end, NoNormalization);
+    // Masked data is omitted from line
+    TS_ASSERT_EQUALS(line.y.size(), 325);
+    TS_ASSERT_EQUALS(line.x.size(), 325);
+    // Unmasked data
+    TS_ASSERT_EQUALS(line.y[300], 3.0);
   }
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {

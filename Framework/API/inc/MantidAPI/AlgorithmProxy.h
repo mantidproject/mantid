@@ -67,97 +67,99 @@ class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
 public:
   AlgorithmProxy(Algorithm_sptr alg);
-  virtual ~AlgorithmProxy();
+  AlgorithmProxy(const AlgorithmProxy &) = delete;
+  AlgorithmProxy &operator=(const AlgorithmProxy &) = delete;
+  ~AlgorithmProxy() override;
 
   /// The name of the algorithm
-  const std::string name() const { return m_name; }
+  const std::string name() const override { return m_name; }
   /// The version of the algorithm
-  int version() const { return m_version; }
+  int version() const override { return m_version; }
   /// The category of the algorithm
-  const std::string category() const { return m_category; }
+  const std::string category() const override { return m_category; }
   /// Function to return all of the categories that contain this algorithm
-  const std::vector<std::string> categories() const;
+  const std::vector<std::string> categories() const override;
   /// Function to return the sperator token for the category string. A default
   /// implementation ',' is provided
-  const std::string categorySeparator() const { return m_categorySeparator; }
+  const std::string categorySeparator() const override {
+    return m_categorySeparator;
+  }
   /// Aliases to the algorithm
-  const std::string alias() const { return m_alias; }
+  const std::string alias() const override { return m_alias; }
   /// function returns a summary message that will be displayed in the default
   /// GUI, and in the help.
-  const std::string summary() const { return m_summary; }
+  const std::string summary() const override { return m_summary; }
 
   /// The algorithmID
-  AlgorithmID getAlgorithmID() const;
+  AlgorithmID getAlgorithmID() const override;
 
-  void initialize();
-  std::map<std::string, std::string> validateInputs();
-  bool execute();
-  void executeAsChildAlg() { throw std::runtime_error("Not implemented."); }
-  Poco::ActiveResult<bool> executeAsync();
-  bool isInitialized() const;
-  bool isExecuted() const;
+  void initialize() override;
+  std::map<std::string, std::string> validateInputs() override;
+  bool execute() override;
+  void executeAsChildAlg() override {
+    throw std::runtime_error("Not implemented.");
+  }
+  Poco::ActiveResult<bool> executeAsync() override;
+  bool isInitialized() const override;
+  bool isExecuted() const override;
 
   /// To query whether algorithm is a child. A proxy is always at top level,
   /// returns false
-  bool isChild() const { return m_isChild; }
-  void setAlwaysStoreInADS(const bool) {}
-  void setChild(const bool val) { m_isChild = val; }
+  bool isChild() const override { return m_isChild; }
+  void setAlwaysStoreInADS(const bool) override {}
+  void setChild(const bool val) override { m_isChild = val; }
   /// Proxies only manage parent algorithms
-  void enableHistoryRecordingForChild(const bool){};
-  void setRethrows(const bool rethrow);
+  void enableHistoryRecordingForChild(const bool) override{};
+  void setRethrows(const bool rethrow) override;
 
-  const std::string workspaceMethodName() const;
-  const std::vector<std::string> workspaceMethodOn() const;
-  const std::string workspaceMethodInputProperty() const;
+  const std::string workspaceMethodName() const override;
+  const std::vector<std::string> workspaceMethodOn() const override;
+  const std::string workspaceMethodInputProperty() const override;
 
   /** @name PropertyManager methods */
   //@{
   /// Set the property value
-  void setPropertyValue(const std::string &name, const std::string &value);
+  void setPropertyValue(const std::string &name,
+                        const std::string &value) override;
   /// Do something after a property was set
-  void afterPropertySet(const std::string &);
+  void afterPropertySet(const std::string &) override;
   /// Make m_properties point to the same PropertyManager as po.
-  void copyPropertiesFrom(const PropertyManagerOwner &po);
+  void copyPropertiesFrom(const PropertyManagerOwner &po) override;
   //@}
 
-  void cancel();
-  bool isRunning() const;
+  void cancel() override;
+  bool isRunning() const override;
 
-  void addObserver(const Poco::AbstractObserver &observer) const;
-  void removeObserver(const Poco::AbstractObserver &observer) const;
+  void addObserver(const Poco::AbstractObserver &observer) const override;
+  void removeObserver(const Poco::AbstractObserver &observer) const override;
 
   /// Set logging on or off
   ///@param value :: true = logging enabled
-  void setLogging(const bool value) { m_isLoggingEnabled = value; }
+  void setLogging(const bool value) override { m_isLoggingEnabled = value; }
   /// Is the algorithm have logging enabled
-  bool isLogging() const { return m_isLoggingEnabled; }
+  bool isLogging() const override { return m_isLoggingEnabled; }
 
   /// returns the logging priority offset
-  void setLoggingOffset(const int value) { m_loggingOffset = value; }
+  void setLoggingOffset(const int value) override { m_loggingOffset = value; }
   /// returns the logging priority offset
-  int getLoggingOffset() const { return m_loggingOffset; }
+  int getLoggingOffset() const override { return m_loggingOffset; }
   /// disable Logging of start and end messages
-  void setAlgStartupLogging(const bool enabled);
+  void setAlgStartupLogging(const bool enabled) override;
   /// get the state of Logging of start and end messages
-  bool getAlgStartupLogging() const;
+  bool getAlgStartupLogging() const override;
 
   /// setting the child start progress
-  void setChildStartProgress(const double startProgress) const;
+  void setChildStartProgress(const double startProgress) const override;
   /// setting the child end progress
-  void setChildEndProgress(const double endProgress) const;
+  void setChildEndProgress(const double endProgress) const override;
 
   /** @name String serialization */
   //@{
   /// Serialize an object to a string
-  virtual std::string toString() const;
+  std::string toString() const override;
   //@}
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  AlgorithmProxy(const AlgorithmProxy &);
-  /// Private assignment operator: NO ASSIGNMENT ALLOWED
-  AlgorithmProxy &operator=(const AlgorithmProxy &);
-
   void createConcreteAlg(bool initOnly = false);
   void stopped();
   void addObservers();

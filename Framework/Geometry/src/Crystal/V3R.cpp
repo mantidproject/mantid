@@ -1,6 +1,4 @@
 #include "MantidGeometry/Crystal/V3R.h"
-#include "MantidKernel/Exception.h"
-
 namespace Mantid {
 namespace Geometry {
 
@@ -23,21 +21,6 @@ V3R::V3R(const std::vector<int> &vector) {
   m_y = vector[1];
   m_z = vector[2];
 }
-
-/// Copy constructor
-V3R::V3R(const V3R &other) : m_x(other.m_x), m_y(other.m_y), m_z(other.m_z) {}
-
-/// Assigment operator
-V3R &V3R::operator=(const V3R &other) {
-  m_x = other.m_x;
-  m_y = other.m_y;
-  m_z = other.m_z;
-
-  return *this;
-}
-
-/// Destructor
-V3R::~V3R() {}
 
 /// Returns the x-component of the vector
 const RationalNumber &V3R::x() const { return m_x; }
@@ -330,27 +313,6 @@ V3R::operator std::vector<double>() const {
   vector.push_back(boost::rational_cast<double>(m_z));
 
   return vector;
-}
-
-/// Performs a matrix multiplication v' = M * v, throws
-/// Kernel::Exception::MisMatch<size_t> if M does not have exactly 3 columns.
-V3R operator*(const Kernel::IntMatrix &lhs, const V3R &rhs) {
-  size_t rows = lhs.numRows();
-  size_t cols = lhs.numCols();
-
-  if (cols != 3) {
-    throw Kernel::Exception::MisMatch<size_t>(cols, 3,
-                                              "operator*(IntMatrix, V3R)");
-  }
-
-  V3R result;
-  for (size_t r = 0; r < rows; ++r) {
-    for (size_t c = 0; c < cols; ++c) {
-      result[r] += lhs[r][c] * rhs[c];
-    }
-  }
-
-  return result;
 }
 
 } // namespace Geometry

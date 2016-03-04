@@ -25,7 +25,7 @@ using namespace API;
  *  @return A pointer to the initialized variable
  */
 double *UserFunction1D::AddVariable(const char *varName, void *palg) {
-  UserFunction1D &alg = *(UserFunction1D *)palg;
+  UserFunction1D &alg = *reinterpret_cast<UserFunction1D *>(palg);
 
   if (std::string(varName) != "x") {
     alg.declareProperty(varName, 0.0);

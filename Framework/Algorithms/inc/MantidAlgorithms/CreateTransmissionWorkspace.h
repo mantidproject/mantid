@@ -34,17 +34,17 @@ namespace Algorithms {
 class DLLExport CreateTransmissionWorkspace : public ReflectometryWorkflowBase {
 public:
   CreateTransmissionWorkspace();
-  virtual ~CreateTransmissionWorkspace();
+  ~CreateTransmissionWorkspace() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates a transmission run workspace in Wavelength from input TOF "
            "workspaces.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
   /// Make a transmission correction workspace
@@ -54,14 +54,13 @@ private:
       const MinMax &wavelengthMonitorIntegrationInterval,
       const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
-      const OptionalDouble &stitchingStartQ,
-      const OptionalDouble &stitchingDeltaQ,
-      const OptionalDouble &stitchingEndQ,
-      const OptionalDouble &stitchingStartOverlapQ,
-      const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep);
+      const OptionalDouble &stitchingStart,
+      const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
+      const OptionalDouble &stitchingStartOverlap,
+      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep);
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

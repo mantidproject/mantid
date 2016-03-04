@@ -11,11 +11,11 @@
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
 #include "vtkQuad.h"
-#include "vtkSmartPointer.h" 
+#include "vtkNew.h"
 #include <vector>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
-
+#include "MantidKernel/make_unique.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -68,11 +68,11 @@ namespace Mantid
     @param progressUpdating: Reporting object to pass progress information up the stack.
     @return fully constructed vtkDataSet.
     */
-    vtkDataSet* vtkMDHistoQuadFactory::create(ProgressAction& progressUpdating) const
-    {
-      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace, progressUpdating);
-      if(product != NULL)
-      {
+    vtkSmartPointer<vtkDataSet>
+    vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
+      auto product = tryDelegatingCreation<MDHistoWorkspace, 2>(
+          m_workspace, progressUpdating);
+      if (product != nullptr) {
         return product;
       }
       else
@@ -99,10 +99,10 @@ namespace Mantid
         }
 
         const int imageSize = (nBinsX ) * (nBinsY );
-        vtkPoints *points = vtkPoints::New();
+        vtkNew<vtkPoints> points;
         points->Allocate(static_cast<int>(imageSize));
 
-        vtkFloatArray * signal = vtkFloatArray::New();
+        vtkNew<vtkFloatArray> signal;
         signal->Allocate(imageSize);
         signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
@@ -118,10 +118,9 @@ namespace Mantid
         is set so that all required vertices are marked, and created in a second step. */
 
         // Array of the points that should be created, set to false
-        bool * pointNeeded = new bool[nPointsX*nPointsY];
-        memset(pointNeeded, 0, nPointsX*nPointsY*sizeof(bool));
+        auto pointNeeded = std::vector<bool>(nPointsX * nPointsY, false);
         // Array with true where the voxel should be shown
-        bool * voxelShown = new bool[nBinsX*nBinsY];
+        auto voxelShown = std::vector<bool>(nBinsX * nBinsY);
 
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;
@@ -169,7 +168,7 @@ namespace Mantid
         in[2] = 0;
 
         // Array with the point IDs (only set where needed)
-        vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY];
+        std::vector<vtkIdType> pointIDs(nPointsX * nPointsY, 0);
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
@@ -195,13 +194,15 @@ namespace Mantid
 
         std::cout << tim << " to create the needed points." << std::endl;
 
-        vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+        auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
         visualDataSet->Allocate(imageSize);
-        visualDataSet->SetPoints(points);
-        visualDataSet->GetCellData()->SetScalars(signal);
+        visualDataSet->SetPoints(points.GetPointer());
+        visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
         // ------ Quad creation ----------------
-        vtkQuad* quad = vtkQuad::New(); // Significant speed increase by creating ONE quad
+        vtkNew<vtkQuad> quad; // Significant speed increase by creating ONE quad
+                              // (assume vtkNew doesn't add significant
+                              // overhead)
         index = 0;
         for (int i = 0; i < nBinsX; i++)
         {
@@ -219,26 +220,20 @@ namespace Mantid
             index++;
           }
         }
-        quad->Delete();
 
         std::cout << tim << " to create and add the quads." << std::endl;
 
-        points->Delete();
-        signal->Delete();
         visualDataSet->Squeeze();
-        delete [] pointIDs;
-        delete [] voxelShown;
-        delete [] pointNeeded;
 
         // Hedge against empty data sets
         if (visualDataSet->GetNumberOfPoints() <= 0)
         {
-          visualDataSet->Delete();
           vtkNullUnstructuredGrid nullGrid;
           visualDataSet = nullGrid.createNullData();
         }
 
-        return visualDataSet;
+        vtkSmartPointer<vtkDataSet> dataSet = visualDataSet;
+        return dataSet;
       }
     }
 

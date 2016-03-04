@@ -39,24 +39,24 @@ namespace DataHandling {
 class DLLExport SaveDiffCal : public API::Algorithm {
 public:
   SaveDiffCal();
-  virtual ~SaveDiffCal();
+  ~SaveDiffCal() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
-  std::map<std::string, std::string> validateInputs();
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
                              DataObjects::SpecialWorkspace2D_const_sptr ws);
   void generateDetidToIndex();
-  bool tableHasColumn(const std::string name) const;
+  bool tableHasColumn(const std::string ColumnName) const;
 
   std::size_t m_numValues;
   API::ITableWorkspace_sptr m_calibrationWS;

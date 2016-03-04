@@ -5,7 +5,6 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h
   inc/MantidVatesSimpleGuiViewWidgets/CameraManager.h
   inc/MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h
-  inc/MantidVatesSimpleGuiViewWidgets/ColorMapManager.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
@@ -32,7 +31,6 @@ set( SOURCE_FILES
   src/AutoScaleRangeGenerator.cpp
   src/CameraManager.cpp
   src/BackgroundRgbProvider.cpp
-  src/ColorMapManager.cpp
   src/ColorMapEditorPanel.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
@@ -54,7 +52,6 @@ set( SOURCE_FILES
 )
 
 set( TEST_FILES
-  test/unitTests/ColorMapManagerTest.h
 )
 
 # These are the headers to be preprocessed using
@@ -140,6 +137,7 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqApplicationComponents
 pqComponents
+${vtkjsoncpp_LIBRARIES}
 vtkPVServerManagerRendering
 vtkRenderingFreeType
 vtksys
@@ -166,6 +164,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
 
   include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
@@ -173,6 +172,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   
   target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
   VatesSimpleGuiViewWidgets 
+  ${vtkjsoncpp_LIBRARIES}
   DataHandling 
   Kernel 
   DataObjects 

@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
@@ -81,15 +81,57 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         except RuntimeError:
             pass
 
-    def test_function_call_raises_RuntimeError_if_num_of_ret_vals_doesnt_match_num_assigned_vars(self):
+    def test_function_call_returns_tuple_when_a_single_argument_is_provided(self):
+        dataX=numpy.linspace(start=1,stop=3,num=11)
+        dataY=numpy.linspace(start=1,stop=3,num=10)
+        workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
+        workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
+
+        ws1_name = "workspace1_test"
+        ws2_name = "workspace2_test"
+
+        self.assertTrue(ws1_name in mtd)
+        self.assertTrue(ws2_name in mtd)
+
+        outputWs_name = "message"
+
+        if outputWs_name in mtd:
+            simpleapi.DeleteWorkspace(outputWs_name)
+
+        result = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
+     
+        self.assertTrue(isinstance(result, tuple))
+
+        simpleapi.DeleteWorkspace(ws1_name)
+        simpleapi.DeleteWorkspace(ws2_name)
+
+    def test_function_call_raises_ValueError_when_not_enough_arguments_in_return_tuple(self):
+        dataX=numpy.linspace(start=1,stop=3,num=11)
+        dataY=numpy.linspace(start=1,stop=3,num=10)
+        workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
+        workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
+
+        ws1_name = "workspace1_test"
+        ws2_name = "workspace2_test"
+
+        self.assertTrue(ws1_name in mtd)
+        self.assertTrue(ws2_name in mtd)
+
+        try:
+            (result, ) = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
+            self.fail("Should not have made it to this point.")
+        except(ValueError):
+            pass
+
+        simpleapi.DeleteWorkspace(ws1_name)
+        simpleapi.DeleteWorkspace(ws2_name)
+
+    def test_function_call_raises_ValueError_if_num_of_ret_vals_doesnt_match_num_assigned_vars(self):
         try:
             ws, ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
-        except RuntimeError, exc:
-            # Check the error is correct and it's not some random runtime error
-            if 'CreateWorkspace is trying to return 1 output(s) but you have provided 2 variable(s). These numbers must match.' == str(exc):
-                pass
-            else:
-                self.fail("Exception was raised but it did not have the correct message: '%s'" % str(exc))
+            self.fail("Should not have made it to this point.")
+        except RuntimeError:
+            pass
         
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         ws1 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
@@ -186,6 +228,31 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         # over the actual object name
         self.assertTrue('workspace' in mtd)
         self.assertTrue('raw' in mtd)
+
+    def test_alg_produces_correct_workspace_in_APS_from_python(self):
+        dataX=numpy.linspace(start=1,stop=3,num=11)
+        dataY=numpy.linspace(start=1,stop=3,num=10)
+        workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
+        workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
+
+        ws1_name = "workspace1_test"
+        ws2_name = "workspace2_test"
+
+        self.assertTrue(ws1_name in mtd)
+        self.assertTrue(ws2_name in mtd)
+
+        outputWs_name = "message"
+
+        if outputWs_name in mtd:
+            simpleapi.DeleteWorkspace(outputWs_name)
+
+        result, message = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
+
+        self.assertTrue(outputWs_name in mtd)
+
+        simpleapi.DeleteWorkspace(message)
+        simpleapi.DeleteWorkspace(ws1_name)
+        simpleapi.DeleteWorkspace(ws2_name)
 
     def test_python_alg_can_use_other_python_alg_through_simple_api(self):
         class SimpleAPIPythonAlgorithm1(PythonAlgorithm):

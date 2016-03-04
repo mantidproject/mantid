@@ -23,17 +23,17 @@ using Geometry::IDetector_sptr;
 using Geometry::IComponent_const_sptr;
 
 /// Empty default constructor
-ApplyCalibration::ApplyCalibration() : Algorithm(), m_pmap(NULL) {}
+ApplyCalibration::ApplyCalibration() : Algorithm(), m_pmap(nullptr) {}
 
 /// Initialisation method.
 void ApplyCalibration::init() {
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
-                                                       Direction::InOut),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "", Direction::InOut),
       "The name of the input workspace to apply the calibration to");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "PositionTable", "", Direction::Input),
                   "The name of the table workspace containing the new "
                   "positions of detectors");
@@ -68,7 +68,7 @@ void ApplyCalibration::exec() {
     setDetectorPosition(instrument, detID[i], detPos[i], false);
   }
   // Ensure pointer is only valid for execution
-  m_pmap = NULL;
+  m_pmap = nullptr;
 }
 
 /**

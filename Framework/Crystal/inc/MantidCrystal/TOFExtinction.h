@@ -38,29 +38,29 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
 class DLLExport TOFExtinction : public API::Algorithm {
 public:
   TOFExtinction();
-  ~TOFExtinction();
+  ~TOFExtinction() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "TOFExtinction"; };
+  const std::string name() const override { return "TOFExtinction"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Extinction correction for single crystal peaks.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal;DataHandling\\Text";
   }
 
 private:
   /// Initialise the properties;
-  void init();
+  void init() override;
   /// Run the algorithm;
-  void exec();
+  void exec() override;
   double getEg(double mosaic);
-  double getEgLaue(double Eb, double twoth, double wl, double divBeam,
+  double getEgLaue(double Eg, double twoth, double wl, double divBeam,
                    double betaBeam);
   double getXqt(double Eg, double cellV, double wl, double twoth, double tbar,
                 double fsq);

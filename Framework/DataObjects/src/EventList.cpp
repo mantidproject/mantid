@@ -5,20 +5,17 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <cfloat>
 
 #include <functional>
 #include <limits>
 #include <math.h>
-#include <Poco/ScopedLock.h>
 #include <stdexcept>
 
 using std::ostream;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using Mantid::Kernel::Mutex;
 
 namespace Mantid {
 namespace DataObjects {
@@ -123,13 +120,13 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 
 /// Constructor (empty)
 EventList::EventList()
-    : eventType(TOF), order(UNSORTED), mru(NULL), m_lockedMRU(false) {}
+    : eventType(TOF), order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
-EventList::EventList(EventWorkspaceMRU *mru, specid_t specNo)
+EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
     : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru),
       m_lockedMRU(false) {}
 
@@ -144,7 +141,7 @@ EventList::EventList(const EventList &rhs)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<TofEvent> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -153,7 +150,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -162,7 +159,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(NULL), m_lockedMRU(false) {
+    : mru(nullptr), m_lockedMRU(false) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -353,8 +350,8 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() +
                                        more_events.size());
-    for (auto it = more_events.begin(); it != more_events.end(); ++it)
-      this->weightedEventsNoTime.emplace_back(*it);
+    for (const auto &more_event : more_events)
+      this->weightedEventsNoTime.emplace_back(more_event);
     break;
   }
 
@@ -1144,7 +1141,7 @@ void EventList::sortTof() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1180,7 +1177,7 @@ void EventList::sortTof2() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1214,7 +1211,7 @@ void EventList::sortTof4() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TOF_SORT)
     return;
@@ -1251,7 +1248,7 @@ void EventList::sortTimeAtSample(const double &tofFactor,
     return;
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == TIMEATSAMPLE_SORT && !forceResort)
     return;
@@ -1283,7 +1280,7 @@ void EventList::sortPulseTime() const {
     return; // nothing to do
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIME_SORT)
     return;
@@ -1314,7 +1311,7 @@ void EventList::sortPulseTimeTOF() const {
     return; // already ordered.
 
   // Avoid sorting from multiple threads
-  Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIMETOF_SORT)
     return;
@@ -1542,7 +1539,7 @@ const MantidVec &EventList::constDataY() const {
   MantidVecWithMarker *yData;
   yData = mru->findY(thread, this->m_specNo);
 
-  if (yData == NULL) {
+  if (yData == nullptr) {
     // Create the MRU object
     yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
@@ -1584,7 +1581,7 @@ const MantidVec &EventList::constDataE() const {
   MantidVecWithMarker *eData;
   eData = mru->findE(thread, this->m_specNo);
 
-  if (eData == NULL) {
+  if (eData == nullptr) {
     // Create the MRU object
     eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
@@ -1976,7 +1973,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
   //---------------------------------
 
   // Do we even have any events to do?
-  if (events.size() > 0) {
+  if (!events.empty()) {
     // Iterate through all events (sorted by tof)
     auto itev = findFirstEvent(events, X[0]);
     auto itev_end = events.cend();
@@ -2026,7 +2023,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
 
   // Now do the sqrt of all errors
   std::transform(E.begin(), E.end(), E.begin(),
-                 static_cast<double (*)(double)>(std::sqrt));
+                 static_cast<double (*)(double)>(sqrt));
 }
 
 // --------------------------------------------------------------------------
@@ -2170,7 +2167,7 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by pulse time)
     auto itev = findFirstPulseEvent(this->events, X[0]);
     auto itev_end = events.cend(); // cache for speed
@@ -2242,7 +2239,7 @@ void EventList::generateCountsHistogramTimeAtSample(
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by pulse time)
     auto itev =
         findFirstTimeAtSampleEvent(this->events, X[0], tofFactor, tofOffset);
@@ -2314,7 +2311,7 @@ void EventList::generateCountsHistogram(const MantidVec &X,
   //---------------------------------
 
   // Do we even have any events to do?
-  if (this->events.size() > 0) {
+  if (!this->events.empty()) {
     // Iterate through all events (sorted by tof)
     std::vector<TofEvent>::const_iterator itev =
         findFirstEvent(this->events, X[0]);
@@ -2373,7 +2370,7 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
 
   // windows can get confused about std::sqrt
   std::transform(Y.begin(), Y.end(), E.begin(),
-                 static_cast<double (*)(double)>(std::sqrt));
+                 static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.
@@ -2410,7 +2407,7 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX,
   sum = 0;
   error = 0;
   // Nothing in the list?
-  if (events.size() == 0)
+  if (events.empty())
     return;
 
   // Iterators for limits - whole range by default
@@ -2560,8 +2557,8 @@ void EventList::convertTofHelper(std::vector<T> &events,
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
   MantidVec &x = this->refX.access();
-  for (auto iter = x.begin(); iter != x.end(); ++iter)
-    *iter = (*iter) * factor + offset;
+  for (double &iter : x)
+    iter = iter * factor + offset;
   // this->refX.access() = x;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
@@ -3989,7 +3986,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Do nothing if there are no entries
-  if (splitter.size() <= 0)
+  if (splitter.empty())
     return;
 
   switch (eventType) {
@@ -4134,7 +4131,7 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Do nothing if there are no entries
-  if (splitter.size() <= 0) {
+  if (splitter.empty()) {
     // 3A. Copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
     // this->duplicate(outputs[-1]);
@@ -4266,7 +4263,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
   std::string debugmessage("");
 
   // Do nothing if there are no entries
-  if (vecgroups.size() == 0) {
+  if (vecgroups.empty()) {
     // Copy all events to group workspace = -1
     (*vec_outputEventList[-1]) = (*this);
     // this->duplicate(outputs[-1]);
@@ -4386,7 +4383,7 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
   }
 
   // Split
-  if (splitter.size() <= 0) {
+  if (splitter.empty()) {
     // No splitter: copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
   } else {

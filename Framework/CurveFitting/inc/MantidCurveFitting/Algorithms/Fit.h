@@ -100,18 +100,18 @@ public:
   /// Default constructor
   Fit() : IFittingAlgorithm() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Fit"; }
+  const std::string name() const override { return "Fit"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Fits a function to data in a Workspace";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 protected:
-  void initConcrete();
-  void execConcrete();
+  void initConcrete() override;
+  void execConcrete() override;
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
 };
 

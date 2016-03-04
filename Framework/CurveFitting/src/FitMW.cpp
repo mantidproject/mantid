@@ -36,11 +36,11 @@ public:
   SimpleJacobian(size_t nData, size_t nParams)
       : m_nParams(nParams), m_data(nData * nParams) {}
   /// Setter
-  virtual void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     m_data[iY * m_nParams + iP] = value;
   }
   /// Getter
-  virtual double get(size_t iY, size_t iP) {
+  double get(size_t iY, size_t iP) override {
     return m_data[iY * m_nParams + iP];
   }
 
@@ -86,7 +86,7 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
 FitMW::FitMW(FitMW::DomainType domainType)
-    : API::IDomainCreator(NULL, std::vector<std::string>(), domainType),
+    : API::IDomainCreator(nullptr, std::vector<std::string>(), domainType),
       m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
       m_maxSize(10), m_normalise(false), m_startIndex(0) {}
 
@@ -130,8 +130,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   m_normalisePropertyName = "Normalise" + suffix;
 
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
-    auto mustBePositive =
-        boost::shared_ptr<BoundedValidator<int>>(new BoundedValidator<int>());
+    auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0,
                                                mustBePositive),

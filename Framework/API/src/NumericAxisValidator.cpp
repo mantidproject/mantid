@@ -1,5 +1,6 @@
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/NumericAxisValidator.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace API {

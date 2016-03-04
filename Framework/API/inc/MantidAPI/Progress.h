@@ -38,16 +38,16 @@ class Algorithm;
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL Progress : public Mantid::Kernel::ProgressBase {
+class MANTID_API_DLL Progress final : public Mantid::Kernel::ProgressBase {
 public:
   Progress();
   Progress(Algorithm *alg, double start, double end, int numSteps);
   Progress(Algorithm *alg, double start, double end, int64_t numSteps);
   Progress(Algorithm *alg, double start, double end, size_t numSteps);
-  virtual ~Progress();
+  ~Progress() override;
 
-  void doReport(const std::string &msg = "");
-  bool hasCancellationBeenRequested() const;
+  void doReport(const std::string &msg = "") override;
+  bool hasCancellationBeenRequested() const override;
 
 private:
   /// Owning algorithm

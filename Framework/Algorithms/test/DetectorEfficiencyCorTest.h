@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -141,12 +143,11 @@ private:
     xmlShape += "<algebra val=\"shape\" /> ";
 
     // convert into a Geometry object
-    ShapeFactory sFactory;
     bool addTypeTag = true;
     boost::shared_ptr<Object> shape =
         ShapeFactory().createShape(xmlShape, addTypeTag);
 
-    boost::shared_ptr<Instrument> instrument(new Instrument);
+    boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
     space2D->setInstrument(instrument);
     ObjComponent *sample = new ObjComponent("sample", shape, NULL);
     sample->setPos(0, 0, 0);

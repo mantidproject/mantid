@@ -3,6 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -12,7 +17,7 @@ using namespace DataObjects;
 
 /** Constructor
  */
-WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(NULL) {}
+WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
 /** Destructor
  */
@@ -249,9 +254,9 @@ void WorkspaceJoiners::validateInputs(API::MatrixWorkspace_const_sptr ws1,
  * @param min The minimum id (output).
  * @param max The maximum id (output).
  */
-void WorkspaceJoiners::getMinMax(MatrixWorkspace_const_sptr ws, specid_t &min,
-                                 specid_t &max) {
-  specid_t temp;
+void WorkspaceJoiners::getMinMax(MatrixWorkspace_const_sptr ws, specnum_t &min,
+                                 specnum_t &max) {
+  specnum_t temp;
   size_t length = ws->getNumberHistograms();
   // initial values
   min = max = ws->getSpectrum(0)->getSpectrumNo();

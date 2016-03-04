@@ -7,8 +7,6 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-using namespace Mantid::API;
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -38,7 +36,7 @@ TMDE(MDBox)::~MDBox() {
  */
 TMDE(MDBox)::MDBox(API::BoxController_sptr &splitter, const uint32_t depth,
                    const size_t nBoxEvents, const size_t boxID)
-    : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID), m_Saveable(NULL),
+    : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID), m_Saveable(nullptr),
       m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
@@ -52,7 +50,7 @@ TMDE(MDBox)::MDBox(API::BoxController_sptr &splitter, const uint32_t depth,
  */
 TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
                    const size_t nBoxEvents, const size_t boxID)
-    : MDBoxBase<MDE, nd>(splitter, depth, boxID), m_Saveable(NULL),
+    : MDBoxBase<MDE, nd>(splitter, depth, boxID), m_Saveable(nullptr),
       m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
@@ -67,12 +65,12 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController_sptr &splitter, const uint32_t depth,
+    API::BoxController_sptr &splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID, extentsVector),
-      m_Saveable(NULL), m_bIsMasked(false) {
+      m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
 //-----------------------------------------------------------------------------------------------
@@ -85,12 +83,12 @@ TMDE(MDBox)::MDBox(
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
-    BoxController *const splitter, const uint32_t depth,
+    API::BoxController *const splitter, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
         extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter, depth, boxID, extentsVector),
-      m_Saveable(NULL), m_bIsMasked(false) {
+      m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
 /**Common part of MD box constructor */
@@ -114,7 +112,7 @@ TMDE(void MDBox)::initMDBox(const size_t nBoxEvents) {
  */
 TMDE(MDBox)::MDBox(const MDBox<MDE, nd> &other,
                    Mantid::API::BoxController *const otherBC)
-    : MDBoxBase<MDE, nd>(other, otherBC), m_Saveable(NULL), data(other.data),
+    : MDBoxBase<MDE, nd>(other, otherBC), m_Saveable(nullptr), data(other.data),
       m_bIsMasked(other.m_bIsMasked) {
   if (otherBC) // may be absent in some tests but generally have to be present
   {
@@ -380,7 +378,7 @@ TMDE(bool MDBox)::isDataAdded() const {
     if (m_Saveable->isLoaded())
       return data.size() != m_Saveable->getFileSize();
   }
-  return (data.size() != 0);
+  return (!data.empty());
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -690,6 +688,7 @@ TMDE(void MDBox)::centroidSphere(Mantid::API::CoordTransform &radiusTransform,
 TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
                                       std::vector<double> &offset) {
   MDBoxBase<MDE, nd>::transformDimensions(scaling, offset);
+  this->calculateCentroid(this->m_centroid);
   std::vector<MDE> &events = this->getEvents();
   typename std::vector<MDE>::iterator it;
   typename std::vector<MDE>::iterator it_end = events.end();
@@ -704,7 +703,11 @@ TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
 }
 
 /// Setter for masking the box
-TMDE(void MDBox)::mask() { m_bIsMasked = true; }
+TMDE(void MDBox)::mask() {
+  this->setSignal(API::MDMaskValue);
+  this->setErrorSquared(API::MDMaskValue);
+  m_bIsMasked = true;
+}
 
 /// Setter for unmasking the box
 TMDE(void MDBox)::unmask() { m_bIsMasked = false; }
@@ -722,9 +725,8 @@ TMDE(size_t MDBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
   size_t nEvents = sigErrSq.size() / 2;
   size_t nExisiting = data.size();
   data.reserve(nExisiting + nEvents);
-  this->m_dataMutex.lock();
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
   IF<MDE, nd>::EXEC(this->data, sigErrSq, Coord, runIndex, detectorId, nEvents);
-  this->m_dataMutex.unlock();
 
   return 0;
 }
@@ -740,10 +742,9 @@ TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal,
                                    const signal_t errorSq,
                                    const std::vector<coord_t> &point,
                                    uint16_t runIndex, uint32_t detectorId) {
-  this->m_dataMutex.lock();
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
   this->data.push_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
                                                 runIndex, detectorId));
-  this->m_dataMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -771,10 +772,8 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * @param Evnt :: reference to a MDEvent to add.
  * */
 TMDE(void MDBox)::addEvent(const MDE &Evnt) {
-  this->m_dataMutex.lock();
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
   this->data.push_back(Evnt);
-
-  this->m_dataMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -797,13 +796,11 @@ TMDE(void MDBox)::addEventUnsafe(const MDE &Evnt) {
  *bounds)
  */
 TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
-  this->m_dataMutex.lock();
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
   typename std::vector<MDE>::const_iterator start = events.begin();
   typename std::vector<MDE>::const_iterator end = events.end();
   // Copy all the events
   this->data.insert(this->data.end(), start, end);
-
-  this->m_dataMutex.unlock();
   return 0;
 }
 
@@ -894,7 +891,7 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver,
     throw(std::invalid_argument(
         " The data file has to be opened to use box loadAndAddFrom function"));
 
-  Poco::ScopedLock<Kernel::Mutex> _lock(this->m_dataMutex);
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
 
   std::vector<coord_t> TableData;
   FileSaver->loadBlock(TableData, filePosition, nEvents);
@@ -919,7 +916,7 @@ TMDE(void MDBox)::clearFileBacked(bool loadDiskBackedData) {
     // tell disk buffer that there are no point of tracking this box any more.
     this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
     delete m_Saveable;
-    m_Saveable = NULL;
+    m_Saveable = nullptr;
   }
 }
 

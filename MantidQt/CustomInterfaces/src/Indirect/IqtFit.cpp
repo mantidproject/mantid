@@ -159,13 +159,22 @@ void IqtFit::run() {
 
   func->applyTies();
 
-  std::string function = std::string(func->asString());
-  QString fitType = fitTypeString();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
+  const auto function = std::string(func->asString());
+  const auto fitType = fitTypeString();
+  const long specMin = m_uiForm.spSpectraMin->value();
+  const long specMax = m_uiForm.spSpectraMax->value();
+  const auto minimizer = minimizerString("$outputname_$wsindex");
+  const auto save = m_uiForm.ckSave->isChecked();
+  m_plotOption = m_uiForm.cbPlotType->currentText().toStdString();
+  const auto startX = boost::lexical_cast<double>(
+      m_properties["StartX"]->valueText().toStdString());
+  const auto endX = boost::lexical_cast<double>(
+      m_properties["EndX"]->valueText().toStdString());
+  const auto maxIt = boost::lexical_cast<long>(
+      m_properties["MaxIterations"]->valueText().toStdString());
 
   QString pyInput =
-      "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
+      "from IndirectDataAnalysis import furyfitSeq\n"
       "input = '" +
       m_ffInputWSName + "'\n"
                         "func = r'" +
@@ -177,15 +186,15 @@ void IqtFit::run() {
                                             "endx = " +
       m_properties["EndX"]->valueText() + "\n"
                                           "plot = '" +
-      m_uiForm.cbPlotType->currentText() + "'\n"
-                                           "spec_min = " +
-      specMin + "\n"
-                "spec_max = " +
-      specMax + "\n"
-                "spec_max = None\n"
-                "minimizer = '" +
-      minimizerString("$outputname_$wsindex") + "'\n"
-                                                "max_iterations = " +
+      QString::fromStdString(m_plotOption) + "'\n"
+                                             "spec_min = " +
+      QString::number(specMin) + "\n"
+                                 "spec_max = " +
+      QString::number(specMax) + "\n"
+                                 "spec_max = None\n"
+                                 "minimizer = '" +
+      minimizer + "'\n"
+                  "max_iterations = " +
       QString::number(m_dblManager->value(m_properties["MaxIterations"])) +
       "\n";
 
@@ -194,7 +203,7 @@ void IqtFit::run() {
   else
     pyInput += "constrain_intens = False \n";
 
-  if (m_uiForm.ckSave->isChecked())
+  if (save)
     pyInput += "save = True\n";
   else
     pyInput += "save = False\n";
@@ -205,24 +214,115 @@ void IqtFit::run() {
                "intensities_constrained=constrain_intens, Save=save, "
                "Plot=plot, minimizer=minimizer, "
                "max_iterations=max_iterations)\n";
+
+    QString pyOutput = runPythonCode(pyInput);
+
+    // Set the result workspace for Python script export
+    QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
+    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
+                           "_fury_" + fitType + QString::number(specMin) +
+                           "_to_" + QString::number(specMax) + "_Workspaces";
+    m_pythonExportWsName = resultWsName.toStdString();
+    updatePlot();
+
   } else {
-    pyInput += "furyfitMult(input, func, ftype, startx, endx, "
-               "spec_min=spec_min, spec_max=spec_max, "
-               "intensities_constrained=constrain_intens, Save=save, "
-               "Plot=plot, minimizer=minimizer, "
-               "max_iterations=max_iterations)\n";
+    m_baseName =
+        constructBaseName(m_ffInputWSName.toStdString(), specMin, specMax);
+    auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
+    iqtFitMultiple->initialize();
+    iqtFitMultiple->setProperty("InputWorkspace",
+                                m_ffInputWSName.toStdString());
+    iqtFitMultiple->setProperty("Function", function);
+    iqtFitMultiple->setProperty("FitType", fitType.toStdString());
+    iqtFitMultiple->setProperty("StartX", startX);
+    iqtFitMultiple->setProperty("EndX", endX);
+    iqtFitMultiple->setProperty("SpecMin", specMin);
+    iqtFitMultiple->setProperty("SpecMax", specMax);
+    iqtFitMultiple->setProperty("Minimizer", minimizer.toStdString());
+    iqtFitMultiple->setProperty("MaxIterations", maxIt);
+    iqtFitMultiple->setProperty("ConstrainIntensities", constrainIntens);
+    iqtFitMultiple->setProperty("OutputResultWorkspace",
+                                m_baseName + "_Result");
+    iqtFitMultiple->setProperty("OutputParameterWorkspace",
+                                m_baseName + "_Parameters");
+    iqtFitMultiple->setProperty("OutputWorkspaceGroup",
+                                m_baseName + "_Workspaces");
+    m_pythonExportWsName = (m_baseName + "_Workspaces");
+    m_batchAlgoRunner->addAlgorithm(iqtFitMultiple);
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(algorithmComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
   }
+}
 
-  QString pyOutput = runPythonCode(pyInput);
+/**
+ * Plot workspace based on user input
+ */
+void IqtFit::plotWorkspace() {
+  auto resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_baseName + "_Result");
+  if (!(m_plotOption.compare("None") == 0)) {
+    if (m_plotOption.compare("All") == 0) {
+      int specEnd = (int)resultWs->getNumberHistograms();
+      for (int i = 0; i < specEnd; i++) {
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  i, i);
+      }
+    } else {
+      int specNumber = m_uiForm.cbPlotType->currentIndex();
+      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                specNumber, specNumber);
+    }
+  }
+}
 
-  // Set the result workspace for Python script export
-  QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
-  QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) +
-                         "_fury_" + fitType + specMin + "_to_" + specMax +
-                         "_Workspaces";
-  m_pythonExportWsName = resultWsName.toStdString();
+/**
+ * Save the result of the algorithm
+ */
+void IqtFit::saveResult() {
+  if (m_uiForm.ckSave->isChecked()) {
+    const auto workingdirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+    const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
+    addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
+                            QString::fromStdString(filepath));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+}
 
+/**
+* Handles completion of the IqtFitMultiple algorithm.
+* @param error True if the algorithm was stopped due to error, false otherwise
+*/
+void IqtFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+  if (error)
+    return;
   updatePlot();
+  plotWorkspace();
+  saveResult();
+}
+
+/**
+ * Constructs the desired output base name for the  IqtFitMultiple
+ * @param inputName		:: Name of the inputworkspace
+ * @param specMin		:: Minimum number of spectra being fitted
+ * @param specMax		:: Maximum number of spectra being fitted
+ * @return the base name
+ */
+std::string IqtFit::constructBaseName(const std::string &inputName,
+                                      const long &specMin,
+                                      const long &specMax) {
+  QString baseName = QString::fromStdString(inputName);
+  baseName = baseName.left(baseName.lastIndexOf("_"));
+  baseName += "_Iqt_1Smult_s";
+  baseName += QString::number(specMin);
+  baseName += "_to_";
+  baseName += QString::number(specMax);
+  const auto baseName_str = baseName.toStdString();
+  return baseName_str;
 }
 
 bool IqtFit::validate() {
@@ -401,28 +501,28 @@ void IqtFit::typeSelection(int index) {
     m_ffTree->addProperty(m_properties["Exponential1"]);
 
     // remove option to plot beta and add all
-	m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(4);
     m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->addItem("All");
     break;
   case 1:
     m_ffTree->addProperty(m_properties["Exponential1"]);
     m_ffTree->addProperty(m_properties["Exponential2"]);
 
     // remove option to plot beta and add all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
 
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->addItem("All");
     break;
   case 2:
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
-	// add option to plot beta and all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("Beta");
-	m_uiForm.cbPlotType->addItem("All");
+    // add option to plot beta and all
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->addItem("Beta");
+    m_uiForm.cbPlotType->addItem("All");
 
     break;
   case 3:
@@ -430,10 +530,10 @@ void IqtFit::typeSelection(int index) {
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
     // add option to plot beta and all
-	m_uiForm.cbPlotType->removeItem(4);
-	m_uiForm.cbPlotType->removeItem(3);
-	m_uiForm.cbPlotType->addItem("Beta");
-	m_uiForm.cbPlotType->addItem("All");
+    m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
+    m_uiForm.cbPlotType->addItem("Beta");
+    m_uiForm.cbPlotType->addItem("All");
 
     break;
   }

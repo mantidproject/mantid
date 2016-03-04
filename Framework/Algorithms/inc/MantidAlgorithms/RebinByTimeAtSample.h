@@ -35,24 +35,24 @@ namespace Algorithms {
 class DLLExport RebinByTimeAtSample : public RebinByTimeBase {
 public:
   RebinByTimeAtSample();
-  virtual ~RebinByTimeAtSample();
+  ~RebinByTimeAtSample() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
   void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
                        Mantid::API::MatrixWorkspace_sptr outputWS,
                        Mantid::MantidVecPtr &XValues_new,
                        Mantid::MantidVec &OutXValues_scaled,
-                       Mantid::API::Progress &prog);
+                       Mantid::API::Progress &prog) override;
 
   /// Get the minimum x across all spectra in workspace
-  virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr ws) const;
+  uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr ws) const override;
   /// Get the maximum x across all spectra in workspace
-  virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr ws) const;
+  uint64_t getMinX(Mantid::API::IEventWorkspace_sptr ws) const override;
 };
 
 } // namespace Algorithms

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGESTACKPREPARAMS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGESTACKPREPARAMS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidKernel/V2D.h"
 
 #include <utility>
@@ -44,7 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ImageStackPreParams {
+class MANTIDQT_CUSTOMINTERFACES_DLL ImageStackPreParams {
 public:
 
   ImageStackPreParams();
@@ -54,7 +54,6 @@ public:
   Mantid::Kernel::V2D cor;
   Box2D roi;
   Box2D normalizationRegion;  //< also known as 'air' region
-  bool medianFilter;
 };
 
 } // namespace CustomInterfaces

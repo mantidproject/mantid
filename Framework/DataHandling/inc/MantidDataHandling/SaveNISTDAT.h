@@ -26,27 +26,27 @@ public:
   /// (Empty) Constructor
   SaveNISTDAT() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SaveNISTDAT() {}
+  ~SaveNISTDAT() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SaveNISTDAT"; }
+  const std::string name() const override { return "SaveNISTDAT"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save I(Qx,Qy) data to a text file compatible with NIST and DANSE "
            "readers.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;DataHandling\\Text";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

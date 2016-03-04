@@ -38,22 +38,22 @@ namespace LiveData {
 class DLLExport LoadLiveData : public LiveDataAlgorithm {
 public:
   LoadLiveData();
-  virtual ~LoadLiveData();
+  ~LoadLiveData() override;
 
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a chunk of live data. You should call StartLiveData, and not "
            "this algorithm directly.";
   }
 
-  virtual const std::string category() const;
-  virtual int version() const;
+  const std::string category() const override;
+  int version() const override;
 
-  void exec();
+  void exec() override;
 
 private:
-  void init();
+  void init() override;
 
   Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS,
                                             bool PostProcess);

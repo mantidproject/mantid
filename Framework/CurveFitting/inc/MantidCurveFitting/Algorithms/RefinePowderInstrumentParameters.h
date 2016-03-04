@@ -54,28 +54,28 @@ namespace Algorithms {
 class DLLExport RefinePowderInstrumentParameters : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters();
-  virtual ~RefinePowderInstrumentParameters();
+  ~RefinePowderInstrumentParameters() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "RefinePowderInstrumentParameters";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction\\Fitting"; }
+  const std::string category() const override { return "Diffraction\\Fitting"; }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
+  void init() override;
   // Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   //----------------  Processing Input ---------------------
   /// Import instrument parameter from table (workspace)
@@ -146,7 +146,7 @@ private:
   // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
   /// Calcualte value n for thermal neutron peak profile
-  void calculateThermalNeutronSpecial(API::IFunction_sptr mFunction,
+  void calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
                                       std::vector<double> vec_d,
                                       std::vector<double> &vec_n);
 

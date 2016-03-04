@@ -43,69 +43,71 @@ class vtkMDHWSignalArray : public vtkTypeTemplate<vtkMDHWSignalArray<Scalar>,
 public:
   vtkMappedDataArrayNewInstanceMacro(
       vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
-  virtual void PrintSelf(ostream &os, vtkIndent indent);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(
       std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> iterator,
       std::size_t offset, vtkIdType size);
 
   // Reimplemented virtuals -- see superclasses for descriptions:
-  void Initialize();
-  void GetTuples(vtkIdList *ptIds, vtkAbstractArray *output);
-  void GetTuples(vtkIdType p1, vtkIdType p2, vtkAbstractArray *output);
-  void Squeeze();
-  vtkArrayIterator *NewIterator();
-  vtkIdType LookupValue(vtkVariant value);
-  void LookupValue(vtkVariant value, vtkIdList *ids);
-  vtkVariant GetVariantValue(vtkIdType idx);
-  void ClearLookup();
-  double *GetTuple(vtkIdType i);
-  void GetTuple(vtkIdType i, double *tuple);
-  vtkIdType LookupTypedValue(Scalar value);
-  void LookupTypedValue(Scalar value, vtkIdList *ids);
-  Scalar GetValue(vtkIdType idx);
-  Scalar &GetValueReference(vtkIdType idx);
-  void GetTupleValue(vtkIdType idx, Scalar *t);
+  void Initialize() override;
+  void GetTuples(vtkIdList *ptIds, vtkAbstractArray *output) override;
+  void GetTuples(vtkIdType p1, vtkIdType p2, vtkAbstractArray *output) override;
+  void Squeeze() override;
+  vtkArrayIterator *NewIterator() override;
+  vtkIdType LookupValue(vtkVariant value) override;
+  void LookupValue(vtkVariant value, vtkIdList *ids) override;
+  vtkVariant GetVariantValue(vtkIdType idx) override;
+  void ClearLookup() override;
+  double *GetTuple(vtkIdType i) override;
+  void GetTuple(vtkIdType i, double *tuple) override;
+  vtkIdType LookupTypedValue(Scalar value) override;
+  void LookupTypedValue(Scalar value, vtkIdList *ids) override;
+  Scalar GetValue(vtkIdType idx) override;
+  Scalar &GetValueReference(vtkIdType idx) override;
+  void GetTupleValue(vtkIdType idx, Scalar *t) override;
 
   // Description:
   // This container is read only -- this method does nothing but print a
   // warning.
-  int Allocate(vtkIdType sz, vtkIdType ext);
-  int Resize(vtkIdType numTuples);
-  void SetNumberOfTuples(vtkIdType number);
-  void SetTuple(vtkIdType i, vtkIdType j, vtkAbstractArray *source);
-  void SetTuple(vtkIdType i, const float *source);
-  void SetTuple(vtkIdType i, const double *source);
-  void InsertTuple(vtkIdType i, vtkIdType j, vtkAbstractArray *source);
-  void InsertTuple(vtkIdType i, const float *source);
-  void InsertTuple(vtkIdType i, const double *source);
+  int Allocate(vtkIdType sz, vtkIdType ext) override;
+  int Resize(vtkIdType numTuples) override;
+  void SetNumberOfTuples(vtkIdType number) override;
+  void SetTuple(vtkIdType i, vtkIdType j, vtkAbstractArray *source) override;
+  void SetTuple(vtkIdType i, const float *source) override;
+  void SetTuple(vtkIdType i, const double *source) override;
+  void InsertTuple(vtkIdType i, vtkIdType j, vtkAbstractArray *source) override;
+  void InsertTuple(vtkIdType i, const float *source) override;
+  void InsertTuple(vtkIdType i, const double *source) override;
   void InsertTuples(vtkIdList *dstIds, vtkIdList *srcIds,
-                    vtkAbstractArray *source);
+                    vtkAbstractArray *source) override;
   void InsertTuples(vtkIdType dstStart, vtkIdType n, vtkIdType srcStart,
-                    vtkAbstractArray *source);
-  vtkIdType InsertNextTuple(vtkIdType j, vtkAbstractArray *source);
-  vtkIdType InsertNextTuple(const float *source);
-  vtkIdType InsertNextTuple(const double *source);
-  void DeepCopy(vtkAbstractArray *aa);
-  void DeepCopy(vtkDataArray *da);
+                    vtkAbstractArray *source) override;
+  vtkIdType InsertNextTuple(vtkIdType j, vtkAbstractArray *source) override;
+  vtkIdType InsertNextTuple(const float *source) override;
+  vtkIdType InsertNextTuple(const double *source) override;
+  void DeepCopy(vtkAbstractArray *aa) override;
+  void DeepCopy(vtkDataArray *da) override;
   void InterpolateTuple(vtkIdType i, vtkIdList *ptIndices,
-                        vtkAbstractArray *source, double *weights);
+                        vtkAbstractArray *source, double *weights) override;
   void InterpolateTuple(vtkIdType i, vtkIdType id1, vtkAbstractArray *source1,
-                        vtkIdType id2, vtkAbstractArray *source2, double t);
-  void SetVariantValue(vtkIdType idx, vtkVariant value);
-  void RemoveTuple(vtkIdType id);
-  void RemoveFirstTuple();
-  void RemoveLastTuple();
-  void SetTupleValue(vtkIdType i, const Scalar *t);
-  void InsertTupleValue(vtkIdType i, const Scalar *t);
-  vtkIdType InsertNextTupleValue(const Scalar *t);
-  void SetValue(vtkIdType idx, Scalar value);
-  vtkIdType InsertNextValue(Scalar v);
-  void InsertValue(vtkIdType idx, Scalar v);
+                        vtkIdType id2, vtkAbstractArray *source2,
+                        double t) override;
+  void SetVariantValue(vtkIdType idx, vtkVariant value) override;
+  void RemoveTuple(vtkIdType id) override;
+  void RemoveFirstTuple() override;
+  void RemoveLastTuple() override;
+  void SetTupleValue(vtkIdType i, const Scalar *t) override;
+  void InsertTupleValue(vtkIdType i, const Scalar *t) override;
+  vtkIdType InsertNextTupleValue(const Scalar *t) override;
+  void SetValue(vtkIdType idx, Scalar value) override;
+  vtkIdType InsertNextValue(Scalar v) override;
+  void InsertVariantValue(vtkIdType idx, vtkVariant value) override;
+  void InsertValue(vtkIdType idx, Scalar v) override;
 
 protected:
   vtkMDHWSignalArray();
-  ~vtkMDHWSignalArray();
+  ~vtkMDHWSignalArray() override;
 
 private:
   vtkIdType Lookup(const Scalar &val, vtkIdType startIndex);
@@ -247,7 +249,7 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
   m_iterator->jumpTo(m_offset + i);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignalWithMask();
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
   return &m_temporaryTuple[0];
 }
 
@@ -255,7 +257,7 @@ double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
   m_iterator->jumpTo(m_offset + i);
-  tuple[0] = m_iterator->getNormalizedSignalWithMask();
+  tuple[0] = m_iterator->getNormalizedSignal();
 }
 
 //------------------------------------------------------------------------------
@@ -293,13 +295,13 @@ vtkIdType vtkMDHWSignalArray<Scalar>::Lookup(const Scalar &val,
 template <class Scalar>
 Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) {
   m_iterator->jumpTo(m_offset + idx);
-  return m_iterator->getNormalizedSignalWithMask();
+  return m_iterator->getNormalizedSignal();
 }
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
   m_iterator->jumpTo(m_offset + idx);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignalWithMask();
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
   return m_temporaryTuple[0];
 }
 
@@ -308,7 +310,7 @@ template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTupleValue(vtkIdType tupleId,
                                                Scalar *tuple) {
   m_iterator->jumpTo(m_offset + tupleId);
-  tuple[0] = m_iterator->getNormalizedSignalWithMask();
+  tuple[0] = m_iterator->getNormalizedSignal();
 }
 
 //------------------------------------------------------------------------------
@@ -483,6 +485,11 @@ vtkIdType vtkMDHWSignalArray<Scalar>::InsertNextValue(Scalar) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::InsertValue(vtkIdType, Scalar) {
+  vtkErrorMacro("Read only container.") return;
+}
+
+template <class Scalar>
+void vtkMDHWSignalArray<Scalar>::InsertVariantValue(vtkIdType, vtkVariant) {
   vtkErrorMacro("Read only container.") return;
 }
 

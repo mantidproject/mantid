@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -162,7 +163,7 @@ public:
     TS_ASSERT(!conj.isExecuted());
 
     // Adjust second workspace
-    Mantid::specid_t start =
+    Mantid::specnum_t start =
         ws1->getSpectrum(numPixels - 1)->getSpectrumNo() + 10;
     for (int i = 0; i < 5; ++i) {
       Mantid::API::ISpectrum *spec = ws2->getSpectrum(i);

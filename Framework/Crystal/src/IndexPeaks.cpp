@@ -30,26 +30,25 @@ IndexPeaks::~IndexPeaks() {}
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  this->declareProperty(new PropertyWithValue<double>("Tolerance", 0.15,
-                                                      mustBePositive,
-                                                      Direction::Input),
-                        "Indexing Tolerance (0.15)");
+  this->declareProperty(
+      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
+                                             Direction::Input),
+      "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      new PropertyWithValue<int>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
       "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(
-      new PropertyWithValue<double>("AverageError", 0.0, Direction::Output),
-      "Gets set with the average HKL indexing error.");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "AverageError", 0.0, Direction::Output),
+                        "Gets set with the average HKL indexing error.");
 
   this->declareProperty("RoundHKLs", true,
                         "Round H, K and L values to integers");

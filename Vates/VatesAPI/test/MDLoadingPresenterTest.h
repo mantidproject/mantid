@@ -28,7 +28,11 @@ class MOCKMDLoadingPresenter : public Mantid::VATES::MDLoadingPresenter {
 public:
   MOCKMDLoadingPresenter(){}
   ~MOCKMDLoadingPresenter(){}
-  vtkDataSet* execute(Mantid::VATES::vtkDataSetFactory*, Mantid::VATES::ProgressAction&, Mantid::VATES::ProgressAction&) { return NULL;}
+  vtkSmartPointer<vtkDataSet> execute(Mantid::VATES::vtkDataSetFactory *,
+                                      Mantid::VATES::ProgressAction &,
+                                      Mantid::VATES::ProgressAction &) {
+    return nullptr;
+  }
   void executeLoadMetadata() {}
   bool hasTDimensionAvailable(void) const {return true;}
   std::vector<double> getTimeStepValues() const {return std::vector<double>();}
@@ -43,20 +47,23 @@ public:
 
 class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:
-  vtkUnstructuredGrid *makeDataSet() {
+  vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     Mantid::VATES::vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
                             VolumeNormalization);
     factory.initialize(ws);
-    return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
+    auto dataset = factory.create(progressUpdate);
+    auto grid = vtkUnstructuredGrid::SafeDownCast(dataset.Get());
+    return vtkSmartPointer<vtkUnstructuredGrid>(grid);
   }
 public:
   void test_that_non_default_cob_is_created() {
     // Arrange
     MOCKMDLoadingPresenter presenter;
-    auto dataSet = makeDataSet();
+    vtkSmartPointer<vtkUnstructuredGrid> dataSet;
+    dataSet = makeDataSet();
     // Act
     presenter.setDefaultCOBandBoundaries(dataSet);
     // Assert
@@ -91,8 +98,6 @@ public:
     TS_ASSERT_EQUALS(10.0, bounds[3]);
     TS_ASSERT_EQUALS(-10.0, bounds[4]);
     TS_ASSERT_EQUALS(10.0, bounds[5]);
-
-    dataSet->Delete();
   }
 };
 

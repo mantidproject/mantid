@@ -36,15 +36,15 @@ const std::string DiffPeaksWorkspaces::category() const {
 /** Initialises the algorithm's properties.
  */
 void DiffPeaksWorkspaces::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("LHSWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "LHSWorkspace", "", Direction::Input),
                   "The first of peaks.");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("RHSWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The set of peaks that are in the first, but not the second, workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -84,8 +84,7 @@ void DiffPeaksWorkspaces::exec() {
 
   // Loop over the peaks in the second workspace, searching for a match in the
   // first
-  for (size_t i = 0; i < rhsPeaks.size(); ++i) {
-    const Peak &currentPeak = rhsPeaks[i];
+  for (const auto &currentPeak : rhsPeaks) {
     // Now have to go through the first workspace checking for matches
     // Not doing anything clever as peaks workspace are typically not large -
     // just a linear search

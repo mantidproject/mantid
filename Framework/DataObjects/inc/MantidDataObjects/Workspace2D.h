@@ -47,10 +47,11 @@ public:
   Gets the name of the workspace type
   @return Standard string name
    */
-  virtual const std::string id() const { return "Workspace2D"; }
+  const std::string id() const override { return "Workspace2D"; }
 
   Workspace2D();
-  virtual ~Workspace2D();
+  Workspace2D &operator=(const Workspace2D &other) = delete;
+  ~Workspace2D() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<Workspace2D> clone() const {
@@ -58,35 +59,35 @@ public:
   }
 
   /// Returns the histogram number
-  std::size_t getNumberHistograms() const;
+  std::size_t getNumberHistograms() const override;
 
   // section required for iteration
-  virtual std::size_t size() const;
-  virtual std::size_t blocksize() const;
+  std::size_t size() const override;
+  std::size_t blocksize() const override;
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual Mantid::API::ISpectrum *getSpectrum(const size_t index);
+  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
-                         bool skipError = false) const;
+                         bool skipError = false) const override;
 
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<specid_t> &mList) { m_monitorList = mList; }
+  void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
   void setImageY(const API::MantidImage &image, size_t start = 0,
-                 bool parallelExecution = true);
+                 bool parallelExecution = true) override;
   /// Copy the data from an image to this workspace's errors.
   void setImageE(const API::MantidImage &image, size_t start = 0,
-                 bool parallelExecution = true);
+                 bool parallelExecution = true) override;
   /// Copy the data from an image to this workspace's (Y's) and errors.
   void setImageYAndE(const API::MantidImage &imageY,
                      const API::MantidImage &imageE, size_t start = 0,
@@ -96,24 +97,22 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  Workspace2D &operator=(const Workspace2D &other);
 
   /// Called by initialize()
-  virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
-                    const std::size_t &YLength);
+  void init(const std::size_t &NVectors, const std::size_t &XLength,
+            const std::size_t &YLength) override;
 
   /// The number of vectors in the workspace
   std::size_t m_noVectors;
 
   /// a vector holding workspace index of monitors in the workspace
-  std::vector<specid_t> m_monitorList;
+  std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
   std::vector<Mantid::API::ISpectrum *> data;
 
 private:
-  virtual Workspace2D *doClone() const { return new Workspace2D(*this); }
+  Workspace2D *doClone() const override { return new Workspace2D(*this); }
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

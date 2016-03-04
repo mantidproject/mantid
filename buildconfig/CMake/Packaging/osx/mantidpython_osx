@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#
+# For OS X only
+# Launch IPython with paths set for the Mantid environment
+
+# Get the path of this script so that we know where Mantid is installed
+# This method should be robust; work through nested symlinks etc
+pushd . > /dev/null
+SCRIPT_PATH="${BASH_SOURCE[0]}";
+  while([ -h "${SCRIPT_PATH}" ]) do 
+    cd "`dirname "${SCRIPT_PATH}"`"
+    SCRIPT_PATH="$(readlink "`basename "${SCRIPT_PATH}"`")"; 
+  done
+cd "`dirname "${SCRIPT_PATH}"`" > /dev/null
+SCRIPT_PATH="`pwd`";
+popd  > /dev/null
+
+PROG=${SCRIPT_PATH}/bin/ipython
+
+# Define extra libraries for python
+LOCAL_PYTHONPATH=${SCRIPT_PATH}
+if [-n "${PYTHONPATH}" ]; then
+	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+if [ -n "$1" ] && [ "$1" = "--classic" ]; then
+    shift
+    PROG=$(command -v python)
+fi
+
+PYTHONPATH=${LOCAL_PYTHONPATH} \
+	${PROG} $*

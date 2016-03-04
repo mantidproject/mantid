@@ -119,16 +119,14 @@ double XMLInstrumentParameter::createParamValue(
     typedef std::map<std::string, Kernel::Math::StatisticType>
         StatisticsMapType;
     StatisticsMapType statistics_types;
-    statistics_types.insert(
-        std::make_pair("first_value", Kernel::Math::FirstValue));
-    statistics_types.insert(
-        std::make_pair("last_value", Kernel::Math::LastValue));
-    statistics_types.insert(std::make_pair("maximum", Kernel::Math::Maximum));
-    // statistics_types.insert(std::make_pair("mean", Kernel::Math::Mean));
+    statistics_types.emplace("first_value", Kernel::Math::FirstValue);
+    statistics_types.emplace("last_value", Kernel::Math::LastValue);
+    statistics_types.emplace("maximum", Kernel::Math::Maximum);
+    // statistics_types.emplace("mean", Kernel::Math::Mean);
     // //TODO, would conflict with the existing "mean" flag, which corresponds
     // to time_averaged_mean
-    statistics_types.insert(std::make_pair("median", Kernel::Math::Median));
-    statistics_types.insert(std::make_pair("minimum", Kernel::Math::Minimum));
+    statistics_types.emplace("median", Kernel::Math::Median);
+    statistics_types.emplace("minimum", Kernel::Math::Minimum);
     StatisticsMapType::const_iterator statisics_choice =
         statistics_types.find(m_extractSingleValueAs);
     const bool bUsingStandardStatistics =

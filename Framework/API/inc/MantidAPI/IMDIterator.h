@@ -48,7 +48,7 @@ class IMDWorkspace;
 class MANTID_API_DLL IMDIterator {
 public:
   IMDIterator();
-  virtual ~IMDIterator() {}
+  virtual ~IMDIterator() = default;
 
   void setNormalization(Mantid::API::MDNormalization normalization);
   Mantid::API::MDNormalization getNormalization() const;
@@ -75,9 +75,6 @@ public:
 
   /// Returns the normalized error for this box
   virtual signal_t getNormalizedError() const = 0;
-
-  /// Returns the normalized signal or mask value for this box
-  virtual signal_t getNormalizedSignalWithMask() const = 0;
 
   /// Returns the total signal for this box
   virtual signal_t getSignal() const = 0;

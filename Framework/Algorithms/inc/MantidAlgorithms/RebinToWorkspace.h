@@ -50,29 +50,29 @@ public:
   /// Constructor
   RebinToWorkspace() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~RebinToWorkspace() {}
+  ~RebinToWorkspace() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "RebinToWorkspace"; }
+  const std::string name() const override { return "RebinToWorkspace"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Rebin a selected workspace to the same binning as a different "
            "workspace";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Rebin"; }
+  const std::string category() const override { return "Transforms\\Rebin"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Create the rebin paraeters
-  void createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch,
-                             std::vector<double> &rb_params);
+  std::vector<double>
+  createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch);
 };
 }
 }

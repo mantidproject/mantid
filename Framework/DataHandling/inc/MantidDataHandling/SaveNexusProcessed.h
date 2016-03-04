@@ -53,30 +53,30 @@ public:
   /// Default constructor
   SaveNexusProcessed();
   /// Destructor
-  ~SaveNexusProcessed() {}
+  ~SaveNexusProcessed() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveNexusProcessed"; };
+  const std::string name() const override { return "SaveNexusProcessed"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The SaveNexusProcessed algorithm will write the given Mantid "
            "workspace to a Nexus file. SaveNexusProcessed may be invoked by "
            "SaveNexus.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Nexus"; }
+  const std::string category() const override { return "DataHandling\\Nexus"; }
 
 protected:
   /// Override process groups
-  virtual bool processGroups();
+  bool processGroups() override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   void getSpectrumList(std::vector<int> &spec,
                        Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
@@ -90,9 +90,10 @@ private:
                  const bool uniformSpectra, const std::vector<int> spec);
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int perioidNum);
+                          const std::string &propertyValue,
+                          int perioidNum) override;
   /// execute the algorithm.
-  void doExec(Mantid::API::Workspace_sptr workspace,
+  void doExec(Mantid::API::Workspace_sptr inputWorkspace,
               Mantid::NeXus::NexusFileIO_sptr &nexusFile,
               const bool keepFile = false,
               NeXus::NexusFileIO::optional_size_t entryNumber =

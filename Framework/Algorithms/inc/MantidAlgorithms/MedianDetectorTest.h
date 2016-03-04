@@ -73,17 +73,17 @@ public:
   /// constructor
   MedianDetectorTest();
   /// Destructor
-  virtual ~MedianDetectorTest(){};
+  ~MedianDetectorTest() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MedianDetectorTest"; }
-  virtual const std::string category() const;
+  const std::string name() const override { return "MedianDetectorTest"; }
+  const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // The different steps of the calculation, all called by exec()
   /// Loads and checks the values passed to the algorithm
@@ -91,12 +91,12 @@ private:
   /// Calculates the sum of solid angles of detectors for each histogram
   API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
   /// Mask the outlier values to get a better median value
-  int maskOutliers(const std::vector<double> median,
+  int maskOutliers(const std::vector<double> medianvec,
                    API::MatrixWorkspace_sptr countsWS,
                    std::vector<std::vector<size_t>> indexmap);
   /// Do the tests and mask those that fail
   int doDetectorTests(const API::MatrixWorkspace_sptr countsWS,
-                      const std::vector<double> median,
+                      const std::vector<double> medianvec,
                       std::vector<std::vector<size_t>> indexmap,
                       API::MatrixWorkspace_sptr maskWS);
 

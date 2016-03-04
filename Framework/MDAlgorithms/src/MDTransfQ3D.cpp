@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -64,7 +65,7 @@ PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
 bool MDTransfQ3D::calcMatrixCoord3DInelastic(
     const double &E_tr, std::vector<coord_t> &Coord) const {
-  Coord[3] = (coord_t)E_tr;
+  Coord[3] = static_cast<coord_t>(E_tr);
   if (Coord[3] < m_DimMin[3] || Coord[3] >= m_DimMax[3])
     return false;
 
@@ -80,13 +81,23 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
   double qy = -m_ey * k_tr;
   double qz = m_Ki - m_ez * k_tr;
 
-  Coord[0] = (coord_t)(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+  if (convention == "Crystallography") {
+    qx = -qx;
+    qy = -qy;
+    qz = -qz;
+  }
+
+  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
+                                  m_RotMat[2] * qz);
+
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
-  Coord[1] = (coord_t)(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
+                                  m_RotMat[5] * qz);
   if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
     return false;
-  Coord[2] = (coord_t)(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
+                                  m_RotMat[8] * qz);
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
@@ -120,15 +131,25 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
-  Coord[0] = (coord_t)(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+  if (convention == "Crystallography") {
+    qx = -qx;
+    qy = -qy;
+    qz = -qz;
+  }
+
+  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
+                                  m_RotMat[2] * qz);
+
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
 
-  Coord[1] = (coord_t)(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
+                                  m_RotMat[5] * qz);
   if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
     return false;
 
-  Coord[2] = (coord_t)(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
+                                  m_RotMat[8] * qz);
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
@@ -193,8 +214,9 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 /** function initalizes all variables necessary for converting workspace
  * variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
-  m_pEfixedArray = NULL;
-  m_pDetMasks = NULL;
+  m_pEfixedArray = nullptr;
+  m_pDetMasks = nullptr;
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   //********** Generic part of initialization, common for elastic and inelastic
   // modes:
   // get transformation matrix (needed for CrystalAsPoder mode)
@@ -225,8 +247,8 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
     // the wave vector of incident neutrons;
     m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-    m_pEfixedArray = NULL;
-    if (m_Emode == (int)Kernel::DeltaEMode::Indirect)
+    m_pEfixedArray = nullptr;
+    if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
       m_pEfixedArray =
           ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
   } else {
@@ -318,7 +340,7 @@ MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 
 /// constructor;
 MDTransfQ3D::MDTransfQ3D()
-    : m_isLorentzCorrected(false), m_SinThetaSqArray(NULL), SinThetaSq(),
+    : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(),
       m_SinThetaSq(0.), m_AbsMin(0.) {}
 
 } // End MDAlgorighms namespace

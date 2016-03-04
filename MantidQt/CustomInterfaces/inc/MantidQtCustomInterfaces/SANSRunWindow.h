@@ -4,21 +4,21 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
-#include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "MantidQtCustomInterfaces/SANSConstants.h"
 #include "MantidQtCustomInterfaces/SANSDiagnostics.h"
 #include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
-#include "MantidQtCustomInterfaces/SANSConstants.h"
+#include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "ui_SANSRunWindow.h"
 
-#include <QHash>
-#include <QSettings>
-#include <QStringList>
-#include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
+#include <QHash>
+#include <QSettings>
+#include <QStringList>
 #include <vector>
 
 namespace Mantid {
@@ -493,6 +493,20 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
+  
+  /// Gets the BackgroundCorrection settings
+  void retrieveBackgroundCorrection();
+  /// Get Background runner
+  SANSBackgroundCorrectionSettings retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
+  /// Initialize the background correction
+  void initializeBackgroundCorrection();
+  /// Sets the BackgroundCorrection settings
+  void writeBackgroundCorrectionToPythonScript(QString &pythonCode);
+  /// Generic addition of background correction to python script
+  void addBackgroundCorrectionToPythonScript(
+      QString &pythonCode,
+      MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
+      bool isTimeBased);
   /// Check if the user file has a valid user file extension
   bool hasUserFileValidFileExtension();
   /// Check if the user file is valid
@@ -500,6 +514,7 @@ private:
   /// Update IDF file path
   void updateIDFFilePath();
 
+      
   UserSubWindow *slicingWindow;
 };
 }

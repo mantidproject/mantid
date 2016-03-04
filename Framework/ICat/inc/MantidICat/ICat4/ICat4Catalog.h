@@ -40,44 +40,44 @@ public:
   /// Constructor
   ICat4Catalog();
   /// Log the user into the catalog system.
-  virtual API::CatalogSession_sptr login(const std::string &username,
-                                         const std::string &password,
-                                         const std::string &endpoint,
-                                         const std::string &facility);
+  API::CatalogSession_sptr login(const std::string &username,
+                                 const std::string &password,
+                                 const std::string &endpoint,
+                                 const std::string &facility) override;
   /// Log the user out of the catalog system.
-  virtual void logout();
+  void logout() override;
   /// Search the catalog for data.
-  virtual void search(const CatalogSearchParam &inputs,
-                      Mantid::API::ITableWorkspace_sptr &outputws,
-                      const int &offset, const int &limit);
+  void search(const CatalogSearchParam &inputs,
+              Mantid::API::ITableWorkspace_sptr &outputws, const int &offset,
+              const int &limit) override;
   /// Obtain the number of results returned by the search method.
-  virtual int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs);
+  int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs) override;
   /// Show the logged in user's investigations search results.
-  virtual void myData(Mantid::API::ITableWorkspace_sptr &outputws);
+  void myData(Mantid::API::ITableWorkspace_sptr &outputws) override;
   /// Get datasets.
-  virtual void getDataSets(const std::string &investigationId,
-                           Mantid::API::ITableWorkspace_sptr &outputws);
+  void getDataSets(const std::string &investigationId,
+                   Mantid::API::ITableWorkspace_sptr &outputws) override;
   /// Get datafiles
-  virtual void getDataFiles(const std::string &investigationId,
-                            Mantid::API::ITableWorkspace_sptr &outputws);
+  void getDataFiles(const std::string &investigationId,
+                    Mantid::API::ITableWorkspace_sptr &outputws) override;
   /// Get instruments list
-  virtual void listInstruments(std::vector<std::string> &instruments);
+  void listInstruments(std::vector<std::string> &instruments) override;
   /// Get investigationtypes list
-  virtual void listInvestigationTypes(std::vector<std::string> &invstTypes);
+  void listInvestigationTypes(std::vector<std::string> &invstTypes) override;
   /// Get the file location string(s) from archive.
-  virtual const std::string getFileLocation(const long long &fileID);
+  const std::string getFileLocation(const long long &fileID) override;
   /// Get the url(s) based on the fileID.
-  virtual const std::string getDownloadURL(const long long &fileID);
+  const std::string getDownloadURL(const long long &fileID) override;
   /// get URL of where to PUT (publish) files.
-  virtual const std::string
+  const std::string
   getUploadURL(const std::string &investigationID,
                const std::string &createFileName,
-               const std::string &dataFileDescription);
+               const std::string &dataFileDescription) override;
   /// Obtains the investigations that the user can publish to and saves related
   /// information to a workspace.
-  virtual API::ITableWorkspace_sptr getPublishInvestigations();
+  API::ITableWorkspace_sptr getPublishInvestigations() override;
   /// Keep current session alive
-  virtual void keepAlive();
+  void keepAlive() override;
 
 private:
   // Ensures human friendly error messages are provided to the user.
@@ -125,7 +125,7 @@ private:
    */
   template <class T>
   void savetoTableWorkspace(T *input, Mantid::API::TableRow &table) {
-    if (input != 0) {
+    if (input) {
       table << *input;
     } else {
       table << "";

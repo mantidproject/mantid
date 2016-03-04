@@ -45,24 +45,24 @@ namespace Crystal {
 class DLLExport ShowPeakHKLOffsets : public API::Algorithm {
 public:
   ShowPeakHKLOffsets();
-  virtual ~ShowPeakHKLOffsets();
+  ~ShowPeakHKLOffsets() override;
 
-  virtual const std::string name() const { return "ShowPeakHKLOffsets"; };
+  const std::string name() const override { return "ShowPeakHKLOffsets"; };
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return " Histograms, scatter plots, etc. of this data could be useful to "
            "detect calibration problems";
   }
 
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
 
-  const std::string category() const { return "Crystal\\Peaks"; };
+  const std::string category() const override { return "Crystal\\Peaks"; };
 
 private:
-  void init();
+  void init() override;
 
-  void exec();
+  void exec() override;
 };
 }
 }

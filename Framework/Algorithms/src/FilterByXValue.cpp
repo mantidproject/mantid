@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterByXValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -26,11 +27,11 @@ const std::string FilterByXValue::category() const {
 }
 
 void FilterByXValue::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("XMin", EMPTY_DBL(), "The minimum X value (in the units of "
                                        "the input workspace) for which events "
@@ -78,22 +79,13 @@ void FilterByXValue::exec() {
 
   // Check if we're doing thing in-place.
   if (inputWS != outputWS) {
-    // Create a new output workspace if not doing things in place. Preserve
-    // event-ness.
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numSpec,
-                                            inputWS->blocksize() +
-                                                inputWS->isHistogramData(),
-                                            inputWS->blocksize()));
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // Copy over the data.
     // TODO: Make this more efficient by only copying over the events that pass
     // the
     // filter rather than copying everything and then removing some. This should
     // entail new methods (e.g. iterators) on EventList as this algorithm
     // shouldn't
     // need to know about the type of the events (e.g. weighted).
-    outputWS->copyDataFrom(*inputWS);
+    outputWS = EventWorkspace_sptr(inputWS->clone().release());
     setProperty("OutputWorkspace", outputWS);
   }
 

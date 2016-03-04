@@ -9,12 +9,14 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/GroupingLoader.h"
 
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
+#include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 #include <map>
 
@@ -34,7 +36,6 @@ namespace Muon
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
   class MuonAnalysisResultTableTab;
-  struct Grouping;
 
   struct LoadResult {
     Workspace_sptr loadedWorkspace;
@@ -48,7 +49,7 @@ namespace Muon
 
   struct GroupResult {
     bool usedExistGrouping;
-    boost::shared_ptr<Grouping> groupingUsed;
+    boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
   };
 }
 
@@ -94,6 +95,13 @@ public:
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
+
+  /// Sets index of group or pair to plot
+  /// and causes a replot
+  void setGroupOrPairAndReplot(int index);
+
+  /// Gets current index of group or pair to plot
+  int getGroupOrPairToPlot() const;
 
 signals:
   /// Request to hide/show Mantid toolbars
@@ -277,9 +285,6 @@ private:
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
 
-  /// Return the pair which is in focus and -1 if none
-  int pairInFocus();
-
   /// is grouping set
   bool isGroupingSet() const;
 
@@ -305,9 +310,6 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  /// is string a number?
-  bool isNumber(const std::string& s) const;
-
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
@@ -316,9 +318,6 @@ private:
 
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
-
-  ///Return true if data are loaded
-  bool areDataLoaded();
 
   /// Return number of pairs
   int numPairs();
@@ -489,6 +488,9 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+  /// Fills in the grouping table using information from provided Grouping
+  void fillGroupingTable(const Mantid::API::Grouping &grouping);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -513,8 +515,10 @@ private:
 
   /// Current number of periods
   size_t m_numPeriods;
-};
 
+  /// Grouping helper class
+  MuonGroupingHelper m_groupingHelper;
+};
 }
 }
 

@@ -37,27 +37,27 @@ public:
   /// (Empty) Constructor
   HFIRDarkCurrentSubtraction() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~HFIRDarkCurrentSubtraction() {}
+  ~HFIRDarkCurrentSubtraction() override {}
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "HFIRDarkCurrentSubtraction";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Perform HFIR SANS dark current subtraction.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   double getCountingTime(API::MatrixWorkspace_sptr inputWS);
 
   static const int DEFAULT_MONITOR_ID = 0;

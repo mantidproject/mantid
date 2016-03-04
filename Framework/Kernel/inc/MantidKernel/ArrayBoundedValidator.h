@@ -45,9 +45,9 @@ public:
   ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv);
   ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound);
   ArrayBoundedValidator(BoundedValidator<TYPE> &bv);
-  virtual ~ArrayBoundedValidator();
+  ~ArrayBoundedValidator() override;
   /// Clone the current state
-  IValidator_sptr clone() const;
+  IValidator_sptr clone() const override;
   /// Return the object that checks the bounds
   boost::shared_ptr<BoundedValidator<TYPE>> getValidator() const;
 
@@ -70,7 +70,7 @@ public:
   void clearUpper();
 
 private:
-  std::string checkValidity(const std::vector<TYPE> &value) const;
+  std::string checkValidity(const std::vector<TYPE> &value) const override;
 
   /// The object used to do the actual validation
   boost::shared_ptr<BoundedValidator<TYPE>> boundVal;

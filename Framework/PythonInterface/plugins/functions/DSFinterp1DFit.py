@@ -31,6 +31,8 @@ import numpy
 import scipy.interpolate
 
 #pylint: disable=too-many-instance-attributes
+
+
 class DSFinterp1DFit(IFunction1D):
 
     _RegressionTypes = None
@@ -89,9 +91,13 @@ class DSFinterp1DFit(IFunction1D):
         elif name == 'WorkspaceIndex':
             self._WorkspaceIndex = int(value)
         elif name == 'ParameterValues':
-            self._ParameterValues = [ float(f) for f in value.split() ]
-            self._fmin = min(self._ParameterValues)
-            self._fmax = max(self._ParameterValues)
+            self._ParameterValues = []
+            self._fmin = 0.0
+            self._fmax = 0.0
+            if value:
+                self._ParameterValues = [ float(f) for f in value.split() ]
+                self._fmin = min(self._ParameterValues)
+                self._fmax = max(self._ParameterValues)
         elif name == 'LocalRegression':
             self._LocalRegression = bool(value)
         elif name == 'RegressionType':

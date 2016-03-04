@@ -57,21 +57,23 @@ public:
   /// Constructor
   LoadSassena() : API::IFileLoader<Kernel::NexusDescriptor>(), m_filename(""){};
   /// Virtual Destructor
-  virtual ~LoadSassena() {}
+  ~LoadSassena() override {}
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadSassena"; }
+  const std::string name() const override { return "LoadSassena"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return " load a Sassena output file into a group workspace.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Sassena"; }
+  const std::string category() const override {
+    return "DataHandling\\Sassena";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 protected:
   /// Add a workspace to the group and register in the analysis data service
@@ -82,8 +84,8 @@ protected:
   herr_t dataSetInfo(const hid_t &h5file, const std::string setName,
                      hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  void dataSetDouble(const hid_t &h5file, const std::string setName,
-                     double *buf);
+  herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
+                       double *buf);
   /// Load qvectors dataset, calculate modulus of vectors
   const MantidVec loadQvectors(const hid_t &h5file,
                                API::WorkspaceGroup_sptr gws,
@@ -99,9 +101,9 @@ protected:
 
 private:
   /// Initialization code
-  void init(); // Overwrites Algorithm method.
+  void init() override; // Overwrites Algorithm method.
   /// Execution code
-  void exec(); // Overwrites Algorithm method
+  void exec() override; // Overwrites Algorithm method
   /// Loads one dataset
   void loadSet(const std::string &version, const std::string &setName);
 

@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -40,18 +41,18 @@ SmoothNeighbours::SmoothNeighbours()
     : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
       WeightedSum(new NullWeighting), PreserveEvents(false),
       expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
-      m_prog(NULL) {}
+      m_prog(nullptr) {}
 
 /** Initialisation method.
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
@@ -63,11 +64,8 @@ void SmoothNeighbours::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Flat");
-  propOptions.push_back("Linear");
-  propOptions.push_back("Parabolic");
-  propOptions.push_back("Gaussian");
+  std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic",
+                                       "Gaussian"};
   declareProperty("WeightedSum", "Flat",
                   boost::make_shared<StringListValidator>(propOptions),
                   "What sort of Weighting scheme to use?\n"
@@ -80,8 +78,8 @@ void SmoothNeighbours::init() {
   declareProperty(
       "Sigma", 0.5, mustBePositiveDouble,
       "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings(
-      "Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
+  setPropertySettings("Sigma", make_unique<EnabledWhenProperty>(
+                                   "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty(
       "IgnoreMaskedDetectors", true,
@@ -130,9 +128,7 @@ void SmoothNeighbours::init() {
   // -- Non-uniform properties
   // ----------------------------------------------------------------------
 
-  std::vector<std::string> radiusPropOptions;
-  radiusPropOptions.push_back("Meters");
-  radiusPropOptions.push_back("NumberOfPixels");
+  std::vector<std::string> radiusPropOptions{"Meters", "NumberOfPixels"};
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),
@@ -242,7 +238,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   int EndY = AdjY;
   int SumX = getProperty("SumPixelsX");
   int SumY = getProperty("SumPixelsY");
-  bool sum = (SumX * SumY > 1) ? true : false;
+  bool sum = SumX * SumY > 1;
   if (sum) {
     StartX = 0;
     StartY = 0;
@@ -299,8 +295,8 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
           // Adjust the weights of each neighbour to normalize to unity
           if (!sum || expandSumAllPixels)
-            for (size_t q = 0; q < neighbours.size(); q++)
-              neighbours[q].second /= totalWeight;
+            for (auto &neighbour : neighbours)
+              neighbour.second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
           m_neighbours[outWI] = neighbours;
@@ -359,7 +355,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     // We want to skip monitors
     try {
       // Get the list of detectors in this pixel
-      const std::set<detid_t> &dets = inWS->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = inWS->getSpectrum(wi)->getDetectorIDs();
       det = inst->getDetector(*dets.begin());
       if (det->isMonitor())
         continue; // skip monitor
@@ -379,7 +375,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
       continue; // skip missing detector
     }
 
-    specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
+    specnum_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
 
     // Step one - Get the number of specified neighbours
     SpectraDistanceMap insideGrid =
@@ -399,11 +395,11 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     std::vector<weightedNeighbour> neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (auto it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it) {
-      specid_t spec = it->first;
+    for (auto &specDistance : neighbSpectra) {
+      specnum_t spec = specDistance.first;
 
       // Use the weighting strategy to calculate the weight.
-      double weight = WeightedSum->weightAt(it->second);
+      double weight = WeightedSum->weightAt(specDistance.second);
 
       if (weight > 0) {
         // Find the corresponding workspace index
@@ -433,8 +429,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     // Adjust the weights of each neighbour to normalize to unity
     if (sum == 1)
-      for (size_t q = 0; q < neighbours.size(); q++)
-        neighbours[q].second /= totalWeight;
+      for (auto &neighbour : neighbours)
+        neighbour.second /= totalWeight;
 
     // Save the list of neighbours for this output workspace index.
     m_neighbours[outWI] = neighbours;
@@ -542,8 +538,8 @@ Check whether the properties provided are all in their default state.
 */
 bool areAllDefault(ConstVecProperties &properties) {
   bool areAllDefault = false;
-  for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
-    if (!(*it)->isDefault()) {
+  for (auto property : properties) {
+    if (!property->isDefault()) {
       return areAllDefault;
     }
   }
@@ -717,7 +713,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
 
       const ISpectrum *inSpec = inWS->getSpectrum(inWI);
 
-      std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+      auto thesedetids = inSpec->getDetectorIDs();
       outSpec->addDetectorIDs(thesedetids);
 
     } //(each neighbour)
@@ -752,7 +748,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     ISpectrum *inSpec = inWS->getSpectrum(outWIi);
     MantidVec &inX = inSpec->dataX();
 
-    std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+    auto thesedetids = inSpec->getDetectorIDs();
     ISpectrum *outSpec2 = outws2->getSpectrum(outWIi);
     MantidVec &outX = outSpec2->dataX();
     outX = inX;
@@ -810,7 +806,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
   // Ensure thread-safety
-  outWS->sortAll(TOF_SORT, NULL);
+  outWS->sortAll(TOF_SORT, nullptr);
 
   this->setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));

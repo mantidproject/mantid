@@ -41,22 +41,22 @@ class PolynomialFit : public Fit
 		PolynomialFit(ApplicationWindow *parent, Graph *g, QString& curveTitle, double start, double end, int order = 2, bool legend = false);
 		PolynomialFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1, int order = 2, bool legend = false);
 
-		virtual QString legendInfo();
-		void fit();
+                QString legendInfo() override;
+                void fit() override;
 
-		int order(){return d_order;};
+                int order(){return d_order;};
 		void setOrder(int order);
 
 		static QString generateFormula(int order);
 		static QStringList generateParameterList(int order);
 
-		virtual double eval(double *par, double x);
+                double eval(double *par, double x) override;
 
-	private:
+        private:
 		void init();
-		void calculateFitCurveData(double *X, double *Y);
+                void calculateFitCurveData(double *X, double *Y) override;
 
-		int d_order;
+                int d_order;
 		bool show_legend;
 };
 
@@ -70,12 +70,14 @@ class LinearFit : public Fit
 		LinearFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		LinearFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
-		void fit();
-	    virtual double eval(double *par, double x){return par[0] + par[1]*x;};
+                void fit() override;
+                double eval(double *par, double x) override {
+                  return par[0] + par[1] * x;
+                };
 
-	private:
+        private:
 		void init();
-		void calculateFitCurveData(double *X, double *Y);
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 
 class LinearSlopeFit : public Fit
@@ -88,11 +90,13 @@ class LinearSlopeFit : public Fit
 		LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
 		LinearSlopeFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
 
-		void fit();
-	    virtual double eval(double *par, double x){return par[0]*x;};
+                void fit() override;
+                double eval(double *par, double x) override {
+                  return par[0] * x;
+                };
 
-	private:
+        private:
 		void init();
-		void calculateFitCurveData(double *X, double *Y);
+                void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif
