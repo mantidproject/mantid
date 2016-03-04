@@ -65,7 +65,7 @@ signals:
 
 private:
   /// Initialize the layout.
-  virtual void initLayout() {};
+  void initLayout() override{};
   /// Reference to MuonAnalysis form.
   Ui::MuonAnalysis& m_uiForm;
 

@@ -31,7 +31,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
 public:
   SliceViewerWindow(const QString &wsName, const QString &label = QString(),
                     Qt::WFlags f = 0);
-  ~SliceViewerWindow();
+  ~SliceViewerWindow() override;
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();
   const QString &getLabel() const;
@@ -59,14 +59,16 @@ protected slots:
   void showPeaksViewer(bool);
 
 protected:
-  void preDeleteHandle(const std::string &wsName,
-                       const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string &wsName,
-                          const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void resizeEvent(QResizeEvent *event);
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void resizeEvent(QResizeEvent *event) override;
 
-  void renameHandle(const std::string& oldName,
-          const std::string& newName);
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
 
   /// The SliceViewer
   MantidQt::SliceViewer::SliceViewer *m_slicer;

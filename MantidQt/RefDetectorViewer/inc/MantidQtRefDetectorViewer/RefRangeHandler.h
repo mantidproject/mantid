@@ -49,10 +49,11 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumVie
     RefRangeHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure min, max and step controls for the specified data source
-    void configureRangeControls( SpectrumView::SpectrumDataSource_sptr dataSource );
+    void configureRangeControls(
+        SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
     /// Get the range of data to display in the image, from GUI controls
-    void getRange( double &min, double &max, double &step );
+    void getRange(double &min, double &max, double &step) override;
 
     /// Set the values displayed in the GUI controls
     void setRange( double min, double max, double step, char type );

@@ -57,26 +57,26 @@ public:
   /// Default constructor.
   StandardView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor.
-  virtual ~StandardView();
+  ~StandardView() override;
 
   /// @see ViewBase::destroyView
-  void destroyView();
+  void destroyView() override;
   /// @see ViewBase::getView
-  pqRenderView* getView();
+  pqRenderView *getView() override;
   /// @see ViewBase::render
-  void render();
+  void render() override;
   /// @see ViewBase::renderAll
-  void renderAll();
+  void renderAll() override;
   /// @see ViewBase::resetCamera()
-  void resetCamera();
+  void resetCamera() override;
   /// @see ViewBase::resetDisplay()
-  void resetDisplay();
+  void resetDisplay() override;
   /// @see ViewBase::updateUI()
-  void updateUI();
+  void updateUI() override;
   /// @see ViewBase::updateView()
-  void updateView();
+  void updateView() override;
   /// @see ViewBase::closeSubWindows
-  void closeSubWindows();
+  void closeSubWindows() override;
 
 public slots:
   /// Listen to a change in the active source.

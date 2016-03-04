@@ -37,7 +37,7 @@ public:
   SlicingAlgorithmDialog(QWidget *parent = 0);
 
   /// Destructor
-  ~SlicingAlgorithmDialog();
+  ~SlicingAlgorithmDialog() override;
 
   // Customisation for the VSI
   void customiseLayoutForVsi(std::string initialWorkspace);
@@ -77,7 +77,7 @@ private:
   enum HistoryChanged{HasChanged, HasNotChanged};
 
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout() override;
 
   /// Determine if axis aligned or non-axis aligned is required.
   bool doAxisAligned() const;
@@ -132,9 +132,9 @@ public:
   {
   }
 
-  ~SliceMDDialog(){}
+  ~SliceMDDialog() override {}
 
-  void customiseInitLayout();
+  void customiseInitLayout() override;
 };
 
 /*
@@ -148,8 +148,8 @@ public:
   BinMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
-  ~BinMDDialog(){}
-  void customiseInitLayout();
+  ~BinMDDialog() override {}
+  void customiseInitLayout() override;
 };
 
 }

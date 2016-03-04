@@ -22,8 +22,8 @@ public:
   QString workspaceName() const {return m_workspaceName;} 
   std::vector<int> workspaceIndices() const {return m_wsIndices;}
 private slots:
-  void accept();
-  void reject();
+  void accept() override;
+  void reject() override;
   void workspaceNameChanged(const QString&);
   void selectAllSpectra(int state);
 private:
