@@ -21,7 +21,7 @@ compiling, linking, and/or using OpenSSL is allowed.
   (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 500000
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #endif
@@ -11903,7 +11903,7 @@ typedef char *_XML;
 
 } // namespace ICat3
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 500000
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
 #undef GCC_VERSION
 #endif
