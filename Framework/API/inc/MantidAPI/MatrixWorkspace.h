@@ -315,10 +315,10 @@ public:
 
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
-   * @param specNum: the spectrum number
+   * @param index: the workspace index 
    */
-  virtual bool hasDx(const std::size_t specNum) const {
-    return getSpectrum(specNum)->hasDx();
+  virtual bool hasDx(const std::size_t index) const {
+    return getSpectrum(index)->hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.
@@ -364,7 +364,7 @@ public:
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
-  void flagMasked(const size_t &spectrumNum, const size_t &binIndex,
+  void flagMasked(const size_t &index, const size_t &binIndex,
                   const double &weight = 1.0);
   bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
@@ -512,7 +512,7 @@ private:
   /// Flag indicating whether the data has common bins. False by default
   mutable bool m_isCommonBinsFlag;
 
-  /// The set of masked bins in a map keyed on spectrum number
+  /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
 
   /// A workspace holding monitor data relating to the main data in the

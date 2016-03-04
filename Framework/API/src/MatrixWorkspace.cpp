@@ -1067,18 +1067,18 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
 * parallel critical section
 *  and so is thread safe
-*  @param spectrumNum :: The spectrum number of the bin
+*  @param index :: The workspace index of the spectrum
 *  @param binIndex ::      The index of the bin in the spectrum
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
 */
-void MatrixWorkspace::flagMasked(const size_t &spectrumNum,
+void MatrixWorkspace::flagMasked(const size_t &index,
                                  const size_t &binIndex, const double &weight) {
   // Writing to m_masks is not thread-safe, so put in some protection
   PARALLEL_CRITICAL(maskBin) {
     // First get a reference to the list for this spectrum (or create a new
     // list)
-    MaskList &binList = m_masks[spectrumNum];
+    MaskList &binList = m_masks[index];
     auto it = binList.find(binIndex);
     if (it != binList.end()) {
       binList.erase(it);
