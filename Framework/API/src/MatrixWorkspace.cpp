@@ -1072,8 +1072,8 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
 *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
 * masking (the default).
 */
-void MatrixWorkspace::flagMasked(const size_t &index,
-                                 const size_t &binIndex, const double &weight) {
+void MatrixWorkspace::flagMasked(const size_t &index, const size_t &binIndex,
+                                 const double &weight) {
   // Writing to m_masks is not thread-safe, so put in some protection
   PARALLEL_CRITICAL(maskBin) {
     // First get a reference to the list for this spectrum (or create a new

@@ -315,7 +315,7 @@ public:
 
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
-   * @param index: the workspace index 
+   * @param index: the workspace index
    */
   virtual bool hasDx(const std::size_t index) const {
     return getSpectrum(index)->hasDx();
