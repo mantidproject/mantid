@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
+        src/BasicInstrumentInfo.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
@@ -129,6 +130,7 @@ set ( SRC_FILES
 	src/GenerateIPythonNotebook.cpp
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
+        src/GeometryInfo.cpp
 	src/GetAllEi.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
@@ -295,6 +297,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
+	inc/MantidAlgorithms/BasicInstrumentInfo.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
@@ -409,6 +412,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GenerateIPythonNotebook.h
 	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
+        inc/MantidAlgorithms/GeometryInfo.h
 	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
@@ -590,6 +594,7 @@ set ( TEST_FILES
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h
 	AverageLogDataTest.h
+	BasicInstrumentInfoTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
@@ -698,6 +703,7 @@ set ( TEST_FILES
 	GenerateIPythonNotebookTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
+        GeometryInfoTest.h
 	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h

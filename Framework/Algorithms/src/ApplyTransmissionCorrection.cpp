@@ -51,6 +51,43 @@ void ApplyTransmissionCorrection::init() {
       "If true, a theta-dependent transmission correction will be applied.");
 }
 
+class ApplyTransmissionCorrectionToSpectrum {
+public:
+  ApplyTransmissionCorrectionToSpectrum(const std::vector<double> &TrIn,
+                                        const std::vector<double> &ETrIn,
+                                        const bool thetaDependent)
+      : m_TrIn(TrIn), m_ETrIn(ETrIn), m_thetaDependent(thetaDependent) {}
+
+  void operator()(const std::vector<double> &inX, bool isMonitor, bool isMasked,
+                  double twoTheta, std::vector<double> &outX,
+                  std::vector<double> &outY, std::vector<double> &outE) const {
+    // Copy over the X data
+    outX = inX;
+
+    // Skip if we have a monitor or if the detector is masked.
+    if (isMonitor || isMasked)
+      return;
+
+    // Compute theta-dependent transmission term for each wavelength bin
+    const double exp_term = (1.0 / cos(twoTheta) + 1.0) / 2.0;
+    for (int j = 0; j < static_cast<int>(inX.size() - 1); j++) {
+      if (!m_thetaDependent) {
+        outY[j] = 1.0 / m_TrIn[j];
+        outE[j] = std::fabs(m_ETrIn[j] * m_TrIn[j] * m_TrIn[j]);
+      } else {
+        outE[j] =
+            std::fabs(m_ETrIn[j] * exp_term / pow(m_TrIn[j], exp_term + 1.0));
+        outY[j] = 1.0 / pow(m_TrIn[j], exp_term);
+      }
+    }
+  }
+
+private:
+  const std::vector<double> &m_TrIn;
+  const std::vector<double> &m_ETrIn;
+  const bool m_thetaDependent;
+};
+
 void ApplyTransmissionCorrection::exec() {
   // Check whether we only need to divided the workspace by
   // the transmission.
@@ -83,61 +120,14 @@ void ApplyTransmissionCorrection::exec() {
     ETrIn = transWS->readE(0);
   }
 
-  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
-  Progress progress(this, 0.0, 1.0, numHists);
-
   // Create a Workspace2D to match the intput workspace
   MatrixWorkspace_sptr corrWS = WorkspaceFactory::Instance().create(inputWS);
 
-  // Loop through the spectra and apply correction
-  PARALLEL_FOR2(inputWS, corrWS)
-  for (int i = 0; i < numHists; i++) {
-    PARALLEL_START_INTERUPT_REGION
-
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
-      continue;
-
-    // Copy over the X data
-    corrWS->dataX(i) = inputWS->readX(i);
-
-    // Skip if we have a monitor or if the detector is masked.
-    if (det->isMonitor() || det->isMasked())
-      continue;
-
-    // Compute theta-dependent transmission term for each wavelength bin
-    MantidVec &YOut = corrWS->dataY(i);
-    MantidVec &EOut = corrWS->dataE(i);
-
-    const double exp_term =
-        (1.0 / cos(inputWS->detectorTwoTheta(det)) + 1.0) / 2.0;
-    for (int j = 0; j < static_cast<int>(inputWS->readY(0).size()); j++) {
-      if (!thetaDependent) {
-        YOut[j] = 1.0 / TrIn[j];
-        EOut[j] = std::fabs(ETrIn[j] * TrIn[j] * TrIn[j]);
-      } else {
-        EOut[j] = std::fabs(ETrIn[j] * exp_term / pow(TrIn[j], exp_term + 1.0));
-        YOut[j] = 1.0 / pow(TrIn[j], exp_term);
-      }
-    }
-
-    progress.report("Applying Transmission Correction");
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
+  ApplyTransmissionCorrectionToSpectrum apply(TrIn, ETrIn, thetaDependent);
+  this->for_each(
+      *inputWS, std::make_tuple(Getters::constX),
+      std::make_tuple(Getters::isMonitor, Getters::isMasked, Getters::twoTheta),
+      *corrWS, std::make_tuple(Getters::x, Getters::y, Getters::e), apply);
 
   outputWS = inputWS * corrWS;
   setProperty("OutputWorkspace", outputWS);
