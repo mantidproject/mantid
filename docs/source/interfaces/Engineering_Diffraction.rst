@@ -51,7 +51,7 @@ generate a new calibration file (which becomes the new current
 calibration).
 
 With the help of Cropped Calibration user can also calibrate according
-to bank or by setting the SpectrumIDs once the Cropped Calibration group
+to bank or by setting the SpectrumNumbers once the Cropped Calibration group
 box has been enabled.
 
 The plot Calibrated Workspace check-box will enable user to plot
@@ -85,10 +85,10 @@ Bank Name:
   respectively. However the Bank Name drop down list is set to
   "Enable Spectrum-IDs" by default. This option cannot be used together
   with Spectrum IDs, as they overlap. For the convenience of users, the
-  GUI will only enable SpectrumIDs and Customise Bank Name text-fields
+  GUI will only enable SpectrumNumbers and Customise Bank Name text-fields
   when Bank Name drop down list is set to "Enable Spectrum-IDs"
 
-SpectrumIDs:
+SpectrumNumbers:
   This parameter is only required when Cropped Calibration is being
   carried out, the parameter will set the spectrum numbers of the
   detectors, that should be considered in the calibration while all
@@ -98,7 +98,7 @@ SpectrumIDs:
 
 Customise Bank Name:
   This parameter is only required when Cropped Calibration is being
-  carried out with SpectrumIDs, the parameter will set the workspace
+  carried out with SpectrumNumbers, the parameter will set the workspace
   and .his file name according to this Bank Name provided by the user.
   However if the user does not provide a personalised name, the
   interface will use "cropped" as a default bank name.
