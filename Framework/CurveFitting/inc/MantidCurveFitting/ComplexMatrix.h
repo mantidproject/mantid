@@ -6,8 +6,6 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
-#include "MantidKernel/Matrix.h"
-
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>

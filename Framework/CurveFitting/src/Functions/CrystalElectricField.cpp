@@ -527,32 +527,22 @@ double epsilon(int k, int q) {
     return oma[k*(k+1) + q];
   }
 
-  // c--------------------------------
-  // c define the delta function
-  // c--------------------------------
-  double delta(double mj, double nj, double j) {
-    if (mj == nj && fabs(mj) <= j && fabs(nj) <= j) {
-      return 1.0;
-    }
-    return 0.0;
-  }
-
   // c***********************************************************************
   // c                                                                      *
   // c                   Function  fac                                      *
   // c                                                                      *
   // c***********************************************************************
   double fac(double n) {
-    int m, i;
     if (n < 0.0)
       return 0.0;
     if (n == 0.0)
       return 1.0;
     double f = 1.0;
-    int m = n;
+    int m = static_cast<int>(std::floor(n));
     for (int i = 1; i <= m; ++i) {
       f *= i;
     }
+    return f;
   }
 
   // c--------------------------------------------------------
@@ -637,8 +627,8 @@ void sc_crystal_field(size_t nre, const std::string &type, int symmetry,
      GSLMatrix ssbkq(N0_6, N0_6);
      ssbkq.zero();
 
-     for(size_t k = 2; k <= 6; k+=2) {//	   do k=2,6,2
-       for(size_t m = 0; m <= k; ++m) {//	      do m=0,k
+     for(int k = 2; k <= 6; k+=2) {//	   do k=2,6,2
+       for(int m = 0; m <= k; ++m) {//	      do m=0,k
 	        bkq.set(k,m, cifnull(bkq.get(k,m)));
 	        if (bkq.get(k,m) != 0.0) {
 		        ssbkq.set(k,m, 1); // note ||re(Okq)|| = ||im(Okq)|| for q<>0 

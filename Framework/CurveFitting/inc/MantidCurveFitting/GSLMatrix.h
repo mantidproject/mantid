@@ -99,7 +99,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL GSLMatrix {
   /// The pointer to the GSL matrix
-  gsl_matrix *m_matrix;
+  //gsl_matrix *m_matrix;
+  /// Default element storage
+  std::vector<double> m_data;
+  /// The pointer to the GSL vector
+  gsl_matrix_view m_view;
 
 public:
   /// Constructor
@@ -124,9 +128,9 @@ public:
   GSLMatrix &operator=(const GSLMatrix &M);
 
   /// Get the pointer to the GSL matrix
-  gsl_matrix *gsl() { return m_matrix; }
+  gsl_matrix *gsl();
   /// Get the const pointer to the GSL matrix
-  const gsl_matrix *gsl() const { return m_matrix; }
+  const gsl_matrix *gsl() const;
 
   /// Is matrix empty
   bool isEmpty() const;
