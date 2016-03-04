@@ -219,33 +219,47 @@ public:
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
-        composite, indexArray, size, numberOfPeriods, numberOfSpectra,
-        numberOfChannels);
+        composite, indexArray, size, numberOfPeriods, numberOfChannels);
 
     // Assert
     auto intervals = composite.getIntervals();
     TSM_ASSERT_EQUALS("There should be 5 datablocks present", intervals.size(),
                       5);
+
     TSM_ASSERT_EQUALS("The min of the first data block should be 1", 1,
                       intervals[0].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the first data block should be 1", 1,
                       intervals[0].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
+                      intervals[0].getNumberOfSpectra());
+
     TSM_ASSERT_EQUALS("The min of the second data block should be 3", 3,
                       intervals[1].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the second data block should be 5", 5,
                       intervals[1].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("The number of spectra should be 3", 3,
+                      intervals[1].getNumberOfSpectra());
+
     TSM_ASSERT_EQUALS("The min of the third data block should be 8", 8,
                       intervals[2].getMinSpectrumID());
-    TSM_ASSERT_EQUALS("The max of the third data block should be 5", 11,
+    TSM_ASSERT_EQUALS("The max of the third data block should be 11", 11,
                       intervals[2].getMaxSpectrumID());
-    TSM_ASSERT_EQUALS("The min of the fourth data block should be 3", 16,
+    TSM_ASSERT_EQUALS("The number of spectra should be 4", 4,
+                      intervals[2].getNumberOfSpectra());
+
+    TSM_ASSERT_EQUALS("The min of the fourth data block should be 16", 16,
                       intervals[3].getMinSpectrumID());
-    TSM_ASSERT_EQUALS("The max of the fourth data block should be 5", 16,
+    TSM_ASSERT_EQUALS("The max of the fourth data block should be 16", 16,
                       intervals[3].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
+                      intervals[3].getNumberOfSpectra());
+
     TSM_ASSERT_EQUALS("The min of the fifth data block should be 3", 21,
                       intervals[4].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the fiffth data block should be 5", 22,
                       intervals[4].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("The number of spectra should be 2", 2,
+                      intervals[4].getNumberOfSpectra());
   }
 
   void
@@ -577,13 +591,104 @@ public:
     TSM_ASSERT_EQUALS("The max of the third data block should be 16", 16,
                       dataBlock[2].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The min of the third ata block should be 20", 20,
-      dataBlock[3].getMinSpectrumID());
+                      dataBlock[3].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the third data block should be 20", 20,
-      dataBlock[3].getMaxSpectrumID());
+                      dataBlock[3].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The min of the third ata block should be 23", 23,
-      dataBlock[4].getMinSpectrumID());
+                      dataBlock[4].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the third data block should be 24", 24,
-      dataBlock[4].getMaxSpectrumID());
+                      dataBlock[4].getMaxSpectrumID());
+  }
+
+  void test_that_truncation_of_interval_handles_correctly_scenario1() {
+    // Arrange
+    // Scenario:
+    // original   |------|     |------|
+    // truncation   |               |
+    // result       |----|     |----|
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 8;
+    int64_t max = 22;
+
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    auto dataBlocks = dataBlockComposite.getIntervals();
+    TSM_ASSERT_EQUALS("Should have one datablock", 2, dataBlocks.size());
+    TSM_ASSERT_EQUALS("Should have a minimum of 8", 8, dataBlocks[0].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16, dataBlocks[0].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a minimum of 20", 20, dataBlocks[1].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 22", 22, dataBlocks[1].getMaxSpectrumID());
+  }
+
+  void test_that_truncation_of_interval_handles_correctly_scenario2() {
+    // Arrange
+    // Scenario:
+    // original   |------|     |------|
+    // truncation |       |
+    // result     |------|
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+      std::make_pair(5, 16), std::make_pair(20, 26) };
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 5;
+    int64_t max = 18;
+
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    auto dataBlocks = dataBlockComposite.getIntervals();
+    TSM_ASSERT_EQUALS("Should have one datablock", 1, dataBlocks.size());
+    TSM_ASSERT_EQUALS("Should have a minimum of 5", 5, dataBlocks[0].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16, dataBlocks[0].getMaxSpectrumID());
+  }
+
+  void test_that_truncation_of_interval_handles_correctly_scenario3() {
+    // Arrange
+    // Scenario:
+    // original     |------|     |------|
+    // truncation |                       |
+    // result       |------|     |------|
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+      std::make_pair(5, 16), std::make_pair(20, 26) };
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    int64_t min = 4;
+    int64_t max =34;
+    auto dataBlockCompositeCopy = dataBlockComposite;
+    
+    // Act
+    dataBlockComposite.truncate(min, max);
+
+    // Assert
+    TSM_ASSERT("Should be equal", dataBlockComposite == dataBlockCompositeCopy);
+  }
+
+
+
+  void test_that_data_block_composites_are_equal() {
+    // Arrange
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+
+    // Act + Assert
+    TSM_ASSERT("Should be equal", dataBlockComposite == dataBlockComposite);
+  }
+
+  void test_that_data_block_composites_are_not_equal() {
+    // Arrange
+    std::vector<std::pair<int64_t, int64_t>> intervals = {
+        std::make_pair(5, 16), std::make_pair(20, 26)};
+    auto dataBlockComposite = getSampleDataBlockComposite(intervals);
+    std::vector<std::pair<int64_t, int64_t>> intervals2 = {
+        std::make_pair(5, 15), std::make_pair(20, 26)};
+    auto dataBlockComposite2 = getSampleDataBlockComposite(intervals2);
+
+    // Act + Assert
+    TSM_ASSERT("Should not be equal", !(dataBlockComposite == dataBlockComposite2));
   }
 
 private:

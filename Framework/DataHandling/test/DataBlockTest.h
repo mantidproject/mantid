@@ -36,6 +36,30 @@ public:
     TSM_ASSERT_EQUALS("Should have been incremented 7 times", index,
                       expected.size());
   }
+
+  void test_that_two_data_blocks_are_equal() {
+    // Arrange
+    DataBlock block1(1, 10, 3);
+    block1.setMinSpectrumID(5);
+    block1.setMaxSpectrumID(15);
+
+    // Act + Assert
+    TSM_ASSERT("Should be equal", block1 == block1);
+  }
+
+  void test_that_two_data_blocks_are_not_equal() {
+    // Arrange
+    DataBlock block1(1, 10, 3);
+    block1.setMinSpectrumID(5);
+    block1.setMaxSpectrumID(15);
+
+    DataBlock block2(2, 10, 3);
+    block2.setMinSpectrumID(5);
+    block2.setMaxSpectrumID(15);
+
+    // Act + Assert
+    TSM_ASSERT("Should not be equal", !(block1 == block2));
+  }
 };
 
 #endif /* MANTID_DATAHANDLING_DATABLOCKTEST_H_ */

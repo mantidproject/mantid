@@ -27,6 +27,8 @@ public:
   virtual int getNumberOfPeriods() const;
   virtual size_t getNumberOfChannels() const;
 
+  bool operator==(const DataBlock& other) const;
+
   virtual std::unique_ptr<DataBlockGenerator> getGenerator() const;
 
 protected:

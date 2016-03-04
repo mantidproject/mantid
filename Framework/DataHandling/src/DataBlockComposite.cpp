@@ -5,7 +5,7 @@
 
 namespace {
 
-  const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
+const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
 
 /**
  * Gets all removal intervals which have an overlap with the original interval.
@@ -64,10 +64,10 @@ void handleLeftHandSideOverlap(std::pair<int64_t, int64_t> &original,
 std::pair<int64_t, int64_t>
 handleRightHandSideOverlap(std::pair<int64_t, int64_t> &original,
                            const std::pair<int64_t, int64_t> &toRemove) {
-   auto newInterval = std::make_pair(original.first, toRemove.first - 1);
-   original.first = invalidIntervalValue;
-   original.second = invalidIntervalValue;
-   return newInterval;
+  auto newInterval = std::make_pair(original.first, toRemove.first - 1);
+  original.first = invalidIntervalValue;
+  original.second = invalidIntervalValue;
+  return newInterval;
 }
 
 /**
@@ -149,8 +149,10 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
       // In this case we should remove everything. At this point newIntervals
       // should still be empty, since the remove intervals should not be
       // overlapping
-      assert(newIntervals.empty() && "DataBlockComposite: The newIntervals container should be empty");
-      // Set the remainder of the original to invalid, such that we don't pick it up at the very end
+      assert(newIntervals.empty() &&
+             "DataBlockComposite: The newIntervals container should be empty");
+      // Set the remainder of the original to invalid, such that we don't pick
+      // it up at the very end
       original.first = invalidIntervalValue;
       original.second = invalidIntervalValue;
       break;
@@ -168,14 +170,29 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
     }
   }
 
-  // There might be some remainder in the original interval, e.g if there wasn't a full overlap removal
+  // There might be some remainder in the original interval, e.g if there wasn't
+  // a full overlap removal
   // or no righ-hand-side overlap of a removal interval
   if ((original.first != invalidIntervalValue) &&
-    (original.second != invalidIntervalValue)) {
+      (original.second != invalidIntervalValue)) {
     newIntervals.push_back(original);
   }
 
   return newIntervals;
+}
+
+/**
+ * Sorts a data block collection.
+ * TODO: create type trait to check for is iterable.
+ */
+template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
+  // Sort the intervals. We sort them by minimum value
+  using namespace Mantid::DataHandling;
+  auto comparison = [](const DataBlock &el1, const DataBlock &el2) {
+    return el1.getMinSpectrumID() < el2.getMinSpectrumID();
+  };
+  std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
+            comparison);
 }
 }
 
@@ -260,12 +277,91 @@ operator+(const DataBlockComposite &other) {
 
 std::vector<DataBlock> DataBlockComposite::getIntervals() {
   // Sort the intervals. We sort them by minimum value
-  auto comparison = [](const DataBlock &el1, const DataBlock &el2) {
-    return el1.getMinSpectrumID() < el2.getMinSpectrumID();
-  };
-  std::sort(m_dataBlocks.begin(), m_dataBlocks.end(), comparison);
+  sortDataBlocks(m_dataBlocks);
   return m_dataBlocks;
 }
+
+void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
+  sortDataBlocks(m_dataBlocks);
+  // Find the first data block which is not completely cut off by specMin
+  // original: |-----|      |--------|   |------|
+  // spec_min:         | or | or | or|
+  // result:                 this one
+  auto isNotCompletelyCutOffFromMin = [&specMin](DataBlock &block) {
+    return (specMin <= block.getMinSpectrumID()) ||
+           (specMin <= block.getMaxSpectrumID());
+  };
+
+  // Find the last data block which is not completely cut off by specMax
+  // original: |-----|      |--------|         |------|
+  // spec_min:              | or | or| or  |
+  // result:                 this one
+  auto isNotCompletelyCutOffFromMax = [&specMax](DataBlock &block) {
+    return (block.getMinSpectrumID() <= specMax) ||
+           (block.getMaxSpectrumID() <= specMax);
+  };
+
+  auto firstDataBlock = std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
+                                     isNotCompletelyCutOffFromMin);
+
+  // Note that we have to start from the back.
+  auto lastDataBlockReverseIterator =
+    std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(),
+      isNotCompletelyCutOffFromMax);
+  auto lastDataBlock = std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks), *lastDataBlockReverseIterator);
+
+  // Create datablocks
+  // Increment since we want to include the last data block
+  ++lastDataBlock;
+  std::vector<DataBlock> newDataBlocks(firstDataBlock, lastDataBlock);
+
+  // Adjust the spec_min and spec_max value. Only change the block if
+  // the it cuts the block.
+  if (newDataBlocks[0].getMinSpectrumID() < specMin) {
+    auto numberOfSpectra = newDataBlocks[0].getMaxSpectrumID() - specMin + 1;
+    DataBlock block(newDataBlocks[0].getNumberOfPeriods(), numberOfSpectra,
+                    newDataBlocks[0].getNumberOfChannels());
+    block.setMinSpectrumID(specMin);
+    block.setMaxSpectrumID(newDataBlocks[0].getMaxSpectrumID());
+    newDataBlocks[0] = block;
+  }
+
+  auto lastIndex = newDataBlocks.size() - 1;
+  if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()){
+    auto numberOfSpectra = specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
+    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(), numberOfSpectra,
+      newDataBlocks[lastIndex].getNumberOfChannels());
+    block.setMinSpectrumID(newDataBlocks[lastIndex].getMinSpectrumID());
+    block.setMaxSpectrumID(specMax);
+    newDataBlocks[lastIndex] = block;
+  }
+
+  m_dataBlocks.swap(newDataBlocks);
+}
+
+
+bool DataBlockComposite::operator==(const DataBlockComposite& other) const {
+  if (other.m_dataBlocks.size() != m_dataBlocks.size()) {
+    return false;
+  }
+
+  // Create a copy of the intervals, since the comparison operator should not have
+  // side effects!!!!! We need the vector sorted to compare though
+  auto otherDataBlocks = other.m_dataBlocks;
+  auto thisDataBlocks = m_dataBlocks;
+  sortDataBlocks(otherDataBlocks);
+  sortDataBlocks(thisDataBlocks);
+
+  auto isEqual = true;
+  auto itOther = otherDataBlocks.cbegin();
+  auto itThis = thisDataBlocks.cbegin();
+  for (; itOther != otherDataBlocks.cend(); ++itOther, ++itThis) {
+    isEqual = isEqual && *itOther == *itThis;
+  }
+  return isEqual;
+}
+
+
 
 /**
  * Removes the input data blocks from the current list of data blocks.

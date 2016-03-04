@@ -3,6 +3,7 @@
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DllConfig.h"
+#include <type_traits>
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,10 +22,14 @@ public:
 
   std::unique_ptr<DataBlockGenerator> getGenerator() const override;
 
+  bool operator==(const DataBlockComposite& other) const;
+
+  // DataBlockComposite only mehtods
   void addDataBlock(DataBlock dataBlock);
   std::vector<DataBlock> getIntervals();
   DataBlockComposite operator+(const DataBlockComposite&  other);
   void removeSpectra(DataBlockComposite& toRemove);
+  void truncate(int64_t specMin, int64_t specMax);
 
 private:
   std::vector<DataBlock> m_dataBlocks;
@@ -32,19 +37,21 @@ private:
 
 /**
 * Populates a DataBlockComposite with DataBlocks which are extracted from a
-* shared array.
+* indexable collection (array-type). Note that std::is_array does not
+* work on boost::shared_array which is one of the use cases. Hence this
+* function could get abused.
 * @param detBlockComposite: the detector block composite which will get
 * populated
 * @param indexContainer: the container of indices
 * @param nArray: the number of array elements
 * @param numberOfPeriods: the number of periods
 * @param numberOfChannels: the number of channels
-* @param numberOfSpectra: the number of spectra
 */
 template<typename T>
 void DLLExport populateDataBlockCompositeWithContainer(
   DataBlockComposite &dataBlockComposite, T &indexContainer,
-  int64_t nArray, int numberOfPeriods,  size_t numberOfSpectra, size_t numberOfChannels) {
+  int64_t nArray, int numberOfPeriods, size_t numberOfChannels) {
+
   // Find all intervals among the index array (this assumes that spectrum index
   // increases monotonically, else we would have to sort first)
   int64_t startValue = indexContainer[0];
@@ -54,6 +61,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
     auto isSequential = (indexContainer[arrayIndex] - previousValue) == 1;
     if (!isSequential) {
       // We must have completed an interval, we create a DataBlock and add it
+      auto numberOfSpectra = previousValue - startValue + 1;
       DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
       dataBlock.setMinSpectrumID(startValue);
       dataBlock.setMaxSpectrumID(previousValue);
@@ -68,6 +76,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
   }
 
   // The last interval would not have been added
+  auto numberOfSpectra = previousValue - startValue + 1;
   DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
   dataBlock.setMinSpectrumID(startValue);
   dataBlock.setMaxSpectrumID(previousValue);
