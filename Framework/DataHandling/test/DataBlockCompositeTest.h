@@ -87,7 +87,7 @@ public:
     dataBlockCompsite.addDataBlock(dataBlock3);
 
     // Act
-    auto dataBlocks = dataBlockCompsite.getIntervals();
+    auto dataBlocks = dataBlockCompsite.getDataBlocks();
 
     // Assert
     TSM_ASSERT_EQUALS("There should be three data blocks", 3,
@@ -187,7 +187,7 @@ public:
     auto dataBlockCompositeAdded = dataBlockCompsite1 + dataBlockCompsite2;
 
     // Assert
-    auto dataBlocks = dataBlockCompositeAdded.getIntervals();
+    auto dataBlocks = dataBlockCompositeAdded.getDataBlocks();
     size_t expectedNumberOfDataBlocks = 4;
     TSM_ASSERT_EQUALS("Should have 4 data blocks.", expectedNumberOfDataBlocks,
                       dataBlocks.size());
@@ -215,51 +215,50 @@ public:
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
-    size_t numberOfSpectra = 11;
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
         composite, indexArray, size, numberOfPeriods, numberOfChannels);
 
     // Assert
-    auto intervals = composite.getIntervals();
-    TSM_ASSERT_EQUALS("There should be 5 datablocks present", intervals.size(),
+    auto dataBlocks = composite.getDataBlocks();
+    TSM_ASSERT_EQUALS("There should be 5 datablocks present", dataBlocks.size(),
                       5);
 
     TSM_ASSERT_EQUALS("The min of the first data block should be 1", 1,
-                      intervals[0].getMinSpectrumID());
+      dataBlocks[0].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the first data block should be 1", 1,
-                      intervals[0].getMaxSpectrumID());
+      dataBlocks[0].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
-                      intervals[0].getNumberOfSpectra());
+      dataBlocks[0].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the second data block should be 3", 3,
-                      intervals[1].getMinSpectrumID());
+      dataBlocks[1].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the second data block should be 5", 5,
-                      intervals[1].getMaxSpectrumID());
+      dataBlocks[1].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 3", 3,
-                      intervals[1].getNumberOfSpectra());
+      dataBlocks[1].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the third data block should be 8", 8,
-                      intervals[2].getMinSpectrumID());
+      dataBlocks[2].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the third data block should be 11", 11,
-                      intervals[2].getMaxSpectrumID());
+      dataBlocks[2].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 4", 4,
-                      intervals[2].getNumberOfSpectra());
+      dataBlocks[2].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the fourth data block should be 16", 16,
-                      intervals[3].getMinSpectrumID());
+      dataBlocks[3].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the fourth data block should be 16", 16,
-                      intervals[3].getMaxSpectrumID());
+      dataBlocks[3].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
-                      intervals[3].getNumberOfSpectra());
+      dataBlocks[3].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the fifth data block should be 3", 21,
-                      intervals[4].getMinSpectrumID());
+      dataBlocks[4].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the fiffth data block should be 5", 22,
-                      intervals[4].getMaxSpectrumID());
+      dataBlocks[4].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 2", 2,
-                      intervals[4].getNumberOfSpectra());
+      dataBlocks[4].getNumberOfSpectra());
   }
 
   void
@@ -280,8 +279,8 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeForRemoval);
 
     // Assert
-    auto original = copiedDataBlockComposite.getIntervals();
-    auto newDataBlocks = dataBlockComposite.getIntervals();
+    auto original = copiedDataBlockComposite.getDataBlocks();
+    auto newDataBlocks = dataBlockComposite.getDataBlocks();
 
     TSM_ASSERT_EQUALS("SHould have the same number of data blocks",
                       original.size(), newDataBlocks.size());
@@ -318,7 +317,7 @@ public:
     // Act
     dataBlockComposite.removeSpectra(dataBlockCompositeForRemoval);
     // Assert
-    auto newDataBlocks = dataBlockComposite.getIntervals();
+    auto newDataBlocks = dataBlockComposite.getDataBlocks();
 
     // TSM_ASSERT("There should be no data blocks.", newDataBlocks.empty());
   }
@@ -340,7 +339,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 8", 8,
                       dataBlock[0].getMinSpectrumID());
@@ -365,7 +364,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 6", 6,
                       dataBlock[0].getMinSpectrumID());
@@ -390,7 +389,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 5", 5,
                       dataBlock[0].getMinSpectrumID());
@@ -415,7 +414,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 5", 5,
                       dataBlock[0].getMinSpectrumID());
@@ -440,7 +439,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have two data block", 2, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 5", 5,
                       dataBlock[0].getMinSpectrumID());
@@ -469,7 +468,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 10", 10,
                       dataBlock[0].getMinSpectrumID());
@@ -494,7 +493,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have a single data block", 1, dataBlock.size());
     TSM_ASSERT_EQUALS("Should have a min of 5", 5,
                       dataBlock[0].getMinSpectrumID());
@@ -519,7 +518,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT("Should have no data blocks", dataBlock.empty());
   }
 
@@ -541,7 +540,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have three data blocks", 3, dataBlock.size());
     TSM_ASSERT_EQUALS("The min of the first ata block should be 8", 8,
                       dataBlock[0].getMinSpectrumID());
@@ -576,7 +575,7 @@ public:
     dataBlockComposite.removeSpectra(dataBlockCompositeRemoval);
 
     // Assert
-    auto dataBlock = dataBlockComposite.getIntervals();
+    auto dataBlock = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have three data blocks", 5, dataBlock.size());
     TSM_ASSERT_EQUALS("The min of the first ata block should be 8", 8,
                       dataBlock[0].getMinSpectrumID());
@@ -616,7 +615,7 @@ public:
     dataBlockComposite.truncate(min, max);
 
     // Assert
-    auto dataBlocks = dataBlockComposite.getIntervals();
+    auto dataBlocks = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have one datablock", 2, dataBlocks.size());
     TSM_ASSERT_EQUALS("Should have a minimum of 8", 8,
                       dataBlocks[0].getMinSpectrumID());
@@ -644,7 +643,7 @@ public:
     dataBlockComposite.truncate(min, max);
 
     // Assert
-    auto dataBlocks = dataBlockComposite.getIntervals();
+    auto dataBlocks = dataBlockComposite.getDataBlocks();
     TSM_ASSERT_EQUALS("Should have one datablock", 1, dataBlocks.size());
     TSM_ASSERT_EQUALS("Should have a minimum of 5", 5,
                       dataBlocks[0].getMinSpectrumID());

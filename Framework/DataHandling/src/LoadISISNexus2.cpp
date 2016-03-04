@@ -666,7 +666,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
   // put in the spectra range, possibly breaking it into parts by monitors
 
   // Setup the SpectraBlocks based on the DataBlocks
-  auto dataBlocks = LoadBlock.getIntervals();
+  auto dataBlocks = LoadBlock.getDataBlocks();
   auto isMonitor = [&monitors](int64_t spectrumIndex) {
     return monitors.find(spectrumIndex) != monitors.end();
   };

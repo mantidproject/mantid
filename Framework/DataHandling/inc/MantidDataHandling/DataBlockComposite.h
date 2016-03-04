@@ -3,11 +3,36 @@
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DllConfig.h"
-#include <type_traits>
 
 namespace Mantid {
 namespace DataHandling {
 
+  /** DataBlockComposite: The DataBlockComposite handles a collection
+      of DataBlocks. It represents a set of contiguous spectrum numbers
+      which are to be consumed elsewhere.
+
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at:
+  <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+  */
 class DLLExport DataBlockComposite : public DataBlock {
 public:
   int64_t getMinSpectrumID() const override;
@@ -26,7 +51,7 @@ public:
 
   // DataBlockComposite only mehtods
   void addDataBlock(DataBlock dataBlock);
-  std::vector<DataBlock> getIntervals();
+  std::vector<DataBlock> getDataBlocks();
   DataBlockComposite operator+(const DataBlockComposite &other);
   void removeSpectra(DataBlockComposite &toRemove);
   void truncate(int64_t specMin, int64_t specMax);
@@ -40,7 +65,7 @@ private:
 * indexable collection (array-type). Note that std::is_array does not
 * work on boost::shared_array which is one of the use cases. Hence this
 * function could get abused.
-* @param detBlockComposite: the detector block composite which will get
+* @param dataBlockComposite: the detector block composite which will get
 * populated
 * @param indexContainer: the container of indices
 * @param nArray: the number of array elements
@@ -83,9 +108,8 @@ populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
   dataBlock.setMinSpectrumID(startValue);
   dataBlock.setMaxSpectrumID(previousValue);
   dataBlockComposite.addDataBlock(dataBlock);
-};
-// boost::shared_array<int>
-}
 }
 
+}
+}
 #endif

@@ -183,7 +183,6 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
 
 /**
  * Sorts a data block collection.
- * TODO: create type trait to check for is iterable.
  */
 template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
   // Sort the intervals. We sort them by minimum value
@@ -275,7 +274,7 @@ operator+(const DataBlockComposite &other) {
   return output;
 }
 
-std::vector<DataBlock> DataBlockComposite::getIntervals() {
+std::vector<DataBlock> DataBlockComposite::getDataBlocks() {
   // Sort the intervals. We sort them by minimum value
   sortDataBlocks(m_dataBlocks);
   return m_dataBlocks;
@@ -382,7 +381,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   }
 
   // Get intervals for the data blocks which should be removed
-  auto removeBlocks = toRemove.getIntervals();
+  auto removeBlocks = toRemove.getDataBlocks();
   std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
   for (auto &dataBlock : removeBlocks) {
     toRemoveIntervals.emplace_back(std::make_pair(
@@ -406,7 +405,6 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   // Create a new set of data blocks
   auto numberOfPeriods = m_dataBlocks[0].getNumberOfPeriods();
   auto numberOfChannels = m_dataBlocks[0].getNumberOfChannels();
-  auto numberOfSpectra = m_dataBlocks[0].getNumberOfSpectra();
 
   m_dataBlocks.clear();
   for (auto &newInterval : newIntervals) {

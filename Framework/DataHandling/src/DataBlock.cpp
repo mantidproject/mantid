@@ -10,7 +10,7 @@ namespace DataHandling {
 // indices can have.
 
 DataBlock::DataBlock()
-    : m_numberOfPeriods(0), m_numberOfChannels(0), m_numberOfSpectra(0),
+    : m_numberOfPeriods(0),  m_numberOfSpectra(0), m_numberOfChannels(0),
       m_minSpectraID(std::numeric_limits<int64_t>::max()), m_maxSpectraID(0) {}
 
 DataBlock::DataBlock(const Mantid::NeXus::NXInt &data)
