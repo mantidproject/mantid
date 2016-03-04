@@ -293,7 +293,7 @@ public:
     double ll_sample_r = sample.distance(ll_det_pos);
     TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
 
-    size_t lu_ws_index = 255*256; // row = 255, col = 1
+    size_t lu_ws_index = 255 * 256; // row = 255, col = 1
     Kernel::V3D lu_det_pos = outws->getDetector(lu_ws_index)->getPos();
     double lu_sample_r = sample.distance(lu_det_pos);
     TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
@@ -303,90 +303,103 @@ public:
 
     TS_ASSERT(ll_det_pos.X() > center_det_pos.X());
 
-    /*
-    Kernel::V3D det0pos = outws->getDetector(0)->getPos();
-    Kernel::V3D det255pos = outws->getDetector(255)->getPos();
-    Kernel::V3D detlast0 = outws->getDetector(256 * 255)->getPos();
-    Kernel::V3D detlast = outws->getDetector(256 * 256 - 1)->getPos();
-    Kernel::V3D detmiddle =
-        outws->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
-    Kernel::V3D detedgemiddle = outws->getDetector(256 * 256 / 2)->getPos();
-    std::cout << "\n";
-    std::cout << "Sample position: " << sample.X() << ", " << sample.Y() << ", "
-              << sample.Z() << "\n";
-    std::cout << "Source position: " << source.X() << ", " << source.Y() << ", "
-              << source.Z() << "\n";
-    std::cout << "Det Edge Middle: " << detedgemiddle.X() << ", "
-              << detedgemiddle.Y() << ", " << detedgemiddle.Z() << "\n";
-    std::cout << "Det (1, 1)     : " << det0pos.X() << ", " << det0pos.Y()
-              << ", " << det0pos.Z() << "\n";
-
-    // center of the detector must be negative
-    TS_ASSERT_LESS_THAN(detmiddle.X(), 0.0);
-
-    // detector distance
-    double dist0 = sample.distance(det0pos);
-    double dist255 = sample.distance(det255pos);
-    double distlast = sample.distance(detlast);
-    double distlast0 = sample.distance(detlast0);
-    double distmiddle = sample.distance(detmiddle);
-
-    TS_ASSERT_DELTA(dist0, dist255, 0.0001);
-    TS_ASSERT_DELTA(dist0, distlast, 0.0001);
-    TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
-    TS_ASSERT_DELTA(distmiddle, 0.3518, 0.000001);
-
-    // 2theta value
-    Kernel::V3D sample_source = sample - source;
-    std::cout << "Sample - Source = " << sample_source.X() << ", "
-              << sample_source.Y() << ", " << sample_source.Z() << "\n";
-
-    Kernel::V3D detmid_sample = detmiddle - sample;
-    double twotheta_middle =
-        detmid_sample.angle(sample_source) * 180. / 3.1415926;
-    TS_ASSERT_DELTA(twotheta_middle, 42.70975, 0.02);
-    */
-
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038C");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Test of loading HB3A data with calibrated distance
+   * scan table
+   *  such that it can be set to zero-2-theta position
    * @brief test_loadHB3ACalibratedDetDistance
+   * Testing include
+   * 1. 2theta = 15 degree: scattering angle of all 4 corners should be same;
    */
-  void Ntest_loadHB3ACalibratedDetDistance() {
-    // Test 2theta = 15 degree
+  void test_loadHB3ACalibratedDetDistance() {
+    // Test 2theta at 15 degree with sample-detector distance shift
     LoadSpiceXML2DDet loader;
     loader.initialize();
 
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038D"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
-    // shift detector distance from 0.3518 to 0.3350
-    loader.setProperty("ShiftedDetectorDistance", 0.0);
+    loader.setProperty("SpiceTableWorkspace", scantablews);
+    loader.setProperty("PtNumber", 1);
+    loader.setProperty("ShiftedDetectorDistance", 0.1);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
 
     // Get data
     MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038D"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
+
+    // get source and sample positions
+    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
+
+    // check center of the detector @ (128, 115)
+    size_t center_col = 128;
+    size_t center_row = 115;
+    size_t center_ws_index = (center_row - 1) * 256 + (center_col - 1);
+    Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
+    // distance to sample
+    double dist_r = center_det_pos.distance(sample);
+    TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
+    // center of the detector at 15 degree
+    double sample_center_angle =
+        (sample - source).angle(center_det_pos - sample);
+    TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, 15., 0.0001);
+
+    // test the detectors with symmetric to each other
+    // they should have opposite X or Y
+
+    // ll: low-left, lr: low-right, ul: upper-left; ur: upper-right
+    size_t row_ll = 0;
+    size_t col_ll = 2;
+    size_t ws_index_ll = row_ll * 256 + col_ll;
+    Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
+
+    size_t row_lr = 0;
+    size_t col_lr = 2 * 127 - 2;
+    size_t ws_index_lr = row_lr * 256 + col_lr;
+    Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
+
+    size_t row_ul = 114 * 2;
+    size_t col_ul = 2;
+    size_t ws_index_ul = row_ul * 256 + col_ul;
+    Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
+
+    size_t row_ur = 114 * 2;
+    size_t col_ur = 2 * 127 - 2;
+    size_t ws_index_ur = row_ur * 256 + col_ur;
+    Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
+
+    // Check symmetry
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_lr_pos),
+                    0.0000001);
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ul_pos),
+                    0.0000001);
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ur_pos),
+                    0.0000001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038D");
   }
 
   /** Create SPICE scan table workspace

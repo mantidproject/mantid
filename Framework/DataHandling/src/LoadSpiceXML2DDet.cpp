@@ -264,8 +264,8 @@ void LoadSpiceXML2DDet::processInputs() {
 
 //----------------------------------------------------------------------------------------------
 /** Set up sample logs especially 2theta and diffr for loading instrument
- * @brief LoadSpiceXML2DDet::Set up sample logs to output workspace
- * @param outws
+ * @brief LoadSpiceXML2DDet::setupSampleLogs
+ * @param outws :: workspace to have sample logs to set up
  * @return
  */
 bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
@@ -342,9 +342,7 @@ void LoadSpiceXML2DDet::exec() {
 /** Parse SPICE XML file for one Pt./measurement
  * @brief LoadSpiceXML2DDet::parseSpiceXML
  * @param xmlfilename :: name of the XML file to parse
- * @return vecspicenode :: [output] vector of SpiceXMLNode containing
- * information
- * in XML file
+ * @return vector of SpiceXMLNode containing information in XML file
  */
 std::vector<SpiceXMLNode>
 LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
@@ -696,6 +694,12 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
   return haswavelength;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Set x axis to momentum (lab frame Q)
+ * @brief LoadSpiceXML2DDet::setXtoLabQ
+ * @param dataws
+ * @param wavelength
+ */
 void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
                                    const double &wavelength) {
 

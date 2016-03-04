@@ -111,26 +111,27 @@ private:
   /// Get wavelength from workspace
   bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
 
+  /// Set output workspace's X-axs as lab-frame Q space
   void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
 
-  // Class variables
-  // SPICE detector XML file
+  /// SPICE detector XML file
   std::string m_detXMLFileName;
-  // XML node name in detector counts file
+  /// XML node name in detector counts file
   std::string m_detXMLNodeName;
-  //
+  /// Pixel size at X direction
   size_t m_numPixelX;
+  /// Pixel size at Y direction
   size_t m_numPixelY;
-  //
+  /// Flag to show whether instrument is required to load
   bool m_loadInstrument;
-
-  // shift distance from sample to detector center
+  /// shift distance from sample to detector center
   double m_detSampleDistanceShift;
-  //
+  /// Flag to show whether the SPICE scan table workspace is given
   bool m_hasScanTable;
-  ///
+  /// Pt number for the sample logs to load with presense of Spice scan table
+  /// workspace
   int m_ptNumber4Log;
-  ///
+  /// IDF file name to override Mantid's
   std::string m_idfFileName;
 };
 
