@@ -385,7 +385,7 @@ def writeTestDescription( output, suite, test ):
     if not options.noStaticInit:
         output.write( ' %s() : CxxTest::RealTestDescription( %s, %s, %s, "%s" ) {}\n' %
                       (test['class'], suite['tlist'], suite['dobject'], test['line'], test['name']) )
-    output.write( ' void runTest() final { %s }\n' % runBody( suite, test ) )
+    output.write( ' void runTest() override final { %s }\n' % runBody( suite, test ) )
     output.write( '} %s;\n\n' % test['object'] )
 
 def runBody( suite, test ):
