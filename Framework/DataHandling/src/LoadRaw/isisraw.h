@@ -79,6 +79,8 @@ struct RPB_STRUCT {
   int r_prop;         ///< RB (proposal) number
   int spare[10];      ///< to pad out to 32*4 bytes
                       /// constructor
+
+  // cppcheck-suppress memsetClassFloat
   RPB_STRUCT() { memset(this, 0, sizeof(RPB_STRUCT)); }
 };
 
@@ -121,6 +123,7 @@ struct IVPB_STRUCT {
   float i_aofi;       ///< angle of incidence (CRISP)
   int spare[29];      ///< to pad out to 64*4 bytes
                       /// constructor
+  // cppcheck-suppress memsetClassFloat
   IVPB_STRUCT() { memset(this, 0, sizeof(IVPB_STRUCT)); }
 };
 
@@ -150,6 +153,7 @@ struct SPB_STRUCT {
   int e_eqname;      ///< dunno
   int spare[33];     ///< to bring up to 64*4 bytes
                      /// constructor
+  // cppcheck-suppress memsetClassFloat
   SPB_STRUCT() { memset(this, 0, sizeof(SPB_STRUCT)); }
 };
 
@@ -175,6 +179,7 @@ struct SE_STRUCT {
   int sep_pre_proc;     ///< pre process routine number
   int sep_cam_vals[12]; ///< camac values
                         /// constructor
+  // cppcheck-suppress memsetClassFloat
   SE_STRUCT() { memset(this, 0, sizeof(SE_STRUCT)); }
 };
 
@@ -228,6 +233,7 @@ struct DHDR_STRUCT {
   int unused[26];     ///< to bring size to 32*4 bytes
   /// constructor
   DHDR_STRUCT() {
+    // cppcheck-suppress memsetClassFloat
     memset(this, 0, sizeof(DHDR_STRUCT));
     d_comp = 1;
     d_offset = 1 + 32;
