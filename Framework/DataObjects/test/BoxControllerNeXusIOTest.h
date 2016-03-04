@@ -29,7 +29,7 @@ public:
     xxfFileName = "BoxCntrlNexusIOxxfFile.nxs";
   }
 
-  void setUp() {
+  void setUp() override {
     std::string FullPathFile =
         Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
     if (!FullPathFile.empty())

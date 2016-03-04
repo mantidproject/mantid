@@ -31,10 +31,10 @@ public:
     M = Kernel::Matrix<double>(nparams, npoints);
   }
 
-  virtual ~Jacob() {}
-  void set(size_t iY, size_t iP, double value) { M[iP][iY] = value; }
+  ~Jacob() override {}
+  void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
 
-  double get(size_t iY, size_t iP) { return M[iP][iY]; }
+  double get(size_t iY, size_t iP) override { return M[iP][iY]; }
 };
 
 class PeakHKLErrorsTest : public CxxTest::TestSuite {

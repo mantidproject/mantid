@@ -19,10 +19,10 @@ private:
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(isValid, bool());
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunctionParameter() {}
+    ~MockImplicitFunctionParameter() override {}
 
   protected:
-    virtual ImplicitFunctionParameter *clone() const {
+    ImplicitFunctionParameter *clone() const override {
       return new MockImplicitFunctionParameter;
     }
   };
@@ -31,23 +31,23 @@ private:
   class MockImplicitFunctionParameterParserA
       : public Mantid::API::ImplicitFunctionParameterParser {
   public:
-    virtual Mantid::API::ImplicitFunctionParameter *
-    createParameter(Poco::XML::Element *) {
+    Mantid::API::ImplicitFunctionParameter *
+    createParameter(Poco::XML::Element *) override {
       return new MockImplicitFunctionParameter;
     }
-    virtual void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParameterParser *) override {}
   };
 
   class MockImplicitFunctionParameterParserB
       : public Mantid::API::ImplicitFunctionParameterParser {
   public:
-    virtual Mantid::API::ImplicitFunctionParameter *
-    createParameter(Poco::XML::Element *) {
+    Mantid::API::ImplicitFunctionParameter *
+    createParameter(Poco::XML::Element *) override {
       return new MockImplicitFunctionParameter;
     }
-    virtual void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParameterParser *) override {}
   };
 
 public:

@@ -26,12 +26,12 @@ class SlicingAlgorithmImpl : public SlicingAlgorithm {
   friend class SlicingAlgorithmTest;
 
 public:
-  virtual const std::string name() const { return "SlicingAlgorithmImpl"; }
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "Testing"; }
-  virtual const std::string summary() const { return "Summary of this test."; }
-  void init() {}
-  void exec() {}
+  const std::string name() const override { return "SlicingAlgorithmImpl"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Testing"; }
+  const std::string summary() const override { return "Summary of this test."; }
+  void init() override {}
+  void exec() override {}
 };
 
 //------------------------------------------------------------------------------------------------

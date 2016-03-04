@@ -71,82 +71,88 @@ public:
   /// Default Constructor
   TomographyIfaceViewQtGUI(QWidget *parent = 0);
   /// Destructor
-  virtual ~TomographyIfaceViewQtGUI();
+  ~TomographyIfaceViewQtGUI() override;
 
   /// Interface name
   static std::string name() { return "Tomographic Reconstruction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
-  void userWarning(const std::string &warn, const std::string &description);
+  void userWarning(const std::string &warn,
+                   const std::string &description) override;
 
-  void userError(const std::string &err, const std::string &description);
+  void userError(const std::string &err,
+                 const std::string &description) override;
 
-  std::vector<std::string> logMsgs() const { return m_logMsgs; }
+  std::vector<std::string> logMsgs() const override { return m_logMsgs; }
 
   void setComputeResources(const std::vector<std::string> &resources,
-                           const std::vector<bool> &enabled);
+                           const std::vector<bool> &enabled) override;
 
   void setReconstructionTools(const std::vector<std::string> &tools,
-                              const std::vector<bool> &enabled);
+                              const std::vector<bool> &enabled) override;
 
-  std::string getUsername() const;
+  std::string getUsername() const override;
 
-  std::string getPassword() const;
+  std::string getPassword() const override;
 
-  std::string externalInterpreterPath() const {
+  std::string externalInterpreterPath() const override {
     return m_localExternalPythonPath;
   }
 
-  std::string pathLocalReconScripts() const { return m_setupPathReconScripts; };
+  std::string pathLocalReconScripts() const override {
+    return m_setupPathReconScripts;
+  };
 
-  std::string astraMethod() const { return m_astraMethod; }
+  std::string astraMethod() const override { return m_astraMethod; }
 
-  std::string tomopyMethod() const { return m_tomopyMethod; }
+  std::string tomopyMethod() const override { return m_tomopyMethod; }
 
-  void updateLoginControls(bool loggedIn);
+  void updateLoginControls(bool loggedIn) override;
 
-  void enableLoggedActions(bool enable);
+  void enableLoggedActions(bool enable) override;
 
   /// possible for the user to define the configuration of a tool
-  void enableConfigTool(bool on);
+  void enableConfigTool(bool on) override;
 
   /// possible for the user to run / submit a job
-  void enableRunReconstruct(bool on);
+  void enableRunReconstruct(bool on) override;
 
   void updateCompResourceStatus(bool online);
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus);
+          &localStatus) override;
 
-  std::vector<std::string> processingJobsIDs() const {
+  std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
   }
 
   /// Get the current reconstruction tools settings set by the user
-  TomoReconToolsUserSettings reconToolsSettings() const {
+  TomoReconToolsUserSettings reconToolsSettings() const override {
     return m_toolsSettings;
   }
 
-  TomoReconFiltersSettings prePostProcSettings() const;
+  TomoReconFiltersSettings prePostProcSettings() const override;
 
-  std::string currentComputeResource() const { return m_currentComputeRes; }
-  std::string currentReconTool() const { return m_currentReconTool; }
+  std::string currentComputeResource() const override {
+    return m_currentComputeRes;
+  }
+  std::string currentReconTool() const override { return m_currentReconTool; }
 
   /// get the path to the image that the user has requested to visualize
   std::string visImagePath() const;
 
-  std::string showImagePath() const { return m_imgPath; }
-  void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg);
-  void showImage(const std::string &path);
+  std::string showImagePath() const override { return m_imgPath; }
+  void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) override;
+  void showImage(const std::string &path) override;
 
-  int keepAlivePeriod() { return m_settings.useKeepAlive; }
+  int keepAlivePeriod() override { return m_settings.useKeepAlive; }
 
-  TomoPathsConfig currentPathsConfig() const { return m_pathsConfig; }
+  TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
 
-  ImageStackPreParams currentROIEtcParams() const {
+  ImageStackPreParams currentROIEtcParams() const override {
     return m_tabROIW->userSelection();
   }
 
@@ -223,7 +229,7 @@ private:
 
 private:
   /// Setup the interface (tab UI)
-  virtual void initLayout();
+  void initLayout() override;
 
   void doSetupSectionSetup();
   void doSetupSectionRun();
@@ -239,11 +245,11 @@ private:
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
   /// save settings (before closing)
-  void saveSettings() const;
+  void saveSettings() const override;
 
-  void showToolConfig(const std::string &name);
+  void showToolConfig(const std::string &name) override;
 
-  virtual void closeEvent(QCloseEvent *ev);
+  void closeEvent(QCloseEvent *ev) override;
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 

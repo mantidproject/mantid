@@ -15,7 +15,7 @@ class FirstTimeSetup : public QDialog
 
 public:
   explicit FirstTimeSetup(QWidget *parent = 0);
-  ~FirstTimeSetup();
+  ~FirstTimeSetup() override;
 
 private:
   void initLayout();

@@ -30,13 +30,13 @@ public:
                                                // initialized
   }
 
-  void setUp() {
+  void setUp() override {
     m_view.reset(new testing::NiceMock<MockTomographyIfaceView>());
     m_presenter.reset(
         new MantidQt::CustomInterfaces::TomographyIfacePresenter(m_view.get()));
   }
 
-  void tearDown() {
+  void tearDown() override {
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 

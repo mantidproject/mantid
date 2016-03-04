@@ -27,7 +27,7 @@ using namespace Mantid::CurveFitting::Functions;
 
 class DiffSphereTest : public CxxTest::TestSuite {
 public:
-  bool skipTests() {
+  bool skipTests() override {
     // Skip this test suite if running under valgrind as the Bessel function
     // calls in DiffSphere sometimes return NaN in this situation.
     // It's something to do with boost using 80 bit precision where valgrind

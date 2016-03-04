@@ -12,6 +12,7 @@ elseif(CMAKE_COMPILER_IS_GNUCXX AND GMOCK_VERSION VERSION_GREATER "1.6.0")
   # A little bit brutal but cmake doesn't provide a way to remove a compile
   # flag from a single source file
   string(REPLACE "-Wconversion" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "-Wsuggest-override" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")

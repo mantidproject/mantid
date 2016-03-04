@@ -15,7 +15,7 @@ using Mantid::Kernel::ConfigService;
 
 class FilePropertyTest : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     // Ensure we have the correct facility set up
     const std::string xmlStr =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"

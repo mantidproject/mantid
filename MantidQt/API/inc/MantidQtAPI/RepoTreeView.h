@@ -40,14 +40,15 @@ namespace API
     // constuctor 
     RepoTreeView(QWidget * parent=0):QTreeView(parent){};
     // destructor - not virtual, because this is not intended to be base
-    virtual ~RepoTreeView(){};
+    ~RepoTreeView() override{};
 
   signals:
     void currentCell(const QModelIndex& ); 
   
   protected slots:
 
-    void 	currentChanged ( const QModelIndex & current, const QModelIndex & previous ){
+    void currentChanged(const QModelIndex &current,
+                        const QModelIndex &previous) override {
       QTreeView::currentChanged(current,previous); 
       emit currentCell(current);
     };

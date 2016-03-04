@@ -41,8 +41,8 @@ using namespace Mantid::DataHandling;
 // Algorithm to force Gaussian1D to be run by simplex algorithm
 class SimplexGaussian : public Gaussian {
 public:
-  virtual ~SimplexGaussian() {}
-  std::string name() const { return "SimplexGaussian"; }
+  ~SimplexGaussian() override {}
+  std::string name() const override { return "SimplexGaussian"; }
 
 protected:
   void functionDerivMW(Jacobian *out, const double *xValues,

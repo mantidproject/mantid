@@ -88,7 +88,7 @@ public:
   }
 
   // Run the task
-  void run() {
+  void run() override {
     if (depth < 4) {
       // Add ten tasks (one level deeper)
       for (size_t i = 0; i < 10; i++) {
@@ -154,7 +154,7 @@ public:
                    ThreadPoolTest *myParent)
         : ProgressBase(start, end, numSteps), parent(myParent) {}
 
-    void doReport(const std::string &msg = "") {
+    void doReport(const std::string &msg = "") override {
       parent->last_report_message = msg;
       parent->last_report_counter = m_i;
       double p = m_start + m_step * double(m_i - m_ifirst);
@@ -409,7 +409,7 @@ public:
   //=======================================================================================
   /** Task that throws an exception */
   class TaskThatThrows : public Task {
-    void run() {
+    void run() override {
       ThreadPoolTest_TaskThatThrows_counter++;
       throw Mantid::Kernel::Exception::NotImplementedError(
           "Test exception from TaskThatThrows.");

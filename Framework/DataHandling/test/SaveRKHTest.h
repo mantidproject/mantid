@@ -21,7 +21,7 @@ public:
   /// Constructor
   SaveRKHTest() : outputFile("SAVERKH.out") {}
 
-  ~SaveRKHTest() {
+  ~SaveRKHTest() override {
     // Remove the file
     if (Poco::File(outputFile).exists()) {
       Poco::File(outputFile).remove();

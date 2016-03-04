@@ -64,7 +64,7 @@ public:
                     SpectrumView::GraphDisplay* hGraphDisplay,
                     SpectrumView::GraphDisplay* vGraphDisplay );
 
-  ~RefIVConnections();
+  ~RefIVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
   void showColorScale( std::vector<QRgb> & positiveColorTable,

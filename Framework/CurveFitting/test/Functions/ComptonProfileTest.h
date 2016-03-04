@@ -47,16 +47,16 @@ public:
 
 private:
   struct FakeComptonProfile : ComptonProfile {
-    std::string name() const { return "FakeComptonProfile"; }
-    std::vector<size_t> intensityParameterIndices() const {
+    std::string name() const override { return "FakeComptonProfile"; }
+    std::vector<size_t> intensityParameterIndices() const override {
       return std::vector<size_t>();
     }
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &, const size_t,
-                                const std::vector<double> &) const {
+                                const std::vector<double> &) const override {
       return 0;
     }
 
-    void massProfile(double *, const size_t) const {}
+    void massProfile(double *, const size_t) const override {}
   };
 
   Mantid::API::IFunction_sptr createFunction() {
