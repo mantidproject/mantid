@@ -144,6 +144,10 @@ public:
   void set(size_t i, size_t j, double value);
   /// Get an element
   double get(size_t i, size_t j) const;
+  /// The "index" operator
+  double operator()(size_t i, size_t j) const;
+  /// Get the reference to the data element
+  double& operator()(size_t i, size_t j);
 
   /// Set this matrix to identity matrix
   void identity();
@@ -259,6 +263,19 @@ inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
   ostr.flags(fflags);
   return ostr;
 }
+
+/// The "index" operator
+inline double GSLMatrix::operator()(size_t i, size_t j) const {
+  return const_cast<GSLMatrix&>(*this)(i,j);
+}
+
+/// Get the reference to the data element
+inline double& GSLMatrix::operator()(size_t i, size_t j) {
+  // This is how it works according to the GSL docs
+  // https://www.gnu.org/software/gsl/manual/html_node/Matrix-views.html
+  return m_data[i*m_view.matrix.size2 + j];
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid

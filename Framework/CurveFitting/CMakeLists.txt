@@ -20,12 +20,15 @@ set ( SRC_FILES
 	src/Algorithms/SplineInterpolation.cpp
 	src/Algorithms/SplineSmoothing.cpp
 	src/AugmentedLagrangianOptimizer.cpp
+	src/ComplexMatrix.cpp
+	src/ComplexVector.cpp
 	src/Constraints/BoundaryConstraint.cpp
 	src/CostFunctions/CostFuncFitting.cpp
 	src/CostFunctions/CostFuncLeastSquares.cpp
 	src/CostFunctions/CostFuncRwp.cpp
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
+	src/FortranMatrix.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
 	src/FuncMinimizers/DampingMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
@@ -101,8 +104,6 @@ set ( SRC_FILES
 	src/Functions/UserFunction1D.cpp
 	src/Functions/VesuvioResolution.cpp
 	src/Functions/Voigt.cpp
-	src/ComplexMatrix.cpp
-	src/ComplexVector.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
@@ -142,6 +143,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/SplineInterpolation.h
 	inc/MantidCurveFitting/Algorithms/SplineSmoothing.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
+	inc/MantidCurveFitting/ComplexMatrix.h
+	inc/MantidCurveFitting/ComplexVector.h
 	inc/MantidCurveFitting/Constraints/BoundaryConstraint.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
@@ -149,6 +152,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/FitMW.h
+	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
@@ -224,8 +228,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
-	inc/MantidCurveFitting/ComplexMatrix.h
-	inc/MantidCurveFitting/ComplexVector.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -269,11 +271,14 @@ set ( TEST_FILES
 	Algorithms/SplineInterpolationTest.h
 	Algorithms/SplineSmoothingTest.h
 	AugmentedLagrangianOptimizerTest.h
+	ComplexMatrixTest.h
+	ComplexVectorTest.h
 	CompositeFunctionTest.h
 	Constraints/BoundaryConstraintTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
 	FitMWTest.h
+	FortranMatrixTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampingMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
@@ -347,8 +352,6 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
-	ComplexMatrixTest.h
-	ComplexVectorTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	IPeakFunctionCentreParameterNameTest.h
