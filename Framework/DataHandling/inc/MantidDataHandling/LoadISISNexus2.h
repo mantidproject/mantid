@@ -112,7 +112,7 @@ private:
   // Validate the optional input properties
   void checkOptionalProperties();
 
-  /// Prepare a vector of SpectraBlock structures to sifmplify loading
+  /// Prepare a vector of SpectraBlock structures to simplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
                        const std::map<int64_t, specnum_t> &specInd2specNum_map,
@@ -149,8 +149,8 @@ private:
   void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
 
   // build the list of spectra numbers to load and include in the spectra list
-  void buildSpectraInd2SpectraNumMap(
-      bool range_supplied, bool hasSpectraList, DataBlockComposite& dataBlockComposite);
+  void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
+                                     DataBlockComposite &dataBlockComposite);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -213,11 +213,11 @@ private:
   boost::scoped_ptr< ::NeXus::File> m_cppFile;
   // clang-format on
 
-  bool findSpectraDetRangeInFile(
-      NeXus::NXEntry &entry, boost::shared_array<int> &spectrum_index,
-      int64_t ndets, int64_t n_vms_compat_spectra,
-      std::map<int64_t, std::string> &monitors, bool excludeMonitors,
-      bool separateMonitors);
+  bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,
+                                 boost::shared_array<int> &spectrum_index,
+                                 int64_t ndets, int64_t n_vms_compat_spectra,
+                                 std::map<int64_t, std::string> &monitors,
+                                 bool excludeMonitors, bool separateMonitors);
 };
 
 } // namespace DataHandling

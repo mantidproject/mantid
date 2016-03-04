@@ -48,9 +48,11 @@ private:
 * @param numberOfChannels: the number of channels
 */
 template <typename T>
-void DLLExport populateDataBlockCompositeWithContainer(
-    DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
-    int numberOfPeriods, size_t numberOfChannels) {
+void DLLExport
+populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
+                                        T &indexContainer, int64_t nArray,
+                                        int numberOfPeriods,
+                                        size_t numberOfChannels) {
 
   // Find all intervals among the index array (this assumes that spectrum index
   // increases monotonically, else we would have to sort first)

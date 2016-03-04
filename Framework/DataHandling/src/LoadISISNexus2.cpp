@@ -202,9 +202,9 @@ void LoadISISNexus2::exec() {
   }
 
   // Determine the the data block for the detectors and monitors
-  bseparateMonitors = findSpectraDetRangeInFile(
-      entry, m_spec, ndets, nsp1[0], m_monitors, bexcludeMonitors,
-      bseparateMonitors);
+  bseparateMonitors =
+      findSpectraDetRangeInFile(entry, m_spec, ndets, nsp1[0], m_monitors,
+                                bexcludeMonitors, bseparateMonitors);
 
   size_t x_length = m_loadBlockInfo.getNumberOfChannels() + 1;
 
@@ -339,7 +339,8 @@ void LoadISISNexus2::exec() {
       // monitors from the spectra block (wiring table bug).
       // if monitor's spectra present in the detectors block due to this bug
       // should be read from monitors, this map should be dealt with properly.
-      buildSpectraInd2SpectraNumMap(true /*hasRange*/,false /*hasSpectraList*/, m_monBlockInfo);
+      buildSpectraInd2SpectraNumMap(true /*hasRange*/, false /*hasSpectraList*/,
+                                    m_monBlockInfo);
 
       // lo
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
@@ -515,16 +516,14 @@ void LoadISISNexus2::checkOptionalProperties() {
     if (spec_list.back() > m_loadBlockInfo.getMaxSpectrumID()) {
       std::string err =
           "A spectra number in the spectra list exceeds maximal spectra ID:  " +
-          std::to_string(m_loadBlockInfo.getMaxSpectrumID()) +
-          " in the file ";
+          std::to_string(m_loadBlockInfo.getMaxSpectrumID()) + " in the file ";
       throw std::invalid_argument(err);
     }
     if (spec_list.front() < m_loadBlockInfo.getMinSpectrumID()) {
       std::string err =
           "A spectra number in the spectra list smaller then minimal spectra "
           "ID:  " +
-          std::to_string(m_loadBlockInfo.getMinSpectrumID()) +
-          " in the file";
+          std::to_string(m_loadBlockInfo.getMinSpectrumID()) + " in the file";
       throw std::invalid_argument(err);
     }
 
@@ -541,7 +540,7 @@ void LoadISISNexus2::checkOptionalProperties() {
       if (!spec_list.empty()) {
         for (int64_t i = spec_min; i < spec_max + 1; ++i) {
           specnum_t spec_num = static_cast<specnum_t>(i);
-            spec_list.push_back(spec_num);
+          spec_list.push_back(spec_num);
         }
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
@@ -551,15 +550,15 @@ void LoadISISNexus2::checkOptionalProperties() {
     // Create DataBlocks from the spectrum list
     DataBlockComposite composite;
     populateDataBlockCompositeWithContainer(
-      composite, spec_list, spec_list.size(),
-      m_loadBlockInfo.getNumberOfPeriods(),
-      m_loadBlockInfo.getNumberOfChannels());
+        composite, spec_list, spec_list.size(),
+        m_loadBlockInfo.getNumberOfPeriods(),
+        m_loadBlockInfo.getNumberOfChannels());
     m_loadBlockInfo = composite;
 
     hasSpecList = true;
-  }
-  else {
-    // At this point we don't have a spectrum list but there might have been a spectrum range
+  } else {
+    // At this point we don't have a spectrum list but there might have been a
+    // spectrum range
     // which we need to take into account, by truncating the current range
     if (range_supplied) {
       m_loadBlockInfo.truncate(spec_min, spec_max);
@@ -578,7 +577,8 @@ provided a list of spectrum numbers.
 @param range_supplied: if true specifies that the range of values provided
 below have to be processed rather then spectra list
 @param hasSpectraList: did the user specify a spectrum list
-@param dataBlockComposite: a data block composite specfiying the spectra intervals
+@param dataBlockComposite: a data block composite specfiying the spectra
+intervals
 **/
 void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     bool range_supplied, bool hasSpectraList,
@@ -667,14 +667,16 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
 
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getIntervals();
-  auto isMonitor = [&monitors](int64_t spectrumIndex) { return monitors.find(spectrumIndex) != monitors.end(); };
-  for (const auto& dataBlock : dataBlocks) {
+  auto isMonitor = [&monitors](int64_t spectrumIndex) {
+    return monitors.find(spectrumIndex) != monitors.end();
+  };
+  for (const auto &dataBlock : dataBlocks) {
     auto min = dataBlock.getMinSpectrumID();
     if (isMonitor(min)) {
-      m_spectraBlocks.push_back(SpectraBlock(min, min, true, monitors.find(min)->second));
+      m_spectraBlocks.push_back(
+          SpectraBlock(min, min, true, monitors.find(min)->second));
       includedMonitors.push_back(min);
-    }
-    else {
+    } else {
       auto max = dataBlock.getMaxSpectrumID();
       m_spectraBlocks.push_back(SpectraBlock(min, max, false, ""));
     }
@@ -700,7 +702,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
       }
     }
   }
-  
+
   // Count the number of spectra.
   size_t nSpec = 0;
   for (auto &spectraBlock : m_spectraBlocks) {
@@ -954,12 +956,12 @@ void LoadISISNexus2::loadRunDetails(
   runDetails.addProperty("run_header", std::string(header, header + 86));
 
   // Data details on run not the workspace
-  runDetails.addProperty("nspectra",
-                         static_cast<int>(m_loadBlockInfo.getNumberOfSpectra()));
-  runDetails.addProperty("nchannels",
-                         static_cast<int>(m_loadBlockInfo.getNumberOfChannels()));
-  runDetails.addProperty("nperiods",
-                         static_cast<int>(m_loadBlockInfo.getNumberOfPeriods()));
+  runDetails.addProperty(
+      "nspectra", static_cast<int>(m_loadBlockInfo.getNumberOfSpectra()));
+  runDetails.addProperty(
+      "nchannels", static_cast<int>(m_loadBlockInfo.getNumberOfChannels()));
+  runDetails.addProperty(
+      "nperiods", static_cast<int>(m_loadBlockInfo.getNumberOfPeriods()));
 
   // RPB struct info
   NXInt rpb_int = vms_compat.openNXInt("IRPB");
@@ -1145,7 +1147,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
 
     // Iterate over each monitor and create a data block for each monitor
-    for (const auto& monitor : monitors) {
+    for (const auto &monitor : monitors) {
       int64_t monID = static_cast<int64_t>(monitor.first);
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
@@ -1175,9 +1177,11 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
                                           data.dim0() /*Number of Periods*/,
                                           data.dim2() /*Number of channels*/);
 
-  // We should handle legacy files which include the spectrum number of the monitors
+  // We should handle legacy files which include the spectrum number of the
+  // monitors
   // in the detector group ("raw_data_1/detector_1/spectrum_index")
-  // Simple try to remove the monitors. If they are not included nothing should happen
+  // Simple try to remove the monitors. If they are not included nothing should
+  // happen
   m_detBlockInfo.removeSpectra(m_monBlockInfo);
 
   m_loadBlockInfo = m_detBlockInfo;
@@ -1185,10 +1189,13 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   // Check what is actually going or can be loaded
   bool removeMonitors = excludeMonitors || separateMonitors;
 
-  // If the monitors are to be pulled into the same workspace as the detector information, 
+  // If the monitors are to be pulled into the same workspace as the detector
+  // information,
   // then the number of periods and the number of channels has to conincide
-  if (nmons > 0 && ((m_detBlockInfo.getNumberOfPeriods() != m_monBlockInfo.getNumberOfPeriods()) ||
-                    (m_detBlockInfo.getNumberOfChannels() != m_monBlockInfo.getNumberOfChannels()))) {
+  if (nmons > 0 && ((m_detBlockInfo.getNumberOfPeriods() !=
+                     m_monBlockInfo.getNumberOfPeriods()) ||
+                    (m_detBlockInfo.getNumberOfChannels() !=
+                     m_monBlockInfo.getNumberOfChannels()))) {
     if (!removeMonitors) {
       g_log.warning() << " Performing separate loading as can not load spectra "
                          "and monitors in the single workspace:\n";
@@ -1202,33 +1209,39 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
                       << m_detBlockInfo.getNumberOfPeriods() << " period(s)\n";
     }
 
-    // Force the monitors to be removed and separate if the periods and channels don't conincide
+    // Force the monitors to be removed and separate if the periods and channels
+    // don't conincide
     // between monitors and detectors.
     separateMonitors = true;
     removeMonitors = true;
   }
 
-  int64_t spectraID_min =
-      std::min(m_monBlockInfo.getMinSpectrumID(), m_detBlockInfo.getMinSpectrumID());
-  int64_t spectraID_max =
-      std::max(m_monBlockInfo.getMaxSpectrumID(), m_detBlockInfo.getMaxSpectrumID());
-  size_t totNumOfSpectra = m_monBlockInfo.getNumberOfSpectra() + m_detBlockInfo.getNumberOfSpectra();
+  int64_t spectraID_min = std::min(m_monBlockInfo.getMinSpectrumID(),
+                                   m_detBlockInfo.getMinSpectrumID());
+  int64_t spectraID_max = std::max(m_monBlockInfo.getMaxSpectrumID(),
+                                   m_detBlockInfo.getMaxSpectrumID());
+  size_t totNumOfSpectra =
+      m_monBlockInfo.getNumberOfSpectra() + m_detBlockInfo.getNumberOfSpectra();
 
-  // In case we want to load everything into a one workspace, we should combine the
+  // In case we want to load everything into a one workspace, we should combine
+  // the
   // the data blocks of the monitor and the detector
   if (!removeMonitors) {
     m_loadBlockInfo = m_detBlockInfo + m_monBlockInfo;
   }
 
-  // If the monitors are to be loaded separately, then we set the loadblocks to the detblocks, 
+  // If the monitors are to be loaded separately, then we set the loadblocks to
+  // the detblocks,
   // since we want to deal with the detectors (the main workspace) first.
   if (separateMonitors)
     m_loadBlockInfo = m_detBlockInfo;
 
   // Perform a sanity check of the spectrum numbers
   if ((totNumOfSpectra != static_cast<size_t>(n_vms_compat_spectra)) ||
-      (spectraID_max - spectraID_min + 1 != static_cast<int64_t>(n_vms_compat_spectra))) {
-    throw std::runtime_error("LoadISISNexus: There seems to be an inconsistency in the spectrum numbers.");
+      (spectraID_max - spectraID_min + 1 !=
+       static_cast<int64_t>(n_vms_compat_spectra))) {
+    throw std::runtime_error("LoadISISNexus: There seems to be an "
+                             "inconsistency in the spectrum numbers.");
   }
 
   return separateMonitors;
