@@ -50,14 +50,13 @@ std::unique_ptr<DataBlockGenerator> DataBlock::getGenerator() const {
   return Mantid::Kernel::make_unique<DataBlockGenerator>(interval);
 }
 
-bool DataBlock::operator==(const DataBlock& other) const {
+bool DataBlock::operator==(const DataBlock &other) const {
   return (m_numberOfPeriods == other.m_numberOfPeriods) &&
          (m_numberOfChannels == other.m_numberOfChannels) &&
          (m_numberOfSpectra == other.m_numberOfSpectra) &&
          (m_minSpectraID == other.m_minSpectraID) &&
          (m_maxSpectraID == other.m_maxSpectraID);
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid

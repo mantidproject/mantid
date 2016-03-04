@@ -301,14 +301,16 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
            (block.getMaxSpectrumID() <= specMax);
   };
 
-  auto firstDataBlock = std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
-                                     isNotCompletelyCutOffFromMin);
+  auto firstDataBlock =
+      std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
+                   isNotCompletelyCutOffFromMin);
 
   // Note that we have to start from the back.
-  auto lastDataBlockReverseIterator =
-    std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(),
-      isNotCompletelyCutOffFromMax);
-  auto lastDataBlock = std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks), *lastDataBlockReverseIterator);
+  auto lastDataBlockReverseIterator = std::find_if(
+      m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
+  auto lastDataBlock =
+      std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks),
+                *lastDataBlockReverseIterator);
 
   // Create datablocks
   // Increment since we want to include the last data block
@@ -327,10 +329,12 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
   }
 
   auto lastIndex = newDataBlocks.size() - 1;
-  if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()){
-    auto numberOfSpectra = specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
-    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(), numberOfSpectra,
-      newDataBlocks[lastIndex].getNumberOfChannels());
+  if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()) {
+    auto numberOfSpectra =
+        specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
+    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(),
+                    numberOfSpectra,
+                    newDataBlocks[lastIndex].getNumberOfChannels());
     block.setMinSpectrumID(newDataBlocks[lastIndex].getMinSpectrumID());
     block.setMaxSpectrumID(specMax);
     newDataBlocks[lastIndex] = block;
@@ -339,13 +343,13 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
   m_dataBlocks.swap(newDataBlocks);
 }
 
-
-bool DataBlockComposite::operator==(const DataBlockComposite& other) const {
+bool DataBlockComposite::operator==(const DataBlockComposite &other) const {
   if (other.m_dataBlocks.size() != m_dataBlocks.size()) {
     return false;
   }
 
-  // Create a copy of the intervals, since the comparison operator should not have
+  // Create a copy of the intervals, since the comparison operator should not
+  // have
   // side effects!!!!! We need the vector sorted to compare though
   auto otherDataBlocks = other.m_dataBlocks;
   auto thisDataBlocks = m_dataBlocks;
@@ -360,8 +364,6 @@ bool DataBlockComposite::operator==(const DataBlockComposite& other) const {
   }
   return isEqual;
 }
-
-
 
 /**
  * Removes the input data blocks from the current list of data blocks.

@@ -618,10 +618,14 @@ public:
     // Assert
     auto dataBlocks = dataBlockComposite.getIntervals();
     TSM_ASSERT_EQUALS("Should have one datablock", 2, dataBlocks.size());
-    TSM_ASSERT_EQUALS("Should have a minimum of 8", 8, dataBlocks[0].getMinSpectrumID());
-    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16, dataBlocks[0].getMaxSpectrumID());
-    TSM_ASSERT_EQUALS("Should have a minimum of 20", 20, dataBlocks[1].getMinSpectrumID());
-    TSM_ASSERT_EQUALS("Should have a maximum of 22", 22, dataBlocks[1].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a minimum of 8", 8,
+                      dataBlocks[0].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16,
+                      dataBlocks[0].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a minimum of 20", 20,
+                      dataBlocks[1].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 22", 22,
+                      dataBlocks[1].getMaxSpectrumID());
   }
 
   void test_that_truncation_of_interval_handles_correctly_scenario2() {
@@ -631,7 +635,7 @@ public:
     // truncation |       |
     // result     |------|
     std::vector<std::pair<int64_t, int64_t>> intervals = {
-      std::make_pair(5, 16), std::make_pair(20, 26) };
+        std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
     int64_t min = 5;
     int64_t max = 18;
@@ -642,8 +646,10 @@ public:
     // Assert
     auto dataBlocks = dataBlockComposite.getIntervals();
     TSM_ASSERT_EQUALS("Should have one datablock", 1, dataBlocks.size());
-    TSM_ASSERT_EQUALS("Should have a minimum of 5", 5, dataBlocks[0].getMinSpectrumID());
-    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16, dataBlocks[0].getMaxSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a minimum of 5", 5,
+                      dataBlocks[0].getMinSpectrumID());
+    TSM_ASSERT_EQUALS("Should have a maximum of 16", 16,
+                      dataBlocks[0].getMaxSpectrumID());
   }
 
   void test_that_truncation_of_interval_handles_correctly_scenario3() {
@@ -653,20 +659,18 @@ public:
     // truncation |                       |
     // result       |------|     |------|
     std::vector<std::pair<int64_t, int64_t>> intervals = {
-      std::make_pair(5, 16), std::make_pair(20, 26) };
+        std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
     int64_t min = 4;
-    int64_t max =34;
+    int64_t max = 34;
     auto dataBlockCompositeCopy = dataBlockComposite;
-    
+
     // Act
     dataBlockComposite.truncate(min, max);
 
     // Assert
     TSM_ASSERT("Should be equal", dataBlockComposite == dataBlockCompositeCopy);
   }
-
-
 
   void test_that_data_block_composites_are_equal() {
     // Arrange
@@ -688,7 +692,8 @@ public:
     auto dataBlockComposite2 = getSampleDataBlockComposite(intervals2);
 
     // Act + Assert
-    TSM_ASSERT("Should not be equal", !(dataBlockComposite == dataBlockComposite2));
+    TSM_ASSERT("Should not be equal",
+               !(dataBlockComposite == dataBlockComposite2));
   }
 
 private:

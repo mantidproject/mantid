@@ -22,13 +22,13 @@ public:
 
   std::unique_ptr<DataBlockGenerator> getGenerator() const override;
 
-  bool operator==(const DataBlockComposite& other) const;
+  bool operator==(const DataBlockComposite &other) const;
 
   // DataBlockComposite only mehtods
   void addDataBlock(DataBlock dataBlock);
   std::vector<DataBlock> getIntervals();
-  DataBlockComposite operator+(const DataBlockComposite&  other);
-  void removeSpectra(DataBlockComposite& toRemove);
+  DataBlockComposite operator+(const DataBlockComposite &other);
+  void removeSpectra(DataBlockComposite &toRemove);
   void truncate(int64_t specMin, int64_t specMax);
 
 private:
@@ -47,10 +47,10 @@ private:
 * @param numberOfPeriods: the number of periods
 * @param numberOfChannels: the number of channels
 */
-template<typename T>
+template <typename T>
 void DLLExport populateDataBlockCompositeWithContainer(
-  DataBlockComposite &dataBlockComposite, T &indexContainer,
-  int64_t nArray, int numberOfPeriods, size_t numberOfChannels) {
+    DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
+    int numberOfPeriods, size_t numberOfChannels) {
 
   // Find all intervals among the index array (this assumes that spectrum index
   // increases monotonically, else we would have to sort first)
@@ -81,9 +81,8 @@ void DLLExport populateDataBlockCompositeWithContainer(
   dataBlock.setMinSpectrumID(startValue);
   dataBlock.setMaxSpectrumID(previousValue);
   dataBlockComposite.addDataBlock(dataBlock);
-
 };
-//boost::shared_array<int>
+// boost::shared_array<int>
 }
 }
 

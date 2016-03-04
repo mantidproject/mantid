@@ -13,7 +13,8 @@ class DLLExport DataBlock {
 public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);
-  DataBlock(int numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
+  DataBlock(int numberOfperiods, size_t numberOfSpectra,
+            size_t numberOfChannels);
 
   virtual ~DataBlock();
 
@@ -27,7 +28,7 @@ public:
   virtual int getNumberOfPeriods() const;
   virtual size_t getNumberOfChannels() const;
 
-  bool operator==(const DataBlock& other) const;
+  bool operator==(const DataBlock &other) const;
 
   virtual std::unique_ptr<DataBlockGenerator> getGenerator() const;
 
