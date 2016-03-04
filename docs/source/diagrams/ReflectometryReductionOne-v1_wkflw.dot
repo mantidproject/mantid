@@ -38,12 +38,13 @@ digraph ReflectometryReductionOne {
     specRefPosCor   [label="SpecularReflectionPositionCorrect"]
     polyCorr        [label="PolynomialCorrection"]
     expCorr         [label="ExponentialCorrection"]
+    rotateSource    [label="RotateSource"]
   }
 
   subgraph processes {
     $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
-    rotateSource       [label="Rotate Source by ThetaIn"]
+    rotateSourceBack [label="Rotate Source back by ThetaIn"]
   }
 
   subgraph values {
@@ -55,7 +56,7 @@ digraph ReflectometryReductionOne {
   }
 
   inputWorkspace    -> checkXUnit
-  checkXUnit        -> checkThetaIn     [label="Yes"]
+  checkXUnit        -> checkTransRun    [label="Yes"]
   checkXUnit        -> convertToWL      [label="No"]
   convertToWL       -> valMon           [label="Monitors"]
   convertToWL       -> valDet           [label="Detectors"]
@@ -93,6 +94,7 @@ digraph ReflectometryReductionOne {
   checkCorDetPos    -> outputWorkspaceWL[label="No"]
   specRefPosCor     -> outputWorkspaceWL
   outputWorkspaceWL -> rotateSource
-  rotateSource        -> convertToMT
-  convertToMT       -> outputWorkspaceMT
+  rotateSource      -> convertToMT
+  convertToMT       -> rotateSourceBack
+  rotateSourceBack -> outputWorkspaceMT
 }
