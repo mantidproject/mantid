@@ -293,7 +293,7 @@ public:
     double ll_sample_r = sample.distance(ll_det_pos);
     TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
 
-    size_t lu_ws_index = 255*256; // row = 255, col = 1
+    size_t lu_ws_index = 255 * 256; // row = 255, col = 1
     Kernel::V3D lu_det_pos = outws->getDetector(lu_ws_index)->getPos();
     double lu_sample_r = sample.distance(lu_det_pos);
     TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
@@ -360,7 +360,7 @@ public:
     Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = center_det_pos.distance(sample);
-    TS_ASSERT_DELTA(dist_r, 0.3750+0.1, 0.0001);
+    TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
     // center of the detector at 15 degree
     double sample_center_angle =
         (sample - source).angle(center_det_pos - sample);
@@ -391,9 +391,12 @@ public:
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
     // Check symmetry
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_lr_pos), 0.0000001);
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ul_pos), 0.0000001);
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ur_pos), 0.0000001);
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_lr_pos),
+                    0.0000001);
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ul_pos),
+                    0.0000001);
+    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ur_pos),
+                    0.0000001);
 
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038D");
