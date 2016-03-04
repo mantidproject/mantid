@@ -111,21 +111,21 @@ int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialize the algorithm's properties.
 void LoadSQW2::init() {
   using namespace API;
-  using Kernel::make_unique;
   using Kernel::PropertyWithValue;
   using Kernel::StringListValidator;
   typedef std::initializer_list<std::string> StringInitializerList;
 
   // Inputs
-  // std::vector<std::string> exts = {".sqw"};
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                            StringInitializerList({".sqw"})),
-                  "File of type SQW format");
-  declareProperty(make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
-                  "Load Metadata without events.");
-  declareProperty(make_unique<FileProperty>("OutputFilename", "",
-                                            FileProperty::OptionalSave,
-                                            StringInitializerList({".nxs"})),
+  declareProperty(
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        StringInitializerList({".sqw"})),
+      "File of type SQW format");
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
+      "Load Metadata without events.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "OutputFilename", "", FileProperty::OptionalSave,
+                      StringInitializerList({".nxs"})),
                   "If specified, the output workspace will be a file-backed "
                   "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "HKL"};
@@ -134,7 +134,7 @@ void LoadSQW2::init() {
                   "The required frame for the output workspace");
 
   // Outputs
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Output IMDEventWorkspace reflecting SQW data");
 }
