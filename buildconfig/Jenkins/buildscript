@@ -170,6 +170,20 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
+# Generator
+###############################################################################
+if [ $(command -v ninja) ]; then
+  CMAKE_GENERATOR="-G Ninja"
+elif [ $(command -v ninja-build) ]; then
+  CMAKE_GENERATOR="-G Ninja"
+fi
+if [ -e $BUILD_DIR/CMakeCache.txt ]; then
+  CMAKE_GENERATOR=""
+fi
+echo "CMAKE_GENERATOR ${CMAKE_GENERATOR}"
+exit -1
+
+###############################################################################
 # Work in the build directory
 ###############################################################################
 cd $BUILD_DIR
