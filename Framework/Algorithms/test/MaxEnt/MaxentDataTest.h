@@ -228,6 +228,42 @@ public:
     // Should have been updated
     TS_ASSERT_DIFFERS(dataCalc, newDataCalc);
   }
+
+  void test_extended_image() {
+    // The input image may be F times the size of the
+    // experimental data and errors
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MaxentData_sptr maxentData =
+        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
+
+    // Real case
+
+    // Bad image size (should be F*2*dat.size() with F an integer number)
+    std::vector<double> dat = {0, 1};
+    std::vector<double> err = {1, 1};
+    std::vector<double> img = {0, 0, 0, 0, 0};
+    double bkg = 1;
+    TS_ASSERT_THROWS(maxentData->loadReal(dat, err, img, bkg),
+                     std::runtime_error);
+
+    // OK, image is 2 * (2 * dat.size())
+    img = std::vector<double>{0, 0, 0, 0, 0, 0, 0, 0};
+    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
+
+    // Complex case
+
+    // Bad image size (should be F*2*dat.size() with F an integer number)
+    img = std::vector<double>{0, 0, 0, 0, 0};
+    TS_ASSERT_THROWS(maxentData->loadComplex(dat, dat, err, err, img, bkg),
+                     std::runtime_error);
+
+    // OK, image is 3 * (2 * dat.size())
+    img = std::vector<double>{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    TS_ASSERT_THROWS_NOTHING(
+        maxentData->loadComplex(dat, dat, err, err, img, bkg));
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_MAXENTDATATEST_H_ */

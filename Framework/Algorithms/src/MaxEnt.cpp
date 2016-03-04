@@ -71,7 +71,6 @@ void MaxEnt::init() {
 
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
-  mustBePositive->clearUpper();
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "DensityFactor", 1, mustBePositive, Direction::Input),
                   "An integer number indicating the factor by which the number "
@@ -102,8 +101,7 @@ void MaxEnt::init() {
                   "Maximum degree of non-parallelism between S and C");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
-  mustBePositive->setLower(0);
-  mustBePositive->clearUpper();
+  mustBePositive->setLower(1);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations");
