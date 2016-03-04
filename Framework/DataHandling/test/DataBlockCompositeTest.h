@@ -226,39 +226,39 @@ public:
                       5);
 
     TSM_ASSERT_EQUALS("The min of the first data block should be 1", 1,
-      dataBlocks[0].getMinSpectrumID());
+                      dataBlocks[0].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the first data block should be 1", 1,
-      dataBlocks[0].getMaxSpectrumID());
+                      dataBlocks[0].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
-      dataBlocks[0].getNumberOfSpectra());
+                      dataBlocks[0].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the second data block should be 3", 3,
-      dataBlocks[1].getMinSpectrumID());
+                      dataBlocks[1].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the second data block should be 5", 5,
-      dataBlocks[1].getMaxSpectrumID());
+                      dataBlocks[1].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 3", 3,
-      dataBlocks[1].getNumberOfSpectra());
+                      dataBlocks[1].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the third data block should be 8", 8,
-      dataBlocks[2].getMinSpectrumID());
+                      dataBlocks[2].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the third data block should be 11", 11,
-      dataBlocks[2].getMaxSpectrumID());
+                      dataBlocks[2].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 4", 4,
-      dataBlocks[2].getNumberOfSpectra());
+                      dataBlocks[2].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the fourth data block should be 16", 16,
-      dataBlocks[3].getMinSpectrumID());
+                      dataBlocks[3].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the fourth data block should be 16", 16,
-      dataBlocks[3].getMaxSpectrumID());
+                      dataBlocks[3].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 1", 1,
-      dataBlocks[3].getNumberOfSpectra());
+                      dataBlocks[3].getNumberOfSpectra());
 
     TSM_ASSERT_EQUALS("The min of the fifth data block should be 3", 21,
-      dataBlocks[4].getMinSpectrumID());
+                      dataBlocks[4].getMinSpectrumID());
     TSM_ASSERT_EQUALS("The max of the fiffth data block should be 5", 22,
-      dataBlocks[4].getMaxSpectrumID());
+                      dataBlocks[4].getMaxSpectrumID());
     TSM_ASSERT_EQUALS("The number of spectra should be 2", 2,
-      dataBlocks[4].getNumberOfSpectra());
+                      dataBlocks[4].getNumberOfSpectra());
   }
 
   void
