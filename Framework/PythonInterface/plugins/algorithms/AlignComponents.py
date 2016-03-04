@@ -251,7 +251,7 @@ class AlignComponents(PythonAlgorithm):
         calWS = api.SortTableWorkspace(calWS, Columns='detid')
         maskWS = self.getProperty("MaskWorkspace").value
 
-        if maskWS != None:
+        if maskWS is not None:
             self._masking = True
             mask = maskWS.extractY().flatten()
 
