@@ -345,9 +345,8 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     // Combine cluster maps processed by each thread.
     ClusterRegister clusterRegister;
     for (auto &parallelClusterMap : parallelClusterMapVec) {
-      for (auto it = parallelClusterMap.begin(); it != parallelClusterMap.end();
-           ++it) {
-        clusterRegister.add(it->first, it->second);
+      for (auto &cluster : parallelClusterMap) {
+        clusterRegister.add(cluster.first, cluster.second);
       }
     }
 

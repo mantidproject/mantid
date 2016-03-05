@@ -87,8 +87,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace());
+      boost::make_shared<DataObjects::TableWorkspace>();
   tablews->addColumn("double", "XMin");
   tablews->addColumn("double", "XMax");
   tablews->addColumn("str", "SpectraList");
