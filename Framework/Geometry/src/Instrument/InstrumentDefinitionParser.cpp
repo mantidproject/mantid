@@ -2469,9 +2469,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
-       ++it)
-    pElem->removeChild(*it);
+  for (auto comp : allComponentInType)
+    pElem->removeChild(comp);
 }
 
 /// return absolute position of point which is set relative to the
