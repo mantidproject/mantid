@@ -64,7 +64,6 @@ class MANTID_GEOMETRY_DLL ProductOfCyclicGroups : public Group {
 public:
   ProductOfCyclicGroups(const std::string &generators);
   ProductOfCyclicGroups(const std::vector<Group_const_sptr> &factorGroups);
-  ~ProductOfCyclicGroups() override {}
 
 protected:
   Group_const_sptr getGeneratedGroup(const std::string &generators) const;

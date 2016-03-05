@@ -41,35 +41,6 @@ Kernel::Logger g_log("Run");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-/**
- * Default constructor
- */
-Run::Run() : m_goniometer(), m_histoBins() {}
-
-/**
- * Destructor
- */
-Run::~Run() {}
-
-/**
- * Copy constructor
- * @param copy :: The object to initialize the copy from
- */
-Run::Run(const Run &copy) : LogManager(copy), m_goniometer(copy.m_goniometer) {}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Assignment operator
- * @param rhs :: The object whose properties should be copied into this
- * @returns A cont reference to the copied object
- */
-const Run &Run::operator=(const Run &rhs) {
-  if (this == &rhs)
-    return *this;
-  m_manager = rhs.m_manager;
-  m_goniometer = rhs.m_goniometer;
-  return *this;
-}
 
 //-----------------------------------------------------------------------------------------------
 /**

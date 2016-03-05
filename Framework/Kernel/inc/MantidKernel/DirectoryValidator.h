@@ -41,7 +41,6 @@ namespace Kernel {
 class MANTID_KERNEL_DLL DirectoryValidator : public FileValidator {
 public:
   explicit DirectoryValidator(bool testDirectoryExists = true);
-  ~DirectoryValidator() override;
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
 

@@ -28,8 +28,8 @@ private:
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
-  Quadratic(const Quadratic &);
-  Quadratic &operator=(const Quadratic &);
+  Quadratic(const Quadratic &) = default;
+  Quadratic &operator=(const Quadratic &) = default;
 
 public:
   static const int Nprecision = 10; ///< Precision of the output

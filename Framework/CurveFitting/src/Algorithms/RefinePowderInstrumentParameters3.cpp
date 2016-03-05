@@ -517,7 +517,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
-  for (auto paramname : mcgroup) {
+  for (const auto &paramname : mcgroup) {
     // random number between -1 and 1
     double randomnumber =
         2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
@@ -662,7 +662,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
   }
 
   // 2. Record for the best parameters
-  if (bestparammap.size() == 0) {
+  if (bestparammap.empty()) {
     // No record yet
     duplicateParameters(parammap, bestparammap);
   } else if (recordparameter) {
@@ -796,7 +796,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
 double RefinePowderInstrumentParameters3::calculateFunction(
     map<string, Parameter> parammap, vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
-  if (parammap.size() > 0)
+  if (!parammap.empty())
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
@@ -1172,9 +1172,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   stringstream msgss;
   msgss << "Set Instrument Function Parameter : " << endl;
 
-  std::map<std::string, Parameter>::iterator paramiter;
-  for (auto parname : funparamnames) {
-    paramiter = params.find(parname);
+  for (const auto &parname : funparamnames) {
+    auto paramiter = params.find(parname);
 
     if (paramiter != params.end()) {
       // Found, set up the parameter

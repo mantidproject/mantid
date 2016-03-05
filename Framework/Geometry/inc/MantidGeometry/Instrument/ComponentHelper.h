@@ -61,7 +61,7 @@ MANTID_GEOMETRY_DLL void moveComponent(const IComponent &comp,
 MANTID_GEOMETRY_DLL void rotateComponent(const IComponent &comp,
                                          ParameterMap &pmap,
                                          const Kernel::Quat &rot,
-                                         const TransformType positionType);
+                                         const TransformType rotType);
 
 MANTID_GEOMETRY_DLL Geometry::Instrument_sptr
 createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,

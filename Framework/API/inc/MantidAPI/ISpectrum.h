@@ -48,8 +48,7 @@ class DLLExport ISpectrum {
 public:
   ISpectrum();
   ISpectrum(const specnum_t specNo);
-  ISpectrum(const ISpectrum &other);
-  virtual ~ISpectrum();
+  virtual ~ISpectrum() = default;
 
   void copyInfoFrom(const ISpectrum &other);
 

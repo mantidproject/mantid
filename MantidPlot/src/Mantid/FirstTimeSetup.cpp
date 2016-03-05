@@ -156,6 +156,7 @@ void FirstTimeSetup::openManageUserDirectories()
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
+  // cppcheck-suppress memleak
 }
 
 void FirstTimeSetup::openReleaseNotes()

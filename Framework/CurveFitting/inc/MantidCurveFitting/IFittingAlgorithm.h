@@ -63,7 +63,7 @@ private:
   virtual void execConcrete() = 0;
 
   void afterPropertySet(const std::string &propName) override;
-  void addWorkspace(const std::string &workspaceNameProperty,
+  void addWorkspace(const std::string &workspacePropertyName,
                     bool addProperties = true);
   /// Read domain type property and cache the value
   void setDomainType();

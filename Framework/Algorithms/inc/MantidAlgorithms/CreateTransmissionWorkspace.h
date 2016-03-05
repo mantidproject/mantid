@@ -54,11 +54,10 @@ private:
       const MinMax &wavelengthMonitorIntegrationInterval,
       const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
-      const OptionalDouble &stitchingStartQ,
-      const OptionalDouble &stitchingDeltaQ,
-      const OptionalDouble &stitchingEndQ,
-      const OptionalDouble &stitchingStartOverlapQ,
-      const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep);
+      const OptionalDouble &stitchingStart,
+      const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
+      const OptionalDouble &stitchingStartOverlap,
+      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep);
 
   void init() override;
   void exec() override;

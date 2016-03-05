@@ -500,7 +500,7 @@ private:
 
   public:
     TestablePoldiFitPeaks2D() : PoldiFitPeaks2D() {}
-    ~TestablePoldiFitPeaks2D() {}
+    ~TestablePoldiFitPeaks2D() override {}
   };
 };
 

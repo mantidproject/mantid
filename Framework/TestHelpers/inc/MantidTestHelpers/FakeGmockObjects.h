@@ -28,7 +28,7 @@ public:
                Mantid::Geometry::INearestNeighbours *(
                    int, boost::shared_ptr<const Mantid::Geometry::Instrument>,
                    const Mantid::Geometry::ISpectrumDetectorMapping &, bool));
-  virtual ~MockNearestNeighboursFactory() {}
+  ~MockNearestNeighboursFactory() override {}
 };
 
 // Helper typedef and type for mocking NearestNeighbour map usage.
@@ -39,7 +39,7 @@ public:
                      SpectrumDistanceMap(specnum_t spectrum, double radius));
   MOCK_CONST_METHOD1(neighbours, SpectrumDistanceMap(specnum_t spectrum));
   MOCK_METHOD0(die, void());
-  virtual ~MockNearestNeighbours() { die(); }
+  ~MockNearestNeighbours() override { die(); }
 };
 
 #endif /* FAKEOBJECTS_H_ */

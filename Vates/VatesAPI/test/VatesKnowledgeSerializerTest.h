@@ -28,9 +28,7 @@ private:
     MOCK_METHOD1(isPointContained, bool(const Mantid::Kernel::VMD&));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction()
-    {
-    }
+    ~MockImplicitFunction() override {}
   };
 
 //Test methods

@@ -45,6 +45,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
         # external url temporariliy not available. Secondary it also avoid
         # having to worry about proxies.
 
+        #pylint: disable=too-few-public-methods
         class MyXsValidator(pyxsval.XsValidator):
             ########################################
             # force validation of XML input against local file

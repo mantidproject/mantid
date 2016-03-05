@@ -9,13 +9,13 @@ using namespace Mantid::Kernel;
 
 class ArrayPropertyTest : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     iProp = new ArrayProperty<int>("intProp");
     dProp = new ArrayProperty<double>("doubleProp");
     sProp = new ArrayProperty<std::string>("stringProp");
   }
 
-  void tearDown() {
+  void tearDown() override {
     delete iProp;
     delete dProp;
     delete sProp;

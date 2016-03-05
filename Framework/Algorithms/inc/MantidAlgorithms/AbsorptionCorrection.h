@@ -82,8 +82,6 @@ class DLLExport AbsorptionCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AbsorptionCorrection();
-  /// Virtual destructor
-  ~AbsorptionCorrection() override {}
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";

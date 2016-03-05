@@ -43,9 +43,6 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
   m_LogManager = boost::make_shared<API::LogManager>(*(other.m_LogManager));
 }
 
-/// Destructor
-TableWorkspace::~TableWorkspace() {}
-
 size_t TableWorkspace::getMemorySize() const {
   size_t data_size = 0;
   for (const auto &column : m_columns) {

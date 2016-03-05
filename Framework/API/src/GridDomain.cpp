@@ -16,7 +16,7 @@ Kernel::Logger g_log("GridDomain");
 
 /// number of points in the grid
 size_t GridDomain::size() const {
-  if (!m_grids.size())
+  if (m_grids.empty())
     return 0;
   else
     return std::accumulate(

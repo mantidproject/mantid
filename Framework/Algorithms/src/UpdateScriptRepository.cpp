@@ -54,7 +54,7 @@ void UpdateScriptRepository::exec() {
     return; // it means that the ScriptRepository was not installed.
 
   std::vector<std::string> f_list = repo_ptr->check4Update();
-  if (f_list.size() > 0) {
+  if (!f_list.empty()) {
     std::stringstream info;
     info << "Information about ScriptRepository:\n"
          << " A more recent version of the following files was installed:\n";

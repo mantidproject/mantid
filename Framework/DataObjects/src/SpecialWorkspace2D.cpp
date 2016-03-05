@@ -20,11 +20,6 @@ Kernel::Logger g_log("SpecialWorkspace2D");
 DECLARE_WORKSPACE(SpecialWorkspace2D)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecialWorkspace2D::SpecialWorkspace2D() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace
@@ -71,14 +66,6 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
     }
   }
 }
-
-SpecialWorkspace2D::SpecialWorkspace2D(const SpecialWorkspace2D &other)
-    : Workspace2D(other), detID_to_WI(other.detID_to_WI) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecialWorkspace2D::~SpecialWorkspace2D() {}
 
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero

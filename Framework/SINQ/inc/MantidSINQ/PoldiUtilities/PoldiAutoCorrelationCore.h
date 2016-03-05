@@ -61,7 +61,7 @@ struct CountLocator {
 class MANTID_SINQ_DLL PoldiAutoCorrelationCore {
 public:
   PoldiAutoCorrelationCore(Kernel::Logger &g_log);
-  virtual ~PoldiAutoCorrelationCore() {}
+  virtual ~PoldiAutoCorrelationCore() = default;
 
   void setInstrument(const PoldiAbstractDetector_sptr &detector,
                      const PoldiAbstractChopper_sptr &chopper);

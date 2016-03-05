@@ -107,14 +107,14 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp() {
+  void setUp() override {
     m_view = new NiceMock<MockALCBaselineModellingView>();
     m_model = new NiceMock<MockALCBaselineModellingModel>();
     m_presenter = new ALCBaselineModellingPresenter(m_view, m_model);
     m_presenter->initialize();
   }
 
-  void tearDown() {
+  void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 

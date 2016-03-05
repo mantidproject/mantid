@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/Crystal/HKLFilter.cpp
 	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
-	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
@@ -423,7 +422,6 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
 endif ()
 
@@ -447,6 +445,11 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
+
+if (ENABLE_OPENCASCADE)
+  target_include_directories(Geometry SYSTEM PRIVATE ${OPENCASCADE_INCLUDE_DIR})
+endif ()
+
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )

@@ -43,7 +43,8 @@ endif()
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override -Wsuggest-final-types -Wsuggest-final-methods")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wsuggest-final-types -Wsuggest-final-methods")
   endif()
 endif()
 

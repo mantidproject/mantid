@@ -52,7 +52,6 @@ public:
   PropertyManagerOwner();
   PropertyManagerOwner(const PropertyManagerOwner &);
   PropertyManagerOwner &operator=(const PropertyManagerOwner &);
-  ~PropertyManagerOwner() override {}
 
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Property> p,

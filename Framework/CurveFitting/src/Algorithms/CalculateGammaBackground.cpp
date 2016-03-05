@@ -423,7 +423,7 @@ void CalculateGammaBackground::calculateTofSpectrum(
 void CalculateGammaBackground::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_profileFunction = getPropertyValue("ComptonFunction");
-  if (m_profileFunction.find(";") == std::string::npos) // not composite
+  if (m_profileFunction.find(';') == std::string::npos) // not composite
   {
     m_profileFunction = "composite=CompositeFunction;" + m_profileFunction;
   }

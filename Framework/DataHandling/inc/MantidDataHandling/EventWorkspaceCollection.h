@@ -49,14 +49,13 @@ private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
-  /// private copy constructor. Not implemented.
-  EventWorkspaceCollection(const EventWorkspaceCollection &other);
-  /// Private copy assignment operator. Assignment not implemented.
-  EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other);
 
 public:
   EventWorkspaceCollection();
-  virtual ~EventWorkspaceCollection();
+  EventWorkspaceCollection(const EventWorkspaceCollection &other) = delete;
+  EventWorkspaceCollection &
+  operator=(const EventWorkspaceCollection &other) = delete;
+  virtual ~EventWorkspaceCollection() = default;
 
   void setNPeriods(
       size_t nPeriods,
@@ -110,7 +109,7 @@ public:
   DataObjects::EventList *getEventListPtr(size_t i);
   void populateInstrumentParameters();
   void setTitle(std::string title);
-  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> filter);
+  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
   virtual bool threadSafe() const;
 };
 

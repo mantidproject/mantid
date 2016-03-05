@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
+        src/DynamicPDF/DisplayCurveFitTest.cpp
         src/DynamicPDF/SliceSelector.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
@@ -121,6 +122,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+        inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
         inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
@@ -264,6 +266,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
@@ -353,6 +356,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.ui
                inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui

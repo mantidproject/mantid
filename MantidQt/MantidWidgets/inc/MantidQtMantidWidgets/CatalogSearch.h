@@ -48,7 +48,7 @@ public:
   /// Default constructor
   CatalogSearch(QWidget *parent = 0);
   /// Destructor
-  ~CatalogSearch();
+  ~CatalogSearch() override;
 
 private:
   /// Initialise the layout

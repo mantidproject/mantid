@@ -14,10 +14,11 @@
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/algorithm/string.hpp>
-#include <numeric>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <numeric>
 
 #include <fstream>
 
@@ -253,7 +254,7 @@ void FindPeaks::processAlgorithmProperties() {
 
   // Specified peak positions, which is optional
   m_vecPeakCentre = getProperty("PeakPositions");
-  if (m_vecPeakCentre.size() > 0)
+  if (!m_vecPeakCentre.empty())
     std::sort(m_vecPeakCentre.begin(), m_vecPeakCentre.end());
   m_vecFitWindows = getProperty("FitWindows");
 
@@ -449,7 +450,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   // Calculate n1 (Mariscotti eqn. 18)
   const double kz =
       1.22; // This kz corresponds to z=5 & w=0.6*fwhm - see Mariscotti Fig. 8
-  const int n1 = static_cast<int>(kz * m_inputPeakFWHM + 0.5);
+  const int n1 = boost::math::iround(kz * m_inputPeakFWHM);
   // Can't calculate n2 or n3 yet because they need i0
   const int tolerance = getProperty("Tolerance");
 
@@ -563,10 +564,10 @@ void FindPeaks::findPeaksUsingMariscotti() {
           continue;
         }
         // Calculate n2 (Mariscotti eqn. 20)
-        int n2 = abs(
-            static_cast<int>(0.5 * (F[i0] / S[i0]) * (n1 + tolerance) + 0.5));
-        const int n2b = abs(
-            static_cast<int>(0.5 * (F[i0] / S[i0]) * (n1 - tolerance) + 0.5));
+        int n2 = std::abs(
+            boost::math::iround(0.5 * (F[i0] / S[i0]) * (n1 + tolerance)));
+        const int n2b = std::abs(
+            boost::math::iround(0.5 * (F[i0] / S[i0]) * (n1 - tolerance)));
         if (n2b > n2)
           n2 = n2b;
         // Mariscotti eqn. (21)
@@ -576,10 +577,10 @@ void FindPeaks::findPeaksUsingMariscotti() {
           continue;
         }
         // Calculate n3 (Mariscotti eqn. 22)
-        int n3 = abs(static_cast<int>(
-            (n1 + tolerance) * (1 - 2 * (F[i0] / S[i0])) + 0.5));
-        const int n3b = abs(static_cast<int>(
-            (n1 - tolerance) * (1 - 2 * (F[i0] / S[i0])) + 0.5));
+        int n3 = std::abs(
+            boost::math::iround((n1 + tolerance) * (1 - 2 * (F[i0] / S[i0]))));
+        const int n3b = std::abs(
+            boost::math::iround((n1 - tolerance) * (1 - 2 * (F[i0] / S[i0]))));
         if (n3b < n3)
           n3 = n3b;
         // Mariscotti eqn. (23)

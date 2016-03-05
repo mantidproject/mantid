@@ -43,6 +43,9 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionFactoryImpl
     : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction> {
 public:
+  ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
+  ImplicitFunctionFactoryImpl &
+  operator=(const ImplicitFunctionFactoryImpl &) = delete;
   Mantid::Geometry::MDImplicitFunction_sptr
   create(const std::string &className) const override;
 
@@ -54,14 +57,11 @@ public:
 
   friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
 
+private:
   /// Private Constructor for singleton class
-  ImplicitFunctionFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ImplicitFunctionFactoryImpl &operator=(const ImplicitFunctionFactoryImpl &);
+  ImplicitFunctionFactoryImpl() = default;
   /// Private Destructor
-  ~ImplicitFunctionFactoryImpl() override;
+  ~ImplicitFunctionFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

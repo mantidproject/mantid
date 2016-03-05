@@ -20,7 +20,7 @@ public:
 
   MaskDetectorsInShapeTest() { loadTestWS(); }
 
-  ~MaskDetectorsInShapeTest() {
+  ~MaskDetectorsInShapeTest() override {
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 

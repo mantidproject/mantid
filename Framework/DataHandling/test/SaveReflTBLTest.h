@@ -26,7 +26,7 @@ public:
       : m_name("SaveReflTBLTestWS"), m_filename("SaveReflTBLTest.tbl"),
         m_abspath() {}
 
-  ~SaveReflTBLTest() {}
+  ~SaveReflTBLTest() override {}
 
   void testNoQuotes() {
     ITableWorkspace_sptr ws = CreateWorkspace();

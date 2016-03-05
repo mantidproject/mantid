@@ -109,7 +109,7 @@ void LoadDetectorsGroupingFile::exec() {
       std::map<int, std::vector<detid_t>>::iterator dit;
       for (dit = m_groupDetectorsMap.begin(); dit != m_groupDetectorsMap.end();
            ++dit) {
-        if (dit->second.size() > 0)
+        if (!dit->second.empty())
           throw std::invalid_argument(
               "Grouping file specifies detector ID without instrument name");
       }
@@ -192,7 +192,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
     bool norecord = true;
     for (mapiter = m_groupComponentsMap.begin();
          mapiter != m_groupComponentsMap.end(); ++mapiter) {
-      if (mapiter->second.size() > 0) {
+      if (!mapiter->second.empty()) {
         g_log.error() << "Instrument is not specified in XML file.  "
                       << "But tag 'component' is used in XML file for Group "
                       << mapiter->first << " It is not allowed" << std::endl;
@@ -230,7 +230,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
                     << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << std::endl;
 
-      for (auto child : children) {
+      for (const auto &child : children) {
         // c) convert component to detector
         Geometry::IDetector_const_sptr det =
             boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
@@ -262,12 +262,12 @@ void LoadDetectorsGroupingFile::setByComponents() {
 void LoadDetectorsGroupingFile::setByDetectors() {
 
   // 0. Check
-  if (!m_instrument && m_groupDetectorsMap.size() > 0) {
+  if (!m_instrument && !m_groupDetectorsMap.empty()) {
     std::map<int, std::vector<detid_t>>::iterator mapiter;
     bool norecord = true;
     for (mapiter = m_groupDetectorsMap.begin();
          mapiter != m_groupDetectorsMap.end(); ++mapiter)
-      if (mapiter->second.size() > 0) {
+      if (!mapiter->second.empty()) {
         norecord = false;
         g_log.error() << "Instrument is not specified in XML file. "
                       << "But tag 'detid' is used in XML file for Group "

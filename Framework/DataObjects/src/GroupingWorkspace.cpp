@@ -13,11 +13,6 @@ namespace DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GroupingWorkspace::GroupingWorkspace() {}
-
 /** Constructor, buiding with give dimensions
  * @param numvectors: input size of the vector/histogram number for this
  * workspace
@@ -35,11 +30,6 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) {
  */
 GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GroupingWorkspace::~GroupingWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number

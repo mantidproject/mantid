@@ -36,8 +36,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport MantidWebServiceAPIJobManager
     : public Mantid::API::IRemoteJobManager {
 public:
-  ~MantidWebServiceAPIJobManager() override{};
-
   void authenticate(const std::string &username,
                     const std::string &password) override;
 

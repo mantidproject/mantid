@@ -12,46 +12,46 @@ using namespace Mantid::API;
 // TODO: use gmock for this
 class FakeJM : public IRemoteJobManager {
 public:
-  virtual void authenticate(const std::string & /*username*/,
-                            const std::string & /*password*/) {}
+  void authenticate(const std::string & /*username*/,
+                    const std::string & /*password*/) override {}
 
-  virtual void logout(const std::string & /*username*/) {}
+  void logout(const std::string & /*username*/) override {}
 
-  virtual std::string submitRemoteJob(const std::string & /*transactionID*/,
-                                      const std::string & /*runnable*/,
-                                      const std::string & /*param*/,
-                                      const std::string & /*taskName*/ = "",
-                                      const int /*numNodes*/ = 1,
-                                      const int /*coresPerNode*/ = 1) {
+  std::string submitRemoteJob(const std::string & /*transactionID*/,
+                              const std::string & /*runnable*/,
+                              const std::string & /*param*/,
+                              const std::string & /*taskName*/ = "",
+                              const int /*numNodes*/ = 1,
+                              const int /*coresPerNode*/ = 1) override {
     return "";
   }
 
-  virtual void downloadRemoteFile(const std::string & /*transactionID*/,
-                                  const std::string & /*remoteFileName*/,
-                                  const std::string & /*localFileName*/) {}
+  void downloadRemoteFile(const std::string & /*transactionID*/,
+                          const std::string & /*remoteFileName*/,
+                          const std::string & /*localFileName*/) override {}
 
-  virtual std::vector<RemoteJobInfo> queryAllRemoteJobs() const {
+  std::vector<RemoteJobInfo> queryAllRemoteJobs() const override {
     return std::vector<RemoteJobInfo>();
   }
 
-  virtual std::vector<std::string>
-  queryRemoteFile(const std::string & /*transactionID*/) const {
+  std::vector<std::string>
+  queryRemoteFile(const std::string & /*transactionID*/) const override {
     return std::vector<std::string>();
   }
 
-  virtual RemoteJobInfo queryRemoteJob(const std::string & /*jobID*/) const {
+  RemoteJobInfo queryRemoteJob(const std::string & /*jobID*/) const override {
     return RemoteJobInfo();
   }
 
-  virtual std::string startRemoteTransaction() { return ""; }
+  std::string startRemoteTransaction() override { return ""; }
 
-  virtual void stopRemoteTransaction(const std::string & /*transactionID*/) {}
+  void stopRemoteTransaction(const std::string & /*transactionID*/) override {}
 
-  virtual void abortRemoteJob(const std::string & /*jobID*/) {}
+  void abortRemoteJob(const std::string & /*jobID*/) override {}
 
-  virtual void uploadRemoteFile(const std::string & /*transactionID*/,
-                                const std::string & /*remoteFileName*/,
-                                const std::string & /*localFileName*/) {}
+  void uploadRemoteFile(const std::string & /*transactionID*/,
+                        const std::string & /*remoteFileName*/,
+                        const std::string & /*localFileName*/) override {}
 };
 
 class FakeJMDeriv : public FakeJM {};

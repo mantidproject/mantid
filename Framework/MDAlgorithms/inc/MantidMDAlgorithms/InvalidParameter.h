@@ -57,8 +57,6 @@ public:
 
   std::string toXMLString() const override;
 
-  ~InvalidParameter() override;
-
   static std::string parameterName() { return "InvalidParameter"; }
 };
 }

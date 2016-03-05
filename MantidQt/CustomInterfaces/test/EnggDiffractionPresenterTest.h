@@ -26,7 +26,7 @@ private:
   void startAsyncCalibWorker(const std::string &outFilename,
                              const std::string &vanNo,
                              const std::string &ceriaNo,
-                             const std::string &specNos) {
+                             const std::string &specNos) override {
     doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
     calibrationFinished();
   }
@@ -35,7 +35,7 @@ private:
                              const std::vector<std::string> &multi_RunNo,
                              const std::vector<bool> &banks,
                              const std::string &specNos,
-                             const std::string &dgFile) {
+                             const std::string &dgFile) override {
     std::cerr << "focus run " << std::endl;
 
     std::string runNo = multi_RunNo[0];
@@ -46,14 +46,14 @@ private:
   }
 
   void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
-                                     const std::string &outWSName) {
+                                     const std::string &outWSName) override {
     doRebinningTime(runNo, bin, outWSName);
     rebinningFinished();
   }
 
   void startAsyncRebinningPulsesWorker(const std::string &runNo,
                                        size_t nperiods, double timeStep,
-                                       const std::string &outWSName) {
+                                       const std::string &outWSName) override {
     doRebinningPulses(runNo, nperiods, timeStep, outWSName);
     rebinningFinished();
   }
@@ -78,7 +78,7 @@ public:
                                                // initialized
   }
 
-  void setUp() {
+  void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffractionView>());
     m_presenter.reset(
         new MantidQt::CustomInterfaces::EnggDiffractionPresenter(m_view.get()));
@@ -110,7 +110,7 @@ public:
     m_basicCalibSettings.m_rebinCalibrate = 1;
   }
 
-  void tearDown() {
+  void tearDown() override {
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
@@ -438,6 +438,8 @@ public:
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(1)
         .WillOnce(Return(specid));
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught
@@ -554,6 +556,9 @@ public:
         .Times(2)
         .WillRepeatedly(Return(specid));
 
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
+
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
     EXPECT_CALL(mockView,
@@ -608,6 +613,9 @@ public:
     EXPECT_CALL(mockView, currentCalibSpecNos())
         .Times(2)
         .WillRepeatedly(Return(specid));
+
+	EXPECT_CALL(mockView, currentCalibCustomisedBankName())
+		.Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);

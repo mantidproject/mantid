@@ -44,9 +44,6 @@ class MANTID_SINQ_DLL PoldiSourceSpectrum {
 public:
   PoldiSourceSpectrum(Kernel::Interpolation spectrum);
   PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
-
-  ~PoldiSourceSpectrum() {}
-
   double intensity(double wavelength) const;
 
 protected:

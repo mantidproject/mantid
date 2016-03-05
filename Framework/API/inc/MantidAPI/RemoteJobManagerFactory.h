@@ -80,9 +80,7 @@ private:
   RemoteJobManagerFactoryImpl(const RemoteJobManagerFactoryImpl &);
   /// Disallow assignment
   RemoteJobManagerFactoryImpl &operator=(const RemoteJobManagerFactoryImpl &);
-
-  /// Private Destructor
-  ~RemoteJobManagerFactoryImpl() override;
+  ~RemoteJobManagerFactoryImpl() override = default;
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<IRemoteJobManager>::create;

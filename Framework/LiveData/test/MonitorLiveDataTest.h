@@ -38,7 +38,7 @@ public:
       : loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml",
                          "TEST") {}
 
-  void setUp() {
+  void setUp() override {
     // Register algorithms
     FrameworkManager::Instance();
     AnalysisDataService::Instance().clear();

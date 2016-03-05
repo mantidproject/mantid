@@ -90,25 +90,6 @@ Projection::Projection(const ITableWorkspace &ws) {
   }
 }
 
-Projection::Projection(const Projection &other) {
-  for (size_t i = 0; i < 3; ++i) {
-    m_dimensions[i] = other.m_dimensions[i];
-    m_offsets[i] = other.m_offsets[i];
-    m_units[i] = other.m_units[i];
-  }
-}
-
-Projection &Projection::operator=(const Projection &other) {
-  for (size_t i = 0; i < 3; ++i) {
-    m_dimensions[i] = other.m_dimensions[i];
-    m_offsets[i] = other.m_offsets[i];
-    m_units[i] = other.m_units[i];
-  }
-  return *this;
-}
-
-Projection::~Projection() {}
-
 double Projection::getOffset(size_t nd) {
   if (nd >= 3)
     throw std::invalid_argument("given axis out of range");
