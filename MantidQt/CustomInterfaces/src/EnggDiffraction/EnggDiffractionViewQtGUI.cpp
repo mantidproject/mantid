@@ -260,6 +260,13 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.comboBox_calib_cropped_bank_name->setCurrentIndex(0);
 
+  m_uiTabCalib.lineEdit_cropped_spec_ids->setText(
+      qs.value("user-params-calib-cropped-spectrum-nos", "").toString());
+
+  m_uiTabCalib.lineEdit_cropped_customise_bank_name->setText(
+      qs.value("user-params-calib-cropped-customise-name", "cropped")
+          .toString());
+
   m_uiTabCalib.checkBox_PlotData_Calib->setChecked(
       qs.value("user-param-calib-plot-data", true).toBool());
 
@@ -367,6 +374,12 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());
+
+  qs.setValue("user-params-calib-cropped-spectrum-nos",
+              m_uiTabCalib.lineEdit_cropped_spec_ids->text());
+
+  qs.setValue("user-params-calib-cropped-customise-name",
+              m_uiTabCalib.lineEdit_cropped_customise_bank_name->text());
 
   qs.setValue("user-param-calib-plot-data",
               m_uiTabCalib.checkBox_PlotData_Calib->isChecked());
@@ -956,14 +969,22 @@ void EnggDiffractionViewQtGUI::calibSpecIdChanged(int /*idx*/) {
 }
 
 void EnggDiffractionViewQtGUI::enableSpecIds() {
-  if (m_currentCropCalibBankName == 0)
+  if (m_currentCropCalibBankName == 0) {
     m_uiTabCalib.lineEdit_cropped_spec_ids->setEnabled(true);
-  else
+    m_uiTabCalib.lineEdit_cropped_customise_bank_name->setEnabled(true);
+  } else {
     m_uiTabCalib.lineEdit_cropped_spec_ids->setDisabled(true);
+    m_uiTabCalib.lineEdit_cropped_customise_bank_name->setDisabled(true);
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibSpecNos() const {
   return m_uiTabCalib.lineEdit_cropped_spec_ids->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::currentCalibCustomisedBankName() const {
+  return m_uiTabCalib.lineEdit_cropped_customise_bank_name->text()
+      .toStdString();
 }
 
 void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
