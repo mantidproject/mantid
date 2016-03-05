@@ -784,10 +784,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
               << detids.size() << " detectors.";
         throw runtime_error(errss.str());
       }
-      detid_t detid = 0;
-      for (auto detit = detids.begin(); detit != detids.end(); ++detit)
-        detid = *detit;
-      vecDetIDs[i] = detid;
+      vecDetIDs[i] = *detids.begin();
     }
 
     // Map correction map to list

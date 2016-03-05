@@ -234,12 +234,12 @@ public:
     boost::split(strs, str, boost::is_any_of(", "));
 
     std::vector<TYPE> vals;
-    for (size_t d = 0; d < strs.size(); d++) {
-      if (!strs[d].empty()) {
+    for (auto &str : strs) {
+      if (!str.empty()) {
         TYPE v;
-        if (!Strings::convert(strs[d], v))
+        if (!Strings::convert(str, v))
           throw std::invalid_argument(
-              "VMDBase: Unable to convert the string '" + strs[d] +
+              "VMDBase: Unable to convert the string '" + str +
               "' to a number.");
         vals.push_back(v);
       }

@@ -134,10 +134,10 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
   // Create the entry in the cache and work with it directly
   std::vector<std::string> &typeNames = m_cachedFunctionNames[soughtType];
   const std::vector<std::string> names = this->getKeys();
-  for (auto it = names.begin(); it != names.end(); ++it) {
-    boost::shared_ptr<IFunction> func = this->createFunction(*it);
+  for (const auto &name : names) {
+    boost::shared_ptr<IFunction> func = this->createFunction(name);
     if (func && dynamic_cast<FunctionType *>(func.get())) {
-      typeNames.push_back(*it);
+      typeNames.push_back(std::move(name));
     }
   }
   return typeNames;

@@ -218,12 +218,9 @@ public:
   virtual const std::vector<std::string> getKeys() const {
     std::vector<std::string> names;
     names.reserve(_map.size());
-
-    typename FactoryMap::const_iterator iter = _map.begin();
-    for (; iter != _map.end(); ++iter) {
-      names.push_back(iter->first);
+    for (const auto &mapPair : _map) {
+      names.push_back(mapPair.first);
     }
-
     return names;
   }
 

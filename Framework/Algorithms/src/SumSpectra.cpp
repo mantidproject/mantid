@@ -242,8 +242,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 
   // Loop over spectra
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
-    int i = *it;
+  for (auto i : this->m_indices) {
     // Don't go outside the range.
     if ((i >= this->m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
@@ -356,8 +355,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
 
   // Loop over spectra
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (auto it = m_indices.begin(); it != m_indices.end(); ++it) {
-    int i = *it;
+  for (auto i : m_indices) {
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
@@ -453,8 +451,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numMasked(0);
   size_t numZeros(0);
   // for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  for (auto it = indices.begin(); it != indices.end(); ++it) {
-    int i = *it;
+  for (auto i : indices) {
     // Don't go outside the range.
     if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i

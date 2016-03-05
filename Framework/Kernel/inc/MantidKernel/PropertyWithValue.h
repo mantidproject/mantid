@@ -155,9 +155,8 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
 
   value.clear();
   value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {
-    value.push_back(boost::lexical_cast<T>(*it));
+  for (const auto &str : values) {
+    value.push_back(boost::lexical_cast<T>(str));
   }
 }
 
@@ -172,15 +171,15 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
   value.clear();
   value.reserve(tokens.count());
 
-  for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt) {
-    tokenizer values(*oIt, innerDelimiter,
+  for (const auto &token : tokens) {
+    tokenizer values(token, innerDelimiter,
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
+    vect.reserve(values.count());
+    for (auto &value : values)
+      vect.push_back(boost::lexical_cast<T>(value));
 
-    for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
-      vect.push_back(boost::lexical_cast<T>(*iIt));
-
-    value.push_back(vect);
+    value.push_back(std::move(vect));
   }
 }
 
@@ -270,8 +269,9 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
                                                        const IValidator &) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
-  for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
-    values.push_back(it->second);
+  values.reserve(enumMap.size());
+  for (const auto &str : enumMap) {
+    values.push_back(str.second);
   }
   return values;
 }
