@@ -118,7 +118,7 @@ private:
   std::string outMessage;
 
 public:
-  FileError(const std::string &Description, const std::string &FileName);
+  FileError(const std::string &Desc, const std::string &FName);
   FileError(const FileError &A);
   /// Assignment operator
   FileError &operator=(const FileError &A);

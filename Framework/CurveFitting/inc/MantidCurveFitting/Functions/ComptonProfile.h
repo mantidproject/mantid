@@ -58,7 +58,7 @@ public:
   /// Cache a copy of the workspace pointer and pull out the parameters
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+                     size_t wsIndex, double startX, double endX) override;
 
   /// Pre-calculate the Y-space values with specified resolution parameters
   void cacheYSpaceValues(const std::vector<double> &tseconds,

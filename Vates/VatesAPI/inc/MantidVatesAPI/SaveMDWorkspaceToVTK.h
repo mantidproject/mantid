@@ -39,16 +39,16 @@ class SaveMDWorkspaceToVTKImpl;
 class DLLExport SaveMDWorkspaceToVTK : public Mantid::API::Algorithm {
 public:
   SaveMDWorkspaceToVTK();
-  ~SaveMDWorkspaceToVTK();
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  ~SaveMDWorkspaceToVTK() override;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
-  std::map<std::string, std::string> validateInputs();
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
   std::unique_ptr<SaveMDWorkspaceToVTKImpl> saver;
 };
 }

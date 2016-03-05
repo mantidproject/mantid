@@ -90,7 +90,7 @@ std::string Goniometer::axesInfo() {
     std::vector<GoniometerAxis>::iterator it;
     std::string strCW("CW"), strCCW("CCW"), sense;
 
-    if (motors.size() == 0) {
+    if (motors.empty()) {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";

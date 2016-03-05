@@ -27,9 +27,11 @@ class LocalParameterItemDelegate: public QStyledItemDelegate
   Q_OBJECT
 public:
   LocalParameterItemDelegate(EditLocalParameterDialog *parent = NULL);
-  QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
-  void setEditorData(QWidget * editor, const QModelIndex & index) const;
-  void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                        const QModelIndex &index) const override;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const override;
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
@@ -37,9 +39,11 @@ signals:
   void setTie(int,QString);
   void setTieAll(QString);
 protected:
-  void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const override;
+
 private:
-  bool eventFilter(QObject * obj, QEvent * ev);
+  bool eventFilter(QObject *obj, QEvent *ev) override;
   EditLocalParameterDialog *owner() const;
   mutable LocalParameterEditor* m_currentEditor;
 };

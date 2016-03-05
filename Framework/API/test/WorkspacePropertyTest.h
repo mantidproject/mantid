@@ -17,14 +17,14 @@ class WorkspacePropertyTest : public CxxTest::TestSuite {
 
   class WorkspaceTester1 : public WorkspaceTester {
   public:
-    const std::string id() const { return "WorkspacePropTest"; }
+    const std::string id() const override { return "WorkspacePropTest"; }
   };
 
   // Second, identical private test class - used for testing check on workspace
   // type in isValid()
   class WorkspaceTester2 : public WorkspaceTester {
   public:
-    const std::string id() const { return "WorkspacePropTest"; }
+    const std::string id() const override { return "WorkspacePropTest"; }
   };
 
 public:
@@ -52,7 +52,7 @@ public:
                                             Direction::Output);
   }
 
-  ~WorkspacePropertyTest() {
+  ~WorkspacePropertyTest() override {
     delete wsp1;
     delete wsp2;
     delete wsp3;

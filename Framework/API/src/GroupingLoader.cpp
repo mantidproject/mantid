@@ -1,7 +1,11 @@
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Strings.h"
 #include <boost/make_shared.hpp>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -215,6 +219,74 @@ void GroupingLoader::loadGroupingFromXML(const std::string &filename,
     grouping.defaultName = defaultElement->getAttribute("name");
   }
 }
+
+/**
+ * Returns a "dummy" grouping: a single group with all the detectors in it.
+ * @return Grouping information
+ */
+boost::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
+  // Group with all the detectors
+  std::ostringstream all;
+  all << "1-" << m_instrument->getNumberDetectors();
+
+  auto dummyGrouping = boost::make_shared<Mantid::API::Grouping>();
+  dummyGrouping->description = "Dummy grouping";
+  dummyGrouping->groupNames.emplace_back("all");
+  dummyGrouping->groups.push_back(all.str());
+  return dummyGrouping;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * Construct a Grouping from a table
+ * @param table :: [input] Table to construct from
+ */
+Grouping::Grouping(ITableWorkspace_sptr table) {
+  for (size_t row = 0; row < table->rowCount(); ++row) {
+    std::vector<int> detectors = table->cell<std::vector<int>>(row, 0);
+
+    // toString() expects the sequence to be sorted
+    std::sort(detectors.begin(), detectors.end());
+
+    // Convert to a range string, i.e. 1-5,6-8,9
+    std::string detectorRange = Kernel::Strings::toString(detectors);
+
+    this->groupNames.push_back(boost::lexical_cast<std::string>(row + 1));
+    this->groups.push_back(detectorRange);
+  }
+
+  // If we have 2 groups only - create a longitudinal pair
+  if (this->groups.size() == 2) {
+    this->pairNames.emplace_back("long");
+    this->pairAlphas.push_back(1.0);
+    this->pairs.emplace_back(0, 1);
+  }
+}
+
+/**
+ * Converts a grouping information to a grouping table. Discard all the
+ * information not stored in a
+ * table - group names, pairing, description.
+ * @return A grouping table as accepted by MuonGroupDetectors
+ */
+ITableWorkspace_sptr Grouping::toTable() const {
+  auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+
+  newTable->addColumn("vector_int", "Detectors");
+
+  for (auto it = this->groups.begin(); it != this->groups.end(); ++it) {
+    TableRow newRow = newTable->appendRow();
+    newRow << Kernel::Strings::parseRange(*it);
+  }
+
+  return newTable;
+}
+
+/**
+ * Define destructor here because the type is complete
+ */
+Grouping::~Grouping() = default;
 
 } // namespace API
 } // namespace Mantid

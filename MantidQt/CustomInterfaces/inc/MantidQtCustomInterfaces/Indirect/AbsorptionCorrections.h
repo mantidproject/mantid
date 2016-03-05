@@ -16,10 +16,10 @@ namespace CustomInterfaces
     AbsorptionCorrections(QWidget * parent = 0);
 
   private:
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
-    virtual void loadSettings(const QSettings & settings);
+    void setup() override;
+    void run() override;
+    bool validate() override;
+    void loadSettings(const QSettings &settings) override;
 
   private slots:
     virtual void algorithmComplete(bool error);

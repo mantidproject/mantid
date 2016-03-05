@@ -5,7 +5,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <algorithm>
 #include <sstream>
-#include <stdexcept>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {

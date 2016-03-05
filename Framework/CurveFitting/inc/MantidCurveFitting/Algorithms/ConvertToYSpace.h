@@ -82,16 +82,15 @@ public:
                         const std::string &name);
   /// Convert single time value to Y,Q & Ei values
   static void calculateY(double &yspace, double &qspace, double &ei,
-                         const double mass, const double tmicro,
-                         const double k1, const double v1,
-                         const DetectorParams &detpar);
+                         const double mass, const double tsec, const double k1,
+                         const double v1, const DetectorParams &detpar);
 
 private:
   void init() override;
   void exec() override;
 
   /// Perform the conversion to Y-space
-  bool convert(const size_t i);
+  bool convert(const size_t index);
   /// Check and store appropriate input data
   void retrieveInputs();
   /// Create the output workspace

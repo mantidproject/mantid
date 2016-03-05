@@ -75,7 +75,7 @@ public:
   /// string but recreates it.
   std::string str() const;
   /// Returns true if the expression is a function (i.e. has arguments)
-  bool isFunct() const { return m_terms.size() > 0; }
+  bool isFunct() const { return !m_terms.empty(); }
   /// Returns the name of the expression which is a function or variable name.
   std::string name() const { return m_funct; }
   /// Returns the the expression's binary operator on its left. Can be an empty

@@ -203,7 +203,7 @@ protected:
   // Call the base class rxPacket(const ADARA::Packet &pkt) which will
   // eventually result
   // in the execution of one of the rxPacket() functions defined above
-  virtual bool rxPacket(const ADARA::Packet &pkt) {
+  bool rxPacket(const ADARA::Packet &pkt) override {
     return ADARA::Parser::rxPacket(pkt);
   }
 

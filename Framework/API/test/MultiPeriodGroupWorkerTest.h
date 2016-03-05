@@ -16,20 +16,20 @@ namespace {
 class TestAlgorithm : public Algorithm {
 public:
   TestAlgorithm() {}
-  virtual const std::string name() const { return "TestAlgorithm"; }
-  virtual int version() const { return 1; }
-  virtual const std::string summary() const { return "Test summary"; }
-  virtual void init() {
+  const std::string name() const override { return "TestAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty(make_unique<ArrayProperty<std::string>>("MyInputWorkspaces",
                                                             Direction::Input));
     declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                      Direction::Output),
                     "");
   }
-  virtual void exec() {
+  void exec() override {
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
   }
-  virtual ~TestAlgorithm() {}
+  ~TestAlgorithm() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithm)
 }

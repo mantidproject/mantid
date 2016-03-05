@@ -67,7 +67,7 @@ public:
 
   uint64_t restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
                           API::BoxController_sptr &bc, bool FileBackEnd,
-                          bool NoFileInfo = false);
+                          bool BoxStructureOnly = false);
 
   /*** this function tries to set file positions of the boxes to
         make data physically located close to each other to be as close as
@@ -128,7 +128,8 @@ public:
   static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName,
                                               int &nDims,
                                               const std::string &WSEventType,
-                                              bool readOnly, bool &exist);
+                                              bool readOnly,
+                                              bool &alreadyExists);
   // save each experiment info into its own NeXus group within an existing
   // opened group
   static void saveExperimentInfos(::NeXus::File *const file,

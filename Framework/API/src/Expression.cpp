@@ -134,7 +134,7 @@ void Expression::parse(const std::string &str) {
 
   tokenize();
 
-  if (m_tokens.size() == 0) {
+  if (m_tokens.empty()) {
     setFunct(m_expr);
     return;
   }
@@ -310,7 +310,7 @@ void Expression::tokenize() {
 
   } // for i
 
-  if (tokens.size()) {
+  if (!tokens.empty()) {
     // remove operators of higher prec
     m_tokens.push_back(Token(tokens[0]));
     for (size_t i = 0; i < tokens.size(); i++) {
@@ -328,7 +328,7 @@ void Expression::tokenize() {
 }
 
 std::string Expression::GetToken(size_t i) {
-  if (m_tokens.size() == 0)
+  if (m_tokens.empty())
     return m_expr;
 
   if (i < m_tokens.size()) {
@@ -345,7 +345,7 @@ std::string Expression::GetToken(size_t i) {
 }
 
 std::string Expression::GetOp(size_t i) {
-  if (m_tokens.size() == 0 || i >= m_tokens.size())
+  if (m_tokens.empty() || i >= m_tokens.size())
     return "";
 
   Token &tok = m_tokens[i];
@@ -354,7 +354,7 @@ std::string Expression::GetOp(size_t i) {
 
 void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
-  if (m_terms.size()) {
+  if (!m_terms.empty()) {
     std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
     for (const auto &term : m_terms)
       term.logPrint(myPads);
@@ -442,7 +442,7 @@ std::string Expression::str() const {
     brackets = true;
   }
 
-  if (m_terms.size()) {
+  if (!m_terms.empty()) {
     if (brackets)
       res << '(';
     for (const auto &term : m_terms) {

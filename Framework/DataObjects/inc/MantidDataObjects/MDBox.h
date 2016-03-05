@@ -221,7 +221,7 @@ private:
   /// one with the boxController;
   MDBox(const MDBox &);
   /// common part of mdBox constructor
-  void initMDBox(const size_t numEvents);
+  void initMDBox(const size_t nBoxEvents);
 
 public:
   /// Typedef for a shared pointer to a MDBox

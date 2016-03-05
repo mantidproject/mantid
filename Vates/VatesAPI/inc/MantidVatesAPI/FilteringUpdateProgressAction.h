@@ -47,8 +47,7 @@ public:
   {
   }
 
-  virtual void eventRaised(double progress)
-  {
+  void eventRaised(double progress) override {
     m_filter->updateAlgorithmProgress(progress, m_message);
   }
 

@@ -14,12 +14,12 @@ public:
 
   QString help() { return "DensityOfStates"; };
 
-  void setup();
-  bool validate();
-  void run();
+  void setup() override;
+  bool validate() override;
+  void run() override;
 
   /// Load default settings into the interface
-  void loadSettings(const QSettings &settings);
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   void dosAlgoComplete(bool error);

@@ -508,7 +508,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   // Load partial spectra
   //---------------------------------------------------------------------------
   // For slight speed up
-  m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
+  m_loadOnlySomeSpectra = (!this->m_spectraList.empty());
 
   // Turn the spectra list into a map, for speed of access
   for (auto spectra : m_spectraList)

@@ -153,7 +153,7 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  void setAttribute(const std::string &attName, const Attribute &att) override;
+  void setAttribute(const std::string &name, const Attribute &att) override;
 
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;

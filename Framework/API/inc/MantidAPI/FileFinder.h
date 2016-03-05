@@ -53,8 +53,8 @@ public:
   std::string getFullPath(const std::string &filename,
                           const bool ignoreDirs = false) const;
   std::string getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                      const std::set<std::string> &filename,
-                      const std::vector<std::string> &extensions) const;
+                      const std::set<std::string> &filenames,
+                      const std::vector<std::string> &exts) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hint,
                            const Kernel::InstrumentInfo &instrument) const;

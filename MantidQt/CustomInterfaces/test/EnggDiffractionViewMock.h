@@ -56,6 +56,9 @@ public:
   // std::string currentCalibSpecNos
   MOCK_CONST_METHOD0(currentCalibSpecNos, std::string());
 
+  // std::string currentCalibCustomisedBankName
+  MOCK_CONST_METHOD0(currentCalibCustomisedBankName, std::string());
+
   // int currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 

@@ -14,7 +14,7 @@ class MantidMDCurveDialog : public QDialog
 
 public:
     MantidMDCurveDialog(QWidget *parent = 0, QString wsName=QString());
-    ~MantidMDCurveDialog();
+    ~MantidMDCurveDialog() override;
 
     LinePlotOptions * getLineOptionsWidget()
     {return m_lineOptions; }
