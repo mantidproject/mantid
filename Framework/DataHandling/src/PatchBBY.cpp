@@ -177,9 +177,9 @@ void PatchBBY::exec() {
   bool reset = getProperty("Reset");
   if (reset) {
     int64_t fileSize = 0;
-    for (auto itr = files.begin(); itr != files.end(); ++itr)
-      if (itr->rfind(".hdf") == itr->length() - 4) {
-        tarFile.select(itr->c_str());
+    for (const auto &file : files)
+      if (file.rfind(".hdf") == file.length() - 4) {
+        tarFile.select(file.c_str());
         fileSize = tarFile.selected_size();
         break;
       }
