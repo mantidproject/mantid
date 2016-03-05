@@ -280,6 +280,7 @@ class AlignComponents(PythonAlgorithm):
                 else:
                     mask_out = None
                 newZ = minimize(self._minimisation_func_L1, x0=componentZ,
+                                method='L-BFGS-B',
                                 args=(wks_name,
                                       componentName,
                                       firstIndex,
@@ -360,6 +361,7 @@ class AlignComponents(PythonAlgorithm):
                                    self._initialPos[5] + self.getProperty("MaxGammaRotation").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
+                               method='L-BFGS-B',
                                args=(wks_name,
                                      component,
                                      firstIndex,
