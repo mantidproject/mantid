@@ -4,6 +4,9 @@ set ( SRC_FILES
 	src/DynamicPDF/DisplayCurveFitTest.cpp
 	src/DynamicPDF/SliceSelector.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
+	src/DynamicPDF/DisplayCurveFitTest.cpp
+	src/DynamicPDF/SliceSelector.cpp
+	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
 	src/Indirect/AbsorptionCorrections.cpp
