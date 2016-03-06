@@ -94,25 +94,22 @@ class SANSCopyUserFileDependency(unittest.TestCase):
         #Arrange
         user_file_name = "does_not_exist.txt"
         target_directory = "copy_user_file_sans_unit_test"
-
-        #Act
+        #import time
+        #time.sleep(10)
         copier = AlgorithmManager.createUnmanaged("SANSCopyUserFileDependency")
         copier.initialize()
         copier.setChild(True)
-        copier.setProperty("Filename", user_file_name)
-        copier.setProperty("OutputDirectory", target_directory)
 
+        # Act + Assert
+        msg = ""
         raises_exception = False
-        error_message = ""
         try:
-            copier.execute()
-        except RuntimeError as e:
+            copier.setProperty("Filename", user_file_name)
+        except ValueError:
+            msg = "Should raise because there is no valid file name specified"
             raises_exception = True
-            error_message = str(e)
-
-        # Assert
+        self.assertTrue(msg)
         self.assertTrue(raises_exception)
-        self.assertTrue("finding the specfied user file" in error_message)
 
     def test_that_raises_when_a_dependency_cannot_be_found(self):
         #Arrange
@@ -156,23 +153,20 @@ class SANSCopyUserFileDependency(unittest.TestCase):
         copier.initialize()
         copier.setChild(True)
         copier.setProperty("Filename", user_file_name)
-        copier.setProperty("OutputDirectory", target_directory)
 
+        # Act + Assert
+        msg = ""
         raises_exception = False
-        error_message = ""
         try:
-            copier.execute()
-        except RuntimeError as e:
+            copier.setProperty("OutputDirectory", target_directory)
+        except ValueError:
+            msg = "Should raise because there is no valid file name specified"
             raises_exception = True
-            error_message = str(e)
-
-        # Assert
+        self.assertTrue(msg)
         self.assertTrue(raises_exception)
-        self.assertTrue("output directory" in error_message)
 
         # Cleanup
         self._remove_files(to_remove)
-
 
 
 class UserFileDependencyExtractorTest(unittest.TestCase):
