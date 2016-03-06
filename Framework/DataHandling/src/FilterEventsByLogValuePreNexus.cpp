@@ -1416,8 +1416,8 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
   size_t numerror = 0;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size());
-         ++i) { // NOLINT
+    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); // NOLINT
+         ++i) {
       PARALLEL_START_INTERUPT_REGION
 
       uint64_t eventindex = m_vecEventIndex[i];
