@@ -399,22 +399,22 @@ private:
     std::string error;
 
     // Cycle through each workspace in the group ...
-    for (const auto &name : wsGroupNames) {
+    for (const auto &memberWsName : wsGroupNames) {
       boost::shared_ptr<Workspace> memberWs =
-          AnalysisDataService::Instance().retrieve(name);
+          AnalysisDataService::Instance().retrieve(memberWsName);
 
       // Table Workspaces are ignored
       if ("TableWorkspace" == memberWs->id()) {
-        error = "Workspace " + name + " is of type TableWorkspace and "
-                                      "will therefore be ignored as "
-                                      "part of the GroupedWorkspace.";
+        error = "Workspace " + memberWsName + " is of type TableWorkspace and "
+                                              "will therefore be ignored as "
+                                              "part of the GroupedWorkspace.";
 
         g_log.debug() << error << std::endl;
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
         if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
-          error = "Workspace " + name + " is not of type " +
+          error = "Workspace " + memberWsName + " is not of type " +
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";
 
@@ -425,7 +425,7 @@ private:
         // If it is of the correct type, it may still be invalid. Check.
         else {
           Mantid::API::WorkspaceProperty<TYPE> memberWsProperty(*this);
-          std::string memberError = memberWsProperty.setValue(name);
+          std::string memberError = memberWsProperty.setValue(memberWsName);
           if (!memberError.empty())
             return memberError; // Since if this member is invalid, then the
                                 // whole group is invalid.

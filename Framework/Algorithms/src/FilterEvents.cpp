@@ -766,8 +766,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   // Apply to m_detTofOffsets and m_detTofShifts
   if (usedetid) {
     // Get vector IDs
-    vector<detid_t> vecDetIDs;
-    vecDetIDs.resize(numhist, 0);
+    vector<detid_t> vecDetIDs(numhist, 0);
     // Set up the detector IDs to vecDetIDs and set up the initial value
     for (size_t i = 0; i < numhist; ++i) {
       // It is assumed that there is one detector per spectra.
