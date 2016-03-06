@@ -58,8 +58,8 @@ class SANSCopyUserFileDependency(PythonAlgorithm):
         except IOError:
             self._remove_copied_files(dependencies)
             error_msg = ("SANSCopyUserFileDependency: There was an issue copying"
-                             " the file " + src + " to " + trg + ". Attempted to remove all"
-                             "copied files. Please make sure that you have write permissions.")
+                         " the file " + src + " to " + trg + ". Attempted to remove all"
+                         "copied files. Please make sure that you have write permissions.")
             raise RuntimeError(error_msg)
 
     def _get_user_file_target(self, user_file_full_path, target_directory):
