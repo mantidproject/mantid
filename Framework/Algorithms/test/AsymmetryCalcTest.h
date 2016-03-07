@@ -18,6 +18,16 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
+/**
+ * This is a test class that exists to test the method validateInputs()
+ */
+class TestAsymmetryCalc : public Mantid::Algorithms::AsymmetryCalc {
+public:
+  std::map<std::string, std::string> wrapValidateInputs() {
+    return this->validateInputs();
+  }
+};
+
 class AsymmetryCalcTest : public CxxTest::TestSuite {
 public:
   void testName() {
@@ -112,7 +122,6 @@ public:
     }
   }
 
-
   void test_validateInputs() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 1);
     AsymmetryCalc asymCalc;
@@ -128,6 +137,33 @@ public:
     asymCalc.setPropertyValue("ForwardSpectra", "3");
     // Bad spectrum number for ForwardSpectra
     TS_ASSERT_THROWS(asymCalc.execute(), std::runtime_error);
+  }
+
+  /**
+ * Test that the algorithm can handle a WorkspaceGroup as input without
+ * crashing
+ * We have to use the ADS to test WorkspaceGroups
+ */
+  void testValidateInputsWithWSGroup() {
+    auto ws1 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(2, 1));
+    auto ws2 = boost::static_pointer_cast<Workspace>(
+        WorkspaceCreationHelper::Create2DWorkspace(2, 1));
+    AnalysisDataService::Instance().add("workspace1", ws1);
+    AnalysisDataService::Instance().add("workspace2", ws2);
+    auto group = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().add("group", group);
+    group->add("workspace1");
+    group->add("workspace2");
+    TestAsymmetryCalc calc;
+    calc.initialize();
+    calc.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(calc.setPropertyValue("InputWorkspace", "group"));
+    calc.setPropertyValue("OutputWorkspace", "__Unused");
+    calc.setPropertyValue("ForwardSpectra", "1");
+    calc.setPropertyValue("BackwardSpectra", "2");
+    TS_ASSERT_THROWS_NOTHING(calc.wrapValidateInputs());
+    AnalysisDataService::Instance().clear();
   }
 
 private:
