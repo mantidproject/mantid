@@ -292,6 +292,10 @@ class DPDFreduction(PythonAlgorithm):
         api.ConvertMDHistoToMatrixWorkspace(InputWorkspace=wn_sqeb,
                                             Normalization='NumEventsNormalization', OutputWorkspace=wn_sqes)
 
+        # Ensure correct units
+        api.mtd[wn_sqes].getAxis(0).setUnit("MomentumTransfer")
+        api.mtd[wn_sqes].getAxis(1).setUnit("DeltaE")
+
         # Shift the energy axis, since the reported values should be the center
         # of the bins, instead of the minimum bin boundary
         ws_sqes = api.mtd[wn_sqes]
@@ -308,7 +312,7 @@ class DPDFreduction(PythonAlgorithm):
         # Clean up workspaces from intermediate steps
         if self._clean:
             for name in (wn_van, wn_reduced, wn_ste, wn_van_st, wn_sten,
-                         wn_steni, wn_sqe, wn_sqeb, wn_sqesn):
+                         wn_steni, wn_sqe, wn_sqeb):
                 api.DeleteWorkspace(name)
             if api.mtd.doesExist('PreprocessedDetectorsWS'):
                 api.DeleteWorkspace('PreprocessedDetectorsWS')
