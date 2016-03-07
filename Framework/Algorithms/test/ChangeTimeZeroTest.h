@@ -401,7 +401,7 @@ public:
  * Test that the algorithm can handle a WorkspaceGroup as input without
  * crashing
  * We have to use the ADS to test WorkspaceGroups
- * 
+ *
  * Need to use absolute time to test this part of validateInputs
  */
   void testValidateInputsWithWSGroup() {
