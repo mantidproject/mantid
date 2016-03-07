@@ -10,6 +10,8 @@
 Description
 -----------
 
+Performs the post fitting corrections steps for Vesuvio data.
+These steps in include corrections for multiple scattering and gamma.
 
 Usage
 -----
