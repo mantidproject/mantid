@@ -170,6 +170,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     if (!fit->isExecuted() || status != success) {
       std::ostringstream error;
       error << "Fit failed for spectrum " << ispec;
+      error << ": " << status;
       throw std::runtime_error(error.str());
     }
 
