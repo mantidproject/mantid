@@ -209,7 +209,7 @@ void LoadISISNexus2::exec() {
   size_t x_length = m_loadBlockInfo.getNumberOfChannels() + 1;
 
   // Check input is consistent with the file, throwing if not
-  checkOptionalProperties();
+  checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
   size_t total_specs =
       prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
@@ -444,8 +444,10 @@ void LoadISISNexus2::validateMultiPeriodLogs(
 /**
 * Check the validity of the optional properties of the algorithm and identify if
 * partial data should be loaded.
+* @param: bseparateMonitors: flag indicating if the monitors are to be loaded separately
+* @param: bexcludeMonitor: flag indicating if the monitors are to be excluded
 */
-void LoadISISNexus2::checkOptionalProperties() {
+void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor) {
   // optional properties specify that only some spectra have to be loaded
   bool range_supplied(false);
 
@@ -454,8 +456,12 @@ void LoadISISNexus2::checkOptionalProperties() {
   int64_t spec_max = getProperty("SpectrumMax");
 
   // default spectra ID-s would not work if spectraID_min!=1
-  // This situation can happen if we load the detectors without the monitors
-  if (m_loadBlockInfo.getMinSpectrumID() != 1) {
+  // This situation can happen if we load the detectors without the monitors,
+  // If monitors are not at the beginning we need to check if monitors were
+  // excluded or are to be loaded into a separate workspace.
+  if (m_loadBlockInfo.getMinSpectrumID() != 1 || 
+      bseparateMonitors ||
+      bexcludeMonitor) {
     range_supplied = true;
     m_load_selected_spectra = true;
   }
