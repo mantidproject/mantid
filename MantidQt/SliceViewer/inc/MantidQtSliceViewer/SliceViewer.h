@@ -73,7 +73,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget, public Zooma
 
 public:
   SliceViewer(QWidget *parent = 0);
-  ~SliceViewer();
+  ~SliceViewer() override;
 
   void setWorkspace(const QString & wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
@@ -127,9 +127,9 @@ public:
   void clearPeaksWorkspaces(); // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
-  virtual void zoomToRectangle(const PeakBoundingBox& box);
-  virtual void resetView();
-  virtual void detach();
+  void zoomToRectangle(const PeakBoundingBox &box) override;
+  void resetView() override;
+  void detach() override;
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
   void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
@@ -202,9 +202,8 @@ public slots:
   void changeAspectRatioUnlock();
 
 protected:
-
-  void dragEnterEvent(QDragEnterEvent *e);
-  void dropEvent(QDropEvent *e);
+  void dragEnterEvent(QDragEnterEvent *e) override;
+  void dropEvent(QDropEvent *e) override;
 
 private:
   enum AspectRatioType{Guess=0, All=1, Unlock=2};

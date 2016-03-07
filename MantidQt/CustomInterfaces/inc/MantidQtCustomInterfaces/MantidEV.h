@@ -49,21 +49,21 @@ class RunLoadAndConvertToMD : public QRunnable
                          const std::string    & det_cal_file2 );
 
   /// Calls worker->loadAndConvertToMD from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      file_name;
-    std::string      ev_ws_name;
-    std::string      md_ws_name;
-    double           modQ;
-    double           minQ;
-    double           maxQ;
-    bool             do_lorentz_corr;
-    bool             load_data;
-    bool             load_det_cal;
-    std::string      det_cal_file;
-    std::string      det_cal_file2;
+private:
+  MantidEVWorker *worker;
+  std::string file_name;
+  std::string ev_ws_name;
+  std::string md_ws_name;
+  double modQ;
+  double minQ;
+  double maxQ;
+  bool do_lorentz_corr;
+  bool load_data;
+  bool load_det_cal;
+  std::string det_cal_file;
+  std::string det_cal_file2;
 };
 
 
@@ -84,18 +84,18 @@ class RunFindPeaks : public QRunnable
                       double maxQPeaks);
 
   /// Calls worker->findPeaks from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      ev_ws_name;
-    std::string      md_ws_name;
-    std::string      peaks_ws_name;
-    double           max_abc;
-    size_t           num_to_find;
-    double           min_intensity;
-    double           minQPeaks;
-    double           maxQPeaks;
+private:
+  MantidEVWorker *worker;
+  std::string ev_ws_name;
+  std::string md_ws_name;
+  std::string peaks_ws_name;
+  double max_abc;
+  size_t num_to_find;
+  double min_intensity;
+  double minQPeaks;
+  double maxQPeaks;
 };
 
 /// Local class to run PredictPeaks in a Non-Qt thread.
@@ -112,15 +112,15 @@ class RunPredictPeaks : public QRunnable
                       double           max_pred_dspacing );
 
   /// Calls worker->predictPeaks from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      peaks_ws_name;
-    double           min_pred_wl;
-    double           max_pred_wl;
-    double           min_pred_dspacing;
-    double           max_pred_dspacing;
+private:
+  MantidEVWorker *worker;
+  std::string peaks_ws_name;
+  double min_pred_wl;
+  double max_pred_wl;
+  double min_pred_dspacing;
+  double max_pred_dspacing;
 };
 
 /// Local class to run IntegratePeaksMD in a Non-Qt thread.
@@ -142,20 +142,20 @@ class RunSphereIntegrate : public QRunnable
                       const std::string &    cylinder_profile_fit);
 
   /// Calls worker->sphereIntegrate from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      peaks_ws_name;
-    std::string      event_ws_name;
-    double           peak_radius; 
-    double           inner_radius; 
-    double           outer_radius; 
-    bool             integrate_edge; 
-    bool             use_cylinder_integration;
-    double           cylinder_length;
-    double           cylinder_percent_bkg;
-    std::string      cylinder_profile_fit;
+private:
+  MantidEVWorker *worker;
+  std::string peaks_ws_name;
+  std::string event_ws_name;
+  double peak_radius;
+  double inner_radius;
+  double outer_radius;
+  bool integrate_edge;
+  bool use_cylinder_integration;
+  double cylinder_length;
+  double cylinder_percent_bkg;
+  std::string cylinder_profile_fit;
 };
 
 
@@ -173,15 +173,15 @@ class RunFitIntegrate : public QRunnable
                          bool             use_ikeda_carpenter );
 
   /// Calls worker->fitIntegrate from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      peaks_ws_name;
-    std::string      event_ws_name;
-    std::string      rebin_params;
-    size_t           n_bad_edge_pix;
-    bool             use_ikeda_carpenter;
+private:
+  MantidEVWorker *worker;
+  std::string peaks_ws_name;
+  std::string event_ws_name;
+  std::string rebin_params;
+  size_t n_bad_edge_pix;
+  bool use_ikeda_carpenter;
 };
 
 
@@ -201,17 +201,17 @@ class RunEllipsoidIntegrate : public QRunnable
                                double           outer_size );
 
   /// Calls worker->ellipsoidIntegrate from a separate thread
-  void run();
+  void run() override;
 
-  private:
-    MantidEVWorker * worker;
-    std::string      peaks_ws_name;
-    std::string      event_ws_name;
-    double           region_radius;
-    bool             specify_size;
-    double           peak_size;
-    double           inner_size;
-    double           outer_size;
+private:
+  MantidEVWorker *worker;
+  std::string peaks_ws_name;
+  std::string event_ws_name;
+  double region_radius;
+  bool specify_size;
+  double peak_size;
+  double inner_size;
+  double outer_size;
 };
 
 
@@ -236,7 +236,7 @@ public:
   MantidEV(QWidget *parent = 0);
 
   /// Destructor
-  ~MantidEV();
+  ~MantidEV() override;
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
@@ -386,7 +386,7 @@ private slots:
 
 private:
   /// super class pure virtual method we MUST implement
-  virtual void initLayout();
+  void initLayout() override;
 
   /// Utility method to display an error message
   void errorMessage( const std::string & message );

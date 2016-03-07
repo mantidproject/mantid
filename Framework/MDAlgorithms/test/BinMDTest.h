@@ -37,17 +37,17 @@ private:
   public:
     using MDImplicitFunction::isPointContained; // Avoids Intel compiler
                                                 // warning.
-    virtual bool isPointContained(const Mantid::coord_t *) { return false; }
-    virtual std::string getName() const { return "MockImplicitFunction"; }
+    bool isPointContained(const Mantid::coord_t *) override { return false; }
+    std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction() { ; }
+    ~MockImplicitFunction() override { ; }
   };
 
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const {
+    Mantid::Geometry::MDImplicitFunction *create() const override {
       return new MockImplicitFunction;
     }
   };
@@ -58,13 +58,13 @@ private:
   public:
     MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL) {}
     Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) {
+    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;
     }
-    void
-    setSuccessorParser(Mantid::API::ImplicitFunctionParser * /*successor*/) {}
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParser * /*successor*/) override {}
     void setParameterParser(
-        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) {}
+        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) override {}
   };
   // helper ws creator
   Mantid::API::Workspace_sptr createSimple3DWorkspace() {
@@ -977,7 +977,7 @@ public:
     TS_ASSERT_EQUALS(in_ws->getBoxController()->getMaxId(), 1001);
   }
 
-  ~BinMDTestPerformance() {
+  ~BinMDTestPerformance() override {
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 

@@ -19,10 +19,10 @@ namespace IDA
     Elwin(QWidget* parent = 0);
 
   private:
-    virtual void setup();
-    virtual void run();
-    virtual bool validate();
-    virtual void loadSettings(const QSettings & settings);
+    void setup() override;
+    void run() override;
+    bool validate() override;
+    void loadSettings(const QSettings &settings) override;
     void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
     void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 

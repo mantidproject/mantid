@@ -57,7 +57,7 @@ namespace MantidQt
       /// Default Constructor
       DirectConvertToEnergy(QWidget *parent = 0);
       ///Destructor
-      ~DirectConvertToEnergy();
+      ~DirectConvertToEnergy() override;
       /// Interface name
       static std::string name() { return "Convert To Energy (Direct)"; }
       /// Aliases for this interface
@@ -77,8 +77,8 @@ namespace MantidQt
 
     private: // private functions (and slots)
       /// Initialize the layout
-      virtual void initLayout();
-      virtual void initLocalPython();
+      void initLayout() override;
+      void initLocalPython() override;
       void readSettings();
       void saveSettings();
       void setDefaultInstrument(const QString & name);

@@ -159,7 +159,7 @@ public:
   }
 
 private:
-  ~SavePHXTest() {
+  ~SavePHXTest() override {
     // delete test ws from ds after the test ends
     AnalysisDataService::Instance().remove(WSName);
     // delete test output file from the hdd;

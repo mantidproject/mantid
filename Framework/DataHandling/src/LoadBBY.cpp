@@ -13,6 +13,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 #include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
@@ -543,7 +545,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
         instrumentInfo.bm_counts = tmp_int32;
       if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
         instrumentInfo.att_pos =
-            static_cast<int32_t>(tmp_float + 0.5f); // [1.0, 2.0, ..., 5.0]
+            boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
 
       if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
@@ -598,8 +600,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("bm1_counts"))
       instrumentInfo.bm_counts = conf->getInt("bm1_counts");
     if (conf->hasProperty("att_pos"))
-      instrumentInfo.att_pos =
-          static_cast<int32_t>(conf->getDouble("att_pos") + 0.5f);
+      instrumentInfo.att_pos = boost::math::iround(conf->getDouble("att_pos"));
 
     if (conf->hasProperty("master_chopper_freq"))
       instrumentInfo.period_master =
@@ -793,19 +794,19 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,
                                      Progress_LoadBinFile);
 
-  unsigned int x = 0; // 9 bits [0-239] tube number
-  unsigned int y = 0; // 8 bits [0-255] position along tube
+  uint64_t x = 0; // 9 bits [0-239] tube number
+  uint64_t y = 0; // 8 bits [0-255] position along tube
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
-  unsigned int dt = 0;
+  uint64_t dt = 0;
   double tof = 0.0;
 
   if ((fileSize == 0) || !tarFile.skip(128))
     return;
 
   int state = 0;
-  unsigned int c;
+  uint64_t c;
   while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
          static_cast<unsigned int>(-1)) {
 

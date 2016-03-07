@@ -53,7 +53,7 @@ template <class VectorValueParameterType>
 class DLLExport VectorParameterParser
     : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  VectorValueParameterType *parseVectorParameter(std::string value);
+  VectorValueParameterType *parseVectorParameter(std::string sValue);
 
   Mantid::API::ImplicitFunctionParameter *
   createParameter(Poco::XML::Element *parameterElement) override;

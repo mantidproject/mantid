@@ -23,7 +23,7 @@ public:
   static void destroySuite(LoadSaveAsciiTest *suite) { delete suite; }
 
   LoadSaveAsciiTest() {}
-  ~LoadSaveAsciiTest() {
+  ~LoadSaveAsciiTest() override {
     FrameworkManager::Instance().deleteWorkspace("LoadSaveAsciiWS_0");
     FrameworkManager::Instance().deleteWorkspace("LoadSaveAsciiWS_1");
   }

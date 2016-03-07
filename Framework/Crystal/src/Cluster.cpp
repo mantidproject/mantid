@@ -84,7 +84,7 @@ Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
  * @param disjointSet
  */
 void Cluster::toUniformMinimum(VecElements &disjointSet) {
-  if (m_indexes.size() > 0) {
+  if (!m_indexes.empty()) {
     size_t parentIndex = m_rootCluster->getRepresentitiveIndex();
 
     for (size_t i = 1; i < m_indexes.size(); ++i) {

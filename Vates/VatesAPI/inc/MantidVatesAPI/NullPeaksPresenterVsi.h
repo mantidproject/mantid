@@ -14,31 +14,31 @@ namespace VATES {
 class DLLExport NullPeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   NullPeaksPresenterVsi() {}
-  virtual ~NullPeaksPresenterVsi() {}
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const {
+  ~NullPeaksPresenterVsi() override {}
+  Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const override {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual std::vector<bool> getViewablePeaks() const {
+  std::vector<bool> getViewablePeaks() const override {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual void updateViewFrustum(ViewFrustum_const_sptr) {}
-  virtual std::string getFrame() const {
+  void updateViewFrustum(ViewFrustum_const_sptr) override {}
+  std::string getFrame() const override {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual std::string getPeaksWorkspaceName() const {
+  std::string getPeaksWorkspaceName() const override {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr, int,
-                            Mantid::Kernel::V3D &, double &, Mantid::Kernel::SpecialCoordinateSystem) const {
+  void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr, int,
+                    Mantid::Kernel::V3D &, double &,
+                    Mantid::Kernel::SpecialCoordinateSystem) const override {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual void sortPeaksWorkspace(const std::string &,
-                                  const bool ) {}
+  void sortPeaksWorkspace(const std::string &, const bool) override {}
 };
 }
 }

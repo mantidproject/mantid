@@ -191,7 +191,7 @@ private:
 
   // calculate generic detectors parameters:
   void calcDetPar(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &GroupCenter, DetParameters &Detector);
+                  const Kernel::V3D &Observer, DetParameters &Detector);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -269,7 +269,7 @@ public:
         m_nComponents(0) {}
   void addDetInfo(const Geometry::IDetector_const_sptr &spDet,
                   const Kernel::V3D &Observer);
-  void returnAvrgDetPar(DetParameters &det);
+  void returnAvrgDetPar(DetParameters &avrgDet);
 
   void setUseSpherical(bool shouldWe = true) { m_useSphericalSizes = shouldWe; }
 

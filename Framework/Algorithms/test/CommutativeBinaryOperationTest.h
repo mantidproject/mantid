@@ -17,15 +17,15 @@ public:
   /// Default constructor
   CommutativeBinaryOpHelper() : CommutativeBinaryOperation(){};
   /// Destructor
-  virtual ~CommutativeBinaryOpHelper(){};
+  ~CommutativeBinaryOpHelper() override{};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "CommutativeBinaryOperationHelper";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's summary for identification overriding a virtual method
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sommutative binary operation helper.";
   }
 
@@ -44,7 +44,7 @@ private:
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const MantidVec &rhsY,
                               const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) {
+                              MantidVec &EOut) override {
     UNUSED_ARG(lhsX);
     UNUSED_ARG(lhsY);
     UNUSED_ARG(lhsE);
@@ -56,7 +56,7 @@ private:
   void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) {
+                              MantidVec &EOut) override {
     UNUSED_ARG(lhsX);
     UNUSED_ARG(lhsY);
     UNUSED_ARG(lhsE);

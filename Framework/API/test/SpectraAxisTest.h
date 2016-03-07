@@ -27,7 +27,7 @@ public:
     spectraAxis->title() = "A spectra axis";
   }
 
-  ~SpectraAxisTest() {
+  ~SpectraAxisTest() override {
     delete spectraAxis;
     delete ws;
   }

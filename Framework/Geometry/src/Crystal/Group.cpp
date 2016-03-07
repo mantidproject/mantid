@@ -128,7 +128,7 @@ bool Group::isGroup() const {
 /// empty.
 void Group::setSymmetryOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) {
-  if (symmetryOperations.size() < 1) {
+  if (symmetryOperations.empty()) {
     throw std::invalid_argument("Group needs at least one element.");
   }
 

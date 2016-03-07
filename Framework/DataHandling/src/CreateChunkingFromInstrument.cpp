@@ -449,9 +449,7 @@ void CreateChunkingFromInstrument::exec() {
     // fill in the table workspace
     for (auto &group : grouping) {
       stringstream banks;
-      // for (auto bank = group.second.begin(); bank != group.second.end();
-      // ++bank)
-      for (auto bank : group.second) {
+      for (const auto &bank : group.second) {
         banks << bank << ",";
       }
       // remove the trailing comma

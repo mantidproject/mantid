@@ -477,11 +477,11 @@ public:
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames() const;
   /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string &attName) const;
+  virtual Attribute getAttribute(const std::string &name) const;
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &attName, const Attribute &);
+  virtual void setAttribute(const std::string &name, const Attribute &);
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string &attName) const;
+  virtual bool hasAttribute(const std::string &name) const;
   /// Set an attribute value
   template <typename T>
   void setAttributeValue(const std::string &attName, const T &value) {
@@ -495,7 +495,7 @@ public:
   virtual void setUpForFit() = 0;
 
   /// Calculate numerical derivatives
-  void calNumericalDeriv(const FunctionDomain &domain, Jacobian &out);
+  void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
   void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
   /// Get the covariance matrix
@@ -525,7 +525,7 @@ protected:
                                 const std::string &description = "") = 0;
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
-  double convertValue(double value, Kernel::Unit_sptr &inUnit,
+  double convertValue(double value, Kernel::Unit_sptr &outUnit,
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       size_t wsIndex) const;
 

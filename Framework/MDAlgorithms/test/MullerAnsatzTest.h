@@ -26,9 +26,9 @@ private:
     }
 
     /// Returns the number of attributes associated with the function
-    virtual size_t nAttributes() const { return 2; }
+    size_t nAttributes() const override { return 2; }
     /// Returns a list of attribute names
-    virtual std::vector<std::string> getAttributeNames() const {
+    std::vector<std::string> getAttributeNames() const override {
       auto names = std::vector<std::string>(3);
       names[0] = "IonName";
       names[1] = "ChainDirection";
@@ -36,8 +36,10 @@ private:
       return names;
     }
 
-    std::string name() const { return "FakeFGModelFitFunction"; }
-    double functionMD(const Mantid::API::IMDIterator &) const { return 0.0; }
+    std::string name() const override { return "FakeFGModelFitFunction"; }
+    double functionMD(const Mantid::API::IMDIterator &) const override {
+      return 0.0;
+    }
   };
 
 public:

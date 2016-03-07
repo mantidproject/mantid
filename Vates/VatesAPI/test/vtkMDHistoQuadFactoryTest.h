@@ -228,9 +228,7 @@ private:
   Mantid::API::IMDWorkspace_sptr m_ws_sptr;
 
 public:
-
-  void setUp()
-  {
+  void setUp() override {
     // WS with 2 dimension, 100x100
     m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 1000);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);

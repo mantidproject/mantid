@@ -55,7 +55,9 @@ public:
     }
   }
 
-  ~FindCenterOfMassPosition2Test() { AnalysisDataService::Instance().clear(); }
+  ~FindCenterOfMassPosition2Test() override {
+    AnalysisDataService::Instance().clear();
+  }
 
   void testParameters() {
     Mantid::Algorithms::FindCenterOfMassPosition2 center;

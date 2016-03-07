@@ -27,20 +27,26 @@ namespace {
 class MOCKMDLoadingPresenter : public Mantid::VATES::MDLoadingPresenter {
 public:
   MOCKMDLoadingPresenter(){}
-  ~MOCKMDLoadingPresenter(){}
-  vtkSmartPointer<vtkDataSet> execute(Mantid::VATES::vtkDataSetFactory *,
-                                      Mantid::VATES::ProgressAction &,
-                                      Mantid::VATES::ProgressAction &) {
+  ~MOCKMDLoadingPresenter() override {}
+  vtkSmartPointer<vtkDataSet>
+  execute(Mantid::VATES::vtkDataSetFactory *, Mantid::VATES::ProgressAction &,
+          Mantid::VATES::ProgressAction &) override {
     return nullptr;
   }
-  void executeLoadMetadata() {}
-  bool hasTDimensionAvailable(void) const {return true;}
-  std::vector<double> getTimeStepValues() const {return std::vector<double>();}
-  std::string getTimeStepLabel() const {return std::string();}
-  void setAxisLabels(vtkDataSet* ) {}
-  bool canReadFile() const {return true;}
-  const std::string& getGeometryXML() const {return MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER;}
-  const std::string& getInstrument() {return MOCK_INSTRUMENT_MD_LOADING_PRESENTER;}
+  void executeLoadMetadata() override {}
+  bool hasTDimensionAvailable(void) const override { return true; }
+  std::vector<double> getTimeStepValues() const override {
+    return std::vector<double>();
+  }
+  std::string getTimeStepLabel() const override { return std::string(); }
+  void setAxisLabels(vtkDataSet *) override {}
+  bool canReadFile() const override { return true; }
+  const std::string &getGeometryXML() const override {
+    return MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER;
+  }
+  const std::string &getInstrument() override {
+    return MOCK_INSTRUMENT_MD_LOADING_PRESENTER;
+  }
 };
 }
 

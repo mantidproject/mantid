@@ -1098,7 +1098,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     peakWS->addPeak(*p);
   }
 
-  for (auto str : columnNames) {
+  for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
       NXInt nxInt = nx_tw.openNXInt(str.c_str());
       nxInt.load();
@@ -2157,7 +2157,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
           } else
             ++it;
       }
-      if (m_spec_list.size() == 0)
+      if (m_spec_list.empty())
         m_list = false;
       total_specs += static_cast<int>(m_spec_list.size());
 

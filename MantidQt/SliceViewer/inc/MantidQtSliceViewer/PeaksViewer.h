@@ -31,23 +31,23 @@ public:
   PeaksViewer(QWidget *parent = 0);
   void setPeaksWorkspaces(const SetPeaksWorkspaces &workspaces);
   void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
-  void performUpdate();
-  void updatePeaksWorkspace(
-      const std::string &toName,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
+  void performUpdate() override;
+  void
+  updatePeaksWorkspace(const std::string &toName,
+                       boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
+                           toWorkspace) override;
   bool removePeaksWorkspace(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove);
   bool removePeaksWorkspace(const std::string &toRemove);
   void hide();
-  ~PeaksViewer();
+  ~PeaksViewer() override;
   bool hasThingsToShow() const;
   void clearPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
   void addPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
 
 public slots:
-  void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
-  void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr,
-                                 QColor);
+  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
+  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
   void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);

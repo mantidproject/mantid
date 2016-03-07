@@ -361,7 +361,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     // Get source and sample position
     std::vector<detid_t> vec_detid =
         dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
-    if (vec_detid.size() == 0) {
+    if (vec_detid.empty()) {
       g_log.information() << "Run " << runnumber << " has no detectors."
                           << "\n";
       continue;

@@ -1354,7 +1354,7 @@ bool LSFJobManager::findTransaction(const std::string &id) const {
 *
 */
 void LSFJobManager::addJobInTransaction(const std::string &jobID) {
-  if (g_transactions.size() <= 0)
+  if (g_transactions.empty())
     return;
   auto &jobs = g_transactions.rbegin()->second.jobIDs;
   auto it = std::find(jobs.begin(), jobs.end(), jobID);

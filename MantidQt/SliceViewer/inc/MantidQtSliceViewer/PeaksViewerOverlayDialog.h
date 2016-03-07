@@ -20,10 +20,10 @@ namespace MantidQt
 
     public:
       explicit PeaksViewerOverlayDialog(PeaksPresenter_sptr peaksPresenter, QWidget *parent = 0);
-      ~PeaksViewerOverlayDialog();
+      ~PeaksViewerOverlayDialog() override;
 
-      virtual void closeEvent(QCloseEvent *);
-      virtual void reject();
+      void closeEvent(QCloseEvent *) override;
+      void reject() override;
 
     private slots:
 

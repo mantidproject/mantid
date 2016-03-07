@@ -134,7 +134,7 @@ private:
   EventWorkspace_sptr m_workspace;
 
 public:
-  void setUp() {
+  void setUp() override {
     EventWorkspace_sptr in_ws =
         WorkspaceCreationHelper::CreateEventWorkspace2(30000, 30000);
     m_workspace = in_ws;

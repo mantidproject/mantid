@@ -47,7 +47,7 @@ public:
   void setPeakRange(double xpeakleft, double xpeakright);
 
   /// Set peak width to guess
-  void setupGuessedFWHM(double width, int minfwhm, int maxfwhm, int stepsize,
+  void setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwhm, int stepsize,
                         bool fitwithsteppedfwhm);
 
   void setFitPeakCriteria(bool usepeakpostol, double peakpostol);

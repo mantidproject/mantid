@@ -339,8 +339,7 @@ void FitPowderDiffPeaks::processInputProperties() {
   m_rightmostPeakRightBound = getProperty("RightMostPeakRightBound");
 
   if (m_fitMode == ROBUSTFIT) {
-    if (m_rightmostPeakHKL.size() == 0 ||
-        m_rightmostPeakLeftBound == EMPTY_DBL() ||
+    if (m_rightmostPeakHKL.empty() || m_rightmostPeakLeftBound == EMPTY_DBL() ||
         m_rightmostPeakRightBound == EMPTY_DBL()) {
       stringstream errss;
       errss << "If fit mode is 'RobustFit', then user must specify all 3 "
@@ -758,7 +757,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
                  << peakinfob1 << endl;
 
   // c) Fit peak parameters by the value from right peak
-  if (rightpeakparammap.size() > 0) {
+  if (!rightpeakparammap.empty()) {
     restoreFunctionParameters(peak, rightpeakparammap);
     peak->setParameter("X0", tof_h);
     peak->setParameter("I", height * fwhm);
@@ -2171,7 +2170,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     vector<BackToBackExponential_sptr> peaks) {
-  for (auto thispeak : peaks) {
+  for (const auto &thispeak : peaks) {
     // 1. Set constraint on X.
     double fwhm = thispeak->fwhm();
     double centre = thispeak->centre();
@@ -2908,10 +2907,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       vector<string> tnb2bfuncparnames = tnb2bfunc.getParameterNames();
 
       // Set peak parameters
-      std::map<std::string, double>::iterator miter;
-      for (auto parname : tnb2bfuncparnames) {
+      for (const auto &parname : tnb2bfuncparnames) {
         if (parname.compare("Height") != 0) {
-          miter = m_instrumentParmaeters.find(parname);
+          auto miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {
             stringstream errss;
             errss << "Cannot find peak parameter " << parname

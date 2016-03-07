@@ -30,7 +30,7 @@ public:
       execHistoScalar,
       void(Mantid::DataObjects::MDHistoWorkspace_sptr,
            Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
-  void exec() { BinaryOperationMD::exec(); }
+  void exec() override { BinaryOperationMD::exec(); }
 };
 
 class BinaryOperationMDTest : public CxxTest::TestSuite {
@@ -51,7 +51,7 @@ public:
   WorkspaceSingleValue_sptr scalar;
   IMDWorkspace_sptr out;
 
-  void setUp() {
+  void setUp() override {
     histo_A =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
     histo_B =

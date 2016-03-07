@@ -57,7 +57,7 @@ private:
   /// Returns the indices of the intensity parameters
   std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
-  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t index,
+  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
                               const std::vector<double> &errors) const override;
   /// Compute the sum for all Hermite polynomial coefficents
   void massProfile(double *result, const size_t nData) const override;
