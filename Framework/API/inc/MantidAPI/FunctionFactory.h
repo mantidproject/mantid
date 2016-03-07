@@ -137,7 +137,7 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
   for (const auto &name : names) {
     boost::shared_ptr<IFunction> func = this->createFunction(name);
     if (func && dynamic_cast<FunctionType *>(func.get())) {
-      typeNames.push_back(std::move(name));
+      typeNames.push_back(name);
     }
   }
   return typeNames;

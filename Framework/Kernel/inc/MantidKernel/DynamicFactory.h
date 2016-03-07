@@ -218,9 +218,11 @@ public:
   virtual const std::vector<std::string> getKeys() const {
     std::vector<std::string> names;
     names.reserve(_map.size());
-    for (const auto &mapPair : _map) {
-      names.push_back(mapPair.first);
-    }
+    std::transform(
+        _map.begin(), _map.end(), std::back_inserter(names),
+        [](const std::pair<std::string, AbstractFactory *> &mapPair) {
+          return mapPair.first;
+        });
     return names;
   }
 

@@ -155,9 +155,9 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
 
   value.clear();
   value.reserve(values.count());
-  for (const auto &str : values) {
-    value.push_back(boost::lexical_cast<T>(str));
-  }
+  std::transform(
+      values.begin(), values.end(), std::back_inserter(value),
+      [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
 template <typename T>
@@ -176,9 +176,9 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
     vect.reserve(values.count());
-    for (auto &value : values)
-      vect.push_back(boost::lexical_cast<T>(value));
-
+    std::transform(
+        values.begin(), values.end(), std::back_inserter(vect),
+        [](const std::string &str) { return boost::lexical_cast<T>(str); });
     value.push_back(std::move(vect));
   }
 }
@@ -270,9 +270,10 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
   values.reserve(enumMap.size());
-  for (const auto &str : enumMap) {
-    values.push_back(str.second);
-  }
+  std::transform(enumMap.begin(), enumMap.end(), std::back_inserter(values),
+                 [](const std::pair<OptionalBool::Value, std::string> &str) {
+                   return str.second;
+                 });
   return values;
 }
 }

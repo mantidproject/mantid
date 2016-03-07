@@ -176,15 +176,11 @@ void PatchBBY::exec() {
   // load original values from hdf
   bool reset = getProperty("Reset");
   if (reset) {
-    int64_t fileSize = 0;
-    for (const auto &file : files)
-      if (file.rfind(".hdf") == file.length() - 4) {
-        tarFile.select(file.c_str());
-        fileSize = tarFile.selected_size();
-        break;
-      }
-
-    if (fileSize != 0) {
+    const auto file_it =
+        std::find_if(files.begin(), files.end(), [](const std::string &file) {
+          return file.rfind(".hdf") == file.length() - 4;
+        });
+    if (file_it != files.end()) {
       // extract hdf file into tmp file
       Poco::TemporaryFile hdfFile;
       boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"),
