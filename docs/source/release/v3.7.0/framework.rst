@@ -40,6 +40,15 @@ Improved
 -  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
    An appropriate labelling has now been implemented
   `#15398 <https://github.com/mantidproject/mantid/pull/15398>`_
+-  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI).
+  These algorithms are:
+  - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
+  - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`
+  - :ref:`ConvertToDistribution <algm-ConvertToDistribution>`
+  - :ref:`ChangeTimeZero <algm-ChangeTimeZero>`
+  - :ref:`FFT <algm-FFT>`
+  - :ref:`MaxEnt <algm-MaxEnt>`
+  `#15584 <https://github.com/mantidproject/mantid/pull/15584>`_
 
 Deprecated
 ##########
