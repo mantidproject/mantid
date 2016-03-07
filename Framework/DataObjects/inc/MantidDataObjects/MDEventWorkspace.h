@@ -100,6 +100,7 @@ public:
 
   // Get ordered list of boundaries in position-along-the-line coordinates
   std::set<coord_t> getBoxBoundaryBisectsOnLine(const Kernel::VMD &start,
+                                                const Kernel::VMD &end,
                                                 const size_t num_d,
                                                 const Kernel::VMD &dir,
                                                 const coord_t length) const;
