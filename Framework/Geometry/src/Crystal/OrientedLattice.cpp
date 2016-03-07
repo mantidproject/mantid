@@ -21,12 +21,6 @@ OrientedLattice::OrientedLattice(const DblMatrix &Umatrix) : UnitCell() {
     throw std::invalid_argument("U is not a proper rotation");
 }
 
-/** Copy constructor
-@param other :: The OrientedLattice from which to copy information
-*/
-OrientedLattice::OrientedLattice(const OrientedLattice &other)
-    : UnitCell(other), U(other.U), UB(other.UB) {}
-
 /** Constructor
 @param _a :: lattice parameter \f$ a \f$ with \f$\alpha = \beta = \gamma =
 90^\circ \f$
@@ -80,18 +74,6 @@ OrientedLattice::OrientedLattice(const UnitCell &uc, const DblMatrix &Umatrix)
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
-
-OrientedLattice::OrientedLattice(const UnitCell *uc, const DblMatrix &Umatrix)
-    : UnitCell(uc), U(Umatrix) {
-  if (Umatrix.isRotation()) {
-    U = Umatrix;
-    UB = U * getB();
-  } else
-    throw std::invalid_argument("U is not a proper rotation");
-}
-
-/// Destructor
-OrientedLattice::~OrientedLattice() {}
 
 /// Get the U matrix
 /// @return U :: U orientation matrix

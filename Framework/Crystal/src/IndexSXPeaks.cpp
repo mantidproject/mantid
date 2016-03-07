@@ -29,35 +29,36 @@ void IndexSXPeaks::init() {
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
 
-  declareProperty(new WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>(
-                      "PeaksWorkspace", "", Direction::InOut),
-                  "Input Peaks Workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>>(
+          "PeaksWorkspace", "", Direction::InOut),
+      "Input Peaks Workspace");
 
-  declareProperty(new PropertyWithValue<double>("a", -1.0, mustBePositive,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "a", -1.0, mustBePositive, Direction::Input),
                   "Lattice parameter a");
 
-  declareProperty(new PropertyWithValue<double>("b", -1.0, mustBePositive,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "b", -1.0, mustBePositive, Direction::Input),
                   "Lattice parameter b");
 
-  declareProperty(new PropertyWithValue<double>("c", -1.0, mustBePositive,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "c", -1.0, mustBePositive, Direction::Input),
                   "Lattice parameter c");
 
-  declareProperty(new PropertyWithValue<double>("alpha", -1.0, reasonable_angle,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "alpha", -1.0, reasonable_angle, Direction::Input),
                   "Lattice parameter alpha");
 
-  declareProperty(new PropertyWithValue<double>("beta", -1.0, reasonable_angle,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "beta", -1.0, reasonable_angle, Direction::Input),
                   "Lattice parameter beta");
 
-  declareProperty(new PropertyWithValue<double>("gamma", -1.0, reasonable_angle,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "gamma", -1.0, reasonable_angle, Direction::Input),
                   "Lattice parameter gamma");
 
-  declareProperty(new ArrayProperty<int>("PeakIndices"),
+  declareProperty(make_unique<ArrayProperty<int>>("PeakIndices"),
                   "Index of the peaks in the table workspace to be used. If no "
                   "index are provided, all will be used.");
 
@@ -72,10 +73,11 @@ void IndexSXPeaks::init() {
   extents[3] = range;
   extents[4] = -range;
   extents[5] = range;
-  declareProperty(new ArrayProperty<int>("SearchExtents", extents),
-                  "A comma separated list of min, max for each of H, K and L,\n"
-                  "Specifies the search extents applied for H K L values "
-                  "associated with the peaks.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<int>>("SearchExtents", extents),
+      "A comma separated list of min, max for each of H, K and L,\n"
+      "Specifies the search extents applied for H K L values "
+      "associated with the peaks.");
 }
 
 /**

@@ -17,24 +17,26 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
   class SubAlgorithm : public Algorithm {
   public:
     SubAlgorithm() : Algorithm() {}
-    virtual ~SubAlgorithm() {}
-    const std::string name() const { return "SubAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "SubAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~SubAlgorithm() override {}
+    const std::string name() const override { return "SubAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "SubAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
     }
-    void exec() {
+    void exec() override {
       // nothing to do!
     }
   };
@@ -44,25 +46,27 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
   class BasicAlgorithm : public Algorithm {
   public:
     BasicAlgorithm() : Algorithm() {}
-    virtual ~BasicAlgorithm() {}
-    const std::string name() const { return "BasicAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "BasicAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~BasicAlgorithm() override {}
+    const std::string name() const override { return "BasicAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "BasicAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
       declareProperty("PropertyC", "", Direction::Output);
     }
-    void exec() {
+    void exec() override {
       // the history from this should never be stored
       auto alg = createChildAlgorithm("SubAlgorithm");
       alg->initialize();
@@ -76,25 +80,27 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
     NestedAlgorithm() : DataProcessorAlgorithm() {}
-    virtual ~NestedAlgorithm() {}
-    const std::string name() const { return "NestedAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "NestedAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~NestedAlgorithm() override {}
+    const std::string name() const override { return "NestedAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "NestedAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", 13);
       declareProperty("PropertyB", 42);
     }
 
-    void exec() {
+    void exec() override {
       auto alg = createChildAlgorithm("BasicAlgorithm");
       alg->initialize();
       alg->setProperty("PropertyA", "FirstOne");
@@ -112,26 +118,28 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
   class TopLevelAlgorithm : public DataProcessorAlgorithm {
   public:
     TopLevelAlgorithm() : DataProcessorAlgorithm() {}
-    virtual ~TopLevelAlgorithm() {}
-    const std::string name() const { return "TopLevelAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "TopLevelAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~TopLevelAlgorithm() override {}
+    const std::string name() const override { return "TopLevelAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "TopLevelAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "Workspace;MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
-    void exec() {
+    void exec() override {
       auto alg = createChildAlgorithm("NestedAlgorithm");
       alg->initialize();
       alg->execute();
@@ -148,14 +156,14 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
 
 private:
 public:
-  void setUp() {
+  void setUp() override {
     Mantid::API::AlgorithmFactory::Instance().subscribe<TopLevelAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("TopLevelAlgorithm",
                                                           1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);

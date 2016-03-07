@@ -143,7 +143,7 @@ public:
    *
    * Reset the user's data search directories.
    */
-  ~MultipleFilePropertyTest() {
+  ~MultipleFilePropertyTest() override {
     // Remove temp dirs.
     for (const auto &tempDir : m_tempDirs) {
       Poco::File dir(tempDir);
@@ -151,7 +151,7 @@ public:
     }
   }
 
-  void setUp() {
+  void setUp() override {
     m_oldDataSearchDirectories = g_config.getString("datasearch.directories");
     m_oldDefaultFacility = g_config.getString("default.facilities");
     m_oldDefaultInstrument = g_config.getString("default.instrument");
@@ -167,7 +167,7 @@ public:
     Kernel::ConfigService::Instance().setString("loading.multifile", "On");
   }
 
-  void tearDown() {
+  void tearDown() override {
     g_config.setString("datasearch.directories", m_oldDataSearchDirectories);
     g_config.setString("default.facility", m_oldDefaultFacility);
     g_config.setString("default.instrument", m_oldDefaultInstrument);

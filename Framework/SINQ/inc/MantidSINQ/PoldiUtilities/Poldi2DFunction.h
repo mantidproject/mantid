@@ -44,7 +44,6 @@ class MANTID_SINQ_DLL Poldi2DFunction : public API::IFunction1DSpectrum,
                                         public IPoldiFunction1D {
 public:
   Poldi2DFunction();
-  ~Poldi2DFunction() override {}
 
   void function(const API::FunctionDomain &domain,
                 API::FunctionValues &values) const override;

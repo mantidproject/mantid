@@ -30,7 +30,7 @@ public:
   static DataServiceTest *createSuite() { return new DataServiceTest(); }
   static void destroySuite(DataServiceTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     svc.clear();
     notificationFlag = 0;
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",

@@ -27,7 +27,7 @@ namespace MantidQt
     public:
       /// Default Constructor
       ProcessingAlgoWidget(QWidget *parent = 0);
-      ~ProcessingAlgoWidget();
+      ~ProcessingAlgoWidget() override;
 
       /// @return the info string displayed at the top
       QString infoString() { return ui.lblInfo->text(); }

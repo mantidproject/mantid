@@ -43,12 +43,12 @@ void ReflectometryWorkflowBase::initIndexInputs() {
   boundedIndex->setLower(0);
   mandatoryWorkspaceIndex->add(boundedIndex);
 
-  declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
-                                             Mantid::EMPTY_INT(),
-                                             mandatoryWorkspaceIndex),
+  declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
+                                                      Mantid::EMPTY_INT(),
+                                                      mandatoryWorkspaceIndex),
                   "I0 monitor workspace index");
 
-  declareProperty(new PropertyWithValue<std::string>(
+  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
@@ -60,43 +60,43 @@ void ReflectometryWorkflowBase::initIndexInputs() {
  * Init common wavelength inputs.
  */
 void ReflectometryWorkflowBase::initWavelengthInputs() {
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
   declareProperty(
-      new PropertyWithValue<double>(
+      make_unique<PropertyWithValue<double>>(
           "WavelengthStep", 0.05,
           boost::make_shared<MandatoryValidator<double>>(), Direction::Input),
       "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for "
       "rebinning intermediate workspaces converted into wavelength.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum for monitor background in angstroms.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum for monitor background in angstroms.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
@@ -108,20 +108,20 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
  */
 void ReflectometryWorkflowBase::initStitchingInputs() {
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
       "SecondTransmission run is provided.");
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together");
 
   declareProperty(
-      new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(),
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
+                                             Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
 }
 

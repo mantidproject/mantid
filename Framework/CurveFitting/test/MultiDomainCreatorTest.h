@@ -30,13 +30,13 @@ class MultiDomainCreatorTest_Fun : public IFunction1D, public ParamFunction {
 public:
   size_t m_wsIndex;
   boost::shared_ptr<const MatrixWorkspace> m_workspace;
-  std::string name() const { return "MultiDomainCreatorTest_Fun"; }
-  void function1D(double *, const double *, const size_t) const {}
+  std::string name() const override { return "MultiDomainCreatorTest_Fun"; }
+  void function1D(double *, const double *, const size_t) const override {}
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>,
-                          size_t wi, double, double) {
+                          size_t wi, double, double) override {
     m_wsIndex = wi;
   }
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) {
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) override {
     m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   }
 };
@@ -98,11 +98,11 @@ public:
   void test_creator() {
     Mantid::Kernel::PropertyManager manager;
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS1", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS2", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
@@ -167,11 +167,11 @@ public:
   void test_output_workspace() {
     MultiDomainCreatorTest_Manager manager;
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS1", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS2", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
@@ -243,11 +243,11 @@ public:
   void test_setMatrixWorkspace_and_setWorkspace() {
     Mantid::Kernel::PropertyManager manager;
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS1", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS2", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        new WorkspaceProperty<Workspace>("WS3", "", Direction::Input));
+        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
 

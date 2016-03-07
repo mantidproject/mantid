@@ -48,7 +48,6 @@ class MANTID_CURVEFITTING_DLL PeakParameterFunction
       virtual public API::FunctionParameterDecorator {
 public:
   PeakParameterFunction() : FunctionParameterDecorator() {}
-  ~PeakParameterFunction() override {}
 
   std::string name() const override { return "PeakParameterFunction"; }
 

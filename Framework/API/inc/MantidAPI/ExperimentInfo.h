@@ -43,7 +43,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo();
+  virtual ~ExperimentInfo() = default;
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object
@@ -186,13 +186,13 @@ private:
   /// instrument group open.
   void loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
                                        std::string &instrumentName,
-                                       std::string &instrumentXML);
+                                       std::string &instrumentXml);
 
   /// Set the instrument given the name and XML leading from IDF file if XML
   /// string is empty
   void setInstumentFromXML(const std::string &nxFilename,
                            std::string &instrumentName,
-                           std::string &instrumentXML);
+                           std::string &instrumentXml);
 
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);

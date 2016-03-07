@@ -108,7 +108,7 @@ public:
   }
 
   // Create a notebook to test
-  void setUp() {
+  void setUp() override {
     m_wsName = "TESTWORKSPACE";
     m_instrument = "INSTRUMENT";
 

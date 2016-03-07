@@ -47,7 +47,7 @@ public:
 
   MDGridBox(MDBox<MDE, nd> *box);
 
-  MDGridBox(const MDGridBox<MDE, nd> &box,
+  MDGridBox(const MDGridBox<MDE, nd> &other,
             Mantid::API::BoxController *const otherBC);
 
   ~MDGridBox() override;
@@ -109,12 +109,12 @@ public:
   API::IMDNode *getChild(size_t index) override;
   void setChild(size_t index, MDGridBox<MDE, nd> *newChild);
 
-  void setChildren(const std::vector<API::IMDNode *> &boxes,
+  void setChildren(const std::vector<API::IMDNode *> &otherBoxes,
                    const size_t indexStart, const size_t indexEnd) override;
 
-  void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth,
                 bool leafOnly) override;
-  void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth,
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
@@ -242,12 +242,12 @@ private:
   size_t getLinearIndex(size_t *indices) const;
 
   size_t computeSizesFromSplit();
-  void fillBoxShell(const size_t tot, const coord_t inverseVolume);
+  void fillBoxShell(const size_t tot, const coord_t ChildInverseVolume);
   /**private default copy constructor as the only correct constructor is the one
    * with box controller */
   MDGridBox(const MDGridBox<MDE, nd> &box);
   /**Private constructor as it does not work without box controller */
-  MDGridBox() {}
+  MDGridBox() = default;
   /// common part of MDGridBox contstructor;
   size_t initGridBox();
 };

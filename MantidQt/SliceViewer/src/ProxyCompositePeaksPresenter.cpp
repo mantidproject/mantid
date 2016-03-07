@@ -34,31 +34,32 @@ size_t ProxyCompositePeaksPresenter::size() const {
 /**
 Set the foreground colour of the peaks.
 @ workspace containing the peaks to re-colour
-@ colour to use for re-colouring
+@ color to use for re-colouring
 */
-void ProxyCompositePeaksPresenter::setForegroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, QColor colour) {
-  m_compositePresenter->setForegroundColour(ws, colour);
+void ProxyCompositePeaksPresenter::setForegroundColor(
+    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
+  m_compositePresenter->setForegroundColor(ws, color);
 }
+
 
 /**
 Set the background colour of the peaks.
 @ workspace containing the peaks to re-colour
 @ colour to use for re-colouring
 */
-void ProxyCompositePeaksPresenter::setBackgroundColour(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, QColor colour) {
-  m_compositePresenter->setBackgroundColour(ws, colour);
+void ProxyCompositePeaksPresenter::setBackgroundColor(
+    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
+  m_compositePresenter->setBackgroundColor(ws, color);
 }
 
-QColor ProxyCompositePeaksPresenter::getBackgroundColour(
+PeakViewColor ProxyCompositePeaksPresenter::getBackgroundPeakViewColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
-  return m_compositePresenter->getBackgroundColour(ws);
+  return m_compositePresenter->getBackgroundPeakViewColor(ws);
 }
 
-QColor ProxyCompositePeaksPresenter::getForegroundColour(
+PeakViewColor ProxyCompositePeaksPresenter::getForegroundPeakViewColor(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
-  return m_compositePresenter->getForegroundColour(ws);
+  return m_compositePresenter->getForegroundPeakViewColor(ws);
 }
 
 bool ProxyCompositePeaksPresenter::getShowBackground(

@@ -1286,8 +1286,8 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
         } catch (std::exception &) {
           compatible = false;
         }
-        if (compatible != false) {
-          if (firstPass == true) {
+        if (compatible) {
+          if (firstPass) {
             m_saveToProgram = new QMenu(tr("Send to"), this);
             menu->addMenu(m_saveToProgram);
 
@@ -1311,7 +1311,7 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
 
     // Tell the button what to listen for and what to do once clicked (if there
     // is anything to connect it will be set to false)
-    if (firstPass == false)
+    if (!firstPass)
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this,
               SLOT(saveToProgram(const QString &)));
 

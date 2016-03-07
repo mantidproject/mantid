@@ -31,12 +31,12 @@ void Qxy::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The corrected data in units of wavelength.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the corrected workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the corrected workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(1.0e-12);
@@ -46,21 +46,22 @@ void Qxy::init() {
       "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
   declareProperty("DeltaQ", -1.0, mustBePositive,
                   "The dimension of a Qx-Qy cell.");
-  declareProperty(new WorkspaceProperty<>("PixelAdj", "", Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
                   "efficiency, must have just one bin per spectrum and the "
                   "same number of spectra as DetBankWorkspace.");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input,
-                                          PropertyMode::Optional, wavVal),
-                  "The scaling to apply to each bin to account for monitor "
-                  "counts, transmission fraction, etc. Must be one spectrum "
-                  "with the same binning as the InputWorkspace, the same units "
-                  "(counts) and the same [[ConvertToDistribution|distribution "
-                  "status]].");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
+                                       PropertyMode::Optional, wavVal),
+      "The scaling to apply to each bin to account for monitor "
+      "counts, transmission fraction, etc. Must be one spectrum "
+      "with the same binning as the InputWorkspace, the same units "
+      "(counts) and the same [[ConvertToDistribution|distribution "
+      "status]].");
   declareProperty("AccountForGravity", false,
                   "Whether to correct for the effects of gravity.",
                   Direction::Input);

@@ -77,6 +77,8 @@ public:
   /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+
+  MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
   ~MatrixWorkspace() override;
 
@@ -103,18 +105,18 @@ public:
   /// Causes the nearest neighbours map to be rebuilt
   void rebuildNearestNeighbours();
   /// Query the NearestNeighbours object for a detector
-  std::map<specid_t, Mantid::Kernel::V3D>
+  std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using a
   /// search radius
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighbours(specid_t spec, const double radius,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighbours(specnum_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
   /// Query the NearestNeighbours object for a given spectrum index using the
   /// direct number of nearest neighbours
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specid_t spec, const int nNeighbours,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighboursExact(specnum_t spec, const int nNeighbours,
                      const bool ignoreMaskedDetectors = false) const;
   //@}
 
@@ -130,14 +132,15 @@ public:
   virtual std::vector<size_t>
   getDetectorIDToWorkspaceIndexVector(detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
+
   virtual std::vector<size_t>
-  getSpectrumToWorkspaceIndexVector(specid_t &offset) const;
+  getSpectrumToWorkspaceIndexVector(specnum_t &offset) const;
   std::vector<size_t>
-  getIndicesFromSpectra(const std::vector<specid_t> &spectraList) const;
-  size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
+  getIndicesFromSpectra(const std::vector<specnum_t> &spectraList) const;
+  size_t getIndexFromSpectrumNumber(const specnum_t specNo) const;
   std::vector<size_t>
   getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
-  std::vector<specid_t>
+  std::vector<specnum_t>
   getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
 
   bool hasGroupedDetectors() const;
@@ -363,11 +366,11 @@ public:
                const double &weight = 1.0);
   void flagMasked(const size_t &spectrumIndex, const size_t &binIndex,
                   const double &weight = 1.0);
-  bool hasMaskedBins(const size_t &spectrumIndex) const;
+  bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
-  const MaskList &maskedBins(const size_t &spectrumIndex) const;
+  const MaskList &maskedBins(const size_t &workspaceIndex) const;
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -465,11 +468,9 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  MatrixWorkspace &operator=(const MatrixWorkspace &other);
 
   MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *factory = nullptr);
+      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.

@@ -59,13 +59,13 @@ namespace MantidQt
       /// Default Constructor
       IndirectTools(QWidget *parent = 0);
       ///Destructor
-      ~IndirectTools();
+      ~IndirectTools() override;
       /// Interface name
       static std::string name() { return "Tools"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
 
-      virtual void initLayout();
+      void initLayout() override;
 
     private slots:
       /// Slot for clicking on the run button
@@ -81,7 +81,7 @@ namespace MantidQt
       /// Load default interface settings for each tab
       void loadSettings();
       /// Called upon a close event.
-      virtual void closeEvent(QCloseEvent*);
+      void closeEvent(QCloseEvent *) override;
       /// Handle POCO event
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 

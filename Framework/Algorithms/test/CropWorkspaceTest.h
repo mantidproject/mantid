@@ -438,13 +438,13 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     AnalysisDataService::Instance().add(
         "ToCrop", WorkspaceCreationHelper::CreateEventWorkspace(
                       5000, 10000, 8000, 0.0, 1.0, 3));
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("ToCrop"); }
+  void tearDown() override { AnalysisDataService::Instance().remove("ToCrop"); }
 
   void test_crop_events_inplace() {
     CropWorkspace cropper;

@@ -755,28 +755,29 @@ void PoldiIndexKnownCompounds::assignCrystalStructureParameters(
 /** Initialize the algorithm's properties.
    */
 void PoldiIndexKnownCompounds::init() {
-  declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Workspace that contains unindexed peaks.");
 
-  declareProperty(new ArrayProperty<std::string>("CompoundWorkspaces"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("CompoundWorkspaces"),
                   "A comma-separated list of workspace names or a workspace "
                   "group. Each workspace must contain a list of indexed "
                   "reflections.");
 
   declareProperty(
-      new ArrayProperty<double>("Tolerances", std::vector<double>(1, 0.01)),
+      Kernel::make_unique<ArrayProperty<double>>("Tolerances",
+                                                 std::vector<double>(1, 0.01)),
       "Maximum relative tolerance delta(d)/d for lines to be indexed. Either "
       "one value or one for each compound.");
 
-  declareProperty(new ArrayProperty<double>("ScatteringContributions",
-                                            std::vector<double>(1, 1.0)),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "ScatteringContributions", std::vector<double>(1, 1.0)),
                   "Approximate scattering contribution ratio of the compounds. "
                   "If omitted, all are assumed to contribute to scattering "
                   "equally.");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A workspace group that contains workspaces with indexed and "
                   "unindexed reflections from the input workspace.");
 }

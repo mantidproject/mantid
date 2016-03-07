@@ -148,11 +148,13 @@ private:
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
     std::lock_guard<std::mutex> lock(m_mutex);
     CacheMapConstIterator it_found = m_cacheMap.find(key);
-    if (it_found == m_cacheMap.end()) {
-      return false; // did not find the component
+    bool isValid = it_found != m_cacheMap.end();
+
+    if (isValid) {
+      value = it_found->second;
     }
-    value = it_found->second;
-    return true;
+
+    return isValid;
   }
 
   /// total number of times the cache has contained the requested information
@@ -161,14 +163,13 @@ private:
   /// information
   mutable int m_cacheMiss;
   /// internal cache map
-  std::map<const KEYTYPE, VALUETYPE> m_cacheMap;
+  std::map<KEYTYPE, VALUETYPE> m_cacheMap;
   /// internal mutex
   mutable std::mutex m_mutex;
   /// iterator typedef
-  typedef
-      typename std::map<const KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
+  typedef typename std::map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
   /// const_iterator typedef
-  typedef typename std::map<const KEYTYPE, VALUETYPE>::const_iterator
+  typedef typename std::map<KEYTYPE, VALUETYPE>::const_iterator
       CacheMapConstIterator;
 };
 

@@ -90,8 +90,8 @@ bool BoxControllerDummyIO::openFile(const std::string &fileName,
 
   m_ReadOnly = true;
   ;
-  if (mode.find("w") != std::string::npos ||
-      mode.find("W") != std::string::npos) {
+  if (mode.find('w') != std::string::npos ||
+      mode.find('W') != std::string::npos) {
     m_ReadOnly = false;
   }
 

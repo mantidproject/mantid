@@ -45,7 +45,8 @@ void GetEi::init() {
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       val),
       "The X units of this workspace must be time of flight with times in\n"
       "micro-seconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -81,8 +82,8 @@ void GetEi::init() {
 */
 void GetEi::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const specid_t mon1Spec = getProperty("Monitor1Spec");
-  const specid_t mon2Spec = getProperty("Monitor2Spec");
+  const specnum_t mon1Spec = getProperty("Monitor1Spec");
+  const specnum_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
   getGeometry(inWS, mon1Spec, mon2Spec, dist2moni0, dist2moni1);
 
@@ -149,8 +150,8 @@ void GetEi::exec() {
 * passed to this function second
 *  @throw NotFoundError if no detector is found for the detector ID given
 */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
-                        specid_t mon1Spec, double &monitor0Dist,
+void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
+                        specnum_t mon1Spec, double &monitor0Dist,
                         double &monitor1Dist) const {
   const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
@@ -208,17 +209,19 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec,
 * in the workspace
 */
 std::vector<size_t> GetEi::getMonitorSpecIndexs(
-    API::MatrixWorkspace_const_sptr WS, specid_t specNum1,
-    specid_t specNum2) const { // getting spectra numbers from detector IDs is
-                               // hard because the map works the other way,
-                               // getting index numbers from spectra numbers has
-                               // the same problem and we are about to do both
+    API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
+    specnum_t specNum2) const { // getting spectra numbers from detector IDs is
+                                // hard because the map works the other way,
+  // getting index numbers from spectra numbers has
+  // the same problem and we are about to do both
 
   // get the index number of the histogram for the first monitor
-  std::vector<specid_t> specNumTemp(&specNum1, &specNum1 + 1);
-  auto specInds = WS->getIndicesFromSpectra(specNumTemp);
-  if (specInds.size() != 1) { // the monitor spectrum isn't present in the
-                              // workspace, we can't continue from here
+
+  std::vector<specnum_t> specNumTemp(&specNum1, &specNum1 + 1);
+  auto wsInds = WS->getIndicesFromSpectra(specNumTemp);
+
+  if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
+                            // workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor spectrum, number "
                   << specNum1 << std::endl;
     throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum1);
@@ -226,16 +229,16 @@ std::vector<size_t> GetEi::getMonitorSpecIndexs(
 
   // nowe the second monitor
   specNumTemp[0] = specNum2;
-  auto specIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
-  if (specIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
-                                   // workspace, we can't continue from here
+  auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
+  if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
+                                 // workspace, we can't continue from here
     g_log.error() << "Couldn't find the second monitor spectrum, number "
                   << specNum2 << std::endl;
     throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum2);
   }
 
-  specInds.push_back(specIndexTemp[0]);
-  return specInds;
+  wsInds.push_back(specNumTemp[0]);
+  return wsInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
 *  to travel a distance, s

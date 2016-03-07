@@ -126,11 +126,19 @@ public:
 
   /**
   * customised spec will be passed via specID text field for the
-  * calibrartion process to be carried out
+  * cropped calibrartion process to be carried out
   *
   * @return which format should to applied for plotting data
   */
   virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
+  * customised bank name will be passed with spectrumIDs to
+  * save workspace and file with particular bank name
+  *
+  * @return string which will be used to generate bank name
+  */
+  virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will

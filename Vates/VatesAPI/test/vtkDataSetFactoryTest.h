@@ -47,9 +47,7 @@ private:
   ///Fake helper type.
   class FakeProgressAction : public Mantid::VATES::ProgressAction
   {
-    virtual void eventRaised(double)
-    {
-    }
+    void eventRaised(double) override {}
   };
 
 public:

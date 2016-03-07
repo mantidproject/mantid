@@ -40,13 +40,13 @@ class DLLExport ISISEnergyTransfer : public IndirectDataReductionTab {
 
 public:
   ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = 0);
-  virtual ~ISISEnergyTransfer();
+  ~ISISEnergyTransfer() override;
 
-  virtual void setup();
-  virtual void run();
+  void setup() override;
+  void run() override;
 
 public slots:
-  virtual bool validate();
+  bool validate() override;
 
 private slots:
   void algorithmComplete(bool error);

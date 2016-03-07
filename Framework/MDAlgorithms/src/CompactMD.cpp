@@ -101,11 +101,11 @@ void CompactMD::findFirstNonZeroMinMaxExtents(
 */
 void CompactMD::init() {
   // input workspace to compact
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "MDHistoWorkspace to compact");
   // output workspace that will have been compacted
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output compacted workspace");
 }

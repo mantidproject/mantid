@@ -54,7 +54,7 @@ private:
   void exec() override;
 
   void convertToAbsoluteTime(API::MatrixWorkspace_sptr ws, std::string logname,
-                             std::vector<Kernel::DateAndTime> &abstimeve,
+                             std::vector<Kernel::DateAndTime> &abstimevec,
                              std::vector<double> &orderedtofs);
 
   void writeLogtoFile(API::MatrixWorkspace_sptr ws, std::string logname,

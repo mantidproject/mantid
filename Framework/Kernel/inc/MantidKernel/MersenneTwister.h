@@ -65,7 +65,7 @@ public:
   /// Destructor
   ~MersenneTwister() override;
   /// Set the random number seed
-  void setSeed(const size_t seed) override;
+  void setSeed(const size_t seedValue) override;
   /// Sets the range of the subsequent calls to next
   void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range,

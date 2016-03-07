@@ -60,11 +60,11 @@ void UnwrapSNS::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Contains numbers counts against time of flight (TOF).");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "This workspace will be in the units of time of flight. (See "
                   "http://www.mantidproject.org/Units)");
 

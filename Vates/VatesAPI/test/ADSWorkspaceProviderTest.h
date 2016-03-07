@@ -14,11 +14,10 @@ using namespace Mantid::API;
 class ADSWorkspaceProviderTest : public CxxTest::TestSuite
 {
 public:
-
-void setUp()
-{ 
-  //Put A test workspace into the ADS.
-  Mantid::API::AnalysisDataService::Instance().addOrReplace("WS", IMDWorkspace_sptr(new MockIMDWorkspace()));
+  void setUp() override {
+    // Put A test workspace into the ADS.
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(
+        "WS", IMDWorkspace_sptr(new MockIMDWorkspace()));
 }
 
 void testCanProvideWorkspace()

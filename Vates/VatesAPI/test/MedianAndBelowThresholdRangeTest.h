@@ -25,9 +25,7 @@ private:
   MDHistoWorkspace_sptr sptrWs;
 
 public :
-
-  void setUp()
-  {
+  void setUp() override {
     // Fake workspace with 8 cells
     sptrWs = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 8, 8.0);
     //Set up a standard set of values for subsequent tests. Note that the following set gives a standard deviation of +/-2

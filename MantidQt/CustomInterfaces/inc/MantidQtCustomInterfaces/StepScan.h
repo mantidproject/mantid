@@ -26,7 +26,7 @@ public:
   static QString categoryInfo() { return "General"; }
 
   StepScan(QWidget *parent = 0);
-  ~StepScan();
+  ~StepScan() override;
 
 signals:
   void logsAvailable( const Mantid::API::MatrixWorkspace_const_sptr& );
@@ -51,7 +51,7 @@ private slots:
   void helpClicked();
 
 private:
-  void initLayout();
+  void initLayout() override;
   void startLiveListener();
   bool mergeRuns();
   void setupOptionControls();

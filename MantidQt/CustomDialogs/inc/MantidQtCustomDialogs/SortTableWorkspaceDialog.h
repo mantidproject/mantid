@@ -50,9 +50,9 @@ namespace MantidQt
 
     private:
       /// Initialize the layout
-      void initLayout();
+      void initLayout() override;
       /// Pass input from non-standard GUI elements to the algorithm
-      void parseInput();
+      void parseInput() override;
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
     private slots:

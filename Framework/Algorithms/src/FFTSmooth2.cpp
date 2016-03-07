@@ -23,10 +23,10 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth2::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 

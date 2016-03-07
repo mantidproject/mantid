@@ -59,7 +59,13 @@ class EnggFitPeaksTest(unittest.TestCase):
         """
         if 0 == ref:
             return False
-        return (abs((ref-val)/ref) < epsilon)
+
+        approx_comp = (abs((ref-val)/ref) < epsilon)
+        if not approx_comp:
+            print ("Failed approximate comparison between value {0} and reference value "
+                   "{1}, with epsilon {2}".format(val, ref, epsilon))
+
+        return approx_comp
 
     def _check_outputs_ok(self, tblName, numPeaks, cell00, cell01, cell10, cell14):
         """
@@ -152,13 +158,14 @@ class EnggFitPeaksTest(unittest.TestCase):
                           EnggFitPeaks,
                           sws, WorkspaceIndex=0, ExpectedPeaks='0.542')
 
-    def test_runs_ok_2peaks(self):
+    def test_2peaks_fails_1(self):
         """
-        Tests fitting a couple of peaks.
+        Tests fitting a couple of peaks where Fit fails to fit with enough
+        accuracy one of them.
         """
 
         peak_def1 = "name=BackToBackExponential, I=10000, A=1, B=0.5, X0=8000, S=350"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.7, X0=20000, S=300"
+        peak_def2 = "name=BackToBackExponential, I=1000, A=1, B=1.7, X0=20000, S=300"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
                                     NumBanks=1, BankPixelWidth=1,
@@ -168,6 +175,35 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         peaksTblName = 'test_fit_peaks_table'
         ep1 = 0.4
+        ep2 = 1.09
+        paramsTblName = 'test_difc_zero_table'
+
+        # will fail to fit the first peak (too far off initial guess)
+        try:
+            difc, zero, test_fit_peaks_table = EnggFitPeaks(sws,
+                                                            WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
+                                                            OutFittedPeaksTable=peaksTblName,
+                                                            OutParametersTable=paramsTblName)
+        except RuntimeError as rex:
+            print ("Failed (as expected) to fit the first peak (too far off the initial "
+                   "guess), with RuntimeError: {0}".format(str(rex)))
+
+    def test_2peaks_runs_ok(self):
+        """
+        Tests fitting a couple of peaks.
+        """
+
+        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
+        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.7, X0=20000, S=300"
+        sws = CreateSampleWorkspace(Function="User Defined",
+                                    UserDefinedFunction=peak_def1 + ";" + peak_def2,
+                                    NumBanks=1, BankPixelWidth=1,
+                                    XMin=5000, XMax=30000,
+                                    BinWidth=25)
+        EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
+
+        peaksTblName = 'test_fit_peaks_table'
+        ep1 = 0.83
         ep2 = 1.09
         paramsTblName = 'test_difc_zero_table'
         difc, zero, test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
@@ -181,9 +217,9 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(pTable.columnCount(), 2)
 
         # fitting results on some platforms (OSX) are different by ~0.07%
-        expected_difc = 17395.620526173196
+        expected_difc = 19229.3699679
         self.assertTrue(self._approxRelErrorLessThan(difc, expected_difc, 5e-3))
-        expected_zero = 1058.0490117833390
+        expected_zero = -948.449062995
         self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 5e-3))
 
         # values in the table should also be good within epsilon
@@ -191,7 +227,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0,1), expected_zero, 5e-3))
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, ep1, -8.193560670563205e-10,
+        self._check_outputs_ok(peaksTblName, 2, ep1, -1.5602448495e-06,
                                ep2, 1.723902507582676e-07)
 
     def test_runs_ok_3peaks(self):
@@ -199,9 +235,9 @@ class EnggFitPeaksTest(unittest.TestCase):
         Tests fitting three clean peaks and different widths.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=10000, A=1, B=0.5, X0=8000, S=350"
-        peak_def2 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def3 = "name=BackToBackExponential, I=8000, A=1, B=1.2, X0=20000, S=800"
+        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
+        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.2, X0=20000, S=800"
+        peak_def3 = "name=BackToBackExponential, I=10000, A=1, B=0.9, X0=25000, S=350"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=
                                     peak_def1 + ";" + peak_def2 + ";" + peak_def3,
@@ -211,23 +247,27 @@ class EnggFitPeaksTest(unittest.TestCase):
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
 
         peaksTblName = 'test_fit_peaks_table'
-        ep1 = 0.4
-        ep2 = 0.83
-        ep3 = 1.09
+        ep1 = 0.83
+        ep2 = 1.09
+        ep3 = 1.4
         difc, zero, test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
                                                         OutFittedPeaksTable=peaksTblName)
 
         self.assertEquals(test_fit_peaks_table.rowCount(), 3)
+        self.assertEquals(3, len(test_fit_peaks_table.column('dSpacing')))
+        self.assertEquals(3, len(test_fit_peaks_table.column('X0')))
+        self.assertEquals(3, len(test_fit_peaks_table.column('A')))
+        self.assertEquals(3, len(test_fit_peaks_table.column('S')))
 
-        expected_difc = 17335.67250113934
+        expected_difc = 17500.7287679
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(self._approxRelErrorLessThan(difc, expected_difc, 5e-3))
-        expected_zero = 958.2547157813959
+        expected_zero = 658.544128868
         self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 5e-3))
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 3, ep1, -8.193560670563205e-10,
-                               ep2, 1.3304856478614542e-05)
+        self._check_outputs_ok(peaksTblName, 3, ep1, -0.000162978436217,
+                               ep2, 3.94317157133e-05)
 
 
 if __name__ == '__main__':

@@ -34,11 +34,9 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
-#include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
+#include "MantidQtSliceViewer/PeakViewFactory.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtSliceViewer/SliceViewerFunctions.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
@@ -2349,23 +2347,19 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
             workspaceName);
     const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
-    PeakOverlayViewFactorySelector_sptr viewFactorySelector =
-        boost::make_shared<PeakOverlayViewFactorySelector>();
-    // Candidate for overplotting as spherical peaks
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-            m_spect->yAxis(), numberOfChildPresenters));
-    // Candiate for plotting as a markers of peak positions
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiCrossFactory>(
-            m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), m_spect->xAxis(), m_spect->yAxis(),
-            numberOfChildPresenters));
+    // Peak View factory, displays peaks on a peak by peak basis
+    auto peakViewFactory = boost::make_shared<PeakViewFactory>(
+                                  m_ws, peaksWS,
+                                  m_plot,
+                                  m_plot->canvas(),
+                                  m_spect->xAxis(),
+                                  m_spect->yAxis(),
+                                  numberOfChildPresenters);
+
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(
-              viewFactorySelector->makeSelection(), peaksWS, m_ws,
+              peakViewFactory, peaksWS, m_ws,
               transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.

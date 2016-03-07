@@ -27,22 +27,22 @@ using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction2::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load,
-                            "_event.nxs"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputDarkCurrentWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -65,9 +65,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // If the load algorithm isn't in the reduction properties, add it
   const bool persistent = getProperty("PersistentCorrection");
   if (!reductionManager->existsProperty("DarkCurrentAlgorithm") && persistent) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("DarkCurrentAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   Progress progress(this, 0.0, 1.0, 10);
@@ -138,8 +138,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     if (!(darkWSOutputName.size() == 0))
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
-    reductionManager->declareProperty(
-        new WorkspaceProperty<>(entryName, "", Direction::Output));
+    reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);
   }

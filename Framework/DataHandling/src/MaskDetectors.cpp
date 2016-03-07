@@ -34,19 +34,20 @@ MaskDetectors::~MaskDetectors() {}
  */
 void MaskDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
-  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
                   "An ArrayProperty containing a list of spectra to mask");
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An ArrayProperty containing a list of detector ID's to mask");
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An ArrayProperty containing the workspace indices to mask");
-  declareProperty(new WorkspaceProperty<>("MaskedWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "If given but not as a SpecialWorkspace2D, the masking from "
                   "this workspace will be copied. If given as a "
                   "SpecialWorkspace2D, the masking is read from its Y values.");
@@ -85,7 +86,7 @@ void MaskDetectors::exec() {
   MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
@@ -284,7 +285,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  * @param WS :: The input workspace to be masked
  */
 void MaskDetectors::fillIndexListFromSpectra(
-    std::vector<size_t> &indexList, const std::vector<specid_t> &spectraList,
+    std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
     const API::MatrixWorkspace_sptr WS) {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> spectraSet(spectraList.begin(), spectraList.end());
@@ -293,7 +294,7 @@ void MaskDetectors::fillIndexListFromSpectra(
   indexList.reserve(WS->getNumberHistograms());
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i) {
-    const specid_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
     if (spectraSet.find(currentSpec) != spectraSet.end()) {
       indexList.push_back(i);
     }

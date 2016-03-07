@@ -16,6 +16,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
 namespace Crystal {
@@ -39,16 +40,16 @@ PeakIntegration::~PeakIntegration() {}
  */
 void PeakIntegration::init() {
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "Name of the peaks workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "A 2D workspace with X values of time of flight");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "A 2D workspace with X values of time of flight");
-  declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
+                                                     Direction::Output),
       "Name of the output peaks workspace with integrated intensities.");
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"
@@ -144,8 +145,8 @@ void PeakIntegration::exec() {
     double row = peak.getRow();
 
     // Average integer postion
-    int XPeak = int(col + 0.5);
-    int YPeak = int(row + 0.5);
+    int XPeak = boost::math::iround(col);
+    int YPeak = boost::math::iround(row);
 
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();

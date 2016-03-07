@@ -49,11 +49,7 @@ public:
   /// (Empty) Constructor
   Unit();
   /// Virtual destructor
-  virtual ~Unit();
-  /// Copy Constructor
-  Unit(const Unit &other);
-  /// Copy assignment operator
-  Unit &operator=(const Unit &rhs);
+  virtual ~Unit() = default;
 
   /// @return a cloned instance of the other
   virtual Unit *clone() const = 0;
@@ -87,18 +83,19 @@ public:
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
+   *  @param _l1 ::       The source-sample distance (in metres)
+   *  @param _l2 ::       The sample-detector distance (in metres)
+   *  @param _twoTheta :: The scattering angle (in radians)
+   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
+   * (in
    * meV)
-   *  @param delta ::    Not currently used
+   *  @param _delta ::    Not currently used
    */
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &l1, const double &l2, const double &twoTheta,
-             const int &emode, const double &efixed, const double &delta);
+             const double &_l1, const double &_l2, const double &_twoTheta,
+             const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -121,18 +118,19 @@ public:
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
+   *  @param _l1 ::       The source-sample distance (in metres)
+   *  @param _l2 ::       The sample-detector distance (in metres)
+   *  @param _twoTheta :: The scattering angle (in radians)
+   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
+   * (in
    * meV)
-   *  @param delta ::    Not currently used
+   *  @param _delta ::    Not currently used
    */
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &l1, const double &l2, const double &twoTheta,
-               const int &emode, const double &efixed, const double &delta);
+               const double &_l1, const double &_l2, const double &_twoTheta,
+               const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -268,8 +266,6 @@ public:
 
   /// Constructor
   Empty() : Unit() {}
-  /// Destructor
-  ~Empty() override {}
 };
 
 //=================================================================================================
@@ -284,9 +280,6 @@ public:
   Label(const std::string &caption, const std::string &label);
   void setLabel(const std::string &cpt, const UnitLabel &lbl = UnitLabel(""));
   Unit *clone() const override;
-
-  /// Destructor
-  ~Label() override {}
 
 private:
   /// Caption
@@ -332,8 +325,6 @@ public:
 
   /// Constructor
   Wavelength();
-  /// Destructor
-  ~Wavelength() override {}
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -361,8 +352,6 @@ public:
 
   /// Constructor
   Energy();
-  /// Destructor
-  ~Energy() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -386,8 +375,6 @@ public:
 
   /// Constructor
   Energy_inWavenumber();
-  /// Destructor
-  ~Energy_inWavenumber() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -411,8 +398,6 @@ public:
 
   /// Constructor
   dSpacing();
-  /// Destructor
-  ~dSpacing() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -435,8 +420,6 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   MomentumTransfer();
-  /// Destructor
-  ~MomentumTransfer() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -460,8 +443,6 @@ public:
 
   /// Constructor
   QSquared();
-  /// Destructor
-  ~QSquared() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion
@@ -486,8 +467,6 @@ public:
 
   /// Constructor
   DeltaE();
-  /// Destructor
-  ~DeltaE() override {}
 
 protected:
   double factorTo;    ///< Constant factor for to conversion
@@ -511,8 +490,6 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inWavenumber();
-  /// Destructor
-  ~DeltaE_inWavenumber() override {}
 };
 
 //=================================================================================================
@@ -523,7 +500,7 @@ public:
   const std::string caption() const override { return "Momentum"; }
   const UnitLabel label() const override;
 
-  double singleToTOF(const double x) const override;
+  double singleToTOF(const double ki) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
   Unit *clone() const override;
@@ -532,8 +509,6 @@ public:
 
   /// Constructor
   Momentum();
-  /// Destructor
-  ~Momentum() override {}
 
 protected:
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -560,8 +535,6 @@ public:
 
   /// Constructor
   SpinEchoLength();
-  /// Destructor
-  ~SpinEchoLength() override {}
 };
 
 //=================================================================================================
@@ -581,8 +554,6 @@ public:
 
   /// Constructor
   SpinEchoTime();
-  /// Destructor
-  ~SpinEchoTime() override {}
 };
 
 //=================================================================================================
@@ -602,8 +573,6 @@ public:
 
   /// Constructor
   Time();
-  /// Destructor
-  ~Time() override {}
 
 protected:
   double factorTo;   ///< Constant factor for to conversion

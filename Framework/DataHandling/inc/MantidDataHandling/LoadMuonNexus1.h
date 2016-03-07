@@ -100,7 +100,7 @@ protected:
   void exec() override;
 
 private:
-  void loadData(size_t hist, specid_t &i, specid_t specNo,
+  void loadData(size_t hist, specnum_t &i, specnum_t specNo,
                 MuonNexusReader &nxload, const int64_t lengthIn,
                 DataObjects::Workspace2D_sptr localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);

@@ -62,12 +62,12 @@ const std::string CompareWorkspaces::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace1", "", Direction::Input),
-      "The name of the first input workspace.");
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace2", "", Direction::Input),
-      "The name of the second input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
+                                                            Direction::Input),
+                  "The name of the first input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
+                                                            Direction::Input),
+                  "The name of the second input workspace.");
 
   declareProperty(
       "Tolerance", 0.0,
@@ -108,8 +108,8 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("Messages", "compare_msgs",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
   m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");

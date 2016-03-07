@@ -121,8 +121,6 @@ private:
 
 class DLLExport MappedDataPkt : public RawDataPkt {
 public:
-  MappedDataPkt(const MappedDataPkt &pkt);
-
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
 
@@ -189,8 +187,6 @@ private:
 
 class DLLExport SourceListPkt : public Packet {
 public:
-  SourceListPkt(const SourceListPkt &pkt);
-
   const uint32_t *ids(void) const {
     return reinterpret_cast<const uint32_t *>(payload());
   }
@@ -310,9 +306,7 @@ private:
 
 class DLLExport PixelMappingPkt : public Packet {
 public:
-  PixelMappingPkt(const PixelMappingPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   PixelMappingPkt(const uint8_t *data, uint32_t len);
 
@@ -340,8 +334,6 @@ private:
 
 class DLLExport RunInfoPkt : public Packet {
 public:
-  RunInfoPkt(const RunInfoPkt &pkt);
-
   const std::string &info(void) const { return m_xml; }
 
 private:
@@ -370,8 +362,6 @@ private:
 
 class DLLExport ClientHelloPkt : public Packet {
 public:
-  ClientHelloPkt(const ClientHelloPkt &pkt);
-
   enum Flags {
     PAUSE_AGNOSTIC = 0x0000,
     NO_PAUSE_DATA = 0x0001,
@@ -419,9 +409,7 @@ private:
 
 class DLLExport SyncPkt : public Packet {
 public:
-  SyncPkt(const SyncPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   SyncPkt(const uint8_t *data, uint32_t len);
 
@@ -430,8 +418,6 @@ private:
 
 class DLLExport HeartbeatPkt : public Packet {
 public:
-  HeartbeatPkt(const HeartbeatPkt &pkt);
-
 private:
   HeartbeatPkt(const uint8_t *data, uint32_t len);
 
@@ -440,8 +426,6 @@ private:
 
 class DLLExport GeometryPkt : public Packet {
 public:
-  GeometryPkt(const GeometryPkt &pkt);
-
   const std::string &info(void) const { return m_xml; }
 
 private:
@@ -651,8 +635,6 @@ private:
 
 class DLLExport DataDonePkt : public Packet {
 public:
-  DataDonePkt(const DataDonePkt &pkt);
-
 private:
   DataDonePkt(const uint8_t *data, uint32_t len);
 
@@ -661,8 +643,6 @@ private:
 
 class DLLExport DeviceDescriptorPkt : public Packet {
 public:
-  DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt);
-
   uint32_t devId(void) const { return m_devId; }
   const std::string &description(void) const { return m_desc; }
 

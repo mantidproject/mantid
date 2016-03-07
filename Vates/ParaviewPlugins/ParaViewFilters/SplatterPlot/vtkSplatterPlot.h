@@ -20,7 +20,7 @@ public:
   static vtkSplatterPlot *New();
   vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
   double getTime() const;
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);
   void updateAlgorithmProgress(double progress, const std::string& message);
@@ -32,9 +32,11 @@ public:
   const char* GetInstrument();
 protected:
   vtkSplatterPlot();
-  ~vtkSplatterPlot();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkSplatterPlot() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
   /// Number of total points to plot

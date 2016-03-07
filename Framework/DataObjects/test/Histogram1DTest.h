@@ -19,7 +19,7 @@ private:
   typedef boost::shared_ptr<MantidVec> parray;
   parray pa, pb; // Shared_ptr to vectors
 public:
-  void setUp() {
+  void setUp() override {
     nel = 100;
     x1.resize(nel);
     std::fill(x1.begin(), x1.end(), rand());

@@ -60,8 +60,7 @@ namespace Geometry {
 class DLLExport MDImplicitFunction {
 public:
   MDImplicitFunction();
-  MDImplicitFunction(const MDImplicitFunction &other);
-  virtual ~MDImplicitFunction();
+  virtual ~MDImplicitFunction() = default;
 
   void addPlane(const MDPlane &plane);
 

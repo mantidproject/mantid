@@ -75,7 +75,7 @@ public:
   /// string but recreates it.
   std::string str() const;
   /// Returns true if the expression is a function (i.e. has arguments)
-  bool isFunct() const { return m_terms.size() > 0; }
+  bool isFunct() const { return !m_terms.empty(); }
   /// Returns the name of the expression which is a function or variable name.
   std::string name() const { return m_funct; }
   /// Returns the the expression's binary operator on its left. Can be an empty
@@ -148,10 +148,6 @@ private:
      */
     Token(size_t i, size_t j, size_t k, size_t p)
         : is(i), ie(j), is1(k), prec(p) {}
-    /**
-     * The copy constructor.
-     */
-    Token(const Token &t) : is(t.is), ie(t.ie), is1(t.is1), prec(t.prec) {}
     size_t is;   ///< The index of the first symbol of the token.
     size_t ie;   ///< The index of the last symbol of the token.
     size_t is1;  ///< The index of the first symbol of the next token.

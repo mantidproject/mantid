@@ -54,6 +54,8 @@ class Expression;
 class MANTID_API_DLL ConstraintFactoryImpl final
     : public Kernel::DynamicFactory<IConstraint> {
 public:
+  ConstraintFactoryImpl(const ConstraintFactoryImpl &) = delete;
+  ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &) = delete;
   /// Creates an instance of a Constraint
   IConstraint *createInitialized(IFunction *fun, const std::string &input,
                                  bool isDefault = false) const;
@@ -66,12 +68,8 @@ private:
 
   /// Private Constructor for singleton class
   ConstraintFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  ConstraintFactoryImpl(const ConstraintFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &);
   /// Private Destructor
-  ~ConstraintFactoryImpl() override;
+  ~ConstraintFactoryImpl() override = default;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

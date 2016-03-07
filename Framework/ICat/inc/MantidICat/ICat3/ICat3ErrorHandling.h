@@ -46,11 +46,6 @@ namespace ICat {
  */
 class CErrorHandling {
 public:
-  /// Constructor
-  CErrorHandling();
-  /// Destructor
-  ~CErrorHandling();
-
   /** This method throws the error string returned by gsoap to mantid upper
    * layer
    *  @param icat ICat proxy object
@@ -68,8 +63,6 @@ private:
 public:
   /// constructor
   SessionException(const std::string &error);
-  /// destructor
-  ~SessionException() throw() {}
   /// return the error message
   const char *what() const throw();
 };

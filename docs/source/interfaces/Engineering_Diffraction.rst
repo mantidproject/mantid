@@ -81,10 +81,12 @@ Calibration sample #
 Bank Name:
   This parameter is only required when Cropped Calibration is being
   carried out. The bank name can be selected from a drop down list with
-  option of North and South, which are equivalently to 1 and 2
-  respectively. The Bank Name drop down list is set to `Enable Spectrum-IDs`
-  by default. This option cannot be used together with Spectrum IDs,
-  as they overlap.
+  option of "North" and "South", which are equivalently to 1 and 2
+  respectively. However the Bank Name drop down list is set to
+  "Enable Spectrum-IDs" by default. This option cannot be used together
+  with Spectrum IDs, as they overlap. For the convenience of users, the
+  GUI will only enable SpectrumIDs and Customise Bank Name text-fields
+  when Bank Name drop down list is set to "Enable Spectrum-IDs"
 
 SpectrumIDs:
   This parameter is only required when Cropped Calibration is being
@@ -93,6 +95,13 @@ SpectrumIDs:
   others will be ignored. This option cannot be used together with
   Bank Name, as they overlap. You may also give multiple ranges, for
   example: "0-100", or "0-9", "150-750".
+
+Customise Bank Name:
+  This parameter is only required when Cropped Calibration is being
+  carried out with SpectrumIDs, the parameter will set the workspace
+  and .his file name according to this Bank Name provided by the user.
+  However if the user does not provide a personalised name, the
+  interface will use "cropped" as a default bank name.
 
 The calibration process depends on several additional parameters and
 settings which can be modified in the *Settings* section (tab), see

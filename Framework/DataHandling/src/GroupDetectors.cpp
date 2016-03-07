@@ -24,21 +24,22 @@ GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<CommonBinsValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "Workspace", "", Direction::InOut,
+          boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(
-      new ArrayProperty<specid_t>("SpectraList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,
@@ -51,7 +52,7 @@ void GroupDetectors::exec() {
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
 
   // Could create a Validator to replace the below
@@ -89,7 +90,7 @@ void GroupDetectors::exec() {
 
   const size_t vectorSize = WS->blocksize();
 
-  const specid_t firstIndex = static_cast<specid_t>(indexList[0]);
+  const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
   ISpectrum *firstSpectrum = WS->getSpectrum(firstIndex);
   MantidVec &firstY = WS->dataY(firstIndex);
 

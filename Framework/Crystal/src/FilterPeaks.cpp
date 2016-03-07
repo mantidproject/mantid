@@ -54,11 +54,11 @@ const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void FilterPeaks::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
   std::vector<std::string> filters{"h+k+l", "h^2+k^2+l^2", "Intensity",

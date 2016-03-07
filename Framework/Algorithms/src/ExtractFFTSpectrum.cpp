@@ -21,19 +21,19 @@ using namespace API;
 
 void ExtractFFTSpectrum::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(new WorkspaceProperty<>("InputImagWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "The optional input workspace for the imaginary part.");
   declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0, 5),
                   "Spectrum index, one of the six possible spectra output by "
                   "the FFT algorithm");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace.");
 }
 
 void ExtractFFTSpectrum::exec() {
