@@ -514,7 +514,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
-  const auto file_it =
+  auto file_it =
       std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
         return file.rfind(".hdf") == file.length() - 4;
       });
@@ -579,16 +579,12 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   }
 
   // patching
-  std::string logContent;
-  for (const auto &file : files)
-    if (file.compare("History.log") == 0) {
-      tarFile.select(file.c_str());
-      logContent.resize(tarFile.selected_size());
-      tarFile.read(&logContent[0], logContent.size());
-      break;
-    }
-
-  if (logContent.size() > 0) {
+  file_it = std::find(files.cbegin(), files.cend(), "History.log");
+  if (file_it != files.cend()) {
+    tarFile.select(file_it->c_str());
+    std::string logContent;
+    logContent.resize(tarFile.selected_size());
+    tarFile.read(&logContent[0], logContent.size());
     std::istringstream data(logContent);
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(
         new Poco::Util::PropertyFileConfiguration(data));
