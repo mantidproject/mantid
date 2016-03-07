@@ -1,0 +1,123 @@
+#ifndef MANTID_CURVEFITTING_FORTRANVECTOR_H_
+#define MANTID_CURVEFITTING_FORTRANVECTOR_H_
+
+namespace Mantid {
+namespace CurveFitting {
+
+/** FortranVector is a wrapper template for GSLVactor and ComplexVector
+  to simplify porting fortran programs to C++.
+  This vector allows to use arbitrary index bases as they do in
+  fortran. Indexing can begin with any integer number including
+  negative.
+
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+template<class VectorClass>
+class FortranVector : public VectorClass {
+  /// Base for the index
+  int m_base;
+  typedef decltype(reinterpret_cast<const VectorClass*>(nullptr)->operator[](0)) ElementConstType;
+  typedef decltype(reinterpret_cast<VectorClass*>(nullptr)->operator[](0)) ElementRefType;
+public:
+  /// Constructor
+  FortranVector();
+  /// Constructor
+  FortranVector(const size_t n);
+  /// Copy constructor
+  FortranVector(const FortranVector &V);
+  /// Constructor
+  FortranVector(const int iFrom, const int iTo);
+  ElementConstType operator()(int i) const;
+  ElementRefType operator()(int i);
+  ElementConstType operator[](int i) const;
+  ElementRefType operator[](int i);
+
+private:
+  /// Calculate the size (1D) of a matrix First
+  static size_t makeSize(int firstIndex, int lastIndex);
+};
+
+/// Calculate the size of a vector
+template <class VectorClass>
+size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
+  if (lastIndex < firstIndex) {
+    throw std::invalid_argument("Vector defined with invalid index range.");
+  }
+  return static_cast<size_t>(lastIndex - firstIndex + 1);
+}
+
+/// Constructor
+template <class VectorClass>
+FortranVector<VectorClass>::FortranVector() : VectorClass(), m_base(0) {}
+
+/// Constructor
+template <class VectorClass>
+FortranVector<VectorClass>::FortranVector(const size_t n)
+    : VectorClass(n), m_base(0) {}
+
+/// Copy constructor
+template <class VectorClass>
+FortranVector<VectorClass>::FortranVector(const FortranVector &V)
+    : VectorClass(V), m_base1(V.m_base) {}
+
+/// Construct a FortranVector that has arbitrary index bases.
+/// For example FortranVector(-2,2) creates a vector of length 5.
+/// When accessing elements through operator(i) the index
+/// must be in the range -2 <= j <= 2.
+/// The index ranges defined by this constructor apply only to
+/// operators () and [] but not to methods get() and set().
+/// @param iFirst :: Lowest value for the index
+/// @param iLast :: Highest value for the index
+template <class VectorClass>
+FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
+    : VectorClass(makeSize(iFirst, iLast)),
+      m_base(iFirst) {}
+
+/// The "index" operator
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator()(int i) const {
+  return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
+}
+
+/// Get the reference to the data element
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator()(int i) {
+  return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
+}
+
+/// The "index" operator
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator[](int i) const {
+  return this->operator()(i);
+}
+
+/// Get the reference to the data element
+template <class VectorClass>
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator[](int i) {
+  return this->operator()(i);
+}
+
+
+} // namespace CurveFitting
+} // namespace Mantid
+
+#endif /* MANTID_CURVEFITTING_FORTRANVECTOR_H_ */

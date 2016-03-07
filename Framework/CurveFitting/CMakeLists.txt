@@ -153,6 +153,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FortranMatrix.h
+	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
@@ -279,6 +280,7 @@ set ( TEST_FILES
 	CostFunctions/LeastSquaresTest.h
 	FitMWTest.h
 	FortranMatrixTest.h
+	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampingMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h

@@ -7,8 +7,8 @@
 namespace Mantid {
 namespace CurveFitting {
 
-/** FortranDoubleMatrix extends GSLMatrix to simplify porting
-  fortran programs to C++.
+/** FortranMatrix is a wrapper template for GSLMatrix  and ComplexMatrix
+  to simplify porting fortran programs to C++.
   This matrix allows to use arbitrary index bases as they do in
   fortran. Indexing can begin with any integer number including
   negative.
@@ -82,8 +82,8 @@ template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const FortranMatrix &M)
     : MatrixClass(M), m_base1(M.m_base1), m_base2(M.m_base2) {}
 
-/// Construct a FortranDoubleMatrix that has arbitrary index bases.
-/// For example FortranDoubleMatrix(1,5, -2,2) creates a 5 x 5 matrix.
+/// Construct a FortranMatrix that has arbitrary index bases.
+/// For example FortranMatrix(1,5, -2,2) creates a 5 x 5 matrix.
 /// When accessing elements through operator(i,j) the first index
 /// must be in the range 1 <= i <= 5 and the second in the range
 /// -2 <= j <= 2.
