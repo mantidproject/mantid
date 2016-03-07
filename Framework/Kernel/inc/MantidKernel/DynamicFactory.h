@@ -220,7 +220,7 @@ public:
     std::vector<std::string> names;
     names.reserve(_map.size());
     std::transform(
-        _map.begin(), _map.end(), std::back_inserter(names),
+        _map.cbegin(), _map.cend(), std::back_inserter(names),
         [](const std::pair<std::string, AbstractFactory *> &mapPair) {
           return mapPair.first;
         });

@@ -156,7 +156,7 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
   value.clear();
   value.reserve(values.count());
   std::transform(
-      values.begin(), values.end(), std::back_inserter(value),
+      values.cbegin(), values.cend(), std::back_inserter(value),
       [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
@@ -270,7 +270,7 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
   values.reserve(enumMap.size());
-  std::transform(enumMap.begin(), enumMap.end(), std::back_inserter(values),
+  std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
                  [](const std::pair<OptionalBool::Value, std::string> &str) {
                    return str.second;
                  });

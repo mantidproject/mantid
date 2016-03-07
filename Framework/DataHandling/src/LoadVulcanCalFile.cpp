@@ -453,7 +453,7 @@ void LoadVulcanCalFile::processOffsets(
       g_log.information() << "Find inter-bank correction for bank " << bankid
                           << " for special detid " << interbank_detid << ".\n";
 
-      auto offsetiter = map_detoffset.find(interbank_detid);
+      const auto offsetiter = map_detoffset.find(interbank_detid);
       if (offsetiter == map_detoffset.end())
         throw runtime_error("It cannot happen!");
       double interbanklogcorr = offsetiter->second;
@@ -468,7 +468,7 @@ void LoadVulcanCalFile::processOffsets(
 
       detid_t intermodule_detid =
           static_cast<detid_t>((bankid + 1) * NUMBERRESERVEDPERMODULE) - 1;
-      auto offsetiter = map_detoffset.find(intermodule_detid);
+      const auto offsetiter = map_detoffset.find(intermodule_detid);
       if (offsetiter == map_detoffset.end())
         throw runtime_error("It cannot happen!");
       double intermodulelogcorr = offsetiter->second;

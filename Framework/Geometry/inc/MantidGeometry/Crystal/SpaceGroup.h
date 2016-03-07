@@ -70,7 +70,8 @@ public:
         getSymmetryOperations();
 
     std::vector<T> equivalents;
-    std::transform(symmetryOperations.begin(), symmetryOperations.end(),
+    equivalents.reserve(symmetryOperations.size());
+    std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
                    std::back_inserter(equivalents),
                    [&position](const SymmetryOperation &op) {
                      return Geometry::getWrappedVector(op * position);

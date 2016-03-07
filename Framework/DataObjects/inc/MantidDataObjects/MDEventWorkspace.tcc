@@ -187,7 +187,7 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
     std::vector<API::IMDNode *> boxes;
     boxes.clear();
     this->getBox()->getBoxes(boxes, depth - 1, false);
-    for (auto box : boxes) {
+    for (const auto box : boxes) {
       MDGridBox<MDE, nd> *gbox = dynamic_cast<MDGridBox<MDE, nd> *>(box);
       if (gbox) {
         // Split ALL the contents.
@@ -456,7 +456,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
   this->getBox()->getBoxes(boxes, 1000, false);
   boxes_filtered.reserve(boxes.size());
 
-  for (auto box : boxes) {
+  for (const auto box : boxes) {
     boxes_filtered.push_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
   }
 
@@ -803,7 +803,7 @@ TMDE(void MDEventWorkspace)::setMDMasking(
 
     // Apply new masks
     this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
-    for (auto box : toMaskBoxes) {
+    for (const auto box : toMaskBoxes) {
       box->mask();
     }
 
@@ -818,7 +818,7 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
   std::vector<API::IMDNode *> allBoxes;
   // Clear old masks
   this->data->getBoxes(allBoxes, 10000, true);
-  for (auto box : allBoxes) {
+  for (const auto box : allBoxes) {
     box->unmask();
   }
 }

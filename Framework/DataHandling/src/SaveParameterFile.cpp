@@ -167,7 +167,7 @@ void SaveParameterFile::exec() {
   prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
   // document out of them.
-  for (auto &comp : toSave) {
+  for (const auto &comp : toSave) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Saving parameters");
@@ -181,7 +181,7 @@ void SaveParameterFile::exec() {
     if (cDetID != 0)
       file << " id=\"" << cDetID << "\"";
     file << " name=\"" << cFullName << "\">\n";
-    for (auto &param : comp.second) {
+    for (const auto &param : comp.second) {
       const std::string pName = param.get<0>();
       const std::string pType = param.get<1>();
       const std::string pValue = param.get<2>();

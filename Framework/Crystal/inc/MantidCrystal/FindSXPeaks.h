@@ -92,8 +92,8 @@ public:
     _intensity += rhs._intensity;
     _Ltot += rhs._Ltot;
     npixels += 1;
-    _spectral.insert(_spectral.end(), rhs._spectral.begin(),
-                     rhs._spectral.end());
+    _spectral.insert(_spectral.end(), rhs._spectral.cbegin(),
+                     rhs._spectral.cend());
     return *this;
   }
   /// Normalise by number of pixels

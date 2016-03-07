@@ -234,7 +234,7 @@ public:
     boost::split(strs, str, boost::is_any_of(", "));
 
     std::vector<TYPE> vals;
-    for (auto &str : strs) {
+    for (const auto &str : strs) {
       if (!str.empty()) {
         TYPE v;
         if (!Strings::convert(str, v))

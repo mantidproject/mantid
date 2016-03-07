@@ -177,7 +177,7 @@ void PatchBBY::exec() {
   bool reset = getProperty("Reset");
   if (reset) {
     const auto file_it =
-        std::find_if(files.begin(), files.end(), [](const std::string &file) {
+        std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
           return file.rfind(".hdf") == file.length() - 4;
         });
     if (file_it != files.end()) {

@@ -2469,7 +2469,7 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (auto comp : allComponentInType)
+  for (const auto comp : allComponentInType)
     pElem->removeChild(comp);
 }
 

@@ -515,7 +515,7 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
   const auto file_it =
-      std::find_if(files.begin(), files.end(), [](const std::string &file) {
+      std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
         return file.rfind(".hdf") == file.length() - 4;
       });
   if (file_it != files.end()) {

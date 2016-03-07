@@ -50,7 +50,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     dFractionalOffsets.clear();
     dOffsets.clear();
 
-    for (double offset : offsets) {
+    for (const double offset : offsets) {
       double dEquivalent = Conversions::TOFtoD(offset, distance, sinTheta);
       double rounded = floor(dEquivalent / deltaD + 0.5);
       dOffsets.push_back(static_cast<int>(rounded));

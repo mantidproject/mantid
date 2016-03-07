@@ -297,7 +297,7 @@ public:
 
       const auto &splitTopInto = m_splitTopInto.get();
       size_t numSplitTop =
-          std::accumulate(splitTopInto.begin(), splitTopInto.end(), size_t{1},
+          std::accumulate(splitTopInto.cbegin(), splitTopInto.cend(), size_t{1},
                           std::multiplies<size_t>());
       m_numMDBoxes[depth + 1] += numSplitTop;
     } else {
@@ -322,13 +322,13 @@ public:
 
   /** Return the total number of MD Boxes, irrespective of depth */
   size_t getTotalNumMDBoxes() const {
-    return std::accumulate(m_numMDBoxes.begin(), m_numMDBoxes.end(), size_t{0},
+    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(), size_t{0},
                            std::plus<size_t>());
   }
 
   /** Return the total number of MDGridBox'es, irrespective of depth */
   size_t getTotalNumMDGridBoxes() const {
-    return std::accumulate(m_numMDGridBoxes.begin(), m_numMDGridBoxes.end(),
+    return std::accumulate(m_numMDGridBoxes.cbegin(), m_numMDGridBoxes.cend(),
                            size_t{0}, std::plus<size_t>());
   }
 

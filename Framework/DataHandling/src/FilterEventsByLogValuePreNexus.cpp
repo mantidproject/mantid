@@ -602,7 +602,7 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
   std::map<PixelType, size_t>::iterator mit;
-  for (auto pid : this->wrongdetids) {
+  for (const auto pid : this->wrongdetids) {
     // Convert Pixel ID to 'wrong detectors ID' map's index
     mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
@@ -1111,7 +1111,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "Number of Wrong Detector IDs = " << wrongdetids.size()
                    << "\n";
 
-    for (auto pid : this->wrongdetids) {
+    for (const auto pid : this->wrongdetids) {
       g_log.notice() << "Wrong Detector ID : " << pid << std::endl;
     }
     for (const auto &detidPair : wrongdetidmap) {
@@ -1756,7 +1756,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     for (const auto wrongdetid : this->wrongdetids) {
       g_log.notice() << "Wrong Detector ID : " << wrongdetid << std::endl;
     }
-    for (auto &detidPair : this->wrongdetidmap) {
+    for (const auto &detidPair : this->wrongdetidmap) {
       PixelType tmpid = detidPair.first;
       size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "

@@ -532,7 +532,7 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 /** Process imbed logs (marked by bad pixel IDs)
  */
 void LoadEventPreNexus2::processImbedLogs() {
-  for (auto pid : this->wrongdetids) {
+  for (const auto pid : this->wrongdetids) {
     // a. pixel ID -> index
     const auto mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
@@ -609,7 +609,7 @@ void LoadEventPreNexus2::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (auto &ending : eventExts) {
+  for (const auto &ending : eventExts) {
     size_t pos = instrument.find(ending);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
