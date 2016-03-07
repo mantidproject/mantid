@@ -444,10 +444,12 @@ void LoadISISNexus2::validateMultiPeriodLogs(
 /**
 * Check the validity of the optional properties of the algorithm and identify if
 * partial data should be loaded.
-* @param: bseparateMonitors: flag indicating if the monitors are to be loaded separately
+* @param: bseparateMonitors: flag indicating if the monitors are to be loaded
+* separately
 * @param: bexcludeMonitor: flag indicating if the monitors are to be excluded
 */
-void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor) {
+void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
+                                             bool bexcludeMonitor) {
   // optional properties specify that only some spectra have to be loaded
   bool range_supplied(false);
 
@@ -459,8 +461,7 @@ void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexclu
   // This situation can happen if we load the detectors without the monitors,
   // If monitors are not at the beginning we need to check if monitors were
   // excluded or are to be loaded into a separate workspace.
-  if (m_loadBlockInfo.getMinSpectrumID() != 1 || 
-      bseparateMonitors ||
+  if (m_loadBlockInfo.getMinSpectrumID() != 1 || bseparateMonitors ||
       bexcludeMonitor) {
     range_supplied = true;
     m_load_selected_spectra = true;
