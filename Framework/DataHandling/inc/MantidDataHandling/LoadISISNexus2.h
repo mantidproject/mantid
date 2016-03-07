@@ -115,7 +115,6 @@ private:
   /// Prepare a vector of SpectraBlock structures to simplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
-                       const std::map<int64_t, specnum_t> &wsInd2specNum_map,
                        DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);

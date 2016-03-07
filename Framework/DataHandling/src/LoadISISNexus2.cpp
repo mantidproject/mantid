@@ -212,7 +212,7 @@ void LoadISISNexus2::exec() {
   checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
   size_t total_specs =
-      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_loadBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_loadBlockInfo);
 
   m_progress = boost::make_shared<API::Progress>(
       this, 0.0, 1.0, total_specs * m_detBlockInfo.getNumberOfPeriods());
@@ -343,7 +343,7 @@ void LoadISISNexus2::exec() {
                                     m_monBlockInfo);
 
       // lo
-      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_monBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_monBlockInfo);
 
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
@@ -444,9 +444,9 @@ void LoadISISNexus2::validateMultiPeriodLogs(
 /**
 * Check the validity of the optional properties of the algorithm and identify if
 * partial data should be loaded.
-* @param: bseparateMonitors: flag indicating if the monitors are to be loaded
+* @param bseparateMonitors: flag indicating if the monitors are to be loaded
 * separately
-* @param: bexcludeMonitor: flag indicating if the monitors are to be excluded
+* @param bexcludeMonitor: flag indicating if the monitors are to be excluded
 */
 void LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
                                              bool bexcludeMonitor) {
@@ -622,7 +622,6 @@ bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
 */
 size_t LoadISISNexus2::prepareSpectraBlocks(
     std::map<int64_t, std::string> &monitors,
-    const std::map<int64_t, specnum_t> &wsInd2specNum_map,
     DataBlockComposite &LoadBlock) {
   std::vector<int64_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
