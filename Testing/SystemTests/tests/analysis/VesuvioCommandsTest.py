@@ -45,16 +45,18 @@ def _create_test_flags(background):
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
+    _fit_results = None
+
     def runTest(self):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
-        fit_results = fit_tof(runs, flags)
+        self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
-        self.assertTrue(isinstance(fit_results, tuple))
-        self.assertEqual(4, len(fit_results))
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEqual(4, len(self._fit_results))
 
-        fitted_wsg = fit_results[0]
+        fitted_wsg = self._fit_results[0]
         self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
         self.assertEqual(2, len(fitted_wsg))
 
@@ -69,31 +71,33 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         # self.assertAlmostEqual(1.45746507977816e-05, fitted_ws.readY(1)[0])
         # self.assertAlmostEqual(7.33791942084561e-05, fitted_ws.readY(1)[-1])
 
-        fitted_params = fit_results[1]
+        fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
         self.assertEqual(10, fitted_params.getNumberHistograms())
 
-        chisq_values = fit_results[2]
+        chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
         self.assertEqual(1, len(chisq_values))
 
-        exit_iteration = fit_results[3]
+        exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
 
 class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
+    _fit_results = None
+
     def runTest(self):
         flags = _create_test_flags(background=True)
         runs = "15039-15045"
-        fit_results = fit_tof(runs, flags)
+        self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
-        self.assertTrue(isinstance(fit_results, tuple))
-        self.assertEqual(4, len(fit_results))
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEqual(4, len(self._fit_results))
 
-        fitted_wsg = fit_results[0]
+        fitted_wsg = self._fit_results[0]
         self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
         self.assertEqual(2, len(fitted_wsg))
 
@@ -108,33 +112,35 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         # self.assertAlmostEqual(-0.00756178413274695, fitted_ws.readY(1)[0])
         # self.assertAlmostEqual(0.00355843687365601, fitted_ws.readY(1)[-1])
 
-        fitted_params = fit_results[1]
+        fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
         self.assertEqual(14, fitted_params.getNumberHistograms())
 
-        chisq_values = fit_results[2]
+        chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
         self.assertEqual(1, len(chisq_values))
 
-        exit_iteration = fit_results[3]
+        exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
 
 class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
+    _fit_results = None
+
     def runTest(self):
         flags = _create_test_flags(background=False)
         flags['fit_mode'] = 'bank'
         flags['spectra'] = 'forward'
         runs = "15039-15045"
-        fit_results = fit_tof(runs, flags)
+        self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
-        self.assertTrue(isinstance(fit_results, tuple))
-        self.assertEquals(4, len(fit_results))
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEquals(4, len(self._fit_results))
 
-        fitted_banks = fit_results[0]
+        fitted_banks = self._fit_results[0]
         self.assertTrue(isinstance(fitted_banks, list))
         self.assertEqual(8, len(fitted_banks))
 
@@ -162,29 +168,31 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         # self.assertAlmostEqual(0.000596850729120898, bank8_data.readY(1)[0])
         # self.assertAlmostEqual(0.000529343513813141, bank8_data.readY(1)[-1])
 
-        chisq_values = fit_results[2]
+        chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
         self.assertEqual(8, len(chisq_values))
 
-        exit_iteration = fit_results[3]
+        exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
 
 class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
+    _fit_results = None
+
     def runTest(self):
         flags = _create_test_flags(background=False)
         flags['fit_mode'] = 'spectra'
         flags['spectra'] = '143-144'
         runs = "15039-15045"
-        fit_results = fit_tof(runs, flags)
+        self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
-        self.assertTrue(isinstance(fit_results, tuple))
-        self.assertEquals(4, len(fit_results))
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEquals(4, len(self._fit_results))
 
-        fitted_spec = fit_results[0]
+        fitted_spec = self._fit_results[0]
         self.assertTrue(isinstance(fitted_spec, list))
         self.assertEqual(2, len(fitted_spec))
 
@@ -212,11 +220,11 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         # self.assertAlmostEqual(5.57952304659615e-06, spec144_data.readY(1)[0])
         # self.assertAlmostEqual(6.00056973529846e-05, spec144_data.readY(1)[-1])
 
-        chisq_values = fit_results[2]
+        chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
         self.assertEqual(2, len(chisq_values))
 
-        exit_iteration = fit_results[3]
+        exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
