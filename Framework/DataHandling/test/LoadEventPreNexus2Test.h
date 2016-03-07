@@ -49,7 +49,7 @@ public:
 
   LoadEventPreNexus2Test() {}
 
-  void setUp() {
+  void setUp() override {
     eventLoader = new LoadEventPreNexus2();
     eventLoader->initialize();
   }

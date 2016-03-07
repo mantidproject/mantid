@@ -8,16 +8,16 @@
 /**
  * Construct a QwtWorkspaceSpectrumData object with a source workspace
  * @param workspace The workspace containing the data
- * @param specIndex Index of the spectrum to plot
+ * @param wsIndex Index of the spectrum to plot
  * @param logScale If true, plot a log scale
  * @param plotAsDistribution If true and the data is histogram and not already a
  * distribution then plot the Y values/X bin-width
  */
 QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
-    const Mantid::API::MatrixWorkspace &workspace, int specIndex,
+    const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
     const bool logScale, const bool plotAsDistribution)
-    : m_spec(specIndex), m_X(workspace.readX(specIndex)),
-      m_Y(workspace.readY(specIndex)), m_E(workspace.readE(specIndex)),
+    : m_wsIndex(wsIndex), m_X(workspace.readX(wsIndex)),
+      m_Y(workspace.readY(wsIndex)), m_E(workspace.readE(wsIndex)),
       m_xTitle(), m_yTitle(), m_isHistogram(workspace.isHistogramData()),
       m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
       m_logScale(logScale), m_isDistribution(false), m_isWaterfall(false),
@@ -47,7 +47,7 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const {
 */
 QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
     const Mantid::API::MatrixWorkspace &workspace) const {
-  return new QwtWorkspaceSpectrumData(workspace, m_spec, m_logScale,
+  return new QwtWorkspaceSpectrumData(workspace, m_wsIndex, m_logScale,
                                       m_isDistribution);
 }
 
@@ -170,7 +170,7 @@ void QwtWorkspaceSpectrumData::setWaterfallPlot(bool on) { m_isWaterfall = on; }
 QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::
 operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
-    m_spec = rhs.m_spec;
+    m_wsIndex = rhs.m_wsIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;
     m_E = rhs.m_E;

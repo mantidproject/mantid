@@ -17,22 +17,22 @@ private:
     EmptyUtf8Label() : Mantid::Kernel::Unit() {}
 
     // Empty overrides of virtual methods
-    const std::string unitID() const { return "aUnit"; }
-    const std::string caption() const { return "Caption"; }
-    const Mantid::Kernel::UnitLabel label() const {
+    const std::string unitID() const override { return "aUnit"; }
+    const std::string caption() const override { return "Caption"; }
+    const Mantid::Kernel::UnitLabel label() const override {
       return Mantid::Kernel::UnitLabel("unittext", L"", "");
     }
-    void init() {}
-    virtual double singleToTOF(const double) const { return 0; }
-    virtual double singleFromTOF(const double) const { return 0; }
-    virtual double conversionTOFMax() const {
+    void init() override {}
+    double singleToTOF(const double) const override { return 0; }
+    double singleFromTOF(const double) const override { return 0; }
+    double conversionTOFMax() const override {
       return std::numeric_limits<double>::quiet_NaN();
     }
-    virtual double conversionTOFMin() const {
+    double conversionTOFMin() const override {
       return std::numeric_limits<double>::quiet_NaN();
     }
 
-    virtual Unit *clone() const { return new EmptyUtf8Label(); }
+    Unit *clone() const override { return new EmptyUtf8Label(); }
   };
 
 public:

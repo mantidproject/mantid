@@ -103,14 +103,14 @@ public:
   /// Default Constructor
   SANSDiagnostics(QWidget *parent, Ui::SANSRunWindow *ParWidgets);
   /// Destructor
-  virtual ~SANSDiagnostics();
+  ~SANSDiagnostics() override;
 
 signals:
   void applyMask(const QString &wsName, bool time_pixel);
 
 private:
   /// Initilaise the current tab
-  void initLayout();
+  void initLayout() override;
   /// set tool tips
   void setToolTips();
   /// execute sumrowcolumn algorithm

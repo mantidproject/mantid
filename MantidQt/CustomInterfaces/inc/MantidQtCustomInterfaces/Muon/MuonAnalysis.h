@@ -255,10 +255,10 @@ private:
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment
-  void initLocalPython();
+  void initLocalPython() override;
 
   /// Initialize the layout
-  void initLayout();
+  void initLayout() override;
 
   /// Set start up interface look
   void startUpLook();
@@ -267,10 +267,10 @@ private:
   void setCurrentDataName(const QString& name);
 
   /// Executed when interface gets hidden or closed
-  void hideEvent(QHideEvent *e);
-  
+  void hideEvent(QHideEvent *e) override;
+
   /// Executed when interface gets shown
-  void showEvent(QShowEvent *e);
+  void showEvent(QShowEvent *e) override;
 
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList& filenames);

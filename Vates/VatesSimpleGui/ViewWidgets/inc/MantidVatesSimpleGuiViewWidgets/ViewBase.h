@@ -63,7 +63,7 @@ public:
   ViewBase(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
 
   /// Default destructor.
-  virtual ~ViewBase() {}
+  ~ViewBase() override {}
 
   /// Poll the view to set status for mode control buttons.
   virtual void checkView(ModeControlWidget::Views initialView);

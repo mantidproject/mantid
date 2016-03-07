@@ -298,7 +298,7 @@ public:
 
   /** Set up workspaces
     */
-  void setUp() {
+  void setUp() override {
     // Load data file
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();

@@ -53,7 +53,7 @@ using std::size_t;
 LoadISISNexus2::LoadISISNexus2()
     : m_filename(), m_instrument_name(), m_samplename(), m_detBlockInfo(),
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
-      m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
+      m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
       m_cppFile() {}
@@ -212,7 +212,7 @@ void LoadISISNexus2::exec() {
   checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
   size_t total_specs =
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_loadBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_loadBlockInfo);
 
   m_progress = boost::make_shared<API::Progress>(
       this, 0.0, 1.0, total_specs * m_detBlockInfo.getNumberOfPeriods());
@@ -334,7 +334,7 @@ void LoadISISNexus2::exec() {
               WorkspaceFactory::Instance().create(period_free_workspace));
 
       m_spectraBlocks.clear();
-      m_specInd2specNum_map.clear();
+      m_wsInd2specNum_map.clear();
       // at the moment here we clear this map to enable possibility to load
       // monitors from the spectra block (wiring table bug).
       // if monitor's spectra present in the detectors block due to this bug
@@ -343,7 +343,7 @@ void LoadISISNexus2::exec() {
                                     m_monBlockInfo);
 
       // lo
-      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
+      prepareSpectraBlocks(m_monitors, m_wsInd2specNum_map, m_monBlockInfo);
 
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
@@ -406,7 +406,7 @@ void LoadISISNexus2::exec() {
   m_tof_data.reset();
   m_spec.reset();
   m_monitors.clear();
-  m_specInd2specNum_map.clear();
+  m_wsInd2specNum_map.clear();
 }
 
 // Function object for remove_if STL algorithm
@@ -622,7 +622,7 @@ bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
 */
 size_t LoadISISNexus2::prepareSpectraBlocks(
     std::map<int64_t, std::string> &monitors,
-    const std::map<int64_t, specnum_t> &specInd2specNum_map,
+    const std::map<int64_t, specnum_t> &wsInd2specNum_map,
     DataBlockComposite &LoadBlock) {
   std::vector<int64_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
@@ -703,10 +703,10 @@ void LoadISISNexus2::loadPeriodData(
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specnum_t>(it->first));
         auto spec = local_workspace->getSpectrum(hist_index);
-        specnum_t specID = m_specInd2specNum_map.at(hist_index);
+        specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
         spec->setDetectorIDs(
-            m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
-        spec->setSpectrumNo(specID);
+            m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+        spec->setSpectrumNo(specNum);
       }
 
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
@@ -803,11 +803,11 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
       // local_workspace->getAxis(1)->setValue(hist,
       // static_cast<specnum_t>(spec_num));
       auto spec = local_workspace->getSpectrum(hist);
-      specnum_t specID = m_specInd2specNum_map.at(hist);
+      specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
-      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
-      spec->setSpectrumNo(specID);
+      spec->setSpectrumNo(specNum);
     }
 
     ++hist;

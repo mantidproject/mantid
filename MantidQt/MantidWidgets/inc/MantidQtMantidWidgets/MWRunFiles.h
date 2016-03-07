@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Override parent class run().
-  virtual void run() override;
+  void run() override;
 
 private:
   /// Use the specified algorithm and property to find files instead of using
@@ -147,7 +147,7 @@ public:
   MWRunFiles(QWidget *parent = NULL);
 
   /// Destructor
-  ~MWRunFiles();
+  ~MWRunFiles() override;
 
   // property accessors/modifiers
   bool isForRunFiles() const;
@@ -216,6 +216,10 @@ public:
   void setInstrumentOverride(const QString &instName);
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
+  /// Get the last directory
+  QString getLastDirectory() { return m_lastDir; }
+  /// Set the last directory
+  void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
 
 signals:
   /// Emitted when the file text changes

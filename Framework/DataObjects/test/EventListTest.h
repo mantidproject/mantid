@@ -42,7 +42,7 @@ public:
     NUMEVENTS = 100;
   }
 
-  void setUp() {
+  void setUp() override {
     // Make a little event list with 3 events
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100, 200));
@@ -1339,14 +1339,14 @@ public:
 
   /// Dummy unit for testing conversion
   class DummyUnit1 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x * 10.; }
-    virtual double singleFromTOF(const double tof) const { return tof / 10.; }
+    double singleToTOF(const double x) const override { return x * 10.; }
+    double singleFromTOF(const double tof) const override { return tof / 10.; }
   };
 
   /// Dummy unit for testing conversion
   class DummyUnit2 : public Mantid::Kernel::Units::Degrees {
-    virtual double singleToTOF(const double x) const { return x / 20.; }
-    virtual double singleFromTOF(const double tof) const { return tof * 20.; }
+    double singleToTOF(const double x) const override { return x / 20.; }
+    double singleFromTOF(const double tof) const override { return tof * 20.; }
   };
 
   //-----------------------------------------------------------------------------------------------
@@ -2476,7 +2476,7 @@ public:
   MantidVec fineX;
   MantidVec coarseX;
 
-  void setUp() {
+  void setUp() override {
     // Reset the random event list
     el_random.clear();
     el_random += el_random_source;
@@ -2486,7 +2486,7 @@ public:
     el_sorted.setSortOrder(TOF_SORT);
   }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_sort_tof() { el_random.sortTof(); }
 

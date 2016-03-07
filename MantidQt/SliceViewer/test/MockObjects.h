@@ -33,7 +33,7 @@ public:
   MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox &));
   MOCK_METHOD0(resetView, void());
   MOCK_METHOD0(detach, void());
-  virtual ~MockZoomablePeaksView() {}
+  ~MockZoomablePeaksView() override {}
 };
 
 /*------------------------------------------------------------
@@ -70,7 +70,7 @@ public:
   MOCK_METHOD1(peakEditMode, void(EditMode));
   MOCK_METHOD2(addPeakAt, bool(double, double));
   MOCK_CONST_METHOD0(hasPeakAddMode, bool());
-  virtual ~MockPeaksPresenter() {}
+  ~MockPeaksPresenter() override {}
 };
 
 /*------------------------------------------------------------
@@ -79,7 +79,7 @@ Mock Peaks Presenter, with additional hooks for verifying destruction.
 class DyingMockPeaksPresenter : public MockPeaksPresenter {
 public:
   MOCK_METHOD0(die, void());
-  virtual ~DyingMockPeaksPresenter() { die(); }
+  ~DyingMockPeaksPresenter() override { die(); }
 };
 
 /*------------------------------------------------------------
@@ -90,7 +90,7 @@ public:
   MockPeakTransform()
       : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"),
                       regex("^K.*$"), regex("^L.*$")) {}
-  ~MockPeakTransform() {}
+  ~MockPeakTransform() override {}
   MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
   MOCK_CONST_METHOD1(transform,
                      Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));
@@ -139,7 +139,7 @@ public:
   MOCK_METHOD0(peakAdditionMode, void());
   MOCK_METHOD0(peakDisplayMode, void());
   MOCK_METHOD1(takeSettingsFrom, void(PeakOverlayView const *const));
-  virtual ~MockPeakOverlayView() {}
+  ~MockPeakOverlayView() override {}
 };
 
 /*------------------------------------------------------------
@@ -225,7 +225,7 @@ public:
   MOCK_CONST_METHOD1(
       getDimension,
       boost::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
-  virtual ~MockMDGeometry() {}
+  ~MockMDGeometry() override {}
 };
 
 /*------------------------------------------------------------

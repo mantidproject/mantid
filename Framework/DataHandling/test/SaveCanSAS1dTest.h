@@ -77,7 +77,7 @@ public:
 
   // saving is required by all the following test so, if this test fails so will
   // all the others!
-  void setUp() {
+  void setUp() override {
     SaveCanSAS1D savealg;
 
     TS_ASSERT_THROWS_NOTHING(savealg.initialize());
@@ -90,7 +90,7 @@ public:
     m_filename = savealg.getPropertyValue("Filename");
   }
 
-  void tearDown() {
+  void tearDown() override {
     if (Poco::File(m_filename).exists())
       Poco::File(m_filename).remove();
   }

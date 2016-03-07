@@ -5,6 +5,11 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+Reflectometry Instruments
+--------------------------
+
+An updated version of the OFFSPEC IDF is now being used in mantid `#15561 <https://github.com/mantidproject/mantid/pull/15561>_`
+   
 ConvertToReflectometryQ
 -----------------------
 

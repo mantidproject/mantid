@@ -22,7 +22,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectFunctionDialog : public QDialog
 
 public:
   SelectFunctionDialog(QWidget *parent = NULL);
-  ~SelectFunctionDialog();
+  ~SelectFunctionDialog() override;
   /// Return selected function
   QString getFunction() const;
 protected:

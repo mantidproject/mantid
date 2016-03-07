@@ -284,12 +284,11 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
 /** Write the bin values and errors in a single histogram spectra to the file
 *  @param WS :: the workspace to being saved
 *  @param outFile :: the file object to write to
-*  @param specIn :: the index number of the histogram to write
+*  @param wsIn :: the index number of the histogram to write
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
-                        FILE *const outFile, const int specIn) const {
-  check_and_copy_spectra(WS->readY(specIn), WS->readE(specIn), m_tSignal,
-                         m_tError);
+                        FILE *const outFile, const int wsIn) const {
+  check_and_copy_spectra(WS->readY(wsIn), WS->readE(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 

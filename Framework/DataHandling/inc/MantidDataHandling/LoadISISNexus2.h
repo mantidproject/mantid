@@ -115,7 +115,7 @@ private:
   /// Prepare a vector of SpectraBlock structures to simplify loading
   size_t
   prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
-                       const std::map<int64_t, specnum_t> &specInd2specNum_map,
+                       const std::map<int64_t, specnum_t> &wsInd2specNum_map,
                        DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
@@ -178,8 +178,8 @@ private:
 
   /// if true, a spectra list or range of spectra is supplied
   bool m_load_selected_spectra;
-  /// map of spectra Index to spectra Number (spectraID)
-  std::map<int64_t, specnum_t> m_specInd2specNum_map;
+  /// map of workspace Index to spectra Number (spectraID)
+  std::map<int64_t, specnum_t> m_wsInd2specNum_map;
   /// spectra Number to detector ID (multi)map
   API::SpectrumDetectorMapping m_spec2det_map;
 

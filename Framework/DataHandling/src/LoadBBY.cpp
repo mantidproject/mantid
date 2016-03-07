@@ -794,19 +794,19 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,
                                      Progress_LoadBinFile);
 
-  unsigned int x = 0; // 9 bits [0-239] tube number
-  unsigned int y = 0; // 8 bits [0-255] position along tube
+  uint64_t x = 0; // 9 bits [0-239] tube number
+  uint64_t y = 0; // 8 bits [0-255] position along tube
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
-  unsigned int dt = 0;
+  uint64_t dt = 0;
   double tof = 0.0;
 
   if ((fileSize == 0) || !tarFile.skip(128))
     return;
 
   int state = 0;
-  unsigned int c;
+  uint64_t c;
   while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
          static_cast<unsigned int>(-1)) {
 

@@ -23,7 +23,7 @@ public:
         "FakeForegroundModel");
   }
 
-  ~TobyFitResolutionModelTest() {
+  ~TobyFitResolutionModelTest() override {
     using namespace Mantid::MDAlgorithms;
     ForegroundModelFactory::Instance().unsubscribe("FakeForegroundModel");
   }
